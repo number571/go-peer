@@ -11,8 +11,7 @@ func init() {
 }
 
 func main() {
-    node := gopeer.NewNode(":8080").GeneratePrivate(2048)
-    node.Open().Run(handleInit, handleServer, handleClient).Close()
+    gopeer.NewNode(":8080").Open().Run(handleInit, handleServer, handleClient).Close()
 }
 
 func handleInit(node *gopeer.Node) {
