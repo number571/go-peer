@@ -11,7 +11,7 @@ func init() {
 }
 
 func main() {
-    gopeer.NewNode(":8080").Open().Run(handleInit, handleServer, handleClient).Close()
+    gopeer.NewNode("IPv4:Port").Open().Run(handleInit, handleServer, handleClient).Close()
 }
 
 func handleInit(node *gopeer.Node) {
