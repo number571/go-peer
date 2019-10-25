@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized, distributed and hybrid networks.
+> Framework for create centralized, decentralized, distributed and hybrid networks.
 
 ### Template:
 ```go
