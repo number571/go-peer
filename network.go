@@ -176,7 +176,7 @@ func (node *Node) Send(pack *Package) *Node {
 
 // Connect to node, his nodes and send him connections.
 func (node *Node) MergeConnect(addr string) *Node {
-    if !setting.IS_DISTRIB || node.IsAmI(addr) {
+    if setting.IS_DECENTR || node.IsAmI(addr) {
         return nil
     }
     if node.Setting.Listen == nil {
