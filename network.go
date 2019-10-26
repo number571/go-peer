@@ -210,6 +210,10 @@ func (node *Node) MergeConnect(addr string) *Node {
 // Connect to hidden friends.
 func (node *Node) HiddenConnect(addr string) *Node {
     if setting.IS_DISTRIB && node.Setting.Listen != nil { return nil }
+    if  (!setting.HAS_CRYPTO && node.IsAmI(addr)) || 
+        ( setting.HAS_CRYPTO && addr == node.Hashname) { 
+            return nil 
+    }
     node.Network.Connections[addr] = &Connect{
         Relation: RelationHidden,
     }
