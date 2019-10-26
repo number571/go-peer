@@ -29,10 +29,11 @@ func main() {
 
 func handleInit(node *gopeer.Node) {
     node.ReadOnly(gopeer.ReadNode).ConnectToList(
-        [2]string{":8080", "password"},
-        [2]string{":7070", "password"},
-        [2]string{":6060", "password"},
-    )
+        map[string]string{
+            ":8080": "password",
+            ":7070": "password",
+            ":6060": "password",
+    })
 }
 
 func handleServer(node *gopeer.Node, pack *gopeer.Package) {
