@@ -285,6 +285,7 @@ func (node *Node) Disconnect(addresses ...string) *Node {
 
 // Get address by hashname.
 func (node *Node) AddressByHashname(hashname string) string {
+    if !setting.HAS_CRYPTO { return hashname }
     addr, ok := node.Network.Addresses[hashname]
     if !ok { return hashname }
     return addr
