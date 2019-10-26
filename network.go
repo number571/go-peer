@@ -208,6 +208,7 @@ func (node *Node) MergeConnect(addr string) *Node {
 
 // Connect to hidden friends.
 func (node *Node) HiddenConnect(addr string) *Node {
+    if setting.IS_DISTRIB && node.Setting.Listen != nil { return nil }
     node.Network.Connections[addr] = &Connect{
         Relation: RelationHidden,
     }
@@ -237,6 +238,11 @@ func (node *Node) ConnectToList(list ...interface{}) *Node {
                 data := value.([2]string)
                 if len(data) != 2 { continue }
                 node.Connect(data[0], data[1])
+            case map[string]string:
+                data := value.(map[string]string)
+                for addr, pasw := range data {
+                    node.Connect(addr, pasw)
+                }
         }
     }
     return node
@@ -255,9 +261,7 @@ func (node *Node) Connect(data ...string) *Node {
                 return node.connectToNode(data[0])
             }
         case 2:
-            if setting.IS_DECENTR {
-                return node.connectToFriend(data[0], data[1])
-            }
+            return node.connectToFriend(data[0], data[1])
     }
     return nil
 }
