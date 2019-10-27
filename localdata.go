@@ -420,6 +420,9 @@ func (node *Node) packageSentToMe(pack *Package) (*Package, bool) {
         if addr == nil {
             return nil, false
         }
+        if !node.InConnections(string(addr)) {
+            return nil, false
+        }
         newPack = DecryptAES(node.Network.Connections[string(addr)].Session, base64DecodeString(pack.Body.Data[0]))
         if newPack == nil {
             return nil, false
