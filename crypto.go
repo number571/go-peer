@@ -2,8 +2,10 @@ package gopeer
 
 import (
     "io"
+    "math"
     "bytes"
     "crypto"
+    "math/big"
     "crypto/aes"
     "crypto/rsa"
     "crypto/rand"
@@ -120,7 +122,22 @@ func HashSum(data []byte) []byte {
     }
 }
 
-// Generate bytes in range [33:127].
+// Generate integers in range [0:MaxInt64).
+func GenerateRandomIntegers(max int) []uint64 {
+    var list = make([]uint64, max)
+    var maxNum = big.NewInt(math.MaxInt64)
+    for i := 0; i < max; i++ {
+        nBig, err := rand.Int(rand.Reader, maxNum)
+        if err != nil {
+            list[i] = 0
+            continue
+        }
+        list[i] = nBig.Uint64()
+    }
+    return list
+}
+
+// Generate bytes in range [33:127).
 func GenerateRandomBytes(max int) []byte {
     var slice []byte = make([]byte, max)
     _, err := rand.Read(slice)

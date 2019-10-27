@@ -16,6 +16,7 @@ func NewNode(addr string) *Node {
             TestConnections: make(map[string]bool),
         },
         Network: Network{
+            Addresses: make(map[string]string),
             AccessList: make(map[string]AccessType),
             Connections: make(map[string]*Connect),
         },
@@ -284,12 +285,9 @@ func (node *Node) Disconnect(addresses ...string) *Node {
 
 // Get address by hashname.
 func (node *Node) AddressByHashname(hashname string) string {
-    for addr, conn := range node.Network.Connections {
-        if conn.Hashname == hashname {
-            return addr 
-        }
-    }
-    return hashname
+    addr, ok := node.Network.Addresses[hashname]
+    if !ok { return hashname }
+    return addr
 }
 
 // Get connected addresses.

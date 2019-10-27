@@ -51,6 +51,7 @@ type Keys struct {
 }
 
 type Network struct {
+    Addresses map[string]string
     AccessList map[string]AccessType
     Connections map[string]*Connect
 }

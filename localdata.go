@@ -335,16 +335,6 @@ func (node *Node) onionRouting(pack *Package, role RelationType) *Package {
     }
 }
 
-func appendSlice(list1, list2 []string) []string {
-    next: for _, elem := range list2 {
-        for _, e := range list1 {
-            if elem == e { continue next }
-        }
-        list1 = append(list1, elem)
-    }
-    return list1
-}
-
 func (node *Node) onionPackage(pack *Package) *Package {
     newList := strings.Split(pack.Body.Desc[0], setting.SEPARATOR)
     if len(newList) == 0 {
@@ -395,9 +385,11 @@ func (node *Node) randomRouting(receiver string, role RelationType) []string {
 }
 
 func shuffle(slice []string) []string {
-    rand.Seed(int64(time.Now().Nanosecond()))
-    for i := len(slice)-1; i > 0; i-- {
-        j := rand.Intn(i+1)
+    length := len(slice)
+    mod := uint64(length)
+    randomInts := GenerateRandomIntegers(length)
+    for i := 0; i < length; i++ {
+        j := randomInts[i] % mod
         slice[i], slice[j] = slice[j], slice[i]
     }
     return slice
@@ -426,6 +418,7 @@ func (node *Node) packageSentToMe(pack *Package) (*Package, bool) {
             return nil, false
         }
     } else {
+        // If list not null then redirect package to another node.
         if len(pack.Body.Desc[0]) != 0 {
             return nil, false
         }
@@ -450,7 +443,6 @@ func (node *Node) connectToNode(addr string) *Node {
 }
 
 func (node *Node) connectToFriend(addr, session string) *Node {
-    if node.IsAmI(addr) { return nil }
     if setting.HAS_FRIENDS {
         node.AppendToAccessList(AccessAllowed, addr)
     }
@@ -623,13 +615,16 @@ func (node *Node) decryptPackage(pack *Package) {
 }
 
 func (node *Node) receiveDisconnect(addr string) {
+    if !node.InConnections(addr) { return }
     node.Setting.Mutex.Lock()
+    delete(node.Network.Addresses, node.Network.Connections[addr].Hashname)
     delete(node.Network.Connections, addr)
     node.Setting.Mutex.Unlock()
 }
 
 func (node *Node) receiveMergeConnect(pack *Package, role RelationType, conn net.Conn) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: role,
         Hashname: pack.From.Hashname, 
@@ -660,6 +655,7 @@ func (node *Node) receiveMergeConnect(pack *Package, role RelationType, conn net
 
 func (node *Node) receiveHiddenConnect(pack *Package) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Address] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationHidden,
         Hashname: pack.From.Address, 
@@ -685,6 +681,7 @@ func (node *Node) receiveHiddenConnect(pack *Package) {
 
 func (node *Node) receiveNodeConnect(pack *Package) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationNode,
         Hashname: pack.From.Hashname, 
@@ -708,6 +705,7 @@ func (node *Node) receiveNodeConnect(pack *Package) {
 
 func (node *Node) receiveHandleConnect(pack *Package, conn net.Conn) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationHandle,
         Hashname: pack.From.Hashname, 
@@ -733,6 +731,7 @@ func (node *Node) receiveHandleConnect(pack *Package, conn net.Conn) {
 func (node *Node) saveMergeConnect(pack *Package, role RelationType, conn net.Conn) {
     node.ConnectToList(strings.Split(pack.Body.Desc[1], setting.SEPARATOR))
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: role,
         Hashname: pack.From.Hashname, 
@@ -747,6 +746,7 @@ func (node *Node) saveMergeConnect(pack *Package, role RelationType, conn net.Co
 
 func (node *Node) saveNodeConnect(pack *Package) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationNode,
         Hashname: pack.From.Hashname, 
@@ -758,6 +758,7 @@ func (node *Node) saveNodeConnect(pack *Package) {
 
 func (node *Node) saveHandleConnect(pack *Package, conn net.Conn) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Hashname] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationHandle,
         Hashname: pack.From.Hashname, 
@@ -770,6 +771,7 @@ func (node *Node) saveHandleConnect(pack *Package, conn net.Conn) {
 
 func (node *Node) saveHiddenConnect(pack *Package) {
     node.Setting.Mutex.Lock()
+    node.Network.Addresses[pack.From.Address] = pack.From.Address
     node.Network.Connections[pack.From.Address] = &Connect{
         Relation: RelationHidden,
         Hashname: pack.From.Address, 
