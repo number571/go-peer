@@ -66,7 +66,8 @@ Methods: {
     (node *Node) IsHidden(addr string) bool
     (node *Node) IsHandle(addr string) bool
     (node *Node) IsNode(addr string) bool
-    (node *Node) IsAmI(addr string) bool
+    (node *Node) IsMyAddress(addr string) bool
+    (node *Node) IsMyHashname(hashname string) bool
     (node *Node) AppendToAccessList(access AccessType, addresses ...string)
     (node *Node) DeleteFromAccessList(addresses ...string) *Node
     (node *Node) InAccessList(access AccessType, addr string) bool

@@ -162,7 +162,8 @@ func (node *Node) ReadOnly(types ReadonlyType) *Node {}
 func (node *Node) IsHidden(addr string) bool {}
 func (node *Node) IsHandle(addr string) bool {}
 func (node *Node) IsNode(addr string) bool {}
-func (node *Node) IsAmI(addr string) bool {}
+func (node *Node) IsMyAddress(addr string) bool {}
+func (node *Node) IsMyHashname(hashname string) bool {}
 func (node *Node) AppendToAccessList(access AccessType, addresses ...string) {}
 func (node *Node) DeleteFromAccessList(addresses ...string) *Node {}
 func (node *Node) InAccessList(access AccessType, addr string) bool {}

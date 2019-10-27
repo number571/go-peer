@@ -75,14 +75,19 @@ func (node *Node) IsNode(addr string) bool {
 }
 
 // Check if address is my.
-func (node *Node) IsAmI(addr string) bool {
+func (node *Node) IsMyAddress(addr string) bool {
     return node.Address.IPv4 + node.Address.Port == addr
+}
+
+// Check if hashname is my.
+func (node *Node) IsMyHashname(hashname string) bool {
+    return node.Hashname == hashname
 }
 
 // Append addresses to access list.
 func (node *Node) AppendToAccessList(access AccessType, addresses ...string) {
     for _, addr := range addresses {
-        if node.IsAmI(addr) { continue }
+        if node.IsMyAddress(addr) { continue }
         node.Network.AccessList[addr] = access
     }
 }
@@ -163,7 +168,7 @@ func (node *Node) SendToAll(pack *Package) *Node {
 // In crypto mode function uses hashnames, public keys, 
 // hashes, timestamp, signatures and encryption.
 func (node *Node) Send(pack *Package) *Node {
-    if pack == nil || node.IsAmI(pack.To.Address) {
+    if pack == nil || node.IsMyAddress(pack.To.Address) {
         return nil
     }
     newPack := *pack
@@ -177,7 +182,7 @@ func (node *Node) Send(pack *Package) *Node {
 
 // Connect to node, his nodes and send him connections.
 func (node *Node) MergeConnect(addr string) *Node {
-    if setting.IS_DECENTR || node.IsAmI(addr) {
+    if setting.IS_DECENTR || node.IsMyAddress(addr) {
         return nil
     }
     if node.Setting.Listen == nil {
@@ -210,8 +215,8 @@ func (node *Node) MergeConnect(addr string) *Node {
 // Connect to hidden friends.
 func (node *Node) HiddenConnect(addr string) *Node {
     if setting.IS_DISTRIB && node.Setting.Listen != nil { return nil }
-    if  (!setting.HAS_CRYPTO && node.IsAmI(addr)) || 
-        ( setting.HAS_CRYPTO && addr == node.Hashname) { 
+    if  (!setting.HAS_CRYPTO && node.IsMyAddress(addr)) || 
+        ( setting.HAS_CRYPTO && node.IsMyHashname(addr)) { 
             return nil 
     }
     node.Network.Connections[addr] = &Connect{
@@ -257,7 +262,7 @@ func (node *Node) ConnectToList(list ...interface{}) *Node {
 func (node *Node) Connect(data ...string) *Node {
     // data[0] = address
     // data[1] = password
-    if node.IsAmI(data[0]) { return nil }
+    if node.IsMyAddress(data[0]) { return nil }
     switch len(data) {
         case 1:
             if node.Setting.Listen == nil {
@@ -285,14 +290,6 @@ func (node *Node) Disconnect(addresses ...string) *Node {
         }).receiveDisconnect(addr)
     }
     return node
-}
-
-// Get address by hashname.
-func (node *Node) AddressByHashname(hashname string) string {
-    if !setting.HAS_CRYPTO { return hashname }
-    addr, ok := node.Network.Addresses[hashname]
-    if !ok { return hashname }
-    return addr
 }
 
 // Get connected addresses.

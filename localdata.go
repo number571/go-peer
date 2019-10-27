@@ -123,7 +123,7 @@ redirectPackage:
                     if !setting.IS_DISTRIB { return }
                     node.Send(&Package{
                         To: To{
-                            Address: node.AddressByHashname(pack.Body.Desc[0]),
+                            Address: node.addressByHashname(pack.Body.Desc[0]),
                         },
                         Head: Head{
                             Title: setting.TITLE_REDIRECT,
@@ -221,6 +221,13 @@ func (node *Node) runServer(handle func(*Node, *Package), handleInit func(*Node)
     return node
 }
 
+func (node *Node) addressByHashname(hashname string) string {
+    if !setting.HAS_CRYPTO { return hashname }
+    addr, ok := node.Network.Addresses[hashname]
+    if !ok { return hashname }
+    return addr
+}
+
 func (node *Node) packReceived(addr string) *Node {
     return node.Send(&Package{
         To: To{
@@ -261,7 +268,7 @@ func (node *Node) readPackage(conn net.Conn) (*Package, RelationType) {
 }
 
 func (node *Node) findRouting(pack *Package) *Package {
-    if pack == nil || node.IsAmI(pack.To.Address) { return nil }
+    if pack == nil || node.IsMyAddress(pack.To.Address) { return nil }
     return &Package{
         Head: Head{
             Title: setting.TITLE_REDIRECT,
@@ -278,7 +285,7 @@ func (node *Node) findRouting(pack *Package) *Package {
 }
 
 func (node *Node) findInOnionRouting(pack *Package) *Package {
-    if pack == nil || node.IsAmI(pack.To.Address) { return nil }
+    if pack == nil || node.IsMyAddress(pack.To.Address) { return nil }
     list := node.GetConnections(RelationHandle)
     return node.onionRouting(&Package{
         To: To{
@@ -298,7 +305,7 @@ func (node *Node) findInOnionRouting(pack *Package) *Package {
 }
 
 func (node *Node) onionRouting(pack *Package, role RelationType) *Package {
-    if pack == nil || node.IsAmI(pack.To.Address) ||
+    if pack == nil || node.IsMyAddress(pack.To.Address) ||
         !node.InConnections(pack.To.Address) { return nil }
 
     var (
