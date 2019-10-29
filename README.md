@@ -190,7 +190,7 @@ func ParsePrivate(privData string) *rsa.PrivateKey {}
 func ParsePublic(pubData string) *rsa.PublicKey {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
-func HMAC(Hash func([]byte) []byte, data []byte, key []byte) []byte {}
+func HMAC(fHash func([]byte) []byte, data []byte, key []byte) []byte {}
 func GenerateSessionKey(max int) []byte {}
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
 func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}
