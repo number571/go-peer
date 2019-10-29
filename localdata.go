@@ -545,9 +545,6 @@ func (node *Node) sendToNode(pack *Package) *Node {
         if !node.InConnections(pack.To.Address) {
             return nil
         }
-        if node.Network.Connections[pack.To.Address].Relation == RelationHidden { 
-            return node
-        }
         node.receiveDisconnect(pack.To.Address)
         return nil
     }
@@ -635,7 +632,11 @@ func (node *Node) decryptPackage(pack *Package) {
 }
 
 func (node *Node) receiveDisconnect(addr string) {
-    if !node.InConnections(addr) { return }
+    if !node.InConnections(addr) || node.IsHidden(addr) || 
+        (setting.HAS_FRIENDS && node.IsNode(addr)) { 
+            return 
+    }
+
     node.Setting.Mutex.Lock()
     delete(node.Network.Addresses, node.Network.Connections[addr].Hashname)
     delete(node.Network.Connections, addr)
