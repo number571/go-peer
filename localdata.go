@@ -38,7 +38,7 @@ redirectPackage:
     // Decrypt package.
     if setting.HAS_CRYPTO {
         node.decryptPackage(pack)
-        if packageIsValid(pack) != 0 {
+        if node.packageIsValid(pack) != 0 {
             return
         }
     }
@@ -458,7 +458,7 @@ func (node *Node) connectToFriend(addr, session string) *Node {
     }
     node.Network.Connections[addr] = &Connect{
         Relation: RelationNode,
-        Session: HashSum([]byte(session)),
+        Session: HMAC(sumSHA256, []byte(session), setting.DEFAULT_HMAC_KEY),
     }
     return node
 }
@@ -501,9 +501,19 @@ func (node *Node) formatPackage(pack *Package, hidden bool) *Package {
         pack.Body.Hash = ""
         pack.Body.Sign = ""
 
-        hash_pack := hashPack(pack)
-        pack.Body.Hash = base64.StdEncoding.EncodeToString(hash_pack)
-        pack.Body.Sign = base64.StdEncoding.EncodeToString(node.Sign(hash_pack))
+        if setting.CRYPTO_SPEED {
+            if pack.Head.Title != setting.TITLE_CONNECT && node.InConnections(pack.To.Address) {
+                pack.Body.Sign = base64.StdEncoding.EncodeToString(HMAC(
+                    sumSHA256,
+                    packToBytes(pack),
+                    node.Network.Connections[pack.To.Address].Session,
+                ))
+            }
+        } else {
+            hash_pack := hashPack(pack)
+            pack.Body.Hash = base64.StdEncoding.EncodeToString(hash_pack)
+            pack.Body.Sign = base64.StdEncoding.EncodeToString(node.Sign(hash_pack))
+        }
 
         // printJsonPackage(pack)
         node.encryptPackage(pack)
@@ -825,11 +835,6 @@ func unpaddingPKCS5(origData []byte) []byte {
     return origData[:(length - unpadding)]
 }
 
-func md5HashName(data string) string {
-    hash := md5.Sum([]byte(data))
-    return base64.StdEncoding.EncodeToString(hash[:])
-}
-
 func base64DecodeString(data string) []byte {
     result, err := base64.StdEncoding.DecodeString(data)
     if err != nil {
@@ -852,7 +857,18 @@ func packToBytes(pack *Package) []byte {
 }
 
 func hashPack(pack *Package) []byte {
-    return HashSum(packToBytes(pack))
+    return HMAC(sumSHA256, packToBytes(pack), setting.DEFAULT_HMAC_KEY)
+}
+
+func md5HashName(data string) string {
+    return base64.StdEncoding.EncodeToString(
+        HMAC(sumMD5, []byte(data), setting.DEFAULT_HMAC_KEY),
+    )
+}
+
+func sumMD5(data []byte) []byte {
+    hash := md5.Sum(data)
+    return hash[:]
 }
 
 func sumSHA256(data []byte) []byte {
@@ -860,7 +876,7 @@ func sumSHA256(data []byte) []byte {
     return hash[:]
 }
 
-func packageIsValid(pack *Package) uint8 {
+func (node *Node) packageIsValid(pack *Package) uint8 {
     tempPack := *pack
 
     tempPack.Body.Hash = ""
@@ -870,24 +886,39 @@ func packageIsValid(pack *Package) uint8 {
         return 1
     }
 
-    hash := base64.StdEncoding.EncodeToString(hashPack(&tempPack))
-    if hash != pack.Body.Hash {
+    publicString := string(base64DecodeString(pack.From.Public))
+    if md5HashName(publicString) != pack.From.Hashname {
         return 2
     }
 
-    publicString := string(base64DecodeString(pack.From.Public))
-    if md5HashName(publicString) != pack.From.Hashname {
-        return 3
-    }
+    if setting.CRYPTO_SPEED {
+        // HMAC
+        if pack.Head.Title != setting.TITLE_CONNECT && node.InConnections(pack.From.Address) {
+            mac := base64.StdEncoding.EncodeToString(HMAC(
+                sumSHA256,
+                packToBytes(&tempPack),
+                node.Network.Connections[pack.From.Address].Session,
+            ))
+            if mac != pack.Body.Sign {
+                return 6
+            }
+        }
+    } else {
+        // Digital signature
+        hash := hashPack(&tempPack)
+        if base64.StdEncoding.EncodeToString(hash) != pack.Body.Hash {
+            return 3
+        }
 
-    public := ParsePublic(publicString)
-    if public == nil {
-        return 4
-    }
+        public := ParsePublic(publicString)
+        if public == nil {
+            return 4
+        }
 
-    verify := Verify(public, base64DecodeString(pack.Body.Hash), base64DecodeString(pack.Body.Sign))
-    if verify != nil {
-        return 5
+        verify := Verify(public, hash, base64DecodeString(pack.Body.Sign))
+        if verify != nil {
+            return 5
+        }
     }
 
     return 0

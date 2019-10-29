@@ -28,6 +28,7 @@ Variables: {
     MODE_SAVE_MERG: "[MODE:SAVE][MODE:MERG]"
     MODE_DISTRIB_READ: "[MODE:DISTRIB][MODE:READ]"
     MODE_DISTRIB_SAVE: "[MODE:DISTRIB][MODE:SAVE]"
+    DEFAULT_HMAC_KEY: []byte("DEFAULT-HMAC-KEY")
     PACK_TIME: 10
     WAIT_TIME: 5
     ROUTE_NUM: 3
@@ -96,7 +97,7 @@ Functions: {
     ParsePublic(pubData string) *rsa.PublicKey
     Sign(priv *rsa.PrivateKey, data []byte) []byte
     Verify(pub *rsa.PublicKey, data, sign []byte) error
-    HashSum(data []byte) []byte
+    HMAC(fHash func([]byte) []byte, data []byte, key []byte) []byte
     GenerateSessionKey(max int) []byte
     EncryptRSA(pub *rsa.PublicKey, data []byte) []byte
     DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte
@@ -162,6 +163,7 @@ Structures: {
     }
 
     Network: {
+        Addresses map[string]string
         AccessList map[string]AccessType
         Connections map[string]*Connect
     }

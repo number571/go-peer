@@ -29,6 +29,7 @@ var setting = struct {
     MODE_SAVE_MERG string
     MODE_DISTRIB_READ string
     MODE_DISTRIB_SAVE string
+    DEFAULT_HMAC_KEY []byte
     PACK_TIME time.Duration
     WAIT_TIME time.Duration
     ROUTE_NUM int
@@ -64,6 +65,7 @@ var setting = struct {
     MODE_SAVE_MERG: "[MODE:SAVE][MODE:MERG]",
     MODE_DISTRIB_READ: "[MODE:DISTRIB][MODE:READ]",
     MODE_DISTRIB_SAVE: "[MODE:DISTRIB][MODE:SAVE]",
+    DEFAULT_HMAC_KEY: []byte("DEFAULT-HMAC-KEY"),
     PACK_TIME: 10,
     WAIT_TIME: 5,
     ROUTE_NUM: 3,
@@ -124,6 +126,7 @@ func SettingsGet(key string) interface{} {
         case "MODE_SAVE_MERG": return setting.MODE_SAVE_MERG
         case "MODE_DISTRIB_READ": return setting.MODE_DISTRIB_READ
         case "MODE_DISTRIB_SAVE": return setting.MODE_DISTRIB_SAVE
+        case "DEFAULT_HMAC_KEY": return setting.DEFAULT_HMAC_KEY
         case "IS_DISTRIB": return setting.IS_DISTRIB
         case "IS_DECENTR": return setting.IS_DECENTR
         case "HAS_CRYPTO": return setting.HAS_CRYPTO
@@ -180,6 +183,7 @@ func stringSettings(name string, data interface{}) uint8 {
         case "MODE_SAVE_MERG": setting.MODE_SAVE_MERG = result
         case "MODE_DISTRIB_READ": setting.MODE_DISTRIB_READ = result
         case "MODE_DISTRIB_SAVE": setting.MODE_DISTRIB_SAVE = result
+        case "DEFAULT_HMAC_KEY": setting.DEFAULT_HMAC_KEY = []byte(result)
         default: return 1
     }
     return 0

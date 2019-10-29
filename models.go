@@ -78,7 +78,6 @@ type Package struct {
 }
 
 type Info struct {
-    // PID string
     NET string
 }
 

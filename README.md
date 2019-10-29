@@ -73,11 +73,11 @@ func handleClient(node *gopeer.Node, message []string) {
 * Asymmetric encryption = RSA-OAEP (The key depends from user node);
 * Digital signature = RSASSA-PSS;
 * Hash function = SHA256;
-  
+
 #### Cryptography can be used in fast mode (not recommended). 
 * Mode = "CRYPTO_SPEED";
 * The AES key becomes 128 (Default: 256) bits;
-* The HashSum function becomes H(H(X)) (Default: (H(H(x), x)));
+* HMAC is used instead of digital signatures;
   
 #### Can be used routing:
 * Mode = "HAS_ROUTING";
@@ -123,7 +123,7 @@ const(
 * MAXSIZE_PACKAGE (The size of the package that can be read at a time);
 * CLIENT_NAME_SIZE (Length client name in bytes);
 ***
-### Default strings:
+### Default strings/bytes:
 ```go
 {
     TEMPLATE: "0.0.0.0",
@@ -144,6 +144,7 @@ const(
     MODE_SAVE_MERG: "[MODE:SAVE][MODE:MERG]",
     MODE_DISTRIB_READ: "[MODE:DISTRIB][MODE:READ]",
     MODE_DISTRIB_SAVE: "[MODE:DISTRIB][MODE:SAVE]",
+    DEFAULT_HMAC_KEY: []byte("DEFAULT-HMAC-KEY"),
 }
 ```
 ***
@@ -189,7 +190,7 @@ func ParsePrivate(privData string) *rsa.PrivateKey {}
 func ParsePublic(pubData string) *rsa.PublicKey {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
-func HashSum(data []byte) []byte {}
+func HMAC(Hash func([]byte) []byte, data []byte, key []byte) []byte {}
 func GenerateSessionKey(max int) []byte {}
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
 func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}

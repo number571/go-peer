@@ -107,19 +107,28 @@ func Verify(pub *rsa.PublicKey, data, sign []byte) error {
     return rsa.VerifyPSS(pub, crypto.SHA256, data, sign, nil)
 }
 
-// SHA256 sum.
-// Secure by attacks 'message extension'.
-func HashSum(data []byte) []byte {
-    if setting.CRYPTO_SPEED {
-        // (n/2) bits
-        return sumSHA256(sumSHA256(data))
-    } else {
-        // ~(n) bits
-        return sumSHA256(bytes.Join(
-            [][]byte{sumSHA256(data), data},
-            []byte{},
-        ))
+// MAC by cryptographic hash function.
+func HMAC(fHash func([]byte) []byte, data []byte, key []byte) []byte {
+    const (
+        a = 0x5c
+        b = 0x36
+    )
+    var (
+        length = len(key)
+        outer = make([]byte, length)
+        inner = make([]byte, length)
+    )
+    for index, byte := range key {
+        outer[index] = byte ^ a 
+        inner[index] = byte ^ b
     }
+    return fHash(bytes.Join(
+        [][]byte{outer, fHash(bytes.Join(
+            [][]byte{inner, data},
+            []byte{},
+        ))},
+        []byte{}, 
+    ))
 }
 
 // Generate integers in range [0:MaxInt64).
