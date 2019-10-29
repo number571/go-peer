@@ -35,10 +35,11 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
         case TITLE_NETWORK:
             switch pack.Head.Mode {
                 case MODE_READ:
+                    if !node.InConnections(pack.From.Address) { return }
                     var list []string 
-                    for addr := range node.Network.Connections {
-                        if addr == pack.From.Address { continue }
-                        list = append(list, addr)
+                    for _, conn := range node.Network.Connections {
+                        if conn.Hashname == pack.From.Hashname { continue }
+                        list = append(list, conn.Hashname)
                     }
                     node.Send(&gopeer.Package{
                         To: gopeer.To{
