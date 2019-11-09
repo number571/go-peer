@@ -79,9 +79,8 @@ redirectPackage:
                     }
                     return
                 case setting.MODE_READ_MERG:
-                    if setting.IS_DISTRIB {
-                        node.receiveMergeConnect(pack, role, conn)
-                    }
+                    if !setting.IS_DISTRIB { return }
+                    node.receiveMergeConnect(pack, role, conn)
                     if role == RelationNode { return } else { continue }
 
                 case setting.MODE_SAVE:
@@ -100,9 +99,8 @@ redirectPackage:
                     }
                     return
                 case setting.MODE_SAVE_MERG:
-                    if setting.IS_DISTRIB {
-                        node.saveMergeConnect(pack, role, conn)
-                    }
+                    if !setting.IS_DISTRIB { return }
+                    node.saveMergeConnect(pack, role, conn)
                     if role == RelationNode { return } else { continue }
             }
 
@@ -167,7 +165,9 @@ redirectPackage:
                         role = RelationHidden
                         goto redirectPackage
                     }
-                    node.SendRedirect(pack)
+                    if setting.HANDLE_ROUTING || node.IAmNode() {
+                        node.SendRedirect(pack)
+                    }
                     if sender == RelationNode { return } else { continue }
             }
     }
@@ -636,7 +636,11 @@ func (node *Node) receiveDisconnect(addr string) {
         (setting.HAS_FRIENDS && node.IsNode(addr)) { 
             return 
     }
+    node.deleteFromConnection(addr)
+}
 
+func (node *Node) deleteFromConnection(addr string) {
+    if !node.InConnections(addr) { return }
     node.Setting.Mutex.Lock()
     delete(node.Network.Addresses, node.Network.Connections[addr].Hashname)
     delete(node.Network.Connections, addr)

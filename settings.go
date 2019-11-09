@@ -46,6 +46,7 @@ var setting = struct {
     HAS_ROUTING bool 
     HAS_FRIENDS bool
     CRYPTO_SPEED bool
+    HANDLE_ROUTING bool
 } {
     TEMPLATE: "0.0.0.0",
     CLIENT_NAME: "[CLIENT]",
@@ -82,6 +83,7 @@ var setting = struct {
     HAS_ROUTING: false,
     HAS_FRIENDS: false,
     CRYPTO_SPEED: false,
+    HANDLE_ROUTING: false,
 }
 
 // Set up management.
@@ -142,6 +144,7 @@ func SettingsGet(key string) interface{} {
         case "MAXSIZE_ADDRESS": return setting.MAXSIZE_ADDRESS
         case "MAXSIZE_PACKAGE": return setting.MAXSIZE_PACKAGE
         case "CLIENT_NAME_SIZE": return setting.CLIENT_NAME_SIZE
+        case "HANDLE_ROUTING": return setting.HANDLE_ROUTING
     }
     return nil
 }
@@ -198,6 +201,7 @@ func boolSettings(name string, data interface{}) uint8 {
         case "HAS_ROUTING": setting.HAS_ROUTING = result
         case "HAS_FRIENDS": setting.HAS_FRIENDS = result
         case "CRYPTO_SPEED": setting.CRYPTO_SPEED = result
+        case "HANDLE_ROUTING": setting.HANDLE_ROUTING = result
         default: return 1
     }
     return 0

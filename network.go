@@ -84,6 +84,14 @@ func (node *Node) IsMyHashname(hashname string) bool {
     return node.Hashname == hashname
 }
 
+func (node *Node) IAmClient() bool {
+    return node.Setting.Listen == nil 
+}
+
+func (node *Node) IAmNode() bool {
+    return node.Setting.Listen != nil
+}
+
 // Append addresses to access list.
 func (node *Node) AppendToAccessList(access AccessType, addresses ...string) {
     for _, addr := range addresses {
@@ -155,9 +163,14 @@ func (node *Node) SendToAllWithout(pack *Package, sender string) *Node {
 
 // Use function Send for all nodes.
 func (node *Node) SendToAll(pack *Package) *Node {
+    return node.SendTo(pack, node.GetConnections(RelationAll)...)
+}
+
+func (node *Node) SendTo(pack *Package, addresses ...string) *Node {
     if pack == nil { return nil }
     newPack := *pack
-    for addr := range node.Network.Connections {
+    for _, addr := range addresses {
+        if !node.InConnections(addr) { continue }
         newPack.To.Address = addr
         node.Send(&newPack)
     }
@@ -174,22 +187,23 @@ func (node *Node) Send(pack *Package) *Node {
     newPack := *pack
     if node.IsHandle(pack.To.Address) {
         return node.sendHandle(&newPack)
-    } else {
-        return node.sendToNode(&newPack)
     }
-    return nil
+    return node.sendToNode(&newPack)
 }
 
 // Connect to node, his nodes and send him connections.
 func (node *Node) MergeConnect(addr string) *Node {
-    if setting.IS_DECENTR || node.IsMyAddress(addr) {
-        return nil
+    if (!setting.HANDLE_ROUTING && node.IAmClient()) ||
+        setting.IS_DECENTR || node.IsMyAddress(addr) {
+            return nil
     }
+    relation := RelationNode
     if node.Setting.Listen == nil {
         conn, err := net.Dial("tcp", addr)
         if err != nil {
             return nil
         }
+        relation = RelationHandle
         node.Network.Connections[addr] = &Connect{
             Relation: RelationHandle,
             Link: conn,
@@ -206,7 +220,7 @@ func (node *Node) MergeConnect(addr string) *Node {
         },
         Body: Body{
             Desc: [DATA_SIZE]string{
-                strings.Join(node.GetConnections(RelationNode), setting.SEPARATOR),
+                strings.Join(node.GetConnections(relation), setting.SEPARATOR),
             },
         },
     })
@@ -287,7 +301,7 @@ func (node *Node) Disconnect(addresses ...string) *Node {
                 Title: setting.TITLE_CONNECT,
                 Mode: setting.MODE_REMV,
             },
-        }).receiveDisconnect(addr)
+        }).deleteFromConnection(addr)
     }
     return node
 }
