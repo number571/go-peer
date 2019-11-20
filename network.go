@@ -48,8 +48,14 @@ func (node *Node) Open() *Node {
 }
 
 // Run server and client applications in parallel.
-func (node *Node) Run(handleInit func(*Node), handleServer func(*Node, *Package), handleClient func(*Node, []string)) *Node {
-    go node.runServer(handleServer, handleInit)
+func (node *Node) Run(handleServer func(*Node, *Package), handleClient func(*Node)) *Node {
+    switch {
+        case setting.HAS_CRYPTO && node.Keys.Private == nil:
+            return nil
+    }
+    ch := make(chan bool)
+    go node.runServer(handleServer, ch)
+    <- ch
     return node.runClient(handleClient)
 }
 
@@ -84,10 +90,12 @@ func (node *Node) IsMyHashname(hashname string) bool {
     return node.Hashname == hashname
 }
 
+// Return true if server is not running.
 func (node *Node) IAmClient() bool {
     return node.Setting.Listen == nil 
 }
 
+// Return true if server is running.
 func (node *Node) IAmNode() bool {
     return node.Setting.Listen != nil
 }
@@ -126,7 +134,7 @@ func (node *Node) CreateRedirect(pack *Package) *Package {
     if setting.IS_DECENTR {
         return node.findRouting(pack)
     } else {
-        if node.Setting.Listen == nil {
+        if node.IAmClient() {
             return node.findInOnionRouting(pack)
         } else {
             return node.onionRouting(pack, RelationNode)
@@ -166,6 +174,7 @@ func (node *Node) SendToAll(pack *Package) *Node {
     return node.SendTo(pack, node.GetConnections(RelationAll)...)
 }
 
+// Send package to list of addresses.
 func (node *Node) SendTo(pack *Package, addresses ...string) *Node {
     if pack == nil { return nil }
     newPack := *pack
@@ -191,14 +200,14 @@ func (node *Node) Send(pack *Package) *Node {
     return node.sendToNode(&newPack)
 }
 
-// Connect to node, his nodes and send him connections.
+// Connect to node, his nodes and send to him my connections.
 func (node *Node) MergeConnect(addr string) *Node {
     if (!setting.HANDLE_ROUTING && node.IAmClient()) ||
         setting.IS_DECENTR || node.IsMyAddress(addr) {
             return nil
     }
     relation := RelationNode
-    if node.Setting.Listen == nil {
+    if node.IAmClient() {
         conn, err := net.Dial("tcp", addr)
         if err != nil {
             return nil
@@ -228,7 +237,7 @@ func (node *Node) MergeConnect(addr string) *Node {
 
 // Connect to hidden friends.
 func (node *Node) HiddenConnect(addr string) *Node {
-    if setting.IS_DISTRIB && node.Setting.Listen != nil { return nil }
+    if setting.IS_DISTRIB && node.IAmNode() { return nil }
     if  (!setting.HAS_CRYPTO && node.IsMyAddress(addr)) || 
         ( setting.HAS_CRYPTO && node.IsMyHashname(addr)) { 
             return nil 
@@ -248,23 +257,27 @@ func (node *Node) HiddenConnect(addr string) *Node {
 }
 
 // Connect to many nodes.
-func (node *Node) ConnectToList(list ...interface{}) *Node {
-    for _, value := range list {
-        switch value.(type) {
+// If type data = string then { connect(data) }
+// If type data = []string then { for d in data: connect(d) }
+// If type data = [2]string then { connect(data[0], data[1]) }
+// If type data = map[string]string then { for a,p in data: connect(a,p) }
+func (node *Node) ConnectToList(data ...interface{}) *Node {
+    for _, d := range data {
+        switch d.(type) {
             case string:
-                node.Connect(value.(string))
+                node.Connect(d.(string))
             case []string:
-                data := value.([]string)
-                for _, addr := range data {
+                val := d.([]string)
+                for _, addr := range val {
                     node.Connect(addr)
                 }
             case [2]string:
-                data := value.([2]string)
-                if len(data) != 2 { continue }
-                node.Connect(data[0], data[1])
+                val := d.([2]string)
+                if len(val) != 2 { continue }
+                node.Connect(val[0], val[1])
             case map[string]string:
-                data := value.(map[string]string)
-                for addr, pasw := range data {
+                val := d.(map[string]string)
+                for addr, pasw := range val {
                     node.Connect(addr, pasw)
                 }
         }
@@ -272,14 +285,15 @@ func (node *Node) ConnectToList(list ...interface{}) *Node {
     return node
 }
 
-// Connect to node by address.
+// Connect to node by address and/or password.
+// If length data = 2 then connect to friend by password.
 func (node *Node) Connect(data ...string) *Node {
     // data[0] = address
     // data[1] = password
     if node.IsMyAddress(data[0]) { return nil }
     switch len(data) {
         case 1:
-            if node.Setting.Listen == nil {
+            if node.IAmClient() {
                 return node.handleConnect(node.Setting.HandleServer, data[0])
             } else {
                 return node.connectToNode(data[0])
@@ -291,6 +305,8 @@ func (node *Node) Connect(data ...string) *Node {
 }
 
 // Disconnect from node by address.
+// Send package to node for delete on his side and 
+// delete connections on my side.
 func (node *Node) Disconnect(addresses ...string) *Node {
     for _, addr := range addresses {
         node.Send(&Package{
@@ -306,7 +322,8 @@ func (node *Node) Disconnect(addresses ...string) *Node {
     return node
 }
 
-// Get connected addresses.
+// Get connected addresses by relation.
+// If relation = RelationAll then function return all connections.
 func (node *Node) GetConnections(relation RelationType) []string {
     var list []string 
     if relation == RelationAll {
@@ -323,7 +340,7 @@ func (node *Node) GetConnections(relation RelationType) []string {
     return list
 }
 
-// Turn off server.
+// Turn off server listening.
 func (node *Node) Close() *Node {
     if node.Setting.Listen == nil {
         return nil

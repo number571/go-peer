@@ -11,11 +11,7 @@ func init() {
 }
 
 func main() {
-    gopeer.NewNode("IPv4:Port").Open().Run(handleInit, handleServer, handleClient).Close()
-}
-
-func handleInit(node *gopeer.Node) {
-    
+    gopeer.NewNode("IPv4:Port").Open().Run(handleServer, handleClient).Close()
 }
 
 func handleServer(node *gopeer.Node, pack *gopeer.Package) {
@@ -24,8 +20,6 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
     }
 }
 
-func handleClient(node *gopeer.Node, message []string) {
-    switch message[0] {
-        
-    }
+func handleClient(node *gopeer.Node) {
+   
 }

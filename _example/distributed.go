@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "fmt"
+    "bufio"
     "strings"
     "github.com/number571/gopeer"
 )
@@ -23,11 +24,7 @@ func init() {
 
 func main() {
     node := gopeer.NewNode(os.Args[1]).GeneratePrivate(2048)
-    node.Open().Run(handleInit, handleServer, handleClient).Close()
-}
-
-func handleInit(node *gopeer.Node) {
-    node.ReadOnly(gopeer.ReadNode).ConnectToList(":8080", ":7070", ":6060")
+    node.Open().Run(handleServer, handleClient).Close()
 }
 
 func handleServer(node *gopeer.Node, pack *gopeer.Package) {
@@ -42,7 +39,19 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
     }
 }
 
-func handleClient(node *gopeer.Node, message []string) {
+func handleClient(node *gopeer.Node) {
+    node.ReadOnly(gopeer.ReadNode).ConnectToList(":8080",":7070",":6060")
+    for {
+        handleCLI(node, strings.Split(inputString(), " "))
+    }
+}
+
+func inputString() string {
+    msg, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+    return strings.Replace(msg, "\n", "", -1)
+}
+
+func handleCLI(node *gopeer.Node, message []string) {
     switch message[0] {
         case "/exit": os.Exit(0)
         case "/whoami": fmt.Println("|", node.Hashname)  

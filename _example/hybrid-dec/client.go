@@ -3,6 +3,7 @@ package main
 import (
     "os"
     "fmt"
+    "bufio"
     "strings"
     "github.com/number571/gopeer"
 )
@@ -17,16 +18,13 @@ func init() {
         "IS_DECENTR": true,
         "HAS_CRYPTO": true,
         "HAS_ROUTING": true,
+        // "HANDLE_ROUTING": true,
     })
 }
 
 func main() {
     node := gopeer.NewNode(gopeer.SettingsGet("CLIENT_NAME").(string)).GeneratePrivate(2048)
-    node.Run(handleInit, handleServer, handleClient)
-}
-
-func handleInit(node *gopeer.Node) {
-    node.Connect(":8080")
+    node.Run(handleServer, handleClient)
 }
 
 func handleServer(node *gopeer.Node, pack *gopeer.Package) {
@@ -41,7 +39,19 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
     }
 }
 
-func handleClient(node *gopeer.Node, message []string) {
+func handleClient(node *gopeer.Node) {
+    node.Connect(":8080")
+    for {
+        handleCLI(node, strings.Split(inputString(), " "))
+    }
+}
+
+func inputString() string {
+    msg, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+    return strings.Replace(msg, "\n", "", -1)
+}
+
+func handleCLI(node *gopeer.Node, message []string) {
     switch message[0] {
         case "/exit": os.Exit(0)
         case "/whoami": fmt.Println("|", node.Hashname)  

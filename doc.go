@@ -45,6 +45,7 @@ Variables: {
     HAS_ROUTING: false
     HAS_FRIENDS: false
     CRYPTO_SPEED: false
+    HANDLE_ROUTING: false
 }
 
 Functions: {

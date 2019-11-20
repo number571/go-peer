@@ -18,15 +18,10 @@ func init() {
 
 // Create node in network with address 'IPv4:Port'.
 // Open server for listening connections.
-// Run server and client parts. handleInit runs after run handleServer.
+// Run server and client parts.
 // Close listening connections after use.
 func main() {
-    gopeer.NewNode("IPv4:Port").Open().Run(handleInit, handleServer, handleClient).Close()
-}
-
-// Actions before using the client interface.
-func handleInit(node *gopeer.Node) {
-    
+    gopeer.NewNode("IPv4:Port").Open().Run(handleServer, handleClient).Close()
 }
 
 // Read package from network.
@@ -36,12 +31,9 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
     }
 }
 
-// Read input message. 
-// CLI interface. If another interface is used then this function can be void.
+// Client's interface.
 func handleClient(node *gopeer.Node, message []string) {
-    switch message[0] {
-        
-    }
+    
 }
 ```
 ***
@@ -55,18 +47,19 @@ func handleClient(node *gopeer.Node, message []string) {
     HAS_ROUTING: false,
     HAS_FRIENDS: false,
     CRYPTO_SPEED: false,
+    HANDLE_ROUTING: false,
 }
 ```
 #### The choice between decentralized and distributed networks. 
 * Mode = "IS_NOTHING" (Node can't be created);
 * Mode = "IS_DISTRIB";
 * Mode = "IS_DECENTR";
-  
+
 #### Based on previous networks implemented centralized and hybrid.
 * Need use ReadOnly(RelationHandles) for create centralized networks;
 * Need use ReadOnly(RelationNodes) for create decentralized/distributed networks;
 * By default is hybrid network.
-    
+
 #### Can be used cryptography: 
 * Mode = "HAS_CRYPTO" (Key exchange, data encryption, digital signatures, packet verification, hash names);
 * Symmetric encryption = AES-CBC (The key depends from "CRYPTO_SPEED" option);
@@ -87,6 +80,12 @@ func handleClient(node *gopeer.Node, message []string) {
 #### Nodes have friends:
 * Mode = "HAS_FRIENDS";
 * In this mode nodes can be connected only by passwords.
+
+#### Clients can be used as nodes:
+* Mode = "HANDLE_ROUTING";
+* In decentralized network clients can make a redirect package through itself;
+* In distributed network clients can make a merge connections;
+
 ***
 ### Constants:
 ```go
@@ -214,6 +213,7 @@ package main
 import (
     "os"
     "fmt"
+    "bufio"
     "strings"
     "github.com/number571/gopeer"
 )
@@ -235,15 +235,7 @@ func init() {
 
 func main() {
     node := gopeer.NewNode(os.Args[1]).GeneratePrivate(2048)
-    node.Open().Run(handleInit, handleServer, handleClient).Close()
-}
-
-func handleInit(node *gopeer.Node) {
-    node.ReadOnly(gopeer.ReadNode).ConnectToList(
-        [2]string{":8080", "password"},
-        [2]string{":7070", "password"},
-        [2]string{":6060", "password"},
-    )
+    node.Open().Run(handleServer, handleClient).Close()
 }
 
 func handleServer(node *gopeer.Node, pack *gopeer.Package) {
@@ -258,7 +250,24 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
     }
 }
 
-func handleClient(node *gopeer.Node, message []string) {
+func handleClient(node *gopeer.Node) {
+    node.ReadOnly(gopeer.ReadNode).ConnectToList(
+        map[string]string{
+            ":8080": "password",
+            ":7070": "password",
+            ":6060": "password",
+    })
+    for {
+        handleCLI(node, strings.Split(inputString(), " "))
+    }
+}
+
+func inputString() string {
+    msg, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+    return strings.Replace(msg, "\n", "", -1)
+}
+
+func handleCLI(node *gopeer.Node, message []string) {
     switch message[0] {
         case "/exit": os.Exit(0)
         case "/whoami": fmt.Println("|", node.Hashname)  

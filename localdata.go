@@ -186,31 +186,19 @@ redirectPackage:
 }
 }
 
-func (node *Node) runInit(handle func(*Node)) *Node {
+func (node *Node) runClient(handle func(*Node)) *Node {
     handle(node)
     return node
 }
 
-func (node *Node) runClient(handle func(*Node, []string)) *Node {
+func (node *Node) runServer(handle func(*Node, *Package), ch chan bool) *Node {
     switch {
-        case setting.HAS_CRYPTO && node.Keys.Private == nil:
-            return nil
-    }
-    for {
-        handle(node, strings.Split(inputString(), " "))
-    }
-    return node
-}
-
-func (node *Node) runServer(handle func(*Node, *Package), handleInit func(*Node)) *Node {
-    switch {
-        case setting.HAS_CRYPTO && node.Keys.Private == nil:
-            return nil
-        case node.Setting.Listen == nil:
+        case node.IAmClient():
             node.Setting.HandleServer = handle
-            return node.runInit(handleInit)
+            ch <- true
+            return node
     }
-    node.runInit(handleInit)
+    ch <- true
     for {
         conn, err := node.Setting.Listen.Accept()
         if err != nil {
@@ -510,9 +498,9 @@ func (node *Node) formatPackage(pack *Package, hidden bool) *Package {
                 ))
             }
         } else {
-            hash_pack := hashPack(pack)
-            pack.Body.Hash = base64.StdEncoding.EncodeToString(hash_pack)
-            pack.Body.Sign = base64.StdEncoding.EncodeToString(node.Sign(hash_pack))
+            hashPack := hashPack(pack)
+            pack.Body.Hash = base64.StdEncoding.EncodeToString(hashPack)
+            pack.Body.Sign = base64.StdEncoding.EncodeToString(node.Sign(hashPack))
         }
 
         // printJsonPackage(pack)
@@ -632,9 +620,8 @@ func (node *Node) decryptPackage(pack *Package) {
 }
 
 func (node *Node) receiveDisconnect(addr string) {
-    if !node.InConnections(addr) || node.IsHidden(addr) || 
-        (setting.HAS_FRIENDS && node.IsNode(addr)) { 
-            return 
+    if !node.InConnections(addr) || node.IsHidden(addr) || (setting.HAS_FRIENDS && node.IsNode(addr)) { 
+        return 
     }
     node.deleteFromConnection(addr)
 }
