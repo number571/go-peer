@@ -62,7 +62,7 @@ Functions: {
 }
 
 Methods: {
-    (node *Node) Open() *Node 
+    (node *Node) Open() *Node
     (node *Node) Run(handleInit func(*Node), handleServer func(*Node, *Package), handleClient func(*Node, []string)) *Node
     (node *Node) ReadOnly(types ReadonlyType) *Node
     (node *Node) IsHidden(addr string) bool
@@ -154,7 +154,7 @@ Structures: {
         Mutex *sync.Mutex
         ReadOnly ReadonlyType
         Listen net.Listener
-        HandleServer func(*Node, *Package) 
+        HandleServer func(*Node, *Package)
         TestConnections map[string]bool
     }
 

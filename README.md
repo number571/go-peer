@@ -32,7 +32,7 @@ func handleServer(node *gopeer.Node, pack *gopeer.Package) {
 }
 
 // Client's interface.
-func handleClient(node *gopeer.Node, message []string) {
+func handleClient(node *gopeer.Node) {
     
 }
 ```
