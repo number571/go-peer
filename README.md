@@ -1,6 +1,9 @@
 # gopeer
 > Framework for create decentralized networks. Version: 1.0.0s.
 
+### Framework based applications:
+* Network [HiddenLake](https://github.com/number571/hidden-lake "hidden network");
+
 ### Specifications:
 1. Data transfer:
 * Direct;
@@ -10,9 +13,6 @@
 * Symmetric algorithm: AES256-CBC;
 * Asymmetric algorithm: RSA-OAEP;
 * Hash function: HMAC(SHA256);
-
-### Framework based applications:
-* Network [HiddenLake](https://github.com/number571/hidden-lake "hidden network");
 
 ### Template:
 ```go
