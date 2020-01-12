@@ -3,13 +3,13 @@
 
 ### Specifications:
 1. Data transfer:
-1.1. Direct
-1.2. End to end encryption
-1.3. Packages in blockchain
+* Direct
+* End to end encryption
+* Packages in blockchain
 2. Encryption:
-2.1. Symmetric algorithm: AES256-CBC
-2.2. Asymmetric algorithm: RSA-OAEP
-2.3. Hash function: HMAC(SHA256)
+* Symmetric algorithm: AES256-CBC
+* Asymmetric algorithm: RSA-OAEP
+* Hash function: HMAC(SHA256)
 
 ### Framework based applications:
 * Network [HiddenLake](https://github.com/number571/hidden-lake "hidden network");
