@@ -2,7 +2,7 @@
 > Framework for create decentralized networks. Version: 1.0.0s.
 
 ### Framework based applications:
-* Network [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
+* HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
 
 ### Specifications:
 1. Data transfer:
