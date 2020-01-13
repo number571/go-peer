@@ -4,22 +4,27 @@ import (
     "github.com/number571/gopeer"
 )
 
-func init() {
-    gopeer.SettingsSet(gopeer.SettingsType{
-        
-    })
-}
+const (
+    ADDRESS = "ipv4:port"
+    TITLE = "TITLE"
+)
 
 func main() {
-    gopeer.NewNode("IPv4:Port").Open().Run(handleServer, handleClient).Close()
+    listener := gopeer.NewListener(ADDRESS)
+    listener.Open().Run(handleServer)
+    defer listener.Close()
+
+    // listener.NewClient(gopeer.GeneratePrivate(2048))
 }
 
-func handleServer(node *gopeer.Node, pack *gopeer.Package) {
-    switch pack.Head.Title {
-
-    }
-}
-
-func handleClient(node *gopeer.Node) {
-   
+func handleServer(client *gopeer.Client, pack *gopeer.Package) {
+    client.HandleAction(TITLE, pack, 
+        func(client *gopeer.Client, pack *gopeer.Package) (set string) {
+            
+            return
+        },
+        func(client *gopeer.Client, pack *gopeer.Package) {
+            
+        },
+    )
 }

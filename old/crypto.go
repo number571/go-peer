@@ -1,4 +1,4 @@
-package gopeer
+package old
 
 import (
 	"bytes"
@@ -9,22 +9,62 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/base64"
-	"encoding/binary"
-	"encoding/json"
 	"encoding/pem"
 	"io"
 	"math"
 	"math/big"
 )
 
-// Create private key by size bits.
-func GeneratePrivate(bits int) *rsa.PrivateKey {
+// Generate private key and save in object node.
+func (node *Node) GeneratePrivate(bits int) *Node {
 	priv, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		return nil
 	}
-	return priv
+	return node.SetPrivate(priv)
+}
+
+// Translate public key as *rsa.PublicKey (in node object) to string.
+func (node *Node) StringPublic() string {
+	if node.Keys.Public == nil {
+		return ""
+	}
+	return StringPublic(node.Keys.Public)
+}
+
+// Translate private key as *rsa.PrivateKey (in node object) to string.
+func (node *Node) StringPrivate() string {
+	if node.Keys.Private == nil {
+		return ""
+	}
+	return StringPrivate(node.Keys.Private)
+}
+
+// Translate private key as string to *rsa.PrivateKey (in node object).
+func (node *Node) ParsePrivate(privData string) *Node {
+	priv := ParsePrivate(privData)
+	if priv == nil {
+		return nil
+	}
+	return node.SetPrivate(priv)
+}
+
+// Set private key in node object, calculate public and hashname.
+func (node *Node) SetPrivate(priv *rsa.PrivateKey) *Node {
+	node.Keys.Private = priv
+	node.Keys.Public = &priv.PublicKey
+	node.Hashname = md5HashName(node.StringPublic())
+	return node
+}
+
+// Decrypt data by private key in object node.
+func (node *Node) DecryptRSA(data []byte) []byte {
+	return DecryptRSA(node.Keys.Private, data)
+}
+
+// Sign data by private key in object node.
+func (node *Node) Sign(data []byte) []byte {
+	return Sign(node.Keys.Private, data)
 }
 
 // Translate private key as string to *rsa.PrivateKey.
@@ -67,19 +107,6 @@ func Verify(pub *rsa.PublicKey, data, sign []byte) error {
 	return rsa.VerifyPSS(pub, crypto.SHA256, data, sign, nil)
 }
 
-// Hash string by public key.
-func HashPublic(pub *rsa.PublicKey) string {
-	return Base64Encode(HashSum([]byte(StringPublic(pub))))
-}
-
-// Hash sum by HMAC(SHA256, HMACKEY).
-func HashSum(data []byte) []byte {
-	return HMAC(func(data []byte) []byte {
-		hash := sha256.Sum256(data)
-		return hash[:]
-	}, data, []byte(settings.HMACKEY))
-}
-
 // MAC by cryptographic hash function.
 func HMAC(fHash func([]byte) []byte, data []byte, key []byte) []byte {
 	const (
@@ -119,12 +146,15 @@ func GenerateRandomIntegers(max int) []uint64 {
 	return list
 }
 
-// Generate bytes in range [0:256).
+// Generate bytes in range [33:127).
 func GenerateRandomBytes(max int) []byte {
 	var slice []byte = make([]byte, max)
 	_, err := rand.Read(slice)
 	if err != nil {
 		return nil
+	}
+	for max = max - 1; max >= 0; max-- {
+		slice[max] = slice[max]%94 + 33
 	}
 	return slice
 }
@@ -214,112 +244,4 @@ func StringPrivate(priv *rsa.PrivateKey) string {
 			Bytes: x509.MarshalPKCS1PrivateKey(priv),
 		},
 	))
-}
-
-// base64.StdEncoding.EncodeToString
-func Base64Encode(data []byte) string {
-	return base64.StdEncoding.EncodeToString(data)
-}
-
-// base64.StdEncoding.DecodeString
-func Base64Decode(data string) []byte {
-	result, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		return nil
-	}
-	return result
-}
-
-// Pack another types data to JSON.
-func PackJSON(data interface{}) []byte {
-	jsonData, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		return nil
-	}
-	return jsonData
-}
-
-// Unpack JSON to another types data.
-func UnpackJSON(jsonData []byte, data interface{}) interface{} {
-	err := json.Unmarshal(jsonData, data)
-	if err != nil {
-		return nil
-	}
-	return data
-}
-
-// POW for check hash package by Nonce.
-func ProofOfWork(blockHash []byte, difficulty uint) uint64 {
-	var (
-		Target  = big.NewInt(1)
-		intHash = big.NewInt(1)
-		nonce   uint64
-		hash    []byte
-	)
-	Target.Lsh(Target, 256-difficulty)
-	for nonce < math.MaxUint64 {
-		hash = HashSum(bytes.Join([][]byte{
-			ToBytes(nonce),
-			blockHash,
-		},
-			[]byte{},
-		))
-		intHash.SetBytes(hash)
-		if intHash.Cmp(Target) == -1 {
-			break
-		}
-		nonce++
-	}
-	return nonce
-}
-
-// Return true if Nonce package equal POW(hash, DIFF).
-func NonceIsValid(blockHash []byte, difficulty uint, nonce uint64) bool {
-	var (
-		Target  = big.NewInt(1)
-		intHash = big.NewInt(1)
-		hash    []byte
-	)
-	Target.Lsh(Target, 256-difficulty)
-	hash = HashSum(bytes.Join([][]byte{
-		ToBytes(nonce),
-		blockHash,
-	},
-		[]byte{},
-	))
-	intHash.SetBytes(hash)
-	if intHash.Cmp(Target) == -1 {
-		return true
-	}
-	return false
-}
-
-// Translate uint64 to slice of bytes.
-func ToBytes(num uint64) []byte {
-	var data = new(bytes.Buffer)
-	err := binary.Write(data, binary.BigEndian, num)
-	if err != nil {
-		return nil
-	}
-	return data.Bytes()
-}
-
-// For blockcipher encryption.
-func paddingPKCS5(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
-
-// For blockcipher decryption.
-func unpaddingPKCS5(origData []byte) []byte {
-	length := len(origData)
-	if length == 0 {
-		return nil
-	}
-	unpadding := int(origData[length-1])
-	if length < unpadding {
-		return nil
-	}
-	return origData[:(length - unpadding)]
 }

@@ -1,5 +1,18 @@
 # gopeer
-> Framework for create centralized, decentralized, distributed and hybrid networks.
+> Framework for create decentralized networks. Version: 1.0.0s.
+
+### Specifications:
+1. Data transfer:
+1.1. Direct
+1.2. End to end encryption
+1.3. Packages in blockchain
+2. Encryption:
+2.1. Symmetric algorithm: AES256-CBC
+2.2. Asymmetric algorithm: RSA-OAEP
+2.3. Hash function: HMAC(SHA256)
+
+### Framework based applications:
+* Network [HiddenLake](https://github.com/number571/hidden-lake "hidden network");
 
 ### Template:
 ```go
@@ -9,295 +22,199 @@ import (
     "github.com/number571/gopeer"
 )
 
-// Customize the framework settings before start use.
-func init() {
-    gopeer.SettingsSet(gopeer.SettingsType{
-        
-    })
-}
-
-// Create node in network with address 'IPv4:Port'.
-// Open server for listening connections.
-// Run server and client parts.
-// Close listening connections after use.
-func main() {
-    gopeer.NewNode("IPv4:Port").Open().Run(handleServer, handleClient).Close()
-}
-
-// Read package from network.
-func handleServer(node *gopeer.Node, pack *gopeer.Package) {
-    switch pack.Head.Title {
-
-    }
-}
-
-// Client's interface.
-func handleClient(node *gopeer.Node) {
-    
-}
-```
-***
-### Main settings:
-```go
-{
-    IS_NOTHING: true,
-    IS_DISTRIB: false,
-    IS_DECENTR: false,
-    HAS_CRYPTO: false,
-    HAS_ROUTING: false,
-    HAS_FRIENDS: false,
-    CRYPTO_SPEED: false,
-    HANDLE_ROUTING: false,
-}
-```
-#### The choice between decentralized and distributed networks. 
-* Mode = "IS_NOTHING" (Node can't be created);
-* Mode = "IS_DISTRIB";
-* Mode = "IS_DECENTR";
-
-#### Based on previous networks implemented centralized and hybrid.
-* Need use ReadOnly(RelationHandles) for create centralized networks;
-* Need use ReadOnly(RelationNodes) for create decentralized/distributed networks;
-* By default is hybrid network.
-
-#### Can be used cryptography: 
-* Mode = "HAS_CRYPTO" (Key exchange, data encryption, digital signatures, packet verification, hash names);
-* Symmetric encryption = AES-CBC (The key depends from "CRYPTO_SPEED" option);
-* Asymmetric encryption = RSA-OAEP (The key depends from user node);
-* Digital signature = RSASSA-PSS;
-* Hash function = SHA256;
-
-#### Cryptography can be used in fast mode (not recommended). 
-* Mode = "CRYPTO_SPEED";
-* The AES key becomes 128 (Default: 256) bits;
-* HMAC is used instead of digital signatures;
-  
-#### Can be used routing:
-* Mode = "HAS_ROUTING";
-* In decentralized network is a broadcast data.
-* In distributed network is an onion routing.
-  
-#### Nodes have friends:
-* Mode = "HAS_FRIENDS";
-* In this mode nodes can be connected only by passwords.
-
-#### Clients can be used as nodes:
-* Mode = "HANDLE_ROUTING";
-* In decentralized network clients can make a redirect package through itself;
-* In distributed network clients can make a merge connections;
-
-***
-### Constants:
-```go
-const(
-    LEN_BASE64_SHA256 = 24
-    DATA_SIZE = 3
+const (
+    ADDRESS = "ipv4:port"
+    TITLE = "TITLE"
 )
-```
-* LEN_BASE64_SHA256 = len(base64(sha256(X)));
-* DATA_SIZE = length arrays Data and Desc in structure Package.Body;
-***
-### Default numbers:
 
-```go
-{
-    PACK_TIME: 10,
-    WAIT_TIME: 5,
-    ROUTE_NUM: 3,
-    BUFF_SIZE: 1 << 9, // 512B
-    PID_SIZE: 1 << 3, // 8B
-    SESSION_SIZE: 1 << 5, // 32B
-    MAXSIZE_ADDRESS: 1 << 5, // 32B
-    MAXSIZE_PACKAGE: 1 << 10 << 10, // 1MiB
-    CLIENT_NAME_SIZE: 1 << 4, // 16B
+func main() {
+    listener := gopeer.NewListener(ADDRESS)
+    listener.Open().Run(handleServer)
+    defer listener.Close()
+
+    listener.NewClient(gopeer.GeneratePrivate(2048))
+}
+
+func handleServer(client *gopeer.Client, pack *gopeer.Package) {
+    client.HandleAction(TITLE, pack, 
+        func(client *gopeer.Client, pack *gopeer.Package) (set string) {
+            
+            return
+        },
+        func(client *gopeer.Client, pack *gopeer.Package) {
+            
+        },
+    )
 }
 ```
-* PACK_TIME (Save package by ID in 10 seconds. For broadcast);
-* WAIT_TIME (Time for receive test connection package);
-* ROUTE_NUM (The number of nodes through which the packet passes);
-* BUFF_SIZE (Read package by NB part);
-* PID_SIZE (Package ID in broadcast);
-* SESSION_SIZE (Default: 32B. May be 16B if used "CRYPTO_SPEED");
-* MAXSIZE_ADDRESS (Max address node);
-* MAXSIZE_PACKAGE (The size of the package that can be read at a time);
-* CLIENT_NAME_SIZE (Length client name in bytes);
-***
-### Default strings/bytes:
+
+### Settings:
 ```go
-{
-    TEMPLATE: "0.0.0.0",
-    CLIENT_NAME: "[CLIENT]",
-    SEPARATOR: "\000\001\007\005\000",
-    END_BYTES: "\000\005\007\001\000",
-    NETWORK_NAME: "GENESIS",
-    TITLE_CONNECT: "[TITLE:CONNECT]",
-    TITLE_REDIRECT: "[TITLE:REDIRECT]",
-    MODE_READ: "[MODE:READ]",
-    MODE_SAVE: "[MODE:SAVE]",
-    MODE_TEST: "[MODE:TEST]",
-    MODE_REMV: "[MODE:REMV]",
-    MODE_MERG: "[MODE:MERG]",
-    MODE_DISTRIB: "[MODE:DISTRIB]",
-    MODE_DECENTR: "[MODE:DECENTR]",
-    MODE_READ_MERG: "[MODE:READ][MODE:MERG]",
-    MODE_SAVE_MERG: "[MODE:SAVE][MODE:MERG]",
-    MODE_DISTRIB_READ: "[MODE:DISTRIB][MODE:READ]",
-    MODE_DISTRIB_SAVE: "[MODE:DISTRIB][MODE:SAVE]",
-    DEFAULT_HMAC_KEY: []byte("DEFAULT-HMAC-KEY"),
+type settingsStruct struct {
+	TITLE_LASTHASH   string
+	TITLE_CONNECT    string
+	TITLE_DISCONNECT string
+	OPTION_GET       string
+	OPTION_SET       string
+	NETWORK          string
+	VERSION          string
+	BUFFSIZE         uint16
+	DIFFICULTY       uint8
+	RETRY_NUMB       uint8
+	RETRY_TIME       uint8
+	TEMPLATE         string
+	HMACKEY          string
+	GENESIS          string
+	NOISE            string
 }
 ```
-***
-### Setting functions:
+
+### Get/Set settings example:
 ```go
-func SettingsSet(settings SettingsType) []uint8 {}
-func SettingsGet(key string) interface{} {}
+var OPTION_GET = gopeer.Get("OPTION_GET").(string)
+gopeer.Set(gopeer.SettingsType{
+    "NETWORK": "[HIDDEN-LAKE]",
+    "VERSION": "[1.0.0s]",
+    "HMACKEY": "9163571392708145",
+    "GENESIS": "[GENESIS-LAKE]",
+    "NOISE": "h19dlI#L9dkc8JA]1s-zSp,Nl/qs4;qf",
+})
 ```
-***
+
+### Default settings:
+```go
+{
+	TITLE_LASTHASH:   "[TITLE-LASTHASH]",
+	TITLE_CONNECT:    "[TITLE-CONNECT]",
+	TITLE_DISCONNECT: "[TITLE-DISCONNECT]",
+	OPTION_GET:       "[OPTION-GET]", // Send
+	OPTION_SET:       "[OPTION-SET]", // Receive
+	NETWORK:          "NETWORK-NAME",
+	VERSION:          "Version 1.0.0",
+	BUFFSIZE:         512,
+	DIFFICULTY:       15,
+	RETRY_NUMB:       3,
+	RETRY_TIME:       5, // Seconds
+	TEMPLATE:         "0.0.0.0",
+	HMACKEY:          "PASSWORD",
+	GENESIS:          "[GENESIS-PACKAGE]",
+	NOISE:            "1234567890ABCDEFGHIJKLMNOPQRSTUV",
+}
+```
+
 ### Network functions and methods:
 ```go
-func NewNode(addr string) *Node {}
-func (node *Node) Open() *Node {}
-func (node *Node) Run(handleInit func(*Node), handleServer func(*Node, *Package), handleClient func(*Node, []string)) *Node {}
-func (node *Node) ReadOnly(types ReadonlyType) *Node {}
-func (node *Node) IsHidden(addr string) bool {}
-func (node *Node) IsHandle(addr string) bool {}
-func (node *Node) IsNode(addr string) bool {}
-func (node *Node) IsMyAddress(addr string) bool {}
-func (node *Node) IsMyHashname(hashname string) bool {}
-func (node *Node) AppendToAccessList(access AccessType, addresses ...string) {}
-func (node *Node) DeleteFromAccessList(addresses ...string) *Node {}
-func (node *Node) InAccessList(access AccessType, addr string) bool {}
-func (node *Node) InConnections(addr string) bool {}
-func (node *Node) CreateRedirect(pack *Package) *Package {}
-func (node *Node) Send(pack *Package) *Node {}
-func (node *Node) SendRedirect(pack *Package) *Node {}
-func (node *Node) SendInitRedirect(pack *Package) *Node {}
-func (node *Node) SendToAll(pack *Package) *Node {}
-func (node *Node) SendToAllWithout(pack *Package, sender string) *Node {}
-func (node *Node) MergeConnect(addr string) *Node {}
-func (node *Node) HiddenConnect(addr string) *Node {}
-func (node *Node) ConnectToList(list ...interface{}) *Node {}
-func (node *Node) Connect(data ...string) *Node {}
-func (node *Node) Disconnect(addresses ...string) *Node {}
-func (node *Node) GetConnections(relation RelationType) []string {}
-func (node *Node) Close() *Node {}
+func NewListener(address string) *Listener {}
+func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
+func (listener *Listener) Open() *Listener {}
+func (listener *Listener) Close() {}
+func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
+func (client *Client) InConnections(hash string) bool {}
+func (client *Client) IsConnected(hash string) bool {}
+func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
+func (client *Client) Connect(dest *Destination) error {}
+func (client *Client) Disconnect(dest *Destination) error {}
+func (client *Client) Send(pack *Package) (*Package, error) {}
+func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
-***
-### Cryptography functions and methods:
+
+### Cryptography functions:
 ```go
+func GeneratePrivate(bits int) *rsa.PrivateKey {}
 func ParsePrivate(privData string) *rsa.PrivateKey {}
 func ParsePublic(pubData string) *rsa.PublicKey {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
+func HashPublic(pub *rsa.PublicKey) string {}
+func HashSum(data []byte) []byte {}
 func HMAC(fHash func([]byte) []byte, data []byte, key []byte) []byte {}
-func GenerateSessionKey(max int) []byte {}
+func GenerateRandomIntegers(max int) []uint64 {}
+func GenerateRandomBytes(max int) []byte {}
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
 func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}
 func EncryptAES(key, data []byte) []byte {}
 func DecryptAES(key, data []byte) []byte {}
 func StringPublic(pub *rsa.PublicKey) string {}
 func StringPrivate(priv *rsa.PrivateKey) string {}
-func (node *Node) StringPublic() string {}
-func (node *Node) StringPrivate() string {}
-func (node *Node) ParsePrivate(privData string) *Node {}
-func (node *Node) SetPrivate(priv *rsa.PrivateKey) *Node {}
-func (node *Node) GeneratePrivate(bits int) *Node {}
-func (node *Node) DecryptRSA(data []byte) []byte {}
-func (node *Node) Sign(data []byte) []byte {}
+func ProofOfWork(blockHash []byte, difficulty uint) uint64 {}
+func NonceIsValid(blockHash []byte, difficulty uint, nonce uint64) bool {}
 ```
-***
-### Use in example F2F chat:
+
+### Additional functions:
 ```go
-package main
+func Base64Encode(data []byte) string {}
+func Base64Decode(data string) []byte {}
+func PackJSON(data interface{}) []byte {}
+func UnpackJSON(jsonData []byte, data interface{}) interface{} {}
+func ToBytes(num uint64) []byte {}
+```
 
-import (
-    "os"
-    "fmt"
-    "bufio"
-    "strings"
-    "github.com/number571/gopeer"
-)
-
-const (
-    TITLE_MESSAGE = "[TITLE:MESSAGE]"
-    MODE_READ = "[MODE:READ]"
-)
-
-func init() {
-    if len(os.Args) != 2 { panic("len args != 2") }
-    gopeer.SettingsSet(gopeer.SettingsType{
-        "IS_DECENTR": true,
-        "HAS_CRYPTO": true,
-        "HAS_ROUTING": true,
-        "HAS_FRIENDS": true,
-    })
+### Package structure:
+```go
+{
+	Info: {
+		Network: string,
+		Version: string,
+	},
+	From: {
+		Sender: {
+			Hashname: string,
+		},
+		Address: string,
+	},
+	To: {
+		Receiver: {
+			Hashname: string,
+		},
+		Address: string,
+	},
+	Body: {
+		Data: string,
+		Desc: {
+			Rand: string,
+			PrevHash: string,
+			CurrHash: string,
+			Sign: string,
+			Nonce: uint64,
+			Difficulty: uint8,
+		},
+	},
 }
+```
 
-func main() {
-    node := gopeer.NewNode(os.Args[1]).GeneratePrivate(2048)
-    node.Open().Run(handleServer, handleClient).Close()
+### Listener structure:
+```go
+{
+	Address: {
+		Ipv4: string,
+		Port: string,
+	},
+	Setting: {
+		Listen: net.Listen,
+	},
+	Clients: map[string]{
+		Hashname: string,
+		Keys: {
+			Private: *rsa.PrivateKey,
+			Public: *rsa.PublicKey,
+		},
+		Address: string,
+		Connections: map[string]{
+			Connected: bool,
+			Session: []byte,
+			PrevSession: []byte,
+			Waiting: chan bool,
+			Address: string,
+			LastHash: string,
+			Public: *rsa.PublicKey,
+		},
+	},
 }
-
-func handleServer(node *gopeer.Node, pack *gopeer.Package) {
-    switch pack.Head.Title {
-        case TITLE_MESSAGE:
-            switch pack.Head.Mode {
-                case MODE_READ:
-                    message := strings.TrimLeft(pack.Body.Data[0], " ")
-                    if message == "" { return }
-                    fmt.Printf("[%s]: %s\n", pack.From.Address, message)
-            }
-    }
-}
-
-func handleClient(node *gopeer.Node) {
-    node.ReadOnly(gopeer.ReadNode).ConnectToList(
-        map[string]string{
-            ":8080": "password",
-            ":7070": "password",
-            ":6060": "password",
-    })
-    for {
-        handleCLI(node, strings.Split(inputString(), " "))
-    }
-}
-
-func inputString() string {
-    msg, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-    return strings.Replace(msg, "\n", "", -1)
-}
-
-func handleCLI(node *gopeer.Node, message []string) {
-    switch message[0] {
-        case "/exit": os.Exit(0)
-        case "/whoami": fmt.Println("|", node.Hashname)  
-        case "/hidden": node.HiddenConnect(strings.Join(message[1:], " "))
-        case "/network": fmt.Println(node.GetConnections(gopeer.RelationAll))
-        case "/send": 
-            switch len(message[1:]) {
-                case 0, 1: fmt.Println("[send] need > 0, 1 arguments")
-                default: node.SendInitRedirect(&gopeer.Package{
-                    To: gopeer.To{
-                        Address: message[1],
-                    },
-                    Head: gopeer.Head{
-                        Title: TITLE_MESSAGE,
-                        Mode: MODE_READ,
-                    },
-                    Body: gopeer.Body{
-                        Data: [gopeer.DATA_SIZE]string{strings.Join(message[2:], " ")},
-                    },
-                })
-            }
-        default: node.SendToAll(&gopeer.Package{
-            Head: gopeer.Head{
-                Title: TITLE_MESSAGE,
-                Mode: MODE_READ,
-            },
-            Body: gopeer.Body{
-                Data: [gopeer.DATA_SIZE]string{strings.Join(message, " ")},
-            },
-        })
-    }
+```
+### Destination structure:
+```go
+{
+	Address: string,
+	Public: *rsa.Public,
 }
 ```

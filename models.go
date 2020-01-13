@@ -3,75 +3,9 @@ package gopeer
 import (
 	"crypto/rsa"
 	"net"
-	"sync"
 )
 
-type SettingsType map[string]interface{}
-
-type RelationType uint8
-
-const (
-	RelationAll    RelationType = 0
-	RelationNode   RelationType = 1
-	RelationHandle RelationType = 2
-	RelationHidden RelationType = 3
-)
-
-type ReadonlyType uint8
-
-const (
-	ReadAll    ReadonlyType = 0
-	ReadNode   ReadonlyType = 1
-	ReadHandle ReadonlyType = 2
-)
-
-type AccessType uint8
-
-const (
-	AccessDenied  AccessType = 0
-	AccessAllowed AccessType = 1
-)
-
-type Node struct {
-	Hashname string
-	Keys     Keys
-	Setting  Setting
-	Address  Address
-	Network  Network
-}
-
-type Setting struct {
-	Mutex           *sync.Mutex
-	ReadOnly        ReadonlyType
-	Listen          net.Listener
-	HandleServer    func(*Node, *Package)
-	TestConnections map[string]bool
-}
-
-type Keys struct {
-	Private *rsa.PrivateKey
-	Public  *rsa.PublicKey
-}
-
-type Network struct {
-	Addresses   map[string]string
-	AccessList  map[string]AccessType
-	Connections map[string]*Connect
-}
-
-type Connect struct {
-	Relation RelationType
-	Hashname string
-	Session  []byte
-	Public   *rsa.PublicKey
-	Link     net.Conn
-}
-
-type Address struct {
-	IPv4 string
-	Port string
-}
-
+/* BEGIN PACKAGE PART */
 type Package struct {
 	Info Info
 	From From
@@ -81,29 +15,91 @@ type Package struct {
 }
 
 type Info struct {
-	NET string
+	Network string
+	Version string
+}
+
+type Head struct {
+	Title  string
+	Option string
 }
 
 type From struct {
+	Sender  Sender
+	Address string
+}
+
+type Sender struct {
 	Hashname string
-	Address  string
 	Public   string
 }
 
 type To struct {
-	Address string
+	Receiver Receiver
+	Address  string
 }
 
-type Head struct {
-	Title string
-	Mode  string
+type Receiver struct {
+	Hashname string
 }
 
 type Body struct {
-	Data [DATA_SIZE]string
-	Desc [DATA_SIZE]string
-	// Nonce uint32
-	Time string
-	Hash string
-	Sign string
+	Data string
+	Desc Desc
+}
+
+type Desc struct {
+	Rand       string
+	PrevHash   string
+	CurrHash   string
+	Sign       string
+	Nonce      uint64
+	Difficulty uint8
+}
+
+/* END PACKAGE PART */
+
+/* BEGIN LISTENER PART */
+type Listener struct {
+	Address Address
+	Setting Setting
+	Clients map[string]*Client
+}
+
+type Address struct {
+	Ipv4 string
+	Port string
+}
+
+type Setting struct {
+	Listen net.Listener
+}
+
+type Client struct {
+	Hashname    string
+	Keys        Keys
+	Address     string
+	Connections map[string]*Connect
+}
+
+type Keys struct {
+	Private *rsa.PrivateKey
+	Public  *rsa.PublicKey
+}
+
+type Connect struct {
+	Connected   bool
+	Session     []byte
+	PrevSession []byte
+	Waiting     chan bool
+	Address     string
+	LastHash    string
+	Public      *rsa.PublicKey
+}
+
+/* END LISTENER PART */
+
+type Destination struct {
+	Address string
+	Public  *rsa.PublicKey
 }
