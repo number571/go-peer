@@ -343,14 +343,10 @@ func (client *Client) isValid(pack *Package) error {
 	}
 
 	if client.InConnections(pack.From.Sender.Hashname) {
-		if pack.isLasthash() {
+		if pack.isLasthash() || pack.Head.Option == settings.OPTION_SET {
 			return nil
 		}
-
-		if pack.Head.Option == settings.OPTION_SET {
-			return nil
-		}
-
+		
 		if client.Connections[pack.From.Sender.Hashname].LastHash != pack.Body.Desc.PrevHash {
 			return errors.New("prev pack hash not equal hash in saved")
 		}
