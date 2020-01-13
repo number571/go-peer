@@ -348,7 +348,6 @@ func (client *Client) isValid(pack *Package) error {
 		}
 
 		if pack.Head.Option == settings.OPTION_SET {
-			client.Connections[pack.From.Sender.Hashname].LastHash = pack.Body.Desc.PrevHash
 			return nil
 		}
 
