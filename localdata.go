@@ -312,6 +312,10 @@ func (client *Client) isValid(pack *Package) error {
 	if pack.Body.Desc.Difficulty != settings.DIFFICULTY {
 		return errors.New("difficulty does not match")
 	}
+	
+	if pack.From.Sender.Hashname == client.Hashname {
+		return errors.New("sender and receiver is one person")
+	}
 
 	public := ParsePublic(string(Base64Decode(pack.From.Sender.Public)))
 	if public == nil {
@@ -343,7 +347,7 @@ func (client *Client) isValid(pack *Package) error {
 	}
 
 	if client.InConnections(pack.From.Sender.Hashname) {
-		if pack.isLasthash() || pack.Head.Option == settings.OPTION_SET {
+		if pack.isLasthash() { // || pack.Head.Option == settings.OPTION_SET
 			return nil
 		}
 		
@@ -384,7 +388,7 @@ func (client *Client) confirmPackage(pack *Package) *Package {
 	pack.Body.Desc.Sign = Base64Encode(Sign(client.Keys.Private, hash))
 	pack.Body.Desc.Nonce = ProofOfWork(hash, uint(pack.Body.Desc.Difficulty))
 
-	if !pack.isLasthash() && pack.Head.Option == settings.OPTION_SET {
+	if !pack.isLasthash() { // && pack.Head.Option == settings.OPTION_SET
 		client.Connections[pack.To.Receiver.Hashname].LastHash = pack.Body.Desc.CurrHash
 	}
 
