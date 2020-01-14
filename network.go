@@ -183,6 +183,9 @@ func (client *Client) Send(pack *Package) (*Package, error) {
 	if pack == nil {
 		return nil, errors.New("pack is null")
 	}
+	if pack.To.Receiver.Hashname == client.Hashname {
+		return nil, errors.New("sender and receiver is one person")
+	}
 	if !client.InConnections(pack.To.Receiver.Hashname) {
 		return nil, errors.New("receiver not in connections")
 	}
