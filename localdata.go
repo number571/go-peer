@@ -47,7 +47,7 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 	pack, wasEncrypted = client.tryDecrypt(pack)
 	// printJson(pack)
 	if err := client.isValid(pack); err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return
 	}
 
@@ -464,5 +464,5 @@ retry:
 // For debug.
 func printJson(data interface{}) {
 	jsonData, _ := json.MarshalIndent(data, "", "\t")
-	println(string(jsonData))
+	fmt.Println(string(jsonData))
 }
