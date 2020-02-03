@@ -32,7 +32,7 @@ func defaultSettings() settingsStruct {
 		VERSION:          "Version 1.0.0",
 		BUFFSIZE:         512,
 		DIFFICULTY:       15,
-		RETRY_NUMB:       3,
+		RETRY_NUMB:       2,
 		RETRY_TIME:       5, // Seconds
 		TEMPLATE:         "0.0.0.0",
 		HMACKEY:          "PASSWORD",

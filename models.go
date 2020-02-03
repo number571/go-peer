@@ -56,7 +56,6 @@ type Desc struct {
 	Nonce      uint64
 	Difficulty uint8
 }
-
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
@@ -96,7 +95,6 @@ type Connect struct {
 	LastHash    string
 	Public      *rsa.PublicKey
 }
-
 /* END LISTENER PART */
 
 type Destination struct {

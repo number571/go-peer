@@ -51,7 +51,7 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 		return
 	}
 
-	if client.HandleAction(settings.TITLE_LASTHASH, pack,
+	handleIsUsed := client.HandleAction(settings.TITLE_LASTHASH, pack,
 		func(client *Client, pack *Package) (set string) {
 			if !client.InConnections(pack.From.Sender.Hashname) {
 				return
@@ -64,11 +64,13 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 			}
 			client.Connections[pack.From.Sender.Hashname].LastHash = pack.Body.Data
 		},
-	) {
+	) 
+
+	if handleIsUsed {
 		return
 	}
 
-	handleIsUsed := client.HandleAction(settings.TITLE_CONNECT, pack,
+	handleIsUsed = client.HandleAction(settings.TITLE_CONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
 			client.connectGet(pack)
 			return set

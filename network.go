@@ -105,8 +105,8 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 			})
 			return true
 		case settings.OPTION_SET:
-			handleSet(client, pack)
 			client.Connections[pack.From.Sender.Hashname].Waiting <- true
+			handleSet(client, pack)
 			return true
 		}
 	}
