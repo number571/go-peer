@@ -25,7 +25,7 @@ func runServer(handle func(*Client, *Package), listener *Listener) {
 // Package events. By default:
 // 1) Check last hash;
 // 2) Connection;
-// 3) disconnection;
+// 3) Disconnection;
 func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 	defer conn.Close()
 

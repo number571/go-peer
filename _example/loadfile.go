@@ -14,14 +14,14 @@ type FileTransfer struct{
 }
 
 const (
-    BUFFSIZE = 8 // bytes
+    BUFFSIZE = 1 << 20 // 1MiB
     ADDRESS = ":8080"
     TITLE = "TITLE"
 )
 
 var (
     anotherClient = new(gopeer.Client)
-    IsEOF = false
+    isEOF = false
 )
 
 func main() {
@@ -41,13 +41,12 @@ func handleClient(client *gopeer.Client) {
         Public: anotherClient.Keys.Public,
     }
     client.Connect(dest)
-    loadFile(client, dest, "file.txt")
+    loadFile(client, dest, "archive.zip")
     client.Disconnect(dest)
 }
 
 func loadFile(client *gopeer.Client, dest *gopeer.Destination, filename string) {
-    id := uint(0)
-    for !IsEOF {
+    for id := uint(0); !isEOF; id++ {
         client.SendTo(dest, &gopeer.Package{
             Head: gopeer.Head{
                 Title: TITLE,
@@ -60,7 +59,6 @@ func loadFile(client *gopeer.Client, dest *gopeer.Destination, filename string) 
                 })),
             },
         })
-        id++
     }
 }
 
@@ -82,12 +80,12 @@ func handleServer(client *gopeer.Client, pack *gopeer.Package) {
             var read = new(FileTransfer)
             gopeer.UnpackJSON([]byte(pack.Body.Data), read)
             if read.IsNull {
-                IsEOF = true
+                isEOF = true
                 return
             }
             newFile := "new" + read.Name
             if read.Id == 0 && fileIsExist(newFile) {
-                IsEOF = true
+                isEOF = true
                 return
             }
             writeFile(newFile, gopeer.Base64Decode(read.Data))
