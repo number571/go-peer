@@ -58,7 +58,7 @@ type settingsStruct struct {
 	OPTION_SET       string
 	NETWORK          string
 	VERSION          string
-	PACKSIZE		 uint32
+	PACKSIZE         uint32
 	BUFFSIZE         uint16
 	DIFFICULTY       uint8
 	RETRY_NUMB       uint8
@@ -92,7 +92,7 @@ gopeer.Set(gopeer.SettingsType{
 	OPTION_SET:       "[OPTION-SET]", // Receive
 	NETWORK:          "NETWORK-NAME",
 	VERSION:          "Version 1.0.0",
-	PACKSIZE:		  8 << 20, // 8MiB
+	PACKSIZE:         8 << 20, // 8MiB
 	BUFFSIZE:         1 << 10, // 1KiB
 	DIFFICULTY:       15,
 	RETRY_NUMB:       3,
