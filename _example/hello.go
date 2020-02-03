@@ -3,7 +3,7 @@ package main
 import (
     "fmt"
     "encoding/json"
-    "./gopeer"
+    "github.com/number571/gopeer"
 )
 
 const (

@@ -3,7 +3,7 @@ package main
 import (
     "os"
     "strings"
-    "./gopeer"
+    "github.com/number571/gopeer"
 )
 
 type FileTransfer struct{

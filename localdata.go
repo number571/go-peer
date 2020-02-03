@@ -148,7 +148,8 @@ func (client *Client) disconnectGet(pack *Package) {
 func readPackage(conn net.Conn) *Package {
 	var (
 		message string
-		pack    Package
+		pack    = new(Package)
+		size 	= uint32(0)
 		buffer  = make([]byte, settings.BUFFSIZE)
 	)
 	for {
@@ -156,13 +157,17 @@ func readPackage(conn net.Conn) *Package {
 		if err != nil {
 			break
 		}
+		size += uint32(length)
+		if size >= settings.PACKSIZE {
+			return nil
+		}
 		message += string(buffer[:length])
 	}
-	err := json.Unmarshal(DecryptAES([]byte(settings.NOISE), []byte(message)), &pack)
+	err := json.Unmarshal(DecryptAES([]byte(settings.NOISE), []byte(message)), pack)
 	if err != nil {
 		return nil
 	}
-	return &pack
+	return pack
 }
 
 // If package not decrypted, then uses first version package.

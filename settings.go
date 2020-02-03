@@ -9,6 +9,7 @@ type settingsStruct struct {
 	OPTION_SET       string
 	NETWORK          string
 	VERSION          string
+	PACKSIZE		 uint32
 	BUFFSIZE         uint16
 	DIFFICULTY       uint8
 	RETRY_NUMB       uint8
@@ -30,7 +31,8 @@ func defaultSettings() settingsStruct {
 		OPTION_SET:       "[OPTION-SET]", // Receive
 		NETWORK:          "NETWORK-NAME",
 		VERSION:          "Version 1.0.0",
-		BUFFSIZE:         512,
+		PACKSIZE:		  8 << 20, // 8MiB
+		BUFFSIZE:         1 << 10, // 1KiB
 		DIFFICULTY:       15,
 		RETRY_NUMB:       2,
 		RETRY_TIME:       5, // Seconds
@@ -86,6 +88,8 @@ func Get(key string) interface{} {
 		return settings.GENESIS
 	case "NOISE":
 		return settings.NOISE
+	case "PACKSIZE":
+		return settings.PACKSIZE
 	case "BUFFSIZE":
 		return settings.BUFFSIZE
 	case "DIFFICULTY":
@@ -133,6 +137,8 @@ func stringSettings(name string, data interface{}) uint8 {
 func intSettings(name string, data interface{}) uint8 {
 	result := data.(int)
 	switch name {
+	case "PACKSIZE":
+		settings.PACKSIZE = uint32(result)
 	case "BUFFSIZE":
 		settings.BUFFSIZE = uint16(result)
 	case "DIFFICULTY":
