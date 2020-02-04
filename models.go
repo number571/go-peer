@@ -60,8 +60,8 @@ type Desc struct {
 
 /* BEGIN LISTENER PART */
 type Listener struct {
+	listen net.Listener
 	Address Address
-	Setting Setting
 	Clients map[string]*Client
 }
 
@@ -70,15 +70,17 @@ type Address struct {
 	Port string
 }
 
-type Setting struct {
-	Listen net.Listener
-}
-
 type Client struct {
 	Hashname    string
-	Keys        Keys
 	Address     string
+	Sharing     Sharing
+	Keys        Keys
 	Connections map[string]*Connect
+}
+
+type Sharing struct {
+	Perm bool
+	Path string
 }
 
 type Keys struct {
@@ -87,15 +89,39 @@ type Keys struct {
 }
 
 type Connect struct {
-	Connected   bool
+	connected   bool
+	prevSession []byte
+	waiting     chan bool
+	lastHash    string
+	transfer    transfer
 	Session     []byte
-	PrevSession []byte
-	Waiting     chan bool
 	Address     string
-	LastHash    string
 	Public      *rsa.PublicKey
 }
+
+type transfer struct {
+	outputFile string 
+	isBlocked  bool
+}
 /* END LISTENER PART */
+
+/* BEGIN FILE TRANSFER */
+type FileTransfer struct{
+	Head HeadTransfer
+	Body BodyTransfer
+}
+
+type HeadTransfer struct {
+	Id uint32
+    Name string
+    IsNull bool
+}
+
+type BodyTransfer struct {
+	Hash []byte
+    Data []byte
+}
+/* END FILE TRANSFER */
 
 type Destination struct {
 	Address string

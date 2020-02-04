@@ -7,6 +7,7 @@
 ### Specifications:
 1. Data transfer:
 * Direct;
+* File transfer supported;
 * End to end encryption;
 * Packages in blockchain;
 2. Encryption:
@@ -23,7 +24,7 @@ import (
 )
 
 const (
-    ADDRESS = "ipv4:port"
+    ADDRESS = ":8080"
     TITLE = "TITLE"
 )
 
@@ -38,8 +39,7 @@ func main() {
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
     client.HandleAction(TITLE, pack, 
         func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-            
-            return
+            return set
         },
         func(client *gopeer.Client, pack *gopeer.Package) {
             
@@ -51,22 +51,24 @@ func handleServer(client *gopeer.Client, pack *gopeer.Package) {
 ### Settings:
 ```go
 type settingsStruct struct {
-	TITLE_LASTHASH   string
-	TITLE_CONNECT    string
-	TITLE_DISCONNECT string
-	OPTION_GET       string
-	OPTION_SET       string
-	NETWORK          string
-	VERSION          string
-	PACKSIZE         uint32
-	BUFFSIZE         uint16
-	DIFFICULTY       uint8
-	RETRY_NUMB       uint8
-	RETRY_TIME       uint8
-	TEMPLATE         string
-	HMACKEY          string
-	GENESIS          string
-	NOISE            string
+    TITLE_LASTHASH     string
+    TITLE_CONNECT      string
+    TITLE_DISCONNECT   string
+    TITLE_FILETRANSFER string
+    OPTION_GET         string
+    OPTION_SET         string
+    NETWORK            string
+    VERSION            string
+    PACKSIZE           uint32
+    FILESIZE           uint32
+    BUFFSIZE           uint16
+    DIFFICULTY         uint8
+    RETRY_NUMB         uint8
+    RETRY_TIME         uint8
+    TEMPLATE           string
+    HMACKEY            string
+    GENESIS            string
+    NOISE              string
 }
 ```
 
@@ -85,22 +87,24 @@ gopeer.Set(gopeer.SettingsType{
 ### Default settings:
 ```go
 {
-	TITLE_LASTHASH:   "[TITLE-LASTHASH]",
-	TITLE_CONNECT:    "[TITLE-CONNECT]",
-	TITLE_DISCONNECT: "[TITLE-DISCONNECT]",
-	OPTION_GET:       "[OPTION-GET]", // Send
-	OPTION_SET:       "[OPTION-SET]", // Receive
-	NETWORK:          "NETWORK-NAME",
-	VERSION:          "Version 1.0.0",
-	PACKSIZE:         8 << 20, // 8MiB
-	BUFFSIZE:         1 << 10, // 1KiB
-	DIFFICULTY:       15,
-	RETRY_NUMB:       3,
-	RETRY_TIME:       5, // Seconds
-	TEMPLATE:         "0.0.0.0",
-	HMACKEY:          "PASSWORD",
-	GENESIS:          "[GENESIS-PACKAGE]",
-	NOISE:            "1234567890ABCDEFGHIJKLMNOPQRSTUV",
+    TITLE_LASTHASH:     "[TITLE-LASTHASH]",
+    TITLE_CONNECT:      "[TITLE-CONNECT]",
+    TITLE_DISCONNECT:   "[TITLE-DISCONNECT]",
+    TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
+    OPTION_GET:         "[OPTION-GET]", // Send
+    OPTION_SET:         "[OPTION-SET]", // Receive
+    NETWORK:            "NETWORK-NAME",
+    VERSION:            "Version 1.0.0",
+    PACKSIZE:           8 << 20, // 8MiB
+    FILESIZE:           2 << 20, // 2MiB
+    BUFFSIZE:           1 << 20, // 1MiB
+    DIFFICULTY:         15,
+    RETRY_NUMB:         2,
+    RETRY_TIME:         5, // Seconds
+    TEMPLATE:           "0.0.0.0",
+    HMACKEY:            "PASSWORD",
+    GENESIS:            "[GENESIS-PACKAGE]",
+    NOISE:              "1234567890ABCDEFGHIJKLMNOPQRSTUV",
 }
 ```
 
@@ -113,6 +117,7 @@ func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
 func (client *Client) InConnections(hash string) bool {}
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
+func (client *Client) LoadFile(dest *Destination, input string, output string) error
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
 func (client *Client) Send(pack *Package) (*Package, error) {}
@@ -153,69 +158,90 @@ func ToBytes(num uint64) []byte {}
 ### Package structure:
 ```go
 {
-	Info: {
-		Network: string,
-		Version: string,
-	},
-	From: {
-		Sender: {
-			Hashname: string,
-		},
-		Address: string,
-	},
-	To: {
-		Receiver: {
-			Hashname: string,
-		},
-		Address: string,
-	},
-	Body: {
-		Data: string,
-		Desc: {
-			Rand: string,
-			PrevHash: string,
-			CurrHash: string,
-			Sign: string,
-			Nonce: uint64,
-			Difficulty: uint8,
-		},
-	},
+    Info: {
+        Network: string,
+        Version: string,
+    },
+    From: {
+        Sender: {
+            Hashname: string,
+        },
+        Address: string,
+    },
+    To: {
+        Receiver: {
+            Hashname: string,
+        },
+        Address: string,
+    },
+    Body: {
+        Data: string,
+        Desc: {
+            Rand: string,
+            PrevHash: string,
+            CurrHash: string,
+            Sign: string,
+            Nonce: uint64,
+            Difficulty: uint8,
+        },
+    },
 }
 ```
 
 ### Listener structure:
 ```go
 {
-	Address: {
-		Ipv4: string,
-		Port: string,
-	},
-	Setting: {
-		Listen: net.Listen,
-	},
-	Clients: map[string]{
-		Hashname: string,
-		Keys: {
-			Private: *rsa.PrivateKey,
-			Public: *rsa.PublicKey,
-		},
-		Address: string,
-		Connections: map[string]{
-			Connected: bool,
-			Session: []byte,
-			PrevSession: []byte,
-			Waiting: chan bool,
-			Address: string,
-			LastHash: string,
-			Public: *rsa.PublicKey,
-		},
-	},
+    listen: net.Listen,
+    Address: {
+        Ipv4: string,
+        Port: string,
+    },
+    Clients: map[string]{
+        Hashname: string,
+        Address:  string,
+        Sharing: {
+            Perm: bool,
+            Path: string,
+        },
+        Keys: {
+            Private: *rsa.PrivateKey,
+            Public: *rsa.PublicKey,
+        },
+        Connections: map[string]{
+            connected:   bool,
+            prevSession: []byte,
+            waiting:     chan bool,
+            lastHash:    string,
+            transfer: {
+                outputFile: string,
+                isBlocked:  bool,
+            },
+            Session: []byte,
+            Address: string,
+            Public: *rsa.PublicKey,
+        },
+    },
 }
 ```
 ### Destination structure:
 ```go
 {
-	Address: string,
-	Public: *rsa.Public,
+    Address: string,
+    Public: *rsa.Public,
+}
+```
+
+### File Transfer structure:
+```go
+{
+    Head: {
+        Id:     uint32,
+        Name:   string,
+        IsNull: bool,
+    },
+    Body: {
+        Hash: []byte,
+        Data: []byte,
+    },
 }
 ```
