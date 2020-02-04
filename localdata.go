@@ -197,7 +197,7 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 	}
 
 	switch {
-	case client.IsConnected(pack.To.Receiver.Hashname):
+	case client.isConnected(pack.To.Receiver.Hashname):
 		session = client.Connections[pack.To.Receiver.Hashname].Session
 	case client.Connections[pack.To.Receiver.Hashname].PrevSession != nil:
 		session = client.Connections[pack.To.Receiver.Hashname].PrevSession
@@ -239,6 +239,14 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 			},
 		},
 	}
+}
+
+// Check if user connected to client.
+func (client *Client) isConnected(hash string) bool {
+	if _, ok := client.Connections[hash]; ok {
+		return client.Connections[hash].Connected
+	}
+	return false
 }
 
 // Decrypt package by session key. Decrypted data:

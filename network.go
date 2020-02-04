@@ -71,14 +71,6 @@ func (client *Client) InConnections(hash string) bool {
 	return false
 }
 
-// Check if user connected to client.
-func (client *Client) IsConnected(hash string) bool {
-	if _, ok := client.Connections[hash]; ok {
-		return client.Connections[hash].Connected
-	}
-	return false
-}
-
 // Switcher function about GET and SET options.
 // GET: accept package and send response;
 // SET: accept package;

@@ -112,7 +112,6 @@ func (listener *Listener) Open() *Listener {}
 func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
 func (client *Client) InConnections(hash string) bool {}
-func (client *Client) IsConnected(hash string) bool {}
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
