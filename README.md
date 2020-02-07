@@ -221,7 +221,7 @@ func ToBytes(num uint64) []byte {}
             Session:   []byte,
             Address:   string,
             Public:    *rsa.PublicKey,
-            PublicRecv *rsa.PublicKey,
+            PublicRecv: *rsa.PublicKey,
         },
     },
 }
