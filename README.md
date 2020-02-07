@@ -111,7 +111,7 @@ gopeer.Set(gopeer.SettingsType{
 ### Network functions and methods:
 ```go
 func NewListener(address string) *Listener {}
-func NewDestination(dest *Destination) *Destination
+func NewDestination(dest *Destination) *Destination {}
 func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
 func (listener *Listener) Open() *Listener {}
 func (listener *Listener) Close() {}
