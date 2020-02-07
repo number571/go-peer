@@ -342,7 +342,7 @@ func readPackage(conn net.Conn) *Package {
 		}
 		message += string(buffer[:length])
 	}
-	fmt.Println(len(message))
+	// fmt.Println(len(message))
 	err := json.Unmarshal(DecryptAES([]byte(settings.NOISE), []byte(message)), pack)
 	if err != nil {
 		return nil
