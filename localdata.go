@@ -229,14 +229,17 @@ func (client *Client) send(pack *Package) (*Package, error) {
 	if pack.To.Receiver.Hashname == client.Hashname {
 		return nil, errors.New("sender and receiver is one person")
 	}
+	if !client.InConnections(pack.To.Hashname) {
+		return nil, errors.New("receiver 1 not in connections")
+	}
 	if !client.InConnections(pack.To.Receiver.Hashname) {
-		return nil, errors.New("receiver not in connections")
+		return nil, errors.New("receiver 2 not in connections")
 	}
 	if client.isBlocked(pack.To.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER {
-		return nil, errors.New("connections is blocked [hashname]")
+		return nil, errors.New("connections is blocked [receiver 1]")
 	}
 	if client.isBlocked(pack.To.Receiver.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER {
-		return nil, errors.New("connections is blocked [receiver.hashname]")
+		return nil, errors.New("connections is blocked [receiver 2]")
 	}
 	client.confirmPackage(client.appendHeaders(pack))
 	var (
@@ -268,6 +271,9 @@ func (client *Client) send(pack *Package) (*Package, error) {
 }
 
 func (client *Client) isBlocked(hashname string) bool {
+	if !client.InConnections(hashname) {
+		return false
+	}
 	if client.Connections[hashname].transfer.isBlocked {
 		return true
 	}
