@@ -6,7 +6,7 @@
 
 ### Specifications:
 1. Data transfer:
-* Direct;
+* Direct / Throw;
 * File transfer supported;
 * End to end encryption;
 * Packages in blockchain;
@@ -111,6 +111,7 @@ gopeer.Set(gopeer.SettingsType{
 ### Network functions and methods:
 ```go
 func NewListener(address string) *Listener {}
+func NewDestination(dest *Destination) *Destination
 func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
 func (listener *Listener) Open() *Listener {}
 func (listener *Listener) Close() {}
@@ -120,7 +121,6 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 func (client *Client) LoadFile(dest *Destination, input string, output string) error
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
-func (client *Client) Send(pack *Package) (*Package, error) {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
 
@@ -166,22 +166,24 @@ func ToBytes(num uint64) []byte {}
         Sender: {
             Hashname: string,
         },
-        Address: string,
+        Hashname: string,
+        Address:  string,
     },
     To: {
         Receiver: {
             Hashname: string,
         },
-        Address: string,
+        Hashname: string,
+        Address:  string,
     },
     Body: {
         Data: string,
         Desc: {
-            Rand: string,
-            PrevHash: string,
-            CurrHash: string,
-            Sign: string,
-            Nonce: uint64,
+            Rand:       string,
+            PrevHash:   string,
+            CurrHash:   string,
+            Sign:       string,
+            Nonce:      uint64,
             Difficulty: uint8,
         },
     },
@@ -205,7 +207,7 @@ func ToBytes(num uint64) []byte {}
         },
         Keys: {
             Private: *rsa.PrivateKey,
-            Public: *rsa.PublicKey,
+            Public:  *rsa.PublicKey,
         },
         Connections: map[string]{
             connected:   bool,
@@ -216,9 +218,10 @@ func ToBytes(num uint64) []byte {}
                 outputFile: string,
                 isBlocked:  bool,
             },
-            Session: []byte,
-            Address: string,
-            Public: *rsa.PublicKey,
+            Session:   []byte,
+            Address:   string,
+            Public:    *rsa.PublicKey,
+            PublicRecv *rsa.PublicKey,
         },
     },
 }
@@ -226,8 +229,9 @@ func ToBytes(num uint64) []byte {}
 ### Destination structure:
 ```go
 {
-    Address: string,
-    Public: *rsa.Public,
+    Address:  string,
+    Public:   *rsa.Public,
+    Receiver: *rsa.Public,
 }
 ```
 

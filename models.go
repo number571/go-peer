@@ -25,21 +25,20 @@ type Head struct {
 }
 
 type From struct {
-	Sender  Sender
-	Address string
-}
-
-type Sender struct {
+	Sender   Sender
 	Hashname string
-	Public   string
+	Address  string
 }
 
 type To struct {
 	Receiver Receiver
+	Hashname string
 	Address  string
 }
 
-type Receiver struct {
+type Sender Hidden
+type Receiver Hidden
+type Hidden struct {
 	Hashname string
 }
 
@@ -56,11 +55,12 @@ type Desc struct {
 	Nonce      uint64
 	Difficulty uint8
 }
+
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
 type Listener struct {
-	listen net.Listener
+	listen  net.Listener
 	Address Address
 	Clients map[string]*Client
 }
@@ -97,33 +97,37 @@ type Connect struct {
 	Session     []byte
 	Address     string
 	Public      *rsa.PublicKey
+	PublicRecv  *rsa.PublicKey
 }
 
 type transfer struct {
-	outputFile string 
+	outputFile string
 	isBlocked  bool
 }
+
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
-type FileTransfer struct{
+type FileTransfer struct {
 	Head HeadTransfer
 	Body BodyTransfer
 }
 
 type HeadTransfer struct {
-	Id uint32
-    Name string
-    IsNull bool
+	Id     uint32
+	Name   string
+	IsNull bool
 }
 
 type BodyTransfer struct {
 	Hash []byte
-    Data []byte
+	Data []byte
 }
+
 /* END FILE TRANSFER */
 
 type Destination struct {
-	Address string
-	Public  *rsa.PublicKey
+	Address  string
+	Public   *rsa.PublicKey
+	Receiver *rsa.PublicKey
 }
