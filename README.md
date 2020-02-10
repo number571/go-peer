@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.1.0s.
+> Framework for create decentralized networks. Version: 1.0.3s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
@@ -57,6 +57,7 @@ type settingsStruct struct {
     TITLE_FILETRANSFER string
     OPTION_GET         string
     OPTION_SET         string
+    IS_CLIENT          string
     NETWORK            string
     VERSION            string
     PACKSIZE           uint32
@@ -93,6 +94,7 @@ gopeer.Set(gopeer.SettingsType{
     TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
     OPTION_GET:         "[OPTION-GET]", // Send
     OPTION_SET:         "[OPTION-SET]", // Receive
+    IS_CLIENT:          "[IS-CLIENT]", 
     NETWORK:            "NETWORK-NAME",
     VERSION:            "Version 1.0.0",
     PACKSIZE:           8 << 20, // 8MiB
@@ -194,11 +196,13 @@ func ToBytes(num uint64) []byte {}
 ```go
 {
     listen: net.Listen,
+    handleFunc: func(*Client, *Package),
     Address: {
         Ipv4: string,
         Port: string,
     },
     Clients: map[string]{
+        listener: *Listener,
         Hashname: string,
         Address:  string,
         Sharing: {
@@ -218,9 +222,10 @@ func ToBytes(num uint64) []byte {}
                 outputFile: string,
                 isBlocked:  bool,
             },
-            Session:   []byte,
-            Address:   string,
-            Public:    *rsa.PublicKey,
+            Session:    []byte,
+            Address:    string,
+            Relation:   net.Conn,
+            Public:     *rsa.PublicKey,
             PublicRecv: *rsa.PublicKey,
         },
     },
