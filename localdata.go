@@ -40,78 +40,109 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 
 	var (
 		pack         *Package
+		keepconn     bool
 		wasEncrypted bool
 	)
 
-	pack = readPackage(conn)
+repeat:
+	pack, keepconn = readPackage(conn)
 	if pack == nil {
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
 	client, ok := listener.Clients[pack.To.Receiver.Hashname]
 	if !ok {
 		if pack.To.Hashname == pack.To.Receiver.Hashname {
+			if keepconn {
+				goto repeat
+			}
 			return
 		}
+
 		client, ok = listener.Clients[pack.To.Hashname]
 		if !ok {
+			if keepconn {
+				goto repeat
+			}
 			return
 		}
-		if !client.InConnections(pack.To.Receiver.Hashname) {
+
+		if client.Address == "" {
+			if keepconn {
+				goto repeat
+			}
 			return
 		}
-		if client.isBlocked(pack.To.Receiver.Hashname) {
-			return
-		}
+
 		client.sendRaw(pack)
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
 	pack, wasEncrypted = client.tryDecrypt(pack)
+	// printJson(pack)
 	if err := client.isValid(pack); err != nil {
 		// fmt.Println(err)
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
 	handleIsUsed := client.HandleAction(settings.TITLE_LASTHASH, pack,
 		func(client *Client, pack *Package) (set string) {
-			if !client.InConnections(pack.From.Sender.Hashname) {
+			hash := pack.From.Sender.Hashname
+			if !client.InConnections(hash) {
 				return
 			}
-			return client.Connections[pack.From.Sender.Hashname].lastHash
+			return client.Connections[hash].lastHash
 		},
 		func(client *Client, pack *Package) {
-			if !client.InConnections(pack.From.Sender.Hashname) {
+			hash := pack.From.Sender.Hashname
+			if !client.InConnections(hash) {
 				return
 			}
-			client.Connections[pack.From.Sender.Hashname].lastHash = pack.Body.Data
+			client.Connections[hash].lastHash = pack.Body.Data
 		},
 	)
 
 	if handleIsUsed {
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
 	handleIsUsed = client.HandleAction(settings.TITLE_CONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
-			client.connectGet(pack)
+			client.connectGet(pack, conn)
 			return set
 		},
 		func(client *Client, pack *Package) {
-			if !client.InConnections(pack.From.Sender.Hashname) {
+			hash := pack.From.Sender.Hashname
+			if !client.InConnections(hash) {
 				return
 			}
-			client.Connections[pack.From.Sender.Hashname].connected = true
-			client.Connections[pack.From.Sender.Hashname].lastHash = pack.Body.Desc.CurrHash
+			client.Connections[hash].connected = true
+			client.Connections[hash].lastHash = pack.Body.Desc.CurrHash
 		},
 	)
 
 	// Subsequent verification is carried out only if the data has been encrypted.
 	if handleIsUsed || !wasEncrypted {
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
-	client.Connections[pack.From.Sender.Hashname].lastHash = pack.Body.Desc.CurrHash
+	hash := pack.From.Sender.Hashname
+	client.Connections[hash].lastHash = pack.Body.Desc.CurrHash
 
 	switch pack.Head.Title {
 	case settings.TITLE_DISCONNECT:
@@ -120,8 +151,8 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 			client.disconnectGet(pack)
 			return
 		case settings.OPTION_SET:
-			client.Connections[pack.From.Sender.Hashname].waiting <- true
-			delete(client.Connections, pack.From.Sender.Hashname)
+			client.Connections[hash].waiting <- true
+			delete(client.Connections, hash)
 			return
 		}
 	}
@@ -190,30 +221,63 @@ func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
 		},
 	)
 
-	if handleIsUsed || client.isBlocked(pack.From.Sender.Hashname) {
+	if handleIsUsed || client.isBlocked(hash) {
+		if keepconn {
+			goto repeat
+		}
 		return
 	}
 
 	handle(client, pack)
+	if keepconn {
+		goto repeat
+	}
 }
 
 // Send raw package without checks, retry's and encryptions.
 func (client *Client) sendRaw(pack *Package) (*Package, error) {
-	if pack == nil {
+	switch {
+	case pack == nil: 
 		return nil, errors.New("pack is null")
+	case pack.To.Receiver.Hashname == client.Hashname: 
+		return nil, errors.New("sender and receiver is one person")
+	case !client.InConnections(pack.To.Receiver.Hashname): 
+		return nil, errors.New("receiver not in connections")
+	case client.isBlocked(pack.To.Receiver.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER:
+		return nil, errors.New("connections is blocked [receiver 2]")
 	}
 	var (
 		savedPack = pack
 		hash      = pack.To.Receiver.Hashname
 	)
-	conn, err := net.Dial("tcp", client.Connections[pack.To.Receiver.Hashname].Address)
-	if err != nil {
-		delete(client.Connections, hash)
-		return nil, err
+
+	if client.Connections[hash].Relation != nil {
+		conn := client.Connections[hash].Relation
+		_, err := conn.Write(
+			bytes.Join(
+				[][]byte{
+					EncryptAES([]byte(settings.NOISE), PackJSON(pack)),
+					[]byte(settings.END_BYTES),
+				},
+				[]byte{},
+			),
+		)
+		if err != nil {
+			conn.Close()
+			delete(client.Connections, hash)
+			return nil, err
+		}
+	} else {
+		conn, err := net.Dial("tcp", pack.To.Address)
+		if err != nil {
+			delete(client.Connections, hash)
+			return nil, err
+		}
+		conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
+		conn.Close()
 	}
-	conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
-	conn.Close()
-	return savedPack, err
+
+	return savedPack, nil
 }
 
 // Send package.
@@ -223,48 +287,82 @@ func (client *Client) sendRaw(pack *Package) (*Package, error) {
 // If option package is GET, then get response.
 // If no response received, then use retrySend() function.
 func (client *Client) send(pack *Package) (*Package, error) {
-	if pack == nil {
+	switch {
+	case pack == nil: 
 		return nil, errors.New("pack is null")
-	}
-	if pack.To.Receiver.Hashname == client.Hashname {
+	case pack.To.Receiver.Hashname == client.Hashname: 
 		return nil, errors.New("sender and receiver is one person")
-	}
-	if !client.InConnections(pack.To.Hashname) {
+	case !client.InConnections(pack.To.Hashname): 
 		return nil, errors.New("receiver 1 not in connections")
-	}
-	if !client.InConnections(pack.To.Receiver.Hashname) {
+	case !client.InConnections(pack.To.Receiver.Hashname): 
 		return nil, errors.New("receiver 2 not in connections")
-	}
-	if client.isBlocked(pack.To.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER {
+	case client.isBlocked(pack.To.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER:
 		return nil, errors.New("connections is blocked [receiver 1]")
-	}
-	if client.isBlocked(pack.To.Receiver.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER {
+	case client.isBlocked(pack.To.Receiver.Hashname) && pack.Head.Title != settings.TITLE_FILETRANSFER:
 		return nil, errors.New("connections is blocked [receiver 2]")
 	}
+
 	client.confirmPackage(client.appendHeaders(pack))
 	var (
+		err error
 		savedPack = pack
 		hash      = pack.To.Receiver.Hashname
 	)
+
+	// printJson(pack)
 	if encPack := client.encryptPackage(pack); encPack != nil {
 		pack = encPack
 	}
-	conn, err := net.Dial("tcp", pack.To.Address)
-	if err != nil {
-		delete(client.Connections, hash)
-		return nil, err
+
+	if client.Address == "" && client.Connections[hash].Relation == nil {
+		conn, err := net.Dial("tcp", pack.To.Address)
+		if err != nil {
+			delete(client.Connections, hash)
+			return nil, err
+		}
+		client.Connections[hash].Relation = conn
+		go server(client.listener.handleFunc, client.listener, conn)
 	}
-	conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
-	conn.Close()
+
+	if client.Connections[hash].Relation != nil {
+		conn := client.Connections[hash].Relation
+		_, err := conn.Write(
+			bytes.Join(
+				[][]byte{
+					EncryptAES([]byte(settings.NOISE), PackJSON(pack)),
+					[]byte(settings.END_BYTES),
+				},
+				[]byte{},
+			),
+		)
+		if err != nil {
+			conn.Close()
+			delete(client.Connections, hash)
+			return nil, err
+		}
+	} else {
+		conn, err := net.Dial("tcp", pack.To.Address)
+		if err != nil {
+			delete(client.Connections, hash)
+			return nil, err
+		}
+		conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
+		conn.Close()
+	}
+
 	if savedPack.Head.Option == settings.OPTION_GET {
 		select {
 		case <-client.Connections[hash].waiting:
 			err = nil
 		case <-time.After(time.Duration(settings.RETRY_TIME) * time.Second):
-			if savedPack.isLasthash() {
-				return savedPack, err
+			if savedPack.isConnect() {
+				delete(client.Connections, hash)
+				return savedPack, fmt.Errorf("time is over (%d seconds)", settings.RETRY_TIME)
 			}
-			err = client.retrySend(savedPack)
+			if savedPack.isLasthash() {
+				return savedPack, fmt.Errorf("time is over (%d seconds)", settings.RETRY_TIME)
+			}
+			return savedPack, client.retrySend(savedPack)
 		}
 	}
 	return savedPack, err
@@ -281,7 +379,7 @@ func (client *Client) isBlocked(hashname string) bool {
 }
 
 // Connect by GET option.
-func (client *Client) connectGet(pack *Package) {
+func (client *Client) connectGet(pack *Package, conn net.Conn) {
 	var (
 		public1  *rsa.PublicKey
 		data     conndata
@@ -310,15 +408,20 @@ func (client *Client) connectGet(pack *Package) {
 		PublicRecv: public,
 	}
 
+	if pack.From.Address == "" {
+		client.Connections[pack.From.Sender.Hashname].Relation = conn
+	}
+
 	client.Connections[pack.From.Sender.Hashname].lastHash = pack.Body.Desc.CurrHash
 }
 
 // Disconnect by GET option.
 func (client *Client) disconnectGet(pack *Package) {
+	hash := pack.From.Sender.Hashname
 	dest := NewDestination(&Destination{
 		Address:  pack.From.Address,
-		Public:   client.Connections[pack.From.Sender.Hashname].Public,
-		Receiver: client.Connections[pack.From.Sender.Hashname].PublicRecv,
+		Public:   client.Connections[hash].Public,
+		Receiver: client.Connections[hash].PublicRecv,
 	})
 	client.SendTo(dest, &Package{
 		Head: Head{
@@ -326,12 +429,16 @@ func (client *Client) disconnectGet(pack *Package) {
 			Option: settings.OPTION_SET,
 		},
 	})
-	delete(client.Connections, pack.From.Sender.Hashname)
+	if client.Connections[hash].Relation != nil {
+		client.Connections[hash].Relation.Close()
+	}
+	delete(client.Connections, hash)
 }
 
 // Read raw data and convert to package.
-func readPackage(conn net.Conn) *Package {
+func readPackage(conn net.Conn) (*Package, bool) {
 	var (
+		keepconn bool
 		message string
 		pack    = new(Package)
 		size    = uint32(0)
@@ -344,16 +451,23 @@ func readPackage(conn net.Conn) *Package {
 		}
 		size += uint32(length)
 		if size >= settings.PACKSIZE {
-			return nil
+			return nil, false
 		}
 		message += string(buffer[:length])
+		// if strings.HasSuffix(message, settings.END_BYTES) {
+		if strings.Contains(message, settings.END_BYTES) {
+			// message = strings.TrimSuffix(message, settings.END_BYTES)
+			message = strings.Split(message, settings.END_BYTES)[0]
+			keepconn = true
+			break
+		}
 	}
-	// fmt.Println(len(message))
+	// fmt.Println(size)
 	err := json.Unmarshal(DecryptAES([]byte(settings.NOISE), []byte(message)), pack)
 	if err != nil {
-		return nil
+		return nil, false
 	}
-	return pack
+	return pack, keepconn
 }
 
 // If package not decrypted, then uses first version package.
@@ -627,31 +741,50 @@ func (pack *Package) isLasthash() bool {
 	return false
 }
 
+// Check if title is connect.
+func (pack *Package) isConnect() bool {
+	if pack.Head.Title == settings.TITLE_CONNECT {
+		return true
+	}
+	return false
+}
+
 // Retry sending the package RETRY_NUMB times.
 // Inerval equal RETRY_TIME.
 func (client *Client) retrySend(pack *Package) error {
 	if pack == nil {
 		return errors.New("pack is null")
 	}
-	if !client.InConnections(pack.To.Hashname) {
+	if !client.InConnections(pack.To.Receiver.Hashname) {
 		return errors.New("receiver not in connections")
 	}
 	var (
 		retryNum = settings.RETRY_NUMB
 		hash     = pack.To.Receiver.Hashname
 	)
+
 retry:
 	client.Connections[hash].lastHash = ""
 	dest := NewDestination(&Destination{
 		Address: pack.To.Address,
 		Public:  client.Connections[hash].Public,
+		Receiver:  client.Connections[hash].PublicRecv,
 	})
-	client.SendTo(dest, &Package{
+	_, err := client.SendTo(dest, &Package{
 		Head: Head{
 			Title:  settings.TITLE_LASTHASH,
 			Option: settings.OPTION_GET,
 		},
 	})
+	if err != nil {
+		if retryNum > 1 {
+			retryNum--
+			goto retry
+		}
+		// delete(client.Connections, hash)
+		return fmt.Errorf("time is over (%d seconds)", settings.RETRY_TIME)
+	}
+
 	client.confirmPackage(client.appendHeaders(pack))
 	var (
 		savedPack = pack
@@ -659,13 +792,33 @@ retry:
 	if encPack := client.encryptPackage(pack); encPack != nil {
 		pack = encPack
 	}
-	conn, err := net.Dial("tcp", pack.To.Address)
-	if err != nil {
-		delete(client.Connections, hash)
-		return err
+
+	if client.Connections[hash].Relation != nil {
+		conn := client.Connections[hash].Relation
+		_, err := conn.Write(
+			bytes.Join(
+				[][]byte{
+					EncryptAES([]byte(settings.NOISE), PackJSON(pack)),
+					[]byte(settings.END_BYTES),
+				},
+				[]byte{},
+			),
+		)
+		if err != nil {
+			conn.Close()
+			delete(client.Connections, hash)
+			return err
+		}
+	} else {
+		conn, err := net.Dial("tcp", pack.To.Address)
+		if err != nil {
+			delete(client.Connections, hash)
+			return err
+		}
+		conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
+		conn.Close()
 	}
-	conn.Write(EncryptAES([]byte(settings.NOISE), PackJSON(pack)))
-	conn.Close()
+
 	if savedPack.Head.Option == settings.OPTION_GET {
 		select {
 		case <-client.Connections[hash].waiting:
@@ -676,8 +829,8 @@ retry:
 				retryNum--
 				goto retry
 			}
-			err = fmt.Errorf("time is over (%d seconds)", settings.RETRY_TIME)
-			delete(client.Connections, hash)
+			// delete(client.Connections, hash)
+			return fmt.Errorf("time is over (%d seconds)", settings.RETRY_TIME)
 		}
 	}
 	return err

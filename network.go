@@ -9,6 +9,11 @@ import (
 
 // Create new Listener by address "ipv4:port".
 func NewListener(address string) *Listener {
+	if address == settings.IS_CLIENT {
+		return &Listener{
+			Clients: make(map[string]*Client),
+		}
+	}
 	splited := strings.Split(address, ":")
 	if len(splited) != 2 {
 		return nil
@@ -27,6 +32,7 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 	public := &private.PublicKey
 	hash := HashPublic(public)
 	listener.Clients[hash] = &Client{
+		listener: listener,
 		Hashname: hash,
 		Keys: Keys{
 			Private: private,
@@ -40,6 +46,9 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 
 // Open connection for receiving data.
 func (listener *Listener) Open() *Listener {
+	if listener.Address.Ipv4 + listener.Address.Port == "" {
+		return listener
+	}
 	var err error
 	listener.listen, err = net.Listen("tcp", settings.TEMPLATE+listener.Address.Port)
 	if err != nil {
@@ -50,6 +59,10 @@ func (listener *Listener) Open() *Listener {
 
 // Run handle server for listening packages.
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {
+	if listener.Address.Ipv4 + listener.Address.Port == "" {
+		listener.handleFunc = handleServer
+		return listener
+	}
 	go runServer(handleServer, listener)
 	return listener
 }
@@ -78,13 +91,14 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 	case title:
 		switch pack.Head.Option {
 		case settings.OPTION_GET:
+			hash := pack.From.Sender.Hashname
 			data := handleGet(client, pack)
 			dest := NewDestination(&Destination{
 				Address:  pack.From.Address,
-				Public:   client.Connections[pack.From.Sender.Hashname].Public,
-				Receiver: client.Connections[pack.From.Sender.Hashname].PublicRecv,
+				Public:   client.Connections[hash].Public,
+				Receiver: client.Connections[hash].PublicRecv,
 			})
-			client.SendTo(dest, &Package{
+			go client.SendTo(dest, &Package{
 				Head: Head{
 					Title:  title,
 					Option: settings.OPTION_SET,

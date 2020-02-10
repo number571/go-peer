@@ -1,97 +1,100 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/number571/gopeer"
+    "encoding/json"
+    "fmt"
+    "github.com/number571/gopeer"
+)
+
+var (
+    ADDRESS1 = gopeer.Get("IS_CLIENT").(string)
+    ADDRESS3 = gopeer.Get("IS_CLIENT").(string)
 )
 
 const (
-	ADDRESS1 = ":7070"
-	ADDRESS2 = ":8080"
-	ADDRESS3 = ":9090"
-	TITLE    = "TITLE"
+    ADDRESS2 = ":8080"
+    TITLE    = "TITLE"
 )
 
 var (
-	another1Client = new(gopeer.Client)
-	another2Client = new(gopeer.Client)
+    another1Client = new(gopeer.Client)
+    another2Client = new(gopeer.Client)
 )
 
 func main() {
-	listener1 := gopeer.NewListener(ADDRESS1)
-	listener1.Open().Run(handleServer)
-	defer listener1.Close()
+    listener1 := gopeer.NewListener(ADDRESS1)
+    listener1.Open().Run(handleServer)
+    defer listener1.Close()
 
-	// s7sCvRP0q03zNfXlkepjAvqPYhdj7Uz/Jo9cPSHSdQw=
-	client := listener1.NewClient(gopeer.ParsePrivate(privateKey1))
+    // s7sCvRP0q03zNfXlkepjAvqPYhdj7Uz/Jo9cPSHSdQw=
+    client := listener1.NewClient(gopeer.ParsePrivate(privateKey1))
 
-	listener2 := gopeer.NewListener(ADDRESS2)
-	listener2.Open().Run(handleServer)
-	defer listener2.Close()
+    listener2 := gopeer.NewListener(ADDRESS2)
+    listener2.Open().Run(handleServer)
+    defer listener2.Close()
 
-	// zXRzW0xlgdNhK5hn3LUGTTJJWm+RE179xcFhWFgnnGg=
-	another1Client = listener2.NewClient(gopeer.ParsePrivate(privateKey2))
+    // zXRzW0xlgdNhK5hn3LUGTTJJWm+RE179xcFhWFgnnGg=
+    another1Client = listener2.NewClient(gopeer.ParsePrivate(privateKey2))
 
-	listener3 := gopeer.NewListener(ADDRESS3)
-	listener3.Open().Run(handleServer)
-	defer listener3.Close()
+    listener3 := gopeer.NewListener(ADDRESS3)
+    listener3.Open().Run(handleServer)
+    defer listener3.Close()
 
-	// ZKWBosdx1i9/RkFJesJtHkpl/+NAkOoK5yN5KzAME3Y=
-	another2Client = listener3.NewClient(gopeer.ParsePrivate(privateKey3))
-	another2Client.Sharing.Perm = true
-	another2Client.Sharing.Path = "./"
+    // ZKWBosdx1i9/RkFJesJtHkpl/+NAkOoK5yN5KzAME3Y=
+    another2Client = listener3.NewClient(gopeer.ParsePrivate(privateKey3))
+    another2Client.Sharing.Perm = true
+    another2Client.Sharing.Path = "./"
 
-	handleClient(client)
+    handleClient(client)
 }
 
 func handleClient(client *gopeer.Client) {
-	dest := gopeer.NewDestination(&gopeer.Destination{
-		Address: ADDRESS2,
-		Public:  another1Client.Keys.Public,
-	})
-	client.Connect(dest)
-	another2Client.Connect(dest)
+    dest := gopeer.NewDestination(&gopeer.Destination{
+        Address: ADDRESS2,
+        Public:  another1Client.Keys.Public,
+    })
+    client.Connect(dest)
+    another2Client.Connect(dest)
 
-	dest2 := gopeer.NewDestination(&gopeer.Destination{
-		Address:  ADDRESS2,
-		Public:   another1Client.Keys.Public,
-		Receiver: another2Client.Keys.Public,
-	})
-	client.Connect(dest2) // Hidden connection
-	client.LoadFile(dest2, "archive.zip", "output.zip")
-	client.SendTo(dest2, &gopeer.Package{
-		Head: gopeer.Head{
-			Title:  TITLE,
-			Option: gopeer.Get("OPTION_GET").(string),
-		},
-		Body: gopeer.Body{
-			Data: "hello, world!",
-		},
-	})
-	client.Disconnect(dest2)
-	client.Disconnect(dest)
+    dest2 := gopeer.NewDestination(&gopeer.Destination{
+        Address:  ADDRESS2,
+        Public:   another1Client.Keys.Public,
+        Receiver: another2Client.Keys.Public,
+    })
+    client.Connect(dest2) // Hidden connection
+    // client.LoadFile(dest2, "archive.zip", "output.zip")
+    client.SendTo(dest2, &gopeer.Package{
+        Head: gopeer.Head{
+            Title:  TITLE,
+            Option: gopeer.Get("OPTION_GET").(string),
+        },
+        Body: gopeer.Body{
+            Data: "hello, world!",
+        },
+    })
+    client.Disconnect(dest2)
+    client.Disconnect(dest)
 }
 
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
-	client.HandleAction(TITLE, pack,
-		func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-			fmt.Printf("[%s]: '%s'\n", pack.From.Hashname, pack.Body.Data)
-			return set
-		},
-		func(client *gopeer.Client, pack *gopeer.Package) {
-			// after receive result package
-		},
-	)
+    client.HandleAction(TITLE, pack,
+        func(client *gopeer.Client, pack *gopeer.Package) (set string) {
+            fmt.Printf("[%s]: '%s'\n", pack.From.Sender.Hashname, pack.Body.Data)
+            return set
+        },
+        func(client *gopeer.Client, pack *gopeer.Package) {
+            // after receive result package
+        },
+    )
 }
 
 func printJSON(data interface{}) {
-	jsonData, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(jsonData))
+    jsonData, _ := json.MarshalIndent(data, "", "\t")
+    fmt.Println(string(jsonData))
 }
 
 var (
-	privateKey1 = `-----BEGIN RSA PRIVATE KEY-----
+    privateKey1 = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAxSdUMJ6+8M4yPirk+4MTCQING6zrYAiME0HdMx+qqwQLdkA3
 Y5TVzCVZ2MgrixtEmgEPvDnc9vjjmgfjUhluT3u4wkof/kxyOhaG3hN/j5ucAs7X
 soDgmq60tSC5msx9xMpYLft7Ez/94zuxW+Ygqc4wfnp8SgjGY7vFaBfaacDH7nF/
@@ -118,7 +121,7 @@ jyXN2QKBgHbDjtoZo+NTRqZ5DbkA0mQKrn94xm8oDwnGgxhZS1YzMPmh7HWxPo6V
 E2sbHJznkIB5bbFgqKOeFdp1OO0lFBHS4sPPJewa7ZhLm53nKt7r4K6gDPB+0tGp
 Uw9T6QJ/EZF6+ou0Nf5cRFeXCZUcjZLvNw7S/z7b5ZQElREyeH+f
 -----END RSA PRIVATE KEY-----`
-	privateKey2 = `-----BEGIN RSA PRIVATE KEY-----
+    privateKey2 = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEA1Z6npUgaPTmJUJN9JcnAxEeKdfYkHtZ4HJyO0kzjFyCVnQZH
 Dinnit7IPdPOdcHKpD0upMyIbbYt2Agg+u+8KOuHzP2DMs3TKstHWKpU/+byZpRA
 8DH/1QvJQXpKjV06Qxd3/JyDND8K0ZExf01lvb3vVvyDDmLK0Qiay0et+hHXWqa8
@@ -145,7 +148,7 @@ fWsTV2unVJe6bJ+1RC9qFYhjMllkT1/IQij0sp9jTpu32Kp8D1kZxbn+gZKPUXdv
 9nqiS9tDqKk4Re/FYclhGjzg/0dnVIdHZjITEhW4kfii8fYPCPedvkCc56psjMBj
 UgayZ0CUFTOmyA3RkiniAbVJvHE3i3xGxAv/4Re1sl2LjuMNpVfB
 -----END RSA PRIVATE KEY-----`
-	privateKey3 = `-----BEGIN RSA PRIVATE KEY-----
+    privateKey3 = `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAylTftJ50lH7PloqWPSDc+6fRGf6d5cNzSX79LB697fIlinre
 GrquDdkYNYh91Zp0EJd5RwAeynjXQS7iKWgZx71C3rASQYPbUWAP66kNb4WTY+JL
 PdqWKZ2pWU7+sndOEGcyB832ZExTBC4WXWaYLnlyR4n72W03jnH2rJIi4VdLyAMa

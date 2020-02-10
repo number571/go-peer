@@ -8,6 +8,8 @@ type settingsStruct struct {
 	TITLE_FILETRANSFER string
 	OPTION_GET         string
 	OPTION_SET         string
+	IS_CLIENT          string
+	END_BYTES          string
 	NETWORK            string
 	VERSION            string
 	PACKSIZE           uint32
@@ -32,6 +34,8 @@ func defaultSettings() settingsStruct {
 		TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
 		OPTION_GET:         "[OPTION-GET]", // Send
 		OPTION_SET:         "[OPTION-SET]", // Receive
+		IS_CLIENT:          "[IS-CLIENT]", 
+		END_BYTES:          "\000\000\000\005\007\001\000\000\000",
 		NETWORK:            "NETWORK-NAME",
 		VERSION:            "Version 1.0.0",
 		PACKSIZE:           8 << 20, // 8MiB
@@ -82,6 +86,10 @@ func Get(key string) interface{} {
 		return settings.OPTION_GET
 	case "OPTION_SET":
 		return settings.OPTION_SET
+	case "IS_CLIENT":
+		return settings.IS_CLIENT
+	case "END_BYTES":
+		return settings.END_BYTES
 	case "NETWORK":
 		return settings.NETWORK
 	case "VERSION":
@@ -126,6 +134,10 @@ func stringSettings(name string, data interface{}) uint8 {
 		settings.OPTION_GET = result
 	case "OPTION_SET":
 		settings.OPTION_SET = result
+	case "IS_CLIENT":
+		settings.IS_CLIENT = result
+	case "END_BYTES":
+		settings.END_BYTES = result
 	case "NETWORK":
 		settings.NETWORK = result
 	case "VERSION":

@@ -1,79 +1,57 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/number571/gopeer"
-)
-
-const (
-	ADDRESS       = ":8080"
-	TITLE_MESSAGE = "MESSAGE"
+    "encoding/json"
+    "fmt"
+    "github.com/number571/gopeer"
 )
 
 var (
-	anotherClient = new(gopeer.Client)
+    ADDRESS1 = gopeer.Get("IS_CLIENT").(string)
+)
+
+const (
+    ADDRESS2 = ":8080"
+)
+
+var (
+    anotherClient = new(gopeer.Client)
 )
 
 func main() {
-	listener := gopeer.NewListener(ADDRESS)
-	listener.Open().Run(handleServer)
-	defer listener.Close()
+    listener1 := gopeer.NewListener(ADDRESS1)
+    listener1.Open().Run(handleServer)
+    defer listener1.Close()
 
-	client := listener.NewClient(gopeer.GeneratePrivate(1024))
-	anotherClient = listener.NewClient(gopeer.GeneratePrivate(1024))
+    client := listener1.NewClient(gopeer.GeneratePrivate(1024))
 
-	anotherClient.Sharing.Perm = true
-	anotherClient.Sharing.Path = "./"
+    listener2 := gopeer.NewListener(ADDRESS2)
+    listener2.Open().Run(handleServer)
+    defer listener2.Close()
 
-	handleClient(client)
+    anotherClient = listener2.NewClient(gopeer.GeneratePrivate(1024))
+
+    anotherClient.Sharing.Perm = true
+    anotherClient.Sharing.Path = "./"
+
+    handleClient(client)
 }
 
 func handleClient(client *gopeer.Client) {
-	dest := gopeer.NewDestination(&gopeer.Destination{
-		Address: ADDRESS,
-		Public:  anotherClient.Keys.Public,
-	})
-	client.Connect(dest)
-
-	client.SendTo(dest, &gopeer.Package{
-		Head: gopeer.Head{
-			Title:  TITLE_MESSAGE,
-			Option: gopeer.Get("OPTION_GET").(string),
-		},
-		Body: gopeer.Body{
-			Data: "begin",
-		},
-	})
-
-	client.LoadFile(dest, "archive.zip", "output.zip")
-
-	client.SendTo(dest, &gopeer.Package{
-		Head: gopeer.Head{
-			Title:  TITLE_MESSAGE,
-			Option: gopeer.Get("OPTION_GET").(string),
-		},
-		Body: gopeer.Body{
-			Data: "end",
-		},
-	})
-
-	client.Disconnect(dest)
+    dest := gopeer.NewDestination(&gopeer.Destination{
+        Address: ADDRESS2,
+        Public:  anotherClient.Keys.Public,
+    })
+    client.Connect(dest)
+    client.LoadFile(dest, "archive.zip", "output.zip")
+    client.Disconnect(dest)
 }
 
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
-	client.HandleAction(TITLE_MESSAGE, pack,
-		func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-			fmt.Printf("[%s]: '%s'\n", pack.From.Sender.Hashname, pack.Body.Data)
-			return set
-		},
-		func(client *gopeer.Client, pack *gopeer.Package) {
-			// after receive result package
-		},
-	)
+    
 }
 
 func printJSON(data interface{}) {
-	jsonData, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(jsonData))
+    jsonData, _ := json.MarshalIndent(data, "", "\t")
+    fmt.Println(string(jsonData))
 }

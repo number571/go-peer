@@ -55,12 +55,12 @@ type Desc struct {
 	Nonce      uint64
 	Difficulty uint8
 }
-
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
 type Listener struct {
 	listen  net.Listener
+	handleFunc func(*Client, *Package)
 	Address Address
 	Clients map[string]*Client
 }
@@ -71,6 +71,7 @@ type Address struct {
 }
 
 type Client struct {
+	listener    *Listener
 	Hashname    string
 	Address     string
 	Sharing     Sharing
@@ -96,6 +97,7 @@ type Connect struct {
 	transfer    transfer
 	Session     []byte
 	Address     string
+	Relation    net.Conn
 	Public      *rsa.PublicKey
 	PublicRecv  *rsa.PublicKey
 }
@@ -104,7 +106,6 @@ type transfer struct {
 	outputFile string
 	isBlocked  bool
 }
-
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
