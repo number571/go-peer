@@ -6,11 +6,12 @@
 
 ### Specifications:
 1. Data transfer:
+* Protocol: TCP;
 * Direct / Throw;
 * File transfer supported;
 * End to end encryption;
-* Packages in blockchain;
 2. Encryption:
+* Protocol: TLS;
 * Symmetric algorithm: AES256-CBC;
 * Asymmetric algorithm: RSA-OAEP;
 * Hash function: HMAC(SHA256);
@@ -50,26 +51,27 @@ func handleServer(client *gopeer.Client, pack *gopeer.Package) {
 
 ### Settings:
 ```go
+type SettingsType map[string]interface{}
 type settingsStruct struct {
-    TITLE_LASTHASH     string
     TITLE_CONNECT      string
     TITLE_DISCONNECT   string
     TITLE_FILETRANSFER string
     OPTION_GET         string
     OPTION_SET         string
+    SERVER_NAME        string
     IS_CLIENT          string
-    NETWORK            string
-    VERSION            string
-    PACKSIZE           uint32
-    FILESIZE           uint32
-    BUFFSIZE           uint16
-    DIFFICULTY         uint8
-    RETRY_NUMB         uint8
-    RETRY_TIME         uint8
+    END_BYTES          string
     TEMPLATE           string
     HMACKEY            string
-    GENESIS            string
-    NOISE              string
+    NETWORK            string
+    VERSION            string
+    PACK_SIZE          uint32
+    FILE_SIZE          uint32
+    BUFF_SIZE          uint32
+    REMEMBER           uint16
+    DIFFICULTY         uint8
+    WAITING_TIME       uint8
+    REDIRECT_QUAN      uint8
 }
 ```
 
@@ -80,34 +82,38 @@ gopeer.Set(gopeer.SettingsType{
     "NETWORK": "[HIDDEN-LAKE]",
     "VERSION": "[1.0.0s]",
     "HMACKEY": "9163571392708145",
-    "GENESIS": "[GENESIS-LAKE]",
-    "NOISE": "h19dlI#L9dkc8JA]1s-zSp,Nl/qs4;qf",
 })
 ```
 
 ### Default settings:
 ```go
 {
-    TITLE_LASTHASH:     "[TITLE-LASTHASH]",
     TITLE_CONNECT:      "[TITLE-CONNECT]",
     TITLE_DISCONNECT:   "[TITLE-DISCONNECT]",
     TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
     OPTION_GET:         "[OPTION-GET]", // Send
     OPTION_SET:         "[OPTION-SET]", // Receive
+    SERVER_NAME:        "GOPEER-FRAMEWORK",
     IS_CLIENT:          "[IS-CLIENT]", 
-    NETWORK:            "NETWORK-NAME",
-    VERSION:            "Version 1.0.0",
-    PACKSIZE:           8 << 20, // 8MiB
-    FILESIZE:           2 << 20, // 2MiB
-    BUFFSIZE:           1 << 20, // 1MiB
-    DIFFICULTY:         15,
-    RETRY_NUMB:         2,
-    RETRY_TIME:         5, // Seconds
+    END_BYTES:          "\000\000\000\005\007\001\000\000\000",
     TEMPLATE:           "0.0.0.0",
     HMACKEY:            "PASSWORD",
-    GENESIS:            "[GENESIS-PACKAGE]",
-    NOISE:              "1234567890ABCDEFGHIJKLMNOPQRSTUV",
+    NETWORK:            "NETWORK-NAME",
+    VERSION:            "Version 1.0.0",
+    PACK_SIZE:          8 << 20, // 8MiB
+    FILE_SIZE:          2 << 20, // 2MiB
+    BUFF_SIZE:          1 << 20, // 1MiB
+    REMEMBER:           256, // hash packages
+    DIFFICULTY:         15,
+    WAITING_TIME:       5, // seconds
+    REDIRECT_QUAN:      3,
 }
+```
+
+### Settings functions:
+```go
+func Set(settings SettingsType) []uint8
+func Get(key string) interface{}
 ```
 
 ### Network functions and methods:
@@ -115,7 +121,7 @@ gopeer.Set(gopeer.SettingsType{
 func NewListener(address string) *Listener {}
 func NewDestination(dest *Destination) *Destination {}
 func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
-func (listener *Listener) Open() *Listener {}
+func (listener *Listener) Open(c *Certificate) *Listener {}
 func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
 func (client *Client) InConnections(hash string) bool {}
@@ -123,11 +129,13 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 func (client *Client) LoadFile(dest *Destination, input string, output string) error
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
+func (client *Client) SetSharing(perm bool, path string) {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
 
 ### Cryptography functions:
 ```go
+func GenerateCertificate(name string, bits int) (string, string) {}
 func GeneratePrivate(bits int) *rsa.PrivateKey {}
 func ParsePrivate(privData string) *rsa.PrivateKey {}
 func ParsePublic(pubData string) *rsa.PublicKey {}

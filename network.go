@@ -1,9 +1,12 @@
 package gopeer
 
 import (
+	"time"
+	"sync"
+	"crypto/x509"
+	"crypto/tls"
 	"crypto/rsa"
 	"errors"
-	"net"
 	"strings"
 )
 
@@ -33,24 +36,35 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 	hash := HashPublic(public)
 	listener.Clients[hash] = &Client{
 		listener: listener,
+		remember: remember{
+			mapping: make(map[string]uint16),
+			listing: make([]string, settings.REMEMBER),
+		},
 		Hashname: hash,
 		Keys: Keys{
 			Private: private,
 			Public:  public,
 		},
-		Address:     listener.Address.Ipv4 + listener.Address.Port,
+		Mutex: new(sync.Mutex),
+		Address:  listener.Address.Ipv4 + listener.Address.Port,
+		CertPool: x509.NewCertPool(),
 		Connections: make(map[string]*Connect),
 	}
 	return listener.Clients[hash]
 }
 
 // Open connection for receiving data.
-func (listener *Listener) Open() *Listener {
+func (listener *Listener) Open(c *Certificate) *Listener {
+	cert, err := tls.X509KeyPair(c.Cert, c.Key)
+    if err != nil {
+        return nil
+    }
+	config := &tls.Config{Certificates: []tls.Certificate{cert}}
 	if listener.Address.Ipv4 + listener.Address.Port == "" {
 		return listener
 	}
-	var err error
-	listener.listen, err = net.Listen("tcp", settings.TEMPLATE+listener.Address.Port)
+	listener.Certificate = c.Cert
+	listener.listen, err = tls.Listen("tcp", settings.TEMPLATE+listener.Address.Port, config)
 	if err != nil {
 		return nil
 	}
@@ -59,8 +73,8 @@ func (listener *Listener) Open() *Listener {
 
 // Run handle server for listening packages.
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {
+	listener.handleFunc = handleServer
 	if listener.Address.Ipv4 + listener.Address.Port == "" {
-		listener.handleFunc = handleServer
 		return listener
 	}
 	go runServer(handleServer, listener)
@@ -91,14 +105,15 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 	case title:
 		switch pack.Head.Option {
 		case settings.OPTION_GET:
-			hash := pack.From.Sender.Hashname
+			hash := pack.From.Hashname
 			data := handleGet(client, pack)
 			dest := NewDestination(&Destination{
 				Address:  pack.From.Address,
+				Certificate: client.Connections[hash].Certificate,
 				Public:   client.Connections[hash].Public,
-				Receiver: client.Connections[hash].PublicRecv,
+				Receiver: client.Connections[pack.From.Sender.Hashname].Public,
 			})
-			go client.SendTo(dest, &Package{
+			client.SendTo(dest, &Package{
 				Head: Head{
 					Title:  title,
 					Option: settings.OPTION_SET,
@@ -110,7 +125,6 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 			return true
 		case settings.OPTION_SET:
 			handleSet(client, pack)
-			client.Connections[pack.From.Sender.Hashname].waiting <- true
 			return true
 		}
 	}
@@ -128,6 +142,7 @@ func (client *Client) Disconnect(dest *Destination) error {
 			Option: settings.OPTION_GET,
 		},
 	})
+	client.Connections[hash].Relation.Close()
 	delete(client.Connections, hash)
 	return err
 }
@@ -137,24 +152,19 @@ func (client *Client) Disconnect(dest *Destination) error {
 // After sending GET and receiving SET package, set Connected = true.
 func (client *Client) Connect(dest *Destination) error {
 	var (
-		hash               = HashPublic(dest.Receiver)
-		session            = GenerateRandomBytes(32)
-		lastHash           = settings.GENESIS
-		prevSession []byte = nil
+		session = GenerateRandomBytes(32)
+		hash = HashPublic(dest.Receiver)
 	)
-	if client.InConnections(hash) {
-		lastHash = client.Connections[hash].lastHash
-		prevSession = client.Connections[hash].Session
-	}
 	client.Connections[hash] = &Connect{
 		connected:   false,
-		prevSession: prevSession,
-		Session:     session,
+		transfer: transfer{
+			isBlocked: make(chan bool),
+		},
 		Address:     dest.Address,
-		lastHash:    lastHash,
-		Public:      dest.Public,
-		PublicRecv:  dest.Receiver,
-		waiting:     make(chan bool),
+		Public:      dest.Receiver,
+		Certificate: dest.Certificate,
+		IsAction:    make(chan bool),
+		Session:     session,
 	}
 	_, err := client.SendTo(dest, &Package{
 		Head: Head{
@@ -163,12 +173,29 @@ func (client *Client) Connect(dest *Destination) error {
 		},
 		Body: Body{
 			Data: string(PackJSON(conndata{
+				Certificate: Base64Encode(client.listener.Certificate),
 				Public:  Base64Encode([]byte(StringPublic(client.Keys.Public))),
 				Session: Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),
 		},
 	})
+	select {
+	case <-client.Connections[hash].IsAction:
+		client.Connections[hash].connected = true
+	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+		if client.Connections[hash].Relation != nil {
+			client.Connections[hash].Relation.Close()
+		}
+		delete(client.Connections, hash)
+	}
 	return err
+}
+
+func NewDestination(dest *Destination) *Destination {
+	if dest.Receiver == nil {
+		dest.Receiver = dest.Public
+	}
+	return dest
 }
 
 // Load file from node.
@@ -180,31 +207,8 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		return errors.New("client not connected")
 	}
 
-	client.Connections[hash].transfer.isBlocked = true
+	client.Connections[hash].transfer.inputFile = input
 	client.Connections[hash].transfer.outputFile = output
-
-	for id := uint32(0); client.isBlocked(hash); id++ {
-		client.SendTo(dest, &Package{
-			Head: Head{
-				Title:  settings.TITLE_FILETRANSFER,
-				Option: settings.OPTION_GET,
-			},
-			Body: Body{
-				Data: string(PackJSON(FileTransfer{
-					Head: HeadTransfer{
-						Id:   id,
-						Name: input,
-					},
-				})),
-			},
-		})
-	}
-
-	nullpack := string(PackJSON(FileTransfer{
-		Head: HeadTransfer{
-			IsNull: true,
-		},
-	}))
 
 	client.SendTo(dest, &Package{
 		Head: Head{
@@ -212,27 +216,35 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 			Option: settings.OPTION_GET,
 		},
 		Body: Body{
-			Data: nullpack,
+			Data: string(PackJSON(FileTransfer{
+				Head: HeadTransfer{
+					Id:   0,
+					Name: input,
+				},
+			})),
 		},
 	})
+
+	<-client.Connections[hash].transfer.isBlocked
 	return nil
 }
 
-// Wrap destination structure for check condition of null receiver.
-func NewDestination(dest *Destination) *Destination {
-	if dest.Receiver == nil {
-		dest.Receiver = dest.Public
-	}
-	return dest
+// Set permissions for sharing files.
+func (client *Client) SetSharing(perm bool, path string) {
+	client.sharing.perm = perm
+	client.sharing.path = path
 }
 
-// Send by Destination struct{
-//  Address
-//  Public key
-//  Receiver public key
+// Send by Destination (
+//  Address;
+//  Certificate;
+//  Public key;
+//  Receiver public key;
 // )
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
-	pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
+	if pack.To.Receiver.Hashname == "" {
+		pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
+	}
 	pack.To.Hashname = HashPublic(dest.Public)
 	pack.To.Address = dest.Address
 	return client.send(pack)

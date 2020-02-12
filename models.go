@@ -1,8 +1,10 @@
 package gopeer
 
 import (
+	"crypto/x509"
 	"crypto/rsa"
 	"net"
+	"sync"
 )
 
 /* BEGIN PACKAGE PART */
@@ -25,7 +27,7 @@ type Head struct {
 }
 
 type From struct {
-	Sender   Sender
+	Sender Sender
 	Hashname string
 	Address  string
 }
@@ -36,24 +38,24 @@ type To struct {
 	Address  string
 }
 
-type Sender Hidden
-type Receiver Hidden
-type Hidden struct {
-	Hashname string
-}
-
 type Body struct {
 	Data string
 	Desc Desc
 }
 
+type Receiver Hidden
+type Sender Hidden
+type Hidden struct {
+	Hashname string
+}
+
 type Desc struct {
 	Rand       string
-	PrevHash   string
-	CurrHash   string
+	Hash       string
 	Sign       string
 	Nonce      uint64
 	Difficulty uint8
+	Redirection uint8
 }
 /* END PACKAGE PART */
 
@@ -63,6 +65,7 @@ type Listener struct {
 	handleFunc func(*Client, *Package)
 	Address Address
 	Clients map[string]*Client
+	Certificate []byte
 }
 
 type Address struct {
@@ -72,16 +75,25 @@ type Address struct {
 
 type Client struct {
 	listener    *Listener
+	sharing     sharing
+	remember    remember
 	Hashname    string
 	Address     string
-	Sharing     Sharing
 	Keys        Keys
+	Mutex       *sync.Mutex
+	CertPool    *x509.CertPool
 	Connections map[string]*Connect
 }
 
-type Sharing struct {
-	Perm bool
-	Path string
+type remember struct {
+	index   uint16
+	mapping map[string]uint16
+	listing []string
+}
+
+type sharing struct {
+	perm bool
+	path string
 }
 
 type Keys struct {
@@ -91,20 +103,19 @@ type Keys struct {
 
 type Connect struct {
 	connected   bool
-	prevSession []byte
-	waiting     chan bool
-	lastHash    string
 	transfer    transfer
-	Session     []byte
 	Address     string
+	Session     []byte
 	Relation    net.Conn
+	Certificate []byte
+	IsAction    chan bool
 	Public      *rsa.PublicKey
-	PublicRecv  *rsa.PublicKey
 }
 
 type transfer struct {
+	inputFile string
 	outputFile string
-	isBlocked  bool
+	isBlocked  chan bool
 }
 /* END LISTENER PART */
 
@@ -124,11 +135,16 @@ type BodyTransfer struct {
 	Hash []byte
 	Data []byte
 }
-
 /* END FILE TRANSFER */
 
 type Destination struct {
 	Address  string
+	Certificate []byte
 	Public   *rsa.PublicKey
 	Receiver *rsa.PublicKey
+}
+
+type Certificate struct {
+	Cert []byte
+	Key  []byte
 }

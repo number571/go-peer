@@ -9,14 +9,44 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
 	"encoding/pem"
 	"io"
+	"time"
 	"math"
 	"math/big"
 )
+
+// Generate certificate by server name and number bits of private key.
+func GenerateCertificate(name string, bits int) (string, string) {
+	ca := &x509.Certificate{
+		SerialNumber: big.NewInt(int64(GenerateRandomIntegers(1)[0])),
+		Subject: pkix.Name{
+			CommonName:    name,
+			Organization:  []string{name},
+			Country:       []string{name},
+			Province:      []string{name},
+			Locality:      []string{name},
+			StreetAddress: []string{name},
+			PostalCode:    []string{name},
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(10, 0, 0), // 10 years
+		IsCA:                  true,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+	priv := GeneratePrivate(bits)
+	cert, err := x509.CreateCertificate(rand.Reader, ca, ca, &priv.PublicKey, priv)
+	if err != nil {
+		return "", ""
+	}
+	return StringPrivate(priv), StringCertificate(cert)
+}
 
 // Create private key by size bits.
 func GeneratePrivate(bits int) *rsa.PrivateKey {
@@ -212,6 +242,16 @@ func StringPrivate(priv *rsa.PrivateKey) string {
 		&pem.Block{
 			Type:  "RSA PRIVATE KEY",
 			Bytes: x509.MarshalPKCS1PrivateKey(priv),
+		},
+	))
+}
+
+// Translate certificate bytes to string.
+func StringCertificate(cert []byte) string {
+	return string(pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: cert,
 		},
 	))
 }

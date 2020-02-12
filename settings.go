@@ -2,52 +2,50 @@ package gopeer
 
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-	TITLE_LASTHASH     string
 	TITLE_CONNECT      string
 	TITLE_DISCONNECT   string
 	TITLE_FILETRANSFER string
 	OPTION_GET         string
 	OPTION_SET         string
+	SERVER_NAME        string
 	IS_CLIENT          string
 	END_BYTES          string
-	NETWORK            string
-	VERSION            string
-	PACKSIZE           uint32
-	FILESIZE           uint32
-	BUFFSIZE           uint32
-	DIFFICULTY         uint8
-	RETRY_NUMB         uint8
-	RETRY_TIME         uint8
 	TEMPLATE           string
 	HMACKEY            string
-	GENESIS            string
-	NOISE              string
+	NETWORK            string
+	VERSION            string
+	PACK_SIZE          uint32
+	FILE_SIZE          uint32
+	BUFF_SIZE          uint32
+	REMEMBER           uint16
+	DIFFICULTY         uint8
+	WAITING_TIME       uint8
+	REDIRECT_QUAN      uint8
 }
 
 var settings = defaultSettings()
 
 func defaultSettings() settingsStruct {
 	return settingsStruct{
-		TITLE_LASTHASH:     "[TITLE-LASTHASH]",
 		TITLE_CONNECT:      "[TITLE-CONNECT]",
 		TITLE_DISCONNECT:   "[TITLE-DISCONNECT]",
 		TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
 		OPTION_GET:         "[OPTION-GET]", // Send
 		OPTION_SET:         "[OPTION-SET]", // Receive
 		IS_CLIENT:          "[IS-CLIENT]", 
+		SERVER_NAME:        "GOPEER-FRAMEWORK",
 		END_BYTES:          "\000\000\000\005\007\001\000\000\000",
-		NETWORK:            "NETWORK-NAME",
-		VERSION:            "Version 1.0.0",
-		PACKSIZE:           8 << 20, // 8MiB
-		FILESIZE:           2 << 20, // 2MiB
-		BUFFSIZE:           1 << 20, // 1MiB
-		DIFFICULTY:         15,
-		RETRY_NUMB:         2,
-		RETRY_TIME:         5, // Seconds
 		TEMPLATE:           "0.0.0.0",
 		HMACKEY:            "PASSWORD",
-		GENESIS:            "[GENESIS-PACKAGE]",
-		NOISE:              "1234567890ABCDEFGHIJKLMNOPQRSTUV",
+		NETWORK:            "NETWORK-NAME",
+		VERSION:            "Version 1.0.0",
+		PACK_SIZE:          8 << 20, // 8MiB
+		FILE_SIZE:          2 << 20, // 2MiB
+		BUFF_SIZE:          1 << 20, // 1MiB
+		REMEMBER:           256, // hash packages
+		DIFFICULTY:         15,
+		WAITING_TIME:       5, // seconds
+		REDIRECT_QUAN:      3,
 	}
 }
 
@@ -74,8 +72,6 @@ func Set(settings SettingsType) []uint8 {
 
 func Get(key string) interface{} {
 	switch key {
-	case "TITLE_LASTHASH":
-		return settings.TITLE_LASTHASH
 	case "TITLE_CONNECT":
 		return settings.TITLE_CONNECT
 	case "TITLE_DISCONNECT":
@@ -86,6 +82,8 @@ func Get(key string) interface{} {
 		return settings.OPTION_GET
 	case "OPTION_SET":
 		return settings.OPTION_SET
+	case "SERVER_NAME":
+		return settings.SERVER_NAME
 	case "IS_CLIENT":
 		return settings.IS_CLIENT
 	case "END_BYTES":
@@ -98,22 +96,20 @@ func Get(key string) interface{} {
 		return settings.TEMPLATE
 	case "HMACKEY":
 		return settings.HMACKEY
-	case "GENESIS":
-		return settings.GENESIS
-	case "NOISE":
-		return settings.NOISE
-	case "PACKSIZE":
-		return settings.PACKSIZE
-	case "FILESIZE":
-		return settings.FILESIZE
-	case "BUFFSIZE":
-		return settings.BUFFSIZE
+	case "PACK_SIZE":
+		return settings.PACK_SIZE
+	case "FILE_SIZE":
+		return settings.FILE_SIZE
+	case "BUFF_SIZE":
+		return settings.BUFF_SIZE
+	case "REMEMBER":
+		return settings.REMEMBER
 	case "DIFFICULTY":
 		return settings.DIFFICULTY
-	case "RETRY_NUMB":
-		return settings.RETRY_NUMB
-	case "RETRY_TIME":
-		return settings.RETRY_TIME
+	case "WAITING_TIME":
+		return settings.WAITING_TIME
+	case "REDIRECT_QUAN":
+		return settings.REDIRECT_QUAN
 	default:
 		return nil
 	}
@@ -122,8 +118,6 @@ func Get(key string) interface{} {
 func stringSettings(name string, data interface{}) uint8 {
 	result := data.(string)
 	switch name {
-	case "TITLE_LASTHASH":
-		settings.TITLE_LASTHASH = result
 	case "TITLE_CONNECT":
 		settings.TITLE_CONNECT = result
 	case "TITLE_DISCONNECT":
@@ -134,6 +128,8 @@ func stringSettings(name string, data interface{}) uint8 {
 		settings.OPTION_GET = result
 	case "OPTION_SET":
 		settings.OPTION_SET = result
+	case "SERVER_NAME":
+		settings.SERVER_NAME = result
 	case "IS_CLIENT":
 		settings.IS_CLIENT = result
 	case "END_BYTES":
@@ -146,10 +142,6 @@ func stringSettings(name string, data interface{}) uint8 {
 		settings.TEMPLATE = result
 	case "HMACKEY":
 		settings.HMACKEY = result
-	case "GENESIS":
-		settings.GENESIS = result
-	case "NOISE":
-		settings.NOISE = result
 	default:
 		return 1
 	}
@@ -159,18 +151,20 @@ func stringSettings(name string, data interface{}) uint8 {
 func intSettings(name string, data interface{}) uint8 {
 	result := data.(int)
 	switch name {
-	case "PACKSIZE":
-		settings.PACKSIZE = uint32(result)
-	case "FILESIZE":
-		settings.FILESIZE = uint32(result)
-	case "BUFFSIZE":
-		settings.BUFFSIZE = uint32(result)
+	case "PACK_SIZE":
+		settings.PACK_SIZE = uint32(result)
+	case "FILE_SIZE":
+		settings.FILE_SIZE = uint32(result)
+	case "BUFF_SIZE":
+		settings.BUFF_SIZE = uint32(result)
+	case "REMEMBER":
+		settings.REMEMBER = uint16(result)
 	case "DIFFICULTY":
 		settings.DIFFICULTY = uint8(result)
-	case "RETRY_NUMB":
-		settings.RETRY_NUMB = uint8(result)
-	case "RETRY_TIME":
-		settings.RETRY_TIME = uint8(result)
+	case "WAITING_TIME":
+		settings.WAITING_TIME = uint8(result)
+	case "REDIRECT_QUAN":
+		settings.REDIRECT_QUAN = uint8(result)
 	default:
 		return 1
 	}
