@@ -89,6 +89,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 			pack.From.Address = client.Address
 			client.sendRaw(pack)
 		} else {
+			pack.Body.Desc.Redirection++
 			for hash := range client.Connections {
 				if hash == pack.From.Sender.Hashname {
 					continue
@@ -97,7 +98,6 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 				pack.To.Address = client.Connections[hash].Address
 				pack.From.Hashname = client.Hashname
 				pack.From.Address = client.Address
-				pack.Body.Desc.Redirection++
 				client.sendRaw(pack)
 			}
 		}
