@@ -32,7 +32,7 @@ func defaultSettings() settingsStruct {
 		TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
 		OPTION_GET:         "[OPTION-GET]", // Send
 		OPTION_SET:         "[OPTION-SET]", // Receive
-		IS_CLIENT:          "[IS-CLIENT]", 
+		IS_CLIENT:          "[IS-CLIENT]",
 		SERVER_NAME:        "GOPEER-FRAMEWORK",
 		END_BYTES:          "\000\000\000\005\007\001\000\000\000",
 		TEMPLATE:           "0.0.0.0",
@@ -42,7 +42,7 @@ func defaultSettings() settingsStruct {
 		PACK_SIZE:          8 << 20, // 8MiB
 		FILE_SIZE:          2 << 20, // 2MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
-		REMEMBER:           256, // hash packages
+		REMEMBER:           256,     // hash packages
 		DIFFICULTY:         15,
 		WAITING_TIME:       5, // seconds
 		REDIRECT_QUAN:      3,

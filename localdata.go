@@ -1,7 +1,6 @@
 package gopeer
 
 import (
-	// "time"
 	"bytes"
 	"crypto/rsa"
 	"crypto/tls"
@@ -70,44 +69,41 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 	}
 	client, ok := listener.Clients[pack.To.Hashname]
 	if !ok {
-		return
+		if pack.To.Hashname == pack.To.Receiver.Hashname {
+			return
+		}
+		client, ok = listener.Clients[pack.To.Receiver.Hashname]
+		if !ok {
+			return
+		}
 	}
 	if client.rememberHash(pack.Body.Desc.Hash) {
 		return
 	}
-	if pack.To.Receiver.Hashname != "" && pack.To.Hashname != pack.To.Receiver.Hashname {
-		cli, ok := listener.Clients[pack.To.Receiver.Hashname]
-		if ok {
-			if cli.rememberHash(pack.Body.Desc.Hash) {
-				return
-			}
-			goto skip
-		}
-		cli = client
-		if cli.InConnections(pack.To.Receiver.Hashname) {
+	if pack.To.Hashname != pack.To.Receiver.Hashname {
+		if client.InConnections(pack.To.Receiver.Hashname) {
 			hash := pack.To.Receiver.Hashname
 			pack.To.Hashname = hash
-			pack.To.Address = cli.Connections[hash].Address
-			pack.From.Hashname = cli.Hashname
-			pack.From.Address = cli.Address
-			cli.sendRaw(pack)
+			pack.To.Address = client.Connections[hash].Address
+			pack.From.Hashname = client.Hashname
+			pack.From.Address = client.Address
+			client.sendRaw(pack)
 		} else {
-			for hash := range cli.Connections {
+			for hash := range client.Connections {
 				if hash == pack.From.Sender.Hashname {
 					continue
 				}
 				pack.To.Hashname = hash
-				pack.To.Address = cli.Connections[hash].Address
-				pack.From.Hashname = cli.Hashname
-				pack.From.Address = cli.Address
+				pack.To.Address = client.Connections[hash].Address
+				pack.From.Hashname = client.Hashname
+				pack.From.Address = client.Address
 				pack.Body.Desc.Redirection++
-				cli.sendRaw(pack)
+				client.sendRaw(pack)
 			}
 		}
 		return
 	}
 
-skip:
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
 		fmt.Println(err)
@@ -203,10 +199,10 @@ skip:
 			writeFile(name, read.Body.Data)
 
 			dest := NewDestination(&Destination{
-				Address: client.Connections[pack.From.Hashname].Address,
+				Address:     client.Connections[pack.From.Hashname].Address,
 				Certificate: client.Connections[pack.From.Hashname].Certificate,
-				Public: client.Connections[pack.From.Hashname].Public,
-				Receiver: client.Connections[hash].Public,
+				Public:      client.Connections[pack.From.Hashname].Public,
+				Receiver:    client.Connections[hash].Public,
 			})
 
 			client.SendTo(dest, &Package{
@@ -319,9 +315,9 @@ func (client *Client) sendRaw(pack *Package) (*Package, error) {
 	switch {
 	case pack == nil:
 		return nil, errors.New("pack is null")
-	case pack.To.Hashname == client.Hashname: 
+	case pack.To.Hashname == client.Hashname:
 		return nil, errors.New("sender and receiver is one person")
-	case !client.InConnections(pack.To.Hashname): 
+	case !client.InConnections(pack.To.Hashname):
 		return nil, errors.New("receiver not in connections")
 	}
 
@@ -337,7 +333,7 @@ func (client *Client) sendRaw(pack *Package) (*Package, error) {
 		}
 		config := &tls.Config{
 			ServerName: "localhost",
-			RootCAs: client.CertPool,
+			RootCAs:    client.CertPool,
 		}
 		conn, err := tls.Dial("tcp", pack.To.Address, config)
 		if err != nil {
@@ -379,7 +375,7 @@ func (client *Client) send(pack *Package) (*Package, error) {
 		return nil, errors.New("pack is null")
 	case pack.To.Hashname == client.Hashname:
 		return nil, errors.New("sender and receiver is one person")
-	case !client.InConnections(pack.To.Hashname): 
+	case !client.InConnections(pack.To.Hashname):
 		return nil, errors.New("receiver not in connections")
 	}
 
@@ -396,7 +392,7 @@ func (client *Client) send(pack *Package) (*Package, error) {
 		}
 		config := &tls.Config{
 			ServerName: settings.SERVER_NAME,
-			RootCAs: client.CertPool,
+			RootCAs:    client.CertPool,
 		}
 		conn, err := tls.Dial("tcp", pack.To.Address, config)
 		if err != nil {
@@ -437,7 +433,7 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 	public := ParsePublic(string(Base64Decode(data.Public)))
 
 	client.Connections[pack.From.Sender.Hashname] = &Connect{
-		connected:  true,
+		connected: true,
 		transfer: transfer{
 			isBlocked: make(chan bool),
 		},
@@ -546,11 +542,11 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 		Body: Body{
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
 			Desc: Desc{
-				Rand:       Base64Encode(EncryptAES(session, []byte(pack.Body.Desc.Rand))),
-				Hash:       pack.Body.Desc.Hash,
-				Sign:       pack.Body.Desc.Sign,
-				Nonce:      pack.Body.Desc.Nonce,
-				Difficulty: settings.DIFFICULTY,
+				Rand:        Base64Encode(EncryptAES(session, []byte(pack.Body.Desc.Rand))),
+				Hash:        pack.Body.Desc.Hash,
+				Sign:        pack.Body.Desc.Sign,
+				Nonce:       pack.Body.Desc.Nonce,
+				Difficulty:  settings.DIFFICULTY,
 				Redirection: pack.Body.Desc.Redirection,
 			},
 		},
@@ -598,11 +594,11 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 		Body: Body{
 			Data: string(DecryptAES(session, Base64Decode(pack.Body.Data))),
 			Desc: Desc{
-				Rand:       string(DecryptAES(session, Base64Decode(pack.Body.Desc.Rand))),
-				Hash:       pack.Body.Desc.Hash,
-				Sign:       pack.Body.Desc.Sign,
-				Nonce:      pack.Body.Desc.Nonce,
-				Difficulty: settings.DIFFICULTY,
+				Rand:        string(DecryptAES(session, Base64Decode(pack.Body.Desc.Rand))),
+				Hash:        pack.Body.Desc.Hash,
+				Sign:        pack.Body.Desc.Sign,
+				Nonce:       pack.Body.Desc.Nonce,
+				Difficulty:  settings.DIFFICULTY,
 				Redirection: pack.Body.Desc.Redirection,
 			},
 		},
@@ -636,10 +632,10 @@ func (client *Client) confirmPackage(pack *Package) *Package {
 // Append information about network name, version.
 // Append sender information: hashname, public, address.
 func (client *Client) appendHeaders(pack *Package) *Package {
-	pack.Info.Network  = settings.NETWORK
-	pack.Info.Version  = settings.VERSION
+	pack.Info.Network = settings.NETWORK
+	pack.Info.Version = settings.VERSION
 	pack.From.Hashname = client.Hashname
-	pack.From.Address  = client.Address
+	pack.From.Address = client.Address
 	if pack.From.Sender.Hashname == "" {
 		pack.From.Sender.Hashname = client.Hashname
 	}

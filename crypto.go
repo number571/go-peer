@@ -15,9 +15,9 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"io"
-	"time"
 	"math"
 	"math/big"
+	"time"
 )
 
 // Generate certificate by server name and number bits of private key.

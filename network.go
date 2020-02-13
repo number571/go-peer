@@ -1,19 +1,22 @@
 package gopeer
 
 import (
-	"time"
-	"sync"
-	"crypto/x509"
-	"crypto/tls"
 	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"strings"
+	"sync"
+	"time"
 )
 
 // Create new Listener by address "ipv4:port".
 func NewListener(address string) *Listener {
 	if address == settings.IS_CLIENT {
 		return &Listener{
+			Address: Address{
+				Ipv4: settings.IS_CLIENT,
+			},
 			Clients: make(map[string]*Client),
 		}
 	}
@@ -45,9 +48,9 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 			Private: private,
 			Public:  public,
 		},
-		Mutex: new(sync.Mutex),
-		Address:  listener.Address.Ipv4 + listener.Address.Port,
-		CertPool: x509.NewCertPool(),
+		Mutex:       new(sync.Mutex),
+		Address:     listener.Address.Ipv4 + listener.Address.Port,
+		CertPool:    x509.NewCertPool(),
 		Connections: make(map[string]*Connect),
 	}
 	return listener.Clients[hash]
@@ -56,11 +59,11 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 // Open connection for receiving data.
 func (listener *Listener) Open(c *Certificate) *Listener {
 	cert, err := tls.X509KeyPair(c.Cert, c.Key)
-    if err != nil {
-        return nil
-    }
+	if err != nil {
+		return nil
+	}
 	config := &tls.Config{Certificates: []tls.Certificate{cert}}
-	if listener.Address.Ipv4 + listener.Address.Port == "" {
+	if listener.Address.Ipv4+listener.Address.Port == settings.IS_CLIENT {
 		return listener
 	}
 	listener.Certificate = c.Cert
@@ -74,7 +77,7 @@ func (listener *Listener) Open(c *Certificate) *Listener {
 // Run handle server for listening packages.
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {
 	listener.handleFunc = handleServer
-	if listener.Address.Ipv4 + listener.Address.Port == "" {
+	if listener.Address.Ipv4+listener.Address.Port == settings.IS_CLIENT {
 		return listener
 	}
 	go runServer(handleServer, listener)
@@ -108,10 +111,10 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 			hash := pack.From.Hashname
 			data := handleGet(client, pack)
 			dest := NewDestination(&Destination{
-				Address:  pack.From.Address,
+				Address:     pack.From.Address,
 				Certificate: client.Connections[hash].Certificate,
-				Public:   client.Connections[hash].Public,
-				Receiver: client.Connections[pack.From.Sender.Hashname].Public,
+				Public:      client.Connections[hash].Public,
+				Receiver:    client.Connections[pack.From.Sender.Hashname].Public,
 			})
 			client.SendTo(dest, &Package{
 				Head: Head{
@@ -153,10 +156,10 @@ func (client *Client) Disconnect(dest *Destination) error {
 func (client *Client) Connect(dest *Destination) error {
 	var (
 		session = GenerateRandomBytes(32)
-		hash = HashPublic(dest.Receiver)
+		hash    = HashPublic(dest.Receiver)
 	)
 	client.Connections[hash] = &Connect{
-		connected:   false,
+		connected: false,
 		transfer: transfer{
 			isBlocked: make(chan bool),
 		},
@@ -174,8 +177,8 @@ func (client *Client) Connect(dest *Destination) error {
 		Body: Body{
 			Data: string(PackJSON(conndata{
 				Certificate: Base64Encode(client.listener.Certificate),
-				Public:  Base64Encode([]byte(StringPublic(client.Keys.Public))),
-				Session: Base64Encode(EncryptRSA(dest.Receiver, session)),
+				Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
+				Session:     Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),
 		},
 	})

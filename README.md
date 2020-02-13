@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.0.3s.
+> Framework for create decentralized networks. Version: 1.1.0s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
@@ -7,7 +7,7 @@
 ### Specifications:
 1. Data transfer:
 * Protocol: TCP;
-* Direct / Throw;
+* Direct/Hidden connection;
 * File transfer supported;
 * End to end encryption;
 2. Encryption:
@@ -25,25 +25,30 @@ import (
 )
 
 const (
-    ADDRESS = ":8080"
-    TITLE = "TITLE"
+    ADDRESS = "ipv4:port"
+    TITLE   = "TITLE"
 )
 
 func main() {
+    key, cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 2048)
     listener := gopeer.NewListener(ADDRESS)
-    listener.Open().Run(handleServer)
+    listener.Open(&gopeer.Certificate{
+        Cert: []byte(cert),
+        Key:  []byte(key),
+    }).Run(handleServer)
     defer listener.Close()
 
-    listener.NewClient(gopeer.GeneratePrivate(2048))
+    // listener.NewClient(gopeer.GeneratePrivate(2048))
 }
 
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
-    client.HandleAction(TITLE, pack, 
+    client.HandleAction(TITLE, pack,
         func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-            return set
+
+            return
         },
         func(client *gopeer.Client, pack *gopeer.Package) {
-            
+
         },
     )
 }
@@ -112,8 +117,8 @@ gopeer.Set(gopeer.SettingsType{
 
 ### Settings functions:
 ```go
-func Set(settings SettingsType) []uint8
-func Get(key string) interface{}
+func Set(settings SettingsType) []uint8 {}
+func Get(key string) interface{} {}
 ```
 
 ### Network functions and methods:
@@ -126,7 +131,7 @@ func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
 func (client *Client) InConnections(hash string) bool {}
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
-func (client *Client) LoadFile(dest *Destination, input string, output string) error
+func (client *Client) LoadFile(dest *Destination, input string, output string) error {}
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
 func (client *Client) SetSharing(perm bool, path string) {}
@@ -186,15 +191,19 @@ func ToBytes(num uint64) []byte {}
         Hashname: string,
         Address:  string,
     },
+    Head: {
+        Title:  string,
+        Option: string,
+    },
     Body: {
         Data: string,
         Desc: {
-            Rand:       string,
-            PrevHash:   string,
-            CurrHash:   string,
-            Sign:       string,
-            Nonce:      uint64,
-            Difficulty: uint8,
+            Rand:        string,
+            Hash:        string,
+            Sign:        string,
+            Nonce:       uint64,
+            Difficulty:  uint8,
+            Redirection: uint8,
         },
     },
 }
@@ -211,30 +220,36 @@ func ToBytes(num uint64) []byte {}
     },
     Clients: map[string]{
         listener: *Listener,
+        sharing: {
+            perm: bool,
+            path: string,
+        },
+        remember: {
+            index:   uint16,
+            mapping: map[string]uint16,
+            listing: []string,
+        },
         Hashname: string,
         Address:  string,
-        Sharing: {
-            Perm: bool,
-            Path: string,
-        },
+        Mutex:    *sync.Mutex,
+        CertPool: *x509.CertPool,
         Keys: {
             Private: *rsa.PrivateKey,
             Public:  *rsa.PublicKey,
         },
         Connections: map[string]{
             connected:   bool,
-            prevSession: []byte,
-            waiting:     chan bool,
-            lastHash:    string,
             transfer: {
+                inputFile:  string
                 outputFile: string,
-                isBlocked:  bool,
+                isBlocked:  chan bool,
             },
-            Session:    []byte,
-            Address:    string,
-            Relation:   net.Conn,
-            Public:     *rsa.PublicKey,
-            PublicRecv: *rsa.PublicKey,
+            Address:     string,
+            Session:     []byte,
+            Relation:    net.Conn,
+            Certificate: []byte,
+            IsAction:    chan bool,
+            Public:      *rsa.PublicKey,
         },
     },
 }
@@ -242,9 +257,10 @@ func ToBytes(num uint64) []byte {}
 ### Destination structure:
 ```go
 {
-    Address:  string,
-    Public:   *rsa.Public,
-    Receiver: *rsa.Public,
+    Address:     string,
+    Certificate: []byte,
+    Public:      *rsa.Public,
+    Receiver:    *rsa.Public,
 }
 ```
 

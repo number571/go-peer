@@ -1,8 +1,8 @@
 package gopeer
 
 import (
-	"crypto/x509"
 	"crypto/rsa"
+	"crypto/x509"
 	"net"
 	"sync"
 )
@@ -27,7 +27,7 @@ type Head struct {
 }
 
 type From struct {
-	Sender Sender
+	Sender   Sender
 	Hashname string
 	Address  string
 }
@@ -50,21 +50,22 @@ type Hidden struct {
 }
 
 type Desc struct {
-	Rand       string
-	Hash       string
-	Sign       string
-	Nonce      uint64
-	Difficulty uint8
+	Rand        string
+	Hash        string
+	Sign        string
+	Nonce       uint64
+	Difficulty  uint8
 	Redirection uint8
 }
+
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
 type Listener struct {
-	listen  net.Listener
-	handleFunc func(*Client, *Package)
-	Address Address
-	Clients map[string]*Client
+	listen      net.Listener
+	handleFunc  func(*Client, *Package)
+	Address     Address
+	Clients     map[string]*Client
 	Certificate []byte
 }
 
@@ -79,9 +80,9 @@ type Client struct {
 	remember    remember
 	Hashname    string
 	Address     string
-	Keys        Keys
 	Mutex       *sync.Mutex
 	CertPool    *x509.CertPool
+	Keys        Keys
 	Connections map[string]*Connect
 }
 
@@ -113,10 +114,11 @@ type Connect struct {
 }
 
 type transfer struct {
-	inputFile string
+	inputFile  string
 	outputFile string
 	isBlocked  chan bool
 }
+
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
@@ -135,13 +137,14 @@ type BodyTransfer struct {
 	Hash []byte
 	Data []byte
 }
+
 /* END FILE TRANSFER */
 
 type Destination struct {
-	Address  string
+	Address     string
 	Certificate []byte
-	Public   *rsa.PublicKey
-	Receiver *rsa.PublicKey
+	Public      *rsa.PublicKey
+	Receiver    *rsa.PublicKey
 }
 
 type Certificate struct {
