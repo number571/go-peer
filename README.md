@@ -80,16 +80,6 @@ type settingsStruct struct {
 }
 ```
 
-### Get/Set settings example:
-```go
-var OPTION_GET = gopeer.Get("OPTION_GET").(string)
-gopeer.Set(gopeer.SettingsType{
-    "NETWORK": "[HIDDEN-LAKE]",
-    "VERSION": "[1.0.0s]",
-    "HMACKEY": "9163571392708145",
-})
-```
-
 ### Default settings:
 ```go
 {
@@ -121,10 +111,19 @@ func Set(settings SettingsType) []uint8 {}
 func Get(key string) interface{} {}
 ```
 
+### Get/Set settings example:
+```go
+var OPTION_GET = gopeer.Get("OPTION_GET").(string)
+gopeer.Set(gopeer.SettingsType{
+    "NETWORK": "[HIDDEN-LAKE]",
+    "VERSION": "[1.0.0s]",
+    "HMACKEY": "9163571392708145",
+})
+```
+
 ### Network functions and methods:
 ```go
 func NewListener(address string) *Listener {}
-func NewDestination(dest *Destination) *Destination {}
 func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
 func (listener *Listener) Open(c *Certificate) *Listener {}
 func (listener *Listener) Close() {}
@@ -249,11 +248,13 @@ func ToBytes(num uint64) []byte {}
             Relation:    net.Conn,
             Certificate: []byte,
             IsAction:    chan bool,
+            ThrowClient: *rsa.PublicKey,
             Public:      *rsa.PublicKey,
         },
     },
 }
 ```
+
 ### Destination structure:
 ```go
 {

@@ -7,6 +7,12 @@ import (
 	"sync"
 )
 
+type Option uint8
+const (
+	RAW Option = 0
+	CONFIRM Option = 1
+)
+
 /* BEGIN PACKAGE PART */
 type Package struct {
 	Info Info
@@ -110,6 +116,7 @@ type Connect struct {
 	Relation    net.Conn
 	Certificate []byte
 	IsAction    chan bool
+	ThrowClient *rsa.PublicKey
 	Public      *rsa.PublicKey
 }
 

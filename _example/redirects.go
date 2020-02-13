@@ -1,23 +1,27 @@
 package main
 
 /*
-   A -> F
+      A -> F
+==================
    A--------->B
              /|
    /--------- |
+   |          |
    v          v
-   C----------D
+   C<-------->D
+   |          |
    v          v
    \--------->E
               |
               v
               F
+==================
 */
 
 import (
     "encoding/json"
     "fmt"
-    "./gopeer"
+    "github.com/number571/gopeer"
 )
 
 var (
@@ -108,52 +112,49 @@ func main() {
 }
 
 func handleClient(client *gopeer.Client) {
-    dest := gopeer.NewDestination(&gopeer.Destination{
+    dest := &gopeer.Destination{
         Address:     ADDRESS2,
         Certificate: []byte(node2Cert),
         Public:      client2.Keys.Public,
-    })
+    }
 
     client.Connect(dest)
     client3.Connect(dest)
     client4.Connect(dest)
 
-    dest2 := gopeer.NewDestination(&gopeer.Destination{
+    dest2 := &gopeer.Destination{
         Address:     ADDRESS4,
         Certificate: []byte(node4Cert),
         Public:      client4.Keys.Public,
-    })
+    }
 
     client3.Connect(dest2)
 
-    dest3 := gopeer.NewDestination(&gopeer.Destination{
+    dest3 := &gopeer.Destination{
         Address:     ADDRESS3,
         Certificate: []byte(node3Cert),
         Public:      client3.Keys.Public,
-    })
+    }
 
-    dest4 := gopeer.NewDestination(&gopeer.Destination{
+    dest4 := &gopeer.Destination{
         Address:     ADDRESS4,
         Certificate: []byte(node4Cert),
         Public:      client4.Keys.Public,
-    })
+    }
 
     client5.Connect(dest3)
     client5.Connect(dest4)
 
-    dest5 := gopeer.NewDestination(&gopeer.Destination{
+    dest5 := &gopeer.Destination{
         Address:     ADDRESS5,
         Certificate: []byte(node5Cert),
         Public:      client5.Keys.Public,
-    })
+    }
     client6.Connect(dest5)
 
-    destFinal := gopeer.NewDestination(&gopeer.Destination{
-        Address:     ADDRESS2,
-        Certificate: []byte(node2Cert),
-        Public:      client2.Keys.Public,
+    destFinal := &gopeer.Destination{
         Receiver:    client6.Keys.Public,
-    })
+    }
 
     client.Connect(destFinal)
     client.SendTo(destFinal, &gopeer.Package{

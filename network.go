@@ -110,12 +110,12 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 		case settings.OPTION_GET:
 			hash := pack.From.Hashname
 			data := handleGet(client, pack)
-			dest := NewDestination(&Destination{
+			dest := &Destination{
 				Address:     pack.From.Address,
 				Certificate: client.Connections[hash].Certificate,
 				Public:      client.Connections[hash].Public,
 				Receiver:    client.Connections[pack.From.Sender.Hashname].Public,
-			})
+			}
 			client.SendTo(dest, &Package{
 				Head: Head{
 					Title:  title,
@@ -138,6 +138,8 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 // Send package for disconnect.
 // If the user is not responding: delete in local data.
 func (client *Client) Disconnect(dest *Destination) error {
+	dest = client.wrapDest(dest)
+
 	hash := HashPublic(dest.Receiver)
 	_, err := client.SendTo(dest, &Package{
 		Head: Head{
@@ -145,6 +147,7 @@ func (client *Client) Disconnect(dest *Destination) error {
 			Option: settings.OPTION_GET,
 		},
 	})
+
 	client.Connections[hash].Relation.Close()
 	delete(client.Connections, hash)
 	return err
@@ -154,16 +157,22 @@ func (client *Client) Disconnect(dest *Destination) error {
 // Create local data with parameters.
 // After sending GET and receiving SET package, set Connected = true.
 func (client *Client) Connect(dest *Destination) error {
+	dest = client.wrapDest(dest)
+
 	var (
 		session = GenerateRandomBytes(32)
 		hash    = HashPublic(dest.Receiver)
 	)
+	if dest.Public == nil {
+		return client.hiddenConnect(hash, session, dest.Receiver)
+	}
 	client.Connections[hash] = &Connect{
 		connected: false,
 		transfer: transfer{
 			isBlocked: make(chan bool),
 		},
 		Address:     dest.Address,
+		ThrowClient: dest.Public,
 		Public:      dest.Receiver,
 		Certificate: dest.Certificate,
 		IsAction:    make(chan bool),
@@ -183,7 +192,7 @@ func (client *Client) Connect(dest *Destination) error {
 		},
 	})
 	select {
-	case <-client.Connections[hash].IsAction:
+	case <-client.Connections[hash].transfer.isBlocked:
 		client.Connections[hash].connected = true
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 		if client.Connections[hash].Relation != nil {
@@ -194,17 +203,64 @@ func (client *Client) Connect(dest *Destination) error {
 	return err
 }
 
-func NewDestination(dest *Destination) *Destination {
-	if dest.Receiver == nil {
-		dest.Receiver = dest.Public
+func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.PublicKey) error {
+	var (
+		random = GenerateRandomBytes(16)
+		pack = &Package{
+			Head: Head{
+				Title:  settings.TITLE_CONNECT,
+				Option: settings.OPTION_GET,
+			},
+			Body: Body{
+				Data: string(PackJSON(conndata{
+					Certificate: Base64Encode(client.listener.Certificate),
+					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
+					Session:     Base64Encode(EncryptRSA(receiver, session)),
+				})),
+			},
+		}
+	)
+	for _, conn := range client.Connections {
+		client.Connections[hash] = &Connect{
+			connected: false,
+			transfer: transfer{
+				isBlocked: make(chan bool),
+			},
+			Address:     conn.Address,
+			ThrowClient: conn.Public,
+			Public:      receiver,
+			Certificate: conn.Certificate,
+			IsAction:    make(chan bool),
+			Session:     session,
+		}
+		pack.To.Receiver.Hashname = hash
+		pack.To.Hashname = HashPublic(conn.Public)
+		pack.To.Address = conn.Address
+		pack = client.confirmPackage(random, client.appendHeaders(pack))
+		_, err := client.send(RAW, pack)
+		if err != nil {
+			continue
+		}
+		select {
+		case <-client.Connections[hash].transfer.isBlocked:
+			client.Connections[hash].connected = true
+			return nil
+		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			if client.Connections[hash].Relation != nil {
+				client.Connections[hash].Relation.Close()
+			}
+			delete(client.Connections, hash)
+		}
 	}
-	return dest
+	return errors.New("Connection undefined")
 }
 
 // Load file from node.
 // Input = name file in node side.
 // Output = result name file in our side.
 func (client *Client) LoadFile(dest *Destination, input string, output string) error {
+	dest = client.wrapDest(dest)
+
 	hash := HashPublic(dest.Receiver)
 	if !client.InConnections(hash) {
 		return errors.New("client not connected")
@@ -238,17 +294,15 @@ func (client *Client) SetSharing(perm bool, path string) {
 	client.sharing.path = path
 }
 
-// Send by Destination (
-//  Address;
-//  Certificate;
-//  Public key;
-//  Receiver public key;
-// )
+// Send by Destination.
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
+	dest = client.wrapDest(dest)
+
 	if pack.To.Receiver.Hashname == "" {
 		pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
 	}
 	pack.To.Hashname = HashPublic(dest.Public)
 	pack.To.Address = dest.Address
-	return client.send(pack)
+
+	return client.send(CONFIRM, pack)
 }
