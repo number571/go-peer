@@ -148,7 +148,9 @@ func (client *Client) Disconnect(dest *Destination) error {
 		},
 	})
 
-	client.Connections[hash].Relation.Close()
+	if client.Connections[hash].Relation != nil {
+		client.Connections[hash].Relation.Close()
+	}
 	delete(client.Connections, hash)
 	return err
 }
@@ -158,7 +160,6 @@ func (client *Client) Disconnect(dest *Destination) error {
 // After sending GET and receiving SET package, set Connected = true.
 func (client *Client) Connect(dest *Destination) error {
 	dest = client.wrapDest(dest)
-
 	var (
 		session = GenerateRandomBytes(32)
 		hash    = HashPublic(dest.Receiver)

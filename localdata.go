@@ -406,17 +406,18 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 
 	if pack.From.Hashname == pack.From.Sender.Hashname {
 		client.Connections[hash].ThrowClient = public
+		client.Connections[hash].Relation = conn
 	} else {
 		client.Connections[hash].ThrowClient = client.Connections[pack.From.Hashname].Public
 	}
-
-	client.Connections[hash].Relation = conn
 }
 
 // Disconnect by GET option.
 func (client *Client) disconnectGet(pack *Package) {
 	hash := pack.From.Sender.Hashname
-	client.Connections[hash].Relation.Close()
+	if client.Connections[hash].Relation != nil {
+		client.Connections[hash].Relation.Close()
+	}
 	delete(client.Connections, hash)
 }
 
