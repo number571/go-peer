@@ -135,8 +135,11 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
 func (client *Client) SetSharing(perm bool, path string) {}
+func (client *Client) InFriends(hash string) bool {}
 func (client *Client) SetFriends(perm bool, friends ...string) {}
 func (client *Client) GetFriends() []string {}
+func (client *Client) DeleteFriends(friends ...string) {}
+func (client *Client) AppendFriends(friends ...string) {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
 

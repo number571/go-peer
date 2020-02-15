@@ -309,10 +309,8 @@ func (client *Client) isValid(pack *Package) error {
 		return errors.New("sender and receiver is one person")
 	}
 
-	if client.f2fnet.perm {
-		if _, ok := client.f2fnet.friends[pack.From.Sender.Hashname]; !ok {
-			return errors.New("hashname undefined in list of friends")
-		}
+	if client.f2fnet.perm && !client.InFriends(pack.From.Sender.Hashname) {
+		return errors.New("hashname undefined in list of friends")
 	}
 
 	var public *rsa.PublicKey

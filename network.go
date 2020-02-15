@@ -255,13 +255,20 @@ func (client *Client) SetSharing(perm bool, path string) {
 	client.sharing.path = path
 }
 
+func (client *Client) InFriends(hash string) bool {
+	if _, ok := client.f2fnet.friends[hash]; ok {
+		return true
+	}
+	return false
+}
+
 // If perm true, then use f2f network.
 // Set friends for f2f network.
 func (client *Client) SetFriends(perm bool, friends ...string) {
 	client.f2fnet.perm    = perm
 	client.f2fnet.friends = make(map[string]bool)
-	for _, f := range friends {
-		client.f2fnet.friends[f] = true 
+	for _, hash := range friends {
+		client.f2fnet.friends[hash] = true 
 	}
 }
 
@@ -272,6 +279,20 @@ func (client *Client) GetFriends() []string {
 		list = append(list, hash)
 	}
 	return list
+}
+
+// Delete friend from list.
+func (client *Client) DeleteFriends(friends ...string) {
+	for _, hash := range friends {
+		delete(client.f2fnet.friends, hash)
+	}
+}
+
+// Append friends to list.
+func (client *Client) AppendFriends(friends ...string) {
+	for _, hash := range friends {
+		client.f2fnet.friends[hash] = true
+	}
 }
 
 // Send by Destination.
