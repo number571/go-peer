@@ -39,6 +39,9 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 	hash := HashPublic(public)
 	listener.Clients[hash] = &Client{
 		listener: listener,
+		f2fnet: f2fnet{
+			friends: make(map[string]bool),
+		},
 		remember: remember{
 			mapping: make(map[string]uint16),
 			listing: make([]string, settings.REMEMBER),
@@ -141,6 +144,10 @@ func (client *Client) Disconnect(dest *Destination) error {
 	dest = client.wrapDest(dest)
 
 	hash := HashPublic(dest.Receiver)
+	if !client.InConnections(hash) {
+		return errors.New("client not connected")
+	}
+
 	_, err := client.SendTo(dest, &Package{
 		Head: Head{
 			Title:  settings.TITLE_DISCONNECT,
@@ -151,6 +158,7 @@ func (client *Client) Disconnect(dest *Destination) error {
 	if client.Connections[hash].Relation != nil {
 		client.Connections[hash].Relation.Close()
 	}
+
 	delete(client.Connections, hash)
 	return err
 }
@@ -192,6 +200,9 @@ func (client *Client) Connect(dest *Destination) error {
 			})),
 		},
 	})
+	if err != nil {
+		return err
+	}
 	select {
 	case <-client.Connections[hash].transfer.isBlocked:
 		client.Connections[hash].connected = true
@@ -200,60 +211,9 @@ func (client *Client) Connect(dest *Destination) error {
 			client.Connections[hash].Relation.Close()
 		}
 		delete(client.Connections, hash)
+		return errors.New("client not connected")
 	}
-	return err
-}
-
-func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.PublicKey) error {
-	var (
-		random = GenerateRandomBytes(16)
-		pack = &Package{
-			Head: Head{
-				Title:  settings.TITLE_CONNECT,
-				Option: settings.OPTION_GET,
-			},
-			Body: Body{
-				Data: string(PackJSON(conndata{
-					Certificate: Base64Encode(client.listener.Certificate),
-					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
-					Session:     Base64Encode(EncryptRSA(receiver, session)),
-				})),
-			},
-		}
-	)
-	for _, conn := range client.Connections {
-		client.Connections[hash] = &Connect{
-			connected: false,
-			transfer: transfer{
-				isBlocked: make(chan bool),
-			},
-			Address:     conn.Address,
-			ThrowClient: conn.Public,
-			Public:      receiver,
-			Certificate: conn.Certificate,
-			IsAction:    make(chan bool),
-			Session:     session,
-		}
-		pack.To.Receiver.Hashname = hash
-		pack.To.Hashname = HashPublic(conn.Public)
-		pack.To.Address = conn.Address
-		pack = client.confirmPackage(random, client.appendHeaders(pack))
-		_, err := client.send(RAW, pack)
-		if err != nil {
-			continue
-		}
-		select {
-		case <-client.Connections[hash].transfer.isBlocked:
-			client.Connections[hash].connected = true
-			return nil
-		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
-			if client.Connections[hash].Relation != nil {
-				client.Connections[hash].Relation.Close()
-			}
-			delete(client.Connections, hash)
-		}
-	}
-	return errors.New("Connection undefined")
+	return nil
 }
 
 // Load file from node.
@@ -293,6 +253,16 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 func (client *Client) SetSharing(perm bool, path string) {
 	client.sharing.perm = perm
 	client.sharing.path = path
+}
+
+// If perm true, then use f2f network.
+// Set friends for f2f network.
+func (client *Client) SetFriends(perm bool, friends ...string) {
+	client.f2fnet.perm    = perm
+	client.f2fnet.friends = make(map[string]bool)
+	for _, f := range friends {
+		client.f2fnet.friends[f] = true 
+	}
 }
 
 // Send by Destination.

@@ -1,6 +1,7 @@
 package gopeer
 
 import (
+	"time"
 	"bytes"
 	"crypto/rsa"
 	"crypto/tls"
@@ -224,6 +225,59 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 	handle(client, pack)
 }
 
+// Find hidden connection throw nodes.
+func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.PublicKey) error {
+	var (
+		random = GenerateRandomBytes(16)
+		pack = &Package{
+			Head: Head{
+				Title:  settings.TITLE_CONNECT,
+				Option: settings.OPTION_GET,
+			},
+			Body: Body{
+				Data: string(PackJSON(conndata{
+					Certificate: Base64Encode(client.listener.Certificate),
+					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
+					Session:     Base64Encode(EncryptRSA(receiver, session)),
+				})),
+			},
+		}
+	)
+	for _, conn := range client.Connections {
+		client.Connections[hash] = &Connect{
+			connected: false,
+			transfer: transfer{
+				isBlocked: make(chan bool),
+			},
+			Address:     conn.Address,
+			ThrowClient: conn.Public,
+			Public:      receiver,
+			Certificate: conn.Certificate,
+			IsAction:    make(chan bool),
+			Session:     session,
+		}
+		pack.To.Receiver.Hashname = hash
+		pack.To.Hashname = HashPublic(conn.Public)
+		pack.To.Address = conn.Address
+		pack = client.confirmPackage(random, client.appendHeaders(pack))
+		_, err := client.send(RAW, pack)
+		if err != nil {
+			continue
+		}
+		select {
+		case <-client.Connections[hash].transfer.isBlocked:
+			client.Connections[hash].connected = true
+			return nil
+		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			if client.Connections[hash].Relation != nil {
+				client.Connections[hash].Relation.Close()
+			}
+			delete(client.Connections, hash)
+		}
+	}
+	return errors.New("Connection undefined")
+}
+
 // Check package for compliance:
 // 1) pack is not null;
 // 2) pack.Info.Network == NETWORK;
@@ -253,6 +307,12 @@ func (client *Client) isValid(pack *Package) error {
 
 	if pack.From.Sender.Hashname == client.Hashname {
 		return errors.New("sender and receiver is one person")
+	}
+
+	if client.f2fnet.perm {
+		if _, ok := client.f2fnet.friends[pack.From.Sender.Hashname]; !ok {
+			return errors.New("hashname undefined in list of friends")
+		}
 	}
 
 	var public *rsa.PublicKey

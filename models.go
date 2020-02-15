@@ -84,6 +84,7 @@ type Client struct {
 	listener    *Listener
 	sharing     sharing
 	remember    remember
+	f2fnet      f2fnet
 	Hashname    string
 	Address     string
 	Mutex       *sync.Mutex
@@ -96,6 +97,11 @@ type remember struct {
 	index   uint16
 	mapping map[string]uint16
 	listing []string
+}
+
+type f2fnet struct {
+	perm    bool
+	friends map[string]bool
 }
 
 type sharing struct {
