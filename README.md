@@ -115,6 +115,7 @@ func Get(key string) interface{} {}
 ```go
 var OPTION_GET = gopeer.Get("OPTION_GET").(string)
 gopeer.Set(gopeer.SettingsType{
+    "SERVER_NAME": "HIDDEN-LAKE",
     "NETWORK": "[HIDDEN-LAKE]",
     "VERSION": "[1.0.0s]",
     "HMACKEY": "9163571392708145",
@@ -134,6 +135,8 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
 func (client *Client) SetSharing(perm bool, path string) {}
+func (client *Client) SetFriends(perm bool, friends ...string) {}
+func (client *Client) GetFriends() []string {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
 
@@ -227,6 +230,10 @@ func ToBytes(num uint64) []byte {}
             index:   uint16,
             mapping: map[string]uint16,
             listing: []string,
+        },
+        f2fnet: {
+            perm: bool,
+            friends: map[string]bool,
         },
         Hashname: string,
         Address:  string,

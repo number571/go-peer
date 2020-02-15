@@ -265,6 +265,15 @@ func (client *Client) SetFriends(perm bool, friends ...string) {
 	}
 }
 
+// Get list of friends
+func (client *Client) GetFriends() []string {
+	var list []string
+	for hash := range client.f2fnet.friends {
+		list = append(list, hash)
+	}
+	return list
+}
+
 // Send by Destination.
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
 	dest = client.wrapDest(dest)
