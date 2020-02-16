@@ -92,7 +92,10 @@ func (listener *Listener) Close() {
 	if listener == nil {
 		return
 	}
-	listener.listen = nil
+	if listener.listen == nil {
+		return
+	}
+	listener.listen.Close()
 }
 
 // Check if user saved in client data.
@@ -141,6 +144,7 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 // Send package for disconnect.
 // If the user is not responding: delete in local data.
 func (client *Client) Disconnect(dest *Destination) error {
+	var err error
 	dest = client.wrapDest(dest)
 
 	hash := HashPublic(dest.Receiver)
@@ -148,12 +152,14 @@ func (client *Client) Disconnect(dest *Destination) error {
 		return errors.New("client not connected")
 	}
 
-	_, err := client.SendTo(dest, &Package{
-		Head: Head{
-			Title:  settings.TITLE_DISCONNECT,
-			Option: settings.OPTION_GET,
-		},
-	})
+	if client.Connections[hash].Relation == nil {
+		_, err = client.SendTo(dest, &Package{
+			Head: Head{
+				Title:  settings.TITLE_DISCONNECT,
+				Option: settings.OPTION_GET,
+			},
+		})
+	}
 
 	if client.Connections[hash].Relation != nil {
 		client.Connections[hash].Relation.Close()

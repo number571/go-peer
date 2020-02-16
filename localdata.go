@@ -21,6 +21,7 @@ type conndata struct {
 
 // Get connection and check package.
 func runServer(handle func(*Client, *Package), listener *Listener) {
+	defer listener.Close()
 	for {
 		if listener.listen == nil {
 			break
@@ -29,7 +30,7 @@ func runServer(handle func(*Client, *Package), listener *Listener) {
 		if err != nil {
 			break
 		}
-		go server(handle, listener, conn)
+		go serveNode(handle, listener, conn)
 	}
 }
 
@@ -37,12 +38,39 @@ func runServer(handle func(*Client, *Package), listener *Listener) {
 // 1) Check last hash;
 // 2) Connection;
 // 3) Disconnection;
-func server(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
-	defer conn.Close()
+func serveNode(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
+	var (
+		client *Client
+		hash   string
+	)
+	defer func() {
+		if client != nil {
+			delete(client.Connections, hash)
+		}
+		conn.Close()
+	}()
 	for {
 		pack := readPackage(conn)
 		if pack == nil {
-			continue
+			break
+		}
+		received := pack.receive(handle, listener, conn)
+		if hash == "" && received {
+			client = listener.Clients[pack.To.Hashname]
+			hash = pack.From.Hashname
+		}
+	}
+}
+
+func serveClient(handle func(*Client, *Package), listener *Listener, client *Client, hash string, conn net.Conn) {
+	defer func(){
+		delete(client.Connections, hash)
+		conn.Close()
+	}()
+	for {
+		pack := readPackage(conn)
+		if pack == nil {
+			break
 		}
 		pack.receive(handle, listener, conn)
 	}
@@ -64,22 +92,22 @@ func (client *Client) rememberHash(hash string) bool {
 }
 
 // Receive package.
-func (pack *Package) receive(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
+func (pack *Package) receive(handle func(*Client, *Package), listener *Listener, conn net.Conn) bool {
 	if pack.Body.Desc.Redirection >= settings.REDIRECT_QUAN {
-		return
+		return false
 	}
 	client, ok := listener.Clients[pack.To.Hashname]
 	if !ok {
 		if pack.To.Hashname == pack.To.Receiver.Hashname {
-			return
+			return false
 		}
 		client, ok = listener.Clients[pack.To.Receiver.Hashname]
 		if !ok {
-			return
+			return false
 		}
 	}
 	if client.rememberHash(pack.Body.Desc.Hash) {
-		return
+		return false
 	}
 	if pack.To.Hashname != pack.To.Receiver.Hashname {
 		if client.InConnections(pack.To.Receiver.Hashname) {
@@ -98,13 +126,13 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 				client.send(RAW, pack)
 			}
 		}
-		return
+		return false
 	}
 
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
-		// fmt.Println(err)
-		return
+		fmt.Println(err)
+		return false
 	}
 
 	// printJson(pack)
@@ -123,9 +151,13 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 		},
 	)
 
+	if handleIsUsed {
+		return true
+	}
+
 	// Subsequent verification is carried out only if the data has been encrypted.
-	if handleIsUsed || !wasEncrypted {
-		return
+	if !wasEncrypted {
+		return false
 	}
 
 	switch pack.Head.Title {
@@ -133,7 +165,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 		switch pack.Head.Option {
 		case settings.OPTION_GET:
 			client.disconnectGet(pack)
-			return
+			return true
 		}
 	}
 
@@ -219,10 +251,11 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 	)
 
 	if handleIsUsed {
-		return
+		return true
 	}
 
 	handle(client, pack)
+	return true
 }
 
 // Find hidden connection throw nodes.
@@ -378,7 +411,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 	if option == CONFIRM {
 		pack = client.confirmPackage(GenerateRandomBytes(16), pack)
 	}
-	
+
 	var (
 		savedPack = pack
 		hash      = pack.To.Hashname
@@ -399,7 +432,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 			return nil, err
 		}
 		client.Connections[hash].Relation = conn
-		go server(client.listener.handleFunc, client.listener, conn)
+		go serveClient(client.listener.handleFunc, client.listener, client, hash, conn)
 	}
 
 	if option == CONFIRM {
@@ -490,16 +523,14 @@ func readPackage(conn net.Conn) *Package {
 	for {
 		length, err := conn.Read(buffer)
 		if err != nil {
-			break
+			return nil
 		}
 		size += uint32(length)
 		if size >= settings.PACK_SIZE {
 			return nil
 		}
 		message += string(buffer[:length])
-		// if strings.HasSuffix(message, settings.END_BYTES) {
 		if strings.Contains(message, settings.END_BYTES) {
-			// message = strings.TrimSuffix(message, settings.END_BYTES)
 			message = strings.Split(message, settings.END_BYTES)[0]
 			break
 		}
