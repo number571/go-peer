@@ -114,7 +114,6 @@ func main() {
 func handleClient(client *gopeer.Client) {
     dest := &gopeer.Destination{
         Address:     ADDRESS2,
-        Certificate: []byte(node2Cert),
         Public:      client2.Keys.Public,
     }
 
@@ -124,7 +123,6 @@ func handleClient(client *gopeer.Client) {
 
     dest2 := &gopeer.Destination{
         Address:     ADDRESS4,
-        Certificate: []byte(node4Cert),
         Public:      client4.Keys.Public,
     }
 
@@ -132,13 +130,11 @@ func handleClient(client *gopeer.Client) {
 
     dest3 := &gopeer.Destination{
         Address:     ADDRESS3,
-        Certificate: []byte(node3Cert),
         Public:      client3.Keys.Public,
     }
 
     dest4 := &gopeer.Destination{
         Address:     ADDRESS4,
-        Certificate: []byte(node4Cert),
         Public:      client4.Keys.Public,
     }
 
@@ -147,7 +143,6 @@ func handleClient(client *gopeer.Client) {
 
     dest5 := &gopeer.Destination{
         Address:     ADDRESS5,
-        Certificate: []byte(node5Cert),
         Public:      client5.Keys.Public,
     }
     client6.Connect(dest5)
