@@ -152,7 +152,7 @@ func (client *Client) Disconnect(dest *Destination) error {
 		return errors.New("client not connected")
 	}
 
-	if client.Connections[hash].Relation == nil {
+	if client.Connections[hash].relation == nil {
 		_, err = client.SendTo(dest, &Package{
 			Head: Head{
 				Title:  settings.TITLE_DISCONNECT,
@@ -161,8 +161,8 @@ func (client *Client) Disconnect(dest *Destination) error {
 		})
 	}
 
-	if client.Connections[hash].Relation != nil {
-		client.Connections[hash].Relation.Close()
+	if client.Connections[hash].relation != nil {
+		client.Connections[hash].relation.Close()
 	}
 
 	delete(client.Connections, hash)
@@ -213,8 +213,8 @@ func (client *Client) Connect(dest *Destination) error {
 	case <-client.Connections[hash].transfer.isBlocked:
 		client.Connections[hash].connected = true
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
-		if client.Connections[hash].Relation != nil {
-			client.Connections[hash].Relation.Close()
+		if client.Connections[hash].relation != nil {
+			client.Connections[hash].relation.Close()
 		}
 		delete(client.Connections, hash)
 		return errors.New("client not connected")

@@ -116,10 +116,10 @@ type Keys struct {
 
 type Connect struct {
 	connected   bool
+	relation    net.Conn
 	transfer    transfer
 	Address     string
 	Session     []byte
-	Relation    net.Conn
 	Certificate []byte
 	IsAction    chan bool
 	ThrowClient *rsa.PublicKey

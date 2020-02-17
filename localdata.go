@@ -302,8 +302,8 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			client.Connections[hash].connected = true
 			return nil
 		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
-			if client.Connections[hash].Relation != nil {
-				client.Connections[hash].Relation.Close()
+			if client.Connections[hash].relation != nil {
+				client.Connections[hash].relation.Close()
 			}
 			delete(client.Connections, hash)
 		}
@@ -417,7 +417,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 		hash      = pack.To.Hashname
 	)
 
-	if client.Connections[hash].Relation == nil {
+	if client.Connections[hash].relation == nil {
 		ok := client.CertPool.AppendCertsFromPEM([]byte(client.Connections[hash].Certificate))
 		if !ok {
 			return nil, errors.New("failed to parse root certificate")
@@ -431,7 +431,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 			delete(client.Connections, hash)
 			return nil, err
 		}
-		client.Connections[hash].Relation = conn
+		client.Connections[hash].relation = conn
 		go serveClient(client.listener.handleFunc, client.listener, client, hash, conn)
 	}
 
@@ -441,7 +441,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 		}
 	}
 
-	conn := client.Connections[hash].Relation
+	conn := client.Connections[hash].relation
 	_, err := conn.Write(
 		bytes.Join(
 			[][]byte{
@@ -497,7 +497,7 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 
 	if pack.From.Hashname == pack.From.Sender.Hashname {
 		client.Connections[hash].ThrowClient = public
-		client.Connections[hash].Relation = conn
+		client.Connections[hash].relation = conn
 	} else {
 		client.Connections[hash].ThrowClient = client.Connections[pack.From.Hashname].Public
 	}
@@ -506,8 +506,8 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 // Disconnect by GET option.
 func (client *Client) disconnectGet(pack *Package) {
 	hash := pack.From.Sender.Hashname
-	if client.Connections[hash].Relation != nil {
-		client.Connections[hash].Relation.Close()
+	if client.Connections[hash].relation != nil {
+		client.Connections[hash].relation.Close()
 	}
 	delete(client.Connections, hash)
 }
