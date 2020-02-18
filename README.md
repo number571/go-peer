@@ -241,6 +241,7 @@ func ToBytes(num uint64) []byte {}
         Hashname: string,
         Address:  string,
         Mutex:    *sync.Mutex,
+        CertPool: *x509.CertPool,
         Keys: {
             Private: *rsa.PrivateKey,
             Public:  *rsa.PublicKey,
@@ -255,6 +256,7 @@ func ToBytes(num uint64) []byte {}
             Address:     string,
             Session:     []byte,
             Relation:    net.Conn,
+            Certificate: []byte,
             IsAction:    chan bool,
             ThrowClient: *rsa.PublicKey,
             Public:      *rsa.PublicKey,
@@ -267,6 +269,7 @@ func ToBytes(num uint64) []byte {}
 ```go
 {
     Address:     string,
+    Certificate: []byte,
     Public:      *rsa.Public,
     Receiver:    *rsa.Public,
 }

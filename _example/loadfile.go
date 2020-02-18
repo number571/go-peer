@@ -47,11 +47,12 @@ func main() {
 func handleClient(client *gopeer.Client) {
     dest := &gopeer.Destination{
         Address:     ADDRESS2,
+        Certificate: []byte(node2Cert),
         Public:      anotherClient.Keys.Public,
     }
 
     client.Connect(dest)
-    client.LoadFile(dest, "main", "output")
+    client.LoadFile(dest, "archive.zip", "output.zip")
     client.Disconnect(dest)
 }
 

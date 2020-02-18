@@ -3,6 +3,7 @@ package gopeer
 import (
 	"crypto/rsa"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"strings"
 	"sync"
@@ -52,6 +53,7 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 		},
 		Mutex:       new(sync.Mutex),
 		Address:     listener.Address.Ipv4 + listener.Address.Port,
+		CertPool:    x509.NewCertPool(),
 		Connections: make(map[string]*Connect),
 	}
 	return listener.Clients[hash]
@@ -116,6 +118,7 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 			data := handleGet(client, pack)
 			dest := &Destination{
 				Address:     pack.From.Address,
+				Certificate: client.Connections[hash].Certificate,
 				Public:      client.Connections[hash].Public,
 				Receiver:    client.Connections[pack.From.Sender.Hashname].Public,
 			}
@@ -186,6 +189,7 @@ func (client *Client) Connect(dest *Destination) error {
 		Address:     dest.Address,
 		ThrowClient: dest.Public,
 		Public:      dest.Receiver,
+		Certificate: dest.Certificate,
 		IsAction:    make(chan bool),
 		Session:     session,
 	}
@@ -196,6 +200,7 @@ func (client *Client) Connect(dest *Destination) error {
 		},
 		Body: Body{
 			Data: string(PackJSON(conndata{
+				Certificate: Base64Encode(client.listener.Certificate),
 				Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
 				Session:     Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),

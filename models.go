@@ -2,6 +2,7 @@ package gopeer
 
 import (
 	"crypto/rsa"
+	"crypto/x509"
 	"net"
 	"sync"
 )
@@ -87,6 +88,7 @@ type Client struct {
 	Hashname    string
 	Address     string
 	Mutex       *sync.Mutex
+	CertPool    *x509.CertPool
 	Keys        Keys
 	Connections map[string]*Connect
 }
@@ -118,6 +120,7 @@ type Connect struct {
 	transfer    transfer
 	Address     string
 	Session     []byte
+	Certificate []byte
 	IsAction    chan bool
 	ThrowClient *rsa.PublicKey
 	Public      *rsa.PublicKey
@@ -152,6 +155,7 @@ type BodyTransfer struct {
 
 type Destination struct {
 	Address     string
+	Certificate []byte
 	Public      *rsa.PublicKey
 	Receiver    *rsa.PublicKey
 }
