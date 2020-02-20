@@ -56,6 +56,7 @@ type Hidden struct {
 }
 
 type Desc struct {
+	Id          uint64
 	Rand        string
 	Hash        string
 	Sign        string
@@ -63,7 +64,6 @@ type Desc struct {
 	Difficulty  uint8
 	Redirection uint8
 }
-
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
@@ -82,9 +82,9 @@ type Address struct {
 
 type Client struct {
 	listener    *Listener
-	sharing     sharing
 	remember    remember
-	f2fnet      f2fnet
+	F2F         F2F
+	Sharing     Sharing
 	Hashname    string
 	Address     string
 	Mutex       *sync.Mutex
@@ -99,14 +99,14 @@ type remember struct {
 	listing []string
 }
 
-type f2fnet struct {
-	perm    bool
-	friends map[string]bool
+type F2F struct {
+	Perm    bool
+	Friends map[string]bool
 }
 
-type sharing struct {
-	perm bool
-	path string
+type Sharing struct {
+	Perm bool
+	Path string
 }
 
 type Keys struct {
@@ -116,22 +116,27 @@ type Keys struct {
 
 type Connect struct {
 	connected   bool
+	packageId   uint64
 	relation    net.Conn
 	transfer    transfer
+	Chans       Chans
 	Address     string
 	Session     []byte
 	Certificate []byte
-	IsAction    chan bool
 	ThrowClient *rsa.PublicKey
 	Public      *rsa.PublicKey
 }
 
-type transfer struct {
-	inputFile  string
-	outputFile string
-	isBlocked  chan bool
+type Chans struct {
+	Action chan bool
+	action chan bool
 }
 
+type transfer struct {
+	active bool
+	inputFile  string
+	outputFile string
+}
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */

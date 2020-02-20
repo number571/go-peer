@@ -44,7 +44,6 @@ func main() {
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
     client.HandleAction(TITLE, pack,
         func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-
             return
         },
         func(client *gopeer.Client, pack *gopeer.Package) {
@@ -70,6 +69,7 @@ type settingsStruct struct {
     HMACKEY            string
     NETWORK            string
     VERSION            string
+    MAX_ID             uint64
     PACK_SIZE          uint32
     FILE_SIZE          uint32
     BUFF_SIZE          uint32
@@ -95,6 +95,7 @@ type settingsStruct struct {
     HMACKEY:            "PASSWORD",
     NETWORK:            "NETWORK-NAME",
     VERSION:            "Version 1.0.0",
+    MAX_ID:             1 << 32, // 2^32 packages
     PACK_SIZE:          8 << 20, // 8MiB
     FILE_SIZE:          2 << 20, // 2MiB
     BUFF_SIZE:          1 << 20, // 1MiB
@@ -134,12 +135,6 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 func (client *Client) LoadFile(dest *Destination, input string, output string) error {}
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
-func (client *Client) SetSharing(perm bool, path string) {}
-func (client *Client) InFriends(hash string) bool {}
-func (client *Client) SetFriends(perm bool, friends ...string) {}
-func (client *Client) GetFriends() []string {}
-func (client *Client) DeleteFriends(friends ...string) {}
-func (client *Client) AppendFriends(friends ...string) {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
 ```
 
@@ -203,6 +198,7 @@ func ToBytes(num uint64) []byte {}
     Body: {
         Data: string,
         Desc: {
+            Id:          uint64,
             Rand:        string,
             Hash:        string,
             Sign:        string,
@@ -225,33 +221,38 @@ func ToBytes(num uint64) []byte {}
     },
     Clients: map[string]{
         listener: *Listener,
-        sharing: {
-            perm: bool,
-            path: string,
-        },
         remember: {
             index:   uint16,
             mapping: map[string]uint16,
             listing: []string,
         },
-        f2fnet: {
-            perm: bool,
-            friends: map[string]bool,
+        F2F: {
+            Perm:    bool,
+            Friends: map[string]bool,
+        },
+        Sharing: {
+            Perm: bool,
+            Path: string,
+        },
+        Keys: {
+            Private: *rsa.PrivateKey,
+            Public:  *rsa.PublicKey,
         },
         Hashname: string,
         Address:  string,
         Mutex:    *sync.Mutex,
         CertPool: *x509.CertPool,
-        Keys: {
-            Private: *rsa.PrivateKey,
-            Public:  *rsa.PublicKey,
-        },
         Connections: map[string]{
             connected:   bool,
+            packageId:   uint64,
             transfer: {
+                active:     bool,
                 inputFile:  string
                 outputFile: string,
-                isBlocked:  chan bool,
+            },
+            Chans: {
+                Action:  chan bool,
+                action:  chan bool,
             },
             Address:     string,
             Session:     []byte,

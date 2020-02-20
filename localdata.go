@@ -135,8 +135,6 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 		return false
 	}
 
-	// printJson(pack)
-
 	handleIsUsed := client.HandleAction(settings.TITLE_CONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
 			client.connectGet(pack, conn)
@@ -147,7 +145,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 			if !client.InConnections(hash) {
 				return
 			}
-			client.Connections[hash].transfer.isBlocked <- true
+			client.Connections[hash].Chans.action <- true
 		},
 	)
 
@@ -177,7 +175,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 				},
 			}))
 
-			if !client.sharing.perm {
+			if !client.Sharing.Perm {
 				return nullpack
 			}
 
@@ -189,7 +187,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 			}
 
 			name := strings.Replace(read.Head.Name, "..", "", -1)
-			data := readFile(client.sharing.path+name, read.Head.Id)
+			data := readFile(client.Sharing.Path+name, read.Head.Id)
 
 			return string(PackJSON(FileTransfer{
 				Head: HeadTransfer{
@@ -208,20 +206,24 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 			UnpackJSON([]byte(pack.Body.Data), read)
 
 			hash := pack.From.Sender.Hashname
+			if !client.Connections[hash].transfer.active {
+				return
+			}
+
 			if read.Head.IsNull {
-				client.Connections[hash].transfer.isBlocked <- false
+				client.Connections[hash].Chans.action <- false
 				return
 			}
 
 			name := client.Connections[hash].transfer.outputFile
 			if read.Head.Id == 0 && fileIsExist(name) {
-				client.Connections[hash].transfer.isBlocked <- false
+				client.Connections[hash].Chans.action <- false
 				return
 			}
 
 			data := read.Body.Data
 			if !bytes.Equal(read.Body.Hash, HashSum(data)) {
-				client.Connections[hash].transfer.isBlocked <- false
+				client.Connections[hash].Chans.action <- false
 				return
 			}
 
@@ -279,14 +281,14 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 	for _, conn := range client.Connections {
 		client.Connections[hash] = &Connect{
 			connected: false,
-			transfer: transfer{
-				isBlocked: make(chan bool),
+			Chans: Chans{
+				Action: make(chan bool),
+				action: make(chan bool),
 			},
 			Address:     conn.Address,
 			ThrowClient: conn.Public,
 			Public:      receiver,
 			Certificate: conn.Certificate,
-			IsAction:    make(chan bool),
 			Session:     session,
 		}
 		pack.To.Receiver.Hashname = hash
@@ -298,7 +300,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			continue
 		}
 		select {
-		case <-client.Connections[hash].transfer.isBlocked:
+		case <-client.Connections[hash].Chans.action:
 			client.Connections[hash].connected = true
 			return nil
 		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
@@ -342,7 +344,7 @@ func (client *Client) isValid(pack *Package) error {
 		return errors.New("sender and receiver is one person")
 	}
 
-	if client.f2fnet.perm && !client.InFriends(pack.From.Sender.Hashname) {
+	if _, ok := client.F2F.Friends[pack.From.Sender.Hashname]; client.F2F.Perm && !ok {
 		return errors.New("hashname undefined in list of friends")
 	}
 
@@ -372,11 +374,13 @@ func (client *Client) isValid(pack *Package) error {
 			[]byte(pack.Head.Title),
 			[]byte(pack.Head.Option),
 			[]byte(pack.Body.Data),
+			ToBytes(pack.Body.Desc.Id),
 			[]byte(pack.Body.Desc.Rand),
 		},
 		[]byte{},
 	))
 	if Base64Encode(hash) != pack.Body.Desc.Hash {
+		printJson(pack)
 		return errors.New("pack hash invalid")
 	}
 
@@ -386,6 +390,21 @@ func (client *Client) isValid(pack *Package) error {
 
 	if !NonceIsValid(Base64Decode(pack.Body.Desc.Hash), uint(pack.Body.Desc.Difficulty), pack.Body.Desc.Nonce) {
 		return errors.New("pack nonce is invalid")
+	}
+
+	if client.InConnections(pack.From.Sender.Hashname) {
+		if pack.Head.Title == settings.TITLE_FILETRANSFER {
+			client.Connections[pack.From.Sender.Hashname].packageId++
+			return nil
+		}
+		if client.Connections[pack.From.Sender.Hashname].packageId >= settings.MAX_ID && pack.Head.Option == settings.OPTION_SET {
+			client.Connect(client.Destination(pack.From.Sender.Hashname))
+			return nil
+		}
+		if pack.Head.Title != settings.TITLE_CONNECT && pack.Body.Desc.Id < client.Connections[pack.From.Sender.Hashname].packageId {
+			return errors.New("package id < saved package id")
+		}
+		client.Connections[pack.From.Sender.Hashname].packageId++
 	}
 
 	return nil
@@ -485,13 +504,13 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 	hash := pack.From.Sender.Hashname
 	client.Connections[hash] = &Connect{
 		connected: true,
-		transfer: transfer{
-			isBlocked: make(chan bool),
+		Chans: Chans{
+			Action: make(chan bool),
+			action: make(chan bool),
 		},
 		Address:     pack.From.Address,
 		Public:      public,
 		Certificate: Base64Decode(data.Certificate),
-		IsAction:    make(chan bool),
 		Session:     DecryptRSA(client.Keys.Private, Base64Decode(data.Session)),
 	}
 
@@ -590,14 +609,15 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 			Address:  pack.To.Address,
 		},
 		Head: Head{
-			// Title:  pack.Head.Title,
-			// Option: pack.Head.Option,
-			Title:  Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
-			Option: Base64Encode(EncryptAES(session, []byte(pack.Head.Option))),
+			Title:  pack.Head.Title,
+			Option: pack.Head.Option,
+			// Title:  Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
+			// Option: Base64Encode(EncryptAES(session, []byte(pack.Head.Option))),
 		},
 		Body: Body{
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
 			Desc: Desc{
+				Id:          pack.Body.Desc.Id,
 				Rand:        Base64Encode(EncryptAES(session, []byte(pack.Body.Desc.Rand))),
 				Hash:        pack.Body.Desc.Hash,
 				Sign:        pack.Body.Desc.Sign,
@@ -642,14 +662,15 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 			Address:  pack.To.Address,
 		},
 		Head: Head{
-			// Title:  pack.Head.Title,
-			// Option: pack.Head.Option,
-			Title:  string(DecryptAES(session, Base64Decode(pack.Head.Title))),
-			Option: string(DecryptAES(session, Base64Decode(pack.Head.Option))),
+			Title:  pack.Head.Title,
+			Option: pack.Head.Option,
+			// Title:  string(DecryptAES(session, Base64Decode(pack.Head.Title))),
+			// Option: string(DecryptAES(session, Base64Decode(pack.Head.Option))),
 		},
 		Body: Body{
 			Data: string(DecryptAES(session, Base64Decode(pack.Body.Data))),
 			Desc: Desc{
+				Id:          pack.Body.Desc.Id,
 				Rand:        string(DecryptAES(session, Base64Decode(pack.Body.Desc.Rand))),
 				Hash:        pack.Body.Desc.Hash,
 				Sign:        pack.Body.Desc.Sign,
@@ -664,6 +685,7 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 // Get previous hash, generate random bytes, calculate new hash, sign and nonce for package.
 // Save current hash in local storage.
 func (client *Client) confirmPackage(random []byte, pack *Package) *Package {
+	pack.Body.Desc.Id = client.Connections[pack.To.Receiver.Hashname].packageId
 	pack.Body.Desc.Rand = Base64Encode(random)
 	pack.Body.Desc.Difficulty = settings.DIFFICULTY
 	hash := HashSum(bytes.Join(
@@ -675,6 +697,7 @@ func (client *Client) confirmPackage(random []byte, pack *Package) *Package {
 			[]byte(pack.Head.Title),
 			[]byte(pack.Head.Option),
 			[]byte(pack.Body.Data),
+			ToBytes(pack.Body.Desc.Id),
 			[]byte(pack.Body.Desc.Rand),
 		},
 		[]byte{},

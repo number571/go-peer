@@ -39,12 +39,12 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 	hash := HashPublic(public)
 	listener.Clients[hash] = &Client{
 		listener: listener,
-		f2fnet: f2fnet{
-			friends: make(map[string]bool),
-		},
 		remember: remember{
 			mapping: make(map[string]uint16),
 			listing: make([]string, settings.REMEMBER),
+		},
+		F2F: F2F{
+			Friends: make(map[string]bool),
 		},
 		Hashname: hash,
 		Keys: Keys{
@@ -98,6 +98,18 @@ func (listener *Listener) Close() {
 	listener.listen.Close()
 }
 
+func (client *Client) Destination(hash string) *Destination {
+	if !client.InConnections(hash) {
+		return nil
+	}
+	return &Destination{
+		Address:     client.Connections[hash].Address,
+		Certificate: client.Connections[hash].Certificate,
+		Public:      client.Connections[hash].ThrowClient,
+		Receiver:    client.Connections[hash].Public,
+	}
+}
+
 // Check if user saved in client data.
 func (client *Client) InConnections(hash string) bool {
 	if _, ok := client.Connections[hash]; ok {
@@ -114,15 +126,9 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 	case title:
 		switch pack.Head.Option {
 		case settings.OPTION_GET:
-			hash := pack.From.Hashname
 			data := handleGet(client, pack)
-			dest := &Destination{
-				Address:     pack.From.Address,
-				Certificate: client.Connections[hash].Certificate,
-				Public:      client.Connections[hash].Public,
-				Receiver:    client.Connections[pack.From.Sender.Hashname].Public,
-			}
-			client.SendTo(dest, &Package{
+			hash := pack.From.Sender.Hashname
+			client.SendTo(client.Destination(hash), &Package{
 				Head: Head{
 					Title:  title,
 					Option: settings.OPTION_SET,
@@ -183,15 +189,15 @@ func (client *Client) Connect(dest *Destination) error {
 	}
 	client.Connections[hash] = &Connect{
 		connected: false,
-		transfer: transfer{
-			isBlocked: make(chan bool),
-		},
 		Address:     dest.Address,
 		ThrowClient: dest.Public,
 		Public:      dest.Receiver,
 		Certificate: dest.Certificate,
-		IsAction:    make(chan bool),
 		Session:     session,
+		Chans: Chans{
+			Action: make(chan bool),
+			action: make(chan bool),
+		},
 	}
 	_, err := client.SendTo(dest, &Package{
 		Head: Head{
@@ -210,7 +216,7 @@ func (client *Client) Connect(dest *Destination) error {
 		return err
 	}
 	select {
-	case <-client.Connections[hash].transfer.isBlocked:
+	case <-client.Connections[hash].Chans.action:
 		client.Connections[hash].connected = true
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 		if client.Connections[hash].relation != nil {
@@ -233,6 +239,7 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		return errors.New("client not connected")
 	}
 
+	client.Connections[hash].transfer.active = true
 	client.Connections[hash].transfer.inputFile = input
 	client.Connections[hash].transfer.outputFile = output
 
@@ -251,54 +258,9 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		},
 	})
 
-	<-client.Connections[hash].transfer.isBlocked
+	<-client.Connections[hash].Chans.action
+	client.Connections[hash].transfer.active = false
 	return nil
-}
-
-// Set permissions for sharing files.
-func (client *Client) SetSharing(perm bool, path string) {
-	client.sharing.perm = perm
-	client.sharing.path = path
-}
-
-func (client *Client) InFriends(hash string) bool {
-	if _, ok := client.f2fnet.friends[hash]; ok {
-		return true
-	}
-	return false
-}
-
-// If perm true, then use f2f network.
-// Set friends for f2f network.
-func (client *Client) SetFriends(perm bool, friends ...string) {
-	client.f2fnet.perm    = perm
-	client.f2fnet.friends = make(map[string]bool)
-	for _, hash := range friends {
-		client.f2fnet.friends[hash] = true 
-	}
-}
-
-// Get list of friends
-func (client *Client) GetFriends() []string {
-	var list []string
-	for hash := range client.f2fnet.friends {
-		list = append(list, hash)
-	}
-	return list
-}
-
-// Delete friend from list.
-func (client *Client) DeleteFriends(friends ...string) {
-	for _, hash := range friends {
-		delete(client.f2fnet.friends, hash)
-	}
-}
-
-// Append friends to list.
-func (client *Client) AppendFriends(friends ...string) {
-	for _, hash := range friends {
-		client.f2fnet.friends[hash] = true
-	}
 }
 
 // Send by Destination.

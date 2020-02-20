@@ -14,6 +14,7 @@ type settingsStruct struct {
 	HMACKEY            string
 	NETWORK            string
 	VERSION            string
+	MAX_ID             uint64
 	PACK_SIZE          uint32
 	FILE_SIZE          uint32
 	BUFF_SIZE          uint32
@@ -39,6 +40,7 @@ func defaultSettings() settingsStruct {
 		HMACKEY:            "PASSWORD",
 		NETWORK:            "NETWORK-NAME",
 		VERSION:            "Version 1.0.0",
+		MAX_ID:             5, // 2^32 packages
 		PACK_SIZE:          8 << 20, // 8MiB
 		FILE_SIZE:          2 << 20, // 2MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
@@ -96,6 +98,8 @@ func Get(key string) interface{} {
 		return settings.TEMPLATE
 	case "HMACKEY":
 		return settings.HMACKEY
+	case "MAX_ID":
+		return settings.MAX_ID
 	case "PACK_SIZE":
 		return settings.PACK_SIZE
 	case "FILE_SIZE":
@@ -151,6 +155,8 @@ func stringSettings(name string, data interface{}) uint8 {
 func intSettings(name string, data interface{}) uint8 {
 	result := data.(int)
 	switch name {
+	case "MAX_ID":
+		settings.MAX_ID = uint64(result)
 	case "PACK_SIZE":
 		settings.PACK_SIZE = uint32(result)
 	case "FILE_SIZE":
