@@ -693,7 +693,7 @@ func (client *Client) confirmPackage(random []byte, pack *Package) *Package {
 	))
 	pack.Body.Desc.Hash = Base64Encode(hash)
 	pack.Body.Desc.Sign = Base64Encode(Sign(client.Keys.Private, hash))
-	pack.Body.Desc.Nonce = ProofOfWork(hash, uint(pack.Body.Desc.Difficulty))
+	pack.Body.Desc.Nonce = ProofOfWork(hash, pack.Body.Desc.Difficulty)
 	return pack
 }
 

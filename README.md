@@ -157,7 +157,7 @@ func EncryptAES(key, data []byte) []byte {}
 func DecryptAES(key, data []byte) []byte {}
 func StringPublic(pub *rsa.PublicKey) string {}
 func StringPrivate(priv *rsa.PrivateKey) string {}
-func ProofOfWork(blockHash []byte, difficulty uint) uint64 {}
+func ProofOfWork(blockHash []byte, difficulty uint8) uint64 {}
 func NonceIsValid(blockHash []byte, difficulty uint, nonce uint64) bool {}
 ```
 

@@ -289,14 +289,14 @@ func UnpackJSON(jsonData []byte, data interface{}) interface{} {
 }
 
 // POW for check hash package by Nonce.
-func ProofOfWork(blockHash []byte, difficulty uint) uint64 {
+func ProofOfWork(blockHash []byte, difficulty uint8) uint64 {
 	var (
 		Target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 		nonce   uint64
 		hash    []byte
 	)
-	Target.Lsh(Target, 256-difficulty)
+	Target.Lsh(Target, 256-uint(difficulty))
 	for nonce < math.MaxUint64 {
 		hash = HashSum(bytes.Join([][]byte{
 			ToBytes(nonce),
