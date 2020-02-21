@@ -14,6 +14,7 @@ import (
 )
 
 type conndata struct {
+	Certificate string
 	Public      string
 	Session     string
 }
@@ -130,7 +131,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
-		// fmt.Println(err)
+		fmt.Println(err)
 		return false
 	}
 
@@ -228,12 +229,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 
 			writeFile(name, read.Body.Data)
 
-			dest := &Destination{
-				Address:     client.Connections[pack.From.Hashname].Address,
-				Public:      client.Connections[pack.From.Hashname].Public,
-				Receiver:    client.Connections[hash].Public,
-			}
-			client.SendTo(dest, &Package{
+			client.SendTo(client.Destination(hash), &Package{
 				Head: Head{
 					Title:  settings.TITLE_FILETRANSFER,
 					Option: settings.OPTION_GET,
@@ -269,6 +265,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			},
 			Body: Body{
 				Data: string(PackJSON(conndata{
+					Certificate: Base64Encode(client.listener.Certificate),
 					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
 					Session:     Base64Encode(EncryptRSA(receiver, session)),
 				})),
@@ -285,6 +282,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			Address:     conn.Address,
 			ThrowClient: conn.Public,
 			Public:      receiver,
+			Certificate: conn.Certificate,
 			Session:     session,
 		}
 		pack.To.Receiver.Hashname = hash
@@ -390,16 +388,25 @@ func (client *Client) isValid(pack *Package) error {
 
 	if client.InConnections(pack.From.Sender.Hashname) {
 		if pack.Head.Title == settings.TITLE_FILETRANSFER {
-			client.Connections[pack.From.Sender.Hashname].packageId++
-			return nil
+			goto pass
 		}
 		if client.Connections[pack.From.Sender.Hashname].packageId >= settings.MAX_ID && pack.Head.Option == settings.OPTION_SET {
 			client.Connect(client.Destination(pack.From.Sender.Hashname))
 			return nil
 		}
-		if pack.Head.Title != settings.TITLE_CONNECT && pack.Body.Desc.Id < client.Connections[pack.From.Sender.Hashname].packageId {
-			return errors.New("package id < saved package id")
+pass:
+		if pack.Head.Title != settings.TITLE_CONNECT {
+			if pack.Body.Desc.Id < client.Connections[pack.From.Sender.Hashname].packageId {
+				return errors.New("package id < saved package id")
+			}
+			if pack.Head.Option == settings.OPTION_GET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId + 1 {
+				return errors.New("option get: package id /= saved package id + 1")
+			}
+			if pack.Head.Option == settings.OPTION_SET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId {
+				return errors.New("option set: package id /= saved package id")
+			}
 		}
+		
 		client.Connections[pack.From.Sender.Hashname].packageId++
 	}
 
@@ -433,8 +440,13 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 	)
 
 	if client.Connections[hash].relation == nil {
+		ok := client.CertPool.AppendCertsFromPEM([]byte(client.Connections[hash].Certificate))
+		if !ok {
+			return nil, errors.New("failed to parse root certificate")
+		}
 		config := &tls.Config{
-			InsecureSkipVerify: true,
+			ServerName: settings.SERVER_NAME,
+			RootCAs:    client.CertPool,
 		}
 		conn, err := tls.Dial("tcp", pack.To.Address, config)
 		if err != nil {
@@ -479,6 +491,7 @@ func (client *Client) wrapDest(dest *Destination) *Destination {
 	}
 	hash := HashPublic(dest.Receiver)
 	if dest.Public == nil && client.InConnections(hash) {
+		dest.Certificate = client.Connections[hash].Certificate
 		dest.Public      = client.Connections[hash].ThrowClient
 		dest.Address     = client.Connections[hash].Address
 	}
@@ -500,6 +513,7 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 		},
 		Address:     pack.From.Address,
 		Public:      public,
+		Certificate: Base64Decode(data.Certificate),
 		Session:     DecryptRSA(client.Keys.Private, Base64Decode(data.Session)),
 	}
 
@@ -746,6 +760,7 @@ func writeFile(filename string, data []byte) error {
 
 func readFile(filename string, id uint32) []byte {
 	const BEGGINING = 0
+	var FILE_SIZE = settings.PACK_SIZE / 4
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -753,12 +768,12 @@ func readFile(filename string, id uint32) []byte {
 	}
 	defer file.Close()
 
-	_, err = file.Seek(int64(id*settings.FILE_SIZE), BEGGINING)
+	_, err = file.Seek(int64(id * FILE_SIZE), BEGGINING)
 	if err != nil {
 		return nil
 	}
 
-	var buffer = make([]byte, settings.FILE_SIZE)
+	var buffer = make([]byte, FILE_SIZE)
 	length, err := file.Read(buffer)
 	if err != nil {
 		return nil

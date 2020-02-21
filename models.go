@@ -122,6 +122,7 @@ type Connect struct {
 	Chans       Chans
 	Address     string
 	Session     []byte
+	Certificate []byte
 	ThrowClient *rsa.PublicKey
 	Public      *rsa.PublicKey
 }
@@ -159,6 +160,7 @@ type BodyTransfer struct {
 
 type Destination struct {
 	Address     string
+	Certificate []byte
 	Public      *rsa.PublicKey
 	Receiver    *rsa.PublicKey
 }

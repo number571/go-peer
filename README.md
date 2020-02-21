@@ -11,7 +11,7 @@
 * File transfer supported;
 * End to end encryption;
 2. Encryption:
-* Protocol: TLS;
+* Protocol: TLS / Package;
 * Symmetric algorithm: AES256-CBC;
 * Asymmetric algorithm: RSA-OAEP;
 * Hash function: HMAC(SHA256);
@@ -30,15 +30,14 @@ const (
 )
 
 func main() {
-    key, cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 2048)
+    key, cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
     listener := gopeer.NewListener(ADDRESS)
     listener.Open(&gopeer.Certificate{
         Cert: []byte(cert),
         Key:  []byte(key),
     }).Run(handleServer)
     defer listener.Close()
-
-    // listener.NewClient(gopeer.GeneratePrivate(2048))
+    // ...
 }
 
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
@@ -47,10 +46,11 @@ func handleServer(client *gopeer.Client, pack *gopeer.Package) {
             return
         },
         func(client *gopeer.Client, pack *gopeer.Package) {
-
         },
     )
+    // ...
 }
+
 ```
 
 ### Settings:
@@ -219,6 +219,7 @@ func ToBytes(num uint64) []byte {}
         Ipv4: string,
         Port: string,
     },
+    Certificate: []byte,
     Clients: map[string]{
         listener: *Listener,
         remember: {

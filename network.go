@@ -104,6 +104,7 @@ func (client *Client) Destination(hash string) *Destination {
 	}
 	return &Destination{
 		Address:     client.Connections[hash].Address,
+		Certificate: client.Connections[hash].Certificate,
 		Public:      client.Connections[hash].ThrowClient,
 		Receiver:    client.Connections[hash].Public,
 	}
@@ -191,6 +192,7 @@ func (client *Client) Connect(dest *Destination) error {
 		Address:     dest.Address,
 		ThrowClient: dest.Public,
 		Public:      dest.Receiver,
+		Certificate: dest.Certificate,
 		Session:     session,
 		Chans: Chans{
 			Action: make(chan bool),
