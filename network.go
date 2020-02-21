@@ -104,7 +104,6 @@ func (client *Client) Destination(hash string) *Destination {
 	}
 	return &Destination{
 		Address:     client.Connections[hash].Address,
-		Certificate: client.Connections[hash].Certificate,
 		Public:      client.Connections[hash].ThrowClient,
 		Receiver:    client.Connections[hash].Public,
 	}
@@ -192,7 +191,6 @@ func (client *Client) Connect(dest *Destination) error {
 		Address:     dest.Address,
 		ThrowClient: dest.Public,
 		Public:      dest.Receiver,
-		Certificate: dest.Certificate,
 		Session:     session,
 		Chans: Chans{
 			Action: make(chan bool),
@@ -206,7 +204,6 @@ func (client *Client) Connect(dest *Destination) error {
 		},
 		Body: Body{
 			Data: string(PackJSON(conndata{
-				Certificate: Base64Encode(client.listener.Certificate),
 				Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
 				Session:     Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),

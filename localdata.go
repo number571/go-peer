@@ -14,7 +14,6 @@ import (
 )
 
 type conndata struct {
-	Certificate string
 	Public      string
 	Session     string
 }
@@ -231,7 +230,6 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 
 			dest := &Destination{
 				Address:     client.Connections[pack.From.Hashname].Address,
-				Certificate: client.Connections[pack.From.Hashname].Certificate,
 				Public:      client.Connections[pack.From.Hashname].Public,
 				Receiver:    client.Connections[hash].Public,
 			}
@@ -271,7 +269,6 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			},
 			Body: Body{
 				Data: string(PackJSON(conndata{
-					Certificate: Base64Encode(client.listener.Certificate),
 					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
 					Session:     Base64Encode(EncryptRSA(receiver, session)),
 				})),
@@ -288,7 +285,6 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			Address:     conn.Address,
 			ThrowClient: conn.Public,
 			Public:      receiver,
-			Certificate: conn.Certificate,
 			Session:     session,
 		}
 		pack.To.Receiver.Hashname = hash
@@ -437,13 +433,8 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 	)
 
 	if client.Connections[hash].relation == nil {
-		ok := client.CertPool.AppendCertsFromPEM([]byte(client.Connections[hash].Certificate))
-		if !ok {
-			return nil, errors.New("failed to parse root certificate")
-		}
 		config := &tls.Config{
-			ServerName: settings.SERVER_NAME,
-			RootCAs:    client.CertPool,
+			InsecureSkipVerify: true,
 		}
 		conn, err := tls.Dial("tcp", pack.To.Address, config)
 		if err != nil {
@@ -488,7 +479,6 @@ func (client *Client) wrapDest(dest *Destination) *Destination {
 	}
 	hash := HashPublic(dest.Receiver)
 	if dest.Public == nil && client.InConnections(hash) {
-		dest.Certificate = client.Connections[hash].Certificate
 		dest.Public      = client.Connections[hash].ThrowClient
 		dest.Address     = client.Connections[hash].Address
 	}
@@ -510,7 +500,6 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 		},
 		Address:     pack.From.Address,
 		Public:      public,
-		Certificate: Base64Decode(data.Certificate),
 		Session:     DecryptRSA(client.Keys.Private, Base64Decode(data.Session)),
 	}
 
@@ -609,10 +598,10 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 			Address:  pack.To.Address,
 		},
 		Head: Head{
-			Title:  pack.Head.Title,
-			Option: pack.Head.Option,
-			// Title:  Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
-			// Option: Base64Encode(EncryptAES(session, []byte(pack.Head.Option))),
+			// Title:  pack.Head.Title,
+			// Option: pack.Head.Option,
+			Title:  Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
+			Option: Base64Encode(EncryptAES(session, []byte(pack.Head.Option))),
 		},
 		Body: Body{
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
@@ -662,10 +651,10 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 			Address:  pack.To.Address,
 		},
 		Head: Head{
-			Title:  pack.Head.Title,
-			Option: pack.Head.Option,
-			// Title:  string(DecryptAES(session, Base64Decode(pack.Head.Title))),
-			// Option: string(DecryptAES(session, Base64Decode(pack.Head.Option))),
+			// Title:  pack.Head.Title,
+			// Option: pack.Head.Option,
+			Title:  string(DecryptAES(session, Base64Decode(pack.Head.Title))),
+			Option: string(DecryptAES(session, Base64Decode(pack.Head.Option))),
 		},
 		Body: Body{
 			Data: string(DecryptAES(session, Base64Decode(pack.Body.Data))),
