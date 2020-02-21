@@ -259,7 +259,6 @@ func ToBytes(num uint64) []byte {}
             Session:     []byte,
             Relation:    net.Conn,
             Certificate: []byte,
-            IsAction:    chan bool,
             ThrowClient: *rsa.PublicKey,
             Public:      *rsa.PublicKey,
         },
