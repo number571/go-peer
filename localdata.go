@@ -20,7 +20,7 @@ type conndata struct {
 }
 
 // Get connection and check package.
-func runServer(handle func(*Client, *Package), listener *Listener) {
+func runServer(listener *Listener, handle func(*Client, *Package)) {
 	defer listener.Close()
 	for {
 		if listener.listen == nil {
@@ -30,7 +30,7 @@ func runServer(handle func(*Client, *Package), listener *Listener) {
 		if err != nil {
 			break
 		}
-		go serveNode(handle, listener, conn)
+		go serveNode(listener, handle, conn)
 	}
 }
 
@@ -38,7 +38,7 @@ func runServer(handle func(*Client, *Package), listener *Listener) {
 // 1) Check last hash;
 // 2) Connection;
 // 3) Disconnection;
-func serveNode(handle func(*Client, *Package), listener *Listener, conn net.Conn) {
+func serveNode(listener *Listener, handle func(*Client, *Package), conn net.Conn) {
 	var (
 		client *Client
 		hash   string
@@ -54,7 +54,7 @@ func serveNode(handle func(*Client, *Package), listener *Listener, conn net.Conn
 		if pack == nil {
 			break
 		}
-		received := pack.receive(handle, listener, conn)
+		received := pack.receive(listener, handle, conn)
 		if hash == "" && received {
 			client = listener.Clients[pack.To.Hashname]
 			hash = pack.From.Hashname
@@ -62,7 +62,7 @@ func serveNode(handle func(*Client, *Package), listener *Listener, conn net.Conn
 	}
 }
 
-func serveClient(handle func(*Client, *Package), listener *Listener, client *Client, hash string, conn net.Conn) {
+func serveClient(listener *Listener, client *Client, handle func(*Client, *Package), hash string, conn net.Conn) {
 	defer func(){
 		delete(client.Connections, hash)
 		conn.Close()
@@ -72,7 +72,7 @@ func serveClient(handle func(*Client, *Package), listener *Listener, client *Cli
 		if pack == nil {
 			break
 		}
-		pack.receive(handle, listener, conn)
+		pack.receive(listener, handle, conn)
 	}
 }
 
@@ -92,7 +92,7 @@ func (client *Client) rememberHash(hash string) bool {
 }
 
 // Receive package.
-func (pack *Package) receive(handle func(*Client, *Package), listener *Listener, conn net.Conn) bool {
+func (pack *Package) receive(listener *Listener, handle func(*Client, *Package), conn net.Conn) bool {
 	if pack.Body.Desc.Redirection >= settings.REDIRECT_QUAN {
 		return false
 	}
@@ -109,7 +109,7 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 	if client.rememberHash(pack.Body.Desc.Hash) {
 		return false
 	}
-	if pack.To.Hashname != pack.To.Receiver.Hashname {
+	if pack.To.Hashname != pack.To.Receiver.Hashname && pack.To.Receiver.Hashname != client.Hashname {
 		if client.InConnections(pack.To.Receiver.Hashname) {
 			hash := pack.To.Receiver.Hashname
 			pack.To.Hashname = hash
@@ -117,12 +117,12 @@ func (pack *Package) receive(handle func(*Client, *Package), listener *Listener,
 			client.send(RAW, pack)
 		} else {
 			pack.Body.Desc.Redirection++
-			for hash := range client.Connections {
-				if hash == pack.From.Sender.Hashname {
+			for hash, cli := range client.Connections {
+				if hash == pack.From.Sender.Hashname || hash == pack.From.Hashname {
 					continue
 				}
 				pack.To.Hashname = hash
-				pack.To.Address = client.Connections[hash].Address
+				pack.To.Address = cli.Address
 				client.send(RAW, pack)
 			}
 		}
@@ -454,7 +454,7 @@ func (client *Client) send(option Option, pack *Package) (*Package, error) {
 			return nil, err
 		}
 		client.Connections[hash].relation = conn
-		go serveClient(client.listener.handleFunc, client.listener, client, hash, conn)
+		go serveClient(client.listener, client, client.listener.handleFunc, hash, conn)
 	}
 
 	if option == CONFIRM {

@@ -78,12 +78,12 @@ func (listener *Listener) Open(c *Certificate) *Listener {
 }
 
 // Run handle server for listening packages.
-func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {
-	listener.handleFunc = handleServer
+func (listener *Listener) Run(handle func(*Client, *Package)) *Listener {
+	listener.handleFunc = handle
 	if listener.Address.Ipv4+listener.Address.Port == settings.IS_CLIENT {
 		return listener
 	}
-	go runServer(handleServer, listener)
+	go runServer(listener, handle)
 	return listener
 }
 
@@ -122,28 +122,28 @@ func (client *Client) InConnections(hash string) bool {
 // GET: accept package and send response;
 // SET: accept package;
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {
-	switch pack.Head.Title {
-	case title:
-		switch pack.Head.Option {
-		case settings.OPTION_GET:
-			data := handleGet(client, pack)
-			hash := pack.From.Sender.Hashname
-			client.SendTo(client.Destination(hash), &Package{
-				Head: Head{
-					Title:  title,
-					Option: settings.OPTION_SET,
-				},
-				Body: Body{
-					Data: data,
-				},
-			})
-			return true
-		case settings.OPTION_SET:
-			handleSet(client, pack)
-			return true
-		}
+	if pack.Head.Title != title {
+		return false
 	}
-	return false
+	switch pack.Head.Option {
+	case settings.OPTION_GET:
+		data := handleGet(client, pack)
+		hash := pack.From.Sender.Hashname
+		client.SendTo(client.Destination(hash), &Package{
+			Head: Head{
+				Title:  title,
+				Option: settings.OPTION_SET,
+			},
+			Body: Body{
+				Data: data,
+			},
+		})
+	case settings.OPTION_SET:
+		handleSet(client, pack)
+	default: 
+		return false
+	}
+	return true
 }
 
 // Disconnect from user.
@@ -266,9 +266,7 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
 	dest = client.wrapDest(dest)
 
-	if pack.To.Receiver.Hashname == "" {
-		pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
-	}
+	pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
 	pack.To.Hashname = HashPublic(dest.Public)
 	pack.To.Address = dest.Address
 
