@@ -100,12 +100,12 @@ func main() {
     defer listener6.Close()
     client6 = listener6.NewClient(gopeer.GeneratePrivate(1024))
 
-    fmt.Println("A:", client.Hashname)
-    fmt.Println("B:", client2.Hashname)
-    fmt.Println("C:", client3.Hashname)
-    fmt.Println("D:", client4.Hashname)
-    fmt.Println("E:", client5.Hashname)
-    fmt.Println("F:", client6.Hashname)
+    fmt.Println("A:",  client.Hashname())
+    fmt.Println("B:", client2.Hashname())
+    fmt.Println("C:", client3.Hashname())
+    fmt.Println("D:", client4.Hashname())
+    fmt.Println("E:", client5.Hashname())
+    fmt.Println("F:", client6.Hashname())
     fmt.Println()
 
     handleClient(client)
@@ -115,7 +115,7 @@ func handleClient(client *gopeer.Client) {
     dest := &gopeer.Destination{
         Address:     ADDRESS2,
         Certificate: []byte(node2Cert),
-        Public:      client2.Keys.Public,
+        Public:      client2.Public(),
     }
 
     client.Connect(dest)
@@ -125,7 +125,7 @@ func handleClient(client *gopeer.Client) {
     dest2 := &gopeer.Destination{
         Address:     ADDRESS4,
         Certificate: []byte(node4Cert),
-        Public:      client4.Keys.Public,
+        Public:      client4.Public(),
     }
 
     client3.Connect(dest2)
@@ -133,13 +133,13 @@ func handleClient(client *gopeer.Client) {
     dest3 := &gopeer.Destination{
         Address:     ADDRESS3,
         Certificate: []byte(node3Cert),
-        Public:      client3.Keys.Public,
+        Public:      client3.Public(),
     }
 
     dest4 := &gopeer.Destination{
         Address:     ADDRESS4,
         Certificate: []byte(node4Cert),
-        Public:      client4.Keys.Public,
+        Public:      client4.Public(),
     }
 
     client5.Connect(dest3)
@@ -148,12 +148,12 @@ func handleClient(client *gopeer.Client) {
     dest5 := &gopeer.Destination{
         Address:     ADDRESS5,
         Certificate: []byte(node5Cert),
-        Public:      client5.Keys.Public,
+        Public:      client5.Public(),
     }
     client6.Connect(dest5)
 
     destFinal := &gopeer.Destination{
-        Receiver:    client6.Keys.Public,
+        Receiver:    client6.Public(),
     }
 
     client.Connect(destFinal)
@@ -173,7 +173,7 @@ func handleClient(client *gopeer.Client) {
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
     client.HandleAction(TITLE, pack,
         func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-            fmt.Printf("[%s->%s]: '%s'\n", pack.From.Sender.Hashname, client.Hashname, pack.Body.Data)
+            fmt.Printf("[%s->%s]: '%s'\n", pack.From.Sender.Hashname, client.Hashname(), pack.Body.Data)
             return set
         },
         func(client *gopeer.Client, pack *gopeer.Package) {

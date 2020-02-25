@@ -7,89 +7,91 @@ import (
 	"sync"
 )
 
-type Option uint8
+type optionType uint8
+
 const (
-	RAW Option = 0
-	CONFIRM Option = 1
+	_raw     optionType = 0
+	_confirm optionType = 1
 )
 
 /* BEGIN PACKAGE PART */
 type Package struct {
-	Info Info
-	From From
-	To   To
-	Head Head
-	Body Body
+	Info Info `json:"info"`
+	From From `json:"from"`
+	To   To   `json:"to"`
+	Head Head `json:"head"`
+	Body Body `json:"body"`
 }
 
 type Info struct {
-	Network string
-	Version string
+	Network string `json:"network"`
+	Version string `json:"version"`
 }
 
 type Head struct {
-	Title  string
-	Option string
+	Title  string `json:"title"`
+	Option string `json:"option"`
 }
 
 type From struct {
-	Sender   Sender
-	Hashname string
-	Address  string
+	Sender   Sender `json:"sender"`
+	Hashname string `json:"hashname"`
+	Address  string `json:"address"`
 }
 
 type To struct {
-	Receiver Receiver
-	Hashname string
-	Address  string
+	Receiver Receiver `json:"receiver"`
+	Hashname string   `json:"hashname"`
+	Address  string   `json:"address"`
 }
 
 type Body struct {
-	Data string
-	Desc Desc
+	Data string `json:"data"`
+	Desc Desc   `json:"desc"`
 }
 
 type Receiver Hidden
 type Sender Hidden
 type Hidden struct {
-	Hashname string
+	Hashname string `json:"hashname"`
 }
 
 type Desc struct {
-	Id          uint64
-	Rand        string
-	Hash        string
-	Sign        string
-	Nonce       uint64
-	Difficulty  uint8
-	Redirection uint8
+	Id          uint64 `json:"id"`
+	Rand        string `json:"rand"`
+	Hash        string `json:"hash"`
+	Sign        string `json:"sign"`
+	Nonce       uint64 `json:"nonce"`
+	Difficulty  uint8  `json:"difficulty"`
+	Redirection uint8  `json:"redirection"`
 }
+
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
 type Listener struct {
 	listen      net.Listener
 	handleFunc  func(*Client, *Package)
-	Address     Address
+	address     address
+	certificate []byte
 	Clients     map[string]*Client
-	Certificate []byte
 }
 
-type Address struct {
-	Ipv4 string
-	Port string
+type address struct {
+	ipv4 string
+	port string
 }
 
 type Client struct {
 	listener    *Listener
 	remember    remember
+	keys        keys
+	hashname    string
+	address     string
+	certPool    *x509.CertPool
 	F2F         F2F
 	Sharing     Sharing
-	Hashname    string
-	Address     string
 	Mutex       *sync.Mutex
-	CertPool    *x509.CertPool
-	Keys        Keys
 	Connections map[string]*Connect
 }
 
@@ -109,22 +111,23 @@ type Sharing struct {
 	Path string
 }
 
-type Keys struct {
-	Private *rsa.PrivateKey
-	Public  *rsa.PublicKey
+type keys struct {
+	private *rsa.PrivateKey
+	public  *rsa.PublicKey
 }
 
 type Connect struct {
 	connected   bool
+	hashname    string
 	packageId   uint64
 	relation    net.Conn
 	transfer    transfer
+	address     string
+	session     []byte
+	certificate []byte
+	throwClient *rsa.PublicKey
+	public      *rsa.PublicKey
 	Chans       Chans
-	Address     string
-	Session     []byte
-	Certificate []byte
-	ThrowClient *rsa.PublicKey
-	Public      *rsa.PublicKey
 }
 
 type Chans struct {
@@ -133,27 +136,28 @@ type Chans struct {
 }
 
 type transfer struct {
-	active bool
+	active     bool
 	inputFile  string
 	outputFile string
 }
+
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
 type FileTransfer struct {
-	Head HeadTransfer
-	Body BodyTransfer
+	Head HeadTransfer `json:"head"`
+	Body BodyTransfer `json:"body"`
 }
 
 type HeadTransfer struct {
-	Id     uint32
-	Name   string
-	IsNull bool
+	Id     uint32 `json:"id"`
+	Name   string `json:"name"`
+	IsNull bool   `json:"is_null"`
 }
 
 type BodyTransfer struct {
-	Hash []byte
-	Data []byte
+	Hash []byte `json:"hash"`
+	Data []byte `json:"data"`
 }
 
 /* END FILE TRANSFER */

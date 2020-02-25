@@ -130,12 +130,23 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {}
 func (listener *Listener) Open(c *Certificate) *Listener {}
 func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
+func (listener *Listener) Certificate() []byte {}
+func (client *Client) Hashname() string {}
+func (client *Client) Public() *rsa.PublicKey {}
+func (client *Client) Private() *rsa.PrivateKey {}
+func (client *Client) Address() string {}
+func (client *Client) Destination(hash string) *Destination {}
 func (client *Client) InConnections(hash string) bool {}
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
 func (client *Client) LoadFile(dest *Destination, input string, output string) error {}
 func (client *Client) Connect(dest *Destination) error {}
 func (client *Client) Disconnect(dest *Destination) error {}
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {}
+func (connect *Connect) Hashname() string {}
+func (connect *Connect) Public() *rsa.PublicKey {}
+func (connect *Connect) Address() string {}
+func (connect *Connect) Session() []byte {}
+func (connect *Connect) Certificate() []byte {}
 ```
 
 ### Cryptography functions:
@@ -215,11 +226,11 @@ func ToBytes(num uint64) []byte {}
 {
     listen: net.Listen,
     handleFunc: func(*Client, *Package),
-    Address: {
-        Ipv4: string,
-        Port: string,
+    address: {
+        ipv4: string,
+        port: string,
     },
-    Certificate: []byte,
+    certificate: []byte,
     Clients: map[string]{
         listener: *Listener,
         remember: {
@@ -227,6 +238,13 @@ func ToBytes(num uint64) []byte {}
             mapping: map[string]uint16,
             listing: []string,
         },
+        keys: {
+            private: *rsa.PrivateKey,
+            public:  *rsa.PublicKey,
+        },
+        hashname: string,
+        address:  string,
+        certPool: *x509.CertPool,
         F2F: {
             Perm:    bool,
             Friends: map[string]bool,
@@ -235,32 +253,26 @@ func ToBytes(num uint64) []byte {}
             Perm: bool,
             Path: string,
         },
-        Keys: {
-            Private: *rsa.PrivateKey,
-            Public:  *rsa.PublicKey,
-        },
-        Hashname: string,
-        Address:  string,
         Mutex:    *sync.Mutex,
-        CertPool: *x509.CertPool,
         Connections: map[string]{
             connected:   bool,
+            hashname:    string,
             packageId:   uint64,
             transfer: {
                 active:     bool,
                 inputFile:  string
                 outputFile: string,
             },
+            address:     string,
+            session:     []byte,
+            relation:    net.Conn,
+            certificate: []byte,
+            throwClient: *rsa.PublicKey,
+            public:      *rsa.PublicKey,
             Chans: {
                 Action:  chan bool,
                 action:  chan bool,
             },
-            Address:     string,
-            Session:     []byte,
-            Relation:    net.Conn,
-            Certificate: []byte,
-            ThrowClient: *rsa.PublicKey,
-            Public:      *rsa.PublicKey,
         },
     },
 }

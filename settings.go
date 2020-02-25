@@ -39,7 +39,7 @@ func defaultSettings() settingsStruct {
 		HMACKEY:            "PASSWORD",
 		NETWORK:            "NETWORK-NAME",
 		VERSION:            "Version 1.0.0",
-		MAX_ID:             5, // 2^32 packages
+		MAX_ID:             5,       // 2^32 packages
 		PACK_SIZE:          8 << 20, // 8MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
 		REMEMBER:           256,     // hash packages

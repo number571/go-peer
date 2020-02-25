@@ -47,7 +47,7 @@ func handleClient(client *gopeer.Client) {
     dest := &gopeer.Destination{
         Address:     ADDRESS2,
         Certificate: []byte(node2Cert),
-        Public:      anotherClient.Keys.Public,
+        Public:      anotherClient.Public(),
     }
 
     client.Connect(dest)

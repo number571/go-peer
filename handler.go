@@ -1,10 +1,8 @@
 package gopeer
 
 import (
-	"time"
 	"bytes"
 	"crypto/rsa"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,10 +29,7 @@ func runServer(listener *Listener, handle func(*Client, *Package)) {
 	}
 }
 
-// Package events. By default:
-// 1) Check last hash;
-// 2) Connection;
-// 3) Disconnection;
+// Read package by node.
 func serveNode(listener *Listener, handle func(*Client, *Package), conn net.Conn) {
 	var (
 		client *Client
@@ -59,8 +54,9 @@ func serveNode(listener *Listener, handle func(*Client, *Package), conn net.Conn
 	}
 }
 
+// Read package by client.
 func serveClient(listener *Listener, client *Client, handle func(*Client, *Package), hash string, conn net.Conn) {
-	defer func(){
+	defer func() {
 		delete(client.Connections, hash)
 		conn.Close()
 	}()
@@ -73,6 +69,7 @@ func serveClient(listener *Listener, client *Client, handle func(*Client, *Packa
 	}
 }
 
+// Remember package hash.
 func (client *Client) rememberHash(hash string) bool {
 	client.Mutex.Lock()
 	defer client.Mutex.Unlock()
@@ -104,8 +101,8 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 		if client.InConnections(pack.To.Receiver.Hashname) {
 			hash := pack.To.Receiver.Hashname
 			pack.To.Hashname = hash
-			pack.To.Address = client.Connections[hash].Address
-			client.send(RAW, pack)
+			pack.To.Address = client.Connections[hash].address
+			client.send(_raw, pack)
 		} else {
 			pack.Body.Desc.Redirection++
 			for hash, cli := range client.Connections {
@@ -113,8 +110,8 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 					continue
 				}
 				pack.To.Hashname = hash
-				pack.To.Address = cli.Address
-				client.send(RAW, pack)
+				pack.To.Address = cli.address
+				client.send(_raw, pack)
 			}
 		}
 		return false
@@ -125,6 +122,8 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 		// fmt.Println(err)
 		return false
 	}
+
+	// printJSON(pack)
 
 	handleIsUsed := client.HandleAction(settings.TITLE_CONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
@@ -149,13 +148,17 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 		return false
 	}
 
-	switch pack.Head.Title {
-	case settings.TITLE_DISCONNECT:
-		switch pack.Head.Option {
-		case settings.OPTION_GET:
+	handleIsUsed = client.HandleAction(settings.TITLE_DISCONNECT, pack,
+		func(client *Client, pack *Package) (set string) {
 			client.disconnectGet(pack)
-			return true
-		}
+			return set
+		},
+		func(client *Client, pack *Package) {
+		},
+	)
+
+	if handleIsUsed {
+		return true
 	}
 
 	handleIsUsed = client.HandleAction(settings.TITLE_FILETRANSFER, pack,
@@ -245,59 +248,6 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	return true
 }
 
-// Find hidden connection throw nodes.
-func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.PublicKey) error {
-	var (
-		random = GenerateRandomBytes(16)
-		pack = &Package{
-			Head: Head{
-				Title:  settings.TITLE_CONNECT,
-				Option: settings.OPTION_GET,
-			},
-			Body: Body{
-				Data: string(PackJSON(conndata{
-					Certificate: Base64Encode(client.listener.Certificate),
-					Public:      Base64Encode([]byte(StringPublic(client.Keys.Public))),
-					Session:     Base64Encode(EncryptRSA(receiver, session)),
-				})),
-			},
-		}
-	)
-	for _, conn := range client.Connections {
-		client.Connections[hash] = &Connect{
-			connected: false,
-			Chans: Chans{
-				Action: make(chan bool),
-				action: make(chan bool),
-			},
-			Address:     conn.Address,
-			ThrowClient: conn.Public,
-			Public:      receiver,
-			Certificate: conn.Certificate,
-			Session:     session,
-		}
-		pack.To.Receiver.Hashname = hash
-		pack.To.Hashname = HashPublic(conn.Public)
-		pack.To.Address = conn.Address
-		pack = client.confirmPackage(random, client.appendHeaders(pack))
-		_, err := client.send(RAW, pack)
-		if err != nil {
-			continue
-		}
-		select {
-		case <-client.Connections[hash].Chans.action:
-			client.Connections[hash].connected = true
-			return nil
-		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
-			if client.Connections[hash].relation != nil {
-				client.Connections[hash].relation.Close()
-			}
-			delete(client.Connections, hash)
-		}
-	}
-	return errors.New("Connection undefined")
-}
-
 // Check package for compliance:
 // 1) pack is not null;
 // 2) pack.Info.Network == NETWORK;
@@ -308,6 +258,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 // 7) hash(pack) should be equal package hash;
 // 8) signature must be created by sender;
 // 9) nonce should be equal POW(hash, DIFFICULTY);
+// 10) check package id;
 func (client *Client) isValid(pack *Package) error {
 	if pack == nil {
 		return errors.New("pack is null")
@@ -325,7 +276,7 @@ func (client *Client) isValid(pack *Package) error {
 		return errors.New("difficulty does not match")
 	}
 
-	if pack.From.Sender.Hashname == client.Hashname {
+	if pack.From.Sender.Hashname == client.hashname {
 		return errors.New("sender and receiver is one person")
 	}
 
@@ -335,7 +286,7 @@ func (client *Client) isValid(pack *Package) error {
 
 	var public *rsa.PublicKey
 	if client.InConnections(pack.From.Sender.Hashname) {
-		public = client.Connections[pack.From.Sender.Hashname].Public
+		public = client.Connections[pack.From.Sender.Hashname].public
 	} else {
 		var data conndata
 		UnpackJSON([]byte(pack.Body.Data), &data)
@@ -365,7 +316,6 @@ func (client *Client) isValid(pack *Package) error {
 		[]byte{},
 	))
 	if Base64Encode(hash) != pack.Body.Desc.Hash {
-		printJson(pack)
 		return errors.New("pack hash invalid")
 	}
 
@@ -385,108 +335,23 @@ func (client *Client) isValid(pack *Package) error {
 			client.Connect(client.Destination(pack.From.Sender.Hashname))
 			return nil
 		}
-pass:
+	pass:
 		if pack.Head.Title != settings.TITLE_CONNECT {
 			if pack.Body.Desc.Id < client.Connections[pack.From.Sender.Hashname].packageId {
 				return errors.New("package id < saved package id")
 			}
-			if pack.Head.Option == settings.OPTION_GET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId + 1 {
+			if pack.Head.Option == settings.OPTION_GET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId+1 {
 				return errors.New("option get: package id /= saved package id + 1")
 			}
 			if pack.Head.Option == settings.OPTION_SET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId {
 				return errors.New("option set: package id /= saved package id")
 			}
 		}
-		
+
 		client.Connections[pack.From.Sender.Hashname].packageId++
 	}
 
 	return nil
-}
-
-// Send package.
-// Check if pack is not null and receive user in saved data.
-// Append headers and confirm package.
-// Send package.
-// If option package is GET, then get response.
-// If no response received, then use retrySend() function.
-func (client *Client) send(option Option, pack *Package) (*Package, error) {
-	switch {
-	case pack == nil:
-		return nil, errors.New("pack is null")
-	case pack.To.Hashname == client.Hashname:
-		return nil, errors.New("sender and receiver is one person")
-	case !client.InConnections(pack.To.Hashname):
-		return nil, errors.New("receiver not in connections")
-	}
-
-	pack = client.appendHeaders(pack)
-	if option == CONFIRM {
-		pack = client.confirmPackage(GenerateRandomBytes(16), pack)
-	}
-
-	var (
-		savedPack = pack
-		hash      = pack.To.Hashname
-	)
-
-	if client.Connections[hash].relation == nil {
-		ok := client.CertPool.AppendCertsFromPEM([]byte(client.Connections[hash].Certificate))
-		if !ok {
-			return nil, errors.New("failed to parse root certificate")
-		}
-		config := &tls.Config{
-			ServerName: settings.SERVER_NAME,
-			RootCAs:    client.CertPool,
-		}
-		conn, err := tls.Dial("tcp", pack.To.Address, config)
-		if err != nil {
-			delete(client.Connections, hash)
-			return nil, err
-		}
-		client.Connections[hash].relation = conn
-		go serveClient(client.listener, client, client.listener.handleFunc, hash, conn)
-	}
-
-	if option == CONFIRM {
-		if encPack := client.encryptPackage(pack); encPack != nil {
-			pack = encPack
-		}
-	}
-
-	conn := client.Connections[hash].relation
-	_, err := conn.Write(
-		bytes.Join(
-			[][]byte{
-				PackJSON(pack),
-				[]byte(settings.END_BYTES),
-			},
-			[]byte{},
-		),
-	)
-	if err != nil {
-		conn.Close()
-		delete(client.Connections, hash)
-		return nil, err
-	}
-
-	return savedPack, err
-}
-
-func (client *Client) wrapDest(dest *Destination) *Destination {
-	if dest.Public == nil && dest.Receiver == nil {
-		return nil
-	}
-	if dest.Receiver == nil {
-		dest.Receiver = dest.Public
-	}
-	hash := HashPublic(dest.Receiver)
-	if dest.Public == nil && client.InConnections(hash) {
-		dest.Certificate = client.Connections[hash].Certificate
-		dest.Public      = client.Connections[hash].ThrowClient
-		dest.Address     = client.Connections[hash].Address
-	}
-	return dest
 }
 
 // Connect by GET option.
@@ -502,17 +367,18 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 			Action: make(chan bool),
 			action: make(chan bool),
 		},
-		Address:     pack.From.Address,
-		Public:      public,
-		Certificate: Base64Decode(data.Certificate),
-		Session:     DecryptRSA(client.Keys.Private, Base64Decode(data.Session)),
+		hashname:    hash,
+		address:     pack.From.Address,
+		public:      public,
+		certificate: Base64Decode(data.Certificate),
+		session:     DecryptRSA(client.keys.private, Base64Decode(data.Session)),
 	}
 
 	if pack.From.Hashname == pack.From.Sender.Hashname {
-		client.Connections[hash].ThrowClient = public
+		client.Connections[hash].throwClient = public
 		client.Connections[hash].relation = conn
 	} else {
-		client.Connections[hash].ThrowClient = client.Connections[pack.From.Hashname].Public
+		client.Connections[hash].throwClient = client.Connections[pack.From.Hashname].public
 	}
 }
 
@@ -578,7 +444,7 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 
 	switch {
 	case client.isConnected(pack.To.Receiver.Hashname):
-		session = client.Connections[pack.To.Receiver.Hashname].Session
+		session = client.Connections[pack.To.Receiver.Hashname].session
 	default:
 		return nil
 	}
@@ -632,7 +498,7 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 	if !client.InConnections(pack.From.Sender.Hashname) {
 		return nil
 	}
-	session := client.Connections[pack.From.Sender.Hashname].Session
+	session := client.Connections[pack.From.Sender.Hashname].session
 	if DecryptAES(session, Base64Decode(pack.Body.Desc.Rand)) == nil {
 		return nil
 	}
@@ -697,7 +563,7 @@ func (client *Client) confirmPackage(random []byte, pack *Package) *Package {
 		[]byte{},
 	))
 	pack.Body.Desc.Hash = Base64Encode(hash)
-	pack.Body.Desc.Sign = Base64Encode(Sign(client.Keys.Private, hash))
+	pack.Body.Desc.Sign = Base64Encode(Sign(client.keys.private, hash))
 	pack.Body.Desc.Nonce = ProofOfWork(hash, pack.Body.Desc.Difficulty)
 	return pack
 }
@@ -707,20 +573,12 @@ func (client *Client) confirmPackage(random []byte, pack *Package) *Package {
 func (client *Client) appendHeaders(pack *Package) *Package {
 	pack.Info.Network = settings.NETWORK
 	pack.Info.Version = settings.VERSION
-	pack.From.Hashname = client.Hashname
-	pack.From.Address = client.Address
+	pack.From.Hashname = client.hashname
+	pack.From.Address = client.address
 	if pack.From.Sender.Hashname == "" {
-		pack.From.Sender.Hashname = client.Hashname
+		pack.From.Sender.Hashname = client.hashname
 	}
 	return pack
-}
-
-// Check if title is connect.
-func (pack *Package) isConnect() bool {
-	if pack.Head.Title == settings.TITLE_CONNECT {
-		return true
-	}
-	return false
 }
 
 // Check if user connected to client.
@@ -759,7 +617,7 @@ func readFile(filename string, id uint32) []byte {
 	}
 	defer file.Close()
 
-	_, err = file.Seek(int64(id * FILE_SIZE), BEGGINING)
+	_, err = file.Seek(int64(id*FILE_SIZE), BEGGINING)
 	if err != nil {
 		return nil
 	}
@@ -781,7 +639,7 @@ func fileIsExist(filename string) bool {
 }
 
 // For debug.
-func printJson(data interface{}) {
+func printJSON(data interface{}) {
 	jsonData, _ := json.MarshalIndent(data, "", "\t")
 	fmt.Println(string(jsonData))
 }

@@ -39,7 +39,9 @@ func main() {
     defer listener2.Close()
 
     anotherClient = listener2.NewClient(gopeer.GeneratePrivate(1024))
-    anotherClient.SetSharing(true, "./")
+
+    anotherClient.Sharing.Perm = true
+    anotherClient.Sharing.Path = "./"
 
     handleClient(client)
 }
@@ -48,11 +50,11 @@ func handleClient(client *gopeer.Client) {
     dest := &gopeer.Destination{
         Address:     ADDRESS2,
         Certificate: []byte(node2Cert),
-        Public:      anotherClient.Keys.Public,
+        Public:      anotherClient.Public(),
     }
 
     client.Connect(dest)
-    client.LoadFile(dest, "archive.zip", "output.zip")
+    client.LoadFile(dest, "main", "output")
     client.Disconnect(dest)
 }
 
