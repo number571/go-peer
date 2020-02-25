@@ -23,9 +23,6 @@ type conndata struct {
 func runServer(listener *Listener, handle func(*Client, *Package)) {
 	defer listener.Close()
 	for {
-		if listener.listen == nil {
-			break
-		}
 		conn, err := listener.listen.Accept()
 		if err != nil {
 			break
@@ -98,18 +95,12 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	}
 	client, ok := listener.Clients[pack.To.Hashname]
 	if !ok {
-		if pack.To.Hashname == pack.To.Receiver.Hashname {
-			return false
-		}
-		client, ok = listener.Clients[pack.To.Receiver.Hashname]
-		if !ok {
-			return false
-		}
+		return false
 	}
 	if client.rememberHash(pack.Body.Desc.Hash) {
 		return false
 	}
-	if pack.To.Hashname != pack.To.Receiver.Hashname && pack.To.Receiver.Hashname != client.Hashname {
+	if pack.To.Hashname != pack.To.Receiver.Hashname {
 		if client.InConnections(pack.To.Receiver.Hashname) {
 			hash := pack.To.Receiver.Hashname
 			pack.To.Hashname = hash
@@ -131,7 +122,7 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return false
 	}
 

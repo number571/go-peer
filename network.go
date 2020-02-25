@@ -89,10 +89,7 @@ func (listener *Listener) Run(handle func(*Client, *Package)) *Listener {
 
 // Close listener connection.
 func (listener *Listener) Close() {
-	if listener == nil {
-		return
-	}
-	if listener.listen == nil {
+	if listener == nil || listener.listen == nil {
 		return
 	}
 	listener.listen.Close()
