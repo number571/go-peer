@@ -2,6 +2,7 @@ package gopeer
 
 import (
 	"bytes"
+	// "time"
 	"crypto/rsa"
 	"encoding/json"
 	"errors"
@@ -196,47 +197,12 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 			}))
 		},
 		func(client *Client, pack *Package) {
-			var read = new(FileTransfer)
-			UnpackJSON([]byte(pack.Body.Data), read)
-
 			hash := pack.From.Sender.Hashname
 			if !client.Connections[hash].transfer.active {
 				return
 			}
-
-			if read.Head.IsNull {
-				client.Connections[hash].Chans.action <- false
-				return
-			}
-
-			name := client.Connections[hash].transfer.outputFile
-			if read.Head.Id == 0 && fileIsExist(name) {
-				client.Connections[hash].Chans.action <- false
-				return
-			}
-
-			data := read.Body.Data
-			if !bytes.Equal(read.Body.Hash, HashSum(data)) {
-				client.Connections[hash].Chans.action <- false
-				return
-			}
-
-			writeFile(name, read.Body.Data)
-
-			client.SendTo(client.Destination(hash), &Package{
-				Head: Head{
-					Title:  settings.TITLE_FILETRANSFER,
-					Option: settings.OPTION_GET,
-				},
-				Body: Body{
-					Data: string(PackJSON(FileTransfer{
-						Head: HeadTransfer{
-							Id:   read.Head.Id + 1,
-							Name: client.Connections[hash].transfer.inputFile,
-						},
-					})),
-				},
-			})
+			client.Connections[hash].Chans.action <- true
+			client.Connections[hash].transfer.packdata = pack.Body.Data
 		},
 	)
 

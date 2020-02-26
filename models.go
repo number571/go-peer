@@ -137,8 +137,7 @@ type Chans struct {
 
 type transfer struct {
 	active     bool
-	inputFile  string
-	outputFile string
+	packdata   string
 }
 
 /* END LISTENER PART */

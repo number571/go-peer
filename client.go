@@ -226,26 +226,56 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 	}
 
 	client.Connections[hash].transfer.active = true
-	client.Connections[hash].transfer.inputFile = input
-	client.Connections[hash].transfer.outputFile = output
+	defer func() {
+		client.Connections[hash].transfer.active = false
+	}()
 
-	client.SendTo(dest, &Package{
-		Head: Head{
-			Title:  settings.TITLE_FILETRANSFER,
-			Option: settings.OPTION_GET,
-		},
-		Body: Body{
-			Data: string(PackJSON(FileTransfer{
-				Head: HeadTransfer{
-					Id:   0,
-					Name: input,
-				},
-			})),
-		},
-	})
+	for i := uint32(0) ;; i++ {
+		client.SendTo(dest, &Package{
+			Head: Head{
+				Title:  settings.TITLE_FILETRANSFER,
+				Option: settings.OPTION_GET,
+			},
+			Body: Body{
+				Data: string(PackJSON(FileTransfer{
+					Head: HeadTransfer{
+						Id:   i,
+						Name: input,
+					},
+				})),
+			},
+		})
 
-	<-client.Connections[hash].Chans.action
-	client.Connections[hash].transfer.active = false
+		select {
+		case <-client.Connections[hash].Chans.action:
+			// pass
+		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			return errors.New("waiting time is over")
+		}
+
+		var read = new(FileTransfer)
+		UnpackJSON([]byte(client.Connections[hash].transfer.packdata), read)
+
+		if read == nil {
+			return errors.New("pack is null")
+		}
+
+		if read.Head.IsNull {
+			break
+		}
+
+		if read.Head.Id == 0 && fileIsExist(output) {
+			return errors.New("file already exists")
+		}
+
+		data := read.Body.Data
+		if !bytes.Equal(read.Body.Hash, HashSum(data)) {
+			return errors.New("hash not equal file hash")
+		}
+
+		writeFile(output, read.Body.Data)
+	}
+
 	return nil
 }
 
