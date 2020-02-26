@@ -225,6 +225,10 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		return errors.New("client not connected")
 	}
 
+	if fileIsExist(output) {
+		return errors.New("file already exists")
+	}
+
 	client.Connections[hash].transfer.active = true
 	defer func() {
 		client.Connections[hash].transfer.active = false
@@ -249,7 +253,7 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		select {
 		case <-client.Connections[hash].Chans.action:
 			// pass
-		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+		case <-time.After(time.Duration(settings.WAITING_TIME * 2) * time.Second):
 			return errors.New("waiting time is over")
 		}
 
@@ -262,10 +266,6 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 
 		if read.Head.IsNull {
 			break
-		}
-
-		if read.Head.Id == 0 && fileIsExist(output) {
-			return errors.New("file already exists")
 		}
 
 		data := read.Body.Data
