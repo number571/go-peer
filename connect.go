@@ -9,6 +9,11 @@ func (connect *Connect) Hashname() string {
 	return connect.hashname
 }
 
+// Return public key of intermediate node.
+func (connect *Connect) Throw() *rsa.PublicKey {
+	return connect.throwClient
+}
+
 // Return client's public.
 func (connect *Connect) Public() *rsa.PublicKey {
 	x := *connect.public
