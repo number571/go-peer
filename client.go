@@ -234,7 +234,7 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		client.Connections[hash].transfer.active = false
 	}()
 
-	for i := uint32(0) ;; i++ {
+	for i := uint64(0) ;; i++ {
 		client.SendTo(dest, &Package{
 			Head: Head{
 				Title:  settings.TITLE_FILETRANSFER,

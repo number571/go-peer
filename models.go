@@ -149,7 +149,7 @@ type FileTransfer struct {
 }
 
 type HeadTransfer struct {
-	Id     uint32 `json:"id"`
+	Id     uint64 `json:"id"`
 	Name   string `json:"name"`
 	IsNull bool   `json:"is_null"`
 }

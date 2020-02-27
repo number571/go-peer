@@ -14,8 +14,9 @@ type settingsStruct struct {
 	HMACKEY            string
 	NETWORK            string
 	VERSION            string
-	MAX_ID             uint64
-	PACK_SIZE          uint32
+	max_id             uint64
+	BITS_SIZE          uint64
+	PACK_SIZE          uint64
 	BUFF_SIZE          uint32
 	REMEMBER           uint16
 	DIFFICULTY         uint8
@@ -39,12 +40,13 @@ func defaultSettings() settingsStruct {
 		HMACKEY:            "PASSWORD",
 		NETWORK:            "NETWORK-NAME",
 		VERSION:            "Version 1.0.0",
-		MAX_ID:             5,       // 2^32 packages
+		max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
+		BITS_SIZE:          1 << 48, // 2^48 bits
 		PACK_SIZE:          8 << 20, // 8MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
 		REMEMBER:           256,     // hash packages
-		DIFFICULTY:         15,
-		WAITING_TIME:       5, // seconds
+		DIFFICULTY:         15,      // bits
+		WAITING_TIME:       5,       // seconds
 		REDIRECT_QUAN:      3,
 	}
 }
@@ -59,7 +61,7 @@ func Set(settings SettingsType) []uint8 {
 		switch data.(type) {
 		case string:
 			list[i] = stringSettings(name, data)
-		case int:
+		case uint64:
 			list[i] = intSettings(name, data)
 		default:
 			list[i] = 2
@@ -96,8 +98,8 @@ func Get(key string) interface{} {
 		return settings.TEMPLATE
 	case "HMACKEY":
 		return settings.HMACKEY
-	case "MAX_ID":
-		return settings.MAX_ID
+	case "BITS_SIZE":
+		return settings.BITS_SIZE
 	case "PACK_SIZE":
 		return settings.PACK_SIZE
 	case "BUFF_SIZE":
@@ -149,12 +151,14 @@ func stringSettings(name string, data interface{}) uint8 {
 }
 
 func intSettings(name string, data interface{}) uint8 {
-	result := data.(int)
+	result := data.(uint64)
 	switch name {
-	case "MAX_ID":
-		settings.MAX_ID = uint64(result)
+	case "BITS_SIZE":
+		settings.BITS_SIZE = uint64(result)	
+		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE
 	case "PACK_SIZE":
-		settings.PACK_SIZE = uint32(result)
+		settings.PACK_SIZE = uint64(result)	
+		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE
 	case "BUFF_SIZE":
 		settings.BUFF_SIZE = uint32(result)
 	case "REMEMBER":

@@ -297,7 +297,7 @@ func (client *Client) isValid(pack *Package) error {
 		if pack.Head.Title == settings.TITLE_FILETRANSFER {
 			goto pass
 		}
-		if client.Connections[pack.From.Sender.Hashname].packageId >= settings.MAX_ID && pack.Head.Option == settings.OPTION_SET {
+		if client.Connections[pack.From.Sender.Hashname].packageId >= settings.max_id && pack.Head.Option == settings.OPTION_SET {
 			client.Connect(client.Destination(pack.From.Sender.Hashname))
 			return nil
 		}
@@ -362,7 +362,7 @@ func readPackage(conn net.Conn) *Package {
 	var (
 		message string
 		pack    = new(Package)
-		size    = uint32(0)
+		size    = uint64(0)
 		buffer  = make([]byte, settings.BUFF_SIZE)
 	)
 	for {
@@ -370,7 +370,7 @@ func readPackage(conn net.Conn) *Package {
 		if err != nil {
 			return nil
 		}
-		size += uint32(length)
+		size += uint64(length)
 		if size >= settings.PACK_SIZE {
 			return nil
 		}
@@ -573,7 +573,7 @@ func writeFile(filename string, data []byte) error {
 	return nil
 }
 
-func readFile(filename string, id uint32) []byte {
+func readFile(filename string, id uint64) []byte {
 	const BEGGINING = 0
 	var FILE_SIZE = settings.PACK_SIZE / 4
 
