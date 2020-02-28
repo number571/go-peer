@@ -120,7 +120,7 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
-		// fmt.Println(err)
+		fmt.Println(err)
 		return false
 	}
 
@@ -302,19 +302,10 @@ func (client *Client) isValid(pack *Package) error {
 			return nil
 		}
 	pass:
-		if pack.Head.Title != settings.TITLE_CONNECT {
-			if pack.Body.Desc.Id < client.Connections[pack.From.Sender.Hashname].packageId {
-				return errors.New("package id < saved package id")
-			}
-			if pack.Head.Option == settings.OPTION_GET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId+1 {
-				return errors.New("option get: package id /= saved package id + 1")
-			}
-			if pack.Head.Option == settings.OPTION_SET && pack.Body.Desc.Id != client.Connections[pack.From.Sender.Hashname].packageId {
-				return errors.New("option set: package id /= saved package id")
-			}
+		if pack.Head.Title != settings.TITLE_CONNECT && pack.Body.Desc.Id+1 < client.Connections[pack.From.Sender.Hashname].packageId {
+			return errors.New("package id < saved package id")
 		}
-
-		client.Connections[pack.From.Sender.Hashname].packageId++
+		client.Connections[pack.From.Sender.Hashname].packageId = pack.Body.Desc.Id+1
 	}
 
 	return nil

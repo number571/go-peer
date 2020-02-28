@@ -44,13 +44,16 @@ func defaultSettings() settingsStruct {
 		BITS_SIZE:          1 << 48, // 2^48 bits
 		PACK_SIZE:          8 << 20, // 8MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
-		REMEMBER:           256,     // hash packages
-		DIFFICULTY:         15,      // bits
-		WAITING_TIME:       5,       // seconds
+		REMEMBER:           256,     // quantity hash packages
+		DIFFICULTY:         15,      // bits of 256 bits
+		WAITING_TIME:       5,       // in seconds
 		REDIRECT_QUAN:      3,
 	}
 }
 
+// 0 = success
+// 1 = parameter undefined
+// 2 = type undefined
 func Set(settings SettingsType) []uint8 {
 	var (
 		list = make([]uint8, len(settings))
