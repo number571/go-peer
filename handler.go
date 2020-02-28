@@ -120,7 +120,7 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 
 	pack, wasEncrypted := client.tryDecrypt(pack)
 	if err := client.isValid(pack); err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		return false
 	}
 
