@@ -140,6 +140,7 @@ func (client *Client) Connect(dest *Destination) error {
 		},
 		Body: Body{
 			Data: string(PackJSON(conndata{
+				Certificate: Base64Encode(client.listener.certificate),
 				Public:  Base64Encode([]byte(StringPublic(client.keys.public))),
 				Session: Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),
