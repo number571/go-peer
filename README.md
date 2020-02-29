@@ -12,7 +12,7 @@
 * End to end encryption;
 2. Encryption:
 * Protocol: TLS / Package;
-* Symmetric algorithm: AES256-CBC;
+* Symmetric algorithm: AES256-[CBC,OFB];
 * Asymmetric algorithm: RSA-OAEP;
 * Hash function: HMAC(SHA256);
 
