@@ -190,6 +190,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			address:     conn.address,
 			throwClient: conn.public,
 			public:      receiver,
+			hashname:    hash,
 			certificate: conn.certificate,
 			session:     session,
 		}
@@ -283,8 +284,10 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 // Send by Destination.
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
 	dest = client.wrapDest(dest)
-	if dest == nil {
-		return nil, errors.New("dest is null")
+	switch {
+	case dest == nil: return nil, errors.New("dest is null")
+	case dest.Public == nil: return nil, errors.New("public is null")
+	case dest.Receiver == nil: return nil, errors.New("receiver is null")
 	}
 
 	pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
