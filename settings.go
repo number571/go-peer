@@ -15,6 +15,7 @@ type settingsStruct struct {
 	NETWORK            string
 	VERSION            string
 	max_id             uint64
+	KEY_SIZE           uint16
 	BITS_SIZE          uint64
 	PACK_SIZE          uint64
 	BUFF_SIZE          uint32
@@ -41,6 +42,7 @@ func defaultSettings() settingsStruct {
 		NETWORK:            "NETWORK-NAME",
 		VERSION:            "Version 1.0.0",
 		max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
+		KEY_SIZE:           2 << 10, // 2048 bit
 		BITS_SIZE:          1 << 48, // 2^48 bits
 		PACK_SIZE:          8 << 20, // 8MiB
 		BUFF_SIZE:          1 << 20, // 1MiB
@@ -101,6 +103,8 @@ func Get(key string) interface{} {
 		return settings.TEMPLATE
 	case "HMACKEY":
 		return settings.HMACKEY
+	case "KEY_SIZE":
+		return settings.KEY_SIZE
 	case "BITS_SIZE":
 		return settings.BITS_SIZE
 	case "PACK_SIZE":
@@ -156,6 +160,8 @@ func stringSettings(name string, data interface{}) uint8 {
 func intSettings(name string, data interface{}) uint8 {
 	result := data.(uint64)
 	switch name {
+	case "KEY_SIZE":
+		settings.KEY_SIZE = uint16(result)
 	case "BITS_SIZE":
 		settings.BITS_SIZE = uint64(result)	
 		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE

@@ -38,11 +38,11 @@ const (
 )
 
 var (
-    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
-    node3Key, node3Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
-    node4Key, node4Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
-    node5Key, node5Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
-    node6Key, node6Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node3Key, node3Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node4Key, node4Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node5Key, node5Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node6Key, node6Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
     client2             = new(gopeer.Client)
     client3             = new(gopeer.Client)
     client4             = new(gopeer.Client)
@@ -51,14 +51,14 @@ var (
 )
 
 func main() {
-    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
     listener1 := gopeer.NewListener(ADDRESS1)
     listener1.Open(&gopeer.Certificate{
         Cert: []byte(node1Cert),
         Key:  []byte(node1Key),
     }).Run(handleServer)
     defer listener1.Close()
-    client := listener1.NewClient(gopeer.GeneratePrivate(1024))
+    client := listener1.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener2 := gopeer.NewListener(ADDRESS2)
     listener2.Open(&gopeer.Certificate{
@@ -66,7 +66,7 @@ func main() {
         Key:  []byte(node2Key),
     }).Run(handleServer)
     defer listener2.Close()
-    client2 = listener2.NewClient(gopeer.GeneratePrivate(1024))
+    client2 = listener2.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener3 := gopeer.NewListener(ADDRESS3)
     listener3.Open(&gopeer.Certificate{
@@ -74,7 +74,7 @@ func main() {
         Key:  []byte(node3Key),
     }).Run(handleServer)
     defer listener3.Close()
-    client3 = listener3.NewClient(gopeer.GeneratePrivate(1024))
+    client3 = listener3.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener4 := gopeer.NewListener(ADDRESS4)
     listener4.Open(&gopeer.Certificate{
@@ -82,7 +82,7 @@ func main() {
         Key:  []byte(node4Key),
     }).Run(handleServer)
     defer listener4.Close()
-    client4 = listener4.NewClient(gopeer.GeneratePrivate(1024))
+    client4 = listener4.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener5 := gopeer.NewListener(ADDRESS5)
     listener5.Open(&gopeer.Certificate{
@@ -90,7 +90,7 @@ func main() {
         Key:  []byte(node5Key),
     }).Run(handleServer)
     defer listener5.Close()
-    client5 = listener5.NewClient(gopeer.GeneratePrivate(1024))
+    client5 = listener5.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener6 := gopeer.NewListener(ADDRESS6)
     listener6.Open(&gopeer.Certificate{
@@ -98,7 +98,7 @@ func main() {
         Key:  []byte(node6Key),
     }).Run(handleServer)
     defer listener6.Close()
-    client6 = listener6.NewClient(gopeer.GeneratePrivate(1024))
+    client6 = listener6.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     fmt.Println("A:",  client.Hashname())
     fmt.Println("B:", client2.Hashname())

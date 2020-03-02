@@ -12,7 +12,7 @@
 * End to end encryption;
 2. Encryption:
 * Protocol: TLS / Package;
-* Symmetric algorithm: AES256-[CBC,OFB];
+* Symmetric algorithm: AES-[CBC,OFB];
 * Asymmetric algorithm: RSA-OAEP;
 * Hash function: HMAC(SHA256);
 
@@ -69,9 +69,10 @@ type settingsStruct struct {
     HMACKEY            string
     NETWORK            string
     VERSION            string
-    MAX_ID             uint64
-    PACK_SIZE          uint32
-    FILE_SIZE          uint32
+    max_id             uint64
+    KEY_SIZE           uint16
+    BITS_SIZE          uint64
+    PACK_SIZE          uint64
     BUFF_SIZE          uint32
     REMEMBER           uint16
     DIFFICULTY         uint8
@@ -90,14 +91,16 @@ type settingsStruct struct {
     OPTION_SET:         "[OPTION-SET]", // Receive
     SERVER_NAME:        "GOPEER-FRAMEWORK",
     IS_CLIENT:          "[IS-CLIENT]", 
+    SERVER_NAME:        "GOPEER-FRAMEWORK",
     END_BYTES:          "\000\000\000\005\007\001\000\000\000",
     TEMPLATE:           "0.0.0.0",
     HMACKEY:            "PASSWORD",
     NETWORK:            "NETWORK-NAME",
     VERSION:            "Version 1.0.0",
-    MAX_ID:             1 << 32, // 2^32 packages
+    max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
+    KEY_SIZE:           2 << 10, // 2048 bit
+    BITS_SIZE:          1 << 48, // 2^48 bits
     PACK_SIZE:          8 << 20, // 8MiB
-    FILE_SIZE:          2 << 20, // 2MiB
     BUFF_SIZE:          1 << 20, // 1MiB
     REMEMBER:           256, // hash packages
     DIFFICULTY:         15,
@@ -151,10 +154,13 @@ func (connect *Connect) Certificate() []byte {}
 
 ### Cryptography functions:
 ```go
+func FileEncryptAES(key []byte, input string, output string) error {}
+func FileDecryptAES(key []byte, input string, output string) error {}
 func GenerateCertificate(name string, bits int) (string, string) {}
 func GeneratePrivate(bits int) *rsa.PrivateKey {}
 func ParsePrivate(privData string) *rsa.PrivateKey {}
 func ParsePublic(pubData string) *rsa.PublicKey {}
+func ParseCertificate(certData string) *x509.Certificate {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
 func HashPublic(pub *rsa.PublicKey) string {}
@@ -292,7 +298,7 @@ func ToBytes(num uint64) []byte {}
 ```go
 {
     Head: {
-        Id:     uint32,
+        Id:     uint64,
         Name:   string,
         IsNull: bool,
     },

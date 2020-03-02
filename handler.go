@@ -3,7 +3,9 @@ package gopeer
 import (
 	"bytes"
 	// "time"
+	"math/big"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -221,10 +223,12 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 // 4) pack.Body.Desc.Difficulty == DIFFICULTY;
 // 5) public key can be parsed;
 // 6) hash(public) should be equal sender hashname;
-// 7) hash(pack) should be equal package hash;
-// 8) signature must be created by sender;
-// 9) nonce should be equal POW(hash, DIFFICULTY);
-// 10) check package id;
+// 7) check key size;
+// 8) check certificate size;
+// 9) hash(pack) should be equal package hash;
+// 10) signature must be created by sender;
+// 11) nonce should be equal POW(hash, DIFFICULTY);
+// 12) check package id;
 func (client *Client) isValid(pack *Package) error {
 	if pack == nil {
 		return errors.New("pack is null")
@@ -250,18 +254,43 @@ func (client *Client) isValid(pack *Package) error {
 		return errors.New("hashname undefined in list of friends")
 	}
 
-	var public *rsa.PublicKey
+	var (
+		public *rsa.PublicKey
+		certif *x509.Certificate
+	)
 	if client.InConnections(pack.From.Sender.Hashname) {
 		public = client.Connections[pack.From.Sender.Hashname].public
+		certif = ParseCertificate(string(client.Connections[pack.From.Sender.Hashname].certificate))
 	} else {
 		var data conndata
 		UnpackJSON([]byte(pack.Body.Data), &data)
 		public = ParsePublic(string(Base64Decode(data.Public)))
+		certif = ParseCertificate(string(Base64Decode(data.Certificate)))
 	}
 
 	if public == nil {
 		return errors.New("can't read public key")
 	}
+
+	if certif == nil {
+		return errors.New("can't read certificate")
+	}
+
+	if HashPublic(public) != pack.From.Sender.Hashname {
+		return errors.New("hashname not equal public key")
+	}
+
+	x := big.NewInt(1)
+    x.Lsh(x, uint(settings.KEY_SIZE - 1))
+    if public.N.Cmp(x) == -1 {
+    	return errors.New("public size < setting key size")
+    }
+
+    x = big.NewInt(1)
+    x.Lsh(x, uint(settings.KEY_SIZE - 1))
+    if certif.PublicKey.(*rsa.PublicKey).N.Cmp(x) == -1 {
+    	return errors.New("certificate size < setting cert size")
+    }
 
 	if HashPublic(public) != pack.From.Sender.Hashname {
 		return errors.New("hashname not equal public key")

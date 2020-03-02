@@ -64,10 +64,10 @@ func (listener *Listener) Open(c *Certificate) *Listener {
 		return nil
 	}
 	config := &tls.Config{Certificates: []tls.Certificate{cert}}
+	listener.certificate = c.Cert
 	if listener.address.ipv4+listener.address.port == settings.IS_CLIENT {
 		return listener
 	}
-	listener.certificate = c.Cert
 	listener.listen, err = tls.Listen("tcp", settings.TEMPLATE+listener.address.port, config)
 	if err != nil {
 		return nil

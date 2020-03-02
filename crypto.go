@@ -108,7 +108,7 @@ func readFileBytes(input string, max int) []byte {
 }
 
 // Generate certificate by server name and number bits of private key.
-func GenerateCertificate(name string, bits int) (string, string) {
+func GenerateCertificate(name string, bits uint16) (string, string) {
     ca := &x509.Certificate{
         SerialNumber: big.NewInt(int64(GenerateRandomIntegers(1)[0])),
         Subject: pkix.Name{
@@ -136,8 +136,8 @@ func GenerateCertificate(name string, bits int) (string, string) {
 }
 
 // Create private key by size bits.
-func GeneratePrivate(bits int) *rsa.PrivateKey {
-    priv, err := rsa.GenerateKey(rand.Reader, bits)
+func GeneratePrivate(bits uint16) *rsa.PrivateKey {
+    priv, err := rsa.GenerateKey(rand.Reader, int(bits))
     if err != nil {
         return nil
     }
@@ -156,6 +156,20 @@ func ParsePrivate(privData string) *rsa.PrivateKey {
     }
     return priv
 }
+
+// Translate certificate as string to *x509.Certificate.
+func ParseCertificate(certData string) *x509.Certificate {
+    block, _ := pem.Decode([]byte(certData))
+    if block == nil {
+        return nil
+    }
+    cert, err := x509.ParseCertificate(block.Bytes)
+    if err != nil {
+        return nil
+    }
+    return cert
+}
+
 
 // Translate public key as string to *rsa.PublicKey.
 func ParsePublic(pubData string) *rsa.PublicKey {

@@ -17,11 +17,11 @@ const (
 
 var (
     anotherClient       = new(gopeer.Client)
-    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
 )
 
 func main() {
-    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
     listener1 := gopeer.NewListener(ADDRESS1)
     listener1.Open(&gopeer.Certificate{
         Cert: []byte(node1Cert),
@@ -29,7 +29,7 @@ func main() {
     }).Run(handleServer)
     defer listener1.Close()
 
-    client := listener1.NewClient(gopeer.GeneratePrivate(1024))
+    client := listener1.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     listener2 := gopeer.NewListener(ADDRESS2)
     listener2.Open(&gopeer.Certificate{
@@ -38,7 +38,7 @@ func main() {
     }).Run(handleServer)
     defer listener2.Close()
 
-    anotherClient = listener2.NewClient(gopeer.GeneratePrivate(1024))
+    anotherClient = listener2.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
 
     anotherClient.Sharing.Perm = true
     anotherClient.Sharing.Path = "./"
@@ -54,7 +54,7 @@ func handleClient(client *gopeer.Client) {
     }
 
     client.Connect(dest)
-    client.LoadFile(dest, "main", "output")
+    client.LoadFile(dest, "archive.zip", "output.zip")
     client.Disconnect(dest)
 }
 

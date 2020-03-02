@@ -10,7 +10,10 @@ const (
 )
 
 func main() {
-	key, cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+	key, cert := gopeer.GenerateCertificate(
+		gopeer.Get("SERVER_NAME").(string), 
+		gopeer.Get("CERT_SIZE").(uint16),
+	)
 	listener := gopeer.NewListener(ADDRESS)
 	listener.Open(&gopeer.Certificate{
 		Cert: []byte(cert),
