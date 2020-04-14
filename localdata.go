@@ -2,9 +2,10 @@ package gopeer
 
 import (
 	"bytes"
-	// "time"
+	"time"
 	"math/big"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
@@ -13,80 +14,6 @@ import (
 	"os"
 	"strings"
 )
-
-type conndata struct {
-	Certificate string
-	Public      string
-	Session     string
-}
-
-// Get connection and check package.
-func runServer(listener *Listener, handle func(*Client, *Package)) {
-	defer listener.Close()
-	for {
-		conn, err := listener.listen.Accept()
-		if err != nil {
-			break
-		}
-		go serveNode(listener, handle, conn)
-	}
-}
-
-// Read package by node.
-func serveNode(listener *Listener, handle func(*Client, *Package), conn net.Conn) {
-	var (
-		client *Client
-		hash   string
-	)
-	defer func() {
-		if client != nil {
-			delete(client.Connections, hash)
-		}
-		conn.Close()
-	}()
-	for {
-		pack := readPackage(conn)
-		if pack == nil {
-			break
-		}
-		received := pack.receive(listener, handle, conn)
-		if hash == "" && received {
-			client = listener.Clients[pack.To.Hashname]
-			hash = pack.From.Hashname
-		}
-	}
-}
-
-// Read package by client.
-func serveClient(listener *Listener, client *Client, handle func(*Client, *Package), hash string, conn net.Conn) {
-	defer func() {
-		delete(client.Connections, hash)
-		conn.Close()
-	}()
-	for {
-		pack := readPackage(conn)
-		if pack == nil {
-			break
-		}
-		pack.receive(listener, handle, conn)
-	}
-}
-
-// Remember package hash.
-func (client *Client) rememberHash(hash string) bool {
-	client.Mutex.Lock()
-	defer client.Mutex.Unlock()
-	if _, ok := client.remember.mapping[hash]; ok {
-		return true
-	}
-	client.remember.index = client.remember.index % settings.REMEMBER
-	client.remember.mapping[hash] = client.remember.index
-	if _, ok := client.remember.mapping[client.remember.listing[client.remember.index]]; ok {
-		delete(client.remember.mapping, client.remember.listing[client.remember.index])
-	}
-	client.remember.listing[client.remember.index] = hash
-	return false
-}
 
 // Receive package.
 func (pack *Package) receive(listener *Listener, handle func(*Client, *Package), conn net.Conn) bool {
@@ -97,10 +24,13 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	if !ok {
 		return false
 	}
-	if client.rememberHash(pack.Body.Desc.Hash) {
-		return false
-	}
 	if pack.To.Hashname != pack.To.Receiver.Hashname {
+		if err := client.IsValidRedirect(pack); err != nil {
+			return false
+		}
+		if !client.rememberHash(pack.Body.Desc.Hash) {
+			return false
+		}
 		if client.InConnections(pack.To.Receiver.Hashname) {
 			hash := pack.To.Receiver.Hashname
 			pack.To.Hashname = hash
@@ -127,6 +57,10 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	}
 
 	// printJSON(pack)
+
+	if !client.rememberHash(pack.Body.Desc.Hash) {
+		return false
+	}
 
 	handleIsUsed := client.HandleAction(settings.TITLE_CONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
@@ -213,6 +147,198 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	}
 
 	handle(client, pack)
+	return true
+}
+
+func (client *Client) IsValidRedirect(pack *Package) error {
+	if !client.InConnections(pack.From.Hashname) {
+		return errors.New("not in connections")
+	}
+
+	hash := HashSum(bytes.Join(
+		[][]byte{
+			[]byte(pack.Info.Network),
+			[]byte(pack.Info.Version),
+			[]byte(pack.From.Sender.Hashname),
+			[]byte(pack.To.Receiver.Hashname),
+			[]byte(pack.Head.Title),
+			[]byte(pack.Head.Option),
+			[]byte(pack.Body.Data),
+			ToBytes(pack.Body.Desc.Id),
+			[]byte(pack.Body.Desc.Rand),
+		},
+		[]byte{},
+	))
+
+	if Base64Encode(hash) != pack.Body.Test.Hash {
+		return errors.New("pack hash invalid")
+	}
+
+	public := client.Connections[pack.From.Hashname].public
+	if Verify(public, hash, Base64Decode(pack.Body.Test.Sign)) != nil {
+		return errors.New("pack sign invalid")
+	}
+
+	return nil
+}
+
+// Find hidden connection throw nodes.
+func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.PublicKey) error {
+	var (
+		random = GenerateRandomBytes(16)
+		pack   = &Package{
+			Head: Head{
+				Title:  settings.TITLE_CONNECT,
+				Option: settings.OPTION_GET,
+			},
+			Body: Body{
+				Data: string(PackJSON(conndata{
+					Certificate: Base64Encode(client.listener.certificate),
+					Public:      Base64Encode([]byte(StringPublic(client.keys.public))),
+					Session:     Base64Encode(EncryptRSA(receiver, session)),
+				})),
+			},
+		}
+	)
+	for _, conn := range client.Connections {
+		client.Connections[hash] = &Connect{
+			connected: false,
+			Chans: Chans{
+				Action: make(chan bool),
+				action: make(chan bool),
+			},
+			address:     conn.address,
+			throwClient: conn.public,
+			public:      receiver,
+			hashname:    hash,
+			certificate: conn.certificate,
+			session:     session,
+		}
+		pack.To.Receiver.Hashname = hash
+		pack.To.Hashname = HashPublic(conn.public)
+		pack.To.Address = conn.address
+		pack = client.confirmPackage(random, client.appendHeaders(pack))
+		_, err := client.send(_raw, pack)
+		if err != nil {
+			continue
+		}
+		select {
+		case <-client.Connections[hash].Chans.action:
+			client.Connections[hash].connected = true
+			return nil
+		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			if client.Connections[hash].relation != nil {
+				client.Connections[hash].relation.Close()
+			}
+			delete(client.Connections, hash)
+		}
+	}
+	return errors.New("Connection undefined")
+}
+
+// Send package.
+// Check if pack is not null and receive user in saved data.
+// Append headers and confirm package.
+// Send package.
+// If option package is GET, then get response.
+// If no response received, then use retrySend() function.
+func (client *Client) send(option optionType, pack *Package) (*Package, error) {
+	switch {
+	case pack == nil:
+		return nil, errors.New("pack is null")
+	case pack.To.Hashname == client.hashname:
+		return nil, errors.New("sender and receiver is one person")
+	case !client.InConnections(pack.To.Hashname):
+		return nil, errors.New("receiver not in connections")
+	}
+
+	pack = client.appendHeaders(pack)
+	if option == _confirm {
+		pack = client.confirmPackage(GenerateRandomBytes(16), pack)
+	}
+
+	var (
+		savedPack = pack
+		hash      = pack.To.Hashname
+	)
+
+	if client.Connections[hash].relation == nil {
+		ok := client.certPool.AppendCertsFromPEM([]byte(client.Connections[hash].certificate))
+		if !ok {
+			delete(client.Connections, hash)
+			return nil, errors.New("failed to parse root certificate")
+		}
+		config := &tls.Config{
+			ServerName: settings.NETWORK,
+			RootCAs:    client.certPool,
+		}
+		conn, err := tls.Dial("tcp", pack.To.Address, config)
+		if err != nil {
+			delete(client.Connections, hash)
+			return nil, err
+		}
+		client.Connections[hash].relation = conn
+		go serveClient(client.listener, client, client.listener.handleFunc, hash, conn)
+	}
+
+	if option == _confirm {
+		if encPack := client.encryptPackage(pack); encPack != nil {
+			pack = encPack
+		}
+	}
+	pack = client.signPackage(pack)
+
+	conn := client.Connections[hash].relation
+	_, err := conn.Write(
+		bytes.Join(
+			[][]byte{
+				PackJSON(pack),
+				[]byte(settings.END_BYTES),
+			},
+			[]byte{},
+		),
+	)
+	if err != nil {
+		conn.Close()
+		delete(client.Connections, hash)
+		return nil, err
+	}
+
+	return savedPack, err
+}
+
+func (client *Client) wrapDest(dest *Destination) *Destination {
+	if dest == nil {
+		return nil
+	}
+	if dest.Public == nil && dest.Receiver == nil {
+		return nil
+	}
+	if dest.Receiver == nil {
+		dest.Receiver = dest.Public
+	}
+	hash := HashPublic(dest.Receiver)
+	if dest.Public == nil && client.InConnections(hash) {
+		dest.Certificate = client.Connections[hash].certificate
+		dest.Public = client.Connections[hash].throwClient
+		dest.Address = client.Connections[hash].address
+	}
+	return dest
+}
+
+// Remember package hash.
+func (client *Client) rememberHash(hash string) bool {
+	client.Mutex.Lock()
+	defer client.Mutex.Unlock()
+	if _, ok := client.remember.mapping[hash]; ok {
+		return false
+	}
+	client.remember.index = client.remember.index % settings.REMEMBER
+	client.remember.mapping[hash] = client.remember.index
+	if _, ok := client.remember.mapping[client.remember.listing[client.remember.index]]; ok {
+		delete(client.remember.mapping, client.remember.listing[client.remember.index])
+	}
+	client.remember.listing[client.remember.index] = hash
 	return true
 }
 
@@ -377,37 +503,6 @@ func (client *Client) disconnectGet(pack *Package) {
 	delete(client.Connections, hash)
 }
 
-// Read raw data and convert to package.
-func readPackage(conn net.Conn) *Package {
-	var (
-		message string
-		pack    = new(Package)
-		size    = uint64(0)
-		buffer  = make([]byte, settings.BUFF_SIZE)
-	)
-	for {
-		length, err := conn.Read(buffer)
-		if err != nil {
-			return nil
-		}
-		size += uint64(length)
-		if size >= settings.PACK_SIZE {
-			return nil
-		}
-		message += string(buffer[:length])
-		if strings.Contains(message, settings.END_BYTES) {
-			message = strings.Split(message, settings.END_BYTES)[0]
-			break
-		}
-	}
-	// fmt.Println(size)
-	err := json.Unmarshal([]byte(message), pack)
-	if err != nil {
-		return nil
-	}
-	return pack
-}
-
 // If package not decrypted, then uses first version package.
 func (client *Client) tryDecrypt(pack *Package) (*Package, bool) {
 	if pack == nil {
@@ -420,11 +515,32 @@ func (client *Client) tryDecrypt(pack *Package) (*Package, bool) {
 	return result, true
 }
 
+func (client *Client) signPackage(pack *Package) *Package {
+	hash := HashSum(bytes.Join(
+		[][]byte{
+			[]byte(pack.Info.Network),
+			[]byte(pack.Info.Version),
+			[]byte(pack.From.Sender.Hashname),
+			[]byte(pack.To.Receiver.Hashname),
+			[]byte(pack.Head.Title),
+			[]byte(pack.Head.Option),
+			[]byte(pack.Body.Data),
+			ToBytes(pack.Body.Desc.Id),
+			[]byte(pack.Body.Desc.Rand),
+		},
+		[]byte{},
+	))
+
+	pack.Body.Test.Hash = Base64Encode(hash)
+	pack.Body.Test.Sign = Base64Encode(Sign(client.keys.private, hash))
+	return pack
+}
+
 // Encrypt package by session key. Encrypted data:
 // 1) Head.Title;
 // 2) Head.Option;
 // 3) Body.Data;
-// 4) Body.Desc;
+// 4) Body.Desc.Rand;
 func (client *Client) encryptPackage(pack *Package) *Package {
 	var session []byte
 
@@ -479,7 +595,7 @@ func (client *Client) encryptPackage(pack *Package) *Package {
 // 1) Head.Title;
 // 2) Head.Option;
 // 3) Body.Data;
-// 4) Body.Data.Desc;
+// 4) Body.Desc.Rand;
 func (client *Client) decryptPackage(pack *Package) *Package {
 	if !client.InConnections(pack.From.Sender.Hashname) {
 		return nil
@@ -523,6 +639,10 @@ func (client *Client) decryptPackage(pack *Package) *Package {
 				Nonce:       pack.Body.Desc.Nonce,
 				Difficulty:  settings.DIFFICULTY,
 				Redirection: pack.Body.Desc.Redirection,
+			},
+			Test: Test{
+				Hash: pack.Body.Test.Hash,
+				Sign: pack.Body.Test.Sign,
 			},
 		},
 	}
@@ -573,6 +693,89 @@ func (client *Client) isConnected(hash string) bool {
 		return client.Connections[hash].connected
 	}
 	return false
+}
+
+// Get connection and check package.
+func runServer(listener *Listener, handle func(*Client, *Package)) {
+	defer listener.Close()
+	for {
+		conn, err := listener.listen.Accept()
+		if err != nil {
+			break
+		}
+		go serveNode(listener, handle, conn)
+	}
+}
+
+// Read package by node.
+func serveNode(listener *Listener, handle func(*Client, *Package), conn net.Conn) {
+	var (
+		client *Client
+		hash   string
+	)
+	defer func() {
+		if client != nil {
+			delete(client.Connections, hash)
+		}
+		conn.Close()
+	}()
+	for {
+		pack := readPackage(conn)
+		if pack == nil {
+			break
+		}
+		received := pack.receive(listener, handle, conn)
+		if hash == "" && received {
+			client = listener.Clients[pack.To.Hashname]
+			hash = pack.From.Hashname
+		}
+	}
+}
+
+// Read package by client.
+func serveClient(listener *Listener, client *Client, handle func(*Client, *Package), hash string, conn net.Conn) {
+	defer func() {
+		delete(client.Connections, hash)
+		conn.Close()
+	}()
+	for {
+		pack := readPackage(conn)
+		if pack == nil {
+			break
+		}
+		pack.receive(listener, handle, conn)
+	}
+}
+
+// Read raw data and convert to package.
+func readPackage(conn net.Conn) *Package {
+	var (
+		message string
+		pack    = new(Package)
+		size    = uint64(0)
+		buffer  = make([]byte, settings.BUFF_SIZE)
+	)
+	for {
+		length, err := conn.Read(buffer)
+		if err != nil {
+			return nil
+		}
+		size += uint64(length)
+		if size >= settings.PACK_SIZE {
+			return nil
+		}
+		message += string(buffer[:length])
+		if strings.Contains(message, settings.END_BYTES) {
+			message = strings.Split(message, settings.END_BYTES)[0]
+			break
+		}
+	}
+	// fmt.Println(size)
+	err := json.Unmarshal([]byte(message), pack)
+	if err != nil {
+		return nil
+	}
+	return pack
 }
 
 func writeFile(filename string, data []byte) error {
@@ -628,4 +831,24 @@ func fileIsExist(filename string) bool {
 func printJSON(data interface{}) {
 	jsonData, _ := json.MarshalIndent(data, "", "\t")
 	fmt.Println(string(jsonData))
+}
+
+// For blockcipher encryption.
+func paddingPKCS5(ciphertext []byte, blockSize int) []byte {
+    padding := blockSize - len(ciphertext)%blockSize
+    padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+    return append(ciphertext, padtext...)
+}
+
+// For blockcipher decryption.
+func unpaddingPKCS5(origData []byte) []byte {
+    length := len(origData)
+    if length == 0 {
+        return nil
+    }
+    unpadding := int(origData[length-1])
+    if length < unpadding {
+        return nil
+    }
+    return origData[:(length - unpadding)]
 }

@@ -9,10 +9,18 @@ const (
 	TITLE   = "TITLE"
 )
 
+func init() {
+	gopeer.Set(gopeer.SettingsType{
+		"NETWORK": "GOPEER-NETWORK",
+		"VERSION": "template 1.0.0",
+		"KEY_SIZE": uint64(1 << 10),
+	})
+}
+
 func main() {
 	key, cert := gopeer.GenerateCertificate(
-		gopeer.Get("SERVER_NAME").(string), 
-		gopeer.Get("CERT_SIZE").(uint16),
+		gopeer.Get("NETWORK").(string), 
+		gopeer.Get("KEY_SIZE").(uint16),
 	)
 	listener := gopeer.NewListener(ADDRESS)
 	listener.Open(&gopeer.Certificate{
@@ -26,7 +34,7 @@ func main() {
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
 	client.HandleAction(TITLE, pack,
 		func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-			return
+			return set
 		},
 		func(client *gopeer.Client, pack *gopeer.Package) {
 		},

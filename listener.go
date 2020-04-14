@@ -59,6 +59,9 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 
 // Open connection for receiving data.
 func (listener *Listener) Open(c *Certificate) *Listener {
+	if c == nil {
+		return nil
+	}
 	cert, err := tls.X509KeyPair(c.Cert, c.Key)
 	if err != nil {
 		return nil
@@ -87,13 +90,30 @@ func (listener *Listener) Run(handle func(*Client, *Package)) *Listener {
 
 // Close listener connection.
 func (listener *Listener) Close() {
-	if listener == nil || listener.listen == nil {
+	if listener == nil {
 		return
 	}
-	listener.listen.Close()
+	
+	for i := range listener.Clients {
+		for hash := range listener.Clients[i].Connections {
+			if listener.Clients[i].Connections[hash].relation == nil {
+				continue
+			}
+			listener.Clients[i].Connections[hash].relation.Close()
+		}
+	}
+	
+	if listener.listen != nil {
+		listener.listen.Close()
+	}
 }
 
 // Return listener certificate.
 func (listener *Listener) Certificate() []byte {
 	return listener.certificate
+}
+
+// Return listener address.
+func (listener *Listener) Address() string {
+	return listener.address.ipv4 + listener.address.port
 }

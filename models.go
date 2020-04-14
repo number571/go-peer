@@ -7,6 +7,12 @@ import (
 	"sync"
 )
 
+type conndata struct {
+	Certificate string
+	Public      string
+	Session     string
+}
+
 type optionType uint8
 
 const (
@@ -48,6 +54,7 @@ type To struct {
 type Body struct {
 	Data string `json:"data"`
 	Desc Desc   `json:"desc"`
+	Test Test   `json:"test"`
 }
 
 type Receiver Hidden
@@ -66,6 +73,10 @@ type Desc struct {
 	Redirection uint8  `json:"redirection"`
 }
 
+type Test struct {
+	Hash string `json:"hash"`
+	Sign string `json:"sign"`
+}
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
@@ -139,7 +150,6 @@ type transfer struct {
 	active     bool
 	packdata   string
 }
-
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
@@ -158,7 +168,6 @@ type BodyTransfer struct {
 	Hash []byte `json:"hash"`
 	Data []byte `json:"data"`
 }
-
 /* END FILE TRANSFER */
 
 type Destination struct {

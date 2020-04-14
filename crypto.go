@@ -208,7 +208,7 @@ func HashSum(data []byte) []byte {
     return HMAC(func(data []byte) []byte {
         hash := sha256.Sum256(data)
         return hash[:]
-    }, data, []byte(settings.HMACKEY))
+    }, data, []byte(settings.HMAC_KEY))
 }
 
 // MAC by cryptographic hash function.
@@ -443,24 +443,4 @@ func ToBytes(num uint64) []byte {
         return nil
     }
     return data.Bytes()
-}
-
-// For blockcipher encryption.
-func paddingPKCS5(ciphertext []byte, blockSize int) []byte {
-    padding := blockSize - len(ciphertext)%blockSize
-    padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-    return append(ciphertext, padtext...)
-}
-
-// For blockcipher decryption.
-func unpaddingPKCS5(origData []byte) []byte {
-    length := len(origData)
-    if length == 0 {
-        return nil
-    }
-    unpadding := int(origData[length-1])
-    if length < unpadding {
-        return nil
-    }
-    return origData[:(length - unpadding)]
 }

@@ -38,11 +38,11 @@ const (
 )
 
 var (
-    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
-    node3Key, node3Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
-    node4Key, node4Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
-    node5Key, node5Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
-    node6Key, node6Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node3Key, node3Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node4Key, node4Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node5Key, node5Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node6Key, node6Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
     client2             = new(gopeer.Client)
     client3             = new(gopeer.Client)
     client4             = new(gopeer.Client)
@@ -51,7 +51,7 @@ var (
 )
 
 func main() {
-    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
     listener1 := gopeer.NewListener(ADDRESS1)
     listener1.Open(&gopeer.Certificate{
         Cert: []byte(node1Cert),
@@ -99,6 +99,9 @@ func main() {
     }).Run(handleServer)
     defer listener6.Close()
     client6 = listener6.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
+
+    // client6.Sharing.Perm = true
+    // client6.Sharing.Path = "./"
 
     fmt.Println("A:",  client.Hashname())
     fmt.Println("B:", client2.Hashname())
@@ -157,6 +160,7 @@ func handleClient(client *gopeer.Client) {
     }
 
     client.Connect(destFinal)
+    // client.LoadFile(destFinal, "archive.zip", "output.zip")
     client.SendTo(destFinal, &gopeer.Package{
         Head: gopeer.Head{
             Title:  TITLE,

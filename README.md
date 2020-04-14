@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.1.2s.
+> Framework for create decentralized networks. Version: 1.1.4s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
@@ -29,8 +29,19 @@ const (
     TITLE   = "TITLE"
 )
 
+func init() {
+    gopeer.Set(gopeer.SettingsType{
+        "NETWORK": "GOPEER-NETWORK",
+        "VERSION": "template 1.0.0",
+        "KEY_SIZE": uint64(1 << 10),
+    })
+}
+
 func main() {
-    key, cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), 1024)
+    key, cert := gopeer.GenerateCertificate(
+        gopeer.Get("NETWORK").(string), 
+        gopeer.Get("KEY_SIZE").(uint16),
+    )
     listener := gopeer.NewListener(ADDRESS)
     listener.Open(&gopeer.Certificate{
         Cert: []byte(cert),
@@ -43,14 +54,13 @@ func main() {
 func handleServer(client *gopeer.Client, pack *gopeer.Package) {
     client.HandleAction(TITLE, pack,
         func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-            return
+            return set
         },
         func(client *gopeer.Client, pack *gopeer.Package) {
         },
     )
     // ...
 }
-
 ```
 
 ### Settings:
@@ -62,11 +72,10 @@ type settingsStruct struct {
     TITLE_FILETRANSFER string
     OPTION_GET         string
     OPTION_SET         string
-    SERVER_NAME        string
     IS_CLIENT          string
     END_BYTES          string
     TEMPLATE           string
-    HMACKEY            string
+    HMAC_KEY           string
     NETWORK            string
     VERSION            string
     max_id             uint64
@@ -89,13 +98,11 @@ type settingsStruct struct {
     TITLE_FILETRANSFER: "[TITLE-FILETRANSFER]",
     OPTION_GET:         "[OPTION-GET]", // Send
     OPTION_SET:         "[OPTION-SET]", // Receive
-    SERVER_NAME:        "GOPEER-FRAMEWORK",
-    IS_CLIENT:          "[IS-CLIENT]", 
-    SERVER_NAME:        "GOPEER-FRAMEWORK",
+    IS_CLIENT:          "[IS-CLIENT]",
     END_BYTES:          "\000\000\000\005\007\001\000\000\000",
     TEMPLATE:           "0.0.0.0",
-    HMACKEY:            "PASSWORD",
-    NETWORK:            "NETWORK-NAME",
+    HMAC_KEY:           "PASSWORD",
+    NETWORK:            "GOPEER-FRAMEWORK",
     VERSION:            "Version 1.0.0",
     max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
     KEY_SIZE:           2 << 10, // 2048 bit
@@ -119,10 +126,9 @@ func Get(key string) interface{} {}
 ```go
 var OPTION_GET = gopeer.Get("OPTION_GET").(string)
 gopeer.Set(gopeer.SettingsType{
-    "SERVER_NAME": "HIDDEN-LAKE",
-    "NETWORK": "[HIDDEN-LAKE]",
-    "VERSION": "[1.0.0s]",
-    "HMACKEY": "9163571392708145",
+    "NETWORK":  "HIDDEN-LAKE",
+    "VERSION":  "1.0.0s",
+    "HMAC_KEY": "9163571392708145",
 })
 ```
 
@@ -134,6 +140,7 @@ func (listener *Listener) Open(c *Certificate) *Listener {}
 func (listener *Listener) Close() {}
 func (listener *Listener) Run(handleServer func(*Client, *Package)) *Listener {}
 func (listener *Listener) Certificate() []byte {}
+func (listener *Listener) Address() string {}
 func (client *Client) Hashname() string {}
 func (client *Client) Public() *rsa.PublicKey {}
 func (client *Client) Private() *rsa.PrivateKey {}
@@ -222,6 +229,10 @@ func ToBytes(num uint64) []byte {}
             Nonce:       uint64,
             Difficulty:  uint8,
             Redirection: uint8,
+        },
+        Test: {
+            Hash: string,
+            Sign: string,
         },
     },
 }

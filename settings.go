@@ -7,11 +7,10 @@ type settingsStruct struct {
 	TITLE_FILETRANSFER string
 	OPTION_GET         string
 	OPTION_SET         string
-	SERVER_NAME        string
 	IS_CLIENT          string
 	END_BYTES          string
 	TEMPLATE           string
-	HMACKEY            string
+	HMAC_KEY           string
 	NETWORK            string
 	VERSION            string
 	max_id             uint64
@@ -35,11 +34,10 @@ func defaultSettings() settingsStruct {
 		OPTION_GET:         "[OPTION-GET]", // Send
 		OPTION_SET:         "[OPTION-SET]", // Receive
 		IS_CLIENT:          "[IS-CLIENT]",
-		SERVER_NAME:        "GOPEER-FRAMEWORK",
 		END_BYTES:          "\000\000\000\005\007\001\000\000\000",
 		TEMPLATE:           "0.0.0.0",
-		HMACKEY:            "PASSWORD",
-		NETWORK:            "NETWORK-NAME",
+		HMAC_KEY:           "PASSWORD",
+		NETWORK:            "GOPEER-FRAMEWORK",
 		VERSION:            "Version 1.0.0",
 		max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
 		KEY_SIZE:           2 << 10, // 2048 bit
@@ -89,8 +87,6 @@ func Get(key string) interface{} {
 		return settings.OPTION_GET
 	case "OPTION_SET":
 		return settings.OPTION_SET
-	case "SERVER_NAME":
-		return settings.SERVER_NAME
 	case "IS_CLIENT":
 		return settings.IS_CLIENT
 	case "END_BYTES":
@@ -101,8 +97,8 @@ func Get(key string) interface{} {
 		return settings.VERSION
 	case "TEMPLATE":
 		return settings.TEMPLATE
-	case "HMACKEY":
-		return settings.HMACKEY
+	case "HMAC_KEY":
+		return settings.HMAC_KEY
 	case "KEY_SIZE":
 		return settings.KEY_SIZE
 	case "BITS_SIZE":
@@ -137,8 +133,6 @@ func stringSettings(name string, data interface{}) uint8 {
 		settings.OPTION_GET = result
 	case "OPTION_SET":
 		settings.OPTION_SET = result
-	case "SERVER_NAME":
-		settings.SERVER_NAME = result
 	case "IS_CLIENT":
 		settings.IS_CLIENT = result
 	case "END_BYTES":
@@ -149,8 +143,8 @@ func stringSettings(name string, data interface{}) uint8 {
 		settings.VERSION = result
 	case "TEMPLATE":
 		settings.TEMPLATE = result
-	case "HMACKEY":
-		settings.HMACKEY = result
+	case "HMAC_KEY":
+		settings.HMAC_KEY = result
 	default:
 		return 1
 	}

@@ -17,11 +17,11 @@ const (
 
 var (
     anotherClient       = new(gopeer.Client)
-    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
 )
 
 func main() {
-    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("SERVER_NAME").(string), gopeer.Get("KEY_SIZE").(uint16))
+    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
     listener1 := gopeer.NewListener(ADDRESS1)
     listener1.Open(&gopeer.Certificate{
         Cert: []byte(node1Cert),
