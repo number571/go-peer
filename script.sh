@@ -1,13 +1,14 @@
 #!/bin/sh
 
-i=1
 code=0
-count=150
+
+i=1
+count=5
 
 while [ "$i" -le "$count" ]
 do 
 	echo "\n\n\n===== [ $i ] =====\n\n\n"
-	go test -v -cover
+	go test -count 10 -v -cover
 	code="$?"
 	if [ "$code" != 0 ]
 	then

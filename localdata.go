@@ -220,13 +220,17 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 		}
 		select {
 		case <-client.Connections[hash].action:
+			client.mutex.Lock()
 			client.Connections[hash].connected = true
+			client.mutex.Unlock()
 			return nil
 		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			client.mutex.Lock()
 			if client.Connections[hash].relation != nil {
 				client.Connections[hash].relation.Close()
 			}
 			delete(client.Connections, hash)
+			client.mutex.Unlock()
 		}
 	}
 	return errors.New("connection undefined")

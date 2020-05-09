@@ -111,10 +111,10 @@ func (client *Client) Disconnect(dest *Destination) error {
 			},
 		})
 	}
+	client.mutex.Lock()
 	if client.Connections[hash].relation != nil {
 		client.Connections[hash].relation.Close()
 	}
-	client.mutex.Lock()
 	delete(client.Connections, hash)
 	client.mutex.Unlock()
 	return err
@@ -166,16 +166,20 @@ repeat:
 	}
 	select {
 	case <-client.Connections[hash].action:
+		client.mutex.Lock()
 		client.Connections[hash].connected = true
+		client.mutex.Unlock()
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 		if count > 0 {
 			count--
 			goto repeat
 		}
+		client.mutex.Lock()
 		if client.Connections[hash].relation != nil {
 			client.Connections[hash].relation.Close()
 		}
 		delete(client.Connections, hash)
+		client.mutex.Unlock()
 		return errors.New("client not connected")
 	}
 	return nil
