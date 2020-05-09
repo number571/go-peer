@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.1.4s.
+> Framework for create decentralized networks. Version: 1.1.5s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
@@ -79,13 +79,16 @@ type settingsStruct struct {
     NETWORK            string
     VERSION            string
     max_id             uint64
-    KEY_SIZE           uint16
     BITS_SIZE          uint64
     PACK_SIZE          uint64
     BUFF_SIZE          uint32
+    RAND_SIZE          uint16
+    KEY_SIZE           uint16
     REMEMBER           uint16
     DIFFICULTY         uint8
+    RETRY_QUAN         uint8
     WAITING_TIME       uint8
+    SESSION_SIZE       uint8
     REDIRECT_QUAN      uint8
 }
 ```
@@ -105,14 +108,17 @@ type settingsStruct struct {
     NETWORK:            "GOPEER-FRAMEWORK",
     VERSION:            "Version 1.0.0",
     max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
-    KEY_SIZE:           2 << 10, // 2048 bit
-    BITS_SIZE:          1 << 48, // 2^48 bits
+    BITS_SIZE:          1 << 48, // 2^48b
     PACK_SIZE:          8 << 20, // 8MiB
     BUFF_SIZE:          1 << 20, // 1MiB
-    REMEMBER:           256, // hash packages
-    DIFFICULTY:         15,
-    WAITING_TIME:       5, // seconds
-    REDIRECT_QUAN:      3,
+    RAND_SIZE:          1 << 4,  // 16B
+    KEY_SIZE:           2 << 10, // 2048b
+    REMEMBER:           256,     // quantity hash packages
+    DIFFICULTY:         15,      // bits of 256b
+    RETRY_QUAN:         2,       // quantity retry send one package
+    WAITING_TIME:       5,       // in seconds
+    SESSION_SIZE:       32,      // bytes for AES128/192/256
+    REDIRECT_QUAN:      3,       // quantity hidden nodes that can send a package
 }
 ```
 
@@ -147,6 +153,7 @@ func (client *Client) Private() *rsa.PrivateKey {}
 func (client *Client) Address() string {}
 func (client *Client) Destination(hash string) *Destination {}
 func (client *Client) InConnections(hash string) bool {}
+func (client *Client) Action(action func()) {}
 func (client *Client) HandleAction(title string, pack *Package, handleGet func(*Client, *Package) string, handleSet func(*Client, *Package)) bool {}
 func (client *Client) LoadFile(dest *Destination, input string, output string) error {}
 func (client *Client) Connect(dest *Destination) error {}
@@ -248,6 +255,7 @@ func ToBytes(num uint64) []byte {}
         port: string,
     },
     certificate: []byte,
+    mutex: *sync.Mutex,
     Clients: map[string]{
         listener: *Listener,
         remember: {
@@ -262,6 +270,7 @@ func ToBytes(num uint64) []byte {}
         hashname: string,
         address:  string,
         certPool: *x509.CertPool,
+        mutex:    *sync.Mutex,
         F2F: {
             Perm:    bool,
             Friends: map[string]bool,
@@ -270,7 +279,6 @@ func ToBytes(num uint64) []byte {}
             Perm: bool,
             Path: string,
         },
-        Mutex:    *sync.Mutex,
         Connections: map[string]{
             connected:   bool,
             hashname:    string,
@@ -286,10 +294,8 @@ func ToBytes(num uint64) []byte {}
             certificate: []byte,
             throwClient: *rsa.PublicKey,
             public:      *rsa.PublicKey,
-            Chans: {
-                Action:  chan bool,
-                action:  chan bool,
-            },
+            action:      chan bool,
+            Action:      chan bool,
         },
     },
 }

@@ -15,6 +15,7 @@ func NewListener(addr string) *Listener {
 			address: address{
 				ipv4: settings.IS_CLIENT,
 			},
+			mutex:   new(sync.Mutex),
 			Clients: make(map[string]*Client),
 		}
 	}
@@ -27,6 +28,7 @@ func NewListener(addr string) *Listener {
 			ipv4: splited[0],
 			port: ":" + splited[1],
 		},
+		mutex:   new(sync.Mutex),
 		Clients: make(map[string]*Client),
 	}
 }
@@ -41,17 +43,17 @@ func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
 			mapping: make(map[string]uint16),
 			listing: make([]string, settings.REMEMBER),
 		},
-		F2F: F2F{
-			Friends: make(map[string]bool),
-		},
 		hashname: hash,
 		keys: keys{
 			private: private,
 			public:  public,
 		},
-		Mutex:       new(sync.Mutex),
-		address:     listener.address.ipv4 + listener.address.port,
-		certPool:    x509.NewCertPool(),
+		address:  listener.address.ipv4 + listener.address.port,
+		certPool: x509.NewCertPool(),
+		F2F: F2F{
+			Friends: make(map[string]bool),
+		},
+		mutex:       new(sync.Mutex),
 		Connections: make(map[string]*Connect),
 	}
 	return listener.Clients[hash]
@@ -68,7 +70,7 @@ func (listener *Listener) Open(c *Certificate) *Listener {
 	}
 	config := &tls.Config{Certificates: []tls.Certificate{cert}}
 	listener.certificate = c.Cert
-	if listener.address.ipv4+listener.address.port == settings.IS_CLIENT {
+	if listener.Address() == settings.IS_CLIENT {
 		return listener
 	}
 	listener.listen, err = tls.Listen("tcp", settings.TEMPLATE+listener.address.port, config)
@@ -81,7 +83,7 @@ func (listener *Listener) Open(c *Certificate) *Listener {
 // Run handle server for listening packages.
 func (listener *Listener) Run(handle func(*Client, *Package)) *Listener {
 	listener.handleFunc = handle
-	if listener.address.ipv4+listener.address.port == settings.IS_CLIENT {
+	if listener.Address() == settings.IS_CLIENT {
 		return listener
 	}
 	go runServer(listener, handle)
@@ -93,16 +95,18 @@ func (listener *Listener) Close() {
 	if listener == nil {
 		return
 	}
-	
+	listener.mutex.Lock()
+	defer listener.mutex.Unlock()
 	for i := range listener.Clients {
+		listener.Clients[i].mutex.Lock()
 		for hash := range listener.Clients[i].Connections {
-			if listener.Clients[i].Connections[hash].relation == nil {
-				continue
+			if listener.Clients[i].Connections[hash].relation != nil {
+				listener.Clients[i].Connections[hash].relation.Close()
 			}
-			listener.Clients[i].Connections[hash].relation.Close()
+			delete(listener.Clients[i].Connections, hash)
 		}
+		listener.Clients[i].mutex.Unlock()
 	}
-	
 	if listener.listen != nil {
 		listener.listen.Close()
 	}

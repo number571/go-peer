@@ -1,16 +1,14 @@
 package gopeer
 
 import (
-	// "fmt"
-	"time"
 	"testing"
+	"time"
 )
 
 func TestClientHashname(t *testing.T) {
-	t.Parallel()
 	var (
 		errorIsExist bool
-		hashes = [3]string{
+		hashes       = [3]string{
 			"qxn2+NJOo10RHmncVtA7fZ27Is678XPA1sZPlJFZGK4=",
 			"LdQYHNvHfXDNXN+j92bk9wKSYUJ7sx+pphsb++TJnrw=",
 			"fK/1gDOZHPU57MzghX5oBQLk2ETPKagmKwVr5UHV1gA=",
@@ -19,7 +17,7 @@ func TestClientHashname(t *testing.T) {
 	for index := range Clients {
 		if Clients[index].Hashname() != hashes[index] {
 			t.Errorf("client[%d].Hashname() != '%s'", index, hashes[index])
-			errorIsExist = true 
+			errorIsExist = true
 		}
 	}
 	if !errorIsExist {
@@ -28,10 +26,9 @@ func TestClientHashname(t *testing.T) {
 }
 
 func TestClientPublic(t *testing.T) {
-	t.Parallel()
 	var (
 		errorIsExist bool
-		pubkeys = [3]string{
+		pubkeys      = [3]string{
 			`-----BEGIN RSA PUBLIC KEY-----
 MIGJAoGBAO3/0l65YYzobHcqJtlr/EkOul4N0RAKxhNOALfN00pRaApYpYVtgnWx
 k9F4O75kXNEvh6ul84knyZF4XjZTp3LC+uTuptTI6ZBIRBMJPbJOkGjgkjeSTqkE
@@ -87,72 +84,66 @@ func TestClientDisconnect(t *testing.T) {
 	initConnects()
 	defer clearConnects()
 	var (
-		err error
+		err          error
 		errorIsExist bool
 	)
 	dest := Clients[0].Destination(Clients[2].Hashname())
 	err = Clients[0].Disconnect(dest)
 	if err != nil {
 		errorIsExist = true
-    	t.Errorf("client[0].Disconnect(2)")
+		t.Errorf("client[0].Disconnect(2)")
 	}
-
 	time.Sleep(500 * time.Millisecond)
-
 	dest = Clients[0].Destination(Clients[1].Hashname())
 	err = Clients[0].Disconnect(dest)
 	if err != nil {
 		errorIsExist = true
-    	t.Errorf("client[0].Disconnect(1)")
+		t.Errorf("client[0].Disconnect(1)")
 	}
-
 	dest = Clients[2].Destination(Clients[1].Hashname())
 	err = Clients[2].Disconnect(dest)
 	if err != nil {
 		errorIsExist = true
-    	t.Errorf("client[2].Disconnect(1)")
+		t.Errorf("client[2].Disconnect(1)")
 	}
-
 	if !errorIsExist {
-    	t.Logf("client.Disconnect() success")
-    }
-
-    time.Sleep(500 * time.Millisecond)
+		t.Logf("client.Disconnect() success")
+	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func TestClientConnect(t *testing.T) {
 	defer clearConnects()
 	var (
-		err error
+		err          error
 		errorIsExist bool
 	)
 	dest := &Destination{
-        Address: Clients[1].Address(),
-        Certificate: Clients[1].Certificate(),
-        Public: Clients[1].Public(),
-    }
-    err = Clients[0].Connect(dest)
-    if err != nil {
-    	errorIsExist = true
-    	t.Errorf("client[0].Connect(1)")
-    }
-    err = Clients[2].Connect(dest)
-    if err != nil {
-    	errorIsExist = true
-    	t.Errorf("client[2].Connect(1)")
-    }
-
-    dest = &Destination{
-        Receiver: Clients[2].Public(),
-    }
-    err = Clients[0].Connect(dest)
-    if err != nil {
-    	errorIsExist = true
-    	t.Errorf("client[0].Connect(2)")
-    }
-    if !errorIsExist {
-    	t.Logf("client.Connect() success")
-    }
+		Address:     Clients[1].Address(),
+		Certificate: Clients[1].Certificate(),
+		Public:      Clients[1].Public(),
+	}
+	err = Clients[0].Connect(dest)
+	if err != nil {
+		errorIsExist = true
+		t.Errorf("client[0].Connect(1)")
+	}
+	err = Clients[2].Connect(dest)
+	if err != nil {
+		errorIsExist = true
+		t.Errorf("client[2].Connect(1)")
+	}
+	dest = &Destination{
+		Receiver: Clients[2].Public(),
+	}
+	err = Clients[0].Connect(dest)
+	if err != nil {
+		errorIsExist = true
+		t.Errorf("client[0].Connect(2)")
+	}
+	if !errorIsExist {
+		t.Logf("client.Connect() success")
+	}
 }
 
 func TestClientSendTo(t *testing.T) {
@@ -178,7 +169,7 @@ func sendTestPackage(t *testing.T, eie *bool, sender *Client, receiver *Client) 
 	dest := sender.Destination(receiver.Hashname())
 	sender.SendTo(dest, &Package{
 		Head: Head{
-			Title: TITLE_TEST,
+			Title:  TITLE_TEST,
 			Option: settings.OPTION_GET,
 		},
 		Body: Body{
@@ -186,7 +177,7 @@ func sendTestPackage(t *testing.T, eie *bool, sender *Client, receiver *Client) 
 		},
 	})
 	select {
-	case <-sender.Connections[hash].Chans.Action:
+	case <-sender.Connections[hash].Action:
 		// pass
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 		*eie = true
@@ -210,7 +201,16 @@ func sendTestPackage(t *testing.T, eie *bool, sender *Client, receiver *Client) 
               v
               F
 ==================
+
+qxn2+NJOo10RHmncVtA7fZ27Is678XPA1sZPlJFZGK4= ----- Clients[0] = B
+LdQYHNvHfXDNXN+j92bk9wKSYUJ7sx+pphsb++TJnrw= ----- Clients[1] = C
+fK/1gDOZHPU57MzghX5oBQLk2ETPKagmKwVr5UHV1gA= ----- Clients[2] = D
+
+T3kBS/dw2afVaEhg6/vOHT7HH1PKgEdFjDWEN81NkJk= ----- newClient1 = A ----- SET
+CoCV95aLEumtNXTEUHbXCN1GuCmISLpm5JcjROBJ914= ----- newClient2 = E
+w38QEKtGkBJQoh1YBXK9w8pYNSmWe8MH4UP7jFxFnfw= ----- newClient3 = F ----- GET
 */
+
 func sendRedirectPackage(t *testing.T, eie *bool) {
 	var (
 		newClient1 = new(Client) // A
@@ -222,12 +222,6 @@ func sendRedirectPackage(t *testing.T, eie *bool) {
 		newClient2.listener.Close()
 		newClient3.listener.Close()
 	}()
-	// newClient1 = A
-	// Clients[0] = B
-	// Clients[1] = C
-	// Clients[2] = D
-	// newClient2 = E
-	// newClient3 = F
 	var (
 		privkeys = [3]string{
 			`-----BEGIN RSA PRIVATE KEY-----
@@ -282,17 +276,17 @@ RLohWeibe3Scpj0prVo5V1h2wmltUDu+ZoJWSObIpw==
 	)
 	newClient1 = createNewClient(":7070", ParsePrivate(privkeys[0]))
 	dest := &Destination{
-		Address: newClient1.Address(),
-    	Certificate: newClient1.Certificate(),
-    	Public: newClient1.Public(),
+		Address:     newClient1.Address(),
+		Certificate: newClient1.Certificate(),
+		Public:      newClient1.Public(),
 	}
 	Clients[0].Connect(dest) // B -> A
 
 	newClient2 = createNewClient(":9090", ParsePrivate(privkeys[1]))
 	dest = &Destination{
-		Address: newClient2.Address(),
-    	Certificate: newClient2.Certificate(),
-    	Public: newClient2.Public(),
+		Address:     newClient2.Address(),
+		Certificate: newClient2.Certificate(),
+		Public:      newClient2.Public(),
 	}
 	Clients[1].Connect(dest) // C -> E
 	Clients[2].Connect(dest) // D -> E
@@ -307,12 +301,12 @@ RLohWeibe3Scpj0prVo5V1h2wmltUDu+ZoJWSObIpw==
 	err := newClient1.Connect(dest) // A -> F
 	if err != nil {
 		*eie = true
-		t.Errorf("client[A].Connect(F)")
+		t.Errorf("=================== client[A].Connect(F)")
 		return
 	}
 	newClient1.SendTo(dest, &Package{
 		Head: Head{
-			Title: TITLE_TEST,
+			Title:  TITLE_TEST,
 			Option: settings.OPTION_GET,
 		},
 		Body: Body{
@@ -321,10 +315,10 @@ RLohWeibe3Scpj0prVo5V1h2wmltUDu+ZoJWSObIpw==
 	})
 
 	select {
-	case <-newClient1.Connections[newClient3.Hashname()].Chans.Action:
+	case <-newClient1.Connections[newClient3.Hashname()].Action:
 		// pass
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 		*eie = true
-		t.Errorf("client[A].SendTo(F)")
+		t.Errorf("=================== client[A].SendTo(F)[2]")
 	}
 }

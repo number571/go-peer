@@ -1,17 +1,16 @@
 package gopeer
 
 import (
-    "fmt"
-    "crypto/rsa"
+	// "fmt"
+	"crypto/rsa"
 )
 
 const (
-    TITLE_TEST = "[TITLE-TEST]"
+	TITLE_TEST = "[TITLE-TEST]"
 )
 
 var (
-    Clients [3]*Client
-    _ = fmt.Sprintf("")
+	Clients [3]*Client
 )
 
 func init() {
@@ -19,66 +18,62 @@ func init() {
 		"KEY_SIZE": uint64(1 << 10),
 	})
 
-    Clients[0] = createNewClient(settings.IS_CLIENT, ParsePrivate(PRIVATE_KEY1))
-    Clients[1] = createNewClient(":8080", ParsePrivate(PRIVATE_KEY2))
-    Clients[2] = createNewClient(settings.IS_CLIENT, ParsePrivate(PRIVATE_KEY3))
+	Clients[0] = createNewClient(settings.IS_CLIENT, ParsePrivate(PRIVATE_KEY1))
+	Clients[1] = createNewClient(":8080", ParsePrivate(PRIVATE_KEY2))
+	Clients[2] = createNewClient(settings.IS_CLIENT, ParsePrivate(PRIVATE_KEY3))
 }
 
 func createNewClient(address string, privkey *rsa.PrivateKey) *Client {
-    var client = new(Client)
-    nodeKey, nodeCert := GenerateCertificate(settings.NETWORK, settings.KEY_SIZE)
-    listener := NewListener(address)
-    listener.Open(&Certificate{
-        Cert: []byte(nodeCert),
-        Key:  []byte(nodeKey),
-    }).Run(handleServer)
-    if privkey == nil {
-        client = listener.NewClient(GeneratePrivate(settings.KEY_SIZE))
-    } else {
-        client = listener.NewClient(privkey)
-    }
-    return client
+	var client = new(Client)
+	nodeKey, nodeCert := GenerateCertificate(settings.NETWORK, settings.KEY_SIZE)
+	listener := NewListener(address)
+	listener.Open(&Certificate{
+		Cert: []byte(nodeCert),
+		Key:  []byte(nodeKey),
+	}).Run(handleServer)
+	if privkey == nil {
+		client = listener.NewClient(GeneratePrivate(settings.KEY_SIZE))
+	} else {
+		client = listener.NewClient(privkey)
+	}
+	return client
 }
 
 func initConnects() {
-    dest := &Destination{
-        Address: Clients[1].Address(),
-        Certificate: Clients[1].Certificate(),
-        Public: Clients[1].Public(),
-    }
+	dest := &Destination{
+		Address:     Clients[1].Address(),
+		Certificate: Clients[1].Certificate(),
+		Public:      Clients[1].Public(),
+	}
 
-    Clients[0].Connect(dest)
-    Clients[2].Connect(dest)
+	Clients[0].Connect(dest)
+	Clients[2].Connect(dest)
 
-    dest = &Destination{
-        Receiver: Clients[2].Public(),
-    }
+	dest = &Destination{
+		Receiver: Clients[2].Public(),
+	}
 
-    Clients[0].Connect(dest)
+	Clients[0].Connect(dest)
 }
 
 func clearConnects() {
-    for i := range Clients {
-        // for hash := range Clients[i].Connections {
-        //     if Clients[i].Connections[hash].relation != nil {
-        //         Clients[i].Connections[hash].relation.Close()
-        //     }
-        //     delete(Clients[i].Connections, hash)
-        // }
-        Clients[i].Connections = make(map[string]*Connect)
-    }
+	for i := range Clients {
+		Clients[i].Action(func() {
+			Clients[i].Connections = make(map[string]*Connect)
+		})
+	}
 }
 
 func handleServer(client *Client, pack *Package) {
-    client.HandleAction(TITLE_TEST, pack,
-        func(client *Client, pack *Package) (set string) {
-            // fmt.Printf("[%s]: '%s'\n", pack.From.Sender.Hashname, pack.Body.Data)
-            return set
-        },
-        func(client *Client, pack *Package) {
-            client.Connections[pack.From.Sender.Hashname].Chans.Action <- true
-        },
-    )
+	client.HandleAction(TITLE_TEST, pack,
+		func(client *Client, pack *Package) (set string) {
+			// fmt.Printf("[%s]: '%s'\n", pack.From.Sender.Hashname, pack.Body.Data)
+			return set
+		},
+		func(client *Client, pack *Package) {
+			client.Connections[pack.From.Sender.Hashname].Action <- true
+		},
+	)
 }
 
 const (

@@ -77,6 +77,7 @@ type Test struct {
 	Hash string `json:"hash"`
 	Sign string `json:"sign"`
 }
+
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
@@ -85,6 +86,7 @@ type Listener struct {
 	handleFunc  func(*Client, *Package)
 	address     address
 	certificate []byte
+	mutex       *sync.Mutex
 	Clients     map[string]*Client
 }
 
@@ -102,7 +104,7 @@ type Client struct {
 	certPool    *x509.CertPool
 	F2F         F2F
 	Sharing     Sharing
-	Mutex       *sync.Mutex
+	mutex       *sync.Mutex
 	Connections map[string]*Connect
 }
 
@@ -138,18 +140,15 @@ type Connect struct {
 	certificate []byte
 	throwClient *rsa.PublicKey
 	public      *rsa.PublicKey
-	Chans       Chans
-}
-
-type Chans struct {
-	Action chan bool
-	action chan bool
+	action      chan bool
+	Action      chan bool
 }
 
 type transfer struct {
-	active     bool
-	packdata   string
+	active   bool
+	packdata string
 }
+
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
@@ -165,9 +164,10 @@ type HeadTransfer struct {
 }
 
 type BodyTransfer struct {
-	Hash []byte `json:"hash"`
 	Data []byte `json:"data"`
+	Hash []byte `json:"hash"`
 }
+
 /* END FILE TRANSFER */
 
 type Destination struct {

@@ -9,7 +9,7 @@ func TestConnectHashname(t *testing.T) {
 	defer clearConnects()
 	var (
 		errorIsExist bool
-		hashes = [3]string{
+		hashes       = [3]string{
 			"qxn2+NJOo10RHmncVtA7fZ27Is678XPA1sZPlJFZGK4=",
 			"LdQYHNvHfXDNXN+j92bk9wKSYUJ7sx+pphsb++TJnrw=",
 			"fK/1gDOZHPU57MzghX5oBQLk2ETPKagmKwVr5UHV1gA=",
@@ -23,6 +23,7 @@ func TestConnectHashname(t *testing.T) {
 			if !client.InConnections(hash) {
 				errorIsExist = true
 				t.Errorf("client[%d].InConnections(%s)", i, hash)
+				break
 			}
 			conn := client.Connections[hash]
 			if hash != conn.Hashname() {
@@ -41,7 +42,7 @@ func TestConnectPublic(t *testing.T) {
 	defer clearConnects()
 	var (
 		errorIsExist bool
-		pubkeys = [3]string{
+		pubkeys      = [3]string{
 			`-----BEGIN RSA PUBLIC KEY-----
 MIGJAoGBAO3/0l65YYzobHcqJtlr/EkOul4N0RAKxhNOALfN00pRaApYpYVtgnWx
 k9F4O75kXNEvh6ul84knyZF4XjZTp3LC+uTuptTI6ZBIRBMJPbJOkGjgkjeSTqkE
@@ -71,6 +72,7 @@ Npjj3L6l11Y69WiFgSkyepRbvWpU1qbeh1gzY2AAWao2ulmxqWGDAgMBAAE=
 			if !client.InConnections(hash) {
 				errorIsExist = true
 				t.Errorf("client[%d].InConnections(%s)", i, hash)
+				break
 			}
 			conn := client.Connections[hash]
 			if pub != StringPublic(conn.Public()) {
@@ -88,8 +90,28 @@ func TestConnectThrow(t *testing.T) {
 	initConnects()
 	defer clearConnects()
 	var (
-		errorIsExist bool 
+		errorIsExist bool
 	)
+	if !Clients[0].InConnections(Clients[2].Hashname()) {
+		errorIsExist = true
+		t.Errorf("Connection failed [1]")
+		return
+	}
+	if !Clients[0].InConnections(Clients[1].Hashname()) {
+		errorIsExist = true
+		t.Errorf("Connection failed [2]")
+		return
+	}
+	if !Clients[2].InConnections(Clients[0].Hashname()) {
+		errorIsExist = true
+		t.Errorf("Connection failed [3]")
+		return
+	}
+	if !Clients[2].InConnections(Clients[1].Hashname()) {
+		errorIsExist = true
+		t.Errorf("Connection failed [4]")
+		return
+	}
 	throw := Clients[0].Connections[Clients[2].Hashname()].Throw()
 	if StringPublic(throw) != StringPublic(Clients[1].Public()) {
 		errorIsExist = true

@@ -55,6 +55,13 @@ func (client *Client) InConnections(hash string) bool {
 	return false
 }
 
+// Wrap function in mutex Lock/Unlock.
+func (client *Client) Action(action func()) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	action()
+}
+
 // Switcher function about GET and SET options.
 // GET: accept package and send response;
 // SET: accept package;
@@ -89,12 +96,13 @@ func (client *Client) HandleAction(title string, pack *Package, handleGet func(*
 func (client *Client) Disconnect(dest *Destination) error {
 	var err error
 	dest = client.wrapDest(dest)
-
+	if dest == nil {
+		return errors.New("dest is null")
+	}
 	hash := HashPublic(dest.Receiver)
 	if !client.InConnections(hash) {
 		return errors.New("client not connected")
 	}
-
 	if client.Connections[hash].relation == nil {
 		_, err = client.SendTo(dest, &Package{
 			Head: Head{
@@ -103,12 +111,12 @@ func (client *Client) Disconnect(dest *Destination) error {
 			},
 		})
 	}
-
 	if client.Connections[hash].relation != nil {
 		client.Connections[hash].relation.Close()
 	}
-
+	client.mutex.Lock()
 	delete(client.Connections, hash)
+	client.mutex.Unlock()
 	return err
 }
 
@@ -117,8 +125,11 @@ func (client *Client) Disconnect(dest *Destination) error {
 // After sending GET and receiving SET package, set Connected = true.
 func (client *Client) Connect(dest *Destination) error {
 	dest = client.wrapDest(dest)
+	if dest == nil {
+		return errors.New("dest is null")
+	}
 	var (
-		session = GenerateRandomBytes(32)
+		session = GenerateRandomBytes(uint(settings.SESSION_SIZE))
 		hash    = HashPublic(dest.Receiver)
 	)
 	if dest.Public == nil {
@@ -132,11 +143,11 @@ func (client *Client) Connect(dest *Destination) error {
 		public:      dest.Receiver,
 		certificate: dest.Certificate,
 		session:     session,
-		Chans: Chans{
-			Action: make(chan bool),
-			action: make(chan bool),
-		},
+		action:      make(chan bool),
+		Action:      make(chan bool),
 	}
+	var count = settings.RETRY_QUAN
+repeat:
 	_, err := client.SendTo(dest, &Package{
 		Head: Head{
 			Title:  settings.TITLE_CONNECT,
@@ -145,8 +156,8 @@ func (client *Client) Connect(dest *Destination) error {
 		Body: Body{
 			Data: string(PackJSON(conndata{
 				Certificate: Base64Encode(client.listener.certificate),
-				Public:  Base64Encode([]byte(StringPublic(client.keys.public))),
-				Session: Base64Encode(EncryptRSA(dest.Receiver, session)),
+				Public:      Base64Encode([]byte(StringPublic(client.keys.public))),
+				Session:     Base64Encode(EncryptRSA(dest.Receiver, session)),
 			})),
 		},
 	})
@@ -154,9 +165,13 @@ func (client *Client) Connect(dest *Destination) error {
 		return err
 	}
 	select {
-	case <-client.Connections[hash].Chans.action:
+	case <-client.Connections[hash].action:
 		client.Connections[hash].connected = true
 	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+		if count > 0 {
+			count--
+			goto repeat
+		}
 		if client.Connections[hash].relation != nil {
 			client.Connections[hash].relation.Close()
 		}
@@ -171,23 +186,27 @@ func (client *Client) Connect(dest *Destination) error {
 // Output = result name file in our side.
 func (client *Client) LoadFile(dest *Destination, input string, output string) error {
 	dest = client.wrapDest(dest)
-
+	if dest == nil {
+		return errors.New("dest is null")
+	}
 	hash := HashPublic(dest.Receiver)
 	if !client.InConnections(hash) {
 		return errors.New("client not connected")
 	}
-
 	if fileIsExist(output) {
 		return errors.New("file already exists")
 	}
-
 	client.Connections[hash].transfer.active = true
 	defer func() {
 		client.Connections[hash].transfer.active = false
 	}()
-
-	for i := uint64(0) ;; i++ {
-		client.SendTo(dest, &Package{
+	var (
+		read  = new(FileTransfer)
+		count = settings.RETRY_QUAN
+	)
+	for id := uint64(0); ; id++ {
+	repeat:
+		_, err := client.SendTo(dest, &Package{
 			Head: Head{
 				Title:  settings.TITLE_FILETRANSFER,
 				Option: settings.OPTION_GET,
@@ -195,39 +214,44 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 			Body: Body{
 				Data: string(PackJSON(FileTransfer{
 					Head: HeadTransfer{
-						Id:   i,
+						Id:   id,
 						Name: input,
 					},
 				})),
 			},
 		})
-
+		if err != nil {
+			return err
+		}
 		select {
-		case <-client.Connections[hash].Chans.action:
+		case <-client.Connections[hash].action:
 			// pass
-		case <-time.After(time.Duration(settings.WAITING_TIME * 2) * time.Second):
+		case <-time.After(time.Duration(settings.WAITING_TIME*2) * time.Second):
+			if count > 0 {
+				count--
+				goto repeat
+			}
 			return errors.New("waiting time is over")
 		}
-
-		var read = new(FileTransfer)
 		UnpackJSON([]byte(client.Connections[hash].transfer.packdata), read)
-
 		if read == nil {
 			return errors.New("pack is null")
 		}
-
 		if read.Head.IsNull {
 			break
 		}
-
-		data := read.Body.Data
-		if !bytes.Equal(read.Body.Hash, HashSum(data)) {
-			return errors.New("hash not equal file hash")
+		if read.Head.Id != id {
+			return errors.New("id not equal file part id")
 		}
-
+		if read.Head.Name != input {
+			return errors.New("input name not equal file part name")
+		}
+		if !bytes.Equal(read.Body.Hash, HashSum(read.Body.Data)) {
+			return errors.New("hash not equal file part hash")
+		}
 		writeFile(output, read.Body.Data)
+		count = settings.RETRY_QUAN
 	}
-
 	return nil
 }
 
@@ -235,14 +259,15 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 func (client *Client) SendTo(dest *Destination, pack *Package) (*Package, error) {
 	dest = client.wrapDest(dest)
 	switch {
-	case dest == nil: return nil, errors.New("dest is null")
-	case dest.Public == nil: return nil, errors.New("public is null")
-	case dest.Receiver == nil: return nil, errors.New("receiver is null")
+	case dest == nil:
+		return nil, errors.New("dest is null")
+	case dest.Public == nil:
+		return nil, errors.New("public is null")
+	case dest.Receiver == nil:
+		return nil, errors.New("receiver is null")
 	}
-
 	pack.To.Receiver.Hashname = HashPublic(dest.Receiver)
 	pack.To.Hashname = HashPublic(dest.Public)
 	pack.To.Address = dest.Address
-
 	return client.send(_confirm, pack)
 }

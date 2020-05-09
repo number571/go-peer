@@ -14,18 +14,23 @@ type settingsStruct struct {
 	NETWORK            string
 	VERSION            string
 	max_id             uint64
-	KEY_SIZE           uint16
 	BITS_SIZE          uint64
 	PACK_SIZE          uint64
 	BUFF_SIZE          uint32
+	RAND_SIZE          uint16
+	KEY_SIZE           uint16
 	REMEMBER           uint16
 	DIFFICULTY         uint8
+	RETRY_QUAN         uint8
 	WAITING_TIME       uint8
+	SESSION_SIZE       uint8
 	REDIRECT_QUAN      uint8
 }
 
 var settings = defaultSettings()
 
+// b = bit
+// B = byte
 func defaultSettings() settingsStruct {
 	return settingsStruct{
 		TITLE_CONNECT:      "[TITLE-CONNECT]",
@@ -40,14 +45,17 @@ func defaultSettings() settingsStruct {
 		NETWORK:            "GOPEER-FRAMEWORK",
 		VERSION:            "Version 1.0.0",
 		max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
-		KEY_SIZE:           2 << 10, // 2048 bit
-		BITS_SIZE:          1 << 48, // 2^48 bits
-		PACK_SIZE:          8 << 20, // 8MiB
-		BUFF_SIZE:          1 << 20, // 1MiB
-		REMEMBER:           256,     // quantity hash packages
-		DIFFICULTY:         15,      // bits of 256 bits
-		WAITING_TIME:       5,       // in seconds
-		REDIRECT_QUAN:      3,
+		BITS_SIZE:          1 << 48,               // 2^48b
+		PACK_SIZE:          8 << 20,               // 8MiB
+		BUFF_SIZE:          1 << 20,               // 1MiB
+		RAND_SIZE:          1 << 4,                // 16B
+		KEY_SIZE:           2 << 10,               // 2048b
+		REMEMBER:           256,                   // quantity hash packages
+		DIFFICULTY:         15,                    // bits of 256b
+		RETRY_QUAN:         2,                     // quantity retry send one package
+		WAITING_TIME:       5,                     // in seconds
+		SESSION_SIZE:       32,                    // bytes for AES128/192/256
+		REDIRECT_QUAN:      3,                     // quantity hidden nodes that can send a package
 	}
 }
 
@@ -99,20 +107,26 @@ func Get(key string) interface{} {
 		return settings.TEMPLATE
 	case "HMAC_KEY":
 		return settings.HMAC_KEY
-	case "KEY_SIZE":
-		return settings.KEY_SIZE
 	case "BITS_SIZE":
 		return settings.BITS_SIZE
 	case "PACK_SIZE":
 		return settings.PACK_SIZE
 	case "BUFF_SIZE":
 		return settings.BUFF_SIZE
+	case "RAND_SIZE":
+		return settings.RAND_SIZE
+	case "KEY_SIZE":
+		return settings.KEY_SIZE
 	case "REMEMBER":
 		return settings.REMEMBER
 	case "DIFFICULTY":
 		return settings.DIFFICULTY
+	case "RETRY_QUAN":
+		return settings.RETRY_QUAN
 	case "WAITING_TIME":
 		return settings.WAITING_TIME
+	case "SESSION_SIZE":
+		return settings.SESSION_SIZE
 	case "REDIRECT_QUAN":
 		return settings.REDIRECT_QUAN
 	default:
@@ -154,22 +168,34 @@ func stringSettings(name string, data interface{}) uint8 {
 func intSettings(name string, data interface{}) uint8 {
 	result := data.(uint64)
 	switch name {
-	case "KEY_SIZE":
-		settings.KEY_SIZE = uint16(result)
 	case "BITS_SIZE":
-		settings.BITS_SIZE = uint64(result)	
+		settings.BITS_SIZE = uint64(result)
 		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE
 	case "PACK_SIZE":
-		settings.PACK_SIZE = uint64(result)	
+		settings.PACK_SIZE = uint64(result)
 		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE
 	case "BUFF_SIZE":
 		settings.BUFF_SIZE = uint32(result)
+	case "RAND_SIZE":
+		settings.RAND_SIZE = uint16(result)
+	case "KEY_SIZE":
+		settings.KEY_SIZE = uint16(result)
 	case "REMEMBER":
 		settings.REMEMBER = uint16(result)
 	case "DIFFICULTY":
 		settings.DIFFICULTY = uint8(result)
+	case "RETRY_QUAN":
+		settings.RETRY_QUAN = uint8(result)
 	case "WAITING_TIME":
 		settings.WAITING_TIME = uint8(result)
+	case "SESSION_SIZE":
+		size := uint8(result)
+		switch size {
+		case 16, 24, 32:
+			settings.SESSION_SIZE = size
+		default:
+			return 1
+		}
 	case "REDIRECT_QUAN":
 		settings.REDIRECT_QUAN = uint8(result)
 	default:
