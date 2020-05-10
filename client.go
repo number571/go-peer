@@ -1,6 +1,7 @@
 package gopeer
 
 import (
+	"net"
 	"bytes"
 	"crypto/rsa"
 	"errors"
@@ -129,12 +130,17 @@ func (client *Client) Connect(dest *Destination) error {
 		return errors.New("dest is null")
 	}
 	var (
+		relation net.Conn
 		session = GenerateRandomBytes(uint(settings.SESSION_SIZE))
 		hash    = HashPublic(dest.Receiver)
 	)
-	if dest.Public == nil {
-		return client.hiddenConnect(hash, session, dest.Receiver)
+	if dest.Address == settings.IS_CLIENT && client.InConnections(hash) {
+		relation = client.Connections[hash].relation
 	}
+	if dest.Public == nil {
+		return client.hiddenConnect(hash, session, dest.Receiver, relation)
+	}
+	client.mutex.Lock()
 	client.Connections[hash] = &Connect{
 		connected:   false,
 		hashname:    hash,
@@ -143,9 +149,11 @@ func (client *Client) Connect(dest *Destination) error {
 		public:      dest.Receiver,
 		certificate: dest.Certificate,
 		session:     session,
+		relation:    relation,
 		action:      make(chan bool),
 		Action:      make(chan bool),
 	}
+	client.mutex.Unlock()
 	var count = settings.RETRY_QUAN
 repeat:
 	_, err := client.SendTo(dest, &Package{
@@ -200,9 +208,13 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 	if fileIsExist(output) {
 		return errors.New("file already exists")
 	}
+	client.mutex.Lock()
 	client.Connections[hash].transfer.active = true
+	client.mutex.Unlock()
 	defer func() {
+		client.mutex.Lock()
 		client.Connections[hash].transfer.active = false
+		client.mutex.Unlock()
 	}()
 	var (
 		read  = new(FileTransfer)
@@ -255,6 +267,7 @@ func (client *Client) LoadFile(dest *Destination, input string, output string) e
 		}
 		writeFile(output, read.Body.Data)
 		count = settings.RETRY_QUAN
+		
 	}
 	return nil
 }

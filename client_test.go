@@ -1,6 +1,7 @@
 package gopeer
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -166,7 +167,7 @@ func TestClientSendTo(t *testing.T) {
 
 func sendTestPackage(t *testing.T, eie *bool, sender *Client, receiver *Client) {
 	hash := receiver.Hashname()
-	dest := sender.Destination(receiver.Hashname())
+	dest := sender.Destination(hash)
 	sender.SendTo(dest, &Package{
 		Head: Head{
 			Title:  TITLE_TEST,
@@ -304,21 +305,25 @@ RLohWeibe3Scpj0prVo5V1h2wmltUDu+ZoJWSObIpw==
 		t.Errorf("=================== client[A].Connect(F)")
 		return
 	}
-	newClient1.SendTo(dest, &Package{
-		Head: Head{
-			Title:  TITLE_TEST,
-			Option: settings.OPTION_GET,
-		},
-		Body: Body{
-			Data: "hello, world!",
-		},
-	})
 
-	select {
-	case <-newClient1.Connections[newClient3.Hashname()].Action:
-		// pass
-	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
-		*eie = true
-		t.Errorf("=================== client[A].SendTo(F)[2]")
+	for i := 0; i < 10; i++ {
+		newClient1.SendTo(dest, &Package{
+			Head: Head{
+				Title:  TITLE_TEST,
+				Option: settings.OPTION_GET,
+			},
+			Body: Body{
+				Data: fmt.Sprintf("hello, world! [%d]", i),
+			},
+		})
+
+		select {
+		case <-newClient1.Connections[newClient3.Hashname()].Action:
+			// pass
+		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+			*eie = true
+			t.Errorf("=================== client[A].SendTo(F)")
+			return
+		}
 	}
 }

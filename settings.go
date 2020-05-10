@@ -43,10 +43,10 @@ func defaultSettings() settingsStruct {
 		TEMPLATE:           "0.0.0.0",
 		HMAC_KEY:           "PASSWORD",
 		NETWORK:            "GOPEER-FRAMEWORK",
-		VERSION:            "Version 1.0.0",
-		max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
-		BITS_SIZE:          1 << 48,               // 2^48b
-		PACK_SIZE:          8 << 20,               // 8MiB
+		VERSION:            "v1.0.0t",
+		max_id:             (1 << 56) / (8 << 20), // BITS_SIZE / PACK_SIZE 
+		BITS_SIZE:          1 << 56,               // (2^56)b
+		PACK_SIZE:          8 << 20,               // (2^20*8)b = 8MiB
 		BUFF_SIZE:          1 << 20,               // 1MiB
 		RAND_SIZE:          1 << 4,                // 16B
 		KEY_SIZE:           2 << 10,               // 2048b
