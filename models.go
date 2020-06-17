@@ -77,7 +77,6 @@ type Test struct {
 	Hash string `json:"hash"`
 	Sign string `json:"sign"`
 }
-
 /* END PACKAGE PART */
 
 /* BEGIN LISTENER PART */
@@ -140,6 +139,7 @@ type Connect struct {
 	certificate []byte
 	throwClient *rsa.PublicKey
 	public      *rsa.PublicKey
+	closeFunc   chan bool
 	action      chan bool
 	Action      chan bool
 }
@@ -148,7 +148,6 @@ type transfer struct {
 	active   bool
 	packdata string
 }
-
 /* END LISTENER PART */
 
 /* BEGIN FILE TRANSFER */
@@ -167,7 +166,6 @@ type BodyTransfer struct {
 	Data []byte `json:"data"`
 	Hash []byte `json:"hash"`
 }
-
 /* END FILE TRANSFER */
 
 type Destination struct {

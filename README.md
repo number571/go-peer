@@ -106,19 +106,19 @@ type settingsStruct struct {
     TEMPLATE:           "0.0.0.0",
     HMAC_KEY:           "PASSWORD",
     NETWORK:            "GOPEER-FRAMEWORK",
-    VERSION:            "Version 1.0.0",
-    max_id:             (1 << 48) / (8 << 20), // BITS_SIZE / PACK_SIZE
-    BITS_SIZE:          1 << 48, // 2^48b
-    PACK_SIZE:          8 << 20, // 8MiB
-    BUFF_SIZE:          1 << 20, // 1MiB
-    RAND_SIZE:          1 << 4,  // 16B
-    KEY_SIZE:           2 << 10, // 2048b
-    REMEMBER:           256,     // quantity hash packages
-    DIFFICULTY:         15,      // bits of 256b
-    RETRY_QUAN:         2,       // quantity retry send one package
-    WAITING_TIME:       5,       // in seconds
-    SESSION_SIZE:       32,      // bytes for AES128/192/256
-    REDIRECT_QUAN:      3,       // quantity hidden nodes that can send a package
+    VERSION:            "v1.0.0t",
+    max_id:             (1 << 56) / (8 << 20), // BITS_SIZE / PACK_SIZE 
+    BITS_SIZE:          (1 << 56),             // (2^56)b
+    PACK_SIZE:          (8 << 20),             // (2^20*8)b = 8MiB
+    BUFF_SIZE:          (1 << 20),             // (2^20)b = 1MiB
+    RAND_SIZE:          (1 << 4),              // 16B
+    KEY_SIZE:           (2 << 10),             // (2^10*2)b = 2048b
+    REMEMBER:           (1 << 8),              // 256 hashes saved
+    DIFFICULTY:         (1 << 4),              // first 16b of 256b
+    RETRY_QUAN:         2,                     // quantity retry send one package
+    WAITING_TIME:       5,                     // in seconds
+    SESSION_SIZE:       32,                    // 32B for AES128/192/256
+    REDIRECT_QUAN:      3,                     // quantity hidden nodes that can send a package
 }
 ```
 

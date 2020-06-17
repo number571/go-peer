@@ -94,7 +94,6 @@ func TestClientDisconnect(t *testing.T) {
 		errorIsExist = true
 		t.Errorf("client[0].Disconnect(2)")
 	}
-	time.Sleep(500 * time.Millisecond)
 	dest = Clients[0].Destination(Clients[1].Hashname())
 	err = Clients[0].Disconnect(dest)
 	if err != nil {
@@ -110,7 +109,6 @@ func TestClientDisconnect(t *testing.T) {
 	if !errorIsExist {
 		t.Logf("client.Disconnect() success")
 	}
-	time.Sleep(500 * time.Millisecond)
 }
 
 func TestClientConnect(t *testing.T) {
@@ -214,9 +212,9 @@ w38QEKtGkBJQoh1YBXK9w8pYNSmWe8MH4UP7jFxFnfw= ----- newClient3 = F ----- GET
 
 func sendRedirectPackage(t *testing.T, eie *bool) {
 	var (
-		newClient1 = new(Client) // A
-		newClient2 = new(Client) // E
-		newClient3 = new(Client) // F
+		newClient1 *Client // A
+		newClient2 *Client // E
+		newClient3 *Client // F
 	)
 	defer func() {
 		newClient1.listener.Close()

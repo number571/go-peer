@@ -8,7 +8,7 @@ count=5
 while [ "$i" -le "$count" ]
 do 
 	echo "\n\n\n===== [ $i ] =====\n\n\n"
-	go test -count 10 -v -cover
+	go test -v -cover -count 10
 	code="$?"
 	if [ "$code" != 0 ]
 	then

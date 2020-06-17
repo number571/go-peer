@@ -17,12 +17,12 @@ type settingsStruct struct {
 	BITS_SIZE          uint64
 	PACK_SIZE          uint64
 	BUFF_SIZE          uint32
-	RAND_SIZE          uint16
 	KEY_SIZE           uint16
 	REMEMBER           uint16
+	RAND_SIZE          uint16
 	DIFFICULTY         uint8
-	RETRY_QUAN         uint8
 	WAITING_TIME       uint8
+	RETRY_QUAN         uint8
 	SESSION_SIZE       uint8
 	REDIRECT_QUAN      uint8
 }
@@ -45,16 +45,16 @@ func defaultSettings() settingsStruct {
 		NETWORK:            "GOPEER-FRAMEWORK",
 		VERSION:            "v1.0.0t",
 		max_id:             (1 << 56) / (8 << 20), // BITS_SIZE / PACK_SIZE 
-		BITS_SIZE:          1 << 56,               // (2^56)b
-		PACK_SIZE:          8 << 20,               // (2^20*8)b = 8MiB
-		BUFF_SIZE:          1 << 20,               // 1MiB
-		RAND_SIZE:          1 << 4,                // 16B
-		KEY_SIZE:           2 << 10,               // 2048b
-		REMEMBER:           256,                   // quantity hash packages
-		DIFFICULTY:         15,                    // bits of 256b
-		RETRY_QUAN:         2,                     // quantity retry send one package
+		BITS_SIZE:          (1 << 56),             // (2^56)b
+		PACK_SIZE:          (8 << 20),             // (2^20*8)b = 8MiB
+		BUFF_SIZE:          (1 << 20),             // (2^20)b = 1MiB
+		KEY_SIZE:           (2 << 10),             // (2^10*2)b = 2048b
+		REMEMBER:           (1 << 8),              // 256 hashes saved
+		RAND_SIZE:          (1 << 4),              // 16B
+		DIFFICULTY:         (1 << 4),              // first 16b of 256b
 		WAITING_TIME:       5,                     // in seconds
-		SESSION_SIZE:       32,                    // bytes for AES128/192/256
+		RETRY_QUAN:         2,                     // quantity retry send one package
+		SESSION_SIZE:       32,                    // 32B for AES256
 		REDIRECT_QUAN:      3,                     // quantity hidden nodes that can send a package
 	}
 }
@@ -176,18 +176,18 @@ func intSettings(name string, data interface{}) uint8 {
 		settings.max_id = settings.BITS_SIZE / settings.PACK_SIZE
 	case "BUFF_SIZE":
 		settings.BUFF_SIZE = uint32(result)
-	case "RAND_SIZE":
-		settings.RAND_SIZE = uint16(result)
 	case "KEY_SIZE":
 		settings.KEY_SIZE = uint16(result)
 	case "REMEMBER":
 		settings.REMEMBER = uint16(result)
+	case "RAND_SIZE":
+		settings.RAND_SIZE = uint16(result)
 	case "DIFFICULTY":
 		settings.DIFFICULTY = uint8(result)
-	case "RETRY_QUAN":
-		settings.RETRY_QUAN = uint8(result)
 	case "WAITING_TIME":
 		settings.WAITING_TIME = uint8(result)
+	case "RETRY_QUAN":
+		settings.RETRY_QUAN = uint8(result)
 	case "SESSION_SIZE":
 		size := uint8(result)
 		switch size {

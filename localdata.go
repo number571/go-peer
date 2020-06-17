@@ -85,13 +85,18 @@ func (pack *Package) receive(listener *Listener, handle func(*Client, *Package),
 	}
 	handleIsUsed = client.HandleAction(settings.TITLE_DISCONNECT, pack,
 		func(client *Client, pack *Package) (set string) {
-			client.disconnectGet(pack)
 			return set
 		},
 		func(client *Client, pack *Package) {
+			hash := pack.From.Sender.Hashname
+			if !client.InConnections(hash) {
+				return
+			}
+			client.Connections[hash].action <- true
 		},
 	)
 	if handleIsUsed {
+		client.disconnect(pack.From.Sender.Hashname)
 		return true
 	}
 	handleIsUsed = client.HandleAction(settings.TITLE_FILETRANSFER, pack,
@@ -217,10 +222,7 @@ func (client *Client) hiddenConnect(hash string, session []byte, receiver *rsa.P
 			return nil
 		case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
 			client.mutex.Lock()
-			if client.Connections[hash].relation != nil {
-				client.Connections[hash].relation.Close()
-			}
-			delete(client.Connections, hash)
+			client.disconnect(hash)
 			client.mutex.Unlock()
 		}
 	}
@@ -252,10 +254,21 @@ func (client *Client) send(option optionType, pack *Package) (*Package, error) {
 		hash      = pack.To.Hashname
 	)
 	if client.Connections[hash].relation == nil {
-		ok := client.certPool.AppendCertsFromPEM([]byte(client.Connections[hash].certificate))
-		if !ok {
-			delete(client.Connections, hash)
-			return nil, errors.New("failed to parse root certificate")
+		certIsExist := false
+		cert := []byte(client.Connections[hash].certificate)
+		subjects := client.certPool.Subjects() 
+		for _, sub := range subjects {
+			if bytes.Equal(cert, sub) {
+				certIsExist = true
+				break
+			}
+		}
+		if !certIsExist {
+			ok := client.certPool.AppendCertsFromPEM(cert)
+			if !ok {
+				delete(client.Connections, hash)
+				return nil, errors.New("failed to parse root certificate")
+			}
 		}
 		config := &tls.Config{
 			ServerName: settings.NETWORK,
@@ -469,9 +482,8 @@ func (client *Client) connectGet(pack *Package, conn net.Conn) {
 	}
 }
 
-// Disconnect by GET option.
-func (client *Client) disconnectGet(pack *Package) {
-	hash := pack.From.Sender.Hashname
+// Disconnect from client.
+func (client *Client) disconnect(hash string) {
 	if client.Connections[hash].relation != nil {
 		client.Connections[hash].relation.Close()
 	}
@@ -724,9 +736,9 @@ func serveClient(listener *Listener, client *Client, handle func(*Client, *Packa
 	defer func() {
 		listener.mutex.Lock()
 		client.mutex.Lock()
+		conn.Close()
 		delete(client.Connections, hash)
 		client.mutex.Unlock()
-		conn.Close()
 		listener.mutex.Unlock()
 	}()
 	for {

@@ -59,8 +59,8 @@ func (client *Client) InConnections(hash string) bool {
 // Wrap function in mutex Lock/Unlock.
 func (client *Client) Action(action func()) {
 	client.mutex.Lock()
-	defer client.mutex.Unlock()
 	action()
+	client.mutex.Unlock()
 }
 
 // Switcher function about GET and SET options.
@@ -104,21 +104,27 @@ func (client *Client) Disconnect(dest *Destination) error {
 	if !client.InConnections(hash) {
 		return errors.New("client not connected")
 	}
-	if client.Connections[hash].relation == nil {
-		_, err = client.SendTo(dest, &Package{
-			Head: Head{
-				Title:  settings.TITLE_DISCONNECT,
-				Option: settings.OPTION_GET,
-			},
-		})
+	_, err = client.SendTo(dest, &Package{
+		Head: Head{
+			Title:  settings.TITLE_DISCONNECT,
+			Option: settings.OPTION_GET,
+		},
+	})
+	if err != nil {
+		client.mutex.Lock()
+		client.disconnect(hash)
+		client.mutex.Unlock()
+		return err
 	}
-	client.mutex.Lock()
-	if client.Connections[hash].relation != nil {
-		client.Connections[hash].relation.Close()
+	select {
+	case <-client.Connections[hash].action:
+		// disconnect in OPTION_SET
+	case <-time.After(time.Duration(settings.WAITING_TIME) * time.Second):
+		client.mutex.Lock()
+		client.disconnect(hash)
+		client.mutex.Unlock()
 	}
-	delete(client.Connections, hash)
-	client.mutex.Unlock()
-	return err
+	return nil
 }
 
 // Connect to user.
@@ -134,7 +140,7 @@ func (client *Client) Connect(dest *Destination) error {
 		session = GenerateRandomBytes(uint(settings.SESSION_SIZE))
 		hash    = HashPublic(dest.Receiver)
 	)
-	if dest.Address == settings.IS_CLIENT && client.InConnections(hash) {
+	if client.InConnections(hash) { // dest.Address == settings.IS_CLIENT && 
 		relation = client.Connections[hash].relation
 	}
 	if dest.Public == nil {
@@ -183,10 +189,7 @@ repeat:
 			goto repeat
 		}
 		client.mutex.Lock()
-		if client.Connections[hash].relation != nil {
-			client.Connections[hash].relation.Close()
-		}
-		delete(client.Connections, hash)
+		client.disconnect(hash)
 		client.mutex.Unlock()
 		return errors.New("client not connected")
 	}

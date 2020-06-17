@@ -3,6 +3,7 @@ package gopeer
 import (
 	// "fmt"
 	"crypto/rsa"
+	"time"
 )
 
 const (
@@ -59,9 +60,12 @@ func initConnects() {
 func clearConnects() {
 	for i := range Clients {
 		Clients[i].Action(func() {
-			Clients[i].Connections = make(map[string]*Connect)
+			for hash := range Clients[i].Connections {
+				Clients[i].disconnect(hash)
+			}
 		})
 	}
+	time.Sleep(200 * time.Millisecond)
 }
 
 func handleServer(client *Client, pack *Package) {

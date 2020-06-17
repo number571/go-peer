@@ -97,15 +97,12 @@ func (listener *Listener) Close() {
 	}
 	listener.mutex.Lock()
 	defer listener.mutex.Unlock()
-	for i := range listener.Clients {
-		listener.Clients[i].mutex.Lock()
-		for hash := range listener.Clients[i].Connections {
-			if listener.Clients[i].Connections[hash].relation != nil {
-				listener.Clients[i].Connections[hash].relation.Close()
+	for _, client := range listener.Clients {
+		client.Action(func(){
+			for hash := range client.Connections {
+				client.disconnect(hash)
 			}
-			delete(listener.Clients[i].Connections, hash)
-		}
-		listener.Clients[i].mutex.Unlock()
+		})
 	}
 	if listener.listen != nil {
 		listener.listen.Close()
