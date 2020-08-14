@@ -28,8 +28,13 @@ type FriendToFriend struct {
 }
 
 type Package struct {
+	Info InfoPackage `json:"info"`
 	Head HeadPackage `json:"head"`
 	Body BodyPackage `json:"body"`
+}
+
+type InfoPackage struct {
+	Network string `json:"network"`
 }
 
 type HeadPackage struct {

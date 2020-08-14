@@ -164,6 +164,9 @@ func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 		sign = Sign(client.privateKey, hash)
 	)
 	return &Package{
+		Info: InfoPackage{
+			Network: settings.NETW_NAME,
+		},
 		Head: HeadPackage{
 			Rand:    Base64Encode(EncryptAES(session, rand)),
 			Title:   Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
@@ -223,6 +226,9 @@ func (client *Client) decrypt(pack *Package) *Package {
 		return nil
 	}
 	return &Package{
+		Info: InfoPackage{
+			Network: pack.Info.Network,
+		},
 		Head: HeadPackage{
 			Rand:    Base64Encode(rand),
 			Title:   string(titleBytes),

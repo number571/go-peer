@@ -6,6 +6,7 @@ import (
 
 func init() {
 	gp.Set(gp.SettingsType{
+		"NETW_NAME": "NET_TEMPLATE",
 		"AKEY_SIZE": uint(3 << 10),
 		"SKEY_SIZE": uint(1 << 5),
 	})
