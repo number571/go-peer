@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 2.0.0s.
+> Framework for create decentralized networks. Version: 1.2.0s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
