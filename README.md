@@ -45,6 +45,7 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 ```go
 type SettingsType map[string]interface{}
 type settingsStruct struct {
+    NETW_NAME string
     END_BYTES string
     WAIT_TIME uint
     BUFF_SIZE uint
@@ -59,6 +60,7 @@ type settingsStruct struct {
 ### Default settings:
 ```go
 {
+    NETW_NAME: "GOPEER_NETWORK",
     END_BYTES: "\000\005\007\001\001\007\005\000",
     WAIT_TIME: 5,       // seconds
     BUFF_SIZE: 4 << 10, // 4KiB
@@ -80,6 +82,7 @@ func Get(key string) interface{} {}
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
 gp.Set(gp.SettingsType{
+    "NETW_NAME": "TEMPLATE_NET",
     "AKEY_SIZE": uint(3 << 10),
     "SKEY_SIZE": uint(1 << 5),
 })
@@ -134,6 +137,9 @@ func Base64Decode(data string) []byte {}
 ### Package structure:
 ```go
 {
+    Info: {
+        Network: string,
+    },
     Head: {
         Rand:    string,
         Title:   string,
