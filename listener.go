@@ -1,120 +1,97 @@
 package gopeer
 
 import (
-	"crypto/rsa"
-	"crypto/tls"
-	"crypto/x509"
+	"net"
 	"strings"
-	"sync"
 )
 
-// Create new Listener by address "ipv4:port".
-func NewListener(addr string) *Listener {
-	if addr == settings.IS_CLIENT {
-		return &Listener{
-			address: address{
-				ipv4: settings.IS_CLIENT,
-			},
-			mutex:   new(sync.Mutex),
-			Clients: make(map[string]*Client),
+func NewListener(address string, client *Client) *Listener {
+	return &Listener{
+		address: address,
+		client:  client,
+	}
+}
+
+func (listener *Listener) Run(handle func(*Client, *Package)) error {
+	var err error
+	listener.listen, err = net.Listen("tcp", listener.address)
+	if err != nil {
+		return err
+	}
+	listener.serve(handle)
+	return nil
+}
+
+func (listener *Listener) serve(handle func(*Client, *Package)) {
+	for {
+		conn, err := listener.listen.Accept()
+		if err != nil {
+			break
+		}
+		listener.client.connections[conn] = "client"
+		go handleConn(conn, listener.client, handle)
+	}
+}
+
+func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
+	defer func() {
+		conn.Close()
+		delete(client.connections, conn)
+	}()
+	for {
+		pack := readPackage(conn)
+		if pack == nil {
+			break
+		}
+
+		client.mutex.Lock()
+		if _, ok := client.mapping[pack.Body.Hash]; ok {
+			client.mutex.Unlock()
+			continue
+		}
+		if len(client.mapping) >= int(settings.MAPP_SIZE) {
+			client.mapping = make(map[string]bool)
+		}
+		client.mapping[pack.Body.Hash] = true
+		client.mutex.Unlock()
+
+		decPack := client.decrypt(pack)
+		if decPack == nil {
+			client.redirect(pack, conn)
+			continue
+		}
+
+		client.mutex.Lock()
+		if client.F2F.Enabled && !client.InF2F(ParsePublic(decPack.Head.Sender)) {
+			client.mutex.Unlock()
+			continue
+		}
+		client.mutex.Unlock()
+
+		handle(client, decPack)
+	}
+}
+
+func readPackage(conn net.Conn) *Package {
+	var (
+		message string
+		size    = uint(0)
+		buffer  = make([]byte, settings.BUFF_SIZE)
+	)
+	for {
+		length, err := conn.Read(buffer)
+		if err != nil {
+			return nil
+		}
+		size += uint(length)
+		if size >= settings.PACK_SIZE {
+			return nil
+		}
+		message += string(buffer[:length])
+		if strings.Contains(message, settings.END_BYTES) {
+			message = strings.Split(message, settings.END_BYTES)[0]
+			break
 		}
 	}
-	splited := strings.Split(addr, ":")
-	if len(splited) != 2 {
-		return nil
-	}
-	return &Listener{
-		address: address{
-			ipv4: splited[0],
-			port: ":" + splited[1],
-		},
-		mutex:   new(sync.Mutex),
-		Clients: make(map[string]*Client),
-	}
-}
-
-// Create new client in listener by private key.
-func (listener *Listener) NewClient(private *rsa.PrivateKey) *Client {
-	public := &private.PublicKey
-	hash := HashPublic(public)
-	listener.Clients[hash] = &Client{
-		listener: listener,
-		remember: remember{
-			mapping: make(map[string]uint16),
-			listing: make([]string, settings.REMEMBER),
-		},
-		hashname: hash,
-		keys: keys{
-			private: private,
-			public:  public,
-		},
-		address:  listener.address.ipv4 + listener.address.port,
-		certPool: x509.NewCertPool(),
-		F2F: F2F{
-			Friends: make(map[string]bool),
-		},
-		mutex:       new(sync.Mutex),
-		Connections: make(map[string]*Connect),
-	}
-	return listener.Clients[hash]
-}
-
-// Open connection for receiving data.
-func (listener *Listener) Open(c *Certificate) *Listener {
-	if c == nil {
-		return nil
-	}
-	cert, err := tls.X509KeyPair(c.Cert, c.Key)
-	if err != nil {
-		return nil
-	}
-	config := &tls.Config{Certificates: []tls.Certificate{cert}}
-	listener.certificate = c.Cert
-	if listener.Address() == settings.IS_CLIENT {
-		return listener
-	}
-	listener.listen, err = tls.Listen("tcp", settings.TEMPLATE+listener.address.port, config)
-	if err != nil {
-		return nil
-	}
-	return listener
-}
-
-// Run handle server for listening packages.
-func (listener *Listener) Run(handle func(*Client, *Package)) *Listener {
-	listener.handleFunc = handle
-	if listener.Address() == settings.IS_CLIENT {
-		return listener
-	}
-	go runServer(listener, handle)
-	return listener
-}
-
-// Close listener connection.
-func (listener *Listener) Close() {
-	if listener == nil {
-		return
-	}
-	listener.mutex.Lock()
-	defer listener.mutex.Unlock()
-	for _, client := range listener.Clients {
-		client.Action(func(){
-			for hash := range client.Connections {
-				client.disconnect(hash)
-			}
-		})
-	}
-	if listener.listen != nil {
-		listener.listen.Close()
-	}
-}
-
-// Return listener certificate.
-func (listener *Listener) Certificate() []byte {
-	return listener.certificate
-}
-
-// Return listener address.
-func (listener *Listener) Address() string {
-	return listener.address.ipv4 + listener.address.port
+	return DecodePackage(message)
 }

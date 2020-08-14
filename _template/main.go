@@ -1,43 +1,22 @@
 package main
 
 import (
-	"github.com/number571/gopeer"
-)
-
-const (
-	ADDRESS = "ipv4:port"
-	TITLE   = "TITLE"
+	gp "./gopeer"
 )
 
 func init() {
-	gopeer.Set(gopeer.SettingsType{
-		"NETWORK":  "GOPEER-NETWORK",
-		"VERSION":  "template 1.0.0",
-		"KEY_SIZE": uint64(1 << 10),
+	gp.Set(gp.SettingsType{
+		"AKEY_SIZE": uint(3 << 10),
+		"SKEY_SIZE": uint(1 << 5),
 	})
 }
 
 func main() {
-	key, cert := gopeer.GenerateCertificate(
-		gopeer.Get("NETWORK").(string),
-		gopeer.Get("KEY_SIZE").(uint16),
-	)
-	listener := gopeer.NewListener(ADDRESS)
-	listener.Open(&gopeer.Certificate{
-		Cert: []byte(cert),
-		Key:  []byte(key),
-	}).Run(handleServer)
-	defer listener.Close()
+	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	gp.NewListener(":8080", node).Run(handleFunc)
 	// ...
 }
 
-func handleServer(client *gopeer.Client, pack *gopeer.Package) {
-	client.HandleAction(TITLE, pack,
-		func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-			return set
-		},
-		func(client *gopeer.Client, pack *gopeer.Package) {
-		},
-	)
+func handleFunc(client *gp.Client, pack *gp.Package) {
 	// ...
 }

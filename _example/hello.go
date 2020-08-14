@@ -1,101 +1,52 @@
 package main
 
 import (
-    "encoding/json"
-    "fmt"
-    "time"
-    "github.com/number571/gopeer"
-)
-
-var (
-    ADDRESS1 = gopeer.Get("IS_CLIENT").(string)
+	gp "./gopeer"
+	"fmt"
+	"time"
 )
 
 const (
-    ADDRESS2   = ":8080"
-    TITLE_TEST = "TITLE"
+	GET_MESSAGE  = "GET_MESSAGE"
+	SET_MESSAGE  = "SET_MESSAGE"
+	NODE_ADDRESS = ":8080"
 )
-
-var (
-    anotherClient       = new(gopeer.Client)
-    node2Key, node2Cert = gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
-)
-
-func init() {
-    gopeer.Set(gopeer.SettingsType{
-        "KEY_SIZE": uint64(1 << 10),
-    })
-}
 
 func main() {
-    node1Key, node1Cert := gopeer.GenerateCertificate(gopeer.Get("NETWORK").(string), gopeer.Get("KEY_SIZE").(uint16))
-    listener1 := gopeer.NewListener(ADDRESS1)
-    listener1.Open(&gopeer.Certificate{
-        Cert: []byte(node1Cert),
-        Key:  []byte(node1Key),
-    }).Run(handleServer)
-    defer listener1.Close()
+	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
 
-    client := listener1.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
+	go gp.NewListener(NODE_ADDRESS, node).Run(handleFunc)
+	time.Sleep(500 * time.Millisecond)
 
-    listener2 := gopeer.NewListener(ADDRESS2)
-    listener2.Open(&gopeer.Certificate{
-        Cert: []byte(node2Cert),
-        Key:  []byte(node2Key),
-    }).Run(handleServer)
-    defer listener2.Close()
+	client.Connect(NODE_ADDRESS, handleFunc)
 
-    anotherClient = listener2.NewClient(gopeer.GeneratePrivate(gopeer.Get("KEY_SIZE").(uint16)))
-
-    handleClient(client)
+	err := client.Request(node.Public(), &gp.Package{
+		Head: gp.HeadPackage{
+			Title: GET_MESSAGE,
+		},
+		Body: gp.BodyPackage{
+			Data: "hello, world!",
+		},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func handleClient(client *gopeer.Client) {
-    dest := &gopeer.Destination{
-        Address:     ADDRESS2,
-        Certificate: []byte(node2Cert),
-        Public:      anotherClient.Public(),
-    }
-
-    client.Connect(dest)
-    hash := anotherClient.Hashname()
-
-    for i := 0; i < 10; i++ {
-        fmt.Println(client.Connections[hash].Session())
-        
-        client.SendTo(dest, &gopeer.Package{
-            Head: gopeer.Head{
-                Title:  TITLE_TEST,
-                Option: gopeer.Get("OPTION_GET").(string),
-            },
-            Body: gopeer.Body{
-                Data: "hello, world!",
-            },
-        })
-        select {
-        case <-client.Connections[hash].Action:
-            // pass
-        case <-time.After(time.Duration(5 * time.Second)):
-            fmt.Println("ERROR")
-            break
-        }
-        // client.Connect(dest)
-    }
-}
-
-func handleServer(client *gopeer.Client, pack *gopeer.Package) {
-    client.HandleAction(TITLE_TEST, pack,
-        func(client *gopeer.Client, pack *gopeer.Package) (set string) {
-            fmt.Printf("[%s]: '%s'\n", pack.From.Sender.Hashname, pack.Body.Data)
-            return set
-        },
-        func(client *gopeer.Client, pack *gopeer.Package) {
-            client.Connections[pack.From.Sender.Hashname].Action <- true
-        },
-    )
-}
-
-func printJSON(data interface{}) {
-    jsonData, _ := json.MarshalIndent(data, "", "\t")
-    fmt.Println(string(jsonData))
+func handleFunc(client *gp.Client, pack *gp.Package) {
+	switch pack.Head.Title {
+	case GET_MESSAGE:
+		public := gp.ParsePublic(pack.Head.Sender)
+		fmt.Printf("[%s] => '%s'\n", gp.HashPublic(public), pack.Body.Data)
+		client.Send(public, &gp.Package{
+			Head: gp.HeadPackage{
+				Title: SET_MESSAGE,
+			},
+		})
+	case SET_MESSAGE:
+		client.Response(gp.ParsePublic(pack.Head.Sender))
+	default:
+		fmt.Println("title undefined")
+	}
 }
