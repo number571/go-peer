@@ -15,15 +15,14 @@ type Listener struct {
 type Client struct {
 	mutex       *sync.Mutex
 	mapping     map[string]bool
-	publicKey   *rsa.PublicKey
 	privateKey  *rsa.PrivateKey
 	connections map[net.Conn]string
 	actions     map[string]chan string
-	F2F         FriendToFriend
+	f2f         friendToFriend
 }
 
-type FriendToFriend struct {
-	Enabled bool
+type friendToFriend struct {
+	enabled bool
 	friends map[string]*rsa.PublicKey
 }
 

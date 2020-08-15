@@ -86,21 +86,29 @@ gp.Set(gp.SettingsType{
 
 ### Network functions and methods:
 ```go
+// CREATE
 func NewListener(address string, client *Client) *Listener {}
-func (listener *Listener) Run(handle func(*Client, *Package)) error {}
 func NewClient(priv *rsa.PrivateKey) *Client {}
+// ACTIONS
+func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
+func (listener *Listener) Run(handle func(*Client, *Package)) error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) error {}
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {}
 func (client *Client) Disconnect(address string) {}
+// KEYS
 func (client *Client) Public() *rsa.PublicKey {}
 func (client *Client) Private() *rsa.PrivateKey {}
 func (client *Client) StringPublic() string {}
 func (client *Client) StringPrivate() string {}
 func (client *Client) HashPublic() string {}
-func (client *Client) AppendToF2F(pub *rsa.PublicKey) {}
-func (client *Client) RemoveFromF2F(pub *rsa.PublicKey) {}
+// F2F
+func (client *Client) F2F() bool {}
+func (client *Client) EnableF2F() {}
+func (client *Client) DisableF2F() {}
 func (client *Client) InF2F(pub *rsa.PublicKey) bool {}
-func Handle(title string, client *Client, pack *Package, getHandle func(*Client, *Package) string) {}
+func (client *Client) ListF2F() []*rsa.PublicKey {}
+func (client *Client) AppendF2F(pub *rsa.PublicKey) {}
+func (client *Client) RemoveF2F(pub *rsa.PublicKey) {}
 ```
 
 ### Cryptography functions:
@@ -164,8 +172,8 @@ func Base64Decode(data string) []byte {}
     privateKey:  *rsa.PrivateKey,
     connections: map[net.Conn]string,
     actions:     map[string]chan bool,
-    F2F:         {
-        Enabled: bool,
+    f2f:         {
+        enabled: bool,
         friends: map[string]*rsa.PublicKey,
     },
 }

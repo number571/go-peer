@@ -22,6 +22,26 @@ func (listener *Listener) Run(handle func(*Client, *Package)) error {
 	return nil
 }
 
+func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {
+	switch pack.Head.Title {
+	case title:
+		public := ParsePublic(pack.Head.Sender)
+		client.send(public, &Package{
+			Head: HeadPackage{
+				Title: "_"+title,
+			},
+			Body: BodyPackage{
+				Data: handle(client, pack),
+			},
+		})
+	case "_"+title:
+		client.response(
+			ParsePublic(pack.Head.Sender), 
+			pack.Body.Data,
+		)
+	}
+}
+
 func (listener *Listener) serve(handle func(*Client, *Package)) {
 	for {
 		conn, err := listener.listen.Accept()
@@ -62,7 +82,7 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 		}
 
 		client.mutex.Lock()
-		if client.F2F.Enabled && !client.InF2F(ParsePublic(decPack.Head.Sender)) {
+		if client.f2f.enabled && !client.InF2F(ParsePublic(decPack.Head.Sender)) {
 			client.mutex.Unlock()
 			continue
 		}

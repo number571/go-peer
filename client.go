@@ -20,34 +20,12 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 		mutex:       new(sync.Mutex),
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
-		publicKey:   &priv.PublicKey,
+		// publicKey:   &priv.PublicKey,
 		privateKey:  priv,
 		actions:     make(map[string]chan string),
-		F2F: FriendToFriend{
+		f2f: friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
 		},
-	}
-}
-
-
-// HANDLE REQUESTS
-func Handle(title string, client *Client, pack *Package, getHandle func(*Client, *Package) string) {
-	switch pack.Head.Title {
-	case title:
-		public := ParsePublic(pack.Head.Sender)
-		client.send(public, &Package{
-			Head: HeadPackage{
-				Title: "_"+title,
-			},
-			Body: BodyPackage{
-				Data: getHandle(client, pack),
-			},
-		})
-	case "_"+title:
-		client.response(
-			ParsePublic(pack.Head.Sender), 
-			pack.Body.Data,
-		)
 	}
 }
 
@@ -98,7 +76,7 @@ func (client *Client) Disconnect(address string) {
 
 // PUBLIC / PRIVATE
 func (client *Client) Public() *rsa.PublicKey {
-	return client.publicKey
+	return &client.privateKey.PublicKey
 }
 
 func (client *Client) Private() *rsa.PrivateKey {
@@ -106,7 +84,7 @@ func (client *Client) Private() *rsa.PrivateKey {
 }
 
 func (client *Client) StringPublic() string {
-	return StringPublic(client.publicKey)
+	return StringPublic(&client.privateKey.PublicKey)
 }
 
 func (client *Client) StringPrivate() string {
@@ -114,24 +92,44 @@ func (client *Client) StringPrivate() string {
 }
 
 func (client *Client) HashPublic() string {
-	return HashPublic(client.publicKey)
+	return HashPublic(&client.privateKey.PublicKey)
 }
 
 
 // F2F
-func (client *Client) AppendToF2F(pub *rsa.PublicKey) {
-	client.F2F.friends[HashPublic(pub)] = pub
+func (client *Client) F2F() bool {
+	return client.f2f.enabled
 }
 
-func (client *Client) RemoveFromF2F(pub *rsa.PublicKey) {
-	delete(client.F2F.friends, HashPublic(pub))
+func (client *Client) EnableF2F() {
+	client.f2f.enabled = true
+}
+
+func (client *Client) DisableF2F() {
+	client.f2f.enabled = false
 }
 
 func (client *Client) InF2F(pub *rsa.PublicKey) bool {
-	if _, ok := client.F2F.friends[HashPublic(pub)]; ok {
+	if _, ok := client.f2f.friends[HashPublic(pub)]; ok {
 		return true
 	}
 	return false
+}
+
+func (client *Client) ListF2F() []*rsa.PublicKey {
+	var list []*rsa.PublicKey
+	for _, pub := range client.f2f.friends {
+		list = append(list, pub)
+	}
+	return list
+}
+
+func (client *Client) AppendF2F(pub *rsa.PublicKey) {
+	client.f2f.friends[HashPublic(pub)] = pub
+}
+
+func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
+	delete(client.f2f.friends, HashPublic(pub))
 }
 
 
