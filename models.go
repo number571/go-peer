@@ -18,7 +18,7 @@ type Client struct {
 	publicKey   *rsa.PublicKey
 	privateKey  *rsa.PrivateKey
 	connections map[net.Conn]string
-	actions     map[string]chan bool
+	actions     map[string]chan string
 	F2F         FriendToFriend
 }
 
@@ -28,13 +28,8 @@ type FriendToFriend struct {
 }
 
 type Package struct {
-	Info InfoPackage `json:"info"`
 	Head HeadPackage `json:"head"`
 	Body BodyPackage `json:"body"`
-}
-
-type InfoPackage struct {
-	Network string `json:"network"`
 }
 
 type HeadPackage struct {

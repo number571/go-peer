@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	GET_MESSAGE  = "GET_MESSAGE"
-	SET_MESSAGE  = "SET_MESSAGE"
+	TITLE_MESSAGE  = "TITLE_MESSAGE"
 	NODE_ADDRESS = ":8080"
 )
 
@@ -21,9 +20,9 @@ func main() {
 
 	client.Connect(NODE_ADDRESS, handleFunc)
 
-	err := client.Request(node.Public(), &gp.Package{
+	res, err := client.Send(node.Public(), &gp.Package{
 		Head: gp.HeadPackage{
-			Title: GET_MESSAGE,
+			Title: TITLE_MESSAGE,
 		},
 		Body: gp.BodyPackage{
 			Data: "hello, world!",
@@ -32,21 +31,16 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	fmt.Println(res)
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
-	switch pack.Head.Title {
-	case GET_MESSAGE:
-		public := gp.ParsePublic(pack.Head.Sender)
-		fmt.Printf("[%s] => '%s'\n", gp.HashPublic(public), pack.Body.Data)
-		client.Send(public, &gp.Package{
-			Head: gp.HeadPackage{
-				Title: SET_MESSAGE,
-			},
-		})
-	case SET_MESSAGE:
-		client.Response(gp.ParsePublic(pack.Head.Sender))
-	default:
-		fmt.Println("title undefined")
-	}
+	gp.Handle(TITLE_MESSAGE, client, pack, getMessage)
+}
+
+func getMessage(client *gp.Client, pack *gp.Package) (set string) {
+	public := gp.ParsePublic(pack.Head.Sender)
+	fmt.Printf("[%s] => '%s'\n", gp.HashPublic(public), pack.Body.Data)
+	return "ok"
 }

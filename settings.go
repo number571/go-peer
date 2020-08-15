@@ -2,7 +2,6 @@ package gopeer
 
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-	NETW_NAME string
 	END_BYTES string
 	WAIT_TIME uint
 	BUFF_SIZE uint
@@ -17,7 +16,6 @@ var settings = defaultSettings()
 
 func defaultSettings() settingsStruct {
 	return settingsStruct{
-		NETW_NAME: "GOPEER_NETWORK",
 		END_BYTES: "\000\005\007\001\001\007\005\000",
 		WAIT_TIME: 5,       // seconds
 		BUFF_SIZE: 4 << 10, // 4KiB
@@ -50,8 +48,6 @@ func Set(settings SettingsType) []uint8 {
 
 func Get(key string) interface{} {
 	switch key {
-	case "NETW_NAME":
-		return settings.NETW_NAME
 	case "END_BYTES":
 		return settings.END_BYTES
 	case "WAIT_TIME":
@@ -76,8 +72,6 @@ func Get(key string) interface{} {
 func stringSettings(name string, data interface{}) uint8 {
 	result := data.(string)
 	switch name {
-	case "NETW_NAME":
-		settings.NETW_NAME = result
 	case "END_BYTES":
 		settings.END_BYTES = result
 	default:

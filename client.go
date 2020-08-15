@@ -22,7 +22,7 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 		connections: make(map[net.Conn]string),
 		publicKey:   &priv.PublicKey,
 		privateKey:  priv,
-		actions:     make(map[string]chan bool),
+		actions:     make(map[string]chan string),
 		F2F: FriendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
 		},
@@ -30,43 +30,48 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 }
 
 
-// SEND / REQUEST / RESPONSE
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) {
-	client.mapping[pack.Body.Hash] = true
-	encPack := EncodePackage(client.encrypt(receiver, pack))
-	for cn := range client.connections {
-		cn.Write(bytes.Join(
-			[][]byte{
-				[]byte(encPack),
-				[]byte(settings.END_BYTES),
+// HANDLE REQUESTS
+func Handle(title string, client *Client, pack *Package, getHandle func(*Client, *Package) string) {
+	switch pack.Head.Title {
+	case title:
+		public := ParsePublic(pack.Head.Sender)
+		client.send(public, &Package{
+			Head: HeadPackage{
+				Title: "_"+title,
 			},
-			[]byte{},
-		))
+			Body: BodyPackage{
+				Data: getHandle(client, pack),
+			},
+		})
+	case "_"+title:
+		client.response(
+			ParsePublic(pack.Head.Sender), 
+			pack.Body.Data,
+		)
 	}
 }
 
-func (client *Client) Request(receiver *rsa.PublicKey, pack *Package) error {
-	hash := HashPublic(receiver)
 
-	client.actions[hash] = make(chan bool)
+// SEND
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, error) {
+	var (
+		err error
+		result string
+		hash = HashPublic(receiver)
+	)
+
+	client.actions[hash] = make(chan string)
 	defer delete(client.actions, hash)
 
-	client.Send(receiver, pack)
+	client.send(receiver, pack)
 
 	select {
-	case <-client.actions[hash]:
+	case result = <-client.actions[hash]:
 	case <-time.After(time.Duration(settings.WAIT_TIME) * time.Second):
-		return errors.New("time is over")
+		err = errors.New("time is over")
 	}
 
-	return nil
-}
-
-func (client *Client) Response(pub *rsa.PublicKey) {
-	hash := HashPublic(pub)
-	if _, ok := client.actions[hash]; ok {
-		client.actions[hash] <- true
-	}
+	return result, err
 }
 
 
@@ -131,6 +136,20 @@ func (client *Client) InF2F(pub *rsa.PublicKey) bool {
 
 
 // LOCAL DATA
+func (client *Client) send(receiver *rsa.PublicKey, pack *Package) {
+	client.mapping[pack.Body.Hash] = true
+	encPack := EncodePackage(client.encrypt(receiver, pack))
+	for cn := range client.connections {
+		cn.Write(bytes.Join(
+			[][]byte{
+				[]byte(encPack),
+				[]byte(settings.END_BYTES),
+			},
+			[]byte{},
+		))
+	}
+}
+
 func (client *Client) redirect(pack *Package, sender net.Conn) {
 	encPack := EncodePackage(pack)
 	for cn := range client.connections {
@@ -144,6 +163,13 @@ func (client *Client) redirect(pack *Package, sender net.Conn) {
 			},
 			[]byte{},
 		))
+	}
+}
+
+func (client *Client) response(pub *rsa.PublicKey, data string) {
+	hash := HashPublic(pub)
+	if _, ok := client.actions[hash]; ok {
+		client.actions[hash] <- data
 	}
 }
 
@@ -164,9 +190,6 @@ func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 		sign = Sign(client.privateKey, hash)
 	)
 	return &Package{
-		Info: InfoPackage{
-			Network: settings.NETW_NAME,
-		},
 		Head: HeadPackage{
 			Rand:    Base64Encode(EncryptAES(session, rand)),
 			Title:   Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
@@ -226,9 +249,6 @@ func (client *Client) decrypt(pack *Package) *Package {
 		return nil
 	}
 	return &Package{
-		Info: InfoPackage{
-			Network: pack.Info.Network,
-		},
 		Head: HeadPackage{
 			Rand:    Base64Encode(rand),
 			Title:   string(titleBytes),

@@ -24,7 +24,6 @@ import (
 
 func init() {
     gp.Set(gp.SettingsType{
-        "NETW_NAME": "NET_TEMPLATE",
         "AKEY_SIZE": uint(3 << 10),
         "SKEY_SIZE": uint(1 << 5),
     })
@@ -45,7 +44,6 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 ```go
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-    NETW_NAME string
     END_BYTES string
     WAIT_TIME uint
     BUFF_SIZE uint
@@ -60,7 +58,6 @@ type settingsStruct struct {
 ### Default settings:
 ```go
 {
-    NETW_NAME: "GOPEER_NETWORK",
     END_BYTES: "\000\005\007\001\001\007\005\000",
     WAIT_TIME: 5,       // seconds
     BUFF_SIZE: 4 << 10, // 4KiB
@@ -82,7 +79,6 @@ func Get(key string) interface{} {}
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
 gp.Set(gp.SettingsType{
-    "NETW_NAME": "TEMPLATE_NET",
     "AKEY_SIZE": uint(3 << 10),
     "SKEY_SIZE": uint(1 << 5),
 })
@@ -93,9 +89,7 @@ gp.Set(gp.SettingsType{
 func NewListener(address string, client *Client) *Listener {}
 func (listener *Listener) Run(handle func(*Client, *Package)) error {}
 func NewClient(priv *rsa.PrivateKey) *Client {}
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) {}
-func (client *Client) Request(receiver *rsa.PublicKey, pack *Package) error {}
-func (client *Client) Response(pub *rsa.PublicKey) {}
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) error {}
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {}
 func (client *Client) Disconnect(address string) {}
 func (client *Client) Public() *rsa.PublicKey {}
@@ -106,6 +100,7 @@ func (client *Client) HashPublic() string {}
 func (client *Client) AppendToF2F(pub *rsa.PublicKey) {}
 func (client *Client) RemoveFromF2F(pub *rsa.PublicKey) {}
 func (client *Client) InF2F(pub *rsa.PublicKey) bool {}
+func Handle(title string, client *Client, pack *Package, getHandle func(*Client, *Package) string) {}
 ```
 
 ### Cryptography functions:
@@ -137,9 +132,6 @@ func Base64Decode(data string) []byte {}
 ### Package structure:
 ```go
 {
-    Info: {
-        Network: string,
-    },
     Head: {
         Rand:    string,
         Title:   string,

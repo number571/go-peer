@@ -36,7 +36,7 @@ func main() {
 	client2.Connect(NODE2_ADDRESS, handleFunc)
 
 	for i := 0; i < 10; i++ {
-		client1.Send(node2.Public(), &gp.Package{
+		res, err := client1.Send(node2.Public(), &gp.Package{
 			Head: gp.HeadPackage{
 				Title: TITLE_MESSAGE,
 			},
@@ -44,15 +44,20 @@ func main() {
 				Data: fmt.Sprintf("hello, world! [%d]", i),
 			},
 		})
-		time.Sleep(100 * time.Millisecond)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		fmt.Println(res)
 	}
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
-	switch pack.Head.Title {
-	case TITLE_MESSAGE:
-		fmt.Printf("[%s] => '%s'\n", gp.HashPublic(gp.ParsePublic(pack.Head.Sender)), pack.Body.Data)
-	default:
-		fmt.Println("title undefined")
-	}
+	gp.Handle(TITLE_MESSAGE, client, pack, getMessage)
+}
+
+func getMessage(client *gp.Client, pack *gp.Package) (set string) {
+	public := gp.ParsePublic(pack.Head.Sender)
+	fmt.Printf("[%s] => '%s'\n", gp.HashPublic(public), pack.Body.Data)
+	return "ok"
 }
