@@ -43,7 +43,7 @@ func Handle(title string, client *Client, pack *Package, handle func(*Client, *P
 }
 
 func (listener *Listener) serve(handle func(*Client, *Package)) {
-	defer listener.Close()
+	defer listener.listen.Close()
 	for {
 		conn, err := listener.listen.Accept()
 		if err != nil {
