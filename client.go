@@ -10,7 +10,6 @@ import (
 	"time"
 )
 
-
 // CREATE
 func NewClient(priv *rsa.PrivateKey) *Client {
 	if priv == nil {
@@ -21,21 +20,20 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
 		// publicKey:   &priv.PublicKey,
-		privateKey:  priv,
-		actions:     make(map[string]chan string),
+		privateKey: priv,
+		actions:    make(map[string]chan string),
 		f2f: friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
 		},
 	}
 }
 
-
 // SEND
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, error) {
 	var (
-		err error
+		err    error
 		result string
-		hash = HashPublic(receiver)
+		hash   = HashPublic(receiver)
 	)
 
 	client.actions[hash] = make(chan string)
@@ -51,7 +49,6 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, erro
 
 	return result, err
 }
-
 
 // CONNECT / DISCONNECT
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {
@@ -73,7 +70,6 @@ func (client *Client) Disconnect(address string) {
 	}
 }
 
-
 // PUBLIC / PRIVATE
 func (client *Client) Public() *rsa.PublicKey {
 	return &client.privateKey.PublicKey
@@ -94,7 +90,6 @@ func (client *Client) StringPrivate() string {
 func (client *Client) HashPublic() string {
 	return HashPublic(&client.privateKey.PublicKey)
 }
-
 
 // F2F
 func (client *Client) F2F() bool {
@@ -132,15 +127,15 @@ func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
 	delete(client.f2f.friends, HashPublic(pub))
 }
 
-
 // LOCAL DATA
 func (client *Client) send(receiver *rsa.PublicKey, pack *Package) {
-	client.mapping[pack.Body.Hash] = true
-	encPack := EncodePackage(client.encrypt(receiver, pack))
+	encPack := client.encrypt(receiver, pack)
+	bytesPack := EncodePackage(encPack)
+	client.mapping[encPack.Body.Hash] = true
 	for cn := range client.connections {
 		cn.Write(bytes.Join(
 			[][]byte{
-				[]byte(encPack),
+				[]byte(bytesPack),
 				[]byte(settings.END_BYTES),
 			},
 			[]byte{},

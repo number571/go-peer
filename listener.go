@@ -28,15 +28,15 @@ func Handle(title string, client *Client, pack *Package, handle func(*Client, *P
 		public := ParsePublic(pack.Head.Sender)
 		client.send(public, &Package{
 			Head: HeadPackage{
-				Title: "_"+title,
+				Title: "_" + title,
 			},
 			Body: BodyPackage{
 				Data: handle(client, pack),
 			},
 		})
-	case "_"+title:
+	case "_" + title:
 		client.response(
-			ParsePublic(pack.Head.Sender), 
+			ParsePublic(pack.Head.Sender),
 			pack.Body.Data,
 		)
 	}

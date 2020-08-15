@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	TITLE_MESSAGE  = "TITLE_MESSAGE"
-	NODE_ADDRESS = ":8080"
+	TITLE_MESSAGE = "TITLE_MESSAGE"
+	NODE_ADDRESS  = ":8080"
 )
 
 func main() {
