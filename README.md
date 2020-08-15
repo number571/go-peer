@@ -168,7 +168,6 @@ func Base64Decode(data string) []byte {}
 {
     mutex:       *sync.Mutex,
     mapping:     map[string]bool,
-    publicKey:   *rsa.PublicKey,
     privateKey:  *rsa.PrivateKey,
     connections: map[net.Conn]string,
     actions:     map[string]chan bool,
