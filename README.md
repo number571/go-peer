@@ -82,7 +82,7 @@ func Get(key string) interface{} {}
 ### Get/Set settings example:
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
-gp.Set(gp.SettingsType{
+gopeer.Set(gopeer.SettingsType{
     "AKEY_SIZE": uint(3 << 10),
     "SKEY_SIZE": uint(1 << 5),
 })
