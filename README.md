@@ -46,6 +46,8 @@ type SettingsType map[string]interface{}
 type settingsStruct struct {
     END_BYTES string
     WAIT_TIME uint
+    POWS_DIFF uint
+    CONN_SIZE uint
     BUFF_SIZE uint
     PACK_SIZE uint
     MAPP_SIZE uint
@@ -59,7 +61,9 @@ type settingsStruct struct {
 ```go
 {
     END_BYTES: "\000\005\007\001\001\007\005\000",
-    WAIT_TIME: 5,       // seconds
+    WAIT_TIME: 10,      // seconds
+    POWS_DIFF: 20,      // bits
+    CONN_SIZE: 10,      // quantity
     BUFF_SIZE: 4 << 10, // 4KiB
     PACK_SIZE: 2 << 20, // 2MiB
     MAPP_SIZE: 1024,    // elems
@@ -127,6 +131,8 @@ func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
 func EncryptAES(key, data []byte) []byte {}
 func DecryptAES(key, data []byte) []byte {}
+func ProofOfWork(packHash []byte, diff uint) uint64 {}
+func ProofIsValid(packHash []byte, nonce uint64) bool {}
 ```
 
 ### Additional functions:
@@ -150,6 +156,7 @@ func Base64Decode(data string) []byte {}
         Data: string,
         Hash: string,
         Sign: string,
+        Npow: uint64,
     },
 }
 ```

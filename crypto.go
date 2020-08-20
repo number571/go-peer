@@ -10,8 +10,11 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"io"
+	"math"
+	"math/big"
 )
 
 func GenerateBytes(max uint) []byte {
@@ -126,6 +129,58 @@ func DecryptAES(key, data []byte) []byte {
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(data, data)
 	return unpaddingPKCS5(data)
+}
+
+func ProofOfWork(packHash []byte, diff uint) uint64 {
+	var (
+		Target  = big.NewInt(1)
+		intHash = big.NewInt(1)
+		nonce   = uint64(0)
+		hash    []byte
+	)
+	Target.Lsh(Target, 256-diff)
+	for nonce < math.MaxUint64 {
+		hash = HashSum(bytes.Join(
+			[][]byte{
+				packHash,
+				ToBytes(nonce),
+			},
+			[]byte{},
+		))
+		intHash.SetBytes(hash)
+		if intHash.Cmp(Target) == -1 {
+			return nonce
+		}
+		nonce++
+	}
+	return nonce
+}
+
+func ProofIsValid(packHash []byte, nonce uint64) bool {
+	intHash := big.NewInt(1)
+	Target := big.NewInt(1)
+	hash := HashSum(bytes.Join(
+		[][]byte{
+			packHash,
+			ToBytes(nonce),
+		},
+		[]byte{},
+	))
+	intHash.SetBytes(hash)
+	Target.Lsh(Target, 256-settings.POWS_DIFF)
+	if intHash.Cmp(Target) == -1 {
+		return true
+	}
+	return false
+}
+
+func ToBytes(num uint64) []byte {
+	var data = new(bytes.Buffer)
+	err := binary.Write(data, binary.BigEndian, num)
+	if err != nil {
+		return nil
+	}
+	return data.Bytes()
 }
 
 func paddingPKCS5(ciphertext []byte, blockSize int) []byte {

@@ -4,6 +4,8 @@ type SettingsType map[string]interface{}
 type settingsStruct struct {
 	END_BYTES string
 	WAIT_TIME uint
+	POWS_DIFF uint
+	CONN_SIZE uint
 	BUFF_SIZE uint
 	PACK_SIZE uint
 	MAPP_SIZE uint
@@ -17,7 +19,9 @@ var settings = defaultSettings()
 func defaultSettings() settingsStruct {
 	return settingsStruct{
 		END_BYTES: "\000\005\007\001\001\007\005\000",
-		WAIT_TIME: 5,       // seconds
+		WAIT_TIME: 10,      // seconds
+		POWS_DIFF: 20,      // bits
+		CONN_SIZE: 10,      // quantity
 		BUFF_SIZE: 4 << 10, // 4KiB
 		PACK_SIZE: 2 << 20, // 2MiB
 		MAPP_SIZE: 1024,    // elems
@@ -52,6 +56,10 @@ func Get(key string) interface{} {
 		return settings.END_BYTES
 	case "WAIT_TIME":
 		return settings.WAIT_TIME
+	case "POWS_DIFF":
+		return settings.POWS_DIFF
+	case "CONN_SIZE":
+		return settings.CONN_SIZE
 	case "BUFF_SIZE":
 		return settings.BUFF_SIZE
 	case "PACK_SIZE":
@@ -85,6 +93,10 @@ func intSettings(name string, data interface{}) uint8 {
 	switch name {
 	case "WAIT_TIME":
 		settings.WAIT_TIME = result
+	case "POWS_DIFF":
+		settings.POWS_DIFF = result
+	case "CONN_SIZE":
+		settings.CONN_SIZE = result
 	case "BUFF_SIZE":
 		settings.BUFF_SIZE = result
 	case "PACK_SIZE":

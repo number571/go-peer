@@ -193,6 +193,7 @@ func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
 			Hash: Base64Encode(hash),
 			Sign: Base64Encode(sign),
+			Npow: ProofOfWork(hash, settings.POWS_DIFF),
 		},
 	}
 }
@@ -241,6 +242,9 @@ func (client *Client) decrypt(pack *Package) *Package {
 	if err != nil {
 		return nil
 	}
+	if !ProofIsValid(hash, pack.Body.Npow) {
+		return nil
+	}
 	return &Package{
 		Head: HeadPackage{
 			Rand:    Base64Encode(rand),
@@ -252,6 +256,7 @@ func (client *Client) decrypt(pack *Package) *Package {
 			Data: string(dataBytes),
 			Hash: pack.Body.Hash,
 			Sign: pack.Body.Sign,
+			Npow: pack.Body.Npow,
 		},
 	}
 }

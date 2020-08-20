@@ -4,6 +4,7 @@ import (
 	gp "./gopeer"
 	"fmt"
 	"time"
+	// "encoding/json"
 )
 
 const (
@@ -40,7 +41,13 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) (set string) {
+	// printJSON(pack)
 	public := gp.ParsePublic(pack.Head.Sender)
 	fmt.Printf("[%s] => '%s'\n", gp.HashPublic(public), pack.Body.Data)
 	return "ok"
 }
+
+// func printJSON(data interface{}) {
+// 	jsonData, _ := json.MarshalIndent(data, "", "\t")
+// 	fmt.Println(string(jsonData))
+// }

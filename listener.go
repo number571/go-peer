@@ -49,6 +49,10 @@ func (listener *Listener) serve(handle func(*Client, *Package)) {
 		if err != nil {
 			break
 		}
+		if uint(len(listener.client.connections)) > settings.CONN_SIZE {
+			conn.Close()
+			continue
+		}
 		listener.client.connections[conn] = "client"
 		go handleConn(conn, listener.client, handle)
 	}
@@ -70,7 +74,7 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 			client.mutex.Unlock()
 			continue
 		}
-		if len(client.mapping) >= int(settings.MAPP_SIZE) {
+		if uint(len(client.mapping)) > settings.MAPP_SIZE {
 			client.mapping = make(map[string]bool)
 		}
 		client.mapping[pack.Body.Hash] = true
@@ -105,7 +109,7 @@ func readPackage(conn net.Conn) *Package {
 			return nil
 		}
 		size += uint(length)
-		if size >= settings.PACK_SIZE {
+		if size > settings.PACK_SIZE {
 			return nil
 		}
 		message += string(buffer[:length])

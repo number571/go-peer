@@ -42,4 +42,5 @@ type BodyPackage struct {
 	Data string `json:"data"`
 	Hash string `json:"hash"`
 	Sign string `json:"sign"`
+	Npow uint64 `json:"npow"`
 }
