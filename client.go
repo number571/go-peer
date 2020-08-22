@@ -10,17 +10,15 @@ import (
 	"time"
 )
 
-// CREATE
 func NewClient(priv *rsa.PrivateKey) *Client {
 	if priv == nil {
 		return nil
 	}
 	return &Client{
 		mutex:       new(sync.Mutex),
+		privateKey: priv,
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
-		// publicKey:   &priv.PublicKey,
-		privateKey: priv,
 		actions:    make(map[string]chan string),
 		f2f: friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
@@ -28,7 +26,6 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 	}
 }
 
-// SEND
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, error) {
 	var (
 		err    error
@@ -50,7 +47,6 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, erro
 	return result, err
 }
 
-// CONNECT / DISCONNECT
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
@@ -70,7 +66,6 @@ func (client *Client) Disconnect(address string) {
 	}
 }
 
-// PUBLIC / PRIVATE
 func (client *Client) Public() *rsa.PublicKey {
 	return &client.privateKey.PublicKey
 }
@@ -91,7 +86,6 @@ func (client *Client) HashPublic() string {
 	return HashPublic(&client.privateKey.PublicKey)
 }
 
-// F2F
 func (client *Client) F2F() bool {
 	return client.f2f.enabled
 }
@@ -111,10 +105,10 @@ func (client *Client) InF2F(pub *rsa.PublicKey) bool {
 	return false
 }
 
-func (client *Client) ListF2F() []*rsa.PublicKey {
-	var list []*rsa.PublicKey
+func (client *Client) ListF2F() []rsa.PublicKey {
+	var list []rsa.PublicKey
 	for _, pub := range client.f2f.friends {
-		list = append(list, pub)
+		list = append(list, *pub)
 	}
 	return list
 }
@@ -127,13 +121,12 @@ func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
 	delete(client.f2f.friends, HashPublic(pub))
 }
 
-// LOCAL DATA
 func (client *Client) send(receiver *rsa.PublicKey, pack *Package) {
 	encPack := client.encrypt(receiver, pack)
 	bytesPack := EncodePackage(encPack)
 	client.mapping[encPack.Body.Hash] = true
 	for cn := range client.connections {
-		cn.Write(bytes.Join(
+		go cn.Write(bytes.Join(
 			[][]byte{
 				[]byte(bytesPack),
 				[]byte(settings.END_BYTES),
@@ -149,7 +142,7 @@ func (client *Client) redirect(pack *Package, sender net.Conn) {
 		if cn == sender {
 			continue
 		}
-		cn.Write(bytes.Join(
+		go cn.Write(bytes.Join(
 			[][]byte{
 				[]byte(encPack),
 				[]byte(settings.END_BYTES),
@@ -160,10 +153,12 @@ func (client *Client) redirect(pack *Package, sender net.Conn) {
 }
 
 func (client *Client) response(pub *rsa.PublicKey, data string) {
+	client.mutex.Lock()
 	hash := HashPublic(pub)
 	if _, ok := client.actions[hash]; ok {
 		client.actions[hash] <- data
 	}
+	client.mutex.Unlock()
 }
 
 func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {

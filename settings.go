@@ -20,7 +20,7 @@ func defaultSettings() settingsStruct {
 	return settingsStruct{
 		END_BYTES: "\000\005\007\001\001\007\005\000",
 		WAIT_TIME: 10,      // seconds
-		POWS_DIFF: 20,      // bits
+		POWS_DIFF: 16,      // bits
 		CONN_SIZE: 10,      // quantity
 		BUFF_SIZE: 4 << 10, // 4KiB
 		PACK_SIZE: 2 << 20, // 2MiB

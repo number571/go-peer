@@ -14,8 +14,8 @@ type Listener struct {
 
 type Client struct {
 	mutex       *sync.Mutex
-	mapping     map[string]bool
 	privateKey  *rsa.PrivateKey
+	mapping     map[string]bool
 	connections map[net.Conn]string
 	actions     map[string]chan string
 	f2f         friendToFriend

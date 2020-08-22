@@ -81,8 +81,9 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 		client.mutex.Unlock()
 
 		decPack := client.decrypt(pack)
+		client.redirect(pack, conn)
+		
 		if decPack == nil {
-			client.redirect(pack, conn)
 			continue
 		}
 

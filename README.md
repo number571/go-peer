@@ -5,13 +5,10 @@
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
 
 ### Specifications:
-1. Data transfer:
 * Protocol: TCP;
-* End to end encryption;
-* Direct/Hidden connection;
-2. Encryption:
+* Encryption: E2E;
 * Symmetric algorithm: AES-CBC;
-* Asymmetric algorithm: RSA-OAEP;
+* Asymmetric algorithm: RSA-OAEP, RSA-PSS;
 * Hash function: SHA256;
 
 ### Template:
@@ -62,7 +59,7 @@ type settingsStruct struct {
 {
     END_BYTES: "\000\005\007\001\001\007\005\000",
     WAIT_TIME: 10,      // seconds
-    POWS_DIFF: 20,      // bits
+    POWS_DIFF: 16,      // bits
     CONN_SIZE: 10,      // quantity
     BUFF_SIZE: 4 << 10, // 4KiB
     PACK_SIZE: 2 << 20, // 2MiB
@@ -110,7 +107,7 @@ func (client *Client) F2F() bool {}
 func (client *Client) EnableF2F() {}
 func (client *Client) DisableF2F() {}
 func (client *Client) InF2F(pub *rsa.PublicKey) bool {}
-func (client *Client) ListF2F() []*rsa.PublicKey {}
+func (client *Client) ListF2F() []rsa.PublicKey {}
 func (client *Client) AppendF2F(pub *rsa.PublicKey) {}
 func (client *Client) RemoveF2F(pub *rsa.PublicKey) {}
 ```
@@ -174,8 +171,8 @@ func Base64Decode(data string) []byte {}
 ```go
 {
     mutex:       *sync.Mutex,
-    mapping:     map[string]bool,
     privateKey:  *rsa.PrivateKey,
+    mapping:     map[string]bool,
     connections: map[net.Conn]string,
     actions:     map[string]chan bool,
     f2f:         {
