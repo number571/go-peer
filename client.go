@@ -187,7 +187,7 @@ func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 		Body: BodyPackage{
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
 			Hash: Base64Encode(hash),
-			Sign: Base64Encode(sign),
+			Sign: Base64Encode(EncryptAES(session, sign)),
 			Npow: ProofOfWork(hash, settings.POWS_DIFF),
 		},
 	}
@@ -233,7 +233,11 @@ func (client *Client) decrypt(pack *Package) *Package {
 	if Base64Encode(hash) != pack.Body.Hash {
 		return nil
 	}
-	err := Verify(public, hash, Base64Decode(pack.Body.Sign))
+	sign := DecryptAES(session, Base64Decode(pack.Body.Sign))
+	if sign == nil {
+		return nil
+	}
+	err := Verify(public, hash, sign)
 	if err != nil {
 		return nil
 	}
@@ -250,7 +254,7 @@ func (client *Client) decrypt(pack *Package) *Package {
 		Body: BodyPackage{
 			Data: string(dataBytes),
 			Hash: pack.Body.Hash,
-			Sign: pack.Body.Sign,
+			Sign: Base64Encode(sign),
 			Npow: pack.Body.Npow,
 		},
 	}
