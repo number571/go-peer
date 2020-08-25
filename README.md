@@ -61,12 +61,12 @@ type settingsStruct struct {
     WAIT_TIME: 20,      // seconds
     POWS_DIFF: 20,      // bits
     CONN_SIZE: 10,      // quantity
-    BUFF_SIZE: 4 << 10, // 4*(2^10) = 4KiB
-    PACK_SIZE: 2 << 20, // 2*(2^20) = 2MiB
-    MAPP_SIZE: 1 << 10, // 2^10 = 1024H = 44KiB
-    AKEY_SIZE: 2 << 10, // 2*(2^10) = 2048b = 256B
-    SKEY_SIZE: 1 << 4,  // 2^4 = 16B
-    RAND_SIZE: 1 << 4,  // 2^4 = 16B
+    BUFF_SIZE: 4 << 10, // 4*(2^10)B = 4KiB
+    PACK_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
+    MAPP_SIZE: 1 << 10, // 2^10H = 44KiB
+    AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
+    SKEY_SIZE: 1 << 4,  // 2^4B = 16B
+    RAND_SIZE: 1 << 4,  // 2^4B = 16B
 }
 ```
 
@@ -129,7 +129,7 @@ func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
 func EncryptAES(key, data []byte) []byte {}
 func DecryptAES(key, data []byte) []byte {}
 func ProofOfWork(packHash []byte, diff uint) uint64 {}
-func ProofIsValid(packHash []byte, nonce uint64) bool {}
+func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
 ```
 
 ### Additional functions:

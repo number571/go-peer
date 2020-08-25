@@ -156,7 +156,7 @@ func ProofOfWork(packHash []byte, diff uint) uint64 {
 	return nonce
 }
 
-func ProofIsValid(packHash []byte, nonce uint64) bool {
+func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	Target := big.NewInt(1)
 	hash := HashSum(bytes.Join(
@@ -167,7 +167,7 @@ func ProofIsValid(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	))
 	intHash.SetBytes(hash)
-	Target.Lsh(Target, 256-settings.POWS_DIFF)
+	Target.Lsh(Target, 256-diff)
 	if intHash.Cmp(Target) == -1 {
 		return true
 	}

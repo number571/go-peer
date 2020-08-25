@@ -241,7 +241,7 @@ func (client *Client) decrypt(pack *Package) *Package {
 	if err != nil {
 		return nil
 	}
-	if !ProofIsValid(hash, pack.Body.Npow) {
+	if !ProofIsValid(hash, settings.POWS_DIFF, pack.Body.Npow) {
 		return nil
 	}
 	return &Package{

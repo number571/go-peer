@@ -80,7 +80,7 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 		client.mapping[pack.Body.Hash] = true
 		client.mutex.Unlock()
 
-		if !ProofIsValid(Base64Decode(pack.Body.Hash), pack.Body.Npow) {
+		if !ProofIsValid(Base64Decode(pack.Body.Hash), settings.POWS_DIFF, pack.Body.Npow) {
 			continue
 		}
 
