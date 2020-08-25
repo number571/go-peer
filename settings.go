@@ -16,18 +16,21 @@ type settingsStruct struct {
 
 var settings = defaultSettings()
 
+// H - hash = len(base64(sha256(data))) = 44B
+// B - byte
+// b - bit
 func defaultSettings() settingsStruct {
 	return settingsStruct{
 		END_BYTES: "\000\005\007\001\001\007\005\000",
-		WAIT_TIME: 10,      // seconds
-		POWS_DIFF: 16,      // bits
+		WAIT_TIME: 20,      // seconds
+		POWS_DIFF: 20,      // bits
 		CONN_SIZE: 10,      // quantity
-		BUFF_SIZE: 4 << 10, // 4KiB
-		PACK_SIZE: 2 << 20, // 2MiB
-		MAPP_SIZE: 1024,    // elems
-		AKEY_SIZE: 1024,    // bits
-		SKEY_SIZE: 16,      // bytes
-		RAND_SIZE: 16,      // bytes
+		BUFF_SIZE: 4 << 10, // 4*(2^10) = 4KiB
+		PACK_SIZE: 2 << 20, // 2*(2^20) = 2MiB
+		MAPP_SIZE: 1 << 10, // 2^10 = 1024H = 44KiB
+		AKEY_SIZE: 2 << 10, // 2*(2^10) = 2048b = 256B
+		SKEY_SIZE: 1 << 4,  // 2^4 = 16B
+		RAND_SIZE: 1 << 4,  // 2^4 = 16B
 	}
 }
 

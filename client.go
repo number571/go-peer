@@ -16,10 +16,10 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 	}
 	return &Client{
 		mutex:       new(sync.Mutex),
-		privateKey: priv,
+		privateKey:  priv,
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
-		actions:    make(map[string]chan string),
+		actions:     make(map[string]chan string),
 		f2f: friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
 		},

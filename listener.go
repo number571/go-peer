@@ -84,9 +84,9 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 			continue
 		}
 
-		decPack := client.decrypt(pack)
 		client.redirect(pack, conn)
-		
+		decPack := client.decrypt(pack)
+
 		if decPack == nil {
 			continue
 		}
