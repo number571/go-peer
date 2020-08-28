@@ -26,14 +26,14 @@ func Handle(title string, client *Client, pack *Package, handle func(*Client, *P
 	switch pack.Head.Title {
 	case title:
 		public := ParsePublic(pack.Head.Sender)
-		client.send(public, &Package{
+		client.send(client.encrypt(public, &Package{
 			Head: HeadPackage{
 				Title: "_" + title,
 			},
 			Body: BodyPackage{
 				Data: handle(client, pack),
 			},
-		})
+		}))
 	case "_" + title:
 		client.response(
 			ParsePublic(pack.Head.Sender),
@@ -65,8 +65,11 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 	}()
 	for {
 		pack := readPackage(conn)
+		isRoute := false
+
+checkAgain:
 		if pack == nil {
-			break
+			continue
 		}
 
 		client.mutex.Lock()
@@ -84,7 +87,12 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 			continue
 		}
 
-		client.redirect(pack, conn)
+		if isRoute {
+			client.send(pack)
+		} else {
+			client.redirect(pack, conn)
+		}
+		
 		decPack := client.decrypt(pack)
 
 		if decPack == nil {
@@ -97,6 +105,12 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 			continue
 		}
 		client.mutex.Unlock()
+
+		if decPack.Head.Title == settings.ROUTE_MSG {
+			pack = DeserializePackage(decPack.Body.Data)
+			isRoute = true
+			goto checkAgain
+		}
 
 		handle(client, decPack)
 	}
@@ -123,5 +137,5 @@ func readPackage(conn net.Conn) *Package {
 			break
 		}
 	}
-	return DecodePackage(message)
+	return DeserializePackage(message)
 }

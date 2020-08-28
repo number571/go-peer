@@ -4,6 +4,7 @@ import (
 	gp "./gopeer"
 	"fmt"
 	"time"
+	"crypto/rsa"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 )
 
 /*
-	client1 -> node2
+	client1 -> client2
 	client1 <-> node1 <-> client2 <-> node2
 */
 
@@ -35,8 +36,13 @@ func main() {
 
 	client2.Connect(NODE2_ADDRESS, handleFunc)
 
+	route := []*rsa.PublicKey{
+		node1.Public(),
+		node2.Public(),
+	}
+
 	for i := 0; i < 10; i++ {
-		res, err := client1.Send(node2.Public(), nil, &gp.Package{
+		res, err := client1.Send(client2.Public(), route, &gp.Package{
 			Head: gp.HeadPackage{
 				Title: TITLE_MESSAGE,
 			},

@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"math/big"
@@ -201,7 +202,7 @@ func unpaddingPKCS5(origData []byte) []byte {
 	return origData[:(length - unpadding)]
 }
 
-func EncodePackage(pack *Package) string {
+func SerializePackage(pack *Package) string {
 	jsonData, err := json.MarshalIndent(pack, "", "\t")
 	if err != nil {
 		return ""
@@ -209,7 +210,7 @@ func EncodePackage(pack *Package) string {
 	return string(jsonData)
 }
 
-func DecodePackage(jsonData string) *Package {
+func DeserializePackage(jsonData string) *Package {
 	var pack = new(Package)
 	err := json.Unmarshal([]byte(jsonData), pack)
 	if err != nil {
@@ -228,4 +229,9 @@ func Base64Decode(data string) []byte {
 		return nil
 	}
 	return result
+}
+
+func printJSON(data interface{}) {
+	jsonData, _ := json.MarshalIndent(data, "", "\t")
+	fmt.Println(string(jsonData))
 }

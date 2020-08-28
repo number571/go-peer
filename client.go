@@ -26,7 +26,7 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 	}
 }
 
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, error) {
+func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack *Package) (string, error) {
 	var (
 		err    error
 		result string
@@ -36,7 +36,20 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package) (string, erro
 	client.actions[hash] = make(chan string)
 	defer delete(client.actions, hash)
 
-	client.send(receiver, pack)
+	routePack := client.encrypt(receiver, pack)
+
+	for _, pub := range route {
+		routePack = client.encrypt(pub, &Package{
+			Head: HeadPackage{
+				Title: settings.ROUTE_MSG,
+			},
+			Body: BodyPackage{
+				Data: SerializePackage(routePack),
+			},
+		})
+	}
+
+	client.send(routePack)
 
 	select {
 	case result = <-client.actions[hash]:
@@ -121,10 +134,9 @@ func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
 	delete(client.f2f.friends, HashPublic(pub))
 }
 
-func (client *Client) send(receiver *rsa.PublicKey, pack *Package) {
-	encPack := client.encrypt(receiver, pack)
-	bytesPack := EncodePackage(encPack)
-	client.mapping[encPack.Body.Hash] = true
+func (client *Client) send(pack *Package) {
+	bytesPack := SerializePackage(pack)
+	client.mapping[pack.Body.Hash] = true
 	for cn := range client.connections {
 		go cn.Write(bytes.Join(
 			[][]byte{
@@ -137,7 +149,7 @@ func (client *Client) send(receiver *rsa.PublicKey, pack *Package) {
 }
 
 func (client *Client) redirect(pack *Package, sender net.Conn) {
-	encPack := EncodePackage(pack)
+	encPack := SerializePackage(pack)
 	for cn := range client.connections {
 		if cn == sender {
 			continue

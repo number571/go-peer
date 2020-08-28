@@ -21,7 +21,7 @@ func main() {
 
 	client.Connect(NODE_ADDRESS, handleFunc)
 
-	res, err := client.Send(node.Public(), &gp.Package{
+	res, err := client.Send(node.Public(), nil, &gp.Package{
 		Head: gp.HeadPackage{
 			Title: TITLE_MESSAGE,
 		},
