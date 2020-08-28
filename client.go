@@ -61,6 +61,9 @@ func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack
 }
 
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {
+	if uint(len(client.connections)) > settings.CONN_SIZE {
+		return errors.New("max conn")
+	}
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return err
