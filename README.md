@@ -43,6 +43,7 @@ type SettingsType map[string]interface{}
 type settingsStruct struct {
     END_BYTES string
     ROUTE_MSG string
+    RETRY_NUM uint
     WAIT_TIME uint
     POWS_DIFF uint
     CONN_SIZE uint
@@ -60,12 +61,13 @@ type settingsStruct struct {
 {
     END_BYTES: "\000\005\007\001\001\007\005\000",
     ROUTE_MSG: "\000\001\002\003\004\005\006\007",
+    RETRY_NUM: 3,       // quantity
     WAIT_TIME: 20,      // seconds
     POWS_DIFF: 20,      // bits
     CONN_SIZE: 10,      // quantity
     BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
     PACK_SIZE: 4 << 20, // 4*(2^20)B = 4MiB
-    MAPP_SIZE: 1 << 10, // 2^10H = 44KiB
+    MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
     AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
     SKEY_SIZE: 1 << 4,  // 2^4B = 16B
     RAND_SIZE: 1 << 4,  // 2^4B = 16B

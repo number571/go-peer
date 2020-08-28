@@ -28,13 +28,16 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 
 func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack *Package) (string, error) {
 	var (
-		err    error
-		result string
-		hash   = HashPublic(receiver)
+		err      error
+		result   string
+		hash     = HashPublic(receiver)
+		retryNum = settings.RETRY_NUM
 	)
 
 	client.actions[hash] = make(chan string)
 	defer delete(client.actions, hash)
+
+tryAgain:
 
 	routePack := client.encrypt(receiver, pack)
 
@@ -54,6 +57,10 @@ func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack
 	select {
 	case result = <-client.actions[hash]:
 	case <-time.After(time.Duration(settings.WAIT_TIME) * time.Second):
+		if retryNum > 1 {
+			retryNum -= 1
+			goto tryAgain
+		}
 		err = errors.New("time is over")
 	}
 

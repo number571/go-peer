@@ -68,6 +68,7 @@ func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {
 		isRoute := false
 
 checkAgain:
+
 		if pack == nil {
 			continue
 		}
