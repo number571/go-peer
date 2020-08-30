@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.1s.
+> Framework for create decentralized networks. Version: 1.2.2s.
 
 ### Framework based applications:
 * HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
@@ -97,6 +97,7 @@ func NewClient(priv *rsa.PrivateKey) *Client {}
 // ACTIONS
 func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
 func (listener *Listener) Run(handle func(*Client, *Package)) error {}
+func (listener *Listener) Close() error {}
 func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack *Package) error {}
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {}
 func (client *Client) Disconnect(address string) {}
