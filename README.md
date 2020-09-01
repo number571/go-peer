@@ -98,7 +98,6 @@ func NewPackage(title, data string) *Package {}
 // ACTIONS
 func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
 func (listener *Node) Run() error {}
-func (listener *Node) Close() error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
 func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}
@@ -142,8 +141,8 @@ func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
 
 ### Additional functions:
 ```go
-func EncodePackage(pack *Package) string {}
-func DecodePackage(jsonData string) *Package {}
+func SerializePackage(pack *Package) string {}
+func DeserializePackage(jsonData string) *Package {}
 func Base64Encode(data []byte) string {}
 func Base64Decode(data string) []byte {}
 ```
