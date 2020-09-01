@@ -36,14 +36,12 @@ func main() {
 	client2.Connect(NODE2_ADDRESS, handleFunc)
 
 	for i := 0; i < 10; i++ {
-		res, err := client1.Send(node2.Public(), nil, &gp.Package{
-			Head: gp.HeadPackage{
-				Title: TITLE_MESSAGE,
-			},
-			Body: gp.BodyPackage{
-				Data: fmt.Sprintf("hello, world! [%d]", i),
-			},
-		})
+		res, err := client1.Send(
+			node2.Public(), 
+			gp.NewPackage(TITLE_MESSAGE, fmt.Sprintf("hello, world! [%d]", i)),
+			nil, 
+			nil, 
+		)
 		if err != nil {
 			fmt.Println(err)
 			continue

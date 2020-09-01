@@ -26,7 +26,7 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 	}
 }
 
-func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack *Package) (string, error) {
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {
 	var (
 		err      error
 		result   string
@@ -39,17 +39,15 @@ func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack
 
 tryAgain:
 
-	routePack := client.encrypt(receiver, pack)
+	routePack := client.Encrypt(receiver, pack)
+
+	if pseudoSender == nil {
+		pseudoSender = client
+	}
 
 	for _, pub := range route {
-		routePack = client.encrypt(pub, &Package{
-			Head: HeadPackage{
-				Title: settings.ROUTE_MSG,
-			},
-			Body: BodyPackage{
-				Data: SerializePackage(routePack),
-			},
-		})
+		routePack = pseudoSender.Encrypt(pub, 
+			NewPackage(settings.ROUTE_MSG, SerializePackage(routePack)))
 	}
 
 	client.send(routePack)
@@ -144,46 +142,7 @@ func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
 	delete(client.f2f.friends, HashPublic(pub))
 }
 
-func (client *Client) send(pack *Package) {
-	bytesPack := SerializePackage(pack)
-	client.mapping[pack.Body.Hash] = true
-	for cn := range client.connections {
-		go cn.Write(bytes.Join(
-			[][]byte{
-				[]byte(bytesPack),
-				[]byte(settings.END_BYTES),
-			},
-			[]byte{},
-		))
-	}
-}
-
-func (client *Client) redirect(pack *Package, sender net.Conn) {
-	encPack := SerializePackage(pack)
-	for cn := range client.connections {
-		if cn == sender {
-			continue
-		}
-		go cn.Write(bytes.Join(
-			[][]byte{
-				[]byte(encPack),
-				[]byte(settings.END_BYTES),
-			},
-			[]byte{},
-		))
-	}
-}
-
-func (client *Client) response(pub *rsa.PublicKey, data string) {
-	client.mutex.Lock()
-	hash := HashPublic(pub)
-	if _, ok := client.actions[hash]; ok {
-		client.actions[hash] <- data
-	}
-	client.mutex.Unlock()
-}
-
-func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
+func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 	var (
 		session = GenerateBytes(uint(settings.SKEY_SIZE))
 		rand    = GenerateBytes(uint(settings.RAND_SIZE))
@@ -215,7 +174,7 @@ func (client *Client) encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 	}
 }
 
-func (client *Client) decrypt(pack *Package) *Package {
+func (client *Client) Decrypt(pack *Package) *Package {
 	session := DecryptRSA(client.privateKey, Base64Decode(pack.Head.Session))
 	if session == nil {
 		return nil
@@ -280,4 +239,43 @@ func (client *Client) decrypt(pack *Package) *Package {
 			Npow: pack.Body.Npow,
 		},
 	}
+}
+
+func (client *Client) send(pack *Package) {
+	bytesPack := SerializePackage(pack)
+	client.mapping[pack.Body.Hash] = true
+	for cn := range client.connections {
+		go cn.Write(bytes.Join(
+			[][]byte{
+				[]byte(bytesPack),
+				[]byte(settings.END_BYTES),
+			},
+			[]byte{},
+		))
+	}
+}
+
+func (client *Client) redirect(pack *Package, sender net.Conn) {
+	encPack := SerializePackage(pack)
+	for cn := range client.connections {
+		if cn == sender {
+			continue
+		}
+		go cn.Write(bytes.Join(
+			[][]byte{
+				[]byte(encPack),
+				[]byte(settings.END_BYTES),
+			},
+			[]byte{},
+		))
+	}
+}
+
+func (client *Client) response(pub *rsa.PublicKey, data string) {
+	client.mutex.Lock()
+	hash := HashPublic(pub)
+	if _, ok := client.actions[hash]; ok {
+		client.actions[hash] <- data
+	}
+	client.mutex.Unlock()
 }

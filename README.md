@@ -94,13 +94,16 @@ gopeer.Set(gopeer.SettingsType{
 // CREATE
 func NewListener(address string, client *Client) *Listener {}
 func NewClient(priv *rsa.PrivateKey) *Client {}
+func NewPackage(title, data string) *Package {}
 // ACTIONS
 func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
 func (listener *Listener) Run(handle func(*Client, *Package)) error {}
 func (listener *Listener) Close() error {}
-func (client *Client) Send(receiver *rsa.PublicKey, route []*rsa.PublicKey, pack *Package) error {}
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
 func (client *Client) Connect(address string, handle func(*Client, *Package)) error {}
 func (client *Client) Disconnect(address string) {}
+func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {}
+func (client *Client) Decrypt(pack *Package) *Package {}
 // KEYS
 func (client *Client) Public() *rsa.PublicKey {}
 func (client *Client) Private() *rsa.PrivateKey {}

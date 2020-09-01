@@ -12,6 +12,32 @@ func NewListener(address string, client *Client) *Listener {
 	}
 }
 
+func NewPackage(title, data string) *Package {
+	return &Package{
+		Head: HeadPackage {
+			Title: title,
+		},
+		Body: BodyPackage {
+			Data: data,
+		},
+	}
+}
+
+func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {
+	switch pack.Head.Title {
+	case title:
+		client.send(client.Encrypt(
+			ParsePublic(pack.Head.Sender), 
+			NewPackage("_" + title, handle(client, pack)),
+		))
+	case "_" + title:
+		client.response(
+			ParsePublic(pack.Head.Sender),
+			pack.Body.Data,
+		)
+	}
+}
+
 func (listener *Listener) Run(handle func(*Client, *Package)) error {
 	var err error
 	listener.listen, err = net.Listen("tcp", listener.address)
@@ -20,26 +46,6 @@ func (listener *Listener) Run(handle func(*Client, *Package)) error {
 	}
 	listener.serve(handle)
 	return nil
-}
-
-func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {
-	switch pack.Head.Title {
-	case title:
-		public := ParsePublic(pack.Head.Sender)
-		client.send(client.encrypt(public, &Package{
-			Head: HeadPackage{
-				Title: "_" + title,
-			},
-			Body: BodyPackage{
-				Data: handle(client, pack),
-			},
-		}))
-	case "_" + title:
-		client.response(
-			ParsePublic(pack.Head.Sender),
-			pack.Body.Data,
-		)
-	}
 }
 
 func (listener *Listener) serve(handle func(*Client, *Package)) {
@@ -94,7 +100,7 @@ checkAgain:
 			client.redirect(pack, conn)
 		}
 		
-		decPack := client.decrypt(pack)
+		decPack := client.Decrypt(pack)
 
 		if decPack == nil {
 			continue
