@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-func NewListener(address string, client *Client) *Listener {
-	return &Listener{
+func NewNode(address string, client *Client) *Node {
+	return &Node{
 		address: address,
 		client:  client,
 	}
@@ -38,30 +38,26 @@ func Handle(title string, client *Client, pack *Package, handle func(*Client, *P
 	}
 }
 
-func (listener *Listener) Run(handle func(*Client, *Package)) error {
+func (node *Node) Run() error {
 	var err error
-	listener.listen, err = net.Listen("tcp", listener.address)
+	node.listen, err = net.Listen("tcp", node.address)
 	if err != nil {
 		return err
 	}
-	listener.serve(handle)
-	return nil
-}
-
-func (listener *Listener) serve(handle func(*Client, *Package)) {
-	defer listener.listen.Close()
+	defer node.listen.Close()
 	for {
-		conn, err := listener.listen.Accept()
+		conn, err := node.listen.Accept()
 		if err != nil {
 			break
 		}
-		if uint(len(listener.client.connections)) > settings.CONN_SIZE {
+		if uint(len(node.client.connections)) > settings.CONN_SIZE {
 			conn.Close()
 			continue
 		}
-		listener.client.connections[conn] = "client"
-		go handleConn(conn, listener.client, handle)
+		node.client.connections[conn] = "client"
+		go handleConn(conn, node.client, node.client.handle)
 	}
+	return nil
 }
 
 func handleConn(conn net.Conn, client *Client, handle func(*Client, *Package)) {

@@ -19,29 +19,29 @@ const (
 */
 
 func main() {
-	client1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	client2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	client1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+	client2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
 
 	fmt.Println(gp.HashPublic(client1.Public()))
 
-	node1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	node2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	node1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+	node2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
 
-	go gp.NewListener(NODE1_ADDRESS, node1).Run(handleFunc)
-	go gp.NewListener(NODE2_ADDRESS, node2).Run(handleFunc)
+	go gp.NewNode(NODE1_ADDRESS, node1).Run()
+	go gp.NewNode(NODE2_ADDRESS, node2).Run()
 	time.Sleep(500 * time.Millisecond)
 
-	client1.Connect(NODE1_ADDRESS, handleFunc)
-	client2.Connect(NODE1_ADDRESS, handleFunc)
+	client1.Connect(NODE1_ADDRESS)
+	client2.Connect(NODE1_ADDRESS)
 
-	client2.Connect(NODE2_ADDRESS, handleFunc)
+	client2.Connect(NODE2_ADDRESS)
 
 	route := []*rsa.PublicKey{
 		node1.Public(),
 		node2.Public(),
 	}
 
-	pseudoSender := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	pseudoSender := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), nil)
 
 	for i := 0; i < 10; i++ {
 		res, err := client1.Send(

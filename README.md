@@ -27,8 +27,8 @@ func init() {
 }
 
 func main() {
-    node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-    gp.NewListener(":8080", node).Run(handleFunc)
+    node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+    gp.NewNode(":8080", node).Run()
     // ...
 }
 
@@ -92,15 +92,15 @@ gopeer.Set(gopeer.SettingsType{
 ### Network functions and methods:
 ```go
 // CREATE
-func NewListener(address string, client *Client) *Listener {}
-func NewClient(priv *rsa.PrivateKey) *Client {}
+func NewNode(address string, client *Client) *Listener {}
+func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
 func NewPackage(title, data string) *Package {}
 // ACTIONS
 func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
-func (listener *Listener) Run(handle func(*Client, *Package)) error {}
+func (listener *Listener) Run() error {}
 func (listener *Listener) Close() error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
-func (client *Client) Connect(address string, handle func(*Client, *Package)) error {}
+func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {}
 func (client *Client) Decrypt(pack *Package) *Package {}

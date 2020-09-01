@@ -12,8 +12,8 @@ func init() {
 }
 
 func main() {
-	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	gp.NewListener(":8080", node).Run(handleFunc)
+	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+	gp.NewNode(":8080", node).Run()
 	// ...
 }
 

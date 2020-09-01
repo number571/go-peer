@@ -13,22 +13,20 @@ const (
 )
 
 func main() {
-	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
 
-	go gp.NewListener(NODE_ADDRESS, node).Run(handleFunc)
+	go gp.NewNode(NODE_ADDRESS, node).Run()
 	time.Sleep(500 * time.Millisecond)
 
-	client.Connect(NODE_ADDRESS, handleFunc)
+	client.Connect(NODE_ADDRESS)
 
-	res, err := client.Send(node.Public(), nil, &gp.Package{
-		Head: gp.HeadPackage{
-			Title: TITLE_MESSAGE,
-		},
-		Body: gp.BodyPackage{
-			Data: "hello, world!",
-		},
-	})
+	res, err := client.Send(
+		node.Public(), 
+		gp.NewPackage(TITLE_MESSAGE, "hello, world!"), 
+		nil, 
+		nil,
+	)
 	if err != nil {
 		fmt.Println(err)
 	}

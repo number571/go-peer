@@ -10,11 +10,12 @@ import (
 	"time"
 )
 
-func NewClient(priv *rsa.PrivateKey) *Client {
+func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 	if priv == nil {
 		return nil
 	}
 	return &Client{
+		handle:      handle,
 		mutex:       new(sync.Mutex),
 		privateKey:  priv,
 		mapping:     make(map[string]bool),
@@ -65,7 +66,7 @@ tryAgain:
 	return result, err
 }
 
-func (client *Client) Connect(address string, handle func(*Client, *Package)) error {
+func (client *Client) Connect(address string) error {
 	if uint(len(client.connections)) > settings.CONN_SIZE {
 		return errors.New("max conn")
 	}
@@ -74,7 +75,7 @@ func (client *Client) Connect(address string, handle func(*Client, *Package)) er
 		return err
 	}
 	client.connections[conn] = address
-	go handleConn(conn, client, handle)
+	go handleConn(conn, client, client.handle)
 	return nil
 }
 
