@@ -177,6 +177,7 @@ func Base64Decode(data string) []byte {}
 ### Client structure:
 ```go
 {
+    handle:      func(*Client, *Package)
     mutex:       *sync.Mutex,
     privateKey:  *rsa.PrivateKey,
     mapping:     map[string]bool,
