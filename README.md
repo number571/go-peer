@@ -2,10 +2,16 @@
 > Framework for create decentralized networks. Version: 1.2.3s.
 
 ### Framework based applications:
-* HiddenLake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "F2F network");
+* Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
+* Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
+
+### Research Article:
+* The theory of the structure of hidden systems: [github.com/number571/hiddensystems.pdf](https://github.com/number571/hiddensystems.pdf "TSHS");
 
 ### Specifications:
+* Type: Embedded;
 * Protocol: TCP;
+* Routing: Fill;
 * Encryption: E2E;
 * Symmetric algorithm: AES-CBC;
 * Asymmetric algorithm: RSA-OAEP, RSA-PSS;
