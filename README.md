@@ -75,7 +75,7 @@ type settingsStruct struct {
     PACK_SIZE: 4 << 20, // 4*(2^20)B = 4MiB
     MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
     AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
-    SKEY_SIZE: 1 << 4,  // 2^4B = 16B
+    SKEY_SIZE: 1 << 5,  // 2^5B = 32B
     RAND_SIZE: 1 << 4,  // 2^4B = 16B
 }
 ```
