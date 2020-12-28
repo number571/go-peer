@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.3s.
+> Framework for create decentralized networks. Version: 1.2.4s.
 
 ### Framework based applications:
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -27,13 +27,14 @@ import (
 
 func init() {
     gp.Set(gp.SettingsType{
-        "AKEY_SIZE": uint(3 << 10),
-        "SKEY_SIZE": uint(1 << 5),
+        "AKEY_SIZE": uint(1 << 10),
+        "SKEY_SIZE": uint(1 << 4),
     })
 }
 
 func main() {
-    node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+    node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+    node.SetHandle(handleFunc)
     gp.NewNode(":8080", node).Run()
     // ...
 }
@@ -90,8 +91,8 @@ func Get(key string) interface{} {}
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
 gopeer.Set(gopeer.SettingsType{
-    "AKEY_SIZE": uint(3 << 10),
-    "SKEY_SIZE": uint(1 << 5),
+    "AKEY_SIZE": uint(1 << 10),
+    "SKEY_SIZE": uint(1 << 4),
 })
 ```
 
@@ -99,11 +100,12 @@ gopeer.Set(gopeer.SettingsType{
 ```go
 // CREATE
 func NewNode(address string, client *Client) *Node {}
-func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
+func NewClient(priv *rsa.PrivateKey) *Client {}
 func NewPackage(title, data string) *Package {}
 // ACTIONS
 func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
 func (listener *Node) Run() error {}
+func (client *Client) SetHandle(handle func(*Client, *Package)) *Client {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
 func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}

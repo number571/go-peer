@@ -1,6 +1,7 @@
 package gopeer
 
 import (
+	"errors"
 	"net"
 	"strings"
 )
@@ -39,6 +40,9 @@ func Handle(title string, client *Client, pack *Package, handle func(*Client, *P
 }
 
 func (node *Node) Run() error {
+	if node.client.handle == nil {
+		return errors.New("handle nil")
+	}
 	var err error
 	node.listen, err = net.Listen("tcp", node.address)
 	if err != nil {

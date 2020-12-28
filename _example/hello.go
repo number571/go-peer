@@ -13,8 +13,11 @@ const (
 )
 
 func main() {
-	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
-	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), handleFunc)
+	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+
+	client.SetHandle(handleFunc)
+	node.SetHandle(handleFunc)
 
 	go gp.NewNode(NODE_ADDRESS, node).Run()
 	time.Sleep(500 * time.Millisecond)

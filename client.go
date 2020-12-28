@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
+func NewClient(priv *rsa.PrivateKey) *Client {
 	if priv == nil {
 		return nil
 	}
 	return &Client{
-		handle:      handle,
+		handle:		 nil,
 		mutex:       new(sync.Mutex),
 		privateKey:  priv,
 		mapping:     make(map[string]bool),
@@ -25,6 +25,11 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 			friends: make(map[string]*rsa.PublicKey),
 		},
 	}
+}
+
+func (client *Client) SetHandle(handle func(*Client, *Package)) *Client {
+	client.handle = handle
+	return client
 }
 
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {
@@ -67,6 +72,9 @@ tryAgain:
 }
 
 func (client *Client) Connect(address string) error {
+	if client.handle == nil {
+		return errors.New("handle nil")
+	}
 	if uint(len(client.connections)) > settings.CONN_SIZE {
 		return errors.New("max conn")
 	}
