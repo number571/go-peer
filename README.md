@@ -6,7 +6,7 @@
 * Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
 
 ### Research Article:
-* The theory of the structure of hidden systems: [github.com/number571/gopeer/hiddensystems.pdf](https://github.com/number571/gopeer/hiddensystems.pdf "TSHS");
+* The theory of the structure of hidden systems: [hiddensystems.pdf](https://github.com/Number571/gopeer/blob/master/hiddensystems.pdf "TSHS");
 
 ### Specifications:
 * Type: Embedded;
