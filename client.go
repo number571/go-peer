@@ -128,9 +128,12 @@ func (client *Client) Connect(address string) error {
 	if client.handle == nil {
 		return errors.New("handle nil")
 	}
+	client.mutex.Lock()
 	if uint(len(client.connections)) > settings.CONN_SIZE {
+		client.mutex.Unlock()
 		return errors.New("max conn")
 	}
+	client.mutex.Unlock()
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return err
