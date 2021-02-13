@@ -18,22 +18,28 @@ const (
 */
 
 func main() {
-	client1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	client2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-
-	client1.SetHandle(handleFunc)
-	client2.SetHandle(handleFunc)
+	client1 := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
+	client2 := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
 
 	fmt.Println(gp.HashPublic(client1.Public()))
 
-	node1 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	node2 := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
+	node1 := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
+	node2 := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
 
-	node1.SetHandle(handleFunc)
-	node2.SetHandle(handleFunc)
-
-	go gp.NewNode(NODE1_ADDRESS, node1).Run()
-	go gp.NewNode(NODE2_ADDRESS, node2).Run()
+	go node1.RunNode(NODE1_ADDRESS)
+	go node2.RunNode(NODE2_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
 
 	client1.Connect(NODE1_ADDRESS)
@@ -57,7 +63,7 @@ func main() {
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
-	gp.Handle(TITLE_MESSAGE, client, pack, getMessage)
+	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) (set string) {

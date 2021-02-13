@@ -13,13 +13,15 @@ const (
 )
 
 func main() {
-	client := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-
-	client.SetHandle(handleFunc)
-	node.SetHandle(handleFunc)
-
-	go gp.NewNode(NODE_ADDRESS, node).Run()
+	client := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
+	node := gp.NewClient(
+		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
+		handleFunc,
+	)
+	go node.RunNode(NODE_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
 
 	client.Connect(NODE_ADDRESS)
@@ -38,7 +40,7 @@ func main() {
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
-	gp.Handle(TITLE_MESSAGE, client, pack, getMessage)
+	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) (set string) {

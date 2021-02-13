@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.4s.
+> Framework for create decentralized networks. Version: 1.2.5s.
 
 ### Framework based applications:
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -33,9 +33,10 @@ func init() {
 }
 
 func main() {
-    node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-    node.SetHandle(handleFunc)
-    gp.NewNode(":8080", node).Run()
+    gp.NewClient(
+        gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), 
+        handleFunc,
+    ).RunNode(":8080")
     // ...
 }
 
@@ -98,26 +99,20 @@ gopeer.Set(gopeer.SettingsType{
 
 ### Network functions and methods:
 ```go
-// CREATE
-func NewNode(address string, client *Client) *Node {}
-func NewClient(priv *rsa.PrivateKey) *Client {}
+func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
 func NewPackage(title, data string) *Package {}
-// ACTIONS
-func Handle(title string, client *Client, pack *Package, handle func(*Client, *Package) string) {}
-func (listener *Node) Run() error {}
-func (client *Client) SetHandle(handle func(*Client, *Package)) *Client {}
+func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) string) {}
+func (client *Client) RunNode(address string) error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
 func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {}
 func (client *Client) Decrypt(pack *Package) *Package {}
-// KEYS
 func (client *Client) Public() *rsa.PublicKey {}
 func (client *Client) Private() *rsa.PrivateKey {}
 func (client *Client) StringPublic() string {}
 func (client *Client) StringPrivate() string {}
 func (client *Client) HashPublic() string {}
-// F2F
 func (client *Client) F2F() bool {}
 func (client *Client) EnableF2F() {}
 func (client *Client) DisableF2F() {}
@@ -170,15 +165,6 @@ func Base64Decode(data string) []byte {}
         Sign: string,
         Npow: uint64,
     },
-}
-```
-
-### Listener structure:
-```go
-{
-    address: string,
-    client:  *Client,
-    listen:  net.Listener,
 }
 ```
 

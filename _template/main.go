@@ -1,23 +1,24 @@
 package main
 
 import (
-	gp "./gopeer"
+    gp "./gopeer"
 )
 
 func init() {
-	gp.Set(gp.SettingsType{
-		"AKEY_SIZE": uint(1 << 10),
-		"SKEY_SIZE": uint(1 << 4),
-	})
+    gp.Set(gp.SettingsType{
+        "AKEY_SIZE": uint(1 << 10),
+        "SKEY_SIZE": uint(1 << 4),
+    })
 }
 
 func main() {
-	node := gp.NewClient(gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)))
-	node.SetHandle(handleFunc)
-	gp.NewNode(":8080", node).Run()
-	// ...
+    gp.NewClient(
+        gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), 
+        handleFunc,
+    ).RunNode(":8080")
+    // ...
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
-	// ...
+    // ...
 }

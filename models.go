@@ -6,12 +6,6 @@ import (
 	"sync"
 )
 
-type Node struct {
-	address string
-	client  *Client
-	listen  net.Listener
-}
-
 type Client struct {
 	handle      func(*Client, *Package)
 	mutex       *sync.Mutex
