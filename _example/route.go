@@ -55,7 +55,7 @@ func main() {
 
 	pseudoSender := gp.NewClient(
 		gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
+		nil,
 	)
 
 	for i := 0; i < 10; i++ {

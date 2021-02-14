@@ -97,7 +97,6 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 	}()
 
 tryAgain:
-
 	routePack := client.Encrypt(receiver, pack)
 
 	if pseudoSender == nil {
@@ -293,6 +292,9 @@ func (client *Client) Decrypt(pack *Package) *Package {
 		return nil
 	}
 	rand := DecryptAES(session, Base64Decode(pack.Head.Rand))
+	if rand == nil {
+		return nil
+	}
 	check := HashSum(bytes.Join(
 		[][]byte{
 			rand,
@@ -329,12 +331,11 @@ func (client *Client) handleConn(conn net.Conn, handle func(*Client, *Package)) 
 		delete(client.connections, conn)
 		client.mutex.Unlock()
 	}()
+
 	for {
 		pack := readPackage(conn)
-		isRoute := false
 
 checkAgain:
-
 		if pack == nil {
 			continue
 		}
@@ -347,21 +348,15 @@ checkAgain:
 		if uint(len(client.mapping)) > settings.MAPP_SIZE {
 			client.mapping = make(map[string]bool)
 		}
-		client.mapping[pack.Body.Hash] = true
 		client.mutex.Unlock()
 
 		if !ProofIsValid(Base64Decode(pack.Body.Hash), settings.POWS_DIFF, pack.Body.Npow) {
 			continue
 		}
 
-		if isRoute {
-			client.send(pack)
-		} else {
-			client.redirect(pack, conn)
-		}
-		
-		decPack := client.Decrypt(pack)
+		client.send(pack)
 
+		decPack := client.Decrypt(pack)
 		if decPack == nil {
 			continue
 		}
@@ -372,7 +367,6 @@ checkAgain:
 
 		if decPack.Head.Title == settings.ROUTE_MSG {
 			pack = DeserializePackage(decPack.Body.Data)
-			isRoute = true
 			goto checkAgain
 		}
 
@@ -413,24 +407,6 @@ func (client *Client) send(pack *Package) {
 		go cn.Write(bytes.Join(
 			[][]byte{
 				[]byte(bytesPack),
-				[]byte(settings.END_BYTES),
-			},
-			[]byte{},
-		))
-	}
-}
-
-func (client *Client) redirect(pack *Package, sender net.Conn) {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
-	encPack := SerializePackage(pack)
-	for cn := range client.connections {
-		if cn == sender {
-			continue
-		}
-		go cn.Write(bytes.Join(
-			[][]byte{
-				[]byte(encPack),
 				[]byte(settings.END_BYTES),
 			},
 			[]byte{},
