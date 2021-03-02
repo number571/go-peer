@@ -8,15 +8,16 @@ import (
 
 type Client struct {
 	handle      func(*Client, *Package)
-	mutex       *sync.Mutex
+	mutex       sync.Mutex
 	privateKey  *rsa.PrivateKey
 	mapping     map[string]bool
 	connections map[net.Conn]string
 	actions     map[string]chan string
-	f2f         friendToFriend
+	F2F         *friendToFriend
 }
 
 type friendToFriend struct {
+	mutex   sync.Mutex
 	enabled bool
 	friends map[string]*rsa.PublicKey
 }

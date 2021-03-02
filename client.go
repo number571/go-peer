@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"net"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -17,12 +16,11 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 	}
 	return &Client{
 		handle:		 handle,
-		mutex:       new(sync.Mutex),
 		privateKey:  priv,
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
 		actions:     make(map[string]chan string),
-		f2f: friendToFriend{
+		F2F: &friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
 		},
 	}
@@ -40,9 +38,6 @@ func NewPackage(title, data string) *Package {
 }
 
 func (client *Client) RunNode(address string) error {
-	if client.handle == nil {
-		return errors.New("handle nil")
-	}
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
@@ -70,12 +65,12 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 	switch pack.Head.Title {
 	case title:
 		client.send(client.Encrypt(
-			ParsePublic(pack.Head.Sender), 
+			BytesToPublicKey(Base64Decode(pack.Head.Sender)), 
 			NewPackage("_" + title, handle(client, pack)),
 		))
 	case "_" + title:
 		client.response(
-			ParsePublic(pack.Head.Sender),
+			BytesToPublicKey(Base64Decode(pack.Head.Sender)),
 			pack.Body.Data,
 		)
 	}
@@ -85,7 +80,7 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 	var (
 		err      error
 		result   string
-		hash     = HashPublic(receiver)
+		hash     = HashPublicKey(receiver)
 		retryNum = settings.RETRY_NUM
 	)
 
@@ -124,9 +119,6 @@ tryAgain:
 }
 
 func (client *Client) Connect(address string) error {
-	if client.handle == nil {
-		return errors.New("handle nil")
-	}
 	client.mutex.Lock()
 	if uint(len(client.connections)) > settings.CONN_SIZE {
 		client.mutex.Unlock()
@@ -155,67 +147,12 @@ func (client *Client) Disconnect(address string) {
 	}
 }
 
-func (client *Client) Public() *rsa.PublicKey {
+func (client *Client) PublicKey() *rsa.PublicKey {
 	return &client.privateKey.PublicKey
 }
 
-func (client *Client) Private() *rsa.PrivateKey {
+func (client *Client) PrivateKey() *rsa.PrivateKey {
 	return client.privateKey
-}
-
-func (client *Client) StringPublic() string {
-	return StringPublic(&client.privateKey.PublicKey)
-}
-
-func (client *Client) StringPrivate() string {
-	return StringPrivate(client.privateKey)
-}
-
-func (client *Client) HashPublic() string {
-	return HashPublic(&client.privateKey.PublicKey)
-}
-
-func (client *Client) F2F() bool {
-	return client.f2f.enabled
-}
-
-func (client *Client) EnableF2F() {
-	client.f2f.enabled = true
-}
-
-func (client *Client) DisableF2F() {
-	client.f2f.enabled = false
-}
-
-func (client *Client) InF2F(pub *rsa.PublicKey) bool {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
-	if _, ok := client.f2f.friends[HashPublic(pub)]; ok {
-		return true
-	}
-	return false
-}
-
-func (client *Client) ListF2F() []rsa.PublicKey {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
-	var list []rsa.PublicKey
-	for _, pub := range client.f2f.friends {
-		list = append(list, *pub)
-	}
-	return list
-}
-
-func (client *Client) AppendF2F(pub *rsa.PublicKey) {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
-	client.f2f.friends[HashPublic(pub)] = pub
-}
-
-func (client *Client) RemoveF2F(pub *rsa.PublicKey) {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
-	delete(client.f2f.friends, HashPublic(pub))
 }
 
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
@@ -225,20 +162,20 @@ func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 		hash    = HashSum(bytes.Join(
 			[][]byte{
 				rand,
-				Base64Decode(client.StringPublic()),
-				Base64Decode(StringPublic(receiver)),
+				PublicKeyToBytes(client.PublicKey()),
+				PublicKeyToBytes(receiver),
 				[]byte(pack.Head.Title),
 				[]byte(pack.Body.Data),
 			},
 			[]byte{},
 		))
-		sign = Sign(client.privateKey, hash)
+		sign = Sign(client.PrivateKey(), hash)
 	)
 	return &Package{
 		Head: HeadPackage{
 			Rand:    Base64Encode(EncryptAES(session, rand)),
 			Title:   Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
-			Sender:  Base64Encode(EncryptAES(session, Base64Decode(client.StringPublic()))),
+			Sender:  Base64Encode(EncryptAES(session, PublicKeyToBytes(client.PublicKey()))),
 			Session: Base64Encode(EncryptRSA(receiver, session)),
 		},
 		Body: BodyPackage{
@@ -258,7 +195,7 @@ func (client *Client) Decrypt(pack *Package) *Package {
 	if !ProofIsValid(hash, settings.POWS_DIFF, pack.Body.Npow) {
 		return nil
 	}
-	session := DecryptRSA(client.privateKey, Base64Decode(pack.Head.Session))
+	session := DecryptRSA(client.PrivateKey(), Base64Decode(pack.Head.Session))
 	if session == nil {
 		return nil
 	}
@@ -266,7 +203,7 @@ func (client *Client) Decrypt(pack *Package) *Package {
 	if publicBytes == nil {
 		return nil
 	}
-	public := ParsePublic(Base64Encode(publicBytes))
+	public := BytesToPublicKey(publicBytes)
 	if public == nil {
 		return nil
 	}
@@ -299,7 +236,7 @@ func (client *Client) Decrypt(pack *Package) *Package {
 		[][]byte{
 			rand,
 			publicBytes,
-			Base64Decode(client.StringPublic()),
+			PublicKeyToBytes(client.PublicKey()),
 			titleBytes,
 			dataBytes,
 		},
@@ -348,6 +285,7 @@ checkAgain:
 		if uint(len(client.mapping)) > settings.MAPP_SIZE {
 			client.mapping = make(map[string]bool)
 		}
+		client.mapping[pack.Body.Hash] = true
 		client.mutex.Unlock()
 
 		if !ProofIsValid(Base64Decode(pack.Body.Hash), settings.POWS_DIFF, pack.Body.Npow) {
@@ -361,7 +299,7 @@ checkAgain:
 			continue
 		}
 		
-		if client.f2f.enabled && !client.InF2F(ParsePublic(decPack.Head.Sender)) {
+		if client.F2F.State() && !client.F2F.InList(BytesToPublicKey(Base64Decode(decPack.Head.Sender))) {
 			continue
 		}
 
@@ -370,8 +308,51 @@ checkAgain:
 			goto checkAgain
 		}
 
+		if handle == nil {
+			continue
+		}
+
 		handle(client, decPack)
 	}
+}
+
+func (f2f *friendToFriend) State() bool {
+	return f2f.enabled
+}
+
+func (f2f *friendToFriend) Switch() {
+	f2f.enabled = !f2f.enabled
+}
+
+func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	if _, ok := f2f.friends[HashPublicKey(pub)]; ok {
+		return true
+	}
+	return false
+}
+
+func (f2f *friendToFriend) List() []rsa.PublicKey {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	var list []rsa.PublicKey
+	for _, pub := range f2f.friends {
+		list = append(list, *pub)
+	}
+	return list
+}
+
+func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	f2f.friends[HashPublicKey(pub)] = pub
+}
+
+func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	delete(f2f.friends, HashPublicKey(pub))
 }
 
 func readPackage(conn net.Conn) *Package {
@@ -417,7 +398,7 @@ func (client *Client) send(pack *Package) {
 func (client *Client) response(pub *rsa.PublicKey, data string) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	hash := HashPublic(pub)
+	hash := HashPublicKey(pub)
 	if _, ok := client.actions[hash]; ok {
 		client.actions[hash] <- data
 	}

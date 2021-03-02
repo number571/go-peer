@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.5s.
+> Framework for create decentralized networks. Version: 1.2.6s.
 
 ### Framework based applications:
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -34,7 +34,7 @@ func init() {
 
 func main() {
     gp.NewClient(
-        gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), 
+        gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)), 
         handleFunc,
     ).RunNode(":8080")
     // ...
@@ -108,30 +108,26 @@ func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {}
 func (client *Client) Decrypt(pack *Package) *Package {}
-func (client *Client) Public() *rsa.PublicKey {}
-func (client *Client) Private() *rsa.PrivateKey {}
-func (client *Client) StringPublic() string {}
-func (client *Client) StringPrivate() string {}
-func (client *Client) HashPublic() string {}
-func (client *Client) F2F() bool {}
-func (client *Client) EnableF2F() {}
-func (client *Client) DisableF2F() {}
-func (client *Client) InF2F(pub *rsa.PublicKey) bool {}
-func (client *Client) ListF2F() []rsa.PublicKey {}
-func (client *Client) AppendF2F(pub *rsa.PublicKey) {}
-func (client *Client) RemoveF2F(pub *rsa.PublicKey) {}
+func (client *Client) PublicKey() *rsa.PublicKey {}
+func (client *Client) PrivateKey() *rsa.PrivateKey {}
+func (f2f *friendToFriend) State() bool {}
+func (f2f *friendToFriend) Switch() {}
+func (f2f *friendToFriend) List() []rsa.PublicKey {}
+func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {}
+func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {}
+func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {}
 ```
 
 ### Cryptography functions:
 ```go
 func GenerateBytes(max uint) []byte {}
-func GeneratePrivate(bits uint) *rsa.PrivateKey {}
-func HashPublic(pub *rsa.PublicKey) string {}
+func GenerateKey(bits uint) *rsa.PrivateKey {}
 func HashSum(data []byte) []byte {}
-func ParsePrivate(privData string) *rsa.PrivateKey {}
-func ParsePublic(pubData string) *rsa.PublicKey {}
-func StringPrivate(priv *rsa.PrivateKey) string {}
-func StringPublic(pub *rsa.PublicKey) string {}
+func HashPublicKey(pub *rsa.PublicKey) string {}
+func BytesToPrivateKey(privData []byte) *rsa.PrivateKey {}
+func BytesToPublicKey(pubData []byte) *rsa.PublicKey {}
+func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {}
+func PublicKeyToBytes(pub *rsa.PublicKey) []byte {}
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
 func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
@@ -172,12 +168,13 @@ func Base64Decode(data string) []byte {}
 ```go
 {
     handle:      func(*Client, *Package)
-    mutex:       *sync.Mutex,
+    mutex:       sync.Mutex,
     privateKey:  *rsa.PrivateKey,
     mapping:     map[string]bool,
     connections: map[net.Conn]string,
     actions:     map[string]chan bool,
-    f2f:         {
+    F2F:         {
+        mutex:   sync.Mutex,
         enabled: bool,
         friends: map[string]*rsa.PublicKey,
     },

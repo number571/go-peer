@@ -27,7 +27,7 @@ func GenerateBytes(max uint) []byte {
 	return slice
 }
 
-func GeneratePrivate(bits uint) *rsa.PrivateKey {
+func GenerateKey(bits uint) *rsa.PrivateKey {
 	priv, err := rsa.GenerateKey(rand.Reader, int(bits))
 	if err != nil {
 		return nil
@@ -35,8 +35,8 @@ func GeneratePrivate(bits uint) *rsa.PrivateKey {
 	return priv
 }
 
-func HashPublic(pub *rsa.PublicKey) string {
-	return Base64Encode(HashSum([]byte(StringPublic(pub))))
+func HashPublicKey(pub *rsa.PublicKey) string {
+	return Base64Encode(HashSum(PublicKeyToBytes(pub)))
 }
 
 func HashSum(data []byte) []byte {
@@ -44,28 +44,28 @@ func HashSum(data []byte) []byte {
 	return hash[:]
 }
 
-func ParsePrivate(privData string) *rsa.PrivateKey {
-	priv, err := x509.ParsePKCS1PrivateKey(Base64Decode(privData))
+func BytesToPrivateKey(privData []byte) *rsa.PrivateKey {
+	priv, err := x509.ParsePKCS1PrivateKey(privData)
 	if err != nil {
 		return nil
 	}
 	return priv
 }
 
-func ParsePublic(pubData string) *rsa.PublicKey {
-	pub, err := x509.ParsePKCS1PublicKey(Base64Decode(pubData))
+func BytesToPublicKey(pubData []byte) *rsa.PublicKey {
+	pub, err := x509.ParsePKCS1PublicKey(pubData)
 	if err != nil {
 		return nil
 	}
 	return pub
 }
 
-func StringPrivate(priv *rsa.PrivateKey) string {
-	return Base64Encode(x509.MarshalPKCS1PrivateKey(priv))
+func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
+	return x509.MarshalPKCS1PrivateKey(priv)
 }
 
-func StringPublic(pub *rsa.PublicKey) string {
-	return Base64Encode(x509.MarshalPKCS1PublicKey(pub))
+func PublicKeyToBytes(pub *rsa.PublicKey) []byte {
+	return x509.MarshalPKCS1PublicKey(pub)
 }
 
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {

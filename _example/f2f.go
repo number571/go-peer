@@ -4,7 +4,6 @@ import (
 	gp "./gopeer"
 	"fmt"
 	"time"
-	"crypto/rsa"
 )
 
 const (
@@ -22,29 +21,32 @@ func main() {
 		handleFunc,
 	)
 
+	fmt.Println(client1.F2F.State(), client2.F2F.State())
+
+	client1.F2F.Switch()
+	client2.F2F.Switch()
+
+	fmt.Println(client1.F2F.State(), client2.F2F.State())
+
+	client1.F2F.Append(client2.PublicKey())
+	client2.F2F.Append(client1.PublicKey())
+
 	node := gp.NewClient(
 		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
+		nil,
 	)
 	go node.RunNode(NODE_ADDRESS)
+
 	time.Sleep(500 * time.Millisecond)
 
 	client1.Connect(NODE_ADDRESS)
 	client2.Connect(NODE_ADDRESS)
 
-	pseudoSender := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		nil,
-	)
-	route := []*rsa.PublicKey{
-		node.PublicKey(),
-	}
-
 	res, err := client1.Send(
 		client2.PublicKey(), 
 		gp.NewPackage(TITLE_MESSAGE, "hello, world!"), 
-		route, 
-		pseudoSender,
+		nil, 
+		nil,
 	)
 	if err != nil {
 		fmt.Println(err)

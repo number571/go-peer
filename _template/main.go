@@ -13,7 +13,7 @@ func init() {
 
 func main() {
     gp.NewClient(
-        gp.GeneratePrivate(gp.Get("AKEY_SIZE").(uint)), 
+        gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)), 
         handleFunc,
     ).RunNode(":8080")
     // ...
