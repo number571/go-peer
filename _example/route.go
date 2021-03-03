@@ -2,9 +2,9 @@ package main
 
 import (
 	gp "./gopeer"
+	"crypto/rsa"
 	"fmt"
 	"time"
-	"crypto/rsa"
 )
 
 const (
@@ -32,18 +32,15 @@ func main() {
 	client1.Connect(NODE_ADDRESS)
 	client2.Connect(NODE_ADDRESS)
 
-	pseudoSender := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		nil,
-	)
+	pseudoSender := gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
 	route := []*rsa.PublicKey{
 		node.PublicKey(),
 	}
 
 	res, err := client1.Send(
-		client2.PublicKey(), 
-		gp.NewPackage(TITLE_MESSAGE, "hello, world!"), 
-		route, 
+		client2.PublicKey(),
+		gp.NewPackage(TITLE_MESSAGE, "hello, world!"),
+		route,
 		pseudoSender,
 	)
 	if err != nil {

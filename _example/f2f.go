@@ -43,9 +43,9 @@ func main() {
 	client2.Connect(NODE_ADDRESS)
 
 	res, err := client1.Send(
-		client2.PublicKey(), 
-		gp.NewPackage(TITLE_MESSAGE, "hello, world!"), 
-		nil, 
+		client2.PublicKey(),
+		gp.NewPackage(TITLE_MESSAGE, "hello, world!"),
+		nil,
 		nil,
 	)
 	if err != nil {

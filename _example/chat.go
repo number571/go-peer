@@ -2,12 +2,12 @@ package main
 
 import (
 	gp "./gopeer"
-	"fmt"
-	"strings"
 	"bufio"
-	"flag"
-	"os"
 	"crypto/rsa"
+	"flag"
+	"fmt"
+	"os"
+	"strings"
 )
 
 const (
@@ -26,11 +26,11 @@ func init() {
 
 func main() {
 	var (
-		message string
-		splited []string
+		message  string
+		splited  []string
 		receiver *rsa.PublicKey
-		priv   = gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
-		client = gp.NewClient(priv, handleFunc)
+		priv     = gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
+		client   = gp.NewClient(priv, handleFunc)
 	)
 	go client.RunNode(ADDRESS)
 	for {
@@ -65,15 +65,15 @@ func main() {
 				continue
 			}
 			_, err := client.Send(
-				receiver, 
-				gp.NewPackage(TITLE_MESSAGE, strings.Join(splited[1:], " ")), 
-				nil, 
+				receiver,
+				gp.NewPackage(TITLE_MESSAGE, strings.Join(splited[1:], " ")),
+				nil,
 				nil,
 			)
 			if err != nil {
 				fmt.Println("error: send message\n")
 				continue
-			} 
+			}
 			fmt.Println("success: message send\n")
 		}
 	}

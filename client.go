@@ -15,7 +15,7 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 		return nil
 	}
 	return &Client{
-		handle:		 handle,
+		handle:      handle,
 		privateKey:  priv,
 		mapping:     make(map[string]bool),
 		connections: make(map[net.Conn]string),
@@ -28,10 +28,10 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 
 func NewPackage(title, data string) *Package {
 	return &Package{
-		Head: HeadPackage {
+		Head: HeadPackage{
 			Title: title,
 		},
-		Body: BodyPackage {
+		Body: BodyPackage{
 			Data: data,
 		},
 	}
@@ -65,8 +65,8 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 	switch pack.Head.Title {
 	case title:
 		client.send(client.Encrypt(
-			BytesToPublicKey(Base64Decode(pack.Head.Sender)), 
-			NewPackage("_" + title, handle(client, pack)),
+			BytesToPublicKey(Base64Decode(pack.Head.Sender)),
+			NewPackage("_"+title, handle(client, pack)),
 		))
 	case "_" + title:
 		client.response(
@@ -76,7 +76,7 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 	}
 }
 
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {
 	var (
 		err      error
 		result   string
@@ -92,15 +92,9 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 	}()
 
 tryAgain:
-	routePack := client.Encrypt(receiver, pack)
-
-	if pseudoSender == nil {
-		pseudoSender = client
-	}
-
-	for _, pub := range route {
-		routePack = pseudoSender.Encrypt(pub, 
-			NewPackage(settings.ROUTE_MSG, SerializePackage(routePack)))
+	routePack := client.RoutePackage(receiver, pack, route, ppsender)
+	if routePack == nil {
+		return result, errors.New("psender is nil")
 	}
 
 	client.send(routePack)
@@ -116,6 +110,23 @@ tryAgain:
 	}
 
 	return result, err
+}
+
+func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {
+	var (
+		rpack   = client.Encrypt(receiver, pack)
+		psender = NewClient(ppsender, nil)
+	)
+	for _, pub := range route {
+		if psender == nil {
+			return nil
+		}
+		rpack = psender.Encrypt(
+			pub,
+			NewPackage(settings.ROUTE_MSG, SerializePackage(rpack)),
+		)
+	}
+	return rpack
 }
 
 func (client *Client) Connect(address string) error {
@@ -272,7 +283,7 @@ func (client *Client) handleConn(conn net.Conn, handle func(*Client, *Package)) 
 	for {
 		pack := readPackage(conn)
 
-checkAgain:
+	checkAgain:
 		if pack == nil {
 			continue
 		}
@@ -298,7 +309,7 @@ checkAgain:
 		if decPack == nil {
 			continue
 		}
-		
+
 		if client.F2F.State() && !client.F2F.InList(BytesToPublicKey(Base64Decode(decPack.Head.Sender))) {
 			continue
 		}

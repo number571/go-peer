@@ -103,7 +103,8 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
 func NewPackage(title, data string) *Package {}
 func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) string) {}
 func (client *Client) RunNode(address string) error {}
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, pseudoSender *Client) (string, error) {}
+func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {}
+func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {}
 func (client *Client) Connect(address string) error {}
 func (client *Client) Disconnect(address string) {}
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {}
