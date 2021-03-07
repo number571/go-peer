@@ -61,8 +61,7 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) (set string) {
-	publicBytes := gp.Base64Decode(pack.Head.Sender)
-	hash := gp.Base64Encode(gp.HashSum(publicBytes))
+	hash := gp.HashPublicKey(gp.StringToPublicKey(pack.Head.Sender))
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return pack.Body.Data
 }

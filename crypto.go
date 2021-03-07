@@ -44,6 +44,22 @@ func HashSum(data []byte) []byte {
 	return hash[:]
 }
 
+func StringToPrivateKey(privData string) *rsa.PrivateKey {
+	return BytesToPrivateKey(Base64Decode(privData))
+}
+
+func StringToPublicKey(pubData string) *rsa.PublicKey {
+	return BytesToPublicKey(Base64Decode(pubData))
+}
+
+func PrivateKeyToString(priv *rsa.PrivateKey) string {
+	return Base64Encode(PrivateKeyToBytes(priv))
+}
+
+func PublicKeyToString(pub *rsa.PublicKey) string {
+	return Base64Encode(PublicKeyToBytes(pub))
+}
+
 func BytesToPrivateKey(privData []byte) *rsa.PrivateKey {
 	priv, err := x509.ParsePKCS1PrivateKey(privData)
 	if err != nil {

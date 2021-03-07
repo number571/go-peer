@@ -65,7 +65,7 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 	switch pack.Head.Title {
 	case title:
 		client.send(client.Encrypt(
-			BytesToPublicKey(Base64Decode(pack.Head.Sender)),
+			StringToPublicKey(pack.Head.Sender),
 			NewPackage("_"+title, handle(client, pack)),
 		))
 	case "_" + title:
@@ -310,7 +310,7 @@ func (client *Client) handleConn(conn net.Conn, handle func(*Client, *Package)) 
 			continue
 		}
 
-		if client.F2F.State() && !client.F2F.InList(BytesToPublicKey(Base64Decode(decPack.Head.Sender))) {
+		if client.F2F.State() && !client.F2F.InList(StringToPublicKey(decPack.Head.Sender)) {
 			continue
 		}
 

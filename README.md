@@ -127,8 +127,12 @@ func HashSum(data []byte) []byte {}
 func HashPublicKey(pub *rsa.PublicKey) string {}
 func BytesToPrivateKey(privData []byte) *rsa.PrivateKey {}
 func BytesToPublicKey(pubData []byte) *rsa.PublicKey {}
+func StringToPrivateKey(privData string) *rsa.PrivateKey {}
+func StringToPublicKey(pubData string) *rsa.PublicKey {}
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {}
 func PublicKeyToBytes(pub *rsa.PublicKey) []byte {}
+func PrivateKeyToString(priv *rsa.PrivateKey) string {}
+func PublicKeyToString(pub *rsa.PublicKey) string {}
 func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
 func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}
 func Sign(priv *rsa.PrivateKey, data []byte) []byte {}

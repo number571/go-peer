@@ -47,13 +47,13 @@ func main() {
 			client.Connect(splited[1])
 			fmt.Println("success: connect to node\n")
 		case "/public":
-			fmt.Printf("%s\n\n", gp.Base64Encode(gp.PublicKeyToBytes(client.PublicKey())))
+			fmt.Printf("%s\n\n", gp.PublicKeyToString(client.PublicKey()))
 		case "/receiver":
 			if len(splited) != 2 {
 				fmt.Println("error: len.splited != 2\n")
 				continue
 			}
-			receiver = gp.BytesToPublicKey(gp.Base64Decode(splited[1]))
+			receiver = gp.StringToPublicKey(splited[1])
 			fmt.Println("success: set receiver\n")
 		case "/send":
 			if len(splited) < 2 {
@@ -84,8 +84,7 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) (set string) {
-	publicBytes := gp.Base64Decode(pack.Head.Sender)
-	hash := gp.Base64Encode(gp.HashSum(publicBytes))
+	hash := gp.HashPublicKey(gp.StringToPublicKey(pack.Head.Sender))
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return "ok"
 }
