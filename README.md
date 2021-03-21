@@ -139,6 +139,7 @@ func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
 func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
 func EncryptAES(key, data []byte) []byte {}
 func DecryptAES(key, data []byte) []byte {}
+func RaiseEntropy(info, salt []byte, bits int) []byte {}
 func ProofOfWork(packHash []byte, diff uint) uint64 {}
 func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
 ```

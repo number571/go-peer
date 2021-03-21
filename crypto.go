@@ -148,6 +148,20 @@ func DecryptAES(key, data []byte) []byte {
 	return unpaddingPKCS5(data)
 }
 
+func RaiseEntropy(info, salt []byte, bits int) []byte {
+	lim := uint64(1 << bits)
+	for i := uint64(0); i < lim; i++ {
+		info = HashSum(bytes.Join(
+			[][]byte{
+				info,
+				salt,
+			},
+			[]byte{},
+		))
+	}
+	return info
+}
+
 func ProofOfWork(packHash []byte, diff uint) uint64 {
 	var (
 		Target  = big.NewInt(1)
