@@ -1,14 +1,14 @@
 # gopeer
 > Framework for create decentralized networks. Version: 1.2.6s.
 
-### Framework based applications:
+### Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
 * Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
 
-### Research Article:
+### Research Article
 * The theory of the structure of hidden systems: [hiddensystems.pdf](https://github.com/Number571/gopeer/blob/master/hiddensystems.pdf "TSHS");
 
-### Specifications:
+### Specifications
 * Type: Embedded;
 * Protocol: TCP;
 * Routing: Fill;
@@ -17,7 +17,7 @@
 * Asymmetric algorithm: RSA-OAEP, RSA-PSS;
 * Hash function: SHA256;
 
-### Template:
+### Template
 ```go
 package main
 
@@ -45,7 +45,7 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 }
 ```
 
-### Settings:
+### Settings
 ```go
 type SettingsType map[string]interface{}
 type settingsStruct struct {
@@ -64,7 +64,7 @@ type settingsStruct struct {
 }
 ```
 
-### Default settings:
+### Default settings
 ```go
 {
     END_BYTES: "\000\005\007\001\001\007\005\000",
@@ -82,13 +82,13 @@ type settingsStruct struct {
 }
 ```
 
-### Settings functions:
+### Settings functions
 ```go
 func Set(settings SettingsType) []uint8 {}
 func Get(key string) interface{} {}
 ```
 
-### Get/Set settings example:
+### Get/Set settings example
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
 gopeer.Set(gopeer.SettingsType{
@@ -97,7 +97,7 @@ gopeer.Set(gopeer.SettingsType{
 })
 ```
 
-### Network functions and methods:
+### Network functions and methods
 ```go
 func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
 func NewPackage(title, data string) *Package {}
@@ -119,7 +119,7 @@ func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {}
 func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {}
 ```
 
-### Cryptography functions:
+### Cryptography functions
 ```go
 func GenerateBytes(max uint) []byte {}
 func GenerateKey(bits uint) *rsa.PrivateKey {}
@@ -144,7 +144,7 @@ func ProofOfWork(packHash []byte, diff uint) uint64 {}
 func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
 ```
 
-### Additional functions:
+### Additional functions
 ```go
 func SerializePackage(pack *Package) string {}
 func DeserializePackage(jsonData string) *Package {}
@@ -152,7 +152,7 @@ func Base64Encode(data []byte) string {}
 func Base64Decode(data string) []byte {}
 ```
 
-### Package structure:
+### Package structure
 ```go
 {
     Head: {
@@ -170,7 +170,7 @@ func Base64Decode(data string) []byte {}
 }
 ```
 
-### Client structure:
+### Client structure
 ```go
 {
     handle:      func(*Client, *Package)
