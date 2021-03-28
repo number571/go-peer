@@ -6,12 +6,14 @@ import (
 	"sync"
 )
 
+// Basic structure describing the user.
+// Stores the private key and list of friends.
 type Client struct {
 	handle      func(*Client, *Package)
 	mutex       sync.Mutex
 	privateKey  *rsa.PrivateKey
 	mapping     map[string]bool
-	connections map[net.Conn]string
+	connections map[string]net.Conn
 	actions     map[string]chan string
 	F2F         *friendToFriend
 }

@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// Create client by private key as identification.
+// Handle function is used when the network exists. Can be null.
 func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 	if priv == nil {
 		return nil
@@ -18,7 +20,7 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 		handle:      handle,
 		privateKey:  priv,
 		mapping:     make(map[string]bool),
-		connections: make(map[net.Conn]string),
+		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan string),
 		F2F: &friendToFriend{
 			friends: make(map[string]*rsa.PublicKey),
@@ -26,6 +28,7 @@ func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
 	}
 }
 
+// Create package: Head.Title = title, Body.Data = data.
 func NewPackage(title, data string) *Package {
 	return &Package{
 		Head: HeadPackage{
@@ -37,6 +40,8 @@ func NewPackage(title, data string) *Package {
 	}
 }
 
+// Turn on listener by address.
+// Client handle function need be not null.
 func (client *Client) RunNode(address string) error {
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
@@ -54,13 +59,16 @@ func (client *Client) RunNode(address string) error {
 			conn.Close()
 			continue
 		}
-		client.connections[conn] = "client"
+		id := Base64Encode(GenerateBytes(settings.RAND_SIZE))
+		client.connections[id] = conn
 		client.mutex.Unlock()
-		go client.handleConn(conn, client.handle)
+		go client.handleConn(id, client.handle)
 	}
 	return nil
 }
 
+// Handle package by title.
+// If title equal title in package then go to handle function.
 func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) string) {
 	switch pack.Head.Title {
 	case title:
@@ -76,6 +84,8 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 	}
 }
 
+// Send package by public key of receiver.
+// Function supported multiple routing with pseudo sender.
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {
 	var (
 		err      error
@@ -112,6 +122,8 @@ tryAgain:
 	return result, err
 }
 
+// Function wrap package in multiple route.
+// Need use pseudo sender if route not null.
 func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {
 	var (
 		rpack   = client.Encrypt(receiver, pack)
@@ -129,6 +141,29 @@ func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route
 	return rpack
 }
 
+// Get list of connection addresses.
+func (client *Client) Connections() []string {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	var list []string
+	for addr := range client.connections {
+		list = append(list, addr)
+	}
+	return list
+}
+
+// Check the existence of an address in the list of connections.
+func (client *Client) InConnections(address string) bool {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	if _, ok := client.connections[address]; ok {
+		return true
+	}
+	return false
+}
+
+// Connect to node by address.
+// Client handle function need be not null.
 func (client *Client) Connect(address string) error {
 	client.mutex.Lock()
 	if uint(len(client.connections)) > settings.CONN_SIZE {
@@ -141,31 +176,34 @@ func (client *Client) Connect(address string) error {
 		return err
 	}
 	client.mutex.Lock()
-	client.connections[conn] = address
+	client.connections[address] = conn
 	client.mutex.Unlock()
-	go client.handleConn(conn, client.handle)
+	go client.handleConn(address, client.handle)
 	return nil
 }
 
+// Disconnect from node by address.
 func (client *Client) Disconnect(address string) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	for conn, addr := range client.connections {
-		if addr == address {
-			delete(client.connections, conn)
-			conn.Close()
-		}
+	if conn, ok := client.connections[address]; ok {
+		conn.Close()
 	}
+	delete(client.connections, address)
 }
 
+// Get public key from client object.
 func (client *Client) PublicKey() *rsa.PublicKey {
 	return &client.privateKey.PublicKey
 }
 
+// Get private key from client object.
 func (client *Client) PrivateKey() *rsa.PrivateKey {
 	return client.privateKey
 }
 
+// Encrypt package with public key of receiver.
+// The package can be decrypted only if private key is known.
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 	var (
 		session = GenerateBytes(uint(settings.SKEY_SIZE))
@@ -198,6 +236,8 @@ func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 	}
 }
 
+// Decrypt package with private key of receiver.
+// No one else except the sender will be able to decrypt the package.
 func (client *Client) Decrypt(pack *Package) *Package {
 	hash := Base64Decode(pack.Body.Hash)
 	if hash == nil {
@@ -272,11 +312,58 @@ func (client *Client) Decrypt(pack *Package) *Package {
 	}
 }
 
-func (client *Client) handleConn(conn net.Conn, handle func(*Client, *Package)) {
+// Get current state of f2f mode.
+func (f2f *friendToFriend) State() bool {
+	return f2f.enabled
+}
+
+// Switch f2f mode to reverse.
+func (f2f *friendToFriend) Switch() {
+	f2f.enabled = !f2f.enabled
+}
+
+// Check the existence of a friend in the list by the public key.
+func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	if _, ok := f2f.friends[HashPublicKey(pub)]; ok {
+		return true
+	}
+	return false
+}
+
+// Get a list of friends public keys.
+func (f2f *friendToFriend) List() []rsa.PublicKey {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	var list []rsa.PublicKey
+	for _, pub := range f2f.friends {
+		list = append(list, *pub)
+	}
+	return list
+}
+
+// Add public key to list of friends.
+func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	f2f.friends[HashPublicKey(pub)] = pub
+}
+
+// Delete public key from list of friends.
+func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
+	delete(f2f.friends, HashPublicKey(pub))
+}
+
+func (client *Client) handleConn(id string, handle func(*Client, *Package)) {
+	conn := client.connections[id]
+
 	defer func() {
 		conn.Close()
 		client.mutex.Lock()
-		delete(client.connections, conn)
+		delete(client.connections, id)
 		client.mutex.Unlock()
 	}()
 
@@ -327,45 +414,6 @@ func (client *Client) handleConn(conn net.Conn, handle func(*Client, *Package)) 
 	}
 }
 
-func (f2f *friendToFriend) State() bool {
-	return f2f.enabled
-}
-
-func (f2f *friendToFriend) Switch() {
-	f2f.enabled = !f2f.enabled
-}
-
-func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {
-	f2f.mutex.Lock()
-	defer f2f.mutex.Unlock()
-	if _, ok := f2f.friends[HashPublicKey(pub)]; ok {
-		return true
-	}
-	return false
-}
-
-func (f2f *friendToFriend) List() []rsa.PublicKey {
-	f2f.mutex.Lock()
-	defer f2f.mutex.Unlock()
-	var list []rsa.PublicKey
-	for _, pub := range f2f.friends {
-		list = append(list, *pub)
-	}
-	return list
-}
-
-func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {
-	f2f.mutex.Lock()
-	defer f2f.mutex.Unlock()
-	f2f.friends[HashPublicKey(pub)] = pub
-}
-
-func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {
-	f2f.mutex.Lock()
-	defer f2f.mutex.Unlock()
-	delete(f2f.friends, HashPublicKey(pub))
-}
-
 func readPackage(conn net.Conn) *Package {
 	var (
 		message string
@@ -395,7 +443,7 @@ func (client *Client) send(pack *Package) {
 	defer client.mutex.Unlock()
 	bytesPack := SerializePackage(pack)
 	client.mapping[pack.Body.Hash] = true
-	for cn := range client.connections {
+	for _, cn := range client.connections {
 		go cn.Write(bytes.Join(
 			[][]byte{
 				[]byte(bytesPack),
