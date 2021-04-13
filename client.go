@@ -75,6 +75,7 @@ func (client *Client) Handle(title string, pack *Package, handle func(*Client, *
 		client.send(client.Encrypt(
 			StringToPublicKey(pack.Head.Sender),
 			NewPackage("_"+title, handle(client, pack)),
+			settings.POWS_DIFF,
 		))
 	case "_" + title:
 		client.response(
@@ -126,7 +127,7 @@ tryAgain:
 // Need use pseudo sender if route not null.
 func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {
 	var (
-		rpack   = client.Encrypt(receiver, pack)
+		rpack   = client.Encrypt(receiver, pack, settings.POWS_DIFF)
 		psender = NewClient(ppsender, nil)
 	)
 	for _, pub := range route {
@@ -136,6 +137,7 @@ func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route
 		rpack = psender.Encrypt(
 			pub,
 			NewPackage(settings.ROUTE_MSG, SerializePackage(rpack)),
+			settings.POWS_DIFF,
 		)
 	}
 	return rpack
@@ -204,7 +206,7 @@ func (client *Client) PrivateKey() *rsa.PrivateKey {
 
 // Encrypt package with public key of receiver.
 // The package can be decrypted only if private key is known.
-func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
+func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package, pow uint) *Package {
 	var (
 		session = GenerateBytes(uint(settings.SKEY_SIZE))
 		rand    = GenerateBytes(uint(settings.RAND_SIZE))
@@ -231,19 +233,19 @@ func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package) *Package {
 			Data: Base64Encode(EncryptAES(session, []byte(pack.Body.Data))),
 			Hash: Base64Encode(hash),
 			Sign: Base64Encode(EncryptAES(session, sign)),
-			Npow: ProofOfWork(hash, settings.POWS_DIFF),
+			Npow: ProofOfWork(hash, pow),
 		},
 	}
 }
 
 // Decrypt package with private key of receiver.
 // No one else except the sender will be able to decrypt the package.
-func (client *Client) Decrypt(pack *Package) *Package {
+func (client *Client) Decrypt(pack *Package, pow uint) *Package {
 	hash := Base64Decode(pack.Body.Hash)
 	if hash == nil {
 		return nil
 	}
-	if !ProofIsValid(hash, settings.POWS_DIFF, pack.Body.Npow) {
+	if !ProofIsValid(hash, pow, pack.Body.Npow) {
 		return nil
 	}
 	session := DecryptRSA(client.PrivateKey(), Base64Decode(pack.Head.Session))
@@ -392,7 +394,7 @@ func (client *Client) handleConn(id string, handle func(*Client, *Package)) {
 
 		client.send(pack)
 
-		decPack := client.Decrypt(pack)
+		decPack := client.Decrypt(pack, settings.POWS_DIFF)
 		if decPack == nil {
 			continue
 		}
