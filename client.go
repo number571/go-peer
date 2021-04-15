@@ -443,16 +443,16 @@ func readPackage(conn net.Conn) *Package {
 func (client *Client) send(pack *Package) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	bytesPack := SerializePackage(pack)
+	bytesPack := bytes.Join(
+		[][]byte{
+			[]byte(SerializePackage(pack)),
+			[]byte(settings.END_BYTES),
+		},
+		[]byte{},
+	)
 	client.mapping[pack.Body.Hash] = true
 	for _, cn := range client.connections {
-		go cn.Write(bytes.Join(
-			[][]byte{
-				[]byte(bytesPack),
-				[]byte(settings.END_BYTES),
-			},
-			[]byte{},
-		))
+		go cn.Write(bytesPack)
 	}
 }
 

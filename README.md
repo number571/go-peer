@@ -55,8 +55,8 @@ type settingsStruct struct {
     WAIT_TIME uint
     POWS_DIFF uint
     CONN_SIZE uint
-    BUFF_SIZE uint
     PACK_SIZE uint
+    BUFF_SIZE uint
     MAPP_SIZE uint
     AKEY_SIZE uint
     SKEY_SIZE uint
@@ -73,8 +73,8 @@ type settingsStruct struct {
     WAIT_TIME: 20,      // seconds
     POWS_DIFF: 20,      // bits
     CONN_SIZE: 10,      // quantity
+    PACK_SIZE: 8 << 20, // 8*(2^20)B = 8MiB
     BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
-    PACK_SIZE: 4 << 20, // 4*(2^20)B = 4MiB
     MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
     AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
     SKEY_SIZE: 1 << 5,  // 2^5B = 32B
