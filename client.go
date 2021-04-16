@@ -442,7 +442,6 @@ func readPackage(conn net.Conn) *Package {
 			},
 			[]byte{},
 		)
-		// message += string(buffer[:length])
 		if bytes.Contains(message, []byte(settings.END_BYTES)) {
 			message = bytes.Split(message, []byte(settings.END_BYTES))[0]
 			break
