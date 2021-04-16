@@ -66,7 +66,7 @@ func main() {
 			}
 			_, err := client.Send(
 				receiver,
-				gp.NewPackage(TITLE_MESSAGE, strings.Join(splited[1:], " ")),
+				gp.NewPackage(TITLE_MESSAGE, []byte(strings.Join(splited[1:], " "))),
 				nil,
 				nil,
 			)
@@ -83,10 +83,10 @@ func handleFunc(client *gp.Client, pack *gp.Package) {
 	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
-func getMessage(client *gp.Client, pack *gp.Package) (set string) {
-	hash := gp.HashPublicKey(gp.StringToPublicKey(pack.Head.Sender))
-	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
-	return "ok"
+func getMessage(client *gp.Client, pack *gp.Package) []byte {
+	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	fmt.Printf("[%s] => '%s'\n", hash, string(pack.Body.Data))
+	return []byte("ok")
 }
 
 func inputString(before string) string {

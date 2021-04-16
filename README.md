@@ -100,8 +100,8 @@ gopeer.Set(gopeer.SettingsType{
 ### Network functions and methods
 ```go
 func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
-func NewPackage(title, data string) *Package {}
-func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) string) {}
+func NewPackage(title string, data []byte) *Package {}
+func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) []byte) {}
 func (client *Client) RunNode(address string) error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {}
 func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {}
@@ -148,8 +148,8 @@ func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
 
 ### Additional functions
 ```go
-func SerializePackage(pack *Package) string {}
-func DeserializePackage(jsonData string) *Package {}
+func SerializePackage(pack *Package) []byte {}
+func DeserializePackage(jsonData []byte) *Package {}
 func Base64Encode(data []byte) string {}
 func Base64Decode(data string) []byte {}
 ```
@@ -158,15 +158,15 @@ func Base64Decode(data string) []byte {}
 ```go
 {
     Head: {
-        Rand:    string,
         Title:   string,
-        Sender:  string,
-        Session: string,
+        Rand:    []byte,
+        Sender:  []byte,
+        Session: []byte,
     },
     Body: {
-        Data: string,
-        Hash: string,
-        Sign: string,
+        Data: []byte,
+        Hash: []byte,
+        Sign: []byte,
         Npow: uint64,
     },
 }
@@ -180,7 +180,7 @@ func Base64Decode(data string) []byte {}
     privateKey:  *rsa.PrivateKey,
     mapping:     map[string]bool,
     connections: map[string]net.Conn,
-    actions:     map[string]chan bool,
+    actions:     map[string]chan []byte,
     F2F:         {
         mutex:   sync.Mutex,
         enabled: bool,

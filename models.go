@@ -14,7 +14,7 @@ type Client struct {
 	privateKey  *rsa.PrivateKey
 	mapping     map[string]bool
 	connections map[string]net.Conn
-	actions     map[string]chan string
+	actions     map[string]chan []byte
 	F2F         *friendToFriend
 }
 
@@ -30,15 +30,15 @@ type Package struct {
 }
 
 type HeadPackage struct {
-	Rand    string `json:"rand"`
 	Title   string `json:"title"`
-	Sender  string `json:"sender"`
-	Session string `json:"session"`
+	Rand    []byte `json:"rand"`
+	Sender  []byte `json:"sender"`
+	Session []byte `json:"session"`
 }
 
 type BodyPackage struct {
-	Data string `json:"data"`
-	Hash string `json:"hash"`
-	Sign string `json:"sign"`
+	Data []byte `json:"data"`
+	Hash []byte `json:"hash"`
+	Sign []byte `json:"sign"`
 	Npow uint64 `json:"npow"`
 }

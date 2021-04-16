@@ -238,18 +238,18 @@ func ToBytes(num uint64) []byte {
 }
 
 // Serialize with JSON format.
-func SerializePackage(pack *Package) string {
+func SerializePackage(pack *Package) []byte {
 	jsonData, err := json.MarshalIndent(pack, "", "\t")
 	if err != nil {
-		return ""
+		return nil
 	}
-	return string(jsonData)
+	return jsonData
 }
 
 // Deserialize with JSON format.
-func DeserializePackage(jsonData string) *Package {
+func DeserializePackage(jsonData []byte) *Package {
 	var pack = new(Package)
-	err := json.Unmarshal([]byte(jsonData), pack)
+	err := json.Unmarshal(jsonData, pack)
 	if err != nil {
 		return nil
 	}

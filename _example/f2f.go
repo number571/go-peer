@@ -44,7 +44,7 @@ func main() {
 
 	res, err := client1.Send(
 		client2.PublicKey(),
-		gp.NewPackage(TITLE_MESSAGE, "hello, world!"),
+		gp.NewPackage(TITLE_MESSAGE, []byte("hello, world!")),
 		nil,
 		nil,
 	)
@@ -53,15 +53,15 @@ func main() {
 		return
 	}
 
-	fmt.Println(res)
+	fmt.Println(string(res))
 }
 
 func handleFunc(client *gp.Client, pack *gp.Package) {
 	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
-func getMessage(client *gp.Client, pack *gp.Package) (set string) {
-	hash := gp.HashPublicKey(gp.StringToPublicKey(pack.Head.Sender))
+func getMessage(client *gp.Client, pack *gp.Package) []byte {
+	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return pack.Body.Data
 }
