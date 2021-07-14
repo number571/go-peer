@@ -362,7 +362,9 @@ func (f2f *friendToFriend) Remove(pubs ...*rsa.PublicKey) {
 }
 
 func (client *Client) handleConn(id string) {
+	client.mutex.Lock()
 	conn := client.connections[id]
+	client.mutex.Unlock()
 
 	defer func() {
 		conn.Close()
