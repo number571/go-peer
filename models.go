@@ -9,9 +9,9 @@ import (
 // Basic structure describing the user.
 // Stores the private key and list of friends.
 type Client struct {
-	handle      func(*Client, *Package)
 	mutex       sync.Mutex
 	privateKey  *rsa.PrivateKey
+	functions   map[string]func(*Client, *Package) []byte
 	mapping     map[string]bool
 	connections map[string]net.Conn
 	actions     map[string]chan []byte
@@ -24,6 +24,7 @@ type friendToFriend struct {
 	friends map[string]*rsa.PublicKey
 }
 
+// Basic structure of transport package.
 type Package struct {
 	Head HeadPackage `json:"head"`
 	Body BodyPackage `json:"body"`

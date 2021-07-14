@@ -12,7 +12,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"io"
 	"math"
 	"math/big"
@@ -221,10 +220,7 @@ func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {
 	))
 	intHash.SetBytes(hash)
 	Target.Lsh(Target, 256-diff)
-	if intHash.Cmp(Target) == -1 {
-		return true
-	}
-	return false
+	return intHash.Cmp(Target) == -1
 }
 
 // Uint64 to slice of bytes by big endian.
@@ -256,10 +252,12 @@ func DeserializePackage(jsonData []byte) *Package {
 	return pack
 }
 
+// Standart encoding in package.
 func Base64Encode(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
 }
 
+// Standart decoding in package.
 func Base64Decode(data string) []byte {
 	result, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
@@ -286,7 +284,7 @@ func unpaddingPKCS5(origData []byte) []byte {
 	return origData[:(length - unpadding)]
 }
 
-func printJSON(data interface{}) {
-	jsonData, _ := json.MarshalIndent(data, "", "\t")
-	fmt.Println(string(jsonData))
-}
+// func printJSON(data interface{}) {
+// 	jsonData, _ := json.MarshalIndent(data, "", "\t")
+// 	fmt.Println(string(jsonData))
+// }

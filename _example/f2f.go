@@ -1,9 +1,10 @@
 package main
 
 import (
-	gp "./gopeer"
 	"fmt"
 	"time"
+
+	gp "./gopeer"
 )
 
 const (
@@ -12,14 +13,9 @@ const (
 )
 
 func main() {
-	client1 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
-	client2 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
+	client1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	client2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	clinode := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
 
 	fmt.Println(client1.F2F.State(), client2.F2F.State())
 
@@ -31,11 +27,11 @@ func main() {
 	client1.F2F.Append(client2.PublicKey())
 	client2.F2F.Append(client1.PublicKey())
 
-	node := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		nil,
-	)
-	go node.RunNode(NODE_ADDRESS)
+	client1.Handle(TITLE_MESSAGE, getMessage)
+	client2.Handle(TITLE_MESSAGE, getMessage)
+	clinode.Handle(TITLE_MESSAGE, getMessage)
+
+	go clinode.RunNode(NODE_ADDRESS)
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -54,10 +50,6 @@ func main() {
 	}
 
 	fmt.Println(string(res))
-}
-
-func handleFunc(client *gp.Client, pack *gp.Package) {
-	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) []byte {

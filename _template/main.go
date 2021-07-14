@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	gp "./gopeer"
 )
 
@@ -12,13 +14,14 @@ func init() {
 }
 
 func main() {
-	gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	).RunNode(":8080")
+	gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).
+		Handle("/msg", msgRoute).
+		RunNode(":8080")
 	// ...
 }
 
-func handleFunc(client *gp.Client, pack *gp.Package) {
-	// ...
+func msgRoute(client *gp.Client, pack *gp.Package) []byte {
+	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
+	return pack.Body.Data
 }

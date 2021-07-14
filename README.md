@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.9s.
+> Framework for create decentralized networks. Version: 1.2.10s.
 
 ### Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -22,26 +22,29 @@
 package main
 
 import (
-    gp "./gopeer"
+	"fmt"
+
+	gp "./gopeer"
 )
 
 func init() {
-    gp.Set(gp.SettingsType{
-        "AKEY_SIZE": uint(1 << 10),
-        "SKEY_SIZE": uint(1 << 4),
-    })
+	gp.Set(gp.SettingsType{
+		"AKEY_SIZE": uint(1 << 10),
+		"SKEY_SIZE": uint(1 << 4),
+	})
 }
 
 func main() {
-    gp.NewClient(
-        gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)), 
-        handleFunc,
-    ).RunNode(":8080")
-    // ...
+	gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).
+		HandleFunc("/msg", msgRoute).
+		RunNode(":8080")
+	// ...
 }
 
-func handleFunc(client *gp.Client, pack *gp.Package) {
-    // ...
+func msgRoute(client *gp.Client, pack *gp.Package) []byte {
+	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
+	return pack.Body.Data
 }
 ```
 
@@ -101,24 +104,24 @@ gopeer.Set(gopeer.SettingsType{
 ```go
 func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
 func NewPackage(title string, data []byte) *Package {}
-func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) []byte) {}
+func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {}
 func (client *Client) RunNode(address string) error {}
 func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {}
 func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {}
 func (client *Client) Connections() []string {}
 func (client *Client) InConnections(address string) bool {}
-func (client *Client) Connect(address string) error {}
-func (client *Client) Disconnect(address string) {}
+func (client *Client) Connect(address ...string) []error {}
+func (client *Client) Disconnect(address ...string) {}
 func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package, pow uint) *Package {}
 func (client *Client) Decrypt(pack *Package, pow uint) *Package {}
 func (client *Client) PublicKey() *rsa.PublicKey {}
 func (client *Client) PrivateKey() *rsa.PrivateKey {}
 func (f2f *friendToFriend) State() bool {}
 func (f2f *friendToFriend) Switch() {}
-func (f2f *friendToFriend) List() []rsa.PublicKey {}
+func (f2f *friendToFriend) List() []*rsa.PublicKey {}
 func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {}
-func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {}
-func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {}
+func (f2f *friendToFriend) Append(pub ...*rsa.PublicKey) {}
+func (f2f *friendToFriend) Remove(pub ...*rsa.PublicKey) {}
 ```
 
 ### Cryptography functions
@@ -175,9 +178,9 @@ func Base64Decode(data string) []byte {}
 ### Client structure
 ```go
 {
-    handle:      func(*Client, *Package)
     mutex:       sync.Mutex,
     privateKey:  *rsa.PrivateKey,
+    functions:   map[string]func(*Client, *Package) []byte,
     mapping:     map[string]bool,
     connections: map[string]net.Conn,
     actions:     map[string]chan []byte,

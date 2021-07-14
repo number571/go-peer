@@ -11,13 +11,13 @@ import (
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {
+func NewClient(priv *rsa.PrivateKey) *Client {
 	if priv == nil {
 		return nil
 	}
 	return &Client{
-		handle:      handle,
 		privateKey:  priv,
+		functions:   make(map[string]func(*Client, *Package) []byte),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan []byte),
@@ -61,27 +61,17 @@ func (client *Client) RunNode(address string) error {
 		id := Base64Encode(GenerateBytes(settings.RAND_SIZE))
 		client.connections[id] = conn
 		client.mutex.Unlock()
-		go client.handleConn(id, client.handle)
+		go client.handleConn(id)
 	}
 	return nil
 }
 
-// Handle package by title.
-// If title equal title in package then go to handle function.
-func (client *Client) Handle(title string, pack *Package, handle func(*Client, *Package) []byte) {
-	switch pack.Head.Title {
-	case title:
-		client.send(client.Encrypt(
-			BytesToPublicKey(pack.Head.Sender),
-			NewPackage("_"+title, handle(client, pack)),
-			settings.POWS_DIFF,
-		))
-	case "_" + title:
-		client.response(
-			BytesToPublicKey(pack.Head.Sender),
-			pack.Body.Data,
-		)
-	}
+// Add function to mapping for route use.
+func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	client.functions[title] = handle
+	return client
 }
 
 // Send package by public key of receiver.
@@ -94,7 +84,10 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 		retryNum = settings.RETRY_NUM
 	)
 
+	client.mutex.Lock()
 	client.actions[hash] = make(chan []byte)
+	client.mutex.Unlock()
+
 	defer func() {
 		client.mutex.Lock()
 		delete(client.actions, hash)
@@ -127,7 +120,7 @@ tryAgain:
 func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {
 	var (
 		rpack   = client.Encrypt(receiver, pack, settings.POWS_DIFF)
-		psender = NewClient(ppsender, nil)
+		psender = NewClient(ppsender)
 	)
 	for _, pub := range route {
 		if psender == nil {
@@ -165,32 +158,40 @@ func (client *Client) InConnections(address string) bool {
 
 // Connect to node by address.
 // Client handle function need be not null.
-func (client *Client) Connect(address string) error {
-	client.mutex.Lock()
-	if uint(len(client.connections)) > settings.CONN_SIZE {
+func (client *Client) Connect(addresses ...string) []error {
+	var (
+		listErrors []error = nil
+	)
+	for _, addr := range addresses {
+		client.mutex.Lock()
+		if uint(len(client.connections)) > settings.CONN_SIZE {
+			client.mutex.Unlock()
+			return append(listErrors, errors.New("max conn"))
+		}
 		client.mutex.Unlock()
-		return errors.New("max conn")
+		conn, err := net.Dial("tcp", addr)
+		if err != nil {
+			listErrors = append(listErrors, err)
+			continue
+		}
+		client.mutex.Lock()
+		client.connections[addr] = conn
+		client.mutex.Unlock()
+		go client.handleConn(addr)
 	}
-	client.mutex.Unlock()
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		return err
-	}
-	client.mutex.Lock()
-	client.connections[address] = conn
-	client.mutex.Unlock()
-	go client.handleConn(address, client.handle)
-	return nil
+	return listErrors
 }
 
 // Disconnect from node by address.
-func (client *Client) Disconnect(address string) {
+func (client *Client) Disconnect(addresses ...string) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	if conn, ok := client.connections[address]; ok {
-		conn.Close()
+	for _, addr := range addresses {
+		if conn, ok := client.connections[addr]; ok {
+			conn.Close()
+		}
+		delete(client.connections, addr)
 	}
-	delete(client.connections, address)
 }
 
 // Get public key from client object.
@@ -327,38 +328,40 @@ func (f2f *friendToFriend) Switch() {
 func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	if _, ok := f2f.friends[HashPublicKey(pub)]; ok {
-		return true
-	}
-	return false
+	_, ok := f2f.friends[HashPublicKey(pub)]
+	return ok
 }
 
 // Get a list of friends public keys.
-func (f2f *friendToFriend) List() []rsa.PublicKey {
+func (f2f *friendToFriend) List() []*rsa.PublicKey {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	var list []rsa.PublicKey
+	var list []*rsa.PublicKey
 	for _, pub := range f2f.friends {
-		list = append(list, *pub)
+		list = append(list, pub)
 	}
 	return list
 }
 
 // Add public key to list of friends.
-func (f2f *friendToFriend) Append(pub *rsa.PublicKey) {
+func (f2f *friendToFriend) Append(pubs ...*rsa.PublicKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	f2f.friends[HashPublicKey(pub)] = pub
+	for _, pub := range pubs {
+		f2f.friends[HashPublicKey(pub)] = pub
+	}
 }
 
 // Delete public key from list of friends.
-func (f2f *friendToFriend) Remove(pub *rsa.PublicKey) {
+func (f2f *friendToFriend) Remove(pubs ...*rsa.PublicKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	delete(f2f.friends, HashPublicKey(pub))
+	for _, pub := range pubs {
+		delete(f2f.friends, HashPublicKey(pub))
+	}
 }
 
-func (client *Client) handleConn(id string, handle func(*Client, *Package)) {
+func (client *Client) handleConn(id string) {
 	conn := client.connections[id]
 
 	defer func() {
@@ -412,11 +415,27 @@ func (client *Client) handleConn(id string, handle func(*Client, *Package)) {
 			goto checkAgain
 		}
 
-		if handle == nil {
-			continue
-		}
+		handleFunc(client, decPack)
+	}
+}
 
-		handle(client, decPack)
+func handleFunc(client *Client, pack *Package) {
+	for nm, fn := range client.functions {
+		switch pack.Head.Title {
+		case nm:
+			client.send(client.Encrypt(
+				BytesToPublicKey(pack.Head.Sender),
+				NewPackage("_"+nm, fn(client, pack)),
+				settings.POWS_DIFF,
+			))
+			return
+		case "_" + nm:
+			client.response(
+				BytesToPublicKey(pack.Head.Sender),
+				pack.Body.Data,
+			)
+			return
+		}
 	}
 }
 
@@ -437,7 +456,7 @@ func readPackage(conn net.Conn) *Package {
 		}
 		message = bytes.Join(
 			[][]byte{
-				message, 
+				message,
 				buffer[:length],
 			},
 			[]byte{},

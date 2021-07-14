@@ -1,10 +1,11 @@
 package main
 
 import (
-	gp "./gopeer"
 	"crypto/rsa"
 	"fmt"
 	"time"
+
+	gp "./gopeer"
 )
 
 const (
@@ -15,32 +16,24 @@ const (
 )
 
 func main() {
-	client1 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
-	client2 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
+	client1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	client2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
 
-	node1 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
+	node1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	node2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	node3 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+
+	client1.Handle(TITLE_MESSAGE, getMessage)
+	client2.Handle(TITLE_MESSAGE, getMessage)
+
+	node1.Handle(TITLE_MESSAGE, getMessage)
+	node2.Handle(TITLE_MESSAGE, getMessage)
+	node3.Handle(TITLE_MESSAGE, getMessage)
+
 	go node1.RunNode(NODE1_ADDRESS)
-
-	node2 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
 	go node2.RunNode(NODE2_ADDRESS)
-
-	node3 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
 	go node3.RunNode(NODE3_ADDRESS)
+
 	time.Sleep(500 * time.Millisecond)
 
 	node1.Connect(NODE2_ADDRESS)
@@ -69,10 +62,6 @@ func main() {
 		}
 		fmt.Println(string(res))
 	}
-}
-
-func handleFunc(client *gp.Client, pack *gp.Package) {
-	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) []byte {

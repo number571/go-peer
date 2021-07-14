@@ -1,31 +1,23 @@
 package main
 
 import (
-	gp "./gopeer"
 	"fmt"
 	"time"
+
+	gp "./gopeer"
 )
 
 const (
-	TITLE_MESSAGE = "TITLE_MESSAGE"
-	NODE_ADDRESS  = ":8080"
+	ROUTE_MSG    = "/msg"
+	NODE_ADDRESS = ":8080"
 )
 
 func main() {
-	client1 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
-	client2 := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
+	client1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	client2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	clinode := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
 
-	node := gp.NewClient(
-		gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)),
-		handleFunc,
-	)
-	go node.RunNode(NODE_ADDRESS)
+	go clinode.RunNode(NODE_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
 
 	client1.Connect(NODE_ADDRESS)
@@ -33,7 +25,7 @@ func main() {
 
 	res, err := client1.Send(
 		client2.PublicKey(),
-		gp.NewPackage(TITLE_MESSAGE, []byte("hello, world!")),
+		gp.NewPackage(ROUTE_MSG, []byte("hello, world!")),
 		nil,
 		nil,
 	)
@@ -43,10 +35,6 @@ func main() {
 	}
 
 	fmt.Println(string(res))
-}
-
-func handleFunc(client *gp.Client, pack *gp.Package) {
-	client.Handle(TITLE_MESSAGE, pack, getMessage)
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) []byte {

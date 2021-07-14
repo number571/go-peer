@@ -10,7 +10,6 @@ type settingsStruct struct {
 	CONN_SIZE uint
 	PACK_SIZE uint
 	BUFF_SIZE uint
-	DATA_SIZE uint
 	MAPP_SIZE uint
 	AKEY_SIZE uint
 	SKEY_SIZE uint
