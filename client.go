@@ -150,10 +150,8 @@ func (client *Client) Connections() []string {
 func (client *Client) InConnections(address string) bool {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	if _, ok := client.connections[address]; ok {
-		return true
-	}
-	return false
+	_, ok := client.connections[address]
+	return ok
 }
 
 // Connect to node by address.
