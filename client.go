@@ -52,15 +52,12 @@ func (client *Client) RunNode(address string) error {
 		if err != nil {
 			break
 		}
-		client.mutex.Lock()
-		if uint(len(client.connections)) > settings.CONN_SIZE {
-			client.mutex.Unlock()
+		if client.isMaxConnSize() {
 			conn.Close()
 			continue
 		}
 		id := Base64Encode(GenerateBytes(settings.RAND_SIZE))
-		client.connections[id] = conn
-		client.mutex.Unlock()
+		client.setConnection(id, conn)
 		go client.handleConn(id)
 	}
 	return nil
@@ -84,14 +81,9 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 		retryNum = settings.RETRY_NUM
 	)
 
-	client.mutex.Lock()
-	client.actions[hash] = make(chan []byte)
-	client.mutex.Unlock()
-
+	client.setAction(hash)
 	defer func() {
-		client.mutex.Lock()
-		delete(client.actions, hash)
-		client.mutex.Unlock()
+		client.delAction(hash)
 	}()
 
 tryAgain:
@@ -161,20 +153,15 @@ func (client *Client) Connect(addresses ...string) []error {
 		listErrors []error = nil
 	)
 	for _, addr := range addresses {
-		client.mutex.Lock()
-		if uint(len(client.connections)) > settings.CONN_SIZE {
-			client.mutex.Unlock()
+		if client.isMaxConnSize() {
 			return append(listErrors, errors.New("max conn"))
 		}
-		client.mutex.Unlock()
 		conn, err := net.Dial("tcp", addr)
 		if err != nil {
 			listErrors = append(listErrors, err)
 			continue
 		}
-		client.mutex.Lock()
-		client.connections[addr] = conn
-		client.mutex.Unlock()
+		client.setConnection(addr, conn)
 		go client.handleConn(addr)
 	}
 	return listErrors
@@ -360,15 +347,11 @@ func (f2f *friendToFriend) Remove(pubs ...*rsa.PublicKey) {
 }
 
 func (client *Client) handleConn(id string) {
-	client.mutex.Lock()
-	conn := client.connections[id]
-	client.mutex.Unlock()
+	conn := client.getConnection(id)
 
 	defer func() {
 		conn.Close()
-		client.mutex.Lock()
-		delete(client.connections, id)
-		client.mutex.Unlock()
+		client.delConnection(id)
 	}()
 
 	for {
@@ -384,21 +367,14 @@ func (client *Client) handleConn(id string) {
 			continue
 		}
 
-		client.mutex.Lock()
-		if _, ok := client.mapping[Base64Encode(pack.Body.Hash)]; ok {
-			client.mutex.Unlock()
+		if client.inMapping(pack.Body.Hash) {
 			continue
 		}
-		if uint(len(client.mapping)) > settings.MAPP_SIZE {
-			client.mapping = make(map[string]bool)
-		}
-		client.mapping[Base64Encode(pack.Body.Hash)] = true
-		client.mutex.Unlock()
+		client.setMapping(pack.Body.Hash)
 
 		if !ProofIsValid(pack.Body.Hash, settings.POWS_DIFF, pack.Body.Npow) {
 			continue
 		}
-
 		client.send(pack)
 
 		decPack := client.Decrypt(pack, settings.POWS_DIFF)
@@ -492,4 +468,56 @@ func (client *Client) response(pub *rsa.PublicKey, data []byte) {
 	if _, ok := client.actions[hash]; ok {
 		client.actions[hash] <- data
 	}
+}
+
+func (client *Client) setAction(hash string) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	client.actions[hash] = make(chan []byte)
+}
+
+func (client *Client) delAction(hash string) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	delete(client.actions, hash)
+}
+
+func (client *Client) setMapping(hash []byte) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	if uint(len(client.mapping)) > settings.MAPP_SIZE {
+		client.mapping = make(map[string]bool)
+	}
+	client.mapping[Base64Encode(hash)] = true
+}
+
+func (client *Client) inMapping(hash []byte) bool {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	_, ok := client.mapping[Base64Encode(hash)]
+	return ok
+}
+
+func (client *Client) isMaxConnSize() bool {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	return uint(len(client.connections)) > settings.CONN_SIZE
+}
+
+func (client *Client) setConnection(id string, conn net.Conn) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	client.connections[id] = conn
+}
+
+func (client *Client) getConnection(id string) net.Conn {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	return client.connections[id]
+}
+
+func (client *Client) delConnection(id string) {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	delete(client.connections, id)
 }

@@ -254,12 +254,12 @@ func DeserializePackage(jsonData []byte) *Package {
 
 // Standart encoding in package.
 func Base64Encode(data []byte) string {
-	return base64.StdEncoding.EncodeToString(data)
+	return base64.URLEncoding.EncodeToString(data)
 }
 
 // Standart decoding in package.
 func Base64Decode(data string) []byte {
-	result, err := base64.StdEncoding.DecodeString(data)
+	result, err := base64.URLEncoding.DecodeString(data)
 	if err != nil {
 		return nil
 	}

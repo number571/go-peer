@@ -102,7 +102,7 @@ gopeer.Set(gopeer.SettingsType{
 
 ### Network functions and methods
 ```go
-func NewClient(priv *rsa.PrivateKey, handle func(*Client, *Package)) *Client {}
+func NewClient(priv *rsa.PrivateKey) *Client {}
 func NewPackage(title string, data []byte) *Package {}
 func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {}
 func (client *Client) RunNode(address string) error {}
