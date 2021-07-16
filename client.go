@@ -301,11 +301,15 @@ func (client *Client) Decrypt(pack *Package, pow uint) *Package {
 
 // Get current state of f2f mode.
 func (f2f *friendToFriend) State() bool {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
 	return f2f.enabled
 }
 
 // Switch f2f mode to reverse.
 func (f2f *friendToFriend) Switch() {
+	f2f.mutex.Lock()
+	defer f2f.mutex.Unlock()
 	f2f.enabled = !f2f.enabled
 }
 
