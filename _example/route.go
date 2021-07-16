@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	gp "./gopeer"
+	gp "github.com/number571/gopeer"
 )
 
 const (

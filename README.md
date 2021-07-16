@@ -36,7 +36,7 @@ func init() {
 
 func main() {
 	gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).
-		HandleFunc("/msg", msgRoute).
+		Handle("/msg", msgRoute).
 		RunNode(":8080")
 	// ...
 }

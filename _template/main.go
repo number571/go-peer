@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	gp "./gopeer"
+	gp "github.com/number571/gopeer"
 )
 
 func init() {
