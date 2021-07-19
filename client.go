@@ -360,7 +360,7 @@ func (client *Client) handleConn(id string) {
 	for {
 		pack := readPackage(conn)
 
-	checkAgain:
+	repeat:
 		if pack == nil {
 			continue
 		}
@@ -392,7 +392,7 @@ func (client *Client) handleConn(id string) {
 
 		if decPack.Head.Title == settings.ROUTE_MSG {
 			pack = DeserializePackage(decPack.Body.Data)
-			goto checkAgain
+			goto repeat
 		}
 
 		handleFunc(client, decPack)
