@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/big"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -86,7 +87,7 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 		client.delAction(hash)
 	}()
 
-tryAgain:
+repeat:
 	routePack := client.RoutePackage(receiver, pack, route, ppsender)
 	if routePack == nil {
 		return result, errors.New("psender is nil")
@@ -99,7 +100,7 @@ tryAgain:
 	case <-time.After(time.Duration(settings.WAIT_TIME) * time.Second):
 		if retryNum > 1 {
 			retryNum -= 1
-			goto tryAgain
+			goto repeat
 		}
 		err = errors.New("time is over")
 	}
@@ -364,7 +365,7 @@ func (client *Client) handleConn(id string) {
 			continue
 		}
 
-		// size(sha256) = 32 bytes
+		// size(sha256) = 32bytes
 		if len(pack.Body.Hash) != 32 {
 			continue
 		}
@@ -384,7 +385,8 @@ func (client *Client) handleConn(id string) {
 			continue
 		}
 
-		if client.F2F.State() && !client.F2F.InList(BytesToPublicKey(decPack.Head.Sender)) {
+		sender := BytesToPublicKey(decPack.Head.Sender)
+		if client.F2F.State() && !client.F2F.InList(sender) {
 			continue
 		}
 
@@ -398,23 +400,22 @@ func (client *Client) handleConn(id string) {
 }
 
 func handleFunc(client *Client, pack *Package) {
-	for nm, fn := range client.functions {
-		switch pack.Head.Title {
-		case nm:
-			client.send(client.Encrypt(
-				BytesToPublicKey(pack.Head.Sender),
-				NewPackage("_"+nm, fn(client, pack)),
-				settings.POWS_DIFF,
-			))
-			return
-		case "_" + nm:
-			client.response(
-				BytesToPublicKey(pack.Head.Sender),
-				pack.Body.Data,
-			)
-			return
-		}
+	fname := pack.Head.Title
+	if strings.HasPrefix(fname, settings.RET_BYTES) {
+		client.response(
+			BytesToPublicKey(pack.Head.Sender),
+			pack.Body.Data,
+		)
+		return
 	}
+	client.send(client.Encrypt(
+		BytesToPublicKey(pack.Head.Sender),
+		NewPackage(
+			settings.RET_BYTES+fname,
+			client.getFunction(fname)(client, pack),
+		),
+		settings.POWS_DIFF,
+	))
 }
 
 func readPackage(conn net.Conn) *Package {
@@ -470,6 +471,12 @@ func (client *Client) response(pub *rsa.PublicKey, data []byte) {
 	if _, ok := client.actions[hash]; ok {
 		client.actions[hash] <- data
 	}
+}
+
+func (client *Client) getFunction(name string) func(*Client, *Package) []byte {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
+	return client.functions[name]
 }
 
 func (client *Client) setAction(hash string) {

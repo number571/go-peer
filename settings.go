@@ -3,6 +3,7 @@ package gopeer
 type SettingsType map[string]interface{}
 type settingsStruct struct {
 	END_BYTES string
+	RET_BYTES string
 	ROUTE_MSG string
 	RETRY_NUM uint
 	WAIT_TIME uint
@@ -24,6 +25,7 @@ var settings = defaultSettings()
 func defaultSettings() settingsStruct {
 	return settingsStruct{
 		END_BYTES: "\000\005\007\001\001\007\005\000",
+		RET_BYTES: "\000\001\007\005\005\007\001\000",
 		ROUTE_MSG: "\000\001\002\003\004\005\006\007",
 		RETRY_NUM: 3,       // quantity
 		WAIT_TIME: 20,      // seconds
@@ -61,6 +63,8 @@ func Get(key string) interface{} {
 	switch key {
 	case "END_BYTES":
 		return settings.END_BYTES
+	case "RET_BYTES":
+		return settings.RET_BYTES
 	case "ROUTE_MSG":
 		return settings.ROUTE_MSG
 	case "RETRY_NUM":
@@ -93,6 +97,8 @@ func stringSettings(name string, data interface{}) uint8 {
 	switch name {
 	case "END_BYTES":
 		settings.END_BYTES = result
+	case "RET_BYTES":
+		settings.RET_BYTES = result
 	case "ROUTE_MSG":
 		settings.ROUTE_MSG = result
 	default:
