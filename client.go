@@ -169,13 +169,11 @@ func (client *Client) Connect(addresses ...string) []error {
 
 // Disconnect from node by address.
 func (client *Client) Disconnect(addresses ...string) {
-	client.mutex.Lock()
-	defer client.mutex.Unlock()
 	for _, addr := range addresses {
-		if conn, ok := client.connections[addr]; ok {
-			conn.Close()
+		if client.InConnections(addr) {
+			client.getConnection(addr).Close()
 		}
-		delete(client.connections, addr)
+		client.delConnection(addr)
 	}
 }
 
