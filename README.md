@@ -54,38 +54,38 @@ func msgRoute(client *gp.Client, pack *gp.Package) []byte {
 ```go
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-    END_BYTES []byte
+	END_BYTES []byte
 	RET_BYTES []byte
 	ROUTE_MSG []byte
-    RETRY_NUM uint
-    WAIT_TIME uint
-    POWS_DIFF uint
-    CONN_SIZE uint
-    PACK_SIZE uint
-    BUFF_SIZE uint
-    MAPP_SIZE uint
-    AKEY_SIZE uint
-    SKEY_SIZE uint
-    RAND_SIZE uint
+	RETRY_NUM uint
+	WAIT_TIME uint
+	POWS_DIFF uint
+	CONN_SIZE uint
+	PACK_SIZE uint
+	BUFF_SIZE uint
+	MAPP_SIZE uint
+	AKEY_SIZE uint
+	SKEY_SIZE uint
+	RAND_SIZE uint
 }
 ```
 
 ### Default settings
 ```go
 {
-    END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
-    RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
-    ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
-    RETRY_NUM: 3,       // quantity
-    WAIT_TIME: 20,      // seconds
-    POWS_DIFF: 20,      // bits
-    CONN_SIZE: 10,      // quantity
-    PACK_SIZE: 8 << 20, // 8*(2^20)B = 8MiB
-    BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
-    MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
-    AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
-    SKEY_SIZE: 1 << 5,  // 2^5B = 32B
-    RAND_SIZE: 1 << 4,  // 2^4B = 16B
+	END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
+	RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
+	ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
+	RETRY_NUM: 3,       // quantity
+	WAIT_TIME: 20,      // seconds
+	POWS_DIFF: 20,      // bits
+	CONN_SIZE: 10,      // quantity
+	PACK_SIZE: 8 << 20, // 8*(2^20)B = 8MiB
+	BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
+	MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
+	AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
+	SKEY_SIZE: 1 << 5,  // 2^5B = 32B
+	RAND_SIZE: 1 << 4,  // 2^4B = 16B
 }
 ```
 
@@ -99,8 +99,8 @@ func Get(key string) interface{} {}
 ```go
 var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
 gopeer.Set(gopeer.SettingsType{
-    "AKEY_SIZE": uint(1 << 10),
-    "SKEY_SIZE": uint(1 << 4),
+	"AKEY_SIZE": uint(1 << 10),
+	"SKEY_SIZE": uint(1 << 4),
 })
 ```
 
@@ -182,34 +182,34 @@ func ToBytes(num uint64) []byte {}
 ### Package structure
 ```go
 {
-    Head: {
-        Title:   []byte,
-        Rand:    []byte,
-        Sender:  []byte,
-        Session: []byte,
-    },
-    Body: {
-        Data: []byte,
-        Hash: []byte,
-        Sign: []byte,
-        Npow: uint64,
-    },
+	Head: {
+		Title:   []byte,
+		Rand:    []byte,
+		Sender:  []byte,
+		Session: []byte,
+	},
+	Body: {
+		Data: []byte,
+		Hash: []byte,
+		Sign: []byte,
+		Npow: uint64,
+	},
 }
 ```
 
 ### Client structure
 ```go
 {
-    mutex:       sync.Mutex,
-    privateKey:  crypto.PrivKey,
-    functions:   map[string]func(*Client, *Package) []byte,
-    mapping:     map[string]bool,
-    connections: map[string]net.Conn,
-    actions:     map[string]chan []byte,
-    F2F:         {
-        mutex:   sync.Mutex,
-        enabled: bool,
-        friends: map[string]crypto.PubKey,
-    },
+	mutex:       sync.Mutex,
+	privateKey:  crypto.PrivKey,
+	functions:   map[string]func(*Client, *Package) []byte,
+	mapping:     map[string]bool,
+	connections: map[string]net.Conn,
+	actions:     map[string]chan []byte,
+	F2F:         {
+		mutex:   sync.Mutex,
+		enabled: bool,
+		friends: map[string]crypto.PubKey,
+	},
 }
 ```
