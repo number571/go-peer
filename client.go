@@ -41,6 +41,11 @@ func NewPackage(title, data []byte) *Package {
 	}
 }
 
+func (pack *Package) WithDiff(diff uint) *Package {
+	pack.Head.Diff = uint8(diff)
+	return pack
+}
+
 // Create route object with receiver.
 func NewRoute(receiver crypto.PubKey) *Route {
 	if receiver == nil {
@@ -52,13 +57,13 @@ func NewRoute(receiver crypto.PubKey) *Route {
 }
 
 // Append pseudo sender to route.
-func (route *Route) Sender(psender crypto.PrivKey) *Route {
+func (route *Route) WithSender(psender crypto.PrivKey) *Route {
 	route.psender = psender
 	return route
 }
 
 // Append route-nodes to route.
-func (route *Route) Routes(routes []crypto.PubKey) *Route {
+func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {
 	route.routes = routes
 	return route
 }
@@ -135,17 +140,17 @@ repeat:
 // Need use pseudo sender if route not null.
 func (client *Client) RoutePackage(pack *Package, route *Route) *Package {
 	var (
-		rpack   = client.Encrypt(route.receiver, pack, settings.POWS_DIFF)
+		rpack   = client.Encrypt(route.receiver, pack)
 		psender = NewClient(route.psender)
 	)
 	if len(route.routes) != 0 && psender == nil {
 		return nil
 	}
+	diff := uint(rpack.Head.Diff)
 	for _, pub := range route.routes {
 		rpack = psender.Encrypt(
 			pub,
-			NewPackage(settings.ROUTE_MSG, serializePackage(rpack)),
-			settings.POWS_DIFF,
+			NewPackage(settings.ROUTE_MSG, serializePackage(rpack)).WithDiff(diff),
 		)
 	}
 	return rpack
@@ -213,7 +218,7 @@ func (client *Client) PrivKey() crypto.PrivKey {
 
 // Encrypt package with public key of receiver.
 // The package can be decrypted only if private key is known.
-func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) *Package {
+func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package) *Package {
 	var (
 		rand = crypto.GenRand(uint(settings.RAND_SIZE))
 		hash = crypto.HashSum(bytes.Join(
@@ -232,6 +237,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) 
 	return &Package{
 		Head: HeadPackage{
 			Rand:    cipher.Encrypt(rand),
+			Diff:    pack.Head.Diff,
 			Title:   cipher.Encrypt(pack.Head.Title),
 			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
 			Session: receiver.Encrypt(session),
@@ -240,19 +246,19 @@ func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) 
 			Data: cipher.Encrypt(pack.Body.Data),
 			Hash: hash,
 			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(diff).Proof(hash),
+			Npow: crypto.NewPuzzle(pack.Head.Diff).Proof(hash),
 		},
 	}
 }
 
 // Decrypt package with private key of receiver.
 // No one else except the sender will be able to decrypt the package.
-func (client *Client) Decrypt(pack *Package, pow uint) *Package {
+func (client *Client) Decrypt(pack *Package) *Package {
 	hash := pack.Body.Hash
 	if hash == nil {
 		return nil
 	}
-	if !crypto.NewPuzzle(pow).Verify(hash, pack.Body.Npow) {
+	if !crypto.NewPuzzle(pack.Head.Diff).Verify(hash, pack.Body.Npow) {
 		return nil
 	}
 
@@ -314,8 +320,9 @@ func (client *Client) Decrypt(pack *Package, pow uint) *Package {
 
 	return &Package{
 		Head: HeadPackage{
-			Rand:    rand,
 			Title:   titleBytes,
+			Diff:    pack.Head.Diff,
+			Rand:    rand,
 			Sender:  publicBytes,
 			Session: session,
 		},
@@ -405,12 +412,13 @@ func (client *Client) handleConn(id string) {
 		}
 		client.setMapping(pack.Body.Hash)
 
-		if !crypto.NewPuzzle(settings.POWS_DIFF).Verify(pack.Body.Hash, pack.Body.Npow) {
+		puzzle := crypto.NewPuzzle(uint8(settings.POWS_DIFF))
+		if !puzzle.Verify(pack.Body.Hash, pack.Body.Npow) {
 			continue
 		}
 		client.send(pack)
 
-		decPack := client.Decrypt(pack, settings.POWS_DIFF)
+		decPack := client.Decrypt(pack)
 		if decPack == nil {
 			continue
 		}
@@ -438,6 +446,7 @@ func handleFunc(client *Client, pack *Package) {
 		)
 		return
 	}
+	diff := uint(pack.Head.Diff)
 	client.send(client.Encrypt(
 		crypto.LoadPubKey(pack.Head.Sender),
 		NewPackage(
@@ -446,8 +455,7 @@ func handleFunc(client *Client, pack *Package) {
 				fname,
 			}, []byte{}),
 			client.getFunction(fname)(client, pack),
-		),
-		settings.POWS_DIFF,
+		).WithDiff(diff),
 	))
 }
 

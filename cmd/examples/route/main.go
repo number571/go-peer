@@ -52,10 +52,11 @@ func main() {
 		node3.PubKey(),
 	}
 
+	diff := gp.Get("POWS_DIFF").(uint)
 	for i := 0; i < 10; i++ {
 		res, err := client1.Send(
-			gp.NewPackage(ROUTE_MSG, []byte("hello, world!")),
-			gp.NewRoute(client2.PubKey()).Sender(psender).Routes(routes),
+			gp.NewPackage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
+			gp.NewRoute(client2.PubKey()).WithSender(psender).WithRoutes(routes),
 		)
 		if err != nil {
 			fmt.Println(err)

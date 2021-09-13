@@ -119,8 +119,8 @@ func (client *Client) InConnections(address string) bool {}
 func (client *Client) Connect(address ...string) []error {}
 func (client *Client) Disconnect(address ...string) {}
 
-func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) *Package {}
-func (client *Client) Decrypt(pack *Package, pow uint) *Package {}
+func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package) *Package {}
+func (client *Client) Decrypt(pack *Package) *Package {}
 func (client *Client) PubKey() crypto.PubKey {}
 func (client *Client) PrivKey() crypto.PrivKey {}
 
@@ -132,10 +132,11 @@ func (f2f *friendToFriend) Append(pubs ...crypto.PubKey) {}
 func (f2f *friendToFriend) Remove(pubs ...crypto.PubKey) {}
 
 func NewRoute(receiver crypto.PubKey) *Route {}
-func (route *Route) Sender(psender crypto.PrivKey) *Route {}
-func (route *Route) Routes(routes []crypto.PubKey) *Route {}
+func (route *Route) WithSender(psender crypto.PrivKey) *Route {}
+func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {}
 
 func NewPackage(title, data []byte) *Package {}
+func (pack *Package) WithDiff(diff uint) *Package {}
 ```
 
 ### Cryptographic functions and methods

@@ -40,6 +40,7 @@ type Package struct {
 
 type HeadPackage struct {
 	Title   []byte `json:"title"`
+	Diff    uint8  `json:"diff"`
 	Rand    []byte `json:"rand"`
 	Sender  []byte `json:"sender"`
 	Session []byte `json:"session"`

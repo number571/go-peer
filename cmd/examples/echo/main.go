@@ -27,8 +27,9 @@ func main() {
 	client1.Connect(NODE_ADDRESS)
 	client2.Connect(NODE_ADDRESS)
 
+	diff := gp.Get("POWS_DIFF").(uint)
 	res, err := client1.Send(
-		gp.NewPackage(ROUTE_MSG, []byte("hello, world!")),
+		gp.NewPackage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
 		gp.NewRoute(client2.PubKey()),
 	)
 	if err != nil {

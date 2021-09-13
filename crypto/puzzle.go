@@ -13,10 +13,10 @@ var (
 )
 
 type PuzzlePOW struct {
-	diff uint
+	diff uint8
 }
 
-func NewPuzzle(diff uint) Puzzle {
+func NewPuzzle(diff uint8) Puzzle {
 	return &PuzzlePOW{diff}
 }
 
@@ -29,7 +29,7 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	Target.Lsh(Target, 256-puzzle.diff)
+	Target.Lsh(Target, 256-uint(puzzle.diff))
 	for nonce < math.MaxUint64 {
 		hash = HashSum(bytes.Join(
 			[][]byte{
@@ -59,6 +59,6 @@ func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	))
 	intHash.SetBytes(hash)
-	Target.Lsh(Target, 256-puzzle.diff)
+	Target.Lsh(Target, 256-uint(puzzle.diff))
 	return intHash.Cmp(Target) == -1
 }
