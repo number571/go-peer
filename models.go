@@ -1,17 +1,18 @@
 package gopeer
 
 import (
-	"crypto/rsa"
 	"net"
 	"sync"
+
+	"github.com/number571/gopeer/crypto"
 )
 
 // Basic structure describing the user.
 // Stores the private key and list of friends.
 type Client struct {
 	mutex       sync.Mutex
-	privateKey  *rsa.PrivateKey
-	routes      map[string]func(*Client, *Package) []byte
+	privateKey  crypto.PrivKey
+	hroutes     map[string]func(*Client, *Package) []byte
 	mapping     map[string]bool
 	connections map[string]net.Conn
 	actions     map[string]chan []byte
@@ -21,14 +22,14 @@ type Client struct {
 type friendToFriend struct {
 	mutex   sync.Mutex
 	enabled bool
-	friends map[string]*rsa.PublicKey
+	friends map[string]crypto.PubKey
 }
 
 // Basic structure for set route to package.
 type Route struct {
-	receiver *rsa.PublicKey
-	psender  *rsa.PrivateKey
-	routes   []*rsa.PublicKey
+	receiver crypto.PubKey
+	psender  crypto.PrivKey
+	routes   []crypto.PubKey
 }
 
 // Basic structure of transport package.
@@ -38,7 +39,7 @@ type Package struct {
 }
 
 type HeadPackage struct {
-	Title   string `json:"title"`
+	Title   []byte `json:"title"`
 	Rand    []byte `json:"rand"`
 	Sender  []byte `json:"sender"`
 	Session []byte `json:"session"`

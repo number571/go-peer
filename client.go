@@ -2,37 +2,38 @@ package gopeer
 
 import (
 	"bytes"
-	"crypto/rsa"
+	"encoding/json"
 	"errors"
-	"math/big"
 	"net"
-	"strings"
 	"time"
+
+	"github.com/number571/gopeer/crypto"
+	"github.com/number571/gopeer/encoding"
 )
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-func NewClient(priv *rsa.PrivateKey) *Client {
+func NewClient(priv crypto.PrivKey) *Client {
 	if priv == nil {
 		return nil
 	}
 	return &Client{
 		privateKey:  priv,
-		routes:      make(map[string]func(*Client, *Package) []byte),
+		hroutes:     make(map[string]func(*Client, *Package) []byte),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan []byte),
 		F2F: &friendToFriend{
-			friends: make(map[string]*rsa.PublicKey),
+			friends: make(map[string]crypto.PubKey),
 		},
 	}
 }
 
 // Create package: Head.Title = title, Body.Data = data.
-func NewPackage(title string, data []byte) *Package {
+func NewPackage(title, data []byte) *Package {
 	return &Package{
 		Head: HeadPackage{
-			Title: title,
+			Title: []byte(title),
 		},
 		Body: BodyPackage{
 			Data: data,
@@ -40,8 +41,8 @@ func NewPackage(title string, data []byte) *Package {
 	}
 }
 
-// Create route object.
-func NewRoute(receiver *rsa.PublicKey) *Route {
+// Create route object with receiver.
+func NewRoute(receiver crypto.PubKey) *Route {
 	if receiver == nil {
 		return nil
 	}
@@ -51,13 +52,13 @@ func NewRoute(receiver *rsa.PublicKey) *Route {
 }
 
 // Append pseudo sender to route.
-func (route *Route) Psender(psender *rsa.PrivateKey) *Route {
+func (route *Route) Sender(psender crypto.PrivKey) *Route {
 	route.psender = psender
 	return route
 }
 
 // Append route-nodes to route.
-func (route *Route) Routes(routes []*rsa.PublicKey) *Route {
+func (route *Route) Routes(routes []crypto.PubKey) *Route {
 	route.routes = routes
 	return route
 }
@@ -79,7 +80,7 @@ func (client *Client) RunNode(address string) error {
 			conn.Close()
 			continue
 		}
-		id := Base64Encode(GenerateBytes(settings.RAND_SIZE))
+		id := encoding.Base64Encode(crypto.GenRand(settings.RAND_SIZE))
 		client.setConnection(id, conn)
 		go client.handleConn(id)
 	}
@@ -87,10 +88,10 @@ func (client *Client) RunNode(address string) error {
 }
 
 // Add function to mapping for route use.
-func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {
+func (client *Client) Handle(title []byte, handle func(*Client, *Package) []byte) *Client {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	client.routes[title] = handle
+	client.hroutes[encoding.Base64Encode(title)] = handle
 	return client
 }
 
@@ -100,7 +101,7 @@ func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {
 	var (
 		err      error
 		result   []byte
-		hash     = HashPublicKey(route.receiver)
+		hash     = string(route.receiver.Address())
 		retryNum = settings.RETRY_NUM
 	)
 
@@ -137,13 +138,13 @@ func (client *Client) RoutePackage(pack *Package, route *Route) *Package {
 		rpack   = client.Encrypt(route.receiver, pack, settings.POWS_DIFF)
 		psender = NewClient(route.psender)
 	)
-	if psender == nil {
+	if len(route.routes) != 0 && psender == nil {
 		return nil
 	}
 	for _, pub := range route.routes {
 		rpack = psender.Encrypt(
 			pub,
-			NewPackage(settings.ROUTE_MSG, SerializePackage(rpack)),
+			NewPackage(settings.ROUTE_MSG, serializePackage(rpack)),
 			settings.POWS_DIFF,
 		)
 	}
@@ -201,45 +202,45 @@ func (client *Client) Disconnect(addresses ...string) {
 }
 
 // Get public key from client object.
-func (client *Client) PublicKey() *rsa.PublicKey {
-	return &client.privateKey.PublicKey
+func (client *Client) PubKey() crypto.PubKey {
+	return client.privateKey.PubKey()
 }
 
 // Get private key from client object.
-func (client *Client) PrivateKey() *rsa.PrivateKey {
+func (client *Client) PrivKey() crypto.PrivKey {
 	return client.privateKey
 }
 
 // Encrypt package with public key of receiver.
 // The package can be decrypted only if private key is known.
-func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package, pow uint) *Package {
+func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) *Package {
 	var (
-		session = GenerateBytes(uint(settings.SKEY_SIZE))
-		rand    = GenerateBytes(uint(settings.RAND_SIZE))
-		hash    = HashSum(bytes.Join(
+		rand = crypto.GenRand(uint(settings.RAND_SIZE))
+		hash = crypto.HashSum(bytes.Join(
 			[][]byte{
 				rand,
-				PublicKeyToBytes(client.PublicKey()),
-				PublicKeyToBytes(receiver),
+				client.PubKey().Bytes(),
+				receiver.Bytes(),
 				[]byte(pack.Head.Title),
 				pack.Body.Data,
 			},
 			[]byte{},
 		))
-		sign = Sign(client.PrivateKey(), hash)
+		session = crypto.GenRand(uint(settings.SKEY_SIZE))
+		cipher  = crypto.NewCipher(session)
 	)
 	return &Package{
 		Head: HeadPackage{
-			Rand:    EncryptAES(session, rand),
-			Title:   Base64Encode(EncryptAES(session, []byte(pack.Head.Title))),
-			Sender:  EncryptAES(session, PublicKeyToBytes(client.PublicKey())),
-			Session: EncryptRSA(receiver, session),
+			Rand:    cipher.Encrypt(rand),
+			Title:   cipher.Encrypt(pack.Head.Title),
+			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
+			Session: receiver.Encrypt(session),
 		},
 		Body: BodyPackage{
-			Data: EncryptAES(session, pack.Body.Data),
+			Data: cipher.Encrypt(pack.Body.Data),
 			Hash: hash,
-			Sign: EncryptAES(session, sign),
-			Npow: ProofOfWork(hash, pow),
+			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
+			Npow: crypto.NewPuzzle(diff).Proof(hash),
 		},
 	}
 }
@@ -251,51 +252,57 @@ func (client *Client) Decrypt(pack *Package, pow uint) *Package {
 	if hash == nil {
 		return nil
 	}
-	if !ProofIsValid(hash, pow, pack.Body.Npow) {
+	if !crypto.NewPuzzle(pow).Verify(hash, pack.Body.Npow) {
 		return nil
 	}
-	session := DecryptRSA(client.PrivateKey(), pack.Head.Session)
+
+	session := client.PrivKey().Decrypt(pack.Head.Session)
 	if session == nil {
 		return nil
 	}
-	publicBytes := DecryptAES(session, pack.Head.Sender)
+
+	cipher := crypto.NewCipher(session)
+	publicBytes := cipher.Decrypt(pack.Head.Sender)
 	if publicBytes == nil {
 		return nil
 	}
-	public := BytesToPublicKey(publicBytes)
+
+	public := crypto.LoadPubKey(publicBytes)
 	if public == nil {
 		return nil
 	}
-	size := big.NewInt(1)
-	size.Lsh(size, uint(settings.AKEY_SIZE-1))
-	if public.N.Cmp(size) == -1 {
+	if public.Size() != settings.AKEY_SIZE {
 		return nil
 	}
-	sign := DecryptAES(session, pack.Body.Sign)
+
+	sign := cipher.Decrypt(pack.Body.Sign)
 	if sign == nil {
 		return nil
 	}
-	err := Verify(public, hash, sign)
-	if err != nil {
+	if !public.Verify(hash, sign) {
 		return nil
 	}
-	titleBytes := DecryptAES(session, Base64Decode(pack.Head.Title))
+
+	titleBytes := cipher.Decrypt(pack.Head.Title)
 	if titleBytes == nil {
 		return nil
 	}
-	dataBytes := DecryptAES(session, pack.Body.Data)
+
+	dataBytes := cipher.Decrypt(pack.Body.Data)
 	if dataBytes == nil {
 		return nil
 	}
-	rand := DecryptAES(session, pack.Head.Rand)
+
+	rand := cipher.Decrypt(pack.Head.Rand)
 	if rand == nil {
 		return nil
 	}
-	check := HashSum(bytes.Join(
+
+	check := crypto.HashSum(bytes.Join(
 		[][]byte{
 			rand,
 			publicBytes,
-			PublicKeyToBytes(client.PublicKey()),
+			client.PubKey().Bytes(),
 			titleBytes,
 			dataBytes,
 		},
@@ -304,10 +311,11 @@ func (client *Client) Decrypt(pack *Package, pow uint) *Package {
 	if !bytes.Equal(check, hash) {
 		return nil
 	}
+
 	return &Package{
 		Head: HeadPackage{
 			Rand:    rand,
-			Title:   string(titleBytes),
+			Title:   titleBytes,
 			Sender:  publicBytes,
 			Session: session,
 		},
@@ -335,18 +343,18 @@ func (f2f *friendToFriend) Switch() {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {
+func (f2f *friendToFriend) InList(pub crypto.PubKey) bool {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	_, ok := f2f.friends[HashPublicKey(pub)]
+	_, ok := f2f.friends[string(pub.Address())]
 	return ok
 }
 
 // Get a list of friends public keys.
-func (f2f *friendToFriend) List() []*rsa.PublicKey {
+func (f2f *friendToFriend) List() []crypto.PubKey {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
-	var list []*rsa.PublicKey
+	var list []crypto.PubKey
 	for _, pub := range f2f.friends {
 		list = append(list, pub)
 	}
@@ -354,20 +362,20 @@ func (f2f *friendToFriend) List() []*rsa.PublicKey {
 }
 
 // Add public key to list of friends.
-func (f2f *friendToFriend) Append(pubs ...*rsa.PublicKey) {
+func (f2f *friendToFriend) Append(pubs ...crypto.PubKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 	for _, pub := range pubs {
-		f2f.friends[HashPublicKey(pub)] = pub
+		f2f.friends[string(pub.Address())] = pub
 	}
 }
 
 // Delete public key from list of friends.
-func (f2f *friendToFriend) Remove(pubs ...*rsa.PublicKey) {
+func (f2f *friendToFriend) Remove(pubs ...crypto.PubKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 	for _, pub := range pubs {
-		delete(f2f.friends, HashPublicKey(pub))
+		delete(f2f.friends, string(pub.Address()))
 	}
 }
 
@@ -397,7 +405,7 @@ func (client *Client) handleConn(id string) {
 		}
 		client.setMapping(pack.Body.Hash)
 
-		if !ProofIsValid(pack.Body.Hash, settings.POWS_DIFF, pack.Body.Npow) {
+		if !crypto.NewPuzzle(settings.POWS_DIFF).Verify(pack.Body.Hash, pack.Body.Npow) {
 			continue
 		}
 		client.send(pack)
@@ -407,13 +415,13 @@ func (client *Client) handleConn(id string) {
 			continue
 		}
 
-		sender := BytesToPublicKey(decPack.Head.Sender)
+		sender := crypto.LoadPubKey(decPack.Head.Sender)
 		if client.F2F.State() && !client.F2F.InList(sender) {
 			continue
 		}
 
-		if decPack.Head.Title == settings.ROUTE_MSG {
-			pack = DeserializePackage(decPack.Body.Data)
+		if bytes.Equal(decPack.Head.Title, settings.ROUTE_MSG) {
+			pack = deserializePackage(decPack.Body.Data)
 			goto repeat
 		}
 
@@ -423,17 +431,20 @@ func (client *Client) handleConn(id string) {
 
 func handleFunc(client *Client, pack *Package) {
 	fname := pack.Head.Title
-	if strings.HasPrefix(fname, settings.RET_BYTES) {
+	if bytes.HasPrefix(fname, settings.RET_BYTES) {
 		client.response(
-			BytesToPublicKey(pack.Head.Sender),
+			crypto.LoadPubKey(pack.Head.Sender),
 			pack.Body.Data,
 		)
 		return
 	}
 	client.send(client.Encrypt(
-		BytesToPublicKey(pack.Head.Sender),
+		crypto.LoadPubKey(pack.Head.Sender),
 		NewPackage(
-			settings.RET_BYTES+fname,
+			bytes.Join([][]byte{
+				settings.RET_BYTES,
+				fname,
+			}, []byte{}),
 			client.getFunction(fname)(client, pack),
 		),
 		settings.POWS_DIFF,
@@ -467,7 +478,7 @@ func readPackage(conn net.Conn) *Package {
 			break
 		}
 	}
-	return DeserializePackage(message)
+	return deserializePackage(message)
 }
 
 func (client *Client) send(pack *Package) {
@@ -475,30 +486,30 @@ func (client *Client) send(pack *Package) {
 	defer client.mutex.Unlock()
 	bytesPack := bytes.Join(
 		[][]byte{
-			[]byte(SerializePackage(pack)),
+			[]byte(serializePackage(pack)),
 			[]byte(settings.END_BYTES),
 		},
 		[]byte{},
 	)
-	client.mapping[Base64Encode(pack.Body.Hash)] = true
+	client.mapping[encoding.Base64Encode(pack.Body.Hash)] = true
 	for _, cn := range client.connections {
 		go cn.Write(bytesPack)
 	}
 }
 
-func (client *Client) response(pub *rsa.PublicKey, data []byte) {
+func (client *Client) response(pub crypto.PubKey, data []byte) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	hash := HashPublicKey(pub)
+	hash := string(pub.Address())
 	if _, ok := client.actions[hash]; ok {
 		client.actions[hash] <- data
 	}
 }
 
-func (client *Client) getFunction(name string) func(*Client, *Package) []byte {
+func (client *Client) getFunction(name []byte) func(*Client, *Package) []byte {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	return client.routes[name]
+	return client.hroutes[encoding.Base64Encode(name)]
 }
 
 func (client *Client) setAction(hash string) {
@@ -519,13 +530,13 @@ func (client *Client) setMapping(hash []byte) {
 	if uint(len(client.mapping)) > settings.MAPP_SIZE {
 		client.mapping = make(map[string]bool)
 	}
-	client.mapping[Base64Encode(hash)] = true
+	client.mapping[encoding.Base64Encode(hash)] = true
 }
 
 func (client *Client) inMapping(hash []byte) bool {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	_, ok := client.mapping[Base64Encode(hash)]
+	_, ok := client.mapping[encoding.Base64Encode(hash)]
 	return ok
 }
 
@@ -551,4 +562,23 @@ func (client *Client) delConnection(id string) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
 	delete(client.connections, id)
+}
+
+// Serialize with JSON format.
+func serializePackage(pack *Package) []byte {
+	jsonData, err := json.MarshalIndent(pack, "", "\t")
+	if err != nil {
+		return nil
+	}
+	return jsonData
+}
+
+// Deserialize with JSON format.
+func deserializePackage(jsonData []byte) *Package {
+	var pack = new(Package)
+	err := json.Unmarshal(jsonData, pack)
+	if err != nil {
+		return nil
+	}
+	return pack
 }

@@ -2,9 +2,9 @@ package gopeer
 
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-	END_BYTES string
-	RET_BYTES string
-	ROUTE_MSG string
+	END_BYTES []byte
+	RET_BYTES []byte
+	ROUTE_MSG []byte
 	RETRY_NUM uint
 	WAIT_TIME uint
 	POWS_DIFF uint
@@ -24,9 +24,9 @@ var settings = defaultSettings()
 // b - bit
 func defaultSettings() settingsStruct {
 	return settingsStruct{
-		END_BYTES: "\000\005\007\001\001\007\005\000",
-		RET_BYTES: "\000\001\007\005\005\007\001\000",
-		ROUTE_MSG: "\000\001\002\003\004\005\006\007",
+		END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
+		RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
+		ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
 		RETRY_NUM: 3,       // quantity
 		WAIT_TIME: 20,      // seconds
 		POWS_DIFF: 20,      // bits
@@ -48,7 +48,7 @@ func Set(settings SettingsType) []uint8 {
 	for name, data := range settings {
 		switch data.(type) {
 		case string:
-			list[i] = stringSettings(name, data)
+			list[i] = bytesSettings(name, data)
 		case uint:
 			list[i] = intSettings(name, data)
 		default:
@@ -92,8 +92,8 @@ func Get(key string) interface{} {
 	}
 }
 
-func stringSettings(name string, data interface{}) uint8 {
-	result := data.(string)
+func bytesSettings(name string, data interface{}) uint8 {
+	result := data.([]byte)
 	switch name {
 	case "END_BYTES":
 		settings.END_BYTES = result

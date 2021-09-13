@@ -1,34 +1,37 @@
 package main
 
 import (
-	"crypto/rsa"
 	"fmt"
 	"time"
 
 	gp "github.com/number571/gopeer"
+	cr "github.com/number571/gopeer/crypto"
 )
 
 const (
-	TITLE_MESSAGE = "TITLE_MESSAGE"
 	NODE1_ADDRESS = ":7070"
 	NODE2_ADDRESS = ":8080"
 	NODE3_ADDRESS = ":9090"
 )
 
+var (
+	ROUTE_MSG = []byte("/msg")
+)
+
 func main() {
-	client1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
-	client2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	client1 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	client2 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
 
-	node1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
-	node2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
-	node3 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint)))
+	node1 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	node2 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	node3 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
 
-	client1.Handle(TITLE_MESSAGE, getMessage)
-	client2.Handle(TITLE_MESSAGE, getMessage)
+	client1.Handle(ROUTE_MSG, getMessage)
+	client2.Handle(ROUTE_MSG, getMessage)
 
-	node1.Handle(TITLE_MESSAGE, getMessage)
-	node2.Handle(TITLE_MESSAGE, getMessage)
-	node3.Handle(TITLE_MESSAGE, getMessage)
+	node1.Handle(ROUTE_MSG, getMessage)
+	node2.Handle(ROUTE_MSG, getMessage)
+	node3.Handle(ROUTE_MSG, getMessage)
 
 	go node1.RunNode(NODE1_ADDRESS)
 	go node2.RunNode(NODE2_ADDRESS)
@@ -42,17 +45,17 @@ func main() {
 	client1.Connect(NODE1_ADDRESS)
 	client2.Connect(NODE3_ADDRESS)
 
-	psender := gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
-	routes := []*rsa.PublicKey{
-		node1.PublicKey(),
-		node2.PublicKey(),
-		node3.PublicKey(),
+	psender := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
+	routes := []cr.PubKey{
+		node1.PubKey(),
+		node2.PubKey(),
+		node3.PubKey(),
 	}
 
 	for i := 0; i < 10; i++ {
 		res, err := client1.Send(
-			gp.NewPackage(TITLE_MESSAGE, []byte("hello, world!")),
-			gp.NewRoute(client2.PublicKey()).Psender(psender).Routes(routes),
+			gp.NewPackage(ROUTE_MSG, []byte("hello, world!")),
+			gp.NewRoute(client2.PubKey()).Sender(psender).Routes(routes),
 		)
 		if err != nil {
 			fmt.Println(err)
@@ -63,7 +66,7 @@ func main() {
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) []byte {
-	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	hash := cr.LoadPubKey(pack.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return pack.Body.Data
 }

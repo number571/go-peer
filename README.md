@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.2.10s.
+> Framework for create decentralized networks. Version: 1.3.0.
 
 ### Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -24,7 +24,8 @@ package main
 import (
 	"fmt"
 
-	gp "./gopeer"
+	gp "github.com/number571/gopeer"
+	cr "github.com/number571/gopeer/crypto"
 )
 
 func init() {
@@ -35,14 +36,15 @@ func init() {
 }
 
 func main() {
-	gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).
-		Handle("/msg", msgRoute).
+	fmt.Println("Node is listening...")
+	gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).
+		Handle([]byte("/msg"), msgRoute).
 		RunNode(":8080")
 	// ...
 }
 
 func msgRoute(client *gp.Client, pack *gp.Package) []byte {
-	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	hash := cr.LoadPubKey(pack.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return pack.Body.Data
 }
@@ -52,8 +54,9 @@ func msgRoute(client *gp.Client, pack *gp.Package) []byte {
 ```go
 type SettingsType map[string]interface{}
 type settingsStruct struct {
-    END_BYTES string
-    ROUTE_MSG string
+    END_BYTES []byte
+	RET_BYTES []byte
+	ROUTE_MSG []byte
     RETRY_NUM uint
     WAIT_TIME uint
     POWS_DIFF uint
@@ -70,8 +73,9 @@ type settingsStruct struct {
 ### Default settings
 ```go
 {
-    END_BYTES: "\000\005\007\001\001\007\005\000",
-    ROUTE_MSG: "\000\001\002\003\004\005\006\007",
+    END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
+    RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
+    ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
     RETRY_NUM: 3,       // quantity
     WAIT_TIME: 20,      // seconds
     POWS_DIFF: 20,      // bits
@@ -102,66 +106,84 @@ gopeer.Set(gopeer.SettingsType{
 
 ### Network functions and methods
 ```go
-func NewClient(priv *rsa.PrivateKey) *Client {}
-func NewPackage(title string, data []byte) *Package {}
-func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {}
+func NewClient(priv crypto.PrivKey) *Client {}
+
 func (client *Client) RunNode(address string) error {}
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) (string, error) {}
-func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {}
+func (client *Client) Handle(title []byte, handle func(*Client, *Package) []byte) *Client {}
+
+func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {}
+func (client *Client) RoutePackage(pack *Package, route *Route) *Package {}
+
 func (client *Client) Connections() []string {}
 func (client *Client) InConnections(address string) bool {}
 func (client *Client) Connect(address ...string) []error {}
 func (client *Client) Disconnect(address ...string) {}
-func (client *Client) Encrypt(receiver *rsa.PublicKey, pack *Package, pow uint) *Package {}
+
+func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package, diff uint) *Package {}
 func (client *Client) Decrypt(pack *Package, pow uint) *Package {}
-func (client *Client) PublicKey() *rsa.PublicKey {}
-func (client *Client) PrivateKey() *rsa.PrivateKey {}
+func (client *Client) PubKey() crypto.PubKey {}
+func (client *Client) PrivKey() crypto.PrivKey {}
+
 func (f2f *friendToFriend) State() bool {}
 func (f2f *friendToFriend) Switch() {}
 func (f2f *friendToFriend) List() []*rsa.PublicKey {}
-func (f2f *friendToFriend) InList(pub *rsa.PublicKey) bool {}
-func (f2f *friendToFriend) Append(pub ...*rsa.PublicKey) {}
-func (f2f *friendToFriend) Remove(pub ...*rsa.PublicKey) {}
+func (f2f *friendToFriend) InList(pub crypto.PubKey) bool {}
+func (f2f *friendToFriend) Append(pubs ...crypto.PubKey) {}
+func (f2f *friendToFriend) Remove(pubs ...crypto.PubKey) {}
+
+func NewRoute(receiver crypto.PubKey) *Route {}
+func (route *Route) Sender(psender crypto.PrivKey) *Route {}
+func (route *Route) Routes(routes []crypto.PubKey) *Route {}
+
+func NewPackage(title, data []byte) *Package {}
 ```
 
-### Cryptography functions
+### Cryptographic functions and methods
 ```go
-func GenerateBytes(max uint) []byte {}
-func GenerateKey(bits uint) *rsa.PrivateKey {}
-func HashSum(data []byte) []byte {}
-func HashPublicKey(pub *rsa.PublicKey) string {}
-func BytesToPrivateKey(privData []byte) *rsa.PrivateKey {}
-func BytesToPublicKey(pubData []byte) *rsa.PublicKey {}
-func StringToPrivateKey(privData string) *rsa.PrivateKey {}
-func StringToPublicKey(pubData string) *rsa.PublicKey {}
-func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {}
-func PublicKeyToBytes(pub *rsa.PublicKey) []byte {}
-func PrivateKeyToString(priv *rsa.PrivateKey) string {}
-func PublicKeyToString(pub *rsa.PublicKey) string {}
-func EncryptRSA(pub *rsa.PublicKey, data []byte) []byte {}
-func DecryptRSA(priv *rsa.PrivateKey, data []byte) []byte {}
-func Sign(priv *rsa.PrivateKey, data []byte) []byte {}
-func Verify(pub *rsa.PublicKey, data, sign []byte) error {}
-func EncryptAES(key, data []byte) []byte {}
-func DecryptAES(key, data []byte) []byte {}
+func NewPrivKey(bits uint) PrivKey {}
+func LoadPrivKey(pbytes []byte) PrivKey {}
+func (key *PrivKeyRSA) PubKey() PubKey {}
+func (key *PrivKeyRSA) Decrypt(msg []byte) []byte {}
+func (key *PrivKeyRSA) Sign(msg []byte) []byte {}
+func (key *PrivKeyRSA) Bytes() []byte {}
+func (key *PrivKeyRSA) String() string {}
+func (key *PrivKeyRSA) Type() string {}
+
+func LoadPubKey(pbytes []byte) PubKey {}
+func (key *PubKeyRSA) Encrypt(msg []byte) []byte {}
+func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {}
+func (key *PubKeyRSA) Address() Address {}
+func (key *PubKeyRSA) Bytes() []byte {}
+func (key *PubKeyRSA) String() string {}
+func (key *PubKeyRSA) Type() string {}
+
+func NewCipher(key []byte) Cipher {}
+func (cph *CipherAES) Encrypt(msg []byte) []byte {}
+func (cph *CipherAES) Decrypt(msg []byte) []byte {}
+
+func NewPuzzle(diff uint) Puzzle {}
+func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {}
+func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {}
+
 func RaiseEntropy(info, salt []byte, bits int) []byte {}
-func ProofOfWork(packHash []byte, diff uint) uint64 {}
-func ProofIsValid(packHash []byte, diff uint, nonce uint64) bool {}
+
+func HashSum(data []byte) []byte {}
+
+func GenRand(max uint) []byte {}
 ```
 
-### Additional functions
+### Encoding functions
 ```go
-func SerializePackage(pack *Package) []byte {}
-func DeserializePackage(jsonData []byte) *Package {}
 func Base64Encode(data []byte) string {}
 func Base64Decode(data string) []byte {}
+func ToBytes(num uint64) []byte {}
 ```
 
 ### Package structure
 ```go
 {
     Head: {
-        Title:   string,
+        Title:   []byte,
         Rand:    []byte,
         Sender:  []byte,
         Session: []byte,
@@ -179,7 +201,7 @@ func Base64Decode(data string) []byte {}
 ```go
 {
     mutex:       sync.Mutex,
-    privateKey:  *rsa.PrivateKey,
+    privateKey:  crypto.PrivKey,
     functions:   map[string]func(*Client, *Package) []byte,
     mapping:     map[string]bool,
     connections: map[string]net.Conn,
@@ -187,7 +209,7 @@ func Base64Decode(data string) []byte {}
     F2F:         {
         mutex:   sync.Mutex,
         enabled: bool,
-        friends: map[string]*rsa.PublicKey,
+        friends: map[string]crypto.PubKey,
     },
 }
 ```

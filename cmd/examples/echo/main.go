@@ -5,17 +5,21 @@ import (
 	"time"
 
 	gp "github.com/number571/gopeer"
+	cr "github.com/number571/gopeer/crypto"
 )
 
 const (
-	ROUTE_MSG    = "/msg"
 	NODE_ADDRESS = ":8080"
 )
 
+var (
+	ROUTE_MSG = []byte("/msg")
+)
+
 func main() {
-	client1 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
-	client2 := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
-	clinode := gp.NewClient(gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	client1 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	client2 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	clinode := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
 
 	go clinode.RunNode(NODE_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
@@ -25,7 +29,7 @@ func main() {
 
 	res, err := client1.Send(
 		gp.NewPackage(ROUTE_MSG, []byte("hello, world!")),
-		gp.NewRoute(client2.PublicKey()),
+		gp.NewRoute(client2.PubKey()),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -36,7 +40,7 @@ func main() {
 }
 
 func getMessage(client *gp.Client, pack *gp.Package) []byte {
-	hash := gp.HashPublicKey(gp.BytesToPublicKey(pack.Head.Sender))
+	hash := cr.LoadPubKey(pack.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
 	return pack.Body.Data
 }
