@@ -283,8 +283,3 @@ func unpaddingPKCS5(origData []byte) []byte {
 	}
 	return origData[:(length - unpadding)]
 }
-
-// func printJSON(data interface{}) {
-// 	jsonData, _ := json.MarshalIndent(data, "", "\t")
-// 	fmt.Println(string(jsonData))
-// }

@@ -18,7 +18,7 @@ func NewClient(priv *rsa.PrivateKey) *Client {
 	}
 	return &Client{
 		privateKey:  priv,
-		functions:   make(map[string]func(*Client, *Package) []byte),
+		routes:      make(map[string]func(*Client, *Package) []byte),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan []byte),
@@ -38,6 +38,28 @@ func NewPackage(title string, data []byte) *Package {
 			Data: data,
 		},
 	}
+}
+
+// Create route object.
+func NewRoute(receiver *rsa.PublicKey) *Route {
+	if receiver == nil {
+		return nil
+	}
+	return &Route{
+		receiver: receiver,
+	}
+}
+
+// Append pseudo sender to route.
+func (route *Route) Psender(psender *rsa.PrivateKey) *Route {
+	route.psender = psender
+	return route
+}
+
+// Append route-nodes to route.
+func (route *Route) Routes(routes []*rsa.PublicKey) *Route {
+	route.routes = routes
+	return route
 }
 
 // Turn on listener by address.
@@ -68,17 +90,17 @@ func (client *Client) RunNode(address string) error {
 func (client *Client) Handle(title string, handle func(*Client, *Package) []byte) *Client {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	client.functions[title] = handle
+	client.routes[title] = handle
 	return client
 }
 
 // Send package by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) ([]byte, error) {
+func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {
 	var (
 		err      error
 		result   []byte
-		hash     = HashPublicKey(receiver)
+		hash     = HashPublicKey(route.receiver)
 		retryNum = settings.RETRY_NUM
 	)
 
@@ -88,7 +110,7 @@ func (client *Client) Send(receiver *rsa.PublicKey, pack *Package, route []*rsa.
 	}()
 
 repeat:
-	routePack := client.RoutePackage(receiver, pack, route, ppsender)
+	routePack := client.RoutePackage(pack, route)
 	if routePack == nil {
 		return result, errors.New("psender is nil")
 	}
@@ -110,15 +132,15 @@ repeat:
 
 // Function wrap package in multiple route.
 // Need use pseudo sender if route not null.
-func (client *Client) RoutePackage(receiver *rsa.PublicKey, pack *Package, route []*rsa.PublicKey, ppsender *rsa.PrivateKey) *Package {
+func (client *Client) RoutePackage(pack *Package, route *Route) *Package {
 	var (
-		rpack   = client.Encrypt(receiver, pack, settings.POWS_DIFF)
-		psender = NewClient(ppsender)
+		rpack   = client.Encrypt(route.receiver, pack, settings.POWS_DIFF)
+		psender = NewClient(route.psender)
 	)
-	for _, pub := range route {
-		if psender == nil {
-			return nil
-		}
+	if psender == nil {
+		return nil
+	}
+	for _, pub := range route.routes {
 		rpack = psender.Encrypt(
 			pub,
 			NewPackage(settings.ROUTE_MSG, SerializePackage(rpack)),
@@ -476,7 +498,7 @@ func (client *Client) response(pub *rsa.PublicKey, data []byte) {
 func (client *Client) getFunction(name string) func(*Client, *Package) []byte {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	return client.functions[name]
+	return client.routes[name]
 }
 
 func (client *Client) setAction(hash string) {

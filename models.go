@@ -11,7 +11,7 @@ import (
 type Client struct {
 	mutex       sync.Mutex
 	privateKey  *rsa.PrivateKey
-	functions   map[string]func(*Client, *Package) []byte
+	routes      map[string]func(*Client, *Package) []byte
 	mapping     map[string]bool
 	connections map[string]net.Conn
 	actions     map[string]chan []byte
@@ -22,6 +22,13 @@ type friendToFriend struct {
 	mutex   sync.Mutex
 	enabled bool
 	friends map[string]*rsa.PublicKey
+}
+
+// Basic structure for set route to package.
+type Route struct {
+	receiver *rsa.PublicKey
+	psender  *rsa.PrivateKey
+	routes   []*rsa.PublicKey
 }
 
 // Basic structure of transport package.

@@ -42,8 +42,8 @@ func main() {
 	client1.Connect(NODE1_ADDRESS)
 	client2.Connect(NODE3_ADDRESS)
 
-	pseudoSender := gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
-	route := []*rsa.PublicKey{
+	psender := gp.GenerateKey(gp.Get("AKEY_SIZE").(uint))
+	routes := []*rsa.PublicKey{
 		node1.PublicKey(),
 		node2.PublicKey(),
 		node3.PublicKey(),
@@ -51,10 +51,8 @@ func main() {
 
 	for i := 0; i < 10; i++ {
 		res, err := client1.Send(
-			client2.PublicKey(),
 			gp.NewPackage(TITLE_MESSAGE, []byte("hello, world!")),
-			route,
-			pseudoSender,
+			gp.NewRoute(client2.PublicKey()).Psender(psender).Routes(routes),
 		)
 		if err != nil {
 			fmt.Println(err)
