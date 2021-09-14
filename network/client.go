@@ -127,10 +127,14 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 		return nil
 	}
 	diff := uint(rmsg.Head.Diff)
+	pack := rmsg.Serialize()
 	for _, pub := range route.routes {
 		rmsg = psender.Encrypt(
 			pub,
-			NewMessage(gopeer.Get("ROUTE_MSG").([]byte), rmsg.Serialize()).WithDiff(diff),
+			NewMessage(
+				gopeer.Get("ROUTE_MSG").([]byte),
+				pack.Bytes(),
+			).WithDiff(diff),
 		)
 	}
 	return rmsg
@@ -442,10 +446,11 @@ func (client *Client) handleFunc(msg *Message) {
 func (client *Client) send(msg *Message) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
+	pack := msg.Serialize()
 	bytesMsg := bytes.Join(
 		[][]byte{
-			msg.Serialize(),
-			gopeer.Get("END_BYTES").([]byte),
+			pack.Size(),
+			pack.Bytes(),
 		},
 		[]byte{},
 	)
@@ -523,20 +528,40 @@ func (client *Client) delConnection(id string) {
 }
 
 func readMessage(conn net.Conn) *Message {
+	const (
+		UINT64_SIZE = 8 // bytes
+	)
 	var (
 		pack   []byte
 		size   = uint(0)
+		buflen = make([]byte, UINT64_SIZE)
 		buffer = make([]byte, gopeer.Get("BUFF_SIZE").(uint))
 	)
+
+	length, err := conn.Read(buflen)
+	if err != nil {
+		return nil
+	}
+	if length != UINT64_SIZE {
+		return nil
+	}
+
+	mustLen := uint(encoding.BytesToUint64(buflen))
+	if mustLen > gopeer.Get("PACK_SIZE").(uint) {
+		return nil
+	}
+
 	for {
-		length, err := conn.Read(buffer)
+		length, err = conn.Read(buffer)
 		if err != nil {
 			return nil
 		}
+
 		size += uint(length)
-		if size > gopeer.Get("PACK_SIZE").(uint) {
+		if size > mustLen {
 			return nil
 		}
+
 		pack = bytes.Join(
 			[][]byte{
 				pack,
@@ -544,10 +569,11 @@ func readMessage(conn net.Conn) *Message {
 			},
 			[]byte{},
 		)
-		if bytes.Contains(pack, gopeer.Get("END_BYTES").([]byte)) {
-			pack = bytes.Split(pack, gopeer.Get("END_BYTES").([]byte))[0]
+
+		if size == mustLen {
 			break
 		}
 	}
+
 	return Package(pack).Deserialize()
 }

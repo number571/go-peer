@@ -34,7 +34,7 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 		hash = HashSum(bytes.Join(
 			[][]byte{
 				packHash,
-				encoding.ToBytes(nonce),
+				encoding.Uint64ToBytes(nonce),
 			},
 			[]byte{},
 		))
@@ -54,7 +54,7 @@ func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {
 	hash := HashSum(bytes.Join(
 		[][]byte{
 			packHash,
-			encoding.ToBytes(nonce),
+			encoding.Uint64ToBytes(nonce),
 		},
 		[]byte{},
 	))

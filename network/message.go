@@ -2,8 +2,6 @@ package network
 
 import "encoding/json"
 
-type Package []byte
-
 // Basic structure of transport package.
 type Message struct {
 	Head HeadMessage `json:"head"`
@@ -50,14 +48,4 @@ func (msg *Message) Serialize() Package {
 		return nil
 	}
 	return jsonData
-}
-
-// Deserialize with JSON format.
-func (pack Package) Deserialize() *Message {
-	var msg = new(Message)
-	err := json.Unmarshal(pack, msg)
-	if err != nil {
-		return nil
-	}
-	return msg
 }
