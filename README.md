@@ -1,6 +1,6 @@
 # gopeer
 
-> Framework for create secure decentralized applications. Version: 1.3;
+> Framework for create secure decentralized applications. Version: 1.3
 
 ## Research Article
 * The theory of the structure of hidden systems: [hiddensystems.pdf](https://github.com/Number571/gopeer/blob/master/hiddensystems.pdf "TSHS");
@@ -16,6 +16,7 @@ If we assume that there are only three nodes `{A, B, C}` in the network (where o
 Thus, the problem of the sixth stage of anonymity is formed by the difficulty of finding the true subjects of information with three or more users not related to each other by common goals and interests. This is possible when using blind routing in conjunction with probabilistic packet polymorphism, where blind routing ensures packet diffusion, propagates it and makes each node in the network a potential recipient, and probabilistic polymorphism provides packet confusion, leads to a blurring of the role of information subjects, blurs the line between sending and receiving. Based on the above criteria, virtual routing is already formed, which hides and breaks the connection between the object and its subjects, leading to the emergence of the sixth stage of anonymity. 
 
 ## Template
+> Creating a node with a port setting to accept data and a listening function 
 ```go
 package main
 
@@ -48,3 +49,11 @@ func msgRoute(client *nt.Client, msg *nt.Message) []byte {
 	return msg.Body.Data
 }
 ```
+
+## Need to do
+> Pages from “The theory of the structure of hidden systems” 
+
+At the moment, the framework is able to recreate the fourth stage of anonymity, but is not suitable for the sixth. This is due to the three pitfalls of the sixth stage of anonymity that need to be corrected. The list is as follows:
+1. Request time. You need to implement a simulation of packet generation time, either on a request-based or routing-response basis [page 10].
+2. The period of states. This problem should be solved dynamically by the user and based on the framework it is quite possible to fix the vulnerability [page 10].
+3. Package size. It is necessary to adjust all packets to the constant value when sending [pages 11,12]. 
