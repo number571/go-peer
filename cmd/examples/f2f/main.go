@@ -6,6 +6,7 @@ import (
 
 	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
+	nt "github.com/number571/gopeer/network"
 )
 
 const (
@@ -17,9 +18,9 @@ var (
 )
 
 func main() {
-	client1 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
-	client2 := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
-	clinode := gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	client1 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	client2 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	clinode := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
 
 	fmt.Println(client1.F2F.State(), client2.F2F.State())
 
@@ -44,8 +45,8 @@ func main() {
 
 	diff := gp.Get("POWS_DIFF").(uint)
 	res, err := client1.Send(
-		gp.NewPackage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
-		gp.NewRoute(client2.PubKey()),
+		nt.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
+		nt.NewRoute(client2.PubKey()),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -55,8 +56,8 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func getMessage(client *gp.Client, pack *gp.Package) []byte {
-	hash := cr.LoadPubKey(pack.Head.Sender).Address()
-	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
-	return pack.Body.Data
+func getMessage(client *nt.Client, msg *nt.Message) []byte {
+	hash := cr.LoadPubKey(msg.Head.Sender).Address()
+	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
+	return msg.Body.Data
 }

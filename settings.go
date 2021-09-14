@@ -24,19 +24,19 @@ var settings = defaultSettings()
 // b - bit
 func defaultSettings() settingsStruct {
 	return settingsStruct{
-		END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
-		RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
-		ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
-		RETRY_NUM: 3,       // quantity
-		WAIT_TIME: 20,      // seconds
-		POWS_DIFF: 20,      // bits
-		CONN_SIZE: 10,      // quantity
-		PACK_SIZE: 8 << 20, // 8*(2^20)B = 8MiB
-		BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
-		MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
-		AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
-		SKEY_SIZE: 1 << 5,  // 2^5B = 32B
-		RAND_SIZE: 1 << 4,  // 2^4B = 16B
+		END_BYTES: []byte("\000\005\007\001\001\007\005\000"), // End bytes of package
+		RET_BYTES: []byte("\000\001\007\005\005\007\001\000"), // Request/Response bytes of package
+		ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"), // Include package in another package
+		RETRY_NUM: 3,                                          // quantity
+		WAIT_TIME: 20,                                         // seconds
+		POWS_DIFF: 20,                                         // bits
+		CONN_SIZE: 10,                                         // quantity
+		PACK_SIZE: 8 << 20,                                    // 8*(2^20)B = 8MiB
+		BUFF_SIZE: 2 << 20,                                    // 2*(2^20)B = 2MiB
+		MAPP_SIZE: 2 << 10,                                    // 2*(2^10)H = 88KiB
+		AKEY_SIZE: 2 << 10,                                    // 2*(2^10)b = 256B
+		SKEY_SIZE: 1 << 5,                                     // 2^5B = 32B
+		RAND_SIZE: 1 << 4,                                     // 2^4B = 16B
 	}
 }
 

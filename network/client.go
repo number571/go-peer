@@ -1,15 +1,34 @@
-package gopeer
+package network
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net"
+	"sync"
 	"time"
 
+	"github.com/number571/gopeer"
 	"github.com/number571/gopeer/crypto"
 	"github.com/number571/gopeer/encoding"
 )
+
+// Basic structure describing the user.
+// Stores the private key and list of friends.
+type Client struct {
+	mutex       sync.Mutex
+	privateKey  crypto.PrivKey
+	hroutes     map[string]func(*Client, *Message) []byte
+	mapping     map[string]bool
+	connections map[string]net.Conn
+	actions     map[string]chan []byte
+	F2F         *friendToFriend
+}
+
+type friendToFriend struct {
+	mutex   sync.Mutex
+	enabled bool
+	friends map[string]crypto.PubKey
+}
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
@@ -19,7 +38,7 @@ func NewClient(priv crypto.PrivKey) *Client {
 	}
 	return &Client{
 		privateKey:  priv,
-		hroutes:     make(map[string]func(*Client, *Package) []byte),
+		hroutes:     make(map[string]func(*Client, *Message) []byte),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan []byte),
@@ -27,45 +46,6 @@ func NewClient(priv crypto.PrivKey) *Client {
 			friends: make(map[string]crypto.PubKey),
 		},
 	}
-}
-
-// Create package: Head.Title = title, Body.Data = data.
-func NewPackage(title, data []byte) *Package {
-	return &Package{
-		Head: HeadPackage{
-			Title: []byte(title),
-		},
-		Body: BodyPackage{
-			Data: data,
-		},
-	}
-}
-
-func (pack *Package) WithDiff(diff uint) *Package {
-	pack.Head.Diff = uint8(diff)
-	return pack
-}
-
-// Create route object with receiver.
-func NewRoute(receiver crypto.PubKey) *Route {
-	if receiver == nil {
-		return nil
-	}
-	return &Route{
-		receiver: receiver,
-	}
-}
-
-// Append pseudo sender to route.
-func (route *Route) WithSender(psender crypto.PrivKey) *Route {
-	route.psender = psender
-	return route
-}
-
-// Append route-nodes to route.
-func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {
-	route.routes = routes
-	return route
 }
 
 // Turn on listener by address.
@@ -85,7 +65,7 @@ func (client *Client) RunNode(address string) error {
 			conn.Close()
 			continue
 		}
-		id := encoding.Base64Encode(crypto.GenRand(settings.RAND_SIZE))
+		id := encoding.Base64Encode(crypto.GenRand(gopeer.Get("RAND_SIZE").(uint)))
 		client.setConnection(id, conn)
 		go client.handleConn(id)
 	}
@@ -93,21 +73,21 @@ func (client *Client) RunNode(address string) error {
 }
 
 // Add function to mapping for route use.
-func (client *Client) Handle(title []byte, handle func(*Client, *Package) []byte) *Client {
+func (client *Client) Handle(title []byte, handle func(*Client, *Message) []byte) *Client {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
 	client.hroutes[encoding.Base64Encode(title)] = handle
 	return client
 }
 
-// Send package by public key of receiver.
+// Send message by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {
+func (client *Client) Send(msg *Message, route *Route) ([]byte, error) {
 	var (
 		err      error
 		result   []byte
 		hash     = string(route.receiver.Address())
-		retryNum = settings.RETRY_NUM
+		retryNum = gopeer.Get("RETRY_NUM").(uint)
 	)
 
 	client.setAction(hash)
@@ -115,20 +95,20 @@ func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {
 		client.delAction(hash)
 	}()
 
-repeat:
-	routePack := client.RoutePackage(pack, route)
-	if routePack == nil {
+REPEAT:
+	routeMsg := client.RouteMessage(msg, route)
+	if routeMsg == nil {
 		return result, errors.New("psender is nil")
 	}
 
-	client.send(routePack)
+	client.send(routeMsg)
 
 	select {
 	case result = <-client.actions[hash]:
-	case <-time.After(time.Duration(settings.WAIT_TIME) * time.Second):
+	case <-time.After(time.Duration(gopeer.Get("WAIT_TIME").(uint)) * time.Second):
 		if retryNum > 1 {
 			retryNum -= 1
-			goto repeat
+			goto REPEAT
 		}
 		err = errors.New("time is over")
 	}
@@ -136,24 +116,24 @@ repeat:
 	return result, err
 }
 
-// Function wrap package in multiple route.
+// Function wrap message in multiple route.
 // Need use pseudo sender if route not null.
-func (client *Client) RoutePackage(pack *Package, route *Route) *Package {
+func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 	var (
-		rpack   = client.Encrypt(route.receiver, pack)
+		rmsg    = client.Encrypt(route.receiver, msg)
 		psender = NewClient(route.psender)
 	)
 	if len(route.routes) != 0 && psender == nil {
 		return nil
 	}
-	diff := uint(rpack.Head.Diff)
+	diff := uint(rmsg.Head.Diff)
 	for _, pub := range route.routes {
-		rpack = psender.Encrypt(
+		rmsg = psender.Encrypt(
 			pub,
-			NewPackage(settings.ROUTE_MSG, serializePackage(rpack)).WithDiff(diff),
+			NewMessage(gopeer.Get("ROUTE_MSG").([]byte), rmsg.Serialize()).WithDiff(diff),
 		)
 	}
-	return rpack
+	return rmsg
 }
 
 // Get list of connection addresses.
@@ -216,59 +196,59 @@ func (client *Client) PrivKey() crypto.PrivKey {
 	return client.privateKey
 }
 
-// Encrypt package with public key of receiver.
-// The package can be decrypted only if private key is known.
-func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package) *Package {
+// Encrypt message with public key of receiver.
+// The message can be decrypted only if private key is known.
+func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 	var (
-		rand = crypto.GenRand(uint(settings.RAND_SIZE))
+		rand = crypto.GenRand(gopeer.Get("RAND_SIZE").(uint))
 		hash = crypto.HashSum(bytes.Join(
 			[][]byte{
 				rand,
 				client.PubKey().Bytes(),
 				receiver.Bytes(),
-				[]byte(pack.Head.Title),
-				pack.Body.Data,
+				[]byte(msg.Head.Title),
+				msg.Body.Data,
 			},
 			[]byte{},
 		))
-		session = crypto.GenRand(uint(settings.SKEY_SIZE))
+		session = crypto.GenRand(gopeer.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
-	return &Package{
-		Head: HeadPackage{
+	return &Message{
+		Head: HeadMessage{
 			Rand:    cipher.Encrypt(rand),
-			Diff:    pack.Head.Diff,
-			Title:   cipher.Encrypt(pack.Head.Title),
+			Diff:    msg.Head.Diff,
+			Title:   cipher.Encrypt(msg.Head.Title),
 			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
 			Session: receiver.Encrypt(session),
 		},
-		Body: BodyPackage{
-			Data: cipher.Encrypt(pack.Body.Data),
+		Body: BodyMessage{
+			Data: cipher.Encrypt(msg.Body.Data),
 			Hash: hash,
 			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(pack.Head.Diff).Proof(hash),
+			Npow: crypto.NewPuzzle(msg.Head.Diff).Proof(hash),
 		},
 	}
 }
 
-// Decrypt package with private key of receiver.
-// No one else except the sender will be able to decrypt the package.
-func (client *Client) Decrypt(pack *Package) *Package {
-	hash := pack.Body.Hash
+// Decrypt message with private key of receiver.
+// No one else except the sender will be able to decrypt the message.
+func (client *Client) Decrypt(msg *Message) *Message {
+	hash := msg.Body.Hash
 	if hash == nil {
 		return nil
 	}
-	if !crypto.NewPuzzle(pack.Head.Diff).Verify(hash, pack.Body.Npow) {
+	if !crypto.NewPuzzle(msg.Head.Diff).Verify(hash, msg.Body.Npow) {
 		return nil
 	}
 
-	session := client.PrivKey().Decrypt(pack.Head.Session)
+	session := client.PrivKey().Decrypt(msg.Head.Session)
 	if session == nil {
 		return nil
 	}
 
 	cipher := crypto.NewCipher(session)
-	publicBytes := cipher.Decrypt(pack.Head.Sender)
+	publicBytes := cipher.Decrypt(msg.Head.Sender)
 	if publicBytes == nil {
 		return nil
 	}
@@ -277,11 +257,11 @@ func (client *Client) Decrypt(pack *Package) *Package {
 	if public == nil {
 		return nil
 	}
-	if public.Size() != settings.AKEY_SIZE {
+	if public.Size() != gopeer.Get("AKEY_SIZE").(uint) {
 		return nil
 	}
 
-	sign := cipher.Decrypt(pack.Body.Sign)
+	sign := cipher.Decrypt(msg.Body.Sign)
 	if sign == nil {
 		return nil
 	}
@@ -289,17 +269,17 @@ func (client *Client) Decrypt(pack *Package) *Package {
 		return nil
 	}
 
-	titleBytes := cipher.Decrypt(pack.Head.Title)
+	titleBytes := cipher.Decrypt(msg.Head.Title)
 	if titleBytes == nil {
 		return nil
 	}
 
-	dataBytes := cipher.Decrypt(pack.Body.Data)
+	dataBytes := cipher.Decrypt(msg.Body.Data)
 	if dataBytes == nil {
 		return nil
 	}
 
-	rand := cipher.Decrypt(pack.Head.Rand)
+	rand := cipher.Decrypt(msg.Head.Rand)
 	if rand == nil {
 		return nil
 	}
@@ -318,19 +298,19 @@ func (client *Client) Decrypt(pack *Package) *Package {
 		return nil
 	}
 
-	return &Package{
-		Head: HeadPackage{
+	return &Message{
+		Head: HeadMessage{
 			Title:   titleBytes,
-			Diff:    pack.Head.Diff,
+			Diff:    msg.Head.Diff,
 			Rand:    rand,
 			Sender:  publicBytes,
 			Session: session,
 		},
-		Body: BodyPackage{
+		Body: BodyMessage{
 			Data: dataBytes,
 			Hash: hash,
 			Sign: sign,
-			Npow: pack.Body.Npow,
+			Npow: msg.Body.Npow,
 		},
 	}
 }
@@ -395,113 +375,83 @@ func (client *Client) handleConn(id string) {
 	}()
 
 	for {
-		pack := readPackage(conn)
+		msg := readMessage(conn)
 
-	repeat:
-		if pack == nil {
+	REPEAT:
+		if msg == nil {
 			continue
 		}
 
 		// size(sha256) = 32bytes
-		if len(pack.Body.Hash) != 32 {
+		if len(msg.Body.Hash) != 32 {
 			continue
 		}
 
-		if client.inMapping(pack.Body.Hash) {
+		if client.inMapping(msg.Body.Hash) {
 			continue
 		}
-		client.setMapping(pack.Body.Hash)
+		client.setMapping(msg.Body.Hash)
 
-		puzzle := crypto.NewPuzzle(uint8(settings.POWS_DIFF))
-		if !puzzle.Verify(pack.Body.Hash, pack.Body.Npow) {
+		puzzle := crypto.NewPuzzle(uint8(gopeer.Get("POWS_DIFF").(uint)))
+		if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
 			continue
 		}
-		client.send(pack)
+		client.send(msg)
 
-		decPack := client.Decrypt(pack)
-		if decPack == nil {
+		decMsg := client.Decrypt(msg)
+		if decMsg == nil {
 			continue
 		}
 
-		sender := crypto.LoadPubKey(decPack.Head.Sender)
+		sender := crypto.LoadPubKey(decMsg.Head.Sender)
 		if client.F2F.State() && !client.F2F.InList(sender) {
 			continue
 		}
 
-		if bytes.Equal(decPack.Head.Title, settings.ROUTE_MSG) {
-			pack = deserializePackage(decPack.Body.Data)
-			goto repeat
+		if bytes.Equal(decMsg.Head.Title, gopeer.Get("ROUTE_MSG").([]byte)) {
+			msg = Package(decMsg.Body.Data).Deserialize()
+			goto REPEAT
 		}
 
-		handleFunc(client, decPack)
+		client.handleFunc(decMsg)
 	}
 }
 
-func handleFunc(client *Client, pack *Package) {
-	fname := pack.Head.Title
-	if bytes.HasPrefix(fname, settings.RET_BYTES) {
+func (client *Client) handleFunc(msg *Message) {
+	fname := msg.Head.Title
+	if bytes.HasPrefix(fname, gopeer.Get("RET_BYTES").([]byte)) {
 		client.response(
-			crypto.LoadPubKey(pack.Head.Sender),
-			pack.Body.Data,
+			crypto.LoadPubKey(msg.Head.Sender),
+			msg.Body.Data,
 		)
 		return
 	}
-	diff := uint(pack.Head.Diff)
+	diff := uint(msg.Head.Diff)
 	client.send(client.Encrypt(
-		crypto.LoadPubKey(pack.Head.Sender),
-		NewPackage(
+		crypto.LoadPubKey(msg.Head.Sender),
+		NewMessage(
 			bytes.Join([][]byte{
-				settings.RET_BYTES,
+				gopeer.Get("RET_BYTES").([]byte),
 				fname,
 			}, []byte{}),
-			client.getFunction(fname)(client, pack),
+			client.getFunction(fname)(client, msg),
 		).WithDiff(diff),
 	))
 }
 
-func readPackage(conn net.Conn) *Package {
-	var (
-		message []byte
-		size    = uint(0)
-		buffer  = make([]byte, settings.BUFF_SIZE)
-	)
-	for {
-		length, err := conn.Read(buffer)
-		if err != nil {
-			return nil
-		}
-		size += uint(length)
-		if size > settings.PACK_SIZE {
-			return nil
-		}
-		message = bytes.Join(
-			[][]byte{
-				message,
-				buffer[:length],
-			},
-			[]byte{},
-		)
-		if bytes.Contains(message, []byte(settings.END_BYTES)) {
-			message = bytes.Split(message, []byte(settings.END_BYTES))[0]
-			break
-		}
-	}
-	return deserializePackage(message)
-}
-
-func (client *Client) send(pack *Package) {
+func (client *Client) send(msg *Message) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	bytesPack := bytes.Join(
+	bytesMsg := bytes.Join(
 		[][]byte{
-			[]byte(serializePackage(pack)),
-			[]byte(settings.END_BYTES),
+			msg.Serialize(),
+			gopeer.Get("END_BYTES").([]byte),
 		},
 		[]byte{},
 	)
-	client.mapping[encoding.Base64Encode(pack.Body.Hash)] = true
+	client.mapping[encoding.Base64Encode(msg.Body.Hash)] = true
 	for _, cn := range client.connections {
-		go cn.Write(bytesPack)
+		go cn.Write(bytesMsg)
 	}
 }
 
@@ -514,7 +464,7 @@ func (client *Client) response(pub crypto.PubKey, data []byte) {
 	}
 }
 
-func (client *Client) getFunction(name []byte) func(*Client, *Package) []byte {
+func (client *Client) getFunction(name []byte) func(*Client, *Message) []byte {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
 	return client.hroutes[encoding.Base64Encode(name)]
@@ -535,7 +485,7 @@ func (client *Client) delAction(hash string) {
 func (client *Client) setMapping(hash []byte) {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	if uint(len(client.mapping)) > settings.MAPP_SIZE {
+	if uint(len(client.mapping)) > gopeer.Get("MAPP_SIZE").(uint) {
 		client.mapping = make(map[string]bool)
 	}
 	client.mapping[encoding.Base64Encode(hash)] = true
@@ -551,7 +501,7 @@ func (client *Client) inMapping(hash []byte) bool {
 func (client *Client) isMaxConnSize() bool {
 	client.mutex.Lock()
 	defer client.mutex.Unlock()
-	return uint(len(client.connections)) > settings.CONN_SIZE
+	return uint(len(client.connections)) > gopeer.Get("CONN_SIZE").(uint)
 }
 
 func (client *Client) setConnection(id string, conn net.Conn) {
@@ -572,21 +522,32 @@ func (client *Client) delConnection(id string) {
 	delete(client.connections, id)
 }
 
-// Serialize with JSON format.
-func serializePackage(pack *Package) []byte {
-	jsonData, err := json.MarshalIndent(pack, "", "\t")
-	if err != nil {
-		return nil
+func readMessage(conn net.Conn) *Message {
+	var (
+		pack   []byte
+		size   = uint(0)
+		buffer = make([]byte, gopeer.Get("BUFF_SIZE").(uint))
+	)
+	for {
+		length, err := conn.Read(buffer)
+		if err != nil {
+			return nil
+		}
+		size += uint(length)
+		if size > gopeer.Get("PACK_SIZE").(uint) {
+			return nil
+		}
+		pack = bytes.Join(
+			[][]byte{
+				pack,
+				buffer[:length],
+			},
+			[]byte{},
+		)
+		if bytes.Contains(pack, gopeer.Get("END_BYTES").([]byte)) {
+			pack = bytes.Split(pack, gopeer.Get("END_BYTES").([]byte))[0]
+			break
+		}
 	}
-	return jsonData
-}
-
-// Deserialize with JSON format.
-func deserializePackage(jsonData []byte) *Package {
-	var pack = new(Package)
-	err := json.Unmarshal(jsonData, pack)
-	if err != nil {
-		return nil
-	}
-	return pack
+	return Package(pack).Deserialize()
 }
