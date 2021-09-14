@@ -26,6 +26,7 @@ import (
 
 	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
+	nt "github.com/number571/gopeer/network"
 )
 
 func init() {
@@ -37,16 +38,16 @@ func init() {
 
 func main() {
 	fmt.Println("Node is listening...")
-	gp.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).
+	nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).
 		Handle([]byte("/msg"), msgRoute).
 		RunNode(":8080")
 	// ...
 }
 
-func msgRoute(client *gp.Client, pack *gp.Package) []byte {
-	hash := cr.LoadPubKey(pack.Head.Sender).Address()
-	fmt.Printf("[%s] => '%s'\n", hash, pack.Body.Data)
-	return pack.Body.Data
+func msgRoute(client *nt.Client, msg *nt.Message) []byte {
+	hash := cr.LoadPubKey(msg.Head.Sender).Address()
+	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
+	return msg.Body.Data
 }
 ```
 
@@ -109,18 +110,18 @@ gopeer.Set(gopeer.SettingsType{
 func NewClient(priv crypto.PrivKey) *Client {}
 
 func (client *Client) RunNode(address string) error {}
-func (client *Client) Handle(title []byte, handle func(*Client, *Package) []byte) *Client {}
+func (client *Client) Handle(title []byte, handle func(*Client, *Message) []byte) *Client {}
 
-func (client *Client) Send(pack *Package, route *Route) ([]byte, error) {}
-func (client *Client) RoutePackage(pack *Package, route *Route) *Package {}
+func (client *Client) Send(pack *Message, route *Route) ([]byte, error) {}
+func (client *Client) RouteMessage(pack *Message, route *Route) *Message {}
 
 func (client *Client) Connections() []string {}
 func (client *Client) InConnections(address string) bool {}
 func (client *Client) Connect(address ...string) []error {}
 func (client *Client) Disconnect(address ...string) {}
 
-func (client *Client) Encrypt(receiver crypto.PubKey, pack *Package) *Package {}
-func (client *Client) Decrypt(pack *Package) *Package {}
+func (client *Client) Encrypt(receiver crypto.PubKey, pack *Message) *Message {}
+func (client *Client) Decrypt(pack *Message) *Message {}
 func (client *Client) PubKey() crypto.PubKey {}
 func (client *Client) PrivKey() crypto.PrivKey {}
 
@@ -135,8 +136,8 @@ func NewRoute(receiver crypto.PubKey) *Route {}
 func (route *Route) WithSender(psender crypto.PrivKey) *Route {}
 func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {}
 
-func NewPackage(title, data []byte) *Package {}
-func (pack *Package) WithDiff(diff uint) *Package {}
+func NewMessage(title, data []byte) *Message {}
+func (pack *Message) WithDiff(diff uint) *Message {}
 ```
 
 ### Cryptographic functions and methods
@@ -180,7 +181,7 @@ func Base64Decode(data string) []byte {}
 func ToBytes(num uint64) []byte {}
 ```
 
-### Package structure
+### Message structure
 ```go
 {
 	Head: {
@@ -203,7 +204,7 @@ func ToBytes(num uint64) []byte {}
 {
 	mutex:       sync.Mutex,
 	privateKey:  crypto.PrivKey,
-	functions:   map[string]func(*Client, *Package) []byte,
+	functions:   map[string]func(*Client, *Message) []byte,
 	mapping:     map[string]bool,
 	connections: map[string]net.Conn,
 	actions:     map[string]chan []byte,
