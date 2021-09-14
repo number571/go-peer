@@ -14,35 +14,54 @@ const (
 )
 
 var (
+	DIFF_PACK = gp.Get("POWS_DIFF").(uint)
 	ROUTE_MSG = []byte("/msg")
 )
 
 func main() {
-	client1 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
-	client2 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
-	clinode := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).Handle(ROUTE_MSG, getMessage)
+	client := newClient()
+	node := newClient()
 
-	go clinode.RunNode(NODE_ADDRESS)
+	// Run node.
+	go node.RunNode(NODE_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
 
-	client1.Connect(NODE_ADDRESS)
-	client2.Connect(NODE_ADDRESS)
+	// Connect to node.
+	client.Connect(NODE_ADDRESS)
 
-	diff := gp.Get("POWS_DIFF").(uint)
-	res, err := client1.Send(
-		nt.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
-		nt.NewRoute(client2.PubKey()),
-	)
+	// Create message and route.
+	msg := nt.NewMessage(
+		ROUTE_MSG,
+		[]byte("hello, world!"),
+	).WithDiff(DIFF_PACK)
+	route := nt.NewRoute(node.PubKey())
+
+	// Send request 'hello, world!' to node.
+	res, err := client.Send(msg, route)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	// Print response.
 	fmt.Println(string(res))
 }
 
+func newClient() *nt.Client {
+	// Generate private key.
+	priv := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
+	client := nt.NewClient(priv)
+
+	// Set local route to function.
+	client.Handle(ROUTE_MSG, getMessage)
+	return client
+}
+
 func getMessage(client *nt.Client, msg *nt.Message) []byte {
+	// Receive message.
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
+
+	// Response.
 	return msg.Body.Data
 }

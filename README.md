@@ -1,21 +1,12 @@
 # gopeer
 > Framework for create secure decentralized applications. Version: 1.3;
 
-### Framework based applications
-* Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
-* Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
-
 ### Research Article
 * The theory of the structure of hidden systems: [hiddensystems.pdf](https://github.com/Number571/gopeer/blob/master/hiddensystems.pdf "TSHS");
 
-### Specifications
-* Type: Embedded;
-* Protocol: TCP;
-* Routing: Fill;
-* Encryption: E2E;
-* Symmetric algorithm: AES-CBC;
-* Asymmetric algorithm: RSA-OAEP, RSA-PSS;
-* Hash function: SHA256;
+### Framework based applications
+* Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
+* Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
 
 ### Template
 ```go
@@ -51,167 +42,9 @@ func msgRoute(client *nt.Client, msg *nt.Message) []byte {
 }
 ```
 
-### Settings
-```go
-type SettingsType map[string]interface{}
-type settingsStruct struct {
-	END_BYTES []byte
-	RET_BYTES []byte
-	ROUTE_MSG []byte
-	RETRY_NUM uint
-	WAIT_TIME uint
-	POWS_DIFF uint
-	CONN_SIZE uint
-	PACK_SIZE uint
-	BUFF_SIZE uint
-	MAPP_SIZE uint
-	AKEY_SIZE uint
-	SKEY_SIZE uint
-	RAND_SIZE uint
-}
-```
+### Description
+===========
+> Part from "The theory of the structure of hidden systems" (Translated) [page 8]
 
-### Default settings
-```go
-{
-	END_BYTES: []byte("\000\005\007\001\001\007\005\000"),
-	RET_BYTES: []byte("\000\001\007\005\005\007\001\000"),
-	ROUTE_MSG: []byte("\000\001\002\003\004\005\006\007"),
-	RETRY_NUM: 3,       // quantity
-	WAIT_TIME: 20,      // seconds
-	POWS_DIFF: 20,      // bits
-	CONN_SIZE: 10,      // quantity
-	PACK_SIZE: 8 << 20, // 8*(2^20)B = 8MiB
-	BUFF_SIZE: 2 << 20, // 2*(2^20)B = 2MiB
-	MAPP_SIZE: 2 << 10, // 2*(2^10)H = 88KiB
-	AKEY_SIZE: 2 << 10, // 2*(2^10)b = 256B
-	SKEY_SIZE: 1 << 5,  // 2^5B = 32B
-	RAND_SIZE: 1 << 4,  // 2^4B = 16B
-}
-```
-
-### Settings functions
-```go
-func Set(settings SettingsType) []uint8 {}
-func Get(key string) interface{} {}
-```
-
-### Get/Set settings example
-```go
-var AKEY_SIZE = gopeer.Get("AKEY_SIZE").(uint)
-gopeer.Set(gopeer.SettingsType{
-	"AKEY_SIZE": uint(1 << 10),
-	"SKEY_SIZE": uint(1 << 4),
-})
-```
-
-### Network functions and methods
-```go
-func NewClient(priv crypto.PrivKey) *Client {}
-
-func (client *Client) RunNode(address string) error {}
-func (client *Client) Handle(title []byte, handle func(*Client, *Message) []byte) *Client {}
-
-func (client *Client) Send(pack *Message, route *Route) ([]byte, error) {}
-func (client *Client) RouteMessage(pack *Message, route *Route) *Message {}
-
-func (client *Client) Connections() []string {}
-func (client *Client) InConnections(address string) bool {}
-func (client *Client) Connect(address ...string) []error {}
-func (client *Client) Disconnect(address ...string) {}
-
-func (client *Client) Encrypt(receiver crypto.PubKey, pack *Message) *Message {}
-func (client *Client) Decrypt(pack *Message) *Message {}
-func (client *Client) PubKey() crypto.PubKey {}
-func (client *Client) PrivKey() crypto.PrivKey {}
-
-func (f2f *friendToFriend) State() bool {}
-func (f2f *friendToFriend) Switch() {}
-func (f2f *friendToFriend) List() []*rsa.PublicKey {}
-func (f2f *friendToFriend) InList(pub crypto.PubKey) bool {}
-func (f2f *friendToFriend) Append(pubs ...crypto.PubKey) {}
-func (f2f *friendToFriend) Remove(pubs ...crypto.PubKey) {}
-
-func NewRoute(receiver crypto.PubKey) *Route {}
-func (route *Route) WithSender(psender crypto.PrivKey) *Route {}
-func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {}
-
-func NewMessage(title, data []byte) *Message {}
-func (pack *Message) WithDiff(diff uint) *Message {}
-```
-
-### Cryptographic functions and methods
-```go
-func NewPrivKey(bits uint) PrivKey {}
-func LoadPrivKey(pbytes []byte) PrivKey {}
-func (key *PrivKeyRSA) PubKey() PubKey {}
-func (key *PrivKeyRSA) Decrypt(msg []byte) []byte {}
-func (key *PrivKeyRSA) Sign(msg []byte) []byte {}
-func (key *PrivKeyRSA) Bytes() []byte {}
-func (key *PrivKeyRSA) String() string {}
-func (key *PrivKeyRSA) Type() string {}
-
-func LoadPubKey(pbytes []byte) PubKey {}
-func (key *PubKeyRSA) Encrypt(msg []byte) []byte {}
-func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {}
-func (key *PubKeyRSA) Address() Address {}
-func (key *PubKeyRSA) Bytes() []byte {}
-func (key *PubKeyRSA) String() string {}
-func (key *PubKeyRSA) Type() string {}
-
-func NewCipher(key []byte) Cipher {}
-func (cph *CipherAES) Encrypt(msg []byte) []byte {}
-func (cph *CipherAES) Decrypt(msg []byte) []byte {}
-
-func NewPuzzle(diff uint) Puzzle {}
-func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {}
-func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {}
-
-func RaiseEntropy(info, salt []byte, bits int) []byte {}
-
-func HashSum(data []byte) []byte {}
-
-func GenRand(max uint) []byte {}
-```
-
-### Encoding functions
-```go
-func Base64Encode(data []byte) string {}
-func Base64Decode(data string) []byte {}
-func ToBytes(num uint64) []byte {}
-```
-
-### Message structure
-```go
-{
-	Head: {
-		Title:   []byte,
-		Rand:    []byte,
-		Sender:  []byte,
-		Session: []byte,
-	},
-	Body: {
-		Data: []byte,
-		Hash: []byte,
-		Sign: []byte,
-		Npow: uint64,
-	},
-}
-```
-
-### Client structure
-```go
-{
-	mutex:       sync.Mutex,
-	privateKey:  crypto.PrivKey,
-	functions:   map[string]func(*Client, *Message) []byte,
-	mapping:     map[string]bool,
-	connections: map[string]net.Conn,
-	actions:     map[string]chan []byte,
-	F2F:         {
-		mutex:   sync.Mutex,
-		enabled: bool,
-		friends: map[string]crypto.PubKey,
-	},
-}
-```
+If we assume that there are only three nodes `{A, B, C}` in the network (where one of them is the sender - A) and the network itself is based on the sixth stage of anonymity without information polymorphism, then in this case and under this condition it is extremely problematic to determine the true recipient, until he gives himself out as a response to the request (since the response will be a completely new packet, different from all the others). Now, if we assume that there is a possibility of information polymorphism, that is, the probability of its routing, then the stage of merging the properties of receiving and sending begins, forming an anticipation. So, for example, if polymorphism exists, then there will be three stages: `(A → B OR A → C) → (B → C OR C → B) → (B → A OR C → A)`, but if polymorphism does not exist, then there will be two stages: `(A → B OR A → C) → (B → A OR C → A)`. It is assumed that the system only knows the sender of the information (initiator), while the recipient is not defined. It follows that if polymorphism is a static value (that is, it will always exist or not exist at all), then determining the recipient will be an easy task (provided that it always responds to the initiator). But, if polymorphism has a probabilistic value, then the line between sending and receiving will be erased, merged, inverted, which will lead to different interpretations of the analyzed actions: `request(1) - response(1) - request(2)` or `request(1) - routing(1) - response(1)`. But in this case, the property of hyperthelia (over the end) arises, where request(2) does not receive its answer(2), which again leads to the possibility of deterministic determination of subjects. Now, if we align the number of polymorphism actions (the number of packet routing) k and the number of actions without it n (which is always a constant `n = 2`), in other words, adhere to the formula `GCD (k, 2) = 2` (where GCD is the greatest common divisor) , then we get the maximum uncertainty, aleatoryness at a constant k = 2, which can be reduced to the following minimum set of polymorphism actions: `(A → B OR A → C) → (B → C OR C → B) → (B → C OR C → B) → (B → A OR C → A)`. As a result, all actions can be interpreted as two completely self-sufficient processes: `request(1) - response(1) - request(2) - response(2)` or `request(1) - routing(1) - routing(~ 1) - response( 1)`, which in turn leads to the uncertainty of sending and receiving information from the analysis of the traffic of the entire network. And therefore, `response(1) = routing(1), response(2) = response(1), and request(2) = routing(~ 1)`. The problem, in this case, is only the request(1), created by the initiator of the connection, which will always be interpreted deterministically. But here it is worth noting that with subsequent actions, this problem will always fade away due to the increasing entropy, leading to chaotic actions. So, for example, at the next step, there will be an ambiguity of the form request(3) = request(2), which means the ambiguity of identifying the sender. 
+Thus, the problem of the sixth stage of anonymity is formed by the difficulty of finding the true subjects of information with three or more users not related to each other by common goals and interests. This is possible when using blind routing in conjunction with probabilistic packet polymorphism, where blind routing ensures packet diffusion, propagates it and makes each node in the network a potential recipient, and probabilistic polymorphism provides packet confusion, leads to a blurring of the role of information subjects, blurs the line between sending and receiving. Based on the above criteria, virtual routing is already formed, which hides and breaks the connection between the object and its subjects, leading to the emergence of the sixth stage of anonymity. 
