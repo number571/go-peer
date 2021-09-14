@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
+	"fmt"
 
 	"github.com/number571/gopeer/encoding"
 )
@@ -16,7 +17,7 @@ var (
 )
 
 const (
-	KeyType       = "gopeer/rsa"
+	KeyType       = "gopeer\\rsa"
 	TruncatedSize = 20
 )
 
@@ -51,7 +52,7 @@ func (key *PrivKeyRSA) Bytes() []byte {
 }
 
 func (key *PrivKeyRSA) String() string {
-	return privateKeyToString(key.priv)
+	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
 }
 
 func (key *PrivKeyRSA) Sign(msg []byte) []byte {
@@ -89,11 +90,6 @@ func privateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	return x509.MarshalPKCS1PrivateKey(priv)
 }
 
-// PrivateKeyToString(x) = Base64Encode(PrivateKeyToBytes(x)).
-func privateKeyToString(priv *rsa.PrivateKey) string {
-	return encoding.Base64Encode(privateKeyToBytes(priv))
-}
-
 func sign(priv *rsa.PrivateKey, data []byte) []byte {
 	signature, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, data, nil)
 	if err != nil {
@@ -127,7 +123,7 @@ func (key *PubKeyRSA) Bytes() []byte {
 }
 
 func (key *PubKeyRSA) String() string {
-	return publicKeyToString(key.pub)
+	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
 }
 
 func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
@@ -151,7 +147,7 @@ func encryptRSA(pub *rsa.PublicKey, data []byte) []byte {
 	return data
 }
 
-// HashPublicKey(x) = Base64Encode(HashSum(PublicKeyToBytes(x))[:TruncatedSize]).
+// Hash(PublicKey).
 func hashPublicKey(pub *rsa.PublicKey) string {
 	return encoding.Base64Encode(HashSum(publicKeyToBytes(pub))[:TruncatedSize])
 }
@@ -168,11 +164,6 @@ func bytesToPublicKey(pubData []byte) *rsa.PublicKey {
 // Used PKCS1.
 func publicKeyToBytes(pub *rsa.PublicKey) []byte {
 	return x509.MarshalPKCS1PublicKey(pub)
-}
-
-// PublicKeyToString(x) = Base64Encode(PublicKeyToBytes(pub)).
-func publicKeyToString(pub *rsa.PublicKey) string {
-	return encoding.Base64Encode(publicKeyToBytes(pub))
 }
 
 // Used RSA(PSS).

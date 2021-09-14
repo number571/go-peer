@@ -1,5 +1,5 @@
 # gopeer
-> Framework for create decentralized networks. Version: 1.3.0.
+> Framework for create decentralized networks. Version: 1.3;
 
 ### Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
