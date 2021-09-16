@@ -6,6 +6,7 @@ import (
 
 	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
+	lc "github.com/number571/gopeer/local"
 	nt "github.com/number571/gopeer/network"
 )
 
@@ -19,22 +20,22 @@ var (
 )
 
 func main() {
-	client := newClient()
-	node := newClient()
+	client := newNode()
+	node := newNode()
 
 	// Run node.
-	go node.RunNode(NODE_ADDRESS)
+	go node.Listen(NODE_ADDRESS)
 	time.Sleep(500 * time.Millisecond)
 
 	// Connect to node.
 	client.Connect(NODE_ADDRESS)
 
 	// Create message and route.
-	msg := nt.NewMessage(
+	msg := lc.NewMessage(
 		ROUTE_MSG,
 		[]byte("hello, world!"),
 	).WithDiff(DIFF_PACK)
-	route := nt.NewRoute(node.PubKey())
+	route := lc.NewRoute(node.Client().PubKey())
 
 	// Send request 'hello, world!' to node.
 	res, err := client.Send(msg, route)
@@ -47,17 +48,17 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func newClient() *nt.Client {
+func newNode() *nt.Node {
 	// Generate private key.
 	priv := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
-	client := nt.NewClient(priv)
+	node := nt.NewNode(lc.NewClient(priv))
 
 	// Set local route to function.
-	client.Handle(ROUTE_MSG, getMessage)
-	return client
+	node.Handle(ROUTE_MSG, getMessage)
+	return node
 }
 
-func getMessage(client *nt.Client, msg *nt.Message) []byte {
+func getMessage(client *lc.Client, msg *lc.Message) []byte {
 	// Receive message.
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)

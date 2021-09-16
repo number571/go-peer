@@ -5,6 +5,7 @@ import (
 
 	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
+	lc "github.com/number571/gopeer/local"
 	nt "github.com/number571/gopeer/network"
 )
 
@@ -17,13 +18,13 @@ func init() {
 
 func main() {
 	fmt.Println("Node is listening...")
-	nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))).
-		Handle([]byte("/msg"), msgRoute).
-		RunNode(":8080")
+	client := lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	nt.NewNode(client).
+		Handle([]byte("/msg"), msgRoute).Listen(":8080")
 	// ...
 }
 
-func msgRoute(client *nt.Client, msg *nt.Message) []byte {
+func msgRoute(client *lc.Client, msg *lc.Message) []byte {
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
 	return msg.Body.Data

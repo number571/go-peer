@@ -1,8 +1,6 @@
-package network
+package local
 
-import (
-	"github.com/number571/gopeer/crypto"
-)
+import "github.com/number571/gopeer/crypto"
 
 // Basic structure for set route to package.
 type Route struct {
@@ -21,13 +19,18 @@ func NewRoute(receiver crypto.PubKey) *Route {
 	}
 }
 
-// Append pseudo sender to route.
+// Return receiver's public key.
+func (route *Route) Receiver() crypto.PubKey {
+	return route.receiver
+}
+
+// Set pseudo sender to route.
 func (route *Route) WithSender(psender crypto.PrivKey) *Route {
 	route.psender = psender
 	return route
 }
 
-// Append route-nodes to route.
+// Set route-nodes to route.
 func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {
 	route.routes = routes
 	return route

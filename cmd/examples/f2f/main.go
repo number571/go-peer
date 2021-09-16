@@ -6,6 +6,7 @@ import (
 
 	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
+	lc "github.com/number571/gopeer/local"
 	nt "github.com/number571/gopeer/network"
 )
 
@@ -18,35 +19,35 @@ var (
 )
 
 func main() {
-	client1 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
-	client2 := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
-	clinode := nt.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
+	node1 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
+	node2 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
+	lnode := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
 
-	fmt.Println(client1.F2F.State(), client2.F2F.State())
+	fmt.Println(node1.F2F().State(), node2.F2F().State())
 
-	client1.F2F.Switch()
-	client2.F2F.Switch()
+	node1.F2F().Switch()
+	node2.F2F().Switch()
 
-	fmt.Println(client1.F2F.State(), client2.F2F.State())
+	fmt.Println(node1.F2F().State(), node2.F2F().State())
 
-	client1.F2F.Append(client2.PubKey())
-	client2.F2F.Append(client1.PubKey())
+	node1.F2F().Append(node2.Client().PubKey())
+	node2.F2F().Append(node1.Client().PubKey())
 
-	client1.Handle(ROUTE_MSG, getMessage)
-	client2.Handle(ROUTE_MSG, getMessage)
-	clinode.Handle(ROUTE_MSG, getMessage)
+	node1.Handle(ROUTE_MSG, getMessage)
+	node2.Handle(ROUTE_MSG, getMessage)
+	lnode.Handle(ROUTE_MSG, getMessage)
 
-	go clinode.RunNode(NODE_ADDRESS)
+	go lnode.Listen(NODE_ADDRESS)
 
 	time.Sleep(500 * time.Millisecond)
 
-	client1.Connect(NODE_ADDRESS)
-	client2.Connect(NODE_ADDRESS)
+	node1.Connect(NODE_ADDRESS)
+	node2.Connect(NODE_ADDRESS)
 
 	diff := gp.Get("POWS_DIFF").(uint)
-	res, err := client1.Send(
-		nt.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
-		nt.NewRoute(client2.PubKey()),
+	res, err := node1.Send(
+		lc.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
+		lc.NewRoute(node2.Client().PubKey()),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -56,7 +57,7 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func getMessage(client *nt.Client, msg *nt.Message) []byte {
+func getMessage(client *lc.Client, msg *lc.Message) []byte {
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
 	return msg.Body.Data

@@ -115,7 +115,8 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 }
 
 func (key *PubKeyRSA) Address() Address {
-	return Address(hashPublicKey(key.pub))
+	hash := HashSum(key.Bytes())[:TruncatedSize]
+	return Address(encoding.Base64Encode(hash))
 }
 
 func (key *PubKeyRSA) Bytes() []byte {
@@ -145,11 +146,6 @@ func encryptRSA(pub *rsa.PublicKey, data []byte) []byte {
 		return nil
 	}
 	return data
-}
-
-// Hash(PublicKey).
-func hashPublicKey(pub *rsa.PublicKey) string {
-	return encoding.Base64Encode(HashSum(publicKeyToBytes(pub))[:TruncatedSize])
 }
 
 // Used PKCS1.
