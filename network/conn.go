@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/number571/gopeer"
+	"github.com/number571/gopeer/crypto"
 	"github.com/number571/gopeer/encoding"
 	"github.com/number571/gopeer/local"
 )
@@ -57,5 +58,23 @@ func readMessage(conn net.Conn) *local.Message {
 		}
 	}
 
-	return local.Package(pack).Deserialize()
+	return initialCheck(local.Package(pack).Deserialize())
+}
+
+func initialCheck(msg *local.Message) *local.Message {
+	if msg == nil {
+		return nil
+	}
+
+	if len(msg.Body.Hash) != crypto.HashSize {
+		return nil
+	}
+
+	diff := gopeer.Get("POWS_DIFF").(uint)
+	puzzle := crypto.NewPuzzle(uint8(diff))
+	if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
+		return nil
+	}
+
+	return msg
 }

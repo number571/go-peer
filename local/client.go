@@ -37,8 +37,8 @@ func (client *Client) PrivKey() crypto.PrivKey {
 // The message can be decrypted only if private key is known.
 func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 	var (
-		rand = crypto.GenRand(gopeer.Get("RAND_SIZE").(uint))
-		hash = crypto.HashSum(bytes.Join(
+		rand = crypto.Rand(gopeer.Get("RAND_SIZE").(uint))
+		hash = crypto.SumHash(bytes.Join(
 			[][]byte{
 				rand,
 				client.PubKey().Bytes(),
@@ -48,13 +48,13 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 			},
 			[]byte{},
 		))
-		session = crypto.GenRand(gopeer.Get("SKEY_SIZE").(uint))
+		session = crypto.Rand(gopeer.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
 	return &Message{
 		Head: HeadMessage{
+			diff:    msg.Head.diff,
 			Rand:    cipher.Encrypt(rand),
-			Diff:    msg.Head.Diff,
 			Title:   cipher.Encrypt(msg.Head.Title),
 			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
 			Session: receiver.Encrypt(session),
@@ -63,7 +63,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 			Data: cipher.Encrypt(msg.Body.Data),
 			Hash: hash,
 			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(msg.Head.Diff).Proof(hash),
+			Npow: crypto.NewPuzzle(msg.Head.diff).Proof(hash),
 		},
 	}
 }
@@ -72,10 +72,8 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 // No one else except the sender will be able to decrypt the message.
 func (client *Client) Decrypt(msg *Message) *Message {
 	hash := msg.Body.Hash
-	if hash == nil {
-		return nil
-	}
-	if !crypto.NewPuzzle(msg.Head.Diff).Verify(hash, msg.Body.Npow) {
+
+	if !crypto.NewPuzzle(msg.Head.diff).Verify(hash, msg.Body.Npow) {
 		return nil
 	}
 
@@ -121,7 +119,7 @@ func (client *Client) Decrypt(msg *Message) *Message {
 		return nil
 	}
 
-	check := crypto.HashSum(bytes.Join(
+	check := crypto.SumHash(bytes.Join(
 		[][]byte{
 			rand,
 			publicBytes,
@@ -137,8 +135,8 @@ func (client *Client) Decrypt(msg *Message) *Message {
 
 	return &Message{
 		Head: HeadMessage{
+			diff:    msg.Head.diff,
 			Title:   titleBytes,
-			Diff:    msg.Head.Diff,
 			Rand:    rand,
 			Sender:  publicBytes,
 			Session: session,
@@ -162,7 +160,7 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 	if len(route.routes) != 0 && psender == nil {
 		return nil
 	}
-	diff := uint(rmsg.Head.Diff)
+	diff := uint(msg.Head.diff)
 	pack := rmsg.Serialize()
 	for _, pub := range route.routes {
 		rmsg = psender.Encrypt(

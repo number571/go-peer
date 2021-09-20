@@ -115,7 +115,7 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 }
 
 func (key *PubKeyRSA) Address() Address {
-	hash := HashSum(key.Bytes())[:TruncatedSize]
+	hash := SumHash(key.Bytes())[:TruncatedSize]
 	return Address(encoding.Base64Encode(hash))
 }
 

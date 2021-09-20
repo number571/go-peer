@@ -18,7 +18,7 @@ type CipherAES struct {
 
 func NewCipher(key []byte) Cipher {
 	return &CipherAES{
-		key: HashSum(key),
+		key: SumHash(key),
 	}
 }
 

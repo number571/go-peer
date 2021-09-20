@@ -69,7 +69,7 @@ func (node *Node) Listen(address string) error {
 			conn.Close()
 			continue
 		}
-		id := encoding.Base64Encode(crypto.GenRand(gopeer.Get("RAND_SIZE").(uint)))
+		id := encoding.Base64Encode(crypto.Rand(gopeer.Get("RAND_SIZE").(uint)))
 		node.setConnection(id, conn)
 		go node.handleConn(id)
 	}
@@ -171,7 +171,10 @@ func (node *Node) Disconnect(addresses ...string) {
 }
 
 func (node *Node) handleConn(id string) {
-	conn := node.getConnection(id)
+	var (
+		conn = node.getConnection(id)
+		diff = gopeer.Get("POWS_DIFF").(uint)
+	)
 
 	defer func() {
 		conn.Close()
@@ -180,28 +183,19 @@ func (node *Node) handleConn(id string) {
 
 	for {
 		msg := readMessage(conn)
-
-	REPEAT:
 		if msg == nil {
 			continue
 		}
 
-		if len(msg.Body.Hash) != crypto.HashSize {
-			continue
-		}
-
+	REPEAT:
 		if node.inMapping(msg.Body.Hash) {
 			continue
 		}
 		node.setMapping(msg.Body.Hash)
 
-		puzzle := crypto.NewPuzzle(uint8(gopeer.Get("POWS_DIFF").(uint)))
-		if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
-			continue
-		}
 		node.send(msg)
 
-		decMsg := node.client.Decrypt(msg)
+		decMsg := node.client.Decrypt(msg.WithDiff(diff))
 		if decMsg == nil {
 			continue
 		}
@@ -229,7 +223,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 		)
 		return
 	}
-	diff := uint(msg.Head.Diff)
+	diff := gopeer.Get("POWS_DIFF").(uint)
 	node.send(node.client.Encrypt(
 		crypto.LoadPubKey(msg.Head.Sender),
 		local.NewMessage(

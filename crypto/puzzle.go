@@ -31,7 +31,7 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 	)
 	Target.Lsh(Target, 256-uint(puzzle.diff))
 	for nonce < math.MaxUint64 {
-		hash = HashSum(bytes.Join(
+		hash = SumHash(bytes.Join(
 			[][]byte{
 				packHash,
 				encoding.Uint64ToBytes(nonce),
@@ -51,7 +51,7 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	Target := big.NewInt(1)
-	hash := HashSum(bytes.Join(
+	hash := SumHash(bytes.Join(
 		[][]byte{
 			packHash,
 			encoding.Uint64ToBytes(nonce),
