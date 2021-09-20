@@ -17,8 +17,8 @@ var (
 )
 
 const (
-	KeyType       = "gopeer\\rsa"
-	TruncatedSize = 20
+	keyType       = "gopeer\\rsa"
+	truncatedSize = 20
 )
 
 /*
@@ -60,7 +60,7 @@ func (key *PrivKeyRSA) Sign(msg []byte) []byte {
 }
 
 func (key *PrivKeyRSA) Type() string {
-	return KeyType
+	return keyType
 }
 
 func (key *PrivKeyRSA) PubKey() PubKey {
@@ -115,7 +115,7 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 }
 
 func (key *PubKeyRSA) Address() Address {
-	hash := SumHash(key.Bytes())[:TruncatedSize]
+	hash := SumHash(key.Bytes())[:truncatedSize]
 	return Address(encoding.Base64Encode(hash))
 }
 
@@ -132,7 +132,7 @@ func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
 }
 
 func (key *PubKeyRSA) Type() string {
-	return KeyType
+	return keyType
 }
 
 func (key *PubKeyRSA) Size() uint {

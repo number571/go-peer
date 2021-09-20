@@ -22,7 +22,7 @@ type storageData struct {
 }
 
 const (
-	SALT_SIZE = 32 // bytes
+	saltSize = 32 // bytes
 )
 
 func NewStorage(path, password string) *Storage {
@@ -35,9 +35,9 @@ func NewStorage(path, password string) *Storage {
 		if err != nil {
 			return nil
 		}
-		store.salt = encdata[:SALT_SIZE]
+		store.salt = encdata[:saltSize]
 	} else {
-		store.salt = crypto.Rand(SALT_SIZE)
+		store.salt = crypto.Rand(saltSize)
 	}
 
 	ekey := crypto.RaiseEntropy([]byte(password), store.salt, 20)
@@ -62,7 +62,7 @@ func (store *Storage) Write(priv crypto.PrivKey, password string) error {
 			return err
 		}
 
-		data := store.cipher.Decrypt(encdata[SALT_SIZE:])
+		data := store.cipher.Decrypt(encdata[saltSize:])
 		err = json.Unmarshal(data, &mapping)
 		if err != nil {
 			return err
@@ -109,7 +109,7 @@ func (store *Storage) Read(password string) (crypto.PrivKey, error) {
 		return nil, err
 	}
 
-	data := store.cipher.Decrypt(encdata[SALT_SIZE:])
+	data := store.cipher.Decrypt(encdata[saltSize:])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
 		return nil, err
