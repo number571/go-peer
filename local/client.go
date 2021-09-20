@@ -161,8 +161,8 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 		return nil
 	}
 	diff := uint(msg.Head.diff)
-	pack := rmsg.Serialize()
 	for _, pub := range route.routes {
+		pack := rmsg.Serialize()
 		rmsg = psender.Encrypt(
 			pub,
 			NewMessage(
