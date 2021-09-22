@@ -6,7 +6,9 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/number571/gopeer/encoding"
 )
@@ -17,8 +19,8 @@ var (
 )
 
 const (
-	keyType       = "gopeer\\rsa"
-	truncatedSize = 20
+	KeyType       = "gopeer\\rsa"
+	TruncatedSize = 20
 )
 
 /*
@@ -38,13 +40,40 @@ func NewPrivKey(bits uint) PrivKey {
 	return &PrivKeyRSA{priv}
 }
 
-// Create private key by number of bits.
 func LoadPrivKey(pbytes []byte) PrivKey {
 	return &PrivKeyRSA{bytesToPrivateKey(pbytes)}
 }
 
+func LoadPrivKeyByString(pstring string) PrivKey {
+	var (
+		prefix = fmt.Sprintf("Priv(%s)", KeyType)
+		suffix = "}"
+	)
+	if !strings.HasPrefix(pstring, prefix) {
+		return nil
+	}
+	if !strings.HasSuffix(pstring, suffix) {
+		return nil
+	}
+	pstring = strings.TrimPrefix(pstring, prefix)
+	pstring = strings.TrimSuffix(pstring, suffix)
+	pbytes, err := hex.DecodeString(pstring)
+	if err != nil {
+		return nil
+	}
+	return LoadPrivKey(pbytes)
+}
+
 func (key *PrivKeyRSA) Decrypt(msg []byte) []byte {
 	return decryptRSA(key.priv, msg)
+}
+
+func (key *PrivKeyRSA) Sign(msg []byte) []byte {
+	return sign(key.priv, msg)
+}
+
+func (key *PrivKeyRSA) PubKey() PubKey {
+	return &PubKeyRSA{&key.priv.PublicKey}
 }
 
 func (key *PrivKeyRSA) Bytes() []byte {
@@ -52,19 +81,15 @@ func (key *PrivKeyRSA) Bytes() []byte {
 }
 
 func (key *PrivKeyRSA) String() string {
-	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
-}
-
-func (key *PrivKeyRSA) Sign(msg []byte) []byte {
-	return sign(key.priv, msg)
+	return fmt.Sprintf("Priv(%s){%X}", KeyType, key.Bytes())
 }
 
 func (key *PrivKeyRSA) Type() string {
-	return keyType
+	return KeyType
 }
 
-func (key *PrivKeyRSA) PubKey() PubKey {
-	return &PubKeyRSA{&key.priv.PublicKey}
+func (key *PrivKeyRSA) Size() uint {
+	return key.PubKey().Size()
 }
 
 // Used PKCS1.
@@ -110,13 +135,37 @@ func LoadPubKey(pbytes []byte) PubKey {
 	return &PubKeyRSA{bytesToPublicKey(pbytes)}
 }
 
+func LoadPubKeyByString(pstring string) PubKey {
+	var (
+		prefix = fmt.Sprintf("Pub(%s)", KeyType)
+		suffix = "}"
+	)
+	if !strings.HasPrefix(pstring, prefix) {
+		return nil
+	}
+	if !strings.HasSuffix(pstring, suffix) {
+		return nil
+	}
+	pstring = strings.TrimPrefix(pstring, prefix)
+	pstring = strings.TrimSuffix(pstring, suffix)
+	pbytes, err := hex.DecodeString(pstring)
+	if err != nil {
+		return nil
+	}
+	return LoadPubKey(pbytes)
+}
+
 func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
 func (key *PubKeyRSA) Address() Address {
-	hash := SumHash(key.Bytes())[:truncatedSize]
+	hash := SumHash(key.Bytes())[:TruncatedSize]
 	return Address(encoding.Base64Encode(hash))
+}
+
+func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
+	return verify(key.pub, msg, sig) == nil
 }
 
 func (key *PubKeyRSA) Bytes() []byte {
@@ -124,15 +173,11 @@ func (key *PubKeyRSA) Bytes() []byte {
 }
 
 func (key *PubKeyRSA) String() string {
-	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
-}
-
-func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
-	return verify(key.pub, msg, sig) == nil
+	return fmt.Sprintf("Pub(%s){%X}", KeyType, key.Bytes())
 }
 
 func (key *PubKeyRSA) Type() string {
-	return keyType
+	return KeyType
 }
 
 func (key *PubKeyRSA) Size() uint {

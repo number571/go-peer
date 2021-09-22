@@ -9,19 +9,20 @@ import (
 )
 
 const (
+	SUBJECT  = "application_#1"
 	PASSWORD = "privkey-password"
 )
 
 func main() {
-	priv1 := crypto.NewPrivKey(2048)
+	secret1 := []byte(crypto.NewPrivKey(512).Bytes())
 
-	store := local.NewStorage("storage", "storage-password")
-	store.Write(priv1, PASSWORD)
+	store := local.NewStorage("storage.enc", "storage-password")
+	store.Write(secret1, SUBJECT, PASSWORD)
 
-	priv2, err := store.Read(PASSWORD)
+	secret2, err := store.Read(SUBJECT, PASSWORD)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(bytes.Equal(priv1.Bytes(), priv2.Bytes()))
+	fmt.Println(bytes.Equal(secret1, secret2))
 }

@@ -8,6 +8,13 @@ type Decrypter interface {
 	Decrypt(msg []byte) []byte
 }
 
+type Converter interface {
+	String() string
+	Bytes() []byte
+	Type() string
+	Size() uint
+}
+
 type Cipher interface {
 	Encrypter
 	Decrypter
@@ -16,20 +23,15 @@ type Cipher interface {
 type Address string
 type PubKey interface {
 	Encrypter
+	Converter
 	Address() Address
-	Bytes() []byte
-	String() string
 	Verify(msg []byte, sig []byte) bool
-	Type() string
-	Size() uint
 }
 
 type PrivKey interface {
 	Decrypter
-	Bytes() []byte
-	String() string
+	Converter
 	Sign(msg []byte) []byte
-	Type() string
 	PubKey() PubKey
 }
 
