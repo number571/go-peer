@@ -46,7 +46,7 @@ func LoadPrivKey(pbytes []byte) PrivKey {
 
 func LoadPrivKeyByString(pstring string) PrivKey {
 	var (
-		prefix = fmt.Sprintf("Priv(%s)", KeyType)
+		prefix = fmt.Sprintf("Priv(%s){", KeyType)
 		suffix = "}"
 	)
 	if !strings.HasPrefix(pstring, prefix) {

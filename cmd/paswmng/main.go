@@ -1,4 +1,4 @@
-// go run main.go -sn storage.enc -sp st-password --set -n example.com password
+// go run main.go -sn storage.enc -sp st-password --set -n example.com -p password
 // go run main.go -sn storage.enc -sp st-password --get -n example.com
 package main
 
