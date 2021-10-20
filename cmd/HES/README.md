@@ -3,7 +3,7 @@
 > Hidden email service. Version 1.1.11s.
 
 ### Home page
-<img src="/userside/images/HES1.png" alt="HomePage"/>
+<img src="/cmd/HES/userside/images/HES1.png" alt="HomePage"/>
 
 ### Characteristics
 1. End to end encryption;
@@ -13,7 +13,7 @@
 5. Hash function: SHA256;
 
 ### Account page
-<img src="/userside/images/HES4.png" alt="AccountPage"/>
+<img src="/cmd/HES/userside/images/HES4.png" alt="AccountPage"/>
 
 ### Compile and run
 ```
@@ -25,7 +25,7 @@ $ ./client -open="localhost:7545"
 ```
 
 ### List of emails page
-<img src="/userside/images/HES7.png" alt="ListOfEmailsPage"/>
+<img src="/cmd/HES/userside/images/HES7.png" alt="ListOfEmailsPage"/>
 
 ### DB and CFG files
 > Database and config files are creates when the application starts.
@@ -116,4 +116,4 @@ CREATE TABLE IF NOT EXISTS emails (
 ```
 
 ### Email page
-<img src="/userside/images/HES8.png" alt="EmailPage"/>
+<img src="/cmd/HES/userside/images/HES8.png" alt="EmailPage"/>
