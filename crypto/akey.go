@@ -137,7 +137,7 @@ func LoadPubKey(pbytes []byte) PubKey {
 
 func LoadPubKeyByString(pstring string) PubKey {
 	var (
-		prefix = fmt.Sprintf("Pub(%s)", KeyType)
+		prefix = fmt.Sprintf("Pub(%s){", KeyType)
 		suffix = "}"
 	)
 	if !strings.HasPrefix(pstring, prefix) {

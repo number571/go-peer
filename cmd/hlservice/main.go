@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,26 +14,25 @@ import (
 	nt "github.com/number571/gopeer/network"
 )
 
-type Request struct {
-	Host   string
-	Path   string
-	Method string
-	Head   map[string]string
-	Body   []byte
-}
-
 var (
 	PrivKey  cr.PrivKey
 	Services map[string]string
+	Connects []string
 )
 
 const (
-	FileWithPrivKey  = "priv.key"
-	FileWithPubKey   = "pub.key"
-	FileWithServices = "services.json"
+	FileWithPrivKey    = "priv.key"
+	FileWithServices   = "services.json"
+	FileWithConnects   = "connects.json"
+	ServerAddressInRaw = "http://localhost:8080"
 )
 
 func init() {
+	var initOnly bool
+
+	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
+	flag.Parse()
+
 	if !fileIsExist(FileWithPrivKey) {
 		priv := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
 		writeFile(FileWithPrivKey, []byte(priv.String()))
@@ -44,30 +43,48 @@ func init() {
 
 	if !fileIsExist(FileWithServices) {
 		services := make(map[string]string)
-		services["route_service"] = "localhost:8080"
+		services[ServerAddressInHLS] = ServerAddressInRaw
 		writeFile(FileWithServices, serialize(services))
 	}
 	deserialize(readFile(FileWithServices), &Services)
-	fmt.Println(Services)
+
+	if !fileIsExist(FileWithConnects) {
+		connects := []string{"localhost:7070"}
+		writeFile(FileWithConnects, serialize(connects))
+	}
+	deserialize(readFile(FileWithConnects), &Connects)
+
+	if initOnly {
+		os.Exit(0)
+	}
 }
 
 func main() {
 	fmt.Println("Service is listening...")
 	client := lc.NewClient(PrivKey)
-	nt.NewNode(client).
-		Handle([]byte("/hls"), hlservice).Listen(":9571")
+	node := nt.NewNode(client).Handle([]byte(HLS), hlservice)
+	for _, conn := range Connects {
+		err := node.Connect(conn)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	node.Listen(":9571")
 }
 
 func hlservice(client *lc.Client, msg *lc.Message) []byte {
-	request := &Request{}
+	request := new(Request)
+
 	deserialize(msg.Body.Data, request)
 	if request == nil {
 		return nil
 	}
+
 	addr, ok := Services[request.Host]
 	if !ok {
 		return nil
 	}
+
 	req, err := http.NewRequest(
 		request.Method,
 		addr+request.Path,
@@ -76,46 +93,21 @@ func hlservice(client *lc.Client, msg *lc.Message) []byte {
 	if err != nil {
 		return nil
 	}
+
 	for key, val := range request.Head {
 		req.Header.Add(key, val)
 	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil
 	}
+	defer resp.Body.Close()
+
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil
 	}
-	resp.Body.Close()
+
 	return data
-}
-
-func fileIsExist(file string) bool {
-	_, err := os.Stat(file)
-	return !os.IsNotExist(err)
-}
-
-func readFile(file string) []byte {
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return nil
-	}
-	return data
-}
-
-func writeFile(file string, data []byte) error {
-	return ioutil.WriteFile(file, data, 0644)
-}
-
-func serialize(data interface{}) []byte {
-	res, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		return nil
-	}
-	return res
-}
-
-func deserialize(data []byte, res interface{}) error {
-	return json.Unmarshal(data, res)
 }

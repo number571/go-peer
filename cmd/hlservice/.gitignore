@@ -1,5 +1,7 @@
 main
-hlservice
+client
+server
 priv.key
 pub.key
 services.json
+connects.json 

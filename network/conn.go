@@ -14,6 +14,7 @@ func readMessage(conn net.Conn) *local.Message {
 	const (
 		UINT64_SIZE = 8 // bytes
 	)
+
 	var (
 		pack   []byte
 		size   = uint(0)

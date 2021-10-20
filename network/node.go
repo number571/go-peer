@@ -30,6 +30,7 @@ func NewNode(client *local.Client) *Node {
 	if client == nil {
 		return nil
 	}
+
 	return &Node{
 		client:      client,
 		hroutes:     make(map[string]func(*local.Client, *local.Message) []byte),
@@ -60,19 +61,24 @@ func (node *Node) Listen(address string) error {
 		return err
 	}
 	defer listen.Close()
+
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
 			break
 		}
+
 		if node.isMaxConnSize() {
 			conn.Close()
 			continue
 		}
+
 		id := encoding.Base64Encode(crypto.Rand(gopeer.Get("RAND_SIZE").(uint)))
 		node.setConnection(id, conn)
+
 		go node.handleConn(id)
 	}
+
 	return nil
 }
 
@@ -80,6 +86,7 @@ func (node *Node) Listen(address string) error {
 func (node *Node) Handle(title []byte, handle func(*local.Client, *local.Message) []byte) *Node {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	node.hroutes[encoding.Base64Encode(title)] = handle
 	return node
 }
@@ -124,10 +131,12 @@ REPEAT:
 func (node *Node) Connections() []string {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	var list []string
 	for addr := range node.connections {
 		list = append(list, addr)
 	}
+
 	return list
 }
 
@@ -135,45 +144,46 @@ func (node *Node) Connections() []string {
 func (node *Node) InConnections(address string) bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	_, ok := node.connections[address]
 	return ok
 }
 
 // Connect to node by address.
 // Client handle function need be not null.
-func (node *Node) Connect(addresses ...string) []error {
-	var (
-		listErrors []error = nil
-	)
-	for _, addr := range addresses {
-		if node.isMaxConnSize() {
-			return append(listErrors, errors.New("max conn"))
-		}
-		conn, err := net.Dial("tcp", addr)
-		if err != nil {
-			listErrors = append(listErrors, err)
-			continue
-		}
-		node.setConnection(addr, conn)
-		go node.handleConn(addr)
+func (node *Node) Connect(address string) error {
+	if node.isMaxConnSize() {
+		return errors.New("max conn")
 	}
-	return listErrors
+
+	conn, err := net.Dial("tcp", address)
+	if err != nil {
+		return err
+	}
+
+	node.setConnection(address, conn)
+	go node.handleConn(address)
+
+	return nil
 }
 
 // Disconnect from node by address.
-func (node *Node) Disconnect(addresses ...string) {
-	for _, addr := range addresses {
-		if node.InConnections(addr) {
-			node.getConnection(addr).Close()
-		}
-		node.delConnection(addr)
+func (node *Node) Disconnect(address string) {
+	if node.InConnections(address) {
+		node.getConnection(address).Close()
 	}
+	node.delConnection(address)
 }
 
 func (node *Node) handleConn(id string) {
+	const (
+		NUM_FAILS = 5
+	)
+
 	var (
-		conn = node.getConnection(id)
-		diff = gopeer.Get("POWS_DIFF").(uint)
+		failCounter = NUM_FAILS
+		conn        = node.getConnection(id)
+		diff        = gopeer.Get("POWS_DIFF").(uint)
 	)
 
 	defer func() {
@@ -182,10 +192,17 @@ func (node *Node) handleConn(id string) {
 	}()
 
 	for {
+		if failCounter == 0 {
+			break
+		}
+
 		msg := readMessage(conn)
 		if msg == nil {
+			failCounter--
 			continue
 		}
+
+		failCounter = NUM_FAILS
 
 	REPEAT:
 		if node.inMapping(msg.Body.Hash) {
@@ -216,6 +233,7 @@ func (node *Node) handleConn(id string) {
 
 func (node *Node) handleFunc(msg *local.Message) {
 	fname := msg.Head.Title
+
 	if bytes.HasPrefix(fname, gopeer.Get("RET_BYTES").([]byte)) {
 		node.response(
 			crypto.LoadPubKey(msg.Head.Sender),
@@ -223,7 +241,14 @@ func (node *Node) handleFunc(msg *local.Message) {
 		)
 		return
 	}
+
 	diff := gopeer.Get("POWS_DIFF").(uint)
+
+	handler := node.getFunction(fname)
+	if handler == nil {
+		return
+	}
+
 	node.send(node.client.Encrypt(
 		crypto.LoadPubKey(msg.Head.Sender),
 		local.NewMessage(
@@ -231,7 +256,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 				gopeer.Get("RET_BYTES").([]byte),
 				fname,
 			}, []byte{}),
-			node.getFunction(fname)(node.client, msg),
+			handler(node.client, msg),
 		).WithDiff(diff),
 	))
 }
@@ -239,6 +264,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 func (node *Node) send(msg *local.Message) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	pack := msg.Serialize()
 	bytesMsg := bytes.Join(
 		[][]byte{
@@ -247,6 +273,7 @@ func (node *Node) send(msg *local.Message) {
 		},
 		[]byte{},
 	)
+
 	node.mapping[encoding.Base64Encode(msg.Body.Hash)] = true
 	for _, cn := range node.connections {
 		go cn.Write(bytesMsg)
@@ -256,6 +283,7 @@ func (node *Node) send(msg *local.Message) {
 func (node *Node) response(pub crypto.PubKey, data []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	hash := string(pub.Address())
 	if _, ok := node.actions[hash]; ok {
 		node.actions[hash] <- data
@@ -265,33 +293,39 @@ func (node *Node) response(pub crypto.PubKey, data []byte) {
 func (node *Node) getFunction(name []byte) func(*local.Client, *local.Message) []byte {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	return node.hroutes[encoding.Base64Encode(name)]
 }
 
 func (node *Node) setAction(hash string) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	node.actions[hash] = make(chan []byte)
 }
 
 func (node *Node) delAction(hash string) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	delete(node.actions, hash)
 }
 
 func (node *Node) setMapping(hash []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	if uint(len(node.mapping)) > gopeer.Get("MAPP_SIZE").(uint) {
 		node.mapping = make(map[string]bool)
 	}
+
 	node.mapping[encoding.Base64Encode(hash)] = true
 }
 
 func (node *Node) inMapping(hash []byte) bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	_, ok := node.mapping[encoding.Base64Encode(hash)]
 	return ok
 }
@@ -299,23 +333,27 @@ func (node *Node) inMapping(hash []byte) bool {
 func (node *Node) isMaxConnSize() bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	return uint(len(node.connections)) > gopeer.Get("CONN_SIZE").(uint)
 }
 
 func (node *Node) setConnection(id string, conn net.Conn) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	node.connections[id] = conn
 }
 
 func (node *Node) getConnection(id string) net.Conn {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	return node.connections[id]
 }
 
 func (node *Node) delConnection(id string) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
+
 	delete(node.connections, id)
 }
