@@ -1,0 +1,8 @@
+client_*_*
+server_*_*
+client.db
+server.db
+client
+server
+compile
+*.exe

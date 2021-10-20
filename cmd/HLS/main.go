@@ -18,6 +18,7 @@ var (
 	PrivKey  cr.PrivKey
 	Services map[string]string
 	Connects []string
+	OpenAddr string
 )
 
 const (
@@ -25,12 +26,15 @@ const (
 	FileWithServices   = "services.json"
 	FileWithConnects   = "connects.json"
 	ServerAddressInRaw = "http://localhost:8080"
+	DefaultAddressHLS  = "127.0.0.1:9571"
+	AnotherAddressHLS  = "127.0.0.2:9571"
 )
 
 func init() {
 	var initOnly bool
 
 	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
+	flag.StringVar(&OpenAddr, "open", DefaultAddressHLS, "open address for hidden lake service")
 	flag.Parse()
 
 	if !fileIsExist(FileWithPrivKey) {
@@ -49,7 +53,7 @@ func init() {
 	deserialize(readFile(FileWithServices), &Services)
 
 	if !fileIsExist(FileWithConnects) {
-		connects := []string{"localhost:7070"}
+		connects := []string{AnotherAddressHLS}
 		writeFile(FileWithConnects, serialize(connects))
 	}
 	deserialize(readFile(FileWithConnects), &Connects)
@@ -69,7 +73,7 @@ func main() {
 			fmt.Println(err)
 		}
 	}
-	node.Listen(":9571")
+	node.Listen(OpenAddr)
 }
 
 func hlservice(client *lc.Client, msg *lc.Message) []byte {
