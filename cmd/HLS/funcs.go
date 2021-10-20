@@ -18,7 +18,6 @@ const (
 	HLS                = "hidden-lake-service"
 	FileWithPubKey     = "pub.key"
 	ServerAddressInHLS = "route-service"
-	AddressHLS         = "localhost:9571"
 )
 
 func fileIsExist(file string) bool {

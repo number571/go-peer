@@ -12,11 +12,12 @@ import (
 
 func main() {
 	priv := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
+
 	client := lc.NewClient(priv)
 	node := nt.NewNode(client).
 		Handle([]byte(HLS), nil)
 
-	err := node.Connect(AddressHLS)
+	err := node.Connect("localhost:9571")
 	if err != nil {
 		fmt.Println("error: connection")
 		os.Exit(1)

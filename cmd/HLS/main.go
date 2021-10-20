@@ -14,27 +14,26 @@ import (
 	nt "github.com/number571/gopeer/network"
 )
 
+type CFG struct {
+	Address  string            `json:"address"`
+	Services map[string]string `json:"services"`
+	Connects []string          `json:"connects"`
+}
+
 var (
-	PrivKey  cr.PrivKey
-	Services map[string]string
-	Connects []string
-	OpenAddr string
+	PrivKey cr.PrivKey
+	Config  *CFG
 )
 
 const (
-	FileWithPrivKey    = "priv.key"
-	FileWithServices   = "services.json"
-	FileWithConnects   = "connects.json"
-	ServerAddressInRaw = "http://localhost:8080"
-	DefaultAddressHLS  = "127.0.0.1:9571"
-	AnotherAddressHLS  = "127.0.0.2:9571"
+	FileWithPrivKey = "priv.key"
+	FileWithConfig  = "config.json"
 )
 
 func init() {
 	var initOnly bool
 
 	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
-	flag.StringVar(&OpenAddr, "open", DefaultAddressHLS, "open address for hidden lake service")
 	flag.Parse()
 
 	if !fileIsExist(FileWithPrivKey) {
@@ -45,18 +44,17 @@ func init() {
 	spriv := string(readFile(FileWithPrivKey))
 	PrivKey = cr.LoadPrivKeyByString(spriv)
 
-	if !fileIsExist(FileWithServices) {
-		services := make(map[string]string)
-		services[ServerAddressInHLS] = ServerAddressInRaw
-		writeFile(FileWithServices, serialize(services))
+	if !fileIsExist(FileWithConfig) {
+		config := &CFG{
+			Address:  "localhost:9571",
+			Connects: []string{"127.0.0.2:9571"},
+			Services: map[string]string{
+				ServerAddressInHLS: "http://localhost:8080",
+			},
+		}
+		writeFile(FileWithConfig, serialize(config))
 	}
-	deserialize(readFile(FileWithServices), &Services)
-
-	if !fileIsExist(FileWithConnects) {
-		connects := []string{AnotherAddressHLS}
-		writeFile(FileWithConnects, serialize(connects))
-	}
-	deserialize(readFile(FileWithConnects), &Connects)
+	deserialize(readFile(FileWithConfig), &Config)
 
 	if initOnly {
 		os.Exit(0)
@@ -65,15 +63,26 @@ func init() {
 
 func main() {
 	fmt.Println("Service is listening...")
+
 	client := lc.NewClient(PrivKey)
-	node := nt.NewNode(client).Handle([]byte(HLS), hlservice)
-	for _, conn := range Connects {
+	node := nt.NewNode(client).
+		Handle([]byte(HLS), hlservice)
+
+	for _, conn := range Config.Connects {
 		err := node.Connect(conn)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
-	node.Listen(OpenAddr)
+
+	if Config.Address == "" {
+		select {}
+	}
+
+	err := node.Listen(Config.Address)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func hlservice(client *lc.Client, msg *lc.Message) []byte {
@@ -84,7 +93,7 @@ func hlservice(client *lc.Client, msg *lc.Message) []byte {
 		return nil
 	}
 
-	addr, ok := Services[request.Host]
+	addr, ok := Config.Services[request.Host]
 	if !ok {
 		return nil
 	}
