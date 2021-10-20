@@ -1,0 +1,17 @@
+{{ define "title" }}
+    Signin
+{{ end }}
+
+{{ define "main" }}
+    <form class="text-center" method="POST" action="/signin">
+        <div class="form-group">
+            <input type="text" class="form-control bg-dark text-light" name="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control bg-dark text-light" name="password" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <input type="submit" name="submit" value="Enter to account" class="btn btn-success w-100">
+        </div>
+    </form>
+{{ end }}

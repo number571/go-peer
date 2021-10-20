@@ -1,0 +1,28 @@
+{{ define "title" }}
+	Network.Write
+{{ end }}
+
+{{ define "main" }}
+	<form class="text-center" method="POST" action="/network/write" enctype="multipart/form-data">
+        <div class="form-group">
+            <select name="receiver" class="form-control bg-dark text-light">
+                <option disabled>Receiver</option>
+                {{ range $key, $value := .Contacts }}
+                    <option value="{{ $value }}">{{ $key }}</option>
+                {{ end }}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control bg-dark text-light" name="title" placeholder="Title">
+        </div>
+        <div class="form-group">
+            <textarea class="form-control bg-dark text-light" name="message" placeholder="Message"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="file" name="files" class="form-control bg-dark" multiple>
+        </div>
+        <div class="form-group">
+            <input type="submit" name="submit" value="Send email" class="btn btn-success w-100">
+        </div>
+    </form>
+{{ end }}

@@ -1,0 +1,91 @@
+{{ define "title" }}
+	Network.Read
+{{ end }}
+
+{{ define "main" }}
+	{{ if .Email }}
+		{{ $texts := (texts .Email) }}
+		{{ $files := (files .Email) }}
+		<div id="message_copy" style="display: none" class="text-light mx-auto">
+			<div class="alert alert-success" role="alert">
+				<button type="button" class="close" onclick="close_block('message_copy')">
+					<span>&times;</span>
+				</button>
+				Key copied
+			</div>
+		</div>
+		<div class="card text-white bg-dark mb-3">
+			<h5 class="card-header bg-secondary">Sender</h5>
+			<div class="card-header">
+				<div class="row">
+					<h5 class="col-md-6 w-50">{{ .Email.SenderName }}</h5>
+					<div class="col-md-6 w-50">
+						<button type="button" class="btn btn-info w-100" onclick="view_block('view_public_key')">Public key</button>
+					</div>
+				</div>
+			</div>
+		  	<div id="view_public_key" style="display: none" class="card text-white bg-dark mb-3">
+		  		<h5 class="card-header">Public key</h5>
+		  		<div class="card-header">
+		  			<div class="form-group row">
+						<div class="col-md-6 w-50">
+							<button type="button" class="btn btn-success w-100" onclick="copy_text('public_key')">Copy</button>
+						</div>
+						<div class="col-md-6 w-50">
+							<form class="text-center" method="POST" action="/network/read">
+								<input type="hidden" name="public_key" value="{{ .Email.SenderPubl }}">
+								<input type="submit" name="submit" value="QR code" class="btn btn-success w-100">
+							</form>
+						</div>
+					</div>
+		  		</div>
+				<div class="card-body">
+		    		<h6 class="card-text">{{ .Email.SenderPubl }}</h6>
+		    	</div>
+		  	</div>
+		</div>
+		<div class="card text-white bg-dark mb-3">
+			<h5 class="card-header bg-secondary">Email</h5>
+			<h5 class="card-header bg-dark">{{ index $texts 0 }}</h5>
+		  	<div class="card-body">
+		  		{{ $msg := (split (index $texts 1) "\n") }}
+		    	{{ range $msg }}
+		    		<h6 class="card-text">{{ . }}</h6>
+		    	{{ end }}
+		  	</div>
+		</div>
+		{{ if $files }}
+			<div class="card text-white bg-dark mb-3">
+				<h5 class="card-header bg-secondary">Files</h5>
+			  	<div class="card-body row">
+			    	{{ range $files }}
+			    		<div class="text-white bg-dark col-md-4 mb-3">
+			    			<a title="Filename: {{ index . 0 }}" class="btn btn-success card-body text-truncate w-100" download="{{ index . 0 }}" href="data:text/plain;base64,{{ index . 1 }}">{{ index . 0 }}</a>
+			    		</div>
+			    	{{ end }}
+			  	</div>
+			</div>
+		{{ end }}
+		<div class="card text-white bg-dark mb-3">
+			<h5 class="card-header bg-secondary">Time</h5>
+		  	<div class="card-body">
+		    	<h6 class="card-text">{{ .Email.Time }}</h6>
+		  	</div>
+		</div>
+		<div class="card text-white bg-dark mb-3">
+			<h5 class="card-header bg-secondary">Hash</h5>
+		  	<div class="card-body">
+		    	<h6 class="card-text">{{ .Email.Hash }}</h6>
+		  	</div>
+		</div>
+		<div class="form-group">
+			<form class="text-center" method="POST" action="/network">
+				<input type="hidden" name="email" value="{{ .Email.Hash }}">
+				<input type="submit" name="delete" value="Delete" class="btn btn-danger w-100">
+			</form>
+		</div>
+		<div style="opacity:0">
+			<input id="public_key" type="text" value="{{ .Email.SenderPubl }}">
+		</div>
+	{{ end }}
+{{ end }}

@@ -1,0 +1,53 @@
+{{ define "title" }}
+	Network
+{{ end }}
+
+{{ define "main" }}
+	<div class="form-group row">
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="GET" action="/network/contact">
+				<input type="submit" name="submit" value="Contact" class="btn btn-success w-100">
+			</form>
+		</div>
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="GET" action="/network/connect">
+				<input type="submit" name="submit" value="Connect" class="btn btn-success w-100">
+			</form>
+		</div>
+	</div>
+	<div class="form-group row">
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="GET" action="/network/write">
+				<input type="submit" name="submit" value="Write" class="btn btn-success w-100">
+			</form>
+		</div>
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="POST" action="/network">
+				<input type="submit" name="update" value="Update" class="btn btn-success w-100">
+			</form>
+		</div>
+	</div>
+	<div class="form-group row">
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="GET" action="/network">
+				<input type="hidden" name="page" value="{{ dec .Page }}">
+				<input {{ if (not .Page) }} disabled {{ end }} type="submit" name="action" value="Back" class="btn btn-info w-100">
+			</form>
+		</div>
+		<div class="col-md-6 w-50">
+			<form class="text-center" method="GET" action="/network">
+				<input type="hidden" name="page" value="{{ inc .Page }}">
+				<input {{ if (not .Emails) }} disabled {{ end }} type="submit" name="action" value="Next" class="btn btn-info w-100">
+			</form>
+		</div>
+	</div>
+	{{ range .Emails }}
+		{{ $texts := (texts .)}}
+		<div class="form-group">
+			<form class="text-center" method="GET" action="/network/read">
+				<input type="hidden" name="email" value="{{ .Id }}">
+				<input type="submit" name="read" value="{{ .SenderName }} | {{ index $texts 0 }}" class="btn btn-secondary text-truncate w-100">
+			</form>
+		</div>
+	{{ end }}
+{{ end }}
