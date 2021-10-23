@@ -14,7 +14,7 @@ const (
 )
 
 func main() {
-	secret1 := []byte(crypto.NewPrivKey(512).Bytes())
+	secret1 := crypto.NewPrivKey(512).Bytes()
 
 	store := local.NewStorage("storage.enc", "storage-password")
 	store.Write(secret1, SUBJECT, PASSWORD)

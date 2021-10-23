@@ -9,9 +9,18 @@ import (
 type Package []byte
 
 // Size of package in big endian bytes.
-func (pack Package) Size() []byte {
-	length := uint64(len(pack.Bytes()))
-	return encoding.Uint64ToBytes(length)
+func (pack Package) Size() uint {
+	return uint(len(pack.Bytes()))
+}
+
+// Size of package in big endian bytes.
+func (pack Package) SizeToBytes() []byte {
+	return encoding.Uint64ToBytes(uint64(pack.Size()))
+}
+
+// From big endian bytes to uint size.
+func (pack Package) BytesToSize() uint {
+	return uint(encoding.BytesToUint64(pack.Bytes()))
 }
 
 // Bytes of package.

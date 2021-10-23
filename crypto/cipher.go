@@ -5,11 +5,16 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"fmt"
 	"io"
 )
 
 var (
 	_ Cipher = &CipherAES{}
+)
+
+const (
+	SymmKeyType = "gopeer\\aes"
 )
 
 type CipherAES struct {
@@ -56,6 +61,22 @@ func (cph *CipherAES) Decrypt(msg []byte) []byte {
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(msg, msg)
 	return unpaddingPKCS5(msg)
+}
+
+func (cph *CipherAES) String() string {
+	return fmt.Sprintf("Key(%s){%X}", SymmKeyType, cph.Bytes())
+}
+
+func (cph *CipherAES) Bytes() []byte {
+	return cph.key
+}
+
+func (cph *CipherAES) Type() string {
+	return SymmKeyType
+}
+
+func (cph *CipherAES) Size() uint {
+	return HashSize
 }
 
 func paddingPKCS5(ciphertext []byte, blockSize int) []byte {

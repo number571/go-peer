@@ -6,7 +6,6 @@ import (
 
 	"github.com/number571/gopeer"
 	"github.com/number571/gopeer/crypto"
-	"github.com/number571/gopeer/encoding"
 	"github.com/number571/gopeer/local"
 )
 
@@ -30,7 +29,7 @@ func readMessage(conn net.Conn) *local.Message {
 		return nil
 	}
 
-	mustLen := uint(encoding.BytesToUint64(buflen))
+	mustLen := local.Package(buflen).BytesToSize()
 	if mustLen > gopeer.Get("PACK_SIZE").(uint) {
 		return nil
 	}
@@ -71,8 +70,9 @@ func initialCheck(msg *local.Message) *local.Message {
 		return nil
 	}
 
-	diff := gopeer.Get("POWS_DIFF").(uint)
-	puzzle := crypto.NewPuzzle(uint8(diff))
+	diff := uint8(gopeer.Get("POWS_DIFF").(uint))
+
+	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
 		return nil
 	}

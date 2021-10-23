@@ -34,7 +34,8 @@ func main() {
 			},
 			Body: []byte(`{"message": "hello, world!"}`),
 		}),
-	).WithDiff(gp.Get("POWS_DIFF").(uint))
+		gp.Get("POWS_DIFF").(uint),
+	)
 
 	spub := string(readFile(FileWithPubKey))
 	route := lc.NewRoute(cr.LoadPubKeyByString(spub))

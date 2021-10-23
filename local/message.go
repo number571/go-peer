@@ -2,7 +2,6 @@ package local
 
 import (
 	"encoding/json"
-	"math"
 )
 
 // Basic structure of transport package.
@@ -12,7 +11,7 @@ type Message struct {
 }
 
 type HeadMessage struct {
-	diff    uint8
+	Diff    uint8  `json:"diff"`
 	Title   []byte `json:"title"`
 	Rand    []byte `json:"rand"`
 	Sender  []byte `json:"sender"`
@@ -27,22 +26,16 @@ type BodyMessage struct {
 }
 
 // Create message with title and data.
-func NewMessage(title, data []byte) *Message {
+func NewMessage(title, data []byte, diff uint) *Message {
 	return &Message{
 		Head: HeadMessage{
-			diff:  math.MaxUint8,
+			Diff:  uint8(diff), // <- change WithDiff()
 			Title: title,
 		},
 		Body: BodyMessage{
 			Data: data,
 		},
 	}
-}
-
-// Append difference of message.
-func (msg *Message) WithDiff(diff uint) *Message {
-	msg.Head.diff = uint8(diff)
-	return msg
 }
 
 // Serialize with JSON format.

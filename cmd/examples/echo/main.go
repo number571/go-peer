@@ -34,7 +34,8 @@ func main() {
 	msg := lc.NewMessage(
 		ROUTE_MSG,
 		[]byte("hello, world!"),
-	).WithDiff(DIFF_PACK)
+		DIFF_PACK,
+	)
 	route := lc.NewRoute(node.Client().PubKey())
 
 	// Send request 'hello, world!' to node.

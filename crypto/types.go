@@ -18,13 +18,13 @@ type Converter interface {
 type Cipher interface {
 	Encrypter
 	Decrypter
+	Converter
 }
 
-type Address string
 type PubKey interface {
 	Encrypter
 	Converter
-	Address() Address
+	Address() string
 	Verify(msg []byte, sig []byte) bool
 }
 

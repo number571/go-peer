@@ -24,14 +24,11 @@ func (route *Route) Receiver() crypto.PubKey {
 	return route.receiver
 }
 
-// Set pseudo sender to route.
-func (route *Route) WithSender(psender crypto.PrivKey) *Route {
-	route.psender = psender
-	return route
-}
-
-// Set route-nodes to route.
-func (route *Route) WithRoutes(routes []crypto.PubKey) *Route {
-	route.routes = routes
-	return route
+// Append pseude sender and routes.
+func (route *Route) WithRoad(psender crypto.PrivKey, routes []crypto.PubKey) *Route {
+	return &Route{
+		receiver: route.receiver,
+		psender:  psender,
+		routes:   routes,
+	}
 }

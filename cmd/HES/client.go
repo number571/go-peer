@@ -780,7 +780,7 @@ func newEmail(sender, head, body string) *lc.Message {
 		SenderName: sender,
 		Head:       head,
 		Body:       body,
-	})).WithDiff(POWSDIFF)
+	}), POWSDIFF)
 }
 
 func getName(user *User) string {

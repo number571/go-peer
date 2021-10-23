@@ -7,7 +7,8 @@
 
 ## Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
-* Hidden Email Service: [github.com/number571/HES](https://github.com/number571/HES "HES");
+* Hidden Lake Service: [github.com/number571/gopeer/HLS](https://github.com/number571/gopeer/tree/master/cmd/HLS "HLS");
+* Hidden Email Service: [github.com/number571/gopeer/HES](https://github.com/number571/gopeer/tree/master/cmd/HES "HES");
 
 ## Description
 > Part from "The theory of the structure of hidden systems" (Translated) [page 8]

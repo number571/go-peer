@@ -46,7 +46,7 @@ func main() {
 
 	diff := gp.Get("POWS_DIFF").(uint)
 	res, err := node1.Send(
-		lc.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
+		lc.NewMessage(ROUTE_MSG, []byte("hello, world!"), diff),
 		lc.NewRoute(node2.Client().PubKey()),
 	)
 	if err != nil {

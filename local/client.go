@@ -51,9 +51,10 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 		session = crypto.Rand(gopeer.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
+
 	return &Message{
 		Head: HeadMessage{
-			diff:    msg.Head.diff,
+			Diff:    msg.Head.Diff,
 			Rand:    cipher.Encrypt(rand),
 			Title:   cipher.Encrypt(msg.Head.Title),
 			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
@@ -63,7 +64,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 			Data: cipher.Encrypt(msg.Body.Data),
 			Hash: hash,
 			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(msg.Head.diff).Proof(hash),
+			Npow: crypto.NewPuzzle(msg.Head.Diff).Proof(hash),
 		},
 	}
 }
@@ -73,21 +74,26 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 func (client *Client) Decrypt(msg *Message) *Message {
 	hash := msg.Body.Hash
 
-	if !crypto.NewPuzzle(msg.Head.diff).Verify(hash, msg.Body.Npow) {
+	// Proof of work. Prevent spam.
+	puzzle := crypto.NewPuzzle(msg.Head.Diff)
+	if !puzzle.Verify(hash, msg.Body.Npow) {
 		return nil
 	}
 
+	// Decrypt session key by private key of receiver.
 	session := client.PrivKey().Decrypt(msg.Head.Session)
 	if session == nil {
 		return nil
 	}
 
+	// Decrypt public key of sender by decrypted session key.
 	cipher := crypto.NewCipher(session)
 	publicBytes := cipher.Decrypt(msg.Head.Sender)
 	if publicBytes == nil {
 		return nil
 	}
 
+	// Load public key and check standart size.
 	public := crypto.LoadPubKey(publicBytes)
 	if public == nil {
 		return nil
@@ -96,6 +102,8 @@ func (client *Client) Decrypt(msg *Message) *Message {
 		return nil
 	}
 
+	// Decrypt sign of message and verify this
+	// by public key of sender and hash of message.
 	sign := cipher.Decrypt(msg.Body.Sign)
 	if sign == nil {
 		return nil
@@ -104,21 +112,25 @@ func (client *Client) Decrypt(msg *Message) *Message {
 		return nil
 	}
 
+	// Decrypt title of message by session key.
 	titleBytes := cipher.Decrypt(msg.Head.Title)
 	if titleBytes == nil {
 		return nil
 	}
 
+	// Decrypt main data of message by session key.
 	dataBytes := cipher.Decrypt(msg.Body.Data)
 	if dataBytes == nil {
 		return nil
 	}
 
+	// Decrypt random string by session key.
 	rand := cipher.Decrypt(msg.Head.Rand)
 	if rand == nil {
 		return nil
 	}
 
+	// Check received hash and generated hash.
 	check := crypto.SumHash(bytes.Join(
 		[][]byte{
 			rand,
@@ -133,9 +145,10 @@ func (client *Client) Decrypt(msg *Message) *Message {
 		return nil
 	}
 
+	// Return decrypted message.
 	return &Message{
 		Head: HeadMessage{
-			diff:    msg.Head.diff,
+			Diff:    msg.Head.Diff,
 			Title:   titleBytes,
 			Rand:    rand,
 			Sender:  publicBytes,
@@ -157,10 +170,10 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 		rmsg    = client.Encrypt(route.receiver, msg)
 		psender = NewClient(route.psender)
 	)
-	if len(route.routes) != 0 && psender == nil {
+	if psender == nil && len(route.routes) != 0 {
 		return nil
 	}
-	diff := uint(msg.Head.diff)
+	diff := uint(msg.Head.Diff)
 	for _, pub := range route.routes {
 		pack := rmsg.Serialize()
 		rmsg = psender.Encrypt(
@@ -168,7 +181,8 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 			NewMessage(
 				gopeer.Get("ROUTE_MSG").([]byte),
 				pack.Bytes(),
-			).WithDiff(diff),
+				diff,
+			),
 		)
 	}
 	return rmsg

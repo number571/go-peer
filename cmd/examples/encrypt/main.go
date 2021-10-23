@@ -12,8 +12,8 @@ func main() {
 	client1 := lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
 	client2 := lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint)))
 
-	msg := lc.NewMessage([]byte("header"), []byte("hello, world!"))
-	encmsg := client1.Encrypt(client2.PubKey(), msg.WithDiff(0))
+	msg := lc.NewMessage([]byte("header"), []byte("hello, world!"), 0)
+	encmsg := client1.Encrypt(client2.PubKey(), msg)
 
 	decmsg := client2.Decrypt(encmsg)
 

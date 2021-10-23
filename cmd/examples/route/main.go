@@ -57,8 +57,8 @@ func main() {
 	diff := gp.Get("POWS_DIFF").(uint)
 	for i := 0; i < 10; i++ {
 		res, err := client1.Send(
-			lc.NewMessage(ROUTE_MSG, []byte("hello, world!")).WithDiff(diff),
-			lc.NewRoute(client2.Client().PubKey()).WithSender(psender).WithRoutes(routes),
+			lc.NewMessage(ROUTE_MSG, []byte("hello, world!"), diff),
+			lc.NewRoute(client2.Client().PubKey()).WithRoad(psender, routes),
 		)
 		if err != nil {
 			fmt.Println(err)

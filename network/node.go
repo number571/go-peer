@@ -97,26 +97,25 @@ func (node *Node) Send(msg *local.Message, route *local.Route) ([]byte, error) {
 	var (
 		err      error
 		result   []byte
-		hash     = string(route.Receiver().Address())
+		hash     = route.Receiver().Address()
 		retryNum = gopeer.Get("RETRY_NUM").(uint)
 	)
 
 	node.setAction(hash)
-	defer func() {
-		node.delAction(hash)
-	}()
+	defer node.delAction(hash)
 
 REPEAT:
 	routeMsg := node.client.RouteMessage(msg, route)
 	if routeMsg == nil {
-		return result, errors.New("psender is nil")
+		return result, errors.New("psender is nil and routes not nil")
 	}
 
 	node.send(routeMsg)
+	waitTime := time.Duration(gopeer.Get("WAIT_TIME").(uint))
 
 	select {
-	case result = <-node.actions[hash]:
-	case <-time.After(time.Duration(gopeer.Get("WAIT_TIME").(uint)) * time.Second):
+	case result = <-node.getAction(hash):
+	case <-time.After(waitTime * time.Second):
 		if retryNum > 1 {
 			retryNum -= 1
 			goto REPEAT
@@ -124,6 +123,7 @@ REPEAT:
 		err = errors.New("time is over")
 	}
 
+	node.delAction(hash)
 	return result, err
 }
 
@@ -181,9 +181,8 @@ func (node *Node) handleConn(id string) {
 	)
 
 	var (
-		failCounter = NUM_FAILS
+		failCounter = 0
 		conn        = node.getConnection(id)
-		diff        = gopeer.Get("POWS_DIFF").(uint)
 	)
 
 	defer func() {
@@ -192,17 +191,17 @@ func (node *Node) handleConn(id string) {
 	}()
 
 	for {
-		if failCounter == 0 {
+		if failCounter == NUM_FAILS {
 			break
 		}
 
 		msg := readMessage(conn)
 		if msg == nil {
-			failCounter--
+			failCounter++
 			continue
 		}
 
-		failCounter = NUM_FAILS
+		failCounter = 0
 
 	REPEAT:
 		if node.inMapping(msg.Body.Hash) {
@@ -212,12 +211,16 @@ func (node *Node) handleConn(id string) {
 
 		node.send(msg)
 
-		decMsg := node.client.Decrypt(msg.WithDiff(diff))
+		decMsg := node.client.Decrypt(msg)
 		if decMsg == nil {
 			continue
 		}
 
 		sender := crypto.LoadPubKey(decMsg.Head.Sender)
+		if sender == nil {
+			continue
+		}
+
 		if node.f2f.State() && !node.f2f.InList(sender) {
 			continue
 		}
@@ -233,8 +236,10 @@ func (node *Node) handleConn(id string) {
 
 func (node *Node) handleFunc(msg *local.Message) {
 	fname := msg.Head.Title
+	respBytes := gopeer.Get("RET_BYTES").([]byte)
 
-	if bytes.HasPrefix(fname, gopeer.Get("RET_BYTES").([]byte)) {
+	// Receive response
+	if bytes.HasPrefix(fname, respBytes) {
 		node.response(
 			crypto.LoadPubKey(msg.Head.Sender),
 			msg.Body.Data,
@@ -242,6 +247,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 		return
 	}
 
+	// Send response
 	diff := gopeer.Get("POWS_DIFF").(uint)
 
 	handler := node.getFunction(fname)
@@ -257,7 +263,8 @@ func (node *Node) handleFunc(msg *local.Message) {
 				fname,
 			}, []byte{}),
 			handler(node.client, msg),
-		).WithDiff(diff),
+			diff,
+		),
 	))
 }
 
@@ -268,7 +275,7 @@ func (node *Node) send(msg *local.Message) {
 	pack := msg.Serialize()
 	bytesMsg := bytes.Join(
 		[][]byte{
-			pack.Size(),
+			pack.SizeToBytes(),
 			pack.Bytes(),
 		},
 		[]byte{},
@@ -284,7 +291,7 @@ func (node *Node) response(pub crypto.PubKey, data []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	hash := string(pub.Address())
+	hash := pub.Address()
 	if _, ok := node.actions[hash]; ok {
 		node.actions[hash] <- data
 	}
@@ -302,6 +309,18 @@ func (node *Node) setAction(hash string) {
 	defer node.mutex.Unlock()
 
 	node.actions[hash] = make(chan []byte)
+}
+
+func (node *Node) getAction(hash string) chan []byte {
+	node.mutex.Lock()
+	defer node.mutex.Unlock()
+
+	ch, ok := node.actions[hash]
+	if !ok {
+		return make(chan []byte)
+	}
+
+	return ch
 }
 
 func (node *Node) delAction(hash string) {

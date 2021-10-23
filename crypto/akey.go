@@ -19,7 +19,7 @@ var (
 )
 
 const (
-	KeyType       = "gopeer\\rsa"
+	AsymmKeyType  = "gopeer\\rsa"
 	TruncatedSize = 20
 )
 
@@ -46,7 +46,7 @@ func LoadPrivKey(pbytes []byte) PrivKey {
 
 func LoadPrivKeyByString(pstring string) PrivKey {
 	var (
-		prefix = fmt.Sprintf("Priv(%s){", KeyType)
+		prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
 		suffix = "}"
 	)
 	if !strings.HasPrefix(pstring, prefix) {
@@ -81,11 +81,11 @@ func (key *PrivKeyRSA) Bytes() []byte {
 }
 
 func (key *PrivKeyRSA) String() string {
-	return fmt.Sprintf("Priv(%s){%X}", KeyType, key.Bytes())
+	return fmt.Sprintf("Priv(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
 func (key *PrivKeyRSA) Type() string {
-	return KeyType
+	return AsymmKeyType
 }
 
 func (key *PrivKeyRSA) Size() uint {
@@ -137,7 +137,7 @@ func LoadPubKey(pbytes []byte) PubKey {
 
 func LoadPubKeyByString(pstring string) PubKey {
 	var (
-		prefix = fmt.Sprintf("Pub(%s){", KeyType)
+		prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
 		suffix = "}"
 	)
 	if !strings.HasPrefix(pstring, prefix) {
@@ -159,9 +159,9 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
-func (key *PubKeyRSA) Address() Address {
+func (key *PubKeyRSA) Address() string {
 	hash := SumHash(key.Bytes())[:TruncatedSize]
-	return Address(encoding.Base64Encode(hash))
+	return encoding.Base64Encode(hash)
 }
 
 func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
@@ -173,11 +173,11 @@ func (key *PubKeyRSA) Bytes() []byte {
 }
 
 func (key *PubKeyRSA) String() string {
-	return fmt.Sprintf("Pub(%s){%X}", KeyType, key.Bytes())
+	return fmt.Sprintf("Pub(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
 func (key *PubKeyRSA) Type() string {
-	return KeyType
+	return AsymmKeyType
 }
 
 func (key *PubKeyRSA) Size() uint {
