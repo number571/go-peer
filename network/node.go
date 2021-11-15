@@ -73,9 +73,10 @@ func (node *Node) Listen(address string) error {
 			continue
 		}
 
-		id := encoding.Base64Encode(crypto.Rand(gopeer.Get("RAND_SIZE").(uint)))
-		node.setConnection(id, conn)
+		randBytes := crypto.Rand(gopeer.Get("RAND_SIZE").(uint))
+		id := encoding.Base64Encode(randBytes)
 
+		node.setConnection(id, conn)
 		go node.handleConn(id)
 	}
 
@@ -95,35 +96,40 @@ func (node *Node) Handle(title []byte, handle func(*local.Client, *local.Message
 // Function supported multiple routing with pseudo sender.
 func (node *Node) Send(msg *local.Message, route *local.Route) ([]byte, error) {
 	var (
-		err      error
-		result   []byte
+		result []byte
+		err    error
+	)
+
+	var (
+		counter  = uint(0)
 		hash     = route.Receiver().Address()
+		waitTime = time.Duration(gopeer.Get("WAIT_TIME").(uint))
 		retryNum = gopeer.Get("RETRY_NUM").(uint)
 	)
 
 	node.setAction(hash)
 	defer node.delAction(hash)
 
-REPEAT:
-	routeMsg := node.client.RouteMessage(msg, route)
-	if routeMsg == nil {
-		return result, errors.New("psender is nil and routes not nil")
+LOOP:
+	for counter = 0; counter < retryNum; counter++ {
+		routeMsg := node.client.RouteMessage(msg, route)
+		if routeMsg == nil {
+			return nil, errors.New("psender is nil and routes not nil")
+		}
+
+		node.send(routeMsg)
+		select {
+		case result = <-node.getAction(hash):
+			break LOOP
+		case <-time.After(waitTime * time.Second):
+			continue LOOP
+		}
 	}
 
-	node.send(routeMsg)
-	waitTime := time.Duration(gopeer.Get("WAIT_TIME").(uint))
-
-	select {
-	case result = <-node.getAction(hash):
-	case <-time.After(waitTime * time.Second):
-		if retryNum > 1 {
-			retryNum -= 1
-			goto REPEAT
-		}
+	if counter == retryNum {
 		err = errors.New("time is over")
 	}
 
-	node.delAction(hash)
 	return result, err
 }
 
@@ -176,13 +182,10 @@ func (node *Node) Disconnect(address string) {
 }
 
 func (node *Node) handleConn(id string) {
-	const (
-		NUM_FAILS = 5
-	)
-
 	var (
-		failCounter = 0
-		conn        = node.getConnection(id)
+		counter  = uint(0)
+		retryNum = gopeer.Get("RETRY_NUM").(uint)
+		conn     = node.getConnection(id)
 	)
 
 	defer func() {
@@ -191,17 +194,17 @@ func (node *Node) handleConn(id string) {
 	}()
 
 	for {
-		if failCounter == NUM_FAILS {
+		if counter == retryNum {
 			break
 		}
 
 		msg := readMessage(conn)
 		if msg == nil {
-			failCounter++
+			counter++
 			continue
 		}
 
-		failCounter = 0
+		counter = 0
 
 	REPEAT:
 		if node.inMapping(msg.Body.Hash) {
@@ -258,10 +261,13 @@ func (node *Node) handleFunc(msg *local.Message) {
 	node.send(node.client.Encrypt(
 		crypto.LoadPubKey(msg.Head.Sender),
 		local.NewMessage(
-			bytes.Join([][]byte{
-				gopeer.Get("RET_BYTES").([]byte),
-				fname,
-			}, []byte{}),
+			bytes.Join(
+				[][]byte{
+					respBytes,
+					fname,
+				},
+				[]byte{},
+			),
 			handler(node.client, msg),
 			diff,
 		),

@@ -11,13 +11,13 @@ import (
 
 func readMessage(conn net.Conn) *local.Message {
 	const (
-		UINT64_SIZE = 8 // bytes
+		SizeUint64 = 8 // bytes
 	)
 
 	var (
 		pack   []byte
 		size   = uint(0)
-		buflen = make([]byte, UINT64_SIZE)
+		buflen = make([]byte, SizeUint64)
 		buffer = make([]byte, gopeer.Get("BUFF_SIZE").(uint))
 	)
 
@@ -25,7 +25,7 @@ func readMessage(conn net.Conn) *local.Message {
 	if err != nil {
 		return nil
 	}
-	if length != UINT64_SIZE {
+	if length != SizeUint64 {
 		return nil
 	}
 
