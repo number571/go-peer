@@ -1,6 +1,6 @@
 # HES
 
-> Hidden email service. Version 1.1.11s.
+> Hidden email service. Version 1.1.11.
 
 ### Home page
 <img src="/cmd/HES/userside/images/HES1.png" alt="HomePage"/>

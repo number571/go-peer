@@ -13,7 +13,7 @@ type settingsStruct struct {
 	MAPP_SIZE uint
 	AKEY_SIZE uint
 	SKEY_SIZE uint
-	RAND_SIZE uint
+	SALT_SIZE uint
 }
 
 var settings = defaultSettings()
@@ -34,7 +34,7 @@ func defaultSettings() settingsStruct {
 		MAPP_SIZE: 2 << 10,                                    // 2*(2^10)H = 88KiB
 		AKEY_SIZE: 2 << 10,                                    // 2*(2^10)b = 256B
 		SKEY_SIZE: 1 << 5,                                     // 2^5B = 32B
-		RAND_SIZE: 1 << 4,                                     // 2^4B = 16B
+		SALT_SIZE: 1 << 4,                                     // 2^4B = 16B
 	}
 }
 
@@ -81,8 +81,8 @@ func Get(key string) interface{} {
 		return settings.AKEY_SIZE
 	case "SKEY_SIZE":
 		return settings.SKEY_SIZE
-	case "RAND_SIZE":
-		return settings.RAND_SIZE
+	case "SALT_SIZE":
+		return settings.SALT_SIZE
 	default:
 		return nil
 	}
@@ -122,8 +122,8 @@ func intSettings(name string, data interface{}) uint8 {
 		settings.AKEY_SIZE = result
 	case "SKEY_SIZE":
 		settings.SKEY_SIZE = result
-	case "RAND_SIZE":
-		settings.RAND_SIZE = result
+	case "SALT_SIZE":
+		settings.SALT_SIZE = result
 	default:
 		return 1
 	}

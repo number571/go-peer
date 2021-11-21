@@ -37,7 +37,7 @@ func (client *Client) PrivKey() crypto.PrivKey {
 // The message can be decrypted only if private key is known.
 func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 	var (
-		rand = crypto.Rand(gopeer.Get("RAND_SIZE").(uint))
+		rand = crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
 		hash = crypto.SumHash(bytes.Join(
 			[][]byte{
 				rand,
@@ -48,7 +48,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 			},
 			[]byte{},
 		))
-		session = crypto.Rand(gopeer.Get("SKEY_SIZE").(uint))
+		session = crypto.RandBytes(gopeer.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
 

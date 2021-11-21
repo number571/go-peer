@@ -25,7 +25,6 @@ type Node struct {
 }
 
 // Create client by private key as identification.
-// Handle function is used when the network exists. Can be null.
 func NewNode(client *local.Client) *Node {
 	if client == nil {
 		return nil
@@ -68,12 +67,12 @@ func (node *Node) Listen(address string) error {
 			break
 		}
 
-		if node.isMaxConnSize() {
+		if node.hasMaxConnSize() {
 			conn.Close()
 			continue
 		}
 
-		randBytes := crypto.Rand(gopeer.Get("RAND_SIZE").(uint))
+		randBytes := crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
 		id := encoding.Base64Encode(randBytes)
 
 		node.setConnection(id, conn)
@@ -85,10 +84,7 @@ func (node *Node) Listen(address string) error {
 
 // Add function to mapping for route use.
 func (node *Node) Handle(title []byte, handle func(*local.Client, *local.Message) []byte) *Node {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
-
-	node.hroutes[encoding.Base64Encode(title)] = handle
+	node.setFunction(title, handle)
 	return node
 }
 
@@ -158,7 +154,7 @@ func (node *Node) InConnections(address string) bool {
 // Connect to node by address.
 // Client handle function need be not null.
 func (node *Node) Connect(address string) error {
-	if node.isMaxConnSize() {
+	if node.hasMaxConnSize() {
 		return errors.New("max conn")
 	}
 
@@ -251,8 +247,6 @@ func (node *Node) handleFunc(msg *local.Message) {
 	}
 
 	// Send response
-	diff := gopeer.Get("POWS_DIFF").(uint)
-
 	handler := node.getFunction(fname)
 	if handler == nil {
 		return
@@ -269,7 +263,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 				[]byte{},
 			),
 			handler(node.client, msg),
-			diff,
+			gopeer.Get("POWS_DIFF").(uint),
 		),
 	))
 }
@@ -301,6 +295,13 @@ func (node *Node) response(pub crypto.PubKey, data []byte) {
 	if _, ok := node.actions[hash]; ok {
 		node.actions[hash] <- data
 	}
+}
+
+func (node *Node) setFunction(name []byte, handle func(*local.Client, *local.Message) []byte) {
+	node.mutex.Lock()
+	defer node.mutex.Unlock()
+
+	node.hroutes[encoding.Base64Encode(name)] = handle
 }
 
 func (node *Node) getFunction(name []byte) func(*local.Client, *local.Message) []byte {
@@ -355,7 +356,7 @@ func (node *Node) inMapping(hash []byte) bool {
 	return ok
 }
 
-func (node *Node) isMaxConnSize() bool {
+func (node *Node) hasMaxConnSize() bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 

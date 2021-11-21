@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/number571/gopeer"
 	"github.com/number571/gopeer/crypto"
 	"github.com/number571/gopeer/encoding"
 )
@@ -21,9 +22,9 @@ type storageData struct {
 	Secrets map[string][]byte `json:"secrets"`
 }
 
-const (
-	workSize = 20 // bits
-	saltSize = 32 // bytes
+var (
+	workSize = gopeer.Get("POWS_DIFF").(uint) // bits
+	saltSize = gopeer.Get("SALT_SIZE").(uint) // bytes
 )
 
 func NewStorage(path, password string) *Storage {
@@ -38,7 +39,7 @@ func NewStorage(path, password string) *Storage {
 		}
 		store.salt = encdata[:saltSize]
 	} else {
-		store.salt = crypto.Rand(saltSize)
+		store.salt = crypto.RandBytes(saltSize)
 	}
 
 	ekey := crypto.RaiseEntropy([]byte(password), store.salt, workSize)
