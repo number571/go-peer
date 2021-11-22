@@ -53,23 +53,23 @@ func msgRoute(client *lc.Client, msg *lc.Message) []byte {
 
 ## Example of entropy increase (sixth stage of anonymity)
 
-1. request(1)[`I, II`]
-	(A → B OR A → C)
-2. routing(1)[`I`] = response(1)[`II`]
-	(B → C OR C → B)
-	OR
-	(B → A OR C → A)
-3. routing(~1)[`I`] = request(2)[`II, III`]
-	(B → C OR C → B) 
-	OR
-	( (B → A OR B → C) OR (C → A OR C → B) )
-4. response(1)[`I`] = response(2)[`II`] = routing(2)[`III`]
-	(B → A OR C → A)
-	OR
-	( (A → B OR C → B) OR (A → C OR B → C) )
-	OR
-	( (A → C OR C → A) OR (A → B OR B → A) )
-5. ...
+1. request(1)[`I, II`] <br>
+	(A → B OR A → C) <br>
+2. routing(1)[`I`] = response(1)[`II`] <br>
+	(B → C OR C → B) <br>
+	OR <br>
+	(B → A OR C → A) <br>
+3. routing(~1)[`I`] = request(2)[`II, III`] <br>
+	(B → C OR C → B) <br>
+	OR <br>
+	( (B → A OR B → C) OR (C → A OR C → B) ) <br>
+4. response(1)[`I`] = response(2)[`II`] = routing(2)[`III`] <br>
+	(B → A OR C → A) <br>
+	OR <br>
+	( (A → B OR C → B) OR (A → C OR B → C) ) <br>
+	OR <br>
+	( (A → C OR C → A) OR (A → B OR B → A) ) <br>
+5. ... 
 
 ## Need to do
 > Pages from “Theory of the structure of hidden systems” 
