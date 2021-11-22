@@ -54,21 +54,21 @@ func msgRoute(client *lc.Client, msg *lc.Message) []byte {
 ## Example of entropy increase (sixth stage of anonymity)
 
 1. request(1)[`I, II`] <br>
-	(A → B OR A → C) <br>
+	(_A → B OR A → C_) <br>
 2. routing(1)[`I`] = response(1)[`II`] <br>
-	(B → C OR C → B) <br>
-	OR <br>
-	(B → A OR C → A) <br>
+	(_B → C OR C → B_) <br>
+	_OR_ <br>
+	(_B → A OR C → A_) <br>
 3. routing(~1)[`I`] = request(2)[`II, III`] <br>
-	(B → C OR C → B) <br>
-	OR <br>
-	( (B → A OR B → C) OR (C → A OR C → B) ) <br>
+	(_B → C OR C → B_) <br>
+	_OR_ <br>
+	( (_B → A OR B → C_) _OR_ (_C → A OR C → B_) ) <br>
 4. response(1)[`I`] = response(2)[`II`] = routing(2)[`III`] <br>
-	(B → A OR C → A) <br>
-	OR <br>
-	( (A → B OR C → B) OR (A → C OR B → C) ) <br>
-	OR <br>
-	( (A → C OR C → A) OR (A → B OR B → A) ) <br>
+	(_B → A OR C → A_) <br>
+	_OR_ <br>
+	( (_A → B OR C → B_) _OR_ (_A → C OR B → C_) ) <br>
+	_OR_ <br>
+	( (_A → C OR C → A_) _OR_ (_A → B OR B → A_) ) <br>
 5. ... 
 
 ## Need to do
