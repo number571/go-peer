@@ -51,7 +51,8 @@ func msgRoute(client *lc.Client, msg *lc.Message) []byte {
 }
 ```
 
-## Example of entropy increase (sixth stage of anonymity)
+## Entropy increase
+> Example of how the sixth stage of anonymity generates probabilistic polymorphism
 
 1. request(1)[`I, II`] <br>
 	(_A → B OR A → C_) <br>
