@@ -1,7 +1,7 @@
 main
-echo
-encrypt
-f2f
-route
-storage
-storage.enc
+echo/echo
+encrypt/encrypt
+f2f/f2f
+route/route
+storage/storage 
+storage/storage.enc

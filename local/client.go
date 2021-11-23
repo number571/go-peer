@@ -38,7 +38,7 @@ func (client *Client) PrivKey() crypto.PrivKey {
 func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 	var (
 		rand = crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
-		hash = crypto.SumHash(bytes.Join(
+		hash = crypto.NewSHA256(bytes.Join(
 			[][]byte{
 				rand,
 				client.PubKey().Bytes(),
@@ -47,7 +47,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 				msg.Body.Data,
 			},
 			[]byte{},
-		))
+		)).Bytes()
 		session = crypto.RandBytes(gopeer.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
@@ -131,7 +131,7 @@ func (client *Client) Decrypt(msg *Message) *Message {
 	}
 
 	// Check received hash and generated hash.
-	check := crypto.SumHash(bytes.Join(
+	check := crypto.NewSHA256(bytes.Join(
 		[][]byte{
 			rand,
 			publicBytes,
@@ -140,7 +140,7 @@ func (client *Client) Decrypt(msg *Message) *Message {
 			dataBytes,
 		},
 		[]byte{},
-	))
+	)).Bytes()
 	if !bytes.Equal(check, hash) {
 		return nil
 	}

@@ -86,7 +86,7 @@ func (db *DB) StateF2F(user *User) bool {
 	)
 	row := db.ptr.QueryRow(
 		"SELECT f2f FROM users WHERE hashn=$1",
-		en.Base64Encode(cr.SumHash([]byte(user.Name))),
+		cr.NewSHA256([]byte(user.Name)).String(),
 	)
 	row.Scan(&f2f)
 	return f2f
@@ -99,7 +99,7 @@ func (db *DB) SwitchF2F(user *User) error {
 	_, err := db.ptr.Exec(
 		"UPDATE users SET f2f=$1 WHERE hashn=$2",
 		f2f,
-		en.Base64Encode(cr.SumHash([]byte(user.Name))),
+		cr.NewSHA256([]byte(user.Name)).String(),
 	)
 	return err
 }
@@ -120,19 +120,19 @@ func (db *DB) SetUser(name, pasw string, priv cr.PrivKey) error {
 	if db.userExist(name) {
 		return fmt.Errorf("user already exist")
 	}
-	salt := cr.Rand(gp.Get("RAND_SIZE").(uint))
+	salt := cr.RandBytes(gp.Get("RAND_SIZE").(uint))
 	bpasw := cr.RaiseEntropy([]byte(pasw), salt, PASWDIFF)
-	hpasw := cr.SumHash(bytes.Join(
+	hpasw := cr.NewSHA256(bytes.Join(
 		[][]byte{
 			bpasw,
 			[]byte(name),
 		},
 		[]byte{},
-	))
+	)).Bytes()
 	cipher := cr.NewCipher(bpasw)
 	_, err := db.ptr.Exec(
 		"INSERT INTO users (hashn, hashp, salt, priv, f2f) VALUES ($1, $2, $3, $4, 0)",
-		en.Base64Encode(cr.SumHash([]byte(name))),
+		cr.NewSHA256([]byte(name)).String(),
 		en.Base64Encode(hpasw),
 		en.Base64Encode(salt),
 		en.Base64Encode(cipher.Encrypt(priv.Bytes())),
@@ -152,7 +152,7 @@ func (db *DB) GetUser(name, pasw string) *User {
 	name = strings.TrimSpace(name)
 	row := db.ptr.QueryRow(
 		"SELECT id, hashp, salt, priv FROM users WHERE hashn=$1",
-		en.Base64Encode(cr.SumHash([]byte(name))),
+		cr.NewSHA256([]byte(name)).String(),
 	)
 	row.Scan(&id, &hpasw, &ssalt, &spriv)
 	if spriv == "" {
@@ -160,13 +160,13 @@ func (db *DB) GetUser(name, pasw string) *User {
 	}
 	salt := en.Base64Decode(ssalt)
 	bpasw := cr.RaiseEntropy([]byte(pasw), salt, PASWDIFF)
-	chpasw := cr.SumHash(bytes.Join(
+	chpasw := cr.NewSHA256(bytes.Join(
 		[][]byte{
 			bpasw,
 			[]byte(name),
 		},
 		[]byte{},
-	))
+	)).Bytes()
 	if !bytes.Equal(chpasw, en.Base64Decode(hpasw)) {
 		return nil
 	}
@@ -468,7 +468,7 @@ func (db *DB) userExist(name string) bool {
 	)
 	row := db.ptr.QueryRow(
 		"SELECT name FROM users WHERE hashn=$1",
-		en.Base64Encode(cr.SumHash([]byte(name))),
+		cr.NewSHA256([]byte(name)).String(),
 	)
 	row.Scan(&namee)
 	return namee != ""
@@ -515,11 +515,5 @@ func (db *DB) emailExist(user *User, hash string) bool {
 }
 
 func hashWithSecret(user *User, data []byte) string {
-	return en.Base64Encode(cr.SumHash(bytes.Join(
-		[][]byte{
-			data,
-			user.Pasw,
-		},
-		[]byte{},
-	)))
+	return cr.NewHMAC256(data, user.Pasw).String()
 }

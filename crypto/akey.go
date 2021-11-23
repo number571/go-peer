@@ -9,8 +9,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
-
-	"github.com/number571/gopeer/encoding"
 )
 
 var (
@@ -19,8 +17,7 @@ var (
 )
 
 const (
-	AsymmKeyType  = "gopeer\\rsa"
-	TruncatedSize = 20
+	AsymmKeyType = "gopeer\\rsa"
 )
 
 /*
@@ -160,8 +157,7 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 }
 
 func (key *PubKeyRSA) Address() string {
-	hash := SumHash(key.Bytes())[:TruncatedSize]
-	return encoding.Base64Encode(hash)
+	return NewSHA256(key.Bytes()).String()
 }
 
 func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {

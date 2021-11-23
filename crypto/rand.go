@@ -6,7 +6,7 @@ import (
 	"github.com/number571/gopeer/encoding"
 )
 
-// Generates a cryptographically strong pseudo-random sequence.
+// Generates a cryptographically strong pseudo-random bytes.
 func RandBytes(max uint) []byte {
 	slice := make([]byte, max)
 	_, err := rand.Read(slice)
@@ -14,6 +14,11 @@ func RandBytes(max uint) []byte {
 		return nil
 	}
 	return slice
+}
+
+// Generates a cryptographically strong pseudo-random string.
+func RandString(max uint) string {
+	return encoding.Base64Encode(RandBytes(max))[:max]
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.

@@ -64,7 +64,7 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
 		response(w, 2, "error: parse json")
 		return
 	}
-	pasw := cr.SumHash([]byte(FLCONFIG.Pasw))
+	pasw := cr.NewSHA256([]byte(FLCONFIG.Pasw)).Bytes()
 	cipher := cr.NewCipher(pasw)
 	dect := cipher.Decrypt(en.Base64Decode(req.Macp))
 	if !bytes.Equal([]byte(TMESSAGE), dect) {
@@ -104,7 +104,7 @@ func emailSendPage(w http.ResponseWriter, r *http.Request) {
 		response(w, 5, "error: proof of work")
 		return
 	}
-	pasw := cr.SumHash([]byte(FLCONFIG.Pasw))
+	pasw := cr.NewSHA256([]byte(FLCONFIG.Pasw)).Bytes()
 	cipher := cr.NewCipher(pasw)
 	dech := cipher.Decrypt(en.Base64Decode(req.Macp))
 	if !bytes.Equal(hash, dech) {
@@ -119,7 +119,7 @@ func emailSendPage(w http.ResponseWriter, r *http.Request) {
 	for _, conn := range FLCONFIG.Conns {
 		go func() {
 			addr := conn[0]
-			pasw := cr.SumHash([]byte(conn[1]))
+			pasw := cr.NewSHA256([]byte(conn[1])).Bytes()
 			cipher := cr.NewCipher(pasw)
 			req.Macp = en.Base64Encode(cipher.Encrypt(hash))
 			resp, err := HTCLIENT.Post(

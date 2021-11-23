@@ -15,6 +15,10 @@ type Converter interface {
 	Size() uint
 }
 
+type Hasher interface {
+	Converter
+}
+
 type Cipher interface {
 	Encrypter
 	Decrypter

@@ -72,8 +72,7 @@ func (node *Node) Listen(address string) error {
 			continue
 		}
 
-		randBytes := crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
-		id := encoding.Base64Encode(randBytes)
+		id := crypto.RandString(gopeer.Get("SALT_SIZE").(uint))
 
 		node.setConnection(id, conn)
 		go node.handleConn(id)

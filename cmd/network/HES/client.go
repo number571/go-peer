@@ -403,7 +403,7 @@ func networkWritePage(w http.ResponseWriter, r *http.Request) {
 			goto close
 		}
 		for _, conn := range conns {
-			pasw := cr.SumHash([]byte(conn[1]))
+			pasw := cr.NewSHA256([]byte(conn[1])).Bytes()
 			cipher := cr.NewCipher(pasw)
 			req.Macp = en.Base64Encode(cipher.Encrypt(hash))
 			go writeEmails(conn[0], serialize(req))
@@ -610,7 +610,7 @@ func checkConnection(conn [2]string) (int, string) {
 		Macp string `json:"macp"`
 	}
 	var servresp Resp
-	pasw := cr.SumHash([]byte(conn[1]))
+	pasw := cr.NewSHA256([]byte(conn[1])).Bytes()
 	cipher := cr.NewCipher(pasw)
 	macp := cipher.Encrypt([]byte(TMESSAGE))
 	resp, err := HTCLIENT.Post(

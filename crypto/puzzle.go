@@ -31,13 +31,13 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 	)
 	Target.Lsh(Target, 256-uint(puzzle.diff))
 	for nonce < math.MaxUint64 {
-		hash = SumHash(bytes.Join(
+		hash = NewSHA256(bytes.Join(
 			[][]byte{
 				packHash,
 				encoding.Uint64ToBytes(nonce),
 			},
 			[]byte{},
-		))
+		)).Bytes()
 		intHash.SetBytes(hash)
 		if intHash.Cmp(Target) == -1 {
 			return nonce
@@ -51,13 +51,13 @@ func (puzzle *PuzzlePOW) Proof(packHash []byte) uint64 {
 func (puzzle *PuzzlePOW) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	Target := big.NewInt(1)
-	hash := SumHash(bytes.Join(
+	hash := NewSHA256(bytes.Join(
 		[][]byte{
 			packHash,
 			encoding.Uint64ToBytes(nonce),
 		},
 		[]byte{},
-	))
+	)).Bytes()
 	intHash.SetBytes(hash)
 	Target.Lsh(Target, 256-uint(puzzle.diff))
 	return intHash.Cmp(Target) == -1

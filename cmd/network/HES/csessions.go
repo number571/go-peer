@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	gp "github.com/number571/gopeer"
 	cr "github.com/number571/gopeer/crypto"
-	en "github.com/number571/gopeer/encoding"
 )
 
 type sessionData struct {
@@ -28,7 +28,7 @@ func (sessions *Sessions) Set(w http.ResponseWriter, user *User) {
 			break
 		}
 	}
-	key := en.Base64Encode(cr.Rand(32))
+	key := cr.RandString(gp.Get("SALT_SIZE").(uint))
 	sessions.mpn[key] = &sessionData{
 		user: user,
 		ts:   time.Now(),

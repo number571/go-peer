@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/gopeer"
 	"github.com/number571/gopeer/crypto"
-	"github.com/number571/gopeer/encoding"
 )
 
 type Storage struct {
@@ -80,7 +79,7 @@ func (store *Storage) Write(secret []byte, id, password string) error {
 			store.salt,
 		},
 		[]byte{}), workSize)
-	hash := encoding.Base64Encode(crypto.SumHash(ekey))
+	hash := crypto.NewSHA256(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
 	mapping.Secrets[hash] = cipher.Encrypt(secret)
@@ -123,7 +122,7 @@ func (store *Storage) Read(id, password string) ([]byte, error) {
 			store.salt,
 		},
 		[]byte{}), workSize)
-	hash := encoding.Base64Encode(crypto.SumHash(ekey))
+	hash := crypto.NewSHA256(ekey).String()
 
 	encsecret, ok := mapping.Secrets[hash]
 	if !ok {
@@ -155,7 +154,7 @@ func (store *Storage) Delete(id, password string) error {
 			store.salt,
 		},
 		[]byte{}), workSize)
-	hash := encoding.Base64Encode(crypto.SumHash(ekey))
+	hash := crypto.NewSHA256(ekey).String()
 
 	_, ok := mapping.Secrets[hash]
 	if !ok {

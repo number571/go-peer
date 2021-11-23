@@ -23,7 +23,7 @@ type CipherAES struct {
 
 func NewCipher(key []byte) Cipher {
 	return &CipherAES{
-		key: SumHash(key),
+		key: NewSHA256(key).Bytes(),
 	}
 }
 
