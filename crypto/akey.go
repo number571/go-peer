@@ -156,6 +156,10 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
+func (key *PubKeyRSA) Equal(pub PubKey) bool {
+	return key.Address() == pub.Address()
+}
+
 func (key *PubKeyRSA) Address() string {
 	return NewSHA256(key.Bytes()).String()
 }

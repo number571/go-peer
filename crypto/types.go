@@ -28,6 +28,7 @@ type Cipher interface {
 type PubKey interface {
 	Encrypter
 	Converter
+	Equal(PubKey) bool
 	Address() string
 	Verify(msg []byte, sig []byte) bool
 }
