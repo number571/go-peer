@@ -31,12 +31,13 @@ func main() {
 	client.Connect(NODE_ADDRESS)
 
 	// Create message and route.
+	route := lc.NewRoute(node.Client().PubKey())
+
 	msg := lc.NewMessage(
 		ROUTE_MSG,
 		[]byte("hello, world!"),
 		DIFF_PACK,
 	)
-	route := lc.NewRoute(node.Client().PubKey())
 
 	// Send request 'hello, world!' to node.
 	res, err := client.Send(msg, route)

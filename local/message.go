@@ -29,7 +29,7 @@ type BodyMessage struct {
 func NewMessage(title, data []byte, diff uint) *Message {
 	return &Message{
 		Head: HeadMessage{
-			Diff:  uint8(diff), // <- change WithDiff()
+			Diff:  uint8(diff),
 			Title: title,
 		},
 		Body: BodyMessage{

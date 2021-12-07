@@ -96,25 +96,35 @@ func (node *Node) Send(msg *local.Message, route *local.Route) ([]byte, error) {
 	)
 
 	var (
-		counter  = uint(0)
-		hash     = route.Receiver().Address()
+		nonce    = crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
 		waitTime = time.Duration(gopeer.Get("WAIT_TIME").(uint))
 		retryNum = gopeer.Get("RETRY_NUM").(uint)
+		counter  = uint(0)
 	)
 
-	node.setAction(hash)
-	defer node.delAction(hash)
+	copyMsg := *msg
+	copyMsg.Head.Title = bytes.Join(
+		[][]byte{
+			nonce,
+			msg.Head.Title,
+		},
+		[]byte{},
+	)
+
+	node.setAction(nonce)
+	defer node.delAction(nonce)
 
 LOOP:
 	for counter = 0; counter < retryNum; counter++ {
-		routeMsg := node.client.RouteMessage(msg, route)
+		routeMsg := node.client.RouteMessage(&copyMsg, route)
 		if routeMsg == nil {
 			return nil, errors.New("psender is nil and routes not nil")
 		}
 
 		node.send(routeMsg)
+
 		select {
-		case result = <-node.getAction(hash):
+		case result = <-node.getAction(nonce):
 			break LOOP
 		case <-time.After(waitTime * time.Second):
 			continue LOOP
@@ -233,13 +243,21 @@ func (node *Node) handleConn(id string) {
 }
 
 func (node *Node) handleFunc(msg *local.Message) {
-	fname := msg.Head.Title
+	nonceSize := gopeer.Get("SALT_SIZE").(uint)
+
+	if uint(len(msg.Head.Title)) < nonceSize {
+		return
+	}
+
+	nonce := msg.Head.Title[:nonceSize]
+	fname := msg.Head.Title[nonceSize:]
+
 	respBytes := gopeer.Get("RET_BYTES").([]byte)
 
 	// Receive response
 	if bytes.HasPrefix(fname, respBytes) {
 		node.response(
-			crypto.LoadPubKey(msg.Head.Sender),
+			nonce,
 			msg.Body.Data,
 		)
 		return
@@ -256,6 +274,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 		local.NewMessage(
 			bytes.Join(
 				[][]byte{
+					nonce,
 					respBytes,
 					fname,
 				},
@@ -286,13 +305,13 @@ func (node *Node) send(msg *local.Message) {
 	}
 }
 
-func (node *Node) response(pub crypto.PubKey, data []byte) {
+func (node *Node) response(nonce []byte, data []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	hash := pub.Address()
-	if _, ok := node.actions[hash]; ok {
-		node.actions[hash] <- data
+	strNonce := encoding.Base64Encode(nonce)
+	if _, ok := node.actions[strNonce]; ok {
+		node.actions[strNonce] <- data
 	}
 }
 
@@ -310,18 +329,18 @@ func (node *Node) getFunction(name []byte) func(*local.Client, *local.Message) [
 	return node.hroutes[encoding.Base64Encode(name)]
 }
 
-func (node *Node) setAction(hash string) {
+func (node *Node) setAction(nonce []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	node.actions[hash] = make(chan []byte)
+	node.actions[encoding.Base64Encode(nonce)] = make(chan []byte)
 }
 
-func (node *Node) getAction(hash string) chan []byte {
+func (node *Node) getAction(nonce []byte) chan []byte {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	ch, ok := node.actions[hash]
+	ch, ok := node.actions[encoding.Base64Encode(nonce)]
 	if !ok {
 		return make(chan []byte)
 	}
@@ -329,11 +348,11 @@ func (node *Node) getAction(hash string) chan []byte {
 	return ch
 }
 
-func (node *Node) delAction(hash string) {
+func (node *Node) delAction(nonce []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	delete(node.actions, hash)
+	delete(node.actions, encoding.Base64Encode(nonce))
 }
 
 func (node *Node) setMapping(hash []byte) {
@@ -381,4 +400,10 @@ func (node *Node) delConnection(id string) {
 	defer node.mutex.Unlock()
 
 	delete(node.connections, id)
+}
+
+type Nonce []byte
+
+func (nonce Nonce) Cmp(slice []byte) int {
+	return bytes.Compare(nonce, slice)
 }
