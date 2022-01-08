@@ -401,9 +401,3 @@ func (node *Node) delConnection(id string) {
 
 	delete(node.connections, id)
 }
-
-type Nonce []byte
-
-func (nonce Nonce) Cmp(slice []byte) int {
-	return bytes.Compare(nonce, slice)
-}
