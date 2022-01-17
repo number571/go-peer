@@ -23,5 +23,5 @@ func RandString(max uint) string {
 
 // Generate cryptographically strong pseudo-random uint64 number.
 func RandUint64() uint64 {
-	return encoding.BytesToUint64(RandBytes(4))
+	return encoding.BytesToUint64(RandBytes(8))
 }
