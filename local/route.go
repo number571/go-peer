@@ -1,6 +1,6 @@
 package local
 
-import "github.com/number571/gopeer/crypto"
+import "github.com/number571/go-peer/crypto"
 
 // Basic structure for set route to package.
 type Route struct {

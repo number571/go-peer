@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/number571/gopeer"
-	"github.com/number571/gopeer/crypto"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/settings"
 )
 
 type Storage struct {
@@ -22,8 +22,8 @@ type storageData struct {
 }
 
 var (
-	workSize = gopeer.Get("POWS_DIFF").(uint) // bits
-	saltSize = gopeer.Get("SALT_SIZE").(uint) // bytes
+	workSize = settings.Get("POWS_DIFF").(uint) // bits
+	saltSize = settings.Get("SALT_SIZE").(uint) // bytes
 )
 
 func NewStorage(path, password string) *Storage {

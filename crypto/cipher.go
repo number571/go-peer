@@ -14,7 +14,7 @@ var (
 )
 
 const (
-	SymmKeyType = "gopeer\\aes"
+	SymmKeyType = "go-peer\\aes"
 )
 
 type CipherAES struct {

@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	gp "github.com/number571/gopeer"
-	cr "github.com/number571/gopeer/crypto"
-	lc "github.com/number571/gopeer/local"
-	nt "github.com/number571/gopeer/network"
+	cr "github.com/number571/go-peer/crypto"
+	lc "github.com/number571/go-peer/local"
+	nt "github.com/number571/go-peer/network"
+	gp "github.com/number571/go-peer/settings"
 )
 
 func init() {

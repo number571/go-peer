@@ -4,7 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 
-	"github.com/number571/gopeer/encoding"
+	"github.com/number571/go-peer/encoding"
 )
 
 var (
@@ -15,8 +15,8 @@ var (
 const (
 	TruncatedSize = 20
 	HashSize      = 32
-	HashKeyType   = "gopeer\\sha256"
-	HmacKeyType   = "gopeer\\hmac-sha256"
+	HashKeyType   = "go-peer\\sha256"
+	HmacKeyType   = "go-peer\\hmac-sha256"
 )
 
 type SHA256 struct {

@@ -3,7 +3,7 @@ package network
 import (
 	"sync"
 
-	"github.com/number571/gopeer/crypto"
+	"github.com/number571/go-peer/crypto"
 )
 
 // F2F connection mode.

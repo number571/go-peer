@@ -3,7 +3,7 @@ package crypto
 import (
 	"crypto/rand"
 
-	"github.com/number571/gopeer/encoding"
+	"github.com/number571/go-peer/encoding"
 )
 
 // Generates a cryptographically strong pseudo-random bytes.

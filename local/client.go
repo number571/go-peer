@@ -3,8 +3,8 @@ package local
 import (
 	"bytes"
 
-	"github.com/number571/gopeer"
-	"github.com/number571/gopeer/crypto"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/settings"
 )
 
 // Basic structure describing the user.
@@ -37,7 +37,7 @@ func (client *Client) PrivKey() crypto.PrivKey {
 // The message can be decrypted only if private key is known.
 func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 	var (
-		rand = crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
+		rand = crypto.RandBytes(settings.Get("SALT_SIZE").(uint))
 		hash = crypto.NewSHA256(bytes.Join(
 			[][]byte{
 				rand,
@@ -48,7 +48,7 @@ func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
 			},
 			[]byte{},
 		)).Bytes()
-		session = crypto.RandBytes(gopeer.Get("SKEY_SIZE").(uint))
+		session = crypto.RandBytes(settings.Get("SKEY_SIZE").(uint))
 		cipher  = crypto.NewCipher(session)
 	)
 
@@ -98,7 +98,7 @@ func (client *Client) Decrypt(msg *Message) *Message {
 	if public == nil {
 		return nil
 	}
-	if public.Size() != gopeer.Get("AKEY_SIZE").(uint) {
+	if public.Size() != settings.Get("AKEY_SIZE").(uint) {
 		return nil
 	}
 
@@ -179,7 +179,7 @@ func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
 		rmsg = psender.Encrypt(
 			pub,
 			NewMessage(
-				gopeer.Get("ROUTE_MSG").([]byte),
+				settings.Get("ROUTE_MSG").([]byte),
 				pack.Bytes(),
 				diff,
 			),

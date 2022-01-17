@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	gp "github.com/number571/gopeer"
-	cr "github.com/number571/gopeer/crypto"
-	lc "github.com/number571/gopeer/local"
+	cr "github.com/number571/go-peer/crypto"
+	lc "github.com/number571/go-peer/local"
+	gp "github.com/number571/go-peer/settings"
 )
 
 func main() {

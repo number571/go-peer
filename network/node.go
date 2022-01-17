@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/gopeer"
-	"github.com/number571/gopeer/crypto"
-	"github.com/number571/gopeer/encoding"
-	"github.com/number571/gopeer/local"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/settings"
 )
 
 // Basic structure for network use.
@@ -72,7 +72,7 @@ func (node *Node) Listen(address string) error {
 			continue
 		}
 
-		id := crypto.RandString(gopeer.Get("SALT_SIZE").(uint))
+		id := crypto.RandString(settings.Get("SALT_SIZE").(uint))
 
 		node.setConnection(id, conn)
 		go node.handleConn(id)
@@ -96,9 +96,9 @@ func (node *Node) Send(msg *local.Message, route *local.Route) ([]byte, error) {
 	)
 
 	var (
-		nonce    = crypto.RandBytes(gopeer.Get("SALT_SIZE").(uint))
-		waitTime = time.Duration(gopeer.Get("WAIT_TIME").(uint))
-		retryNum = gopeer.Get("RETRY_NUM").(uint)
+		nonce    = crypto.RandBytes(settings.Get("SALT_SIZE").(uint))
+		waitTime = time.Duration(settings.Get("WAIT_TIME").(uint))
+		retryNum = settings.Get("RETRY_NUM").(uint)
 		counter  = uint(0)
 	)
 
@@ -189,7 +189,7 @@ func (node *Node) Disconnect(address string) {
 func (node *Node) handleConn(id string) {
 	var (
 		counter  = uint(0)
-		retryNum = gopeer.Get("RETRY_NUM").(uint)
+		retryNum = settings.Get("RETRY_NUM").(uint)
 		conn     = node.getConnection(id)
 	)
 
@@ -233,7 +233,7 @@ func (node *Node) handleConn(id string) {
 			continue
 		}
 
-		if bytes.Equal(decMsg.Head.Title, gopeer.Get("ROUTE_MSG").([]byte)) {
+		if bytes.Equal(decMsg.Head.Title, settings.Get("ROUTE_MSG").([]byte)) {
 			msg = local.Package(decMsg.Body.Data).Deserialize()
 			goto REPEAT
 		}
@@ -243,7 +243,7 @@ func (node *Node) handleConn(id string) {
 }
 
 func (node *Node) handleFunc(msg *local.Message) {
-	nonceSize := gopeer.Get("SALT_SIZE").(uint)
+	nonceSize := settings.Get("SALT_SIZE").(uint)
 
 	if uint(len(msg.Head.Title)) < nonceSize {
 		return
@@ -252,7 +252,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 	nonce := msg.Head.Title[:nonceSize]
 	fname := msg.Head.Title[nonceSize:]
 
-	respBytes := gopeer.Get("RET_BYTES").([]byte)
+	respBytes := settings.Get("RET_BYTES").([]byte)
 
 	// Receive response
 	if bytes.HasPrefix(fname, respBytes) {
@@ -281,7 +281,7 @@ func (node *Node) handleFunc(msg *local.Message) {
 				[]byte{},
 			),
 			handler(node.client, msg),
-			gopeer.Get("POWS_DIFF").(uint),
+			settings.Get("POWS_DIFF").(uint),
 		),
 	))
 }
@@ -359,7 +359,7 @@ func (node *Node) setMapping(hash []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	if uint(len(node.mapping)) > gopeer.Get("MAPP_SIZE").(uint) {
+	if uint(len(node.mapping)) > settings.Get("MAPP_SIZE").(uint) {
 		node.mapping = make(map[string]bool)
 	}
 
@@ -378,7 +378,7 @@ func (node *Node) hasMaxConnSize() bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
-	return uint(len(node.connections)) > gopeer.Get("CONN_SIZE").(uint)
+	return uint(len(node.connections)) > settings.Get("CONN_SIZE").(uint)
 }
 
 func (node *Node) setConnection(id string, conn net.Conn) {

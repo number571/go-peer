@@ -1,9 +1,9 @@
-# gopeer
+# go-peer
 
 > Framework for create secure decentralized applications. Version: 1.3
 
 ## Research Article
-* Theory of the structure of hidden systems: [hiddensystems.pdf](https://github.com/Number571/gopeer/blob/master/hiddensystems.pdf "TSHS");
+* Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
 
 ## Framework based applications
 * Hidden Lake: [github.com/number571/HiddenLake](https://github.com/number571/HiddenLake "HL");
@@ -23,10 +23,10 @@ package main
 import (
 	"fmt"
 
-	gp "github.com/number571/gopeer"
-	cr "github.com/number571/gopeer/crypto"
-	lc "github.com/number571/gopeer/local"
-	nt "github.com/number571/gopeer/network"
+	gp "github.com/number571/go-peer"
+	cr "github.com/number571/go-peer/crypto"
+	lc "github.com/number571/go-peer/local"
+	nt "github.com/number571/go-peer/network"
 )
 
 func init() {

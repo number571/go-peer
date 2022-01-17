@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/number571/gopeer/crypto"
-	"github.com/number571/gopeer/local"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/local"
 )
 
 const (

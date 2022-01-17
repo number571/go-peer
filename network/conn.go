@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"net"
 
-	"github.com/number571/gopeer"
-	"github.com/number571/gopeer/crypto"
-	"github.com/number571/gopeer/local"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/settings"
 )
 
 func readMessage(conn net.Conn) *local.Message {
@@ -18,7 +18,7 @@ func readMessage(conn net.Conn) *local.Message {
 		pack   []byte
 		size   = uint(0)
 		buflen = make([]byte, SizeUint64)
-		buffer = make([]byte, gopeer.Get("BUFF_SIZE").(uint))
+		buffer = make([]byte, settings.Get("BUFF_SIZE").(uint))
 	)
 
 	length, err := conn.Read(buflen)
@@ -30,7 +30,7 @@ func readMessage(conn net.Conn) *local.Message {
 	}
 
 	mustLen := local.Package(buflen).BytesToSize()
-	if mustLen > gopeer.Get("PACK_SIZE").(uint) {
+	if mustLen > settings.Get("PACK_SIZE").(uint) {
 		return nil
 	}
 
@@ -70,7 +70,7 @@ func initialCheck(msg *local.Message) *local.Message {
 		return nil
 	}
 
-	diff := uint8(gopeer.Get("POWS_DIFF").(uint))
+	diff := uint8(settings.Get("POWS_DIFF").(uint))
 
 	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
