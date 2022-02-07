@@ -7,7 +7,7 @@ import (
 )
 
 // Generates a cryptographically strong pseudo-random bytes.
-func RandBytes(max uint) []byte {
+func RandBytes(max uint64) []byte {
 	slice := make([]byte, max)
 	_, err := rand.Read(slice)
 	if err != nil {
@@ -17,7 +17,7 @@ func RandBytes(max uint) []byte {
 }
 
 // Generates a cryptographically strong pseudo-random string.
-func RandString(max uint) string {
+func RandString(max uint64) string {
 	return encoding.Base64Encode(RandBytes(max))[:max]
 }
 

@@ -12,7 +12,7 @@ type Converter interface {
 	String() string
 	Bytes() []byte
 	Type() string
-	Size() uint
+	Size() uint64
 }
 
 type Hasher interface {

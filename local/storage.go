@@ -11,7 +11,12 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-type Storage struct {
+var (
+	_ Storage = &StorageT{}
+)
+
+type StorageT struct {
+	gs     settings.Settings
 	path   string
 	salt   []byte
 	cipher crypto.Cipher
@@ -21,49 +26,40 @@ type storageData struct {
 	Secrets map[string][]byte `json:"secrets"`
 }
 
-var (
-	workSize = settings.Get("POWS_DIFF").(uint) // bits
-	saltSize = settings.Get("SALT_SIZE").(uint) // bytes
-)
-
-func NewStorage(path, password string) *Storage {
-	store := &Storage{
+func NewStorage(path, password string) Storage {
+	store := &StorageT{
+		gs:   settings.NewSettings(),
 		path: path,
 	}
 
-	if store.Exists() {
+	if store.exists() {
 		encdata, err := ioutil.ReadFile(path)
 		if err != nil {
 			return nil
 		}
-		store.salt = encdata[:saltSize]
+		store.salt = encdata[:store.gs.Get(settings.SizeSkey)]
 	} else {
-		store.salt = crypto.RandBytes(saltSize)
+		store.salt = crypto.RandBytes(store.gs.Get(settings.SizeSkey))
 	}
 
-	ekey := crypto.RaiseEntropy([]byte(password), store.salt, workSize)
+	ekey := crypto.RaiseEntropy([]byte(password), store.salt, store.gs.Get(settings.SizeWork))
 	store.cipher = crypto.NewCipher(ekey)
 
-	if !store.Exists() {
+	if !store.exists() {
 		store.Write(nil, "", "")
 	}
 
 	return store
 }
 
-func (store *Storage) Exists() bool {
-	_, err := os.Stat(store.path)
-	return !os.IsNotExist(err)
-}
-
-func (store *Storage) Write(secret []byte, id, password string) error {
+func (store *StorageT) Write(secret []byte, id, password string) error {
 	var (
 		mapping storageData
 		err     error
 	)
 
 	// Open and decrypt storage
-	if store.Exists() {
+	if store.exists() {
 		mapping, err = store.decrypt()
 		if err != nil {
 			return err
@@ -78,7 +74,7 @@ func (store *Storage) Write(secret []byte, id, password string) error {
 			[]byte(id),
 			store.salt,
 		},
-		[]byte{}), workSize)
+		[]byte{}), store.gs.Get(settings.SizeWork))
 	hash := crypto.NewSHA256(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
@@ -103,9 +99,9 @@ func (store *Storage) Write(secret []byte, id, password string) error {
 	return nil
 }
 
-func (store *Storage) Read(id, password string) ([]byte, error) {
+func (store *StorageT) Read(id, password string) ([]byte, error) {
 	// If storage not exists.
-	if !store.Exists() {
+	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
 	}
 
@@ -121,7 +117,7 @@ func (store *Storage) Read(id, password string) ([]byte, error) {
 			[]byte(id),
 			store.salt,
 		},
-		[]byte{}), workSize)
+		[]byte{}), store.gs.Get(settings.SizeWork))
 	hash := crypto.NewSHA256(ekey).String()
 
 	encsecret, ok := mapping.Secrets[hash]
@@ -135,9 +131,9 @@ func (store *Storage) Read(id, password string) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *Storage) Delete(id, password string) error {
+func (store *StorageT) Delete(id, password string) error {
 	// If storage not exists.
-	if !store.Exists() {
+	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")
 	}
 
@@ -153,7 +149,7 @@ func (store *Storage) Delete(id, password string) error {
 			[]byte(id),
 			store.salt,
 		},
-		[]byte{}), workSize)
+		[]byte{}), store.gs.Get(settings.SizeWork))
 	hash := crypto.NewSHA256(ekey).String()
 
 	_, ok := mapping.Secrets[hash]
@@ -166,7 +162,12 @@ func (store *Storage) Delete(id, password string) error {
 	return nil
 }
 
-func (store *Storage) decrypt() (storageData, error) {
+func (store *StorageT) exists() bool {
+	_, err := os.Stat(store.path)
+	return !os.IsNotExist(err)
+}
+
+func (store *StorageT) decrypt() (storageData, error) {
 	var mapping storageData
 
 	encdata, err := ioutil.ReadFile(store.path)
@@ -174,7 +175,7 @@ func (store *Storage) decrypt() (storageData, error) {
 		return storageData{}, err
 	}
 
-	data := store.cipher.Decrypt(encdata[saltSize:])
+	data := store.cipher.Decrypt(encdata[store.gs.Get(settings.SizeSkey):])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
 		return storageData{}, err

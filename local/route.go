@@ -3,32 +3,25 @@ package local
 import "github.com/number571/go-peer/crypto"
 
 // Basic structure for set route to package.
-type Route struct {
+type RouteT struct {
 	receiver crypto.PubKey
 	psender  crypto.PrivKey
 	routes   []crypto.PubKey
 }
 
 // Create route object with receiver.
-func NewRoute(receiver crypto.PubKey) *Route {
+func NewRoute(receiver crypto.PubKey, psender crypto.PrivKey, routes []crypto.PubKey) *RouteT {
 	if receiver == nil {
 		return nil
 	}
-	return &Route{
+	return &RouteT{
 		receiver: receiver,
+		psender:  psender,
+		routes:   routes,
 	}
 }
 
 // Return receiver's public key.
-func (route *Route) Receiver() crypto.PubKey {
+func (route *RouteT) Receiver() crypto.PubKey {
 	return route.receiver
-}
-
-// Append pseude sender and routes.
-func (route *Route) WithRoad(psender crypto.PrivKey, routes []crypto.PubKey) *Route {
-	return &Route{
-		receiver: route.receiver,
-		psender:  psender,
-		routes:   routes,
-	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	cr "github.com/number571/go-peer/crypto"
@@ -21,12 +22,14 @@ var (
 )
 
 func main() {
-	client1 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
-	client2 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
+	settings := gp.NewSettings()
 
-	node1 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
-	node2 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
-	node3 := nt.NewNode(lc.NewClient(cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))))
+	client1 := nt.NewNode(lc.NewClient(cr.NewPrivKey(settings.Get(gp.SizeAkey))))
+	client2 := nt.NewNode(lc.NewClient(cr.NewPrivKey(settings.Get(gp.SizeAkey))))
+
+	node1 := nt.NewNode(lc.NewClient(cr.NewPrivKey(settings.Get(gp.SizeAkey))))
+	node2 := nt.NewNode(lc.NewClient(cr.NewPrivKey(settings.Get(gp.SizeAkey))))
+	node3 := nt.NewNode(lc.NewClient(cr.NewPrivKey(settings.Get(gp.SizeAkey))))
 
 	client1.Handle(ROUTE_MSG, getMessage)
 	client2.Handle(ROUTE_MSG, getMessage)
@@ -47,28 +50,38 @@ func main() {
 	client1.Connect(NODE1_ADDRESS)
 	client2.Connect(NODE3_ADDRESS)
 
-	psender := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
+	psender := cr.NewPrivKey(settings.Get(gp.SizeAkey))
 	routes := []cr.PubKey{
 		node1.Client().PubKey(),
 		node2.Client().PubKey(),
 		node3.Client().PubKey(),
 	}
 
-	diff := gp.Get("POWS_DIFF").(uint)
-	for i := 0; i < 10; i++ {
-		res, err := client1.Send(
-			lc.NewMessage(ROUTE_MSG, []byte("hello, world!"), diff),
-			lc.NewRoute(client2.Client().PubKey()).WithRoad(psender, routes),
-		)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(string(res))
+	var (
+		wg    sync.WaitGroup
+		count = 20
+	)
+
+	wg.Add(count)
+	for i := 0; i < count; i++ {
+		go func(i int, sender, receiver nt.Node, psender cr.PrivKey, routes []cr.PubKey) {
+			data := fmt.Sprintf("hello, world! [%d]", i)
+			res, err := sender.Broadcast(
+				lc.NewRoute(receiver.Client().PubKey(), psender, routes),
+				lc.NewMessage(ROUTE_MSG, []byte(data)),
+			)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(string(res))
+			wg.Done()
+		}(i, client1, client2, psender, routes)
 	}
+	wg.Wait()
 }
 
-func getMessage(client *lc.Client, msg *lc.Message) []byte {
+func getMessage(client lc.Client, msg lc.Message) []byte {
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
 	return msg.Body.Data

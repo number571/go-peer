@@ -75,7 +75,7 @@ func (cph *CipherAES) Type() string {
 	return SymmKeyType
 }
 
-func (cph *CipherAES) Size() uint {
+func (cph *CipherAES) Size() uint64 {
 	return HashSize
 }
 

@@ -16,8 +16,8 @@ type PuzzlePOW struct {
 	diff uint8
 }
 
-func NewPuzzle(diff uint8) Puzzle {
-	return &PuzzlePOW{diff}
+func NewPuzzle(diff uint64) Puzzle {
+	return &PuzzlePOW{uint8(diff)}
 }
 
 // Proof of work by the method of finding the desired hash.

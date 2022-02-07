@@ -9,16 +9,15 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-func readMessage(conn net.Conn) *local.Message {
+func (node *NodeT) readMessage(conn net.Conn) local.Message {
 	const (
 		SizeUint64 = 8 // bytes
 	)
 
 	var (
 		pack   []byte
-		size   = uint(0)
+		size   = uint64(0)
 		buflen = make([]byte, SizeUint64)
-		buffer = make([]byte, settings.Get("BUFF_SIZE").(uint))
 	)
 
 	length, err := conn.Read(buflen)
@@ -30,18 +29,15 @@ func readMessage(conn net.Conn) *local.Message {
 	}
 
 	mustLen := local.Package(buflen).BytesToSize()
-	if mustLen > settings.Get("PACK_SIZE").(uint) {
+	if mustLen > node.Client().Settings().Get(settings.SizePack) {
 		return nil
 	}
 
 	for {
+		buffer := make([]byte, mustLen-size)
+
 		length, err = conn.Read(buffer)
 		if err != nil {
-			return nil
-		}
-
-		size += uint(length)
-		if size > mustLen {
 			return nil
 		}
 
@@ -53,15 +49,16 @@ func readMessage(conn net.Conn) *local.Message {
 			[]byte{},
 		)
 
+		size += uint64(length)
 		if size == mustLen {
 			break
 		}
 	}
 
-	return initialCheck(local.Package(pack).Deserialize())
+	return node.initialCheck(local.Package(pack).Deserialize())
 }
 
-func initialCheck(msg *local.Message) *local.Message {
+func (node *NodeT) initialCheck(msg local.Message) local.Message {
 	if msg == nil {
 		return nil
 	}
@@ -70,8 +67,7 @@ func initialCheck(msg *local.Message) *local.Message {
 		return nil
 	}
 
-	diff := uint8(settings.Get("POWS_DIFF").(uint))
-
+	diff := node.Client().Settings().Get(settings.SizeWork)
 	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
 		return nil

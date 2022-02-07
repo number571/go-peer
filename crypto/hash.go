@@ -44,7 +44,7 @@ func (h *SHA256) Type() string {
 	return HashKeyType
 }
 
-func (h *SHA256) Size() uint {
+func (h *SHA256) Size() uint64 {
 	return HashSize
 }
 
@@ -73,6 +73,6 @@ func (h *HMAC256) Type() string {
 	return HmacKeyType
 }
 
-func (h *HMAC256) Size() uint {
+func (h *HMAC256) Size() uint64 {
 	return HashSize
 }

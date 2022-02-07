@@ -1,19 +1,19 @@
 package local
 
 import (
+	"bytes"
 	"encoding/json"
+
+	"github.com/number571/go-peer/encoding"
 )
 
 // Basic structure of transport package.
-type Message struct {
+type MessageT struct {
 	Head HeadMessage `json:"head"`
 	Body BodyMessage `json:"body"`
 }
 
 type HeadMessage struct {
-	Diff    uint8  `json:"diff"`
-	Title   []byte `json:"title"`
-	Rand    []byte `json:"rand"`
 	Sender  []byte `json:"sender"`
 	Session []byte `json:"session"`
 }
@@ -26,20 +26,38 @@ type BodyMessage struct {
 }
 
 // Create message with title and data.
-func NewMessage(title, data []byte, diff uint) *Message {
-	return &Message{
-		Head: HeadMessage{
-			Diff:  uint8(diff),
-			Title: title,
-		},
+func NewMessage(title, data []byte) Message {
+	return &MessageT{
 		Body: BodyMessage{
-			Data: data,
+			Data: bytes.Join([][]byte{
+				encoding.Uint64ToBytes(uint64(len(title))),
+				title,
+				data,
+			}, []byte{}),
 		},
 	}
 }
 
+func (msg *MessageT) Export() ([]byte, []byte) {
+	const (
+		SizeUint64 = 8 // bytes
+	)
+
+	if len(msg.Body.Data) < SizeUint64 {
+		return nil, nil
+	}
+
+	mustLen := encoding.BytesToUint64(msg.Body.Data[:SizeUint64])
+	allData := msg.Body.Data[SizeUint64:]
+	if mustLen > uint64(len(allData)) {
+		return nil, nil
+	}
+
+	return allData[:mustLen], allData[mustLen:]
+}
+
 // Serialize with JSON format.
-func (msg *Message) Serialize() Package {
+func (msg *MessageT) Serialize() Package {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil

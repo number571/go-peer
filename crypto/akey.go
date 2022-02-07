@@ -29,7 +29,7 @@ type PrivKeyRSA struct {
 }
 
 // Create private key by number of bits.
-func NewPrivKey(bits uint) PrivKey {
+func NewPrivKey(bits uint64) PrivKey {
 	priv, err := rsa.GenerateKey(rand.Reader, int(bits))
 	if err != nil {
 		return nil
@@ -85,7 +85,7 @@ func (key *PrivKeyRSA) Type() string {
 	return AsymmKeyType
 }
 
-func (key *PrivKeyRSA) Size() uint {
+func (key *PrivKeyRSA) Size() uint64 {
 	return key.PubKey().Size()
 }
 
@@ -180,8 +180,8 @@ func (key *PubKeyRSA) Type() string {
 	return AsymmKeyType
 }
 
-func (key *PubKeyRSA) Size() uint {
-	return uint(key.pub.N.BitLen())
+func (key *PubKeyRSA) Size() uint64 {
+	return uint64(key.pub.N.BitLen())
 }
 
 // Used RSA(OAEP).

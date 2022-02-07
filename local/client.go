@@ -4,78 +4,78 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/settings"
 )
 
+var (
+	_ Client = &ClientT{}
+)
+
 // Basic structure describing the user.
-type Client struct {
-	privateKey crypto.PrivKey
+type ClientT struct {
+	gs settings.Settings
+	pk crypto.PrivKey
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-func NewClient(priv crypto.PrivKey) *Client {
+func NewClient(priv crypto.PrivKey) Client {
 	if priv == nil {
 		return nil
 	}
-	return &Client{
-		privateKey: priv,
+	return &ClientT{
+		gs: settings.NewSettings().
+			Set(settings.SizeAkey, priv.Size()),
+		pk: priv,
 	}
 }
 
 // Get public key from client object.
-func (client *Client) PubKey() crypto.PubKey {
-	return client.privateKey.PubKey()
+func (client *ClientT) PubKey() crypto.PubKey {
+	return client.pk.PubKey()
 }
 
 // Get private key from client object.
-func (client *Client) PrivKey() crypto.PrivKey {
-	return client.privateKey
+func (client *ClientT) PrivKey() crypto.PrivKey {
+	return client.pk
 }
 
-// Encrypt message with public key of receiver.
-// The message can be decrypted only if private key is known.
-func (client *Client) Encrypt(receiver crypto.PubKey, msg *Message) *Message {
-	var (
-		rand = crypto.RandBytes(settings.Get("SALT_SIZE").(uint))
-		hash = crypto.NewSHA256(bytes.Join(
-			[][]byte{
-				rand,
-				client.PubKey().Bytes(),
-				receiver.Bytes(),
-				[]byte(msg.Head.Title),
-				msg.Body.Data,
-			},
-			[]byte{},
-		)).Bytes()
-		session = crypto.RandBytes(settings.Get("SKEY_SIZE").(uint))
-		cipher  = crypto.NewCipher(session)
-	)
+// Get settings from client object.
+func (client *ClientT) Settings() settings.Settings {
+	return client.gs
+}
 
-	return &Message{
-		Head: HeadMessage{
-			Diff:    msg.Head.Diff,
-			Rand:    cipher.Encrypt(rand),
-			Title:   cipher.Encrypt(msg.Head.Title),
-			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
-			Session: receiver.Encrypt(session),
-		},
-		Body: BodyMessage{
-			Data: cipher.Encrypt(msg.Body.Data),
-			Hash: hash,
-			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(msg.Head.Diff).Proof(hash),
-		},
+// Function wrap message in multiple route encryption.
+// Need use pseudo sender if route not null.
+func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
+	var (
+		psender       = NewClient(route.psender)
+		rmsg, session = client.onceEncrypt(route.receiver, msg)
+	)
+	if psender == nil && len(route.routes) != 0 {
+		return nil, nil
 	}
+	for _, pub := range route.routes {
+		rmsg, _ = psender.(*ClientT).onceEncrypt(
+			pub,
+			NewMessage(
+				encoding.Uint64ToBytes(client.gs.Get(settings.MaskRout)),
+				rmsg.Serialize().Bytes(),
+			),
+		)
+	}
+	return rmsg, session
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *Client) Decrypt(msg *Message) *Message {
+func (client *ClientT) Decrypt(msg Message) Message {
 	hash := msg.Body.Hash
 
 	// Proof of work. Prevent spam.
-	puzzle := crypto.NewPuzzle(msg.Head.Diff)
+	diff := client.Settings().Get(settings.SizeWork)
+	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(hash, msg.Body.Npow) {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (client *Client) Decrypt(msg *Message) *Message {
 	if public == nil {
 		return nil
 	}
-	if public.Size() != settings.Get("AKEY_SIZE").(uint) {
+	if public.Size() != client.gs.Get(settings.SizeAkey) {
 		return nil
 	}
 
@@ -112,31 +112,18 @@ func (client *Client) Decrypt(msg *Message) *Message {
 		return nil
 	}
 
-	// Decrypt title of message by session key.
-	titleBytes := cipher.Decrypt(msg.Head.Title)
-	if titleBytes == nil {
-		return nil
-	}
-
 	// Decrypt main data of message by session key.
 	dataBytes := cipher.Decrypt(msg.Body.Data)
 	if dataBytes == nil {
 		return nil
 	}
 
-	// Decrypt random string by session key.
-	rand := cipher.Decrypt(msg.Head.Rand)
-	if rand == nil {
-		return nil
-	}
-
 	// Check received hash and generated hash.
 	check := crypto.NewSHA256(bytes.Join(
 		[][]byte{
-			rand,
+			session,
 			publicBytes,
 			client.PubKey().Bytes(),
-			titleBytes,
 			dataBytes,
 		},
 		[]byte{},
@@ -146,11 +133,8 @@ func (client *Client) Decrypt(msg *Message) *Message {
 	}
 
 	// Return decrypted message.
-	return &Message{
+	return &MessageT{
 		Head: HeadMessage{
-			Diff:    msg.Head.Diff,
-			Title:   titleBytes,
-			Rand:    rand,
 			Sender:  publicBytes,
 			Session: session,
 		},
@@ -163,27 +147,34 @@ func (client *Client) Decrypt(msg *Message) *Message {
 	}
 }
 
-// Function wrap message in multiple route.
-// Need use pseudo sender if route not null.
-func (client *Client) RouteMessage(msg *Message, route *Route) *Message {
+// Encrypt message with public key of receiver.
+// The message can be decrypted only if private key is known.
+func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
 	var (
-		rmsg    = client.Encrypt(route.receiver, msg)
-		psender = NewClient(route.psender)
+		session = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
+		cipher  = crypto.NewCipher(session)
 	)
-	if psender == nil && len(route.routes) != 0 {
-		return nil
-	}
-	diff := uint(msg.Head.Diff)
-	for _, pub := range route.routes {
-		pack := rmsg.Serialize()
-		rmsg = psender.Encrypt(
-			pub,
-			NewMessage(
-				settings.Get("ROUTE_MSG").([]byte),
-				pack.Bytes(),
-				diff,
-			),
-		)
-	}
-	return rmsg
+
+	hash := crypto.NewSHA256(bytes.Join(
+		[][]byte{
+			session,
+			client.PubKey().Bytes(),
+			receiver.Bytes(),
+			msg.Body.Data,
+		},
+		[]byte{},
+	)).Bytes()
+
+	return &MessageT{
+		Head: HeadMessage{
+			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
+			Session: receiver.Encrypt(session),
+		},
+		Body: BodyMessage{
+			Data: cipher.Encrypt(msg.Body.Data),
+			Hash: hash,
+			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
+			Npow: crypto.NewPuzzle(client.Settings().Get(settings.SizeWork)).Proof(hash),
+		},
+	}, session
 }

@@ -15,7 +15,6 @@ const (
 )
 
 var (
-	DIFF_PACK = gp.Get("POWS_DIFF").(uint)
 	ROUTE_MSG = []byte("/msg")
 )
 
@@ -31,16 +30,15 @@ func main() {
 	client.Connect(NODE_ADDRESS)
 
 	// Create message and route.
-	route := lc.NewRoute(node.Client().PubKey())
+	route := lc.NewRoute(node.Client().PubKey(), nil, nil)
 
 	msg := lc.NewMessage(
 		ROUTE_MSG,
 		[]byte("hello, world!"),
-		DIFF_PACK,
 	)
 
 	// Send request 'hello, world!' to node.
-	res, err := client.Send(msg, route)
+	res, err := client.Broadcast(route, msg)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -50,9 +48,11 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func newNode() *nt.Node {
+func newNode() nt.Node {
 	// Generate private key.
-	priv := cr.NewPrivKey(gp.Get("AKEY_SIZE").(uint))
+	settings := gp.NewSettings()
+
+	priv := cr.NewPrivKey(settings.Get(gp.SizeAkey))
 	node := nt.NewNode(lc.NewClient(priv))
 
 	// Set local route to function.
@@ -60,7 +60,7 @@ func newNode() *nt.Node {
 	return node
 }
 
-func getMessage(client *lc.Client, msg *lc.Message) []byte {
+func getMessage(client lc.Client, msg lc.Message) []byte {
 	// Receive message.
 	hash := cr.LoadPubKey(msg.Head.Sender).Address()
 	fmt.Printf("[%s] => '%s'\n", hash, msg.Body.Data)
