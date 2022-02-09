@@ -23,6 +23,7 @@ type NodeT struct {
 	preceiver   crypto.PubKey
 	f2f         F2F
 	mutex       sync.Mutex
+	listener    net.Listener
 	hroutes     map[string]Handler
 	mapping     map[string]bool
 	connections map[string]net.Conn
@@ -49,6 +50,10 @@ func NewNode(client local.Client) Node {
 	}
 }
 
+func (node *NodeT) Close() {
+	node.listener.Close()
+}
+
 // Return client structure.
 func (node *NodeT) Client() local.Client {
 	return node.client
@@ -68,6 +73,7 @@ func (node *NodeT) Listen(address string) error {
 	}
 	defer listen.Close()
 
+	node.listener = listen
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -241,14 +247,13 @@ func (node *NodeT) handleConn(id string) {
 					local.NewRoute(node.preceiver, nil, nil),
 					local.NewMessage(
 						crypto.RandBytes(16),
-						crypto.RandBytes(16),
+						crypto.RandBytes(calcRandSize(len(data))),
 					),
 				)
 				node.send(pMsg)
-				// sleep random[0;wtime] milliseconds
-				rtime := crypto.RandUint64()
+				// sleep random milliseconds
 				wtime := node.Client().Settings().Get(settings.TimePsdo)
-				time.Sleep(time.Millisecond * time.Duration(rtime%wtime))
+				time.Sleep(time.Millisecond * calcRandTime(wtime))
 			}
 			msg = local.Package(data).Deserialize()
 			goto REPEAT
@@ -435,4 +440,15 @@ func (node *NodeT) delConnection(id string) {
 	}
 
 	delete(node.connections, id)
+}
+
+func calcRandSize(len int) uint64 {
+	ulen := uint64(len)
+	rand := crypto.RandUint64() % (10 << 10)
+	return ulen + rand // +[0;10]KiB
+}
+
+func calcRandTime(wtime uint64) time.Duration {
+	rtime := crypto.RandUint64()
+	return time.Duration(rtime % wtime) // +[0;wtime]MS
 }

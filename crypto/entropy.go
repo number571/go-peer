@@ -6,7 +6,7 @@ import "bytes"
 func RaiseEntropy(info, salt []byte, bits uint64) []byte {
 	lim := uint64(1 << bits)
 	for i := uint64(0); i < lim; i++ {
-		info = NewSHA256(bytes.Join(
+		info = NewHasher(bytes.Join(
 			[][]byte{
 				info,
 				salt,

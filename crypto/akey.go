@@ -66,7 +66,7 @@ func (key *PrivKeyRSA) Decrypt(msg []byte) []byte {
 }
 
 func (key *PrivKeyRSA) Sign(msg []byte) []byte {
-	return sign(key.priv, msg)
+	return sign(key.priv, NewHasher(msg).Bytes())
 }
 
 func (key *PrivKeyRSA) PubKey() PubKey {
@@ -112,8 +112,8 @@ func privateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	return x509.MarshalPKCS1PrivateKey(priv)
 }
 
-func sign(priv *rsa.PrivateKey, data []byte) []byte {
-	signature, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, data, nil)
+func sign(priv *rsa.PrivateKey, hash []byte) []byte {
+	signature, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, hash, nil)
 	if err != nil {
 		return nil
 	}
@@ -156,16 +156,12 @@ func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
-func (key *PubKeyRSA) Equal(pub PubKey) bool {
-	return key.Address() == pub.Address()
-}
-
 func (key *PubKeyRSA) Address() string {
-	return NewSHA256(key.Bytes()).String()
+	return NewHasher(key.Bytes()).String()
 }
 
 func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
-	return verify(key.pub, msg, sig) == nil
+	return verify(key.pub, NewHasher(msg).Bytes(), sig) == nil
 }
 
 func (key *PubKeyRSA) Bytes() []byte {
@@ -208,6 +204,6 @@ func publicKeyToBytes(pub *rsa.PublicKey) []byte {
 }
 
 // Used RSA(PSS).
-func verify(pub *rsa.PublicKey, data, sign []byte) error {
-	return rsa.VerifyPSS(pub, crypto.SHA256, data, sign, nil)
+func verify(pub *rsa.PublicKey, hash, sign []byte) error {
+	return rsa.VerifyPSS(pub, crypto.SHA256, hash, sign, nil)
 }

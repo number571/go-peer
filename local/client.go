@@ -20,13 +20,15 @@ type ClientT struct {
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-func NewClient(priv crypto.PrivKey) Client {
+func NewClient(priv crypto.PrivKey, s settings.Settings) Client {
 	if priv == nil {
 		return nil
 	}
+	if priv.Size() != s.Get(settings.SizeAkey) {
+		return nil
+	}
 	return &ClientT{
-		gs: settings.NewSettings().
-			Set(settings.SizeAkey, priv.Size()),
+		gs: s,
 		pk: priv,
 	}
 }
@@ -50,7 +52,7 @@ func (client *ClientT) Settings() settings.Settings {
 // Need use pseudo sender if route not null.
 func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
 	var (
-		psender       = NewClient(route.psender)
+		psender       = NewClient(route.psender, client.gs)
 		rmsg, session = client.onceEncrypt(route.receiver, msg)
 	)
 	if psender == nil && len(route.routes) != 0 {
@@ -71,6 +73,10 @@ func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (client *ClientT) Decrypt(msg Message) Message {
+	const (
+		SizeUint64 = 8 // bytes
+	)
+
 	hash := msg.Body.Hash
 
 	// Proof of work. Prevent spam.
@@ -119,7 +125,7 @@ func (client *ClientT) Decrypt(msg Message) Message {
 	}
 
 	// Check received hash and generated hash.
-	check := crypto.NewSHA256(bytes.Join(
+	check := crypto.NewHasher(bytes.Join(
 		[][]byte{
 			session,
 			publicBytes,
@@ -132,6 +138,18 @@ func (client *ClientT) Decrypt(msg Message) Message {
 		return nil
 	}
 
+	// check size of data
+	if len(dataBytes) < SizeUint64 {
+		return nil
+	}
+
+	// pass random bytes and get main data
+	mustLen := encoding.BytesToUint64(dataBytes[:SizeUint64])
+	allData := dataBytes[SizeUint64:]
+	if mustLen > uint64(len(allData)) {
+		return nil
+	}
+
 	// Return decrypted message.
 	return &MessageT{
 		Head: HeadMessage{
@@ -139,7 +157,7 @@ func (client *ClientT) Decrypt(msg Message) Message {
 			Session: session,
 		},
 		Body: BodyMessage{
-			Data: dataBytes,
+			Data: allData[:mustLen],
 			Hash: hash,
 			Sign: sign,
 			Npow: msg.Body.Npow,
@@ -155,12 +173,21 @@ func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message
 		cipher  = crypto.NewCipher(session)
 	)
 
-	hash := crypto.NewSHA256(bytes.Join(
+	data := bytes.Join(
+		[][]byte{
+			encoding.Uint64ToBytes(uint64(len(msg.Body.Data))),
+			msg.Body.Data,
+			encoding.Uint64ToBytes(crypto.RandUint64() % (settings.SizePack / 4)),
+		},
+		[]byte{},
+	)
+
+	hash := crypto.NewHasher(bytes.Join(
 		[][]byte{
 			session,
 			client.PubKey().Bytes(),
 			receiver.Bytes(),
-			msg.Body.Data,
+			data,
 		},
 		[]byte{},
 	)).Bytes()
@@ -171,7 +198,7 @@ func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message
 			Session: receiver.Encrypt(session),
 		},
 		Body: BodyMessage{
-			Data: cipher.Encrypt(msg.Body.Data),
+			Data: cipher.Encrypt(data),
 			Hash: hash,
 			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
 			Npow: crypto.NewPuzzle(client.Settings().Get(settings.SizeWork)).Proof(hash),

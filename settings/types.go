@@ -1,19 +1,10 @@
 package settings
 
-type (
-	Key   = uint64
-	Value = uint64
-)
-
-type Settings interface {
-	Set(Key, Value) Settings
-	Get(Key) Value
-}
-
 const (
 	MaskRout Key = iota + 1
 	TimeWait
 	TimePsdo
+	SizePsdo
 	SizeRtry
 	SizeWork
 	SizeConn
@@ -22,3 +13,12 @@ const (
 	SizeAkey
 	SizeSkey
 )
+
+type (
+	Key   = uint64
+	Value = uint64
+)
+type Settings interface {
+	Set(Key, Value)
+	Get(Key) Value
+}

@@ -23,7 +23,7 @@ type SHA256 struct {
 	hash []byte
 }
 
-func NewSHA256(data []byte) Hasher {
+func NewHasher(data []byte) Hasher {
 	h := sha256.New()
 	h.Write(data)
 	return &SHA256{
@@ -52,7 +52,7 @@ type HMAC256 struct {
 	hash []byte
 }
 
-func NewHMAC256(data []byte, key []byte) Hasher {
+func NewHasherMAC(data []byte, key []byte) Hasher {
 	h := hmac.New(sha256.New, key)
 	h.Write(data)
 	return &HMAC256{
@@ -75,4 +75,8 @@ func (h *HMAC256) Type() string {
 
 func (h *HMAC256) Size() uint64 {
 	return HashSize
+}
+
+func sizeInBits(n uint) uint {
+	return n * 8
 }

@@ -22,8 +22,13 @@ type CipherAES struct {
 }
 
 func NewCipher(key []byte) Cipher {
+	switch HashSize {
+	case 16, 24, 32: // AES keys
+	default:
+		return nil
+	}
 	return &CipherAES{
-		key: NewSHA256(key).Bytes(),
+		key: NewHasher(key).Bytes(),
 	}
 }
 

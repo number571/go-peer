@@ -26,9 +26,9 @@ type storageData struct {
 	Secrets map[string][]byte `json:"secrets"`
 }
 
-func NewStorage(path, password string) Storage {
+func NewStorage(s settings.Settings, path string, pasw Password) Storage {
 	store := &StorageT{
-		gs:   settings.NewSettings(),
+		gs:   s,
 		path: path,
 	}
 
@@ -42,17 +42,17 @@ func NewStorage(path, password string) Storage {
 		store.salt = crypto.RandBytes(store.gs.Get(settings.SizeSkey))
 	}
 
-	ekey := crypto.RaiseEntropy([]byte(password), store.salt, store.gs.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy([]byte(pasw), store.salt, store.gs.Get(settings.SizeWork))
 	store.cipher = crypto.NewCipher(ekey)
 
 	if !store.exists() {
-		store.Write(nil, "", "")
+		store.Write("", "", nil)
 	}
 
 	return store
 }
 
-func (store *StorageT) Write(secret []byte, id, password string) error {
+func (store *StorageT) Write(id Identifier, pasw Password, secret []byte) error {
 	var (
 		mapping storageData
 		err     error
@@ -69,13 +69,13 @@ func (store *StorageT) Write(secret []byte, id, password string) error {
 	}
 
 	// Encrypt and save private key into storage
-	ekey := crypto.RaiseEntropy([]byte(password), bytes.Join(
+	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
 		[][]byte{
 			[]byte(id),
 			store.salt,
 		},
 		[]byte{}), store.gs.Get(settings.SizeWork))
-	hash := crypto.NewSHA256(ekey).String()
+	hash := crypto.NewHasher(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
 	mapping.Secrets[hash] = cipher.Encrypt(secret)
@@ -99,7 +99,7 @@ func (store *StorageT) Write(secret []byte, id, password string) error {
 	return nil
 }
 
-func (store *StorageT) Read(id, password string) ([]byte, error) {
+func (store *StorageT) Read(id Identifier, pasw Password) ([]byte, error) {
 	// If storage not exists.
 	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
@@ -112,13 +112,13 @@ func (store *StorageT) Read(id, password string) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy([]byte(password), bytes.Join(
+	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
 		[][]byte{
 			[]byte(id),
 			store.salt,
 		},
 		[]byte{}), store.gs.Get(settings.SizeWork))
-	hash := crypto.NewSHA256(ekey).String()
+	hash := crypto.NewHasher(ekey).String()
 
 	encsecret, ok := mapping.Secrets[hash]
 	if !ok {
@@ -131,7 +131,7 @@ func (store *StorageT) Read(id, password string) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *StorageT) Delete(id, password string) error {
+func (store *StorageT) Delete(id Identifier, pasw Password) error {
 	// If storage not exists.
 	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")
@@ -144,13 +144,13 @@ func (store *StorageT) Delete(id, password string) error {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy([]byte(password), bytes.Join(
+	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
 		[][]byte{
 			[]byte(id),
 			store.salt,
 		},
 		[]byte{}), store.gs.Get(settings.SizeWork))
-	hash := crypto.NewSHA256(ekey).String()
+	hash := crypto.NewHasher(ekey).String()
 
 	_, ok := mapping.Secrets[hash]
 	if !ok {
