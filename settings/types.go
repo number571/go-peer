@@ -10,7 +10,6 @@ const (
 	SizeConn
 	SizePack
 	SizeMapp
-	SizeAkey
 	SizeSkey
 )
 

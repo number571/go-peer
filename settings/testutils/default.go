@@ -17,14 +17,13 @@ func NewSettings() gp.Settings {
 func defaultSettings() map[gp.Key]gp.Value {
 	return map[gp.Key]gp.Value{
 		gp.MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
-		gp.TimeWait: 3,                  // seconds
+		gp.TimeWait: 50,                 // seconds
 		gp.TimePsdo: 1000,               // milliseconds
 		gp.SizeRtry: 1,                  // quantity
 		gp.SizeWork: 10,                 // bits
 		gp.SizeConn: 10,                 // quantity
-		gp.SizePack: 1 << 20,            // 2*(2^20)B = 2MiB
+		gp.SizePack: 1 << 20,            // 1*(2^20)B = 1MiB
 		gp.SizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
-		gp.SizeAkey: 1 << 10,            // 1*(2^10)b = 128B
 		gp.SizeSkey: 1 << 4,             // 2^4B = 16B
 	}
 }

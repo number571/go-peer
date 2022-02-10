@@ -36,10 +36,10 @@ func NewNode(client local.Client) Node {
 		return nil
 	}
 
-	ppriv := crypto.NewPrivKey(client.Settings().Get(settings.SizeAkey))
+	pseudo := crypto.NewPrivKey(client.PubKey().Size())
 	return &NodeT{
 		client:      client,
-		preceiver:   ppriv.PubKey(),
+		preceiver:   pseudo.PubKey(),
 		hroutes:     make(map[string]Handler),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),

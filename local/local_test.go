@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	cr "github.com/number571/go-peer/crypto"
-	gp "github.com/number571/go-peer/settings"
 	tu "github.com/number571/go-peer/settings/testutils"
 )
 
 func newClient() Client {
 	settings := tu.NewSettings()
-	privKey := cr.NewPrivKey(settings.Get(gp.SizeAkey))
+	privKey := cr.NewPrivKey(1024)
 	return NewClient(privKey, settings)
 }
 

@@ -24,9 +24,6 @@ func NewClient(priv crypto.PrivKey, s settings.Settings) Client {
 	if priv == nil {
 		return nil
 	}
-	if priv.Size() != s.Get(settings.SizeAkey) {
-		return nil
-	}
 	return &ClientT{
 		gs: s,
 		pk: priv,
@@ -104,7 +101,7 @@ func (client *ClientT) Decrypt(msg Message) Message {
 	if public == nil {
 		return nil
 	}
-	if public.Size() != client.gs.Get(settings.SizeAkey) {
+	if public.Size() != client.PubKey().Size() {
 		return nil
 	}
 

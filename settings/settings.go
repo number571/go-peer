@@ -50,7 +50,6 @@ func defaultSettings() map[Key]Value {
 		SizeConn: 10,                 // quantity
 		SizePack: 8 << 20,            // 8*(2^20)B = 8MiB
 		SizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
-		SizeAkey: 2 << 10,            // 2*(2^10)b = 256B
 		SizeSkey: 1 << 5,             // 2^5B = 32B
 	}
 }

@@ -26,12 +26,9 @@ func echoMessage(client lc.Client, msg lc.Message) []byte {
 }
 
 func newNode() Node {
-	var (
-		settings = tu.NewSettings()
-		keySize  = settings.Get(gp.SizeAkey)
-	)
-
-	client := lc.NewClient(cr.NewPrivKey(keySize), settings)
+	settings := tu.NewSettings()
+	privKey := cr.NewPrivKey(1024)
+	client := lc.NewClient(privKey, settings)
 	return NewNode(client)
 }
 
@@ -95,6 +92,10 @@ func TestF2F(t *testing.T) {
 	nodes, route, msg := initSimple()
 	defer nodes[2].Close()
 
+	// time wait = 1 second
+	nodes[0].Client().Settings().Set(gp.TimeWait, 1)
+	nodes[1].Client().Settings().Set(gp.TimeWait, 1)
+
 	nodes[0].F2F().Switch()
 	nodes[1].F2F().Switch()
 
@@ -139,8 +140,7 @@ func initRoute() ([5]Node, lc.Route, lc.Message) {
 	client1.Connect(nodeAddress1)
 	client2.Connect(nodeAddress3)
 
-	settings := tu.NewSettings()
-	psender := cr.NewPrivKey(settings.Get(gp.SizeAkey))
+	psender := cr.NewPrivKey(client1.Client().PubKey().Size())
 	routes := []cr.PubKey{
 		node1.Client().PubKey(),
 		node2.Client().PubKey(),
