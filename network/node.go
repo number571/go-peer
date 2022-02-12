@@ -286,8 +286,8 @@ func (node *NodeT) handleFunc(msg local.Message, title []byte) {
 	}
 
 	// send response
-	f, ok := node.getFunction(title)
-	if !ok {
+	f := node.getFunction(title)
+	if f == nil {
 		return
 	}
 
@@ -346,13 +346,16 @@ func (node *NodeT) setFunction(name []byte, handle Handler) {
 	node.hroutes[skey] = handle
 }
 
-func (node *NodeT) getFunction(name []byte) (Handler, bool) {
+func (node *NodeT) getFunction(name []byte) Handler {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
 	skey := encoding.Base64Encode(name)
 	f, ok := node.hroutes[skey]
-	return f, ok
+	if !ok {
+		return nil
+	}
+	return f
 }
 
 func (node *NodeT) setAction(nonce []byte) {

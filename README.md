@@ -1,6 +1,6 @@
 # go-peer
 
-> Framework for create secure decentralized applications. Version: 1.3
+> Framework for create secure decentralized applications. Version: 1.4
 
 ## Research Article
 * Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
