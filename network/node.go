@@ -50,8 +50,16 @@ func NewNode(client local.Client) Node {
 	}
 }
 
+// Close listener and current connections.
 func (node *NodeT) Close() {
+	node.mutex.Lock()
+	defer node.mutex.Unlock()
+
 	node.listener.Close()
+	for id, conn := range node.connections {
+		conn.Close()
+		delete(node.connections, id)
+	}
 }
 
 // Return client structure.
@@ -85,7 +93,8 @@ func (node *NodeT) Listen(address string) error {
 			continue
 		}
 
-		id := crypto.RandString(node.Client().Settings().Get(settings.SizeSkey))
+		rsize := node.Client().Settings().Get(settings.SizeSkey)
+		id := crypto.RandString(rsize)
 
 		node.setConnection(id, conn)
 		go node.handleConn(id)
@@ -180,7 +189,15 @@ func (node *NodeT) Connect(address string) error {
 
 // Disconnect from node by address.
 func (node *NodeT) Disconnect(address string) {
-	node.delConnection(address)
+	node.mutex.Lock()
+	defer node.mutex.Unlock()
+
+	conn, ok := node.connections[address]
+	if ok {
+		conn.Close()
+	}
+
+	delete(node.connections, address)
 }
 
 func (node *NodeT) handleConn(id string) {
@@ -191,7 +208,7 @@ func (node *NodeT) handleConn(id string) {
 	)
 
 	defer func() {
-		node.delConnection(id)
+		node.Disconnect(id)
 	}()
 
 	for {
@@ -431,18 +448,6 @@ func (node *NodeT) getConnection(id string) (net.Conn, bool) {
 
 	conn, ok := node.connections[id]
 	return conn, ok
-}
-
-func (node *NodeT) delConnection(id string) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
-
-	conn, ok := node.connections[id]
-	if ok {
-		conn.Close()
-	}
-
-	delete(node.connections, id)
 }
 
 func calcRandSize(len int) uint64 {
