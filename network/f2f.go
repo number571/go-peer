@@ -18,7 +18,7 @@ type F2FT struct {
 }
 
 // Get current state of f2f mode.
-func (f2f *F2FT) State() bool {
+func (f2f *F2FT) Status() bool {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 

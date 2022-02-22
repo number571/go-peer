@@ -111,7 +111,7 @@ func (node *NodeT) Handle(title []byte, handle Handler) Node {
 
 // Send message by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (node *NodeT) Broadcast(route local.Route, msg local.Message) ([]byte, error) {
+func (node *NodeT) Request(route local.Route, msg local.Message) (Response, error) {
 	var (
 		result []byte
 		err    error
@@ -248,7 +248,7 @@ func (node *NodeT) handleConn(id string) {
 
 		// if mode is friend-to-friend and sender not in list of f2f
 		// then pass this request
-		if node.f2f.State() && !node.f2f.InList(sender) {
+		if node.f2f.Status() && !node.f2f.InList(sender) {
 			continue
 		}
 
@@ -257,6 +257,9 @@ func (node *NodeT) handleConn(id string) {
 		title, data := decMsg.Export()
 		routeMsg := node.Client().Settings().Get(settings.MaskRout)
 
+		// if is route package then
+		// 1/2 generate new pseudo-package and sleep rand time
+		// unpack and send new version of package
 		if bytes.Equal(title, encoding.Uint64ToBytes(routeMsg)) {
 			if crypto.RandUint64()%2 == 0 {
 				// send pseudo message

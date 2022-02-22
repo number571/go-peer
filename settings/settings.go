@@ -2,6 +2,19 @@ package settings
 
 import "sync"
 
+const (
+	MaskRout Key = iota + 1
+	TimeWait
+	TimePsdo
+	SizePsdo
+	SizeRtry
+	SizeWork
+	SizeConn
+	SizePack
+	SizeMapp
+	SizeSkey
+)
+
 var (
 	_ Settings = &SettingsT{}
 )

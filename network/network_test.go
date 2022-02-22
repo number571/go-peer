@@ -45,7 +45,7 @@ func initSimple() ([3]Node, lc.Route, lc.Message) {
 
 	go node1.Listen(nodeAddress1)
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	client1.Connect(nodeAddress1)
 	client2.Connect(nodeAddress1)
@@ -59,7 +59,7 @@ func TestSimple(t *testing.T) {
 	nodes, route, msg := initSimple()
 	defer nodes[2].Close()
 
-	_, err := nodes[0].Broadcast(route, msg)
+	_, err := nodes[0].Request(route, msg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -75,7 +75,7 @@ func BenchmarkSimple(b *testing.B) {
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
 		go func(i int, sender Node, route lc.Route, msg lc.Message) {
-			_, err := sender.Broadcast(route, msg)
+			_, err := sender.Request(route, msg)
 			if err != nil {
 				b.Error(err)
 				return
@@ -99,7 +99,7 @@ func TestF2F(t *testing.T) {
 	nodes[0].F2F().Switch()
 	nodes[1].F2F().Switch()
 
-	_, err := nodes[0].Broadcast(route, msg)
+	_, err := nodes[0].Request(route, msg)
 	if err == nil {
 		t.Errorf("f2f mode not working")
 		return
@@ -108,7 +108,7 @@ func TestF2F(t *testing.T) {
 	nodes[0].F2F().Append(nodes[1].Client().PubKey())
 	nodes[1].F2F().Append(nodes[0].Client().PubKey())
 
-	_, err = nodes[0].Broadcast(route, msg)
+	_, err = nodes[0].Request(route, msg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -132,7 +132,7 @@ func initRoute() ([5]Node, lc.Route, lc.Message) {
 	go node2.Listen(nodeAddress2)
 	go node3.Listen(nodeAddress3)
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	node1.Connect(nodeAddress2)
 	node2.Connect(nodeAddress3)
@@ -158,7 +158,7 @@ func TestRoute(t *testing.T) {
 	defer nodes[3].Close()
 	defer nodes[4].Close()
 
-	_, err := nodes[0].Broadcast(route, msg)
+	_, err := nodes[0].Request(route, msg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -176,7 +176,7 @@ func BenchmarkRoute(b *testing.B) {
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
 		go func(i int, sender Node, route lc.Route, msg lc.Message) {
-			_, err := sender.Broadcast(route, msg)
+			_, err := sender.Request(route, msg)
 			if err != nil {
 				b.Error(err)
 				return

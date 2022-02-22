@@ -6,33 +6,35 @@ import (
 )
 
 type (
-	Address = string
-	Handler = func(local.Client, local.Message) []byte
+	Title    = []byte
+	Response = []byte
+	Address  = string
+	Handler  = func(local.Client, local.Message) []byte
 )
 type Node interface {
-	Client() local.Client
-	F2F() F2F
-
 	Listen(Address) error
 	Close()
 
-	Handle([]byte, Handler) Node
-	Broadcast(local.Route, local.Message) ([]byte, error)
+	Client() local.Client
+	F2F() F2F
 
-	InConnections(Address) bool
-	Connections() []Address
+	Handle(Title, Handler) Node
+	Request(local.Route, local.Message) (Response, error)
 
 	Connect(Address) error
 	Disconnect(Address)
+
+	InConnections(Address) bool
+	Connections() []Address
 }
 
 type F2F interface {
-	State() bool
+	Status() bool
 	Switch()
-
-	InList(crypto.PubKey) bool
-	List() []crypto.PubKey
 
 	Append(crypto.PubKey)
 	Remove(crypto.PubKey)
+
+	InList(crypto.PubKey) bool
+	List() []crypto.PubKey
 }
