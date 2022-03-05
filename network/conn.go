@@ -69,7 +69,7 @@ func (node *NodeT) initialCheck(msg local.Message) local.Message {
 
 	diff := node.Client().Settings().Get(settings.SizeWork)
 	puzzle := crypto.NewPuzzle(diff)
-	if !puzzle.Verify(msg.Body.Hash, msg.Body.Npow) {
+	if !puzzle.Verify(msg.Body.Hash, msg.Body.Proof) {
 		return nil
 	}
 

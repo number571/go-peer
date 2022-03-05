@@ -14,15 +14,16 @@ type MessageT struct {
 }
 
 type HeadMessage struct {
-	Sender  []byte `json:"sender"`
-	Session []byte `json:"session"`
+	Sender    []byte `json:"sender"`
+	Session   []byte `json:"session"`
+	RandBytes []byte `json:"rand_bytes"`
 }
 
 type BodyMessage struct {
-	Data []byte `json:"data"`
-	Hash []byte `json:"hash"`
-	Sign []byte `json:"sign"`
-	Npow uint64 `json:"npow"`
+	Data  []byte `json:"data"`
+	Hash  []byte `json:"hash"`
+	Sign  []byte `json:"sign"`
+	Proof uint64 `json:"proof"`
 }
 
 // Create message with title and data.

@@ -52,7 +52,7 @@ type HMAC256 struct {
 	hash []byte
 }
 
-func NewHasherMAC(data []byte, key []byte) Hasher {
+func NewHasherMAC(key []byte, data []byte) Hasher {
 	h := hmac.New(sha256.New, key)
 	h.Write(data)
 	return &HMAC256{

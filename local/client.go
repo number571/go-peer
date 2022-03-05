@@ -67,6 +67,49 @@ func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
 	return rmsg, session
 }
 
+// Encrypt message with public key of receiver.
+// The message can be decrypted only if private key is known.
+func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
+	var (
+		session   = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
+		randBytes = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
+		cipher    = crypto.NewCipher(session)
+	)
+
+	data := bytes.Join(
+		[][]byte{
+			encoding.Uint64ToBytes(uint64(len(msg.Body.Data))),
+			msg.Body.Data,
+			encoding.Uint64ToBytes(crypto.RandUint64() % (settings.SizePack / 4)),
+		},
+		[]byte{},
+	)
+
+	hash := crypto.NewHasher(bytes.Join(
+		[][]byte{
+			randBytes,
+			client.PubKey().Bytes(),
+			receiver.Bytes(),
+			data,
+		},
+		[]byte{},
+	)).Bytes()
+
+	return &MessageT{
+		Head: HeadMessage{
+			Sender:    cipher.Encrypt(client.PubKey().Bytes()),
+			Session:   receiver.Encrypt(session),
+			RandBytes: cipher.Encrypt(randBytes),
+		},
+		Body: BodyMessage{
+			Data:  cipher.Encrypt(data),
+			Hash:  hash,
+			Sign:  cipher.Encrypt(client.PrivKey().Sign(hash)),
+			Proof: crypto.NewPuzzle(client.Settings().Get(settings.SizeWork)).Proof(hash),
+		},
+	}, session
+}
+
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (client *ClientT) Decrypt(msg Message) Message {
@@ -74,12 +117,15 @@ func (client *ClientT) Decrypt(msg Message) Message {
 		SizeUint64 = 8 // bytes
 	)
 
-	hash := msg.Body.Hash
+	// Initial check.
+	if len(msg.Body.Hash) != crypto.HashSize {
+		return nil
+	}
 
 	// Proof of work. Prevent spam.
 	diff := client.Settings().Get(settings.SizeWork)
 	puzzle := crypto.NewPuzzle(diff)
-	if !puzzle.Verify(hash, msg.Body.Npow) {
+	if !puzzle.Verify(msg.Body.Hash, msg.Body.Proof) {
 		return nil
 	}
 
@@ -105,13 +151,9 @@ func (client *ClientT) Decrypt(msg Message) Message {
 		return nil
 	}
 
-	// Decrypt sign of message and verify this
-	// by public key of sender and hash of message.
-	sign := cipher.Decrypt(msg.Body.Sign)
-	if sign == nil {
-		return nil
-	}
-	if !public.Verify(hash, sign) {
+	// Decrypt random bytes.
+	randBytes := cipher.Decrypt(msg.Head.RandBytes)
+	if randBytes == nil {
 		return nil
 	}
 
@@ -124,14 +166,14 @@ func (client *ClientT) Decrypt(msg Message) Message {
 	// Check received hash and generated hash.
 	check := crypto.NewHasher(bytes.Join(
 		[][]byte{
-			session,
+			randBytes,
 			publicBytes,
 			client.PubKey().Bytes(),
 			dataBytes,
 		},
 		[]byte{},
 	)).Bytes()
-	if !bytes.Equal(check, hash) {
+	if !bytes.Equal(check, msg.Body.Hash) {
 		return nil
 	}
 
@@ -147,58 +189,28 @@ func (client *ClientT) Decrypt(msg Message) Message {
 		return nil
 	}
 
+	// Decrypt sign of message and verify this
+	// by public key of sender and hash of message.
+	sign := cipher.Decrypt(msg.Body.Sign)
+	if sign == nil {
+		return nil
+	}
+	if !public.Verify(msg.Body.Hash, sign) {
+		return nil
+	}
+
 	// Return decrypted message.
 	return &MessageT{
 		Head: HeadMessage{
-			Sender:  publicBytes,
-			Session: session,
+			Sender:    publicBytes,
+			Session:   session,
+			RandBytes: randBytes,
 		},
 		Body: BodyMessage{
-			Data: allData[:mustLen],
-			Hash: hash,
-			Sign: sign,
-			Npow: msg.Body.Npow,
+			Data:  allData[:mustLen],
+			Hash:  msg.Body.Hash,
+			Sign:  sign,
+			Proof: msg.Body.Proof,
 		},
 	}
-}
-
-// Encrypt message with public key of receiver.
-// The message can be decrypted only if private key is known.
-func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
-	var (
-		session = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
-		cipher  = crypto.NewCipher(session)
-	)
-
-	data := bytes.Join(
-		[][]byte{
-			encoding.Uint64ToBytes(uint64(len(msg.Body.Data))),
-			msg.Body.Data,
-			encoding.Uint64ToBytes(crypto.RandUint64() % (settings.SizePack / 4)),
-		},
-		[]byte{},
-	)
-
-	hash := crypto.NewHasher(bytes.Join(
-		[][]byte{
-			session,
-			client.PubKey().Bytes(),
-			receiver.Bytes(),
-			data,
-		},
-		[]byte{},
-	)).Bytes()
-
-	return &MessageT{
-		Head: HeadMessage{
-			Sender:  cipher.Encrypt(client.PubKey().Bytes()),
-			Session: receiver.Encrypt(session),
-		},
-		Body: BodyMessage{
-			Data: cipher.Encrypt(data),
-			Hash: hash,
-			Sign: cipher.Encrypt(client.PrivKey().Sign(hash)),
-			Npow: crypto.NewPuzzle(client.Settings().Get(settings.SizeWork)).Proof(hash),
-		},
-	}, session
 }
