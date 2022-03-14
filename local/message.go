@@ -8,18 +8,18 @@ import (
 )
 
 // Basic structure of transport package.
-type MessageT struct {
-	Head HeadMessage `json:"head"`
-	Body BodyMessage `json:"body"`
+type messageT struct {
+	Head headMessage `json:"head"`
+	Body bodyMessage `json:"body"`
 }
 
-type HeadMessage struct {
+type headMessage struct {
 	Sender    []byte `json:"sender"`
 	Session   []byte `json:"session"`
 	RandBytes []byte `json:"rand_bytes"`
 }
 
-type BodyMessage struct {
+type bodyMessage struct {
 	Data  []byte `json:"data"`
 	Hash  []byte `json:"hash"`
 	Sign  []byte `json:"sign"`
@@ -28,8 +28,8 @@ type BodyMessage struct {
 
 // Create message with title and data.
 func NewMessage(title, data []byte) Message {
-	return &MessageT{
-		Body: BodyMessage{
+	return &messageT{
+		Body: bodyMessage{
 			Data: bytes.Join([][]byte{
 				encoding.Uint64ToBytes(uint64(len(title))),
 				title,
@@ -39,7 +39,7 @@ func NewMessage(title, data []byte) Message {
 	}
 }
 
-func (msg *MessageT) Export() ([]byte, []byte) {
+func (msg *messageT) Export() ([]byte, []byte) {
 	const (
 		SizeUint64 = 8 // bytes
 	)
@@ -58,7 +58,7 @@ func (msg *MessageT) Export() ([]byte, []byte) {
 }
 
 // Serialize with JSON format.
-func (msg *MessageT) Serialize() Package {
+func (msg *messageT) Serialize() Package {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil

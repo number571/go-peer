@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-func (node *NodeT) readMessage(conn net.Conn) local.Message {
+func (node *nodeT) readMessage(conn net.Conn) local.Message {
 	const (
 		SizeUint64 = 8 // bytes
 	)
@@ -58,7 +58,7 @@ func (node *NodeT) readMessage(conn net.Conn) local.Message {
 	return node.initialCheck(local.Package(pack).Deserialize())
 }
 
-func (node *NodeT) initialCheck(msg local.Message) local.Message {
+func (node *nodeT) initialCheck(msg local.Message) local.Message {
 	if msg == nil {
 		return nil
 	}

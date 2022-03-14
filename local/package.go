@@ -30,7 +30,7 @@ func (pack Package) Bytes() []byte {
 
 // Deserialize with JSON format.
 func (pack Package) Deserialize() Message {
-	var msg = new(MessageT)
+	var msg = new(messageT)
 	err := json.Unmarshal(pack, msg)
 	if err != nil {
 		return nil

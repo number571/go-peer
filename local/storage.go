@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	_ Storage = &StorageT{}
+	_ Storage = &storageT{}
 )
 
-type StorageT struct {
+type storageT struct {
 	gs     settings.Settings
 	path   string
 	salt   []byte
@@ -27,7 +27,7 @@ type storageData struct {
 }
 
 func NewStorage(s settings.Settings, path string, pasw Password) Storage {
-	store := &StorageT{
+	store := &storageT{
 		gs:   s,
 		path: path,
 	}
@@ -52,7 +52,7 @@ func NewStorage(s settings.Settings, path string, pasw Password) Storage {
 	return store
 }
 
-func (store *StorageT) Write(id Identifier, pasw Password, secret []byte) error {
+func (store *storageT) Write(id Identifier, pasw Password, secret []byte) error {
 	var (
 		mapping storageData
 		err     error
@@ -99,7 +99,7 @@ func (store *StorageT) Write(id Identifier, pasw Password, secret []byte) error 
 	return nil
 }
 
-func (store *StorageT) Read(id Identifier, pasw Password) ([]byte, error) {
+func (store *storageT) Read(id Identifier, pasw Password) ([]byte, error) {
 	// If storage not exists.
 	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
@@ -131,7 +131,7 @@ func (store *StorageT) Read(id Identifier, pasw Password) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *StorageT) Delete(id Identifier, pasw Password) error {
+func (store *storageT) Delete(id Identifier, pasw Password) error {
 	// If storage not exists.
 	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")
@@ -162,12 +162,12 @@ func (store *StorageT) Delete(id Identifier, pasw Password) error {
 	return nil
 }
 
-func (store *StorageT) exists() bool {
+func (store *storageT) exists() bool {
 	_, err := os.Stat(store.path)
 	return !os.IsNotExist(err)
 }
 
-func (store *StorageT) decrypt() (storageData, error) {
+func (store *storageT) decrypt() (storageData, error) {
 	var mapping storageData
 
 	encdata, err := ioutil.ReadFile(store.path)

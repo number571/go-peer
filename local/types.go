@@ -13,8 +13,8 @@ type Keeper interface {
 
 type (
 	Session = []byte
-	Message = *MessageT
-	Route   = *RouteT
+	Message = *messageT
+	Route   = *routeT
 )
 type Cipher interface {
 	Encrypt(Route, Message) (Message, Session)

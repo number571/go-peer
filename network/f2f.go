@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	_ F2F = &F2FT{}
+	_ F2F = &f2fT{}
 )
 
 // F2F connection mode.
-type F2FT struct {
+type f2fT struct {
 	mutex   sync.Mutex
 	enabled bool
 	friends map[string]crypto.PubKey
 }
 
 // Get current state of f2f mode.
-func (f2f *F2FT) Status() bool {
+func (f2f *f2fT) Status() bool {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 
@@ -26,7 +26,7 @@ func (f2f *F2FT) Status() bool {
 }
 
 // Switch f2f mode to reverse.
-func (f2f *F2FT) Switch() {
+func (f2f *f2fT) Switch() {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 
@@ -34,7 +34,7 @@ func (f2f *F2FT) Switch() {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (f2f *F2FT) InList(pub crypto.PubKey) bool {
+func (f2f *f2fT) InList(pub crypto.PubKey) bool {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 
@@ -43,7 +43,7 @@ func (f2f *F2FT) InList(pub crypto.PubKey) bool {
 }
 
 // Get a list of friends public keys.
-func (f2f *F2FT) List() []crypto.PubKey {
+func (f2f *f2fT) List() []crypto.PubKey {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 
@@ -56,7 +56,7 @@ func (f2f *F2FT) List() []crypto.PubKey {
 }
 
 // Add public key to list of friends.
-func (f2f *F2FT) Append(pub crypto.PubKey) {
+func (f2f *f2fT) Append(pub crypto.PubKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 
@@ -64,7 +64,7 @@ func (f2f *F2FT) Append(pub crypto.PubKey) {
 }
 
 // Delete public key from list of friends.
-func (f2f *F2FT) Remove(pub crypto.PubKey) {
+func (f2f *f2fT) Remove(pub crypto.PubKey) {
 	f2f.mutex.Lock()
 	defer f2f.mutex.Unlock()
 

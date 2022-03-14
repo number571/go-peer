@@ -16,28 +16,28 @@ const (
 )
 
 var (
-	_ Settings = &SettingsT{}
+	_ Settings = &settingsT{}
 )
 
-type SettingsT struct {
+type settingsT struct {
 	mutex   sync.Mutex
 	mapping map[Key]Value
 }
 
 func NewSettings() Settings {
-	return &SettingsT{
+	return &settingsT{
 		mapping: defaultSettings(),
 	}
 }
 
-func (s *SettingsT) Set(k Key, v Value) {
+func (s *settingsT) Set(k Key, v Value) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	s.mapping[k] = v
 }
 
-func (s *SettingsT) Get(k Key) Value {
+func (s *settingsT) Get(k Key) Value {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

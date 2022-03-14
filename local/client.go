@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	_ Client = &ClientT{}
+	_ Client = &clientT{}
 )
 
 // Basic structure describing the user.
-type ClientT struct {
+type clientT struct {
 	gs settings.Settings
 	pk crypto.PrivKey
 }
@@ -24,30 +24,30 @@ func NewClient(priv crypto.PrivKey, s settings.Settings) Client {
 	if priv == nil {
 		return nil
 	}
-	return &ClientT{
+	return &clientT{
 		gs: s,
 		pk: priv,
 	}
 }
 
 // Get public key from client object.
-func (client *ClientT) PubKey() crypto.PubKey {
+func (client *clientT) PubKey() crypto.PubKey {
 	return client.pk.PubKey()
 }
 
 // Get private key from client object.
-func (client *ClientT) PrivKey() crypto.PrivKey {
+func (client *clientT) PrivKey() crypto.PrivKey {
 	return client.pk
 }
 
 // Get settings from client object.
-func (client *ClientT) Settings() settings.Settings {
+func (client *clientT) Settings() settings.Settings {
 	return client.gs
 }
 
 // Function wrap message in multiple route encryption.
 // Need use pseudo sender if route not null.
-func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
+func (client *clientT) Encrypt(route Route, msg Message) (Message, Session) {
 	var (
 		psender       = NewClient(route.psender, client.gs)
 		rmsg, session = client.onceEncrypt(route.receiver, msg)
@@ -56,7 +56,7 @@ func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
 		return nil, nil
 	}
 	for _, pub := range route.routes {
-		rmsg, _ = psender.(*ClientT).onceEncrypt(
+		rmsg, _ = psender.(*clientT).onceEncrypt(
 			pub,
 			NewMessage(
 				encoding.Uint64ToBytes(client.gs.Get(settings.MaskRout)),
@@ -69,7 +69,7 @@ func (client *ClientT) Encrypt(route Route, msg Message) (Message, Session) {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
+func (client *clientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
 	var (
 		session   = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
 		randBytes = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
@@ -95,13 +95,13 @@ func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message
 		[]byte{},
 	)).Bytes()
 
-	return &MessageT{
-		Head: HeadMessage{
+	return &messageT{
+		Head: headMessage{
 			Sender:    cipher.Encrypt(client.PubKey().Bytes()),
 			Session:   receiver.Encrypt(session),
 			RandBytes: cipher.Encrypt(randBytes),
 		},
-		Body: BodyMessage{
+		Body: bodyMessage{
 			Data:  cipher.Encrypt(data),
 			Hash:  hash,
 			Sign:  cipher.Encrypt(client.PrivKey().Sign(hash)),
@@ -112,7 +112,7 @@ func (client *ClientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *ClientT) Decrypt(msg Message) Message {
+func (client *clientT) Decrypt(msg Message) Message {
 	const (
 		SizeUint64 = 8 // bytes
 	)
@@ -200,13 +200,13 @@ func (client *ClientT) Decrypt(msg Message) Message {
 	}
 
 	// Return decrypted message.
-	return &MessageT{
-		Head: HeadMessage{
+	return &messageT{
+		Head: headMessage{
 			Sender:    publicBytes,
 			Session:   session,
 			RandBytes: randBytes,
 		},
-		Body: BodyMessage{
+		Body: bodyMessage{
 			Data:  allData[:mustLen],
 			Hash:  msg.Body.Hash,
 			Sign:  sign,

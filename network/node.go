@@ -14,11 +14,11 @@ import (
 )
 
 var (
-	_ Node = &NodeT{}
+	_ Node = &nodeT{}
 )
 
 // Basic structure for network use.
-type NodeT struct {
+type nodeT struct {
 	client      local.Client
 	preceiver   crypto.PubKey
 	f2f         F2F
@@ -37,21 +37,21 @@ func NewNode(client local.Client) Node {
 	}
 
 	pseudo := crypto.NewPrivKey(client.PubKey().Size())
-	return &NodeT{
+	return &nodeT{
 		client:      client,
 		preceiver:   pseudo.PubKey(),
 		hroutes:     make(map[string]Handler),
 		mapping:     make(map[string]bool),
 		connections: make(map[string]net.Conn),
 		actions:     make(map[string]chan []byte),
-		f2f: &F2FT{
+		f2f: &f2fT{
 			friends: make(map[string]crypto.PubKey),
 		},
 	}
 }
 
 // Close listener and current connections.
-func (node *NodeT) Close() {
+func (node *nodeT) Close() {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -63,18 +63,18 @@ func (node *NodeT) Close() {
 }
 
 // Return client structure.
-func (node *NodeT) Client() local.Client {
+func (node *nodeT) Client() local.Client {
 	return node.client
 }
 
 // Return f2f structure.
-func (node *NodeT) F2F() F2F {
+func (node *nodeT) F2F() F2F {
 	return node.f2f
 }
 
 // Turn on listener by address.
 // Client handle function need be not null.
-func (node *NodeT) Listen(address string) error {
+func (node *nodeT) Listen(address string) error {
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
@@ -104,14 +104,14 @@ func (node *NodeT) Listen(address string) error {
 }
 
 // Add function to mapping for route use.
-func (node *NodeT) Handle(title []byte, handle Handler) Node {
+func (node *nodeT) Handle(title []byte, handle Handler) Node {
 	node.setFunction(title, handle)
 	return node
 }
 
 // Send message by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (node *NodeT) Request(route local.Route, msg local.Message) (Response, error) {
+func (node *nodeT) Request(route local.Route, msg local.Message) (Response, error) {
 	var (
 		result []byte
 		err    error
@@ -151,7 +151,7 @@ LOOP:
 }
 
 // Get list of connection addresses.
-func (node *NodeT) Connections() []string {
+func (node *nodeT) Connections() []string {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -164,14 +164,14 @@ func (node *NodeT) Connections() []string {
 }
 
 // Check the existence of an address in the list of connections.
-func (node *NodeT) InConnections(address string) bool {
+func (node *nodeT) InConnections(address string) bool {
 	_, ok := node.getConnection(address)
 	return ok
 }
 
 // Connect to node by address.
 // Client handle function need be not null.
-func (node *NodeT) Connect(address string) error {
+func (node *nodeT) Connect(address string) error {
 	if node.hasMaxConnSize() {
 		return errors.New("max conn")
 	}
@@ -188,7 +188,7 @@ func (node *NodeT) Connect(address string) error {
 }
 
 // Disconnect from node by address.
-func (node *NodeT) Disconnect(address string) {
+func (node *nodeT) Disconnect(address string) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -200,7 +200,7 @@ func (node *NodeT) Disconnect(address string) {
 	delete(node.connections, address)
 }
 
-func (node *NodeT) handleConn(id string) {
+func (node *nodeT) handleConn(id string) {
 	var (
 		counter  = uint64(0)
 		retryNum = node.Client().Settings().Get(settings.SizeRtry)
@@ -285,7 +285,7 @@ func (node *NodeT) handleConn(id string) {
 	}
 }
 
-func (node *NodeT) handleFunc(msg local.Message, title []byte) {
+func (node *nodeT) handleFunc(msg local.Message, title []byte) {
 	var (
 		skeySize  = node.Client().Settings().Get(settings.SizeSkey)
 		respNum   = node.Client().Settings().Get(settings.MaskRout)
@@ -328,7 +328,7 @@ func (node *NodeT) handleFunc(msg local.Message, title []byte) {
 	node.send(rmsg)
 }
 
-func (node *NodeT) send(msg local.Message) {
+func (node *nodeT) send(msg local.Message) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -348,7 +348,7 @@ func (node *NodeT) send(msg local.Message) {
 	}
 }
 
-func (node *NodeT) response(nonce []byte, data []byte) {
+func (node *nodeT) response(nonce []byte, data []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -358,7 +358,7 @@ func (node *NodeT) response(nonce []byte, data []byte) {
 	}
 }
 
-func (node *NodeT) setFunction(name []byte, handle Handler) {
+func (node *nodeT) setFunction(name []byte, handle Handler) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -366,7 +366,7 @@ func (node *NodeT) setFunction(name []byte, handle Handler) {
 	node.hroutes[skey] = handle
 }
 
-func (node *NodeT) getFunction(name []byte) Handler {
+func (node *nodeT) getFunction(name []byte) Handler {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -378,7 +378,7 @@ func (node *NodeT) getFunction(name []byte) Handler {
 	return f
 }
 
-func (node *NodeT) setAction(nonce []byte) {
+func (node *nodeT) setAction(nonce []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -386,7 +386,7 @@ func (node *NodeT) setAction(nonce []byte) {
 	node.actions[skey] = make(chan []byte)
 }
 
-func (node *NodeT) getAction(nonce []byte) chan []byte {
+func (node *nodeT) getAction(nonce []byte) chan []byte {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -399,7 +399,7 @@ func (node *NodeT) getAction(nonce []byte) chan []byte {
 	return ch
 }
 
-func (node *NodeT) delAction(nonce []byte) {
+func (node *nodeT) delAction(nonce []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -407,7 +407,7 @@ func (node *NodeT) delAction(nonce []byte) {
 	delete(node.actions, skey)
 }
 
-func (node *NodeT) setMapping(hash []byte) {
+func (node *nodeT) setMapping(hash []byte) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -422,7 +422,7 @@ func (node *NodeT) setMapping(hash []byte) {
 	node.mapping[skey] = true
 }
 
-func (node *NodeT) inMapping(hash []byte) bool {
+func (node *nodeT) inMapping(hash []byte) bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
@@ -431,21 +431,21 @@ func (node *NodeT) inMapping(hash []byte) bool {
 	return ok
 }
 
-func (node *NodeT) hasMaxConnSize() bool {
+func (node *nodeT) hasMaxConnSize() bool {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
 	return uint64(len(node.connections)) > node.client.Settings().Get(settings.SizeConn)
 }
 
-func (node *NodeT) setConnection(id string, conn net.Conn) {
+func (node *nodeT) setConnection(id string, conn net.Conn) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 
 	node.connections[id] = conn
 }
 
-func (node *NodeT) getConnection(id string) (net.Conn, bool) {
+func (node *nodeT) getConnection(id string) (net.Conn, bool) {
 	node.mutex.Lock()
 	defer node.mutex.Unlock()
 

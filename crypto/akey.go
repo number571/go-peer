@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	_ PrivKey = &PrivKeyRSA{}
-	_ PubKey  = &PubKeyRSA{}
+	_ PrivKey = &privKeyT{}
+	_ PubKey  = &pubKeyT{}
 )
 
 const (
@@ -24,7 +24,7 @@ const (
  * PRIVATE KEY
  */
 
-type PrivKeyRSA struct {
+type privKeyT struct {
 	priv *rsa.PrivateKey
 }
 
@@ -34,11 +34,11 @@ func NewPrivKey(bits uint64) PrivKey {
 	if err != nil {
 		return nil
 	}
-	return &PrivKeyRSA{priv}
+	return &privKeyT{priv}
 }
 
 func LoadPrivKey(pbytes []byte) PrivKey {
-	return &PrivKeyRSA{bytesToPrivateKey(pbytes)}
+	return &privKeyT{bytesToPrivateKey(pbytes)}
 }
 
 func LoadPrivKeyByString(pstring string) PrivKey {
@@ -61,31 +61,31 @@ func LoadPrivKeyByString(pstring string) PrivKey {
 	return LoadPrivKey(pbytes)
 }
 
-func (key *PrivKeyRSA) Decrypt(msg []byte) []byte {
+func (key *privKeyT) Decrypt(msg []byte) []byte {
 	return decryptRSA(key.priv, msg)
 }
 
-func (key *PrivKeyRSA) Sign(msg []byte) []byte {
+func (key *privKeyT) Sign(msg []byte) []byte {
 	return sign(key.priv, NewHasher(msg).Bytes())
 }
 
-func (key *PrivKeyRSA) PubKey() PubKey {
-	return &PubKeyRSA{&key.priv.PublicKey}
+func (key *privKeyT) PubKey() PubKey {
+	return &pubKeyT{&key.priv.PublicKey}
 }
 
-func (key *PrivKeyRSA) Bytes() []byte {
+func (key *privKeyT) Bytes() []byte {
 	return privateKeyToBytes(key.priv)
 }
 
-func (key *PrivKeyRSA) String() string {
+func (key *privKeyT) String() string {
 	return fmt.Sprintf("Priv(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *PrivKeyRSA) Type() string {
+func (key *privKeyT) Type() string {
 	return AsymmKeyType
 }
 
-func (key *PrivKeyRSA) Size() uint64 {
+func (key *privKeyT) Size() uint64 {
 	return key.PubKey().Size()
 }
 
@@ -124,12 +124,12 @@ func sign(priv *rsa.PrivateKey, hash []byte) []byte {
  * PUBLIC KEY
  */
 
-type PubKeyRSA struct {
+type pubKeyT struct {
 	pub *rsa.PublicKey
 }
 
 func LoadPubKey(pbytes []byte) PubKey {
-	return &PubKeyRSA{bytesToPublicKey(pbytes)}
+	return &pubKeyT{bytesToPublicKey(pbytes)}
 }
 
 func LoadPubKeyByString(pstring string) PubKey {
@@ -152,31 +152,31 @@ func LoadPubKeyByString(pstring string) PubKey {
 	return LoadPubKey(pbytes)
 }
 
-func (key *PubKeyRSA) Encrypt(msg []byte) []byte {
+func (key *pubKeyT) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
-func (key *PubKeyRSA) Address() string {
+func (key *pubKeyT) Address() string {
 	return NewHasher(key.Bytes()).String()
 }
 
-func (key *PubKeyRSA) Verify(msg []byte, sig []byte) bool {
+func (key *pubKeyT) Verify(msg []byte, sig []byte) bool {
 	return verify(key.pub, NewHasher(msg).Bytes(), sig) == nil
 }
 
-func (key *PubKeyRSA) Bytes() []byte {
+func (key *pubKeyT) Bytes() []byte {
 	return publicKeyToBytes(key.pub)
 }
 
-func (key *PubKeyRSA) String() string {
+func (key *pubKeyT) String() string {
 	return fmt.Sprintf("Pub(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *PubKeyRSA) Type() string {
+func (key *pubKeyT) Type() string {
 	return AsymmKeyType
 }
 
-func (key *PubKeyRSA) Size() uint64 {
+func (key *pubKeyT) Size() uint64 {
 	return uint64(key.pub.N.BitLen())
 }
 
