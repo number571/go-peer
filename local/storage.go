@@ -49,6 +49,11 @@ func NewStorage(s settings.Settings, path string, pasw Password) Storage {
 		store.Write("", "", nil)
 	}
 
+	_, err := store.decrypt()
+	if err != nil {
+		return nil
+	}
+
 	return store
 }
 
