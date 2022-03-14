@@ -37,28 +37,38 @@ func NewPrivKey(bits uint64) PrivKey {
 	return &privKeyT{priv}
 }
 
-func LoadPrivKey(pbytes []byte) PrivKey {
-	return &privKeyT{bytesToPrivateKey(pbytes)}
-}
+func LoadPrivKey(privkey interface{}) PrivKey {
+	switch x := privkey.(type) {
+	case []byte:
+		priv := bytesToPrivateKey(x)
+		if priv == nil {
+			return nil
+		}
+		return &privKeyT{priv}
+	case string:
+		var (
+			prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
+			suffix = "}"
+		)
 
-func LoadPrivKeyByString(pstring string) PrivKey {
-	var (
-		prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
-		suffix = "}"
-	)
-	if !strings.HasPrefix(pstring, prefix) {
-		return nil
+		if !strings.HasPrefix(x, prefix) {
+			return nil
+		}
+		x = strings.TrimPrefix(x, prefix)
+
+		if !strings.HasSuffix(x, suffix) {
+			return nil
+		}
+		x = strings.TrimSuffix(x, suffix)
+
+		pbytes, err := hex.DecodeString(x)
+		if err != nil {
+			return nil
+		}
+		return LoadPrivKey(pbytes)
+	default:
+		panic("unsupported type")
 	}
-	if !strings.HasSuffix(pstring, suffix) {
-		return nil
-	}
-	pstring = strings.TrimPrefix(pstring, prefix)
-	pstring = strings.TrimSuffix(pstring, suffix)
-	pbytes, err := hex.DecodeString(pstring)
-	if err != nil {
-		return nil
-	}
-	return LoadPrivKey(pbytes)
 }
 
 func (key *privKeyT) Decrypt(msg []byte) []byte {
@@ -128,28 +138,38 @@ type pubKeyT struct {
 	pub *rsa.PublicKey
 }
 
-func LoadPubKey(pbytes []byte) PubKey {
-	return &pubKeyT{bytesToPublicKey(pbytes)}
-}
+func LoadPubKey(pubkey interface{}) PubKey {
+	switch x := pubkey.(type) {
+	case []byte:
+		pub := bytesToPublicKey(x)
+		if pub == nil {
+			return nil
+		}
+		return &pubKeyT{pub}
+	case string:
+		var (
+			prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
+			suffix = "}"
+		)
 
-func LoadPubKeyByString(pstring string) PubKey {
-	var (
-		prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
-		suffix = "}"
-	)
-	if !strings.HasPrefix(pstring, prefix) {
-		return nil
+		if !strings.HasPrefix(x, prefix) {
+			return nil
+		}
+		x = strings.TrimPrefix(x, prefix)
+
+		if !strings.HasSuffix(x, suffix) {
+			return nil
+		}
+		x = strings.TrimSuffix(x, suffix)
+
+		pbytes, err := hex.DecodeString(x)
+		if err != nil {
+			return nil
+		}
+		return LoadPubKey(pbytes)
+	default:
+		panic("unsupported type")
 	}
-	if !strings.HasSuffix(pstring, suffix) {
-		return nil
-	}
-	pstring = strings.TrimPrefix(pstring, prefix)
-	pstring = strings.TrimSuffix(pstring, suffix)
-	pbytes, err := hex.DecodeString(pstring)
-	if err != nil {
-		return nil
-	}
-	return LoadPubKey(pbytes)
 }
 
 func (key *pubKeyT) Encrypt(msg []byte) []byte {

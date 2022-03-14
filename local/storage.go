@@ -39,7 +39,7 @@ func NewStorage(s settings.Settings, path string, pasw Password) Storage {
 		}
 		store.salt = encdata[:store.gs.Get(settings.SizeSkey)]
 	} else {
-		store.salt = crypto.RandBytes(store.gs.Get(settings.SizeSkey))
+		store.salt = crypto.NewPRNG().Bytes(store.gs.Get(settings.SizeSkey))
 	}
 
 	ekey := crypto.RaiseEntropy([]byte(pasw), store.salt, store.gs.Get(settings.SizeWork))

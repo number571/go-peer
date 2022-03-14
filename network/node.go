@@ -94,7 +94,7 @@ func (node *nodeT) Listen(address string) error {
 		}
 
 		rsize := node.Client().Settings().Get(settings.SizeSkey)
-		id := crypto.RandString(rsize)
+		id := crypto.NewPRNG().String(rsize)
 
 		node.setConnection(id, conn)
 		go node.handleConn(id)
@@ -261,13 +261,14 @@ func (node *nodeT) handleConn(id string) {
 		// 1/2 generate new pseudo-package and sleep rand time
 		// unpack and send new version of package
 		if bytes.Equal(title, encoding.Uint64ToBytes(routeMsg)) {
-			if crypto.RandUint64()%2 == 0 {
+			rand := crypto.NewPRNG()
+			if rand.Uint64()%2 == 0 {
 				// send pseudo message
 				pMsg, _ := node.Client().Encrypt(
 					local.NewRoute(node.preceiver, nil, nil),
 					local.NewMessage(
-						crypto.RandBytes(16),
-						crypto.RandBytes(calcRandSize(len(data))),
+						rand.Bytes(16),
+						rand.Bytes(calcRandSize(len(data))),
 					),
 				)
 				node.send(pMsg)
@@ -455,11 +456,11 @@ func (node *nodeT) getConnection(id string) (net.Conn, bool) {
 
 func calcRandSize(len int) uint64 {
 	ulen := uint64(len)
-	rand := crypto.RandUint64() % (10 << 10)
-	return ulen + rand // +[0;10]KiB
+	rand := crypto.NewPRNG()
+	return ulen + rand.Uint64()%(10<<10) // +[0;10]KiB
 }
 
 func calcRandTime(wtime uint64) time.Duration {
-	rtime := crypto.RandUint64()
-	return time.Duration(rtime % wtime) // +[0;wtime]MS
+	rand := crypto.NewPRNG()
+	return time.Duration(rand.Uint64() % wtime) // +[0;wtime]MS
 }

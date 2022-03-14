@@ -29,17 +29,23 @@ type PubKey interface {
 	Encrypter
 	Converter
 	Address() string
-	Verify(msg []byte, sig []byte) bool
+	Verify([]byte, []byte) bool
 }
 
 type PrivKey interface {
 	Decrypter
 	Converter
-	Sign(msg []byte) []byte
+	Sign([]byte) []byte
 	PubKey() PubKey
 }
 
 type Puzzle interface {
-	Proof(hash []byte) uint64
-	Verify(hash []byte, nonce uint64) bool
+	Proof([]byte) uint64
+	Verify([]byte, uint64) bool
+}
+
+type PRNG interface {
+	String(uint64) string
+	Bytes(uint64) []byte
+	Uint64() uint64
 }

@@ -74,6 +74,10 @@ func TestPuzzle(t *testing.T) {
 		t.Errorf("proof is invalid")
 	}
 
+	if NewPuzzle(25).Verify(hash, proof) {
+		t.Errorf("proof 10 with 25 bits is valid?")
+	}
+
 	hash[3] = hash[3] ^ 8
 	if puzzle.Verify(hash, proof) {
 		t.Errorf("proof is correct?")
@@ -81,15 +85,19 @@ func TestPuzzle(t *testing.T) {
 }
 
 func TestRand(t *testing.T) {
-	if bytes.Equal(RandBytes(8), RandBytes(8)) {
+	r := NewPRNG()
+
+	if bytes.Equal(r.Bytes(8), r.Bytes(8)) {
 		t.Errorf("bytes in random equals")
 	}
 
-	if RandString(8) == RandString(8) {
+	//lint:ignore SA4000 is random strings
+	if r.String(8) == r.String(8) {
 		t.Errorf("strings in random equals")
 	}
 
-	if RandUint64() == RandUint64() {
+	//lint:ignore SA4000 is random numbers
+	if r.Uint64() == r.Uint64() {
 		t.Errorf("numbers in random equals")
 	}
 }

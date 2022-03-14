@@ -71,16 +71,16 @@ func (client *clientT) Encrypt(route Route, msg Message) (Message, Session) {
 // The message can be decrypted only if private key is known.
 func (client *clientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message, Session) {
 	var (
-		session   = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
-		randBytes = crypto.RandBytes(client.gs.Get(settings.SizeSkey))
-		cipher    = crypto.NewCipher(session)
+		rand      = crypto.NewPRNG()
+		session   = rand.Bytes(client.gs.Get(settings.SizeSkey))
+		randBytes = rand.Bytes(client.gs.Get(settings.SizeSkey))
 	)
 
 	data := bytes.Join(
 		[][]byte{
 			encoding.Uint64ToBytes(uint64(len(msg.Body.Data))),
 			msg.Body.Data,
-			encoding.Uint64ToBytes(crypto.RandUint64() % (settings.SizePack / 4)),
+			encoding.Uint64ToBytes(rand.Uint64() % (settings.SizePack / 4)),
 		},
 		[]byte{},
 	)
@@ -95,6 +95,7 @@ func (client *clientT) onceEncrypt(receiver crypto.PubKey, msg Message) (Message
 		[]byte{},
 	)).Bytes()
 
+	cipher := crypto.NewCipher(session)
 	return &messageT{
 		Head: headMessage{
 			Sender:    cipher.Encrypt(client.PubKey().Bytes()),

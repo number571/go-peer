@@ -6,22 +6,34 @@ import (
 	"github.com/number571/go-peer/encoding"
 )
 
+var (
+	_ PRNG = &prngT{}
+)
+
+type prngT struct {
+}
+
+func NewPRNG() PRNG {
+	return &prngT{}
+}
+
 // Generates a cryptographically strong pseudo-random bytes.
-func RandBytes(max uint64) []byte {
-	slice := make([]byte, max)
+func (r *prngT) Bytes(n uint64) []byte {
+	slice := make([]byte, n)
 	_, err := rand.Read(slice)
 	if err != nil {
-		return nil
+		// 'return nil' is insecure
+		panic(err)
 	}
 	return slice
 }
 
 // Generates a cryptographically strong pseudo-random string.
-func RandString(max uint64) string {
-	return encoding.Base64Encode(RandBytes(max))[:max]
+func (r *prngT) String(n uint64) string {
+	return encoding.Base64Encode(r.Bytes(n))[:n]
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.
-func RandUint64() uint64 {
-	return encoding.BytesToUint64(RandBytes(8))
+func (r *prngT) Uint64() uint64 {
+	return encoding.BytesToUint64(r.Bytes(8))
 }
