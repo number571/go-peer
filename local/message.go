@@ -7,30 +7,38 @@ import (
 	"github.com/number571/go-peer/encoding"
 )
 
+var (
+	_ IMessage = &sMessage{}
+	_ iHead    = &sHeadMessage{}
+	_ iBody    = &sBodyMessage{}
+)
+
 // Basic structure of transport package.
-type messageT struct {
-	Head headMessage `json:"head"`
-	Body bodyMessage `json:"body"`
+type sMessage struct {
+	FHead *sHeadMessage `json:"head"`
+	FBody *sBodyMessage `json:"body"`
 }
 
-type headMessage struct {
-	Sender    []byte `json:"sender"`
-	Session   []byte `json:"session"`
-	RandBytes []byte `json:"rand_bytes"`
+type sHeadMessage struct {
+	FSender  []byte `json:"sender"`
+	FSession []byte `json:"session"`
+	FSalt    []byte `json:"salt"`
 }
 
-type bodyMessage struct {
-	Data  []byte `json:"data"`
-	Hash  []byte `json:"hash"`
-	Sign  []byte `json:"sign"`
-	Proof uint64 `json:"proof"`
+type sBodyMessage struct {
+	FData  []byte `json:"data"`
+	FHash  []byte `json:"hash"`
+	FSign  []byte `json:"sign"`
+	FProof uint64 `json:"proof"`
 }
 
-// Create message with title and data.
-func NewMessage(title, data []byte) Message {
-	return &messageT{
-		Body: bodyMessage{
-			Data: bytes.Join([][]byte{
+// IMessage
+
+func NewMessage(title, data []byte) IMessage {
+	return &sMessage{
+		FHead: &sHeadMessage{},
+		FBody: &sBodyMessage{
+			FData: bytes.Join([][]byte{
 				encoding.Uint64ToBytes(uint64(len(title))),
 				title,
 				data,
@@ -39,29 +47,69 @@ func NewMessage(title, data []byte) Message {
 	}
 }
 
-func (msg *messageT) Export() ([]byte, []byte) {
+func (msg *sMessage) Head() iHead {
+	return msg.FHead
+}
+
+func (msg *sMessage) Body() iBody {
+	return msg.FBody
+}
+
+func (msg *sMessage) export() []byte {
 	const (
 		SizeUint64 = 8 // bytes
 	)
 
-	if len(msg.Body.Data) < SizeUint64 {
-		return nil, nil
+	if len(msg.FBody.FData) < SizeUint64 {
+		return nil
 	}
 
-	mustLen := encoding.BytesToUint64(msg.Body.Data[:SizeUint64])
-	allData := msg.Body.Data[SizeUint64:]
+	mustLen := encoding.BytesToUint64(msg.FBody.FData[:SizeUint64])
+	allData := msg.FBody.FData[SizeUint64:]
 	if mustLen > uint64(len(allData)) {
-		return nil, nil
+		return nil
 	}
 
-	return allData[:mustLen], allData[mustLen:]
+	msg.FBody.FData = allData[mustLen:]
+	return allData[:mustLen]
 }
 
-// Serialize with JSON format.
-func (msg *messageT) Serialize() Package {
+func (msg *sMessage) ToPackage() IPackage {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil
 	}
-	return jsonData
+	return LoadPackage(jsonData)
+}
+
+// IHead
+
+func (head *sHeadMessage) Sender() []byte {
+	return head.FSender
+}
+
+func (head *sHeadMessage) Session() []byte {
+	return head.FSession
+}
+
+func (head *sHeadMessage) Salt() []byte {
+	return head.FSalt
+}
+
+// IBody
+
+func (body *sBodyMessage) Data() []byte {
+	return body.FData
+}
+
+func (body *sBodyMessage) Hash() []byte {
+	return body.FHash
+}
+
+func (body *sBodyMessage) Sign() []byte {
+	return body.FSign
+}
+
+func (body *sBodyMessage) Proof() uint64 {
+	return body.FProof
 }

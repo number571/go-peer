@@ -4,7 +4,7 @@ type (
 	Key   = uint64
 	Value = uint64
 )
-type Settings interface {
-	Set(Key, Value)
+type ISettings interface {
+	Set(Key, Value) ISettings
 	Get(Key) Value
 }

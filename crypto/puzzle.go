@@ -9,27 +9,27 @@ import (
 )
 
 var (
-	_ Puzzle = &puzzleT{}
+	_ IPuzzle = &sPuzzle{}
 )
 
-type puzzleT struct {
-	diff uint8
+type sPuzzle struct {
+	fDiff uint8
 }
 
-func NewPuzzle(diff uint64) Puzzle {
-	return &puzzleT{uint8(diff)}
+func NewPuzzle(diff uint64) IPuzzle {
+	return &sPuzzle{uint8(diff)}
 }
 
 // Proof of work by the method of finding the desired hash.
 // Hash must start with 'diff' number of zero bits.
-func (puzzle *puzzleT) Proof(packHash []byte) uint64 {
+func (puzzle *sPuzzle) Proof(packHash []byte) uint64 {
 	var (
 		Target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.diff))
+	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.fDiff))
 	for nonce < math.MaxUint64 {
 		hash = NewHasher(bytes.Join(
 			[][]byte{
@@ -48,7 +48,7 @@ func (puzzle *puzzleT) Proof(packHash []byte) uint64 {
 }
 
 // Verifies the work of the proof of work function.
-func (puzzle *puzzleT) Verify(packHash []byte, nonce uint64) bool {
+func (puzzle *sPuzzle) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	Target := big.NewInt(1)
 	hash := NewHasher(bytes.Join(
@@ -59,6 +59,6 @@ func (puzzle *puzzleT) Verify(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	)).Bytes()
 	intHash.SetBytes(hash)
-	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.diff))
+	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.fDiff))
 	return intHash.Cmp(Target) == -1
 }

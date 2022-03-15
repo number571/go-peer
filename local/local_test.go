@@ -5,14 +5,14 @@ import (
 	"os"
 	"testing"
 
-	cr "github.com/number571/go-peer/crypto"
-	tu "github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
-func newClient() Client {
-	settings := tu.NewSettings()
-	privKey := cr.NewPrivKey(1024)
-	return NewClient(privKey, settings)
+func newClient() IClient {
+	sett := testutils.NewSettings()
+	privKey := crypto.NewPrivKey(1024)
+	return NewClient(privKey, sett)
 }
 
 func TestEncrypt(t *testing.T) {
@@ -25,15 +25,14 @@ func TestEncrypt(t *testing.T) {
 	msg := NewMessage(title, data)
 	encmsg, _ := client1.Encrypt(NewRoute(client2.PubKey(), nil, nil), msg)
 
-	decmsg := client2.Decrypt(encmsg)
-	title1, data1 := decmsg.Export()
+	decmsg, title1 := client2.Decrypt(encmsg)
+
+	if !bytes.Equal(data, decmsg.Body().Data()) {
+		t.Errorf("data not equal with decrypted data")
+	}
 
 	if !bytes.Equal(title, title1) {
 		t.Errorf("title not equal with decrypted title")
-	}
-
-	if !bytes.Equal(data, data1) {
-		t.Errorf("data not equal with decrypted data")
 	}
 }
 
@@ -47,9 +46,9 @@ func TestStorage(t *testing.T) {
 	)
 
 	defer os.Remove(storageName)
-	secret1 := cr.NewPrivKey(512).Bytes()
+	secret1 := crypto.NewPrivKey(512).Bytes()
 
-	store := NewStorage(tu.NewSettings(), storageName, storagePasw)
+	store := NewStorage(testutils.NewSettings(), storageName, storagePasw)
 	store.Write(subject, password, secret1)
 
 	secret2, err := store.Read(subject, password)

@@ -1,50 +1,50 @@
 package crypto
 
-type Encrypter interface {
+type iEncrypter interface {
 	Encrypt(msg []byte) []byte
 }
 
-type Decrypter interface {
+type iDecrypter interface {
 	Decrypt(msg []byte) []byte
 }
 
-type Converter interface {
+type iConverter interface {
 	String() string
 	Bytes() []byte
 	Type() string
 	Size() uint64
 }
 
-type Hasher interface {
-	Converter
+type IHasher interface {
+	iConverter
 }
 
-type Cipher interface {
-	Encrypter
-	Decrypter
-	Converter
+type ICipher interface {
+	iEncrypter
+	iDecrypter
+	iConverter
 }
 
-type PubKey interface {
-	Encrypter
-	Converter
+type IPubKey interface {
+	iEncrypter
+	iConverter
 	Address() string
 	Verify([]byte, []byte) bool
 }
 
-type PrivKey interface {
-	Decrypter
-	Converter
+type IPrivKey interface {
+	iDecrypter
+	iConverter
 	Sign([]byte) []byte
-	PubKey() PubKey
+	PubKey() IPubKey
 }
 
-type Puzzle interface {
+type IPuzzle interface {
 	Proof([]byte) uint64
 	Verify([]byte, uint64) bool
 }
 
-type PRNG interface {
+type IPRNG interface {
 	String(uint64) string
 	Bytes(uint64) []byte
 	Uint64() uint64

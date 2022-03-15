@@ -14,74 +14,74 @@ import (
 )
 
 var (
-	_ Node = &nodeT{}
+	_ INode = &sNode{}
 )
 
 // Basic structure for network use.
-type nodeT struct {
-	client      local.Client
-	preceiver   crypto.PubKey
-	f2f         F2F
-	mutex       sync.Mutex
-	listener    net.Listener
-	hroutes     map[string]Handler
-	mapping     map[string]bool
-	connections map[string]net.Conn
-	actions     map[string]chan []byte
+type sNode struct {
+	fClient      local.IClient
+	fPReceiver   crypto.IPubKey
+	fF2F         iF2F
+	fMutex       sync.Mutex
+	fListener    net.Listener
+	fHRoutes     map[string]Handler
+	fMapping     map[string]bool
+	fConnections map[string]net.Conn
+	fActions     map[string]chan []byte
 }
 
 // Create client by private key as identification.
-func NewNode(client local.Client) Node {
+func NewNode(client local.IClient) INode {
 	if client == nil {
 		return nil
 	}
 
 	pseudo := crypto.NewPrivKey(client.PubKey().Size())
-	return &nodeT{
-		client:      client,
-		preceiver:   pseudo.PubKey(),
-		hroutes:     make(map[string]Handler),
-		mapping:     make(map[string]bool),
-		connections: make(map[string]net.Conn),
-		actions:     make(map[string]chan []byte),
-		f2f: &f2fT{
-			friends: make(map[string]crypto.PubKey),
+	return &sNode{
+		fClient:      client,
+		fPReceiver:   pseudo.PubKey(),
+		fHRoutes:     make(map[string]Handler),
+		fMapping:     make(map[string]bool),
+		fConnections: make(map[string]net.Conn),
+		fActions:     make(map[string]chan []byte),
+		fF2F: &sF2F{
+			fFriends: make(map[string]crypto.IPubKey),
 		},
 	}
 }
 
 // Close listener and current connections.
-func (node *nodeT) Close() {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) Close() {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	node.listener.Close()
-	for id, conn := range node.connections {
+	node.fListener.Close()
+	for id, conn := range node.fConnections {
 		conn.Close()
-		delete(node.connections, id)
+		delete(node.fConnections, id)
 	}
 }
 
 // Return client structure.
-func (node *nodeT) Client() local.Client {
-	return node.client
+func (node *sNode) Client() local.IClient {
+	return node.fClient
 }
 
 // Return f2f structure.
-func (node *nodeT) F2F() F2F {
-	return node.f2f
+func (node *sNode) F2F() iF2F {
+	return node.fF2F
 }
 
 // Turn on listener by address.
 // Client handle function need be not null.
-func (node *nodeT) Listen(address string) error {
+func (node *sNode) Listen(address string) error {
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
 	}
 	defer listen.Close()
 
-	node.listener = listen
+	node.fListener = listen
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -104,14 +104,14 @@ func (node *nodeT) Listen(address string) error {
 }
 
 // Add function to mapping for route use.
-func (node *nodeT) Handle(title []byte, handle Handler) Node {
+func (node *sNode) Handle(title []byte, handle Handler) INode {
 	node.setFunction(title, handle)
 	return node
 }
 
 // Send message by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (node *nodeT) Request(route local.Route, msg local.Message) (Response, error) {
+func (node *sNode) Request(route local.IRoute, msg local.IMessage) (Response, error) {
 	var (
 		result []byte
 		err    error
@@ -151,12 +151,12 @@ LOOP:
 }
 
 // Get list of connection addresses.
-func (node *nodeT) Connections() []string {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) Connections() []string {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	var list []string
-	for addr := range node.connections {
+	for addr := range node.fConnections {
 		list = append(list, addr)
 	}
 
@@ -164,14 +164,14 @@ func (node *nodeT) Connections() []string {
 }
 
 // Check the existence of an address in the list of connections.
-func (node *nodeT) InConnections(address string) bool {
+func (node *sNode) InConnections(address string) bool {
 	_, ok := node.getConnection(address)
 	return ok
 }
 
 // Connect to node by address.
 // Client handle function need be not null.
-func (node *nodeT) Connect(address string) error {
+func (node *sNode) Connect(address string) error {
 	if node.hasMaxConnSize() {
 		return errors.New("max conn")
 	}
@@ -188,19 +188,19 @@ func (node *nodeT) Connect(address string) error {
 }
 
 // Disconnect from node by address.
-func (node *nodeT) Disconnect(address string) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) Disconnect(address string) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	conn, ok := node.connections[address]
+	conn, ok := node.fConnections[address]
 	if ok {
 		conn.Close()
 	}
 
-	delete(node.connections, address)
+	delete(node.fConnections, address)
 }
 
-func (node *nodeT) handleConn(id string) {
+func (node *sNode) handleConn(id string) {
 	var (
 		counter  = uint64(0)
 		retryNum = node.Client().Settings().Get(settings.SizeRtry)
@@ -226,35 +226,34 @@ func (node *nodeT) handleConn(id string) {
 
 	REPEAT:
 		// check message in mapping by hash
-		if node.inMapping(msg.Body.Hash) {
+		if node.inMapping(msg.Body().Hash()) {
 			continue
 		}
-		node.setMapping(msg.Body.Hash)
+		node.setMapping(msg.Body().Hash())
 
 		// redirect this message to connections
 		node.send(msg)
 
 		// try decrypt message
-		decMsg := node.client.Decrypt(msg)
+		decMsg, title := node.Client().Decrypt(msg)
 		if decMsg == nil {
 			continue
 		}
 
 		// decrypt sender of message
-		sender := crypto.LoadPubKey(decMsg.Head.Sender)
+		sender := crypto.LoadPubKey(decMsg.Head().Sender())
 		if sender == nil {
 			continue
 		}
 
 		// if mode is friend-to-friend and sender not in list of f2f
 		// then pass this request
-		if node.f2f.Status() && !node.f2f.InList(sender) {
+		if node.F2F().Status() && !node.F2F().InList(sender) {
 			continue
 		}
 
 		// if this message is just route message
 		// then try procedures again
-		title, data := decMsg.Export()
 		routeMsg := node.Client().Settings().Get(settings.MaskRout)
 
 		// if is route package then
@@ -265,10 +264,10 @@ func (node *nodeT) handleConn(id string) {
 			if rand.Uint64()%2 == 0 {
 				// send pseudo message
 				pMsg, _ := node.Client().Encrypt(
-					local.NewRoute(node.preceiver, nil, nil),
+					local.NewRoute(node.fPReceiver, nil, nil),
 					local.NewMessage(
 						rand.Bytes(16),
-						rand.Bytes(calcRandSize(len(data))),
+						rand.Bytes(calcRandSize(len(decMsg.Body().Data()))),
 					),
 				)
 				node.send(pMsg)
@@ -276,17 +275,16 @@ func (node *nodeT) handleConn(id string) {
 				wtime := node.Client().Settings().Get(settings.TimePsdo)
 				time.Sleep(time.Millisecond * calcRandTime(wtime))
 			}
-			msg = local.Package(data).Deserialize()
+			msg = local.LoadPackage(decMsg.Body().Data()).ToMessage()
 			goto REPEAT
 		}
 
 		// send message to handler
-		decMsg.Body.Data = data
 		node.handleFunc(decMsg, title)
 	}
 }
 
-func (node *nodeT) handleFunc(msg local.Message, title []byte) {
+func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 	var (
 		skeySize  = node.Client().Settings().Get(settings.SizeSkey)
 		respNum   = node.Client().Settings().Get(settings.MaskRout)
@@ -301,7 +299,7 @@ func (node *nodeT) handleFunc(msg local.Message, title []byte) {
 		}
 		node.response(
 			title[:skeySize],
-			msg.Body.Data,
+			msg.Body().Data(),
 		)
 		return
 	}
@@ -312,28 +310,28 @@ func (node *nodeT) handleFunc(msg local.Message, title []byte) {
 		return
 	}
 
-	rmsg, _ := node.client.Encrypt(
-		local.NewRoute(crypto.LoadPubKey(msg.Head.Sender), nil, nil),
+	rmsg, _ := node.Client().Encrypt(
+		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender()), nil, nil),
 		local.NewMessage(
 			bytes.Join(
 				[][]byte{
 					respBytes,
-					msg.Head.Session,
+					msg.Head().Session(),
 					title,
 				},
 				[]byte{},
 			),
-			f(node.client, msg),
+			f(node.Client(), msg),
 		),
 	)
 	node.send(rmsg)
 }
 
-func (node *nodeT) send(msg local.Message) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) send(msg local.IMessage) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	pack := msg.Serialize()
+	pack := msg.ToPackage()
 	bytesMsg := bytes.Join(
 		[][]byte{
 			pack.SizeToBytes(),
@@ -342,57 +340,57 @@ func (node *nodeT) send(msg local.Message) {
 		[]byte{},
 	)
 
-	skey := encoding.Base64Encode(msg.Body.Hash)
-	node.mapping[skey] = true
-	for _, cn := range node.connections {
+	skey := encoding.Base64Encode(msg.Body().Hash())
+	node.fMapping[skey] = true
+	for _, cn := range node.fConnections {
 		go cn.Write(bytesMsg)
 	}
 }
 
-func (node *nodeT) response(nonce []byte, data []byte) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) response(nonce []byte, data []byte) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(nonce)
-	if _, ok := node.actions[skey]; ok {
-		node.actions[skey] <- data
+	if _, ok := node.fActions[skey]; ok {
+		node.fActions[skey] <- data
 	}
 }
 
-func (node *nodeT) setFunction(name []byte, handle Handler) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) setFunction(name []byte, handle Handler) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(name)
-	node.hroutes[skey] = handle
+	node.fHRoutes[skey] = handle
 }
 
-func (node *nodeT) getFunction(name []byte) Handler {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) getFunction(name []byte) Handler {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(name)
-	f, ok := node.hroutes[skey]
+	f, ok := node.fHRoutes[skey]
 	if !ok {
 		return nil
 	}
 	return f
 }
 
-func (node *nodeT) setAction(nonce []byte) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) setAction(nonce []byte) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(nonce)
-	node.actions[skey] = make(chan []byte)
+	node.fActions[skey] = make(chan []byte)
 }
 
-func (node *nodeT) getAction(nonce []byte) chan []byte {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) getAction(nonce []byte) chan []byte {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(nonce)
-	ch, ok := node.actions[skey]
+	ch, ok := node.fActions[skey]
 	if !ok {
 		return make(chan []byte)
 	}
@@ -400,57 +398,57 @@ func (node *nodeT) getAction(nonce []byte) chan []byte {
 	return ch
 }
 
-func (node *nodeT) delAction(nonce []byte) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) delAction(nonce []byte) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(nonce)
-	delete(node.actions, skey)
+	delete(node.fActions, skey)
 }
 
-func (node *nodeT) setMapping(hash []byte) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) setMapping(hash []byte) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	if uint64(len(node.mapping)) > node.client.Settings().Get(settings.SizeMapp) {
-		for k := range node.mapping {
-			delete(node.mapping, k)
+	if uint64(len(node.fMapping)) > node.Client().Settings().Get(settings.SizeMapp) {
+		for k := range node.fMapping {
+			delete(node.fMapping, k)
 			break
 		}
 	}
 
 	skey := encoding.Base64Encode(hash)
-	node.mapping[skey] = true
+	node.fMapping[skey] = true
 }
 
-func (node *nodeT) inMapping(hash []byte) bool {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) inMapping(hash []byte) bool {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
 	skey := encoding.Base64Encode(hash)
-	_, ok := node.mapping[skey]
+	_, ok := node.fMapping[skey]
 	return ok
 }
 
-func (node *nodeT) hasMaxConnSize() bool {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) hasMaxConnSize() bool {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	return uint64(len(node.connections)) > node.client.Settings().Get(settings.SizeConn)
+	return uint64(len(node.fConnections)) > node.Client().Settings().Get(settings.SizeConn)
 }
 
-func (node *nodeT) setConnection(id string, conn net.Conn) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) setConnection(id string, conn net.Conn) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	node.connections[id] = conn
+	node.fConnections[id] = conn
 }
 
-func (node *nodeT) getConnection(id string) (net.Conn, bool) {
-	node.mutex.Lock()
-	defer node.mutex.Unlock()
+func (node *sNode) getConnection(id string) (net.Conn, bool) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
 
-	conn, ok := node.connections[id]
+	conn, ok := node.fConnections[id]
 	return conn, ok
 }
 

@@ -1,0 +1,13 @@
+{
+	"address": "test_address",
+	"connects": [
+		"test_connect1",
+		"test_connect2",
+		"test_connect3"
+	],
+	"services": {
+		"test_service1": "test_address1",
+		"test_service2": "test_address2",
+		"test_service3": "test_address3"
+	}
+}

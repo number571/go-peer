@@ -16,32 +16,33 @@ const (
 )
 
 var (
-	_ Settings = &settingsT{}
+	_ ISettings = &sSettings{}
 )
 
-type settingsT struct {
-	mutex   sync.Mutex
-	mapping map[Key]Value
+type sSettings struct {
+	fMutex   sync.Mutex
+	fMapping map[Key]Value
 }
 
-func NewSettings() Settings {
-	return &settingsT{
-		mapping: defaultSettings(),
+func NewSettings() ISettings {
+	return &sSettings{
+		fMapping: defaultSettings(),
 	}
 }
 
-func (s *settingsT) Set(k Key, v Value) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+func (s *sSettings) Set(k Key, v Value) ISettings {
+	s.fMutex.Lock()
+	defer s.fMutex.Unlock()
 
-	s.mapping[k] = v
+	s.fMapping[k] = v
+	return s
 }
 
-func (s *settingsT) Get(k Key) Value {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+func (s *sSettings) Get(k Key) Value {
+	s.fMutex.Lock()
+	defer s.fMutex.Unlock()
 
-	v, ok := s.mapping[k]
+	v, ok := s.fMapping[k]
 	if !ok {
 		panic("settings: value undefined")
 	}

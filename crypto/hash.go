@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	_ Hasher = &sha256T{}
-	_ Hasher = &hmac256T{}
+	_ IHasher = &sSHA256{}
+	_ IHasher = &sHMAC256{}
 )
 
 const (
@@ -19,61 +19,61 @@ const (
 	HmacKeyType   = "go-peer\\hmac-sha256"
 )
 
-type sha256T struct {
-	hash []byte
+type sSHA256 struct {
+	fHash []byte
 }
 
-func NewHasher(data []byte) Hasher {
+func NewHasher(data []byte) IHasher {
 	h := sha256.New()
 	h.Write(data)
-	return &sha256T{
-		hash: h.Sum(nil),
+	return &sSHA256{
+		fHash: h.Sum(nil),
 	}
 }
 
-func (h *sha256T) String() string {
+func (h *sSHA256) String() string {
 	bytes := h.Bytes()
 	return encoding.Base64Encode(bytes[:TruncatedSize])
 }
 
-func (h *sha256T) Bytes() []byte {
-	return h.hash
+func (h *sSHA256) Bytes() []byte {
+	return h.fHash
 }
 
-func (h *sha256T) Type() string {
+func (h *sSHA256) Type() string {
 	return HashKeyType
 }
 
-func (h *sha256T) Size() uint64 {
+func (h *sSHA256) Size() uint64 {
 	return HashSize
 }
 
-type hmac256T struct {
-	hash []byte
+type sHMAC256 struct {
+	fHash []byte
 }
 
-func NewHasherMAC(key []byte, data []byte) Hasher {
+func NewHasherMAC(key []byte, data []byte) IHasher {
 	h := hmac.New(sha256.New, key)
 	h.Write(data)
-	return &hmac256T{
-		hash: h.Sum(nil),
+	return &sHMAC256{
+		fHash: h.Sum(nil),
 	}
 }
 
-func (h *hmac256T) String() string {
+func (h *sHMAC256) String() string {
 	bytes := h.Bytes()
 	return encoding.Base64Encode(bytes[:TruncatedSize])
 }
 
-func (h *hmac256T) Bytes() []byte {
-	return h.hash
+func (h *sHMAC256) Bytes() []byte {
+	return h.fHash
 }
 
-func (h *hmac256T) Type() string {
+func (h *sHMAC256) Type() string {
 	return HmacKeyType
 }
 
-func (h *hmac256T) Size() uint64 {
+func (h *sHMAC256) Size() uint64 {
 	return HashSize
 }
 

@@ -7,7 +7,7 @@
 
 ## Framework based applications
 * Hidden Lake: [github.com/number571/hiddenlake](https://github.com/number571/hiddenlake "HL");
-* Hidden Lake Service: [github.com/number571/hls](https://github.com/number571/hls "HLS");
+* Hidden Lake Service: [github.com/number571/hls](https://github.com/number571/go-peer/cmd/hls "HLS");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
 ## Description
@@ -42,3 +42,12 @@ If we assume that there are only three nodes `{A, B, C}` in the network (where o
 At the moment, the framework is able to recreate the fourth stage of anonymity, but is not suitable for the seven. This is due to the three pitfalls of the seven stage of anonymity that need to be corrected. The list is as follows:
 1. Request time. You need to implement a simulation of packet generation time, either on a request-based or routing-response basis.
 2. The period of states. This problem should be solved dynamically by the user and based on the framework it is quite impossible to fix the vulnerability.
+
+## Specifications of go-peer
+
+1. Prefix 's'/'S' - structure type
+2. Prefix 'i'/'I' - interface type
+3. Prefix 'f'/'F' - field of structure
+4. Prefix 'c'/'C' - constant
+5. Prrfix 'g'/'G' - global variable
+6. Prefix 't'/'T' - test constant/variable/structure

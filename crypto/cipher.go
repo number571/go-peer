@@ -10,30 +10,30 @@ import (
 )
 
 var (
-	_ Cipher = &cipherT{}
+	_ ICipher = &sCipher{}
 )
 
 const (
 	SymmKeyType = "go-peer\\aes"
 )
 
-type cipherT struct {
-	key []byte
+type sCipher struct {
+	fKey []byte
 }
 
-func NewCipher(key []byte) Cipher {
+func NewCipher(key []byte) ICipher {
 	switch HashSize {
 	case 16, 24, 32: // AES keys
 	default:
 		return nil
 	}
-	return &cipherT{
-		key: NewHasher(key).Bytes(),
+	return &sCipher{
+		fKey: NewHasher(key).Bytes(),
 	}
 }
 
-func (cph *cipherT) Encrypt(msg []byte) []byte {
-	block, err := aes.NewCipher(cph.key)
+func (cph *sCipher) Encrypt(msg []byte) []byte {
+	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
 	}
@@ -49,8 +49,8 @@ func (cph *cipherT) Encrypt(msg []byte) []byte {
 	return cipherText
 }
 
-func (cph *cipherT) Decrypt(msg []byte) []byte {
-	block, err := aes.NewCipher(cph.key)
+func (cph *sCipher) Decrypt(msg []byte) []byte {
+	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
 	}
@@ -68,19 +68,19 @@ func (cph *cipherT) Decrypt(msg []byte) []byte {
 	return unpaddingPKCS5(msg)
 }
 
-func (cph *cipherT) String() string {
+func (cph *sCipher) String() string {
 	return fmt.Sprintf("Key(%s){%X}", SymmKeyType, cph.Bytes())
 }
 
-func (cph *cipherT) Bytes() []byte {
-	return cph.key
+func (cph *sCipher) Bytes() []byte {
+	return cph.fKey
 }
 
-func (cph *cipherT) Type() string {
+func (cph *sCipher) Type() string {
 	return SymmKeyType
 }
 
-func (cph *cipherT) Size() uint64 {
+func (cph *sCipher) Size() uint64 {
 	return HashSize
 }
 

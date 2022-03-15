@@ -5,36 +5,36 @@ import (
 	"github.com/number571/go-peer/local"
 )
 
+type iF2F interface {
+	Status() bool
+	Switch()
+
+	Append(crypto.IPubKey)
+	Remove(crypto.IPubKey)
+
+	InList(crypto.IPubKey) bool
+	List() []crypto.IPubKey
+}
+
 type (
 	Title    = []byte
 	Response = []byte
 	Address  = string
-	Handler  = func(local.Client, local.Message) []byte
+	Handler  = func(local.IClient, local.IMessage) []byte
 )
-type Node interface {
+type INode interface {
 	Listen(Address) error
 	Close()
 
-	Client() local.Client
-	F2F() F2F
+	Client() local.IClient
+	F2F() iF2F
 
-	Handle(Title, Handler) Node
-	Request(local.Route, local.Message) (Response, error)
+	Handle(Title, Handler) INode
+	Request(local.IRoute, local.IMessage) (Response, error)
 
 	Connect(Address) error
 	Disconnect(Address)
 
 	InConnections(Address) bool
 	Connections() []Address
-}
-
-type F2F interface {
-	Status() bool
-	Switch()
-
-	Append(crypto.PubKey)
-	Remove(crypto.PubKey)
-
-	InList(crypto.PubKey) bool
-	List() []crypto.PubKey
 }

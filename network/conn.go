@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-func (node *nodeT) readMessage(conn net.Conn) local.Message {
+func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 	const (
 		SizeUint64 = 8 // bytes
 	)
@@ -28,7 +28,7 @@ func (node *nodeT) readMessage(conn net.Conn) local.Message {
 		return nil
 	}
 
-	mustLen := local.Package(buflen).BytesToSize()
+	mustLen := local.LoadPackage(buflen).BytesToSize()
 	if mustLen > node.Client().Settings().Get(settings.SizePack) {
 		return nil
 	}
@@ -55,21 +55,21 @@ func (node *nodeT) readMessage(conn net.Conn) local.Message {
 		}
 	}
 
-	return node.initialCheck(local.Package(pack).Deserialize())
+	return node.initialCheck(local.LoadPackage(pack).ToMessage())
 }
 
-func (node *nodeT) initialCheck(msg local.Message) local.Message {
+func (node *sNode) initialCheck(msg local.IMessage) local.IMessage {
 	if msg == nil {
 		return nil
 	}
 
-	if len(msg.Body.Hash) != crypto.HashSize {
+	if len(msg.Body().Hash()) != crypto.HashSize {
 		return nil
 	}
 
 	diff := node.Client().Settings().Get(settings.SizeWork)
 	puzzle := crypto.NewPuzzle(diff)
-	if !puzzle.Verify(msg.Body.Hash, msg.Body.Proof) {
+	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil
 	}
 

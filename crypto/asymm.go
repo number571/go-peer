@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	_ PrivKey = &privKeyT{}
-	_ PubKey  = &pubKeyT{}
+	_ IPrivKey = &sPrivKey{}
+	_ IPubKey  = &sPubKey{}
 )
 
 const (
@@ -24,27 +24,27 @@ const (
  * PRIVATE KEY
  */
 
-type privKeyT struct {
+type sPrivKey struct {
 	priv *rsa.PrivateKey
 }
 
 // Create private key by number of bits.
-func NewPrivKey(bits uint64) PrivKey {
+func NewPrivKey(bits uint64) IPrivKey {
 	priv, err := rsa.GenerateKey(rand.Reader, int(bits))
 	if err != nil {
 		return nil
 	}
-	return &privKeyT{priv}
+	return &sPrivKey{priv}
 }
 
-func LoadPrivKey(privkey interface{}) PrivKey {
+func LoadPrivKey(privkey interface{}) IPrivKey {
 	switch x := privkey.(type) {
 	case []byte:
 		priv := bytesToPrivateKey(x)
 		if priv == nil {
 			return nil
 		}
-		return &privKeyT{priv}
+		return &sPrivKey{priv}
 	case string:
 		var (
 			prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
@@ -71,31 +71,31 @@ func LoadPrivKey(privkey interface{}) PrivKey {
 	}
 }
 
-func (key *privKeyT) Decrypt(msg []byte) []byte {
+func (key *sPrivKey) Decrypt(msg []byte) []byte {
 	return decryptRSA(key.priv, msg)
 }
 
-func (key *privKeyT) Sign(msg []byte) []byte {
+func (key *sPrivKey) Sign(msg []byte) []byte {
 	return sign(key.priv, NewHasher(msg).Bytes())
 }
 
-func (key *privKeyT) PubKey() PubKey {
-	return &pubKeyT{&key.priv.PublicKey}
+func (key *sPrivKey) PubKey() IPubKey {
+	return &sPubKey{&key.priv.PublicKey}
 }
 
-func (key *privKeyT) Bytes() []byte {
+func (key *sPrivKey) Bytes() []byte {
 	return privateKeyToBytes(key.priv)
 }
 
-func (key *privKeyT) String() string {
+func (key *sPrivKey) String() string {
 	return fmt.Sprintf("Priv(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *privKeyT) Type() string {
+func (key *sPrivKey) Type() string {
 	return AsymmKeyType
 }
 
-func (key *privKeyT) Size() uint64 {
+func (key *sPrivKey) Size() uint64 {
 	return key.PubKey().Size()
 }
 
@@ -134,18 +134,18 @@ func sign(priv *rsa.PrivateKey, hash []byte) []byte {
  * PUBLIC KEY
  */
 
-type pubKeyT struct {
+type sPubKey struct {
 	pub *rsa.PublicKey
 }
 
-func LoadPubKey(pubkey interface{}) PubKey {
+func LoadPubKey(pubkey interface{}) IPubKey {
 	switch x := pubkey.(type) {
 	case []byte:
 		pub := bytesToPublicKey(x)
 		if pub == nil {
 			return nil
 		}
-		return &pubKeyT{pub}
+		return &sPubKey{pub}
 	case string:
 		var (
 			prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
@@ -172,31 +172,31 @@ func LoadPubKey(pubkey interface{}) PubKey {
 	}
 }
 
-func (key *pubKeyT) Encrypt(msg []byte) []byte {
+func (key *sPubKey) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
-func (key *pubKeyT) Address() string {
+func (key *sPubKey) Address() string {
 	return NewHasher(key.Bytes()).String()
 }
 
-func (key *pubKeyT) Verify(msg []byte, sig []byte) bool {
+func (key *sPubKey) Verify(msg []byte, sig []byte) bool {
 	return verify(key.pub, NewHasher(msg).Bytes(), sig) == nil
 }
 
-func (key *pubKeyT) Bytes() []byte {
+func (key *sPubKey) Bytes() []byte {
 	return publicKeyToBytes(key.pub)
 }
 
-func (key *pubKeyT) String() string {
+func (key *sPubKey) String() string {
 	return fmt.Sprintf("Pub(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *pubKeyT) Type() string {
+func (key *sPubKey) Type() string {
 	return AsymmKeyType
 }
 
-func (key *pubKeyT) Size() uint64 {
+func (key *sPubKey) Size() uint64 {
 	return uint64(key.pub.N.BitLen())
 }
 
