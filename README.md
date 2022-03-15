@@ -7,7 +7,7 @@
 
 ## Framework based applications
 * Hidden Lake: [github.com/number571/hiddenlake](https://github.com/number571/hiddenlake "HL");
-* Hidden Lake Service: [github.com/number571/hls](https://github.com/number571/go-peer/cmd/hls "HLS");
+* Hidden Lake Service: [github.com/number571/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
 ## Description
