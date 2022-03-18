@@ -27,7 +27,7 @@ var (
 
 const (
 	tcAKeySize   = 1024
-	tcAddressHLS = "localhost:9571"
+	tcAddressHLS = "localhost:9090"
 
 	tcServiceInHLS  = "hidden-echo-service"
 	tcServiceOutHLS = "localhost:8080"
@@ -38,23 +38,26 @@ const (
 
 // client -> HLS -> server -\
 // client <- HLS <- server -/
-func TestService(t *testing.T) {
+func TestHLS(t *testing.T) {
 	// server
-	srv := startServerHTTP(t)
+	srv := testStartServerHTTP(t)
 	defer srv.Close()
 
 	// service
-	node := startNodeHLS(t)
+	node := testStartNodeHLS(t)
 	defer node.Close()
 
 	// client
 	time.Sleep(100 * time.Millisecond)
-	startClientHLS(t)
+	err := testStartClientHLS()
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 // SERVER
 
-func startServerHTTP(t *testing.T) *http.Server {
+func testStartServerHTTP(t *testing.T) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/echo", testEchoPage)
 
@@ -95,7 +98,7 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 // HLS
 
-func startNodeHLS(t *testing.T) network.INode {
+func testStartNodeHLS(t *testing.T) network.INode {
 	privKey := crypto.LoadPrivKey(tcPrivKeyHLS)
 	client := local.NewClient(privKey, tgSettings)
 
@@ -151,7 +154,7 @@ func testRouteHLS(client local.IClient, msg local.IMessage) []byte {
 
 // CLIENT
 
-func startClientHLS(t *testing.T) {
+func testStartClientHLS() error {
 	priv := crypto.NewPrivKey(tcAKeySize)
 	client := local.NewClient(priv, tgSettings)
 
@@ -160,7 +163,7 @@ func startClientHLS(t *testing.T) {
 
 	err := node.Connect(tcAddressHLS)
 	if err != nil {
-		t.Error(err)
+		return err
 	}
 
 	msg := local.NewMessage(
@@ -178,10 +181,12 @@ func startClientHLS(t *testing.T) {
 
 	res, err := node.Request(route, msg)
 	if err != nil {
-		t.Error(err)
+		return err
 	}
 
 	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		t.Error("result does not match")
+		return fmt.Errorf("result does not match")
 	}
+
+	return nil
 }

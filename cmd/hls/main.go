@@ -1,3 +1,4 @@
+// HLS - Hidden Lake Service
 package main
 
 import (
@@ -13,8 +14,11 @@ import (
 )
 
 func main() {
-	hlsDefaultInit()
-	fmt.Println("Service is listening...")
+	err := hlsDefaultInit()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	node := network.NewNode(gClient).
 		Handle([]byte(cPatternHLS), routeHLS)
@@ -30,10 +34,10 @@ func main() {
 		select {}
 	}
 
-	err := node.Listen(gConfig.Address())
+	err = node.Listen(gConfig.Address())
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 }
 

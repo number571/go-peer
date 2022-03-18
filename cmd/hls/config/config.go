@@ -43,12 +43,12 @@ func NewConfig(filepath string) IConfig {
 		}
 		err := utils.WriteFile(filepath, utils.Serialize(cfg))
 		if err != nil {
-			panic("error: write to file")
+			panic(err)
 		}
 	} else {
 		err := utils.Deserialize(utils.ReadFile(filepath), cfg)
 		if err != nil {
-			panic("error: read from file")
+			panic(err)
 		}
 	}
 

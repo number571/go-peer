@@ -12,11 +12,15 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-func hlsDefaultInit() {
-	var initOnly bool
+func hlsDefaultInit() error {
+	var (
+		initOnly bool
+	)
 
 	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
 	flag.Parse()
+
+	gConfig = config.NewConfig("hls.cfg")
 
 	sett := settings.NewSettings()
 	privKey := getPrivKey(
@@ -26,21 +30,21 @@ func hlsDefaultInit() {
 		utils.InputString("Object password: "),
 	)
 	if privKey == nil {
-		fmt.Println("error: failed load private key")
-		os.Exit(2)
+		return fmt.Errorf("failed load private key")
 	}
 
-	gConfig = config.NewConfig("hls.cfg")
 	gClient = local.NewClient(privKey, sett)
 	if gClient == nil {
-		fmt.Println("error: failed create client node")
-		os.Exit(3)
+		return fmt.Errorf("failed create client node")
 	}
 
 	fmt.Printf("Public key: %s\n", privKey.PubKey())
 	if initOnly {
 		os.Exit(0)
 	}
+
+	fmt.Printf("Service is listening [%s]...\n", gConfig.Address())
+	return nil
 }
 
 func getPrivKey(sett settings.ISettings, filepath, storagePasw, objectPasw string) crypto.IPrivKey {
