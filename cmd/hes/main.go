@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
@@ -18,6 +19,11 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	go func() {
+		time.Sleep(24 * time.Hour)
+		gDB.Clean()
+	}()
 
 	http.HandleFunc("/", indexPage)
 	http.HandleFunc("/size", sizePage)
