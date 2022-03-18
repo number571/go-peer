@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/robfig/cron/v3"
+
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
@@ -21,8 +23,14 @@ func main() {
 	}
 
 	go func() {
-		time.Sleep(24 * time.Hour)
-		gDB.Clean()
+		jakartaTime, _ := time.LoadLocation("Asia/Jakarta")
+		scheduler := cron.New(cron.WithLocation(jakartaTime))
+
+		scheduler.AddFunc("0 0 * * *", func() {
+			gDB.Clean()
+		})
+
+		select {}
 	}()
 
 	http.HandleFunc("/", indexPage)
