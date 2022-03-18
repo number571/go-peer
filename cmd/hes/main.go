@@ -6,9 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
-
-	"github.com/robfig/cron/v3"
 
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
@@ -21,17 +18,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	go func() {
-		jakartaTime, _ := time.LoadLocation("Asia/Jakarta")
-		scheduler := cron.New(cron.WithLocation(jakartaTime))
-
-		scheduler.AddFunc("0 0 * * *", func() {
-			gDB.Clean()
-		})
-
-		select {}
-	}()
 
 	http.HandleFunc("/", indexPage)
 	http.HandleFunc("/size", sizePage)
