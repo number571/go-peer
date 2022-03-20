@@ -9,12 +9,16 @@ var (
 )
 
 type sConfig struct {
-	FAddress string `json:"address"`
+	FAddress   string `json:"address"`
+	FCleanCron string `json:"clean_cron"`
 }
 
 const (
 	// create local hms
-	cAddress = "localhost:9572"
+	cDefaultAddress = "localhost:9572"
+
+	// cron of clean database
+	cDefaultCleanCron = "0 0 * * *"
 )
 
 func NewConfig(filepath string) IConfig {
@@ -22,7 +26,8 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.FileIsExist(filepath) {
 		cfg = &sConfig{
-			FAddress: cAddress,
+			FAddress:   cDefaultAddress,
+			FCleanCron: cDefaultCleanCron,
 		}
 		err := utils.WriteFile(filepath, utils.Serialize(cfg))
 		if err != nil {
@@ -40,4 +45,8 @@ func NewConfig(filepath string) IConfig {
 
 func (cfg *sConfig) Address() string {
 	return cfg.FAddress
+}
+
+func (cfg *sConfig) CleanCron() string {
+	return cfg.FCleanCron
 }

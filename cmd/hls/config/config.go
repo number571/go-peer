@@ -19,15 +19,15 @@ type sConfig struct {
 
 const (
 	// create local hls
-	cAddress = "localhost:9571"
+	cDefaultAddress = "localhost:9571"
 )
 
 var (
 	// connect to another hls's
-	gConnects = []string{"127.0.0.2:9571"}
+	gDefaultConnects = []string{"127.0.0.2:9571"}
 
 	// crypto-address -> network-address
-	gServices = map[string]string{
+	gDefaultServices = map[string]string{
 		"hidden-default-service": "http://localhost:8080",
 	}
 )
@@ -37,9 +37,9 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.FileIsExist(filepath) {
 		cfg = &sConfig{
-			FAddress:  cAddress,
-			FConnects: gConnects,
-			FServices: gServices,
+			FAddress:  cDefaultAddress,
+			FConnects: gDefaultConnects,
+			FServices: gDefaultServices,
 		}
 		err := utils.WriteFile(filepath, utils.Serialize(cfg))
 		if err != nil {

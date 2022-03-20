@@ -19,7 +19,7 @@ func hmsDefaultInit() error {
 	}
 
 	scheduler := cron.New(cron.WithLocation(jakartaTime))
-	scheduler.AddFunc("0 0 * * *", func() {
+	scheduler.AddFunc(gConfig.CleanCron(), func() {
 		gDB.Clean()
 	})
 

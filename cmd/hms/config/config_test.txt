@@ -1,3 +1,4 @@
 {
-	"address": "test_address"
+	"address": "test_address",
+	"clean_cron": "0 0 0 0 0"
 }
