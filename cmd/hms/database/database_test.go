@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	tcPathDB = "test_hes.db"
+	tcPathDB = "test_hms.db"
 	tcKey    = "test-key"
 
 	tcMessageTitle     = "test-title"
@@ -21,12 +21,12 @@ var (
 	tgDB IKeyValueDB
 )
 
-func testHesDefaultInit(path string) {
+func testHmsDefaultInit(path string) {
 	tgDB = NewKeyValueDB(path)
 }
 
 func TestDB(t *testing.T) {
-	testHesDefaultInit(tcPathDB)
+	testHmsDefaultInit(tcPathDB)
 	defer os.RemoveAll(tcPathDB)
 
 	if tgDB.Size([]byte(tcKey)) != 0 {

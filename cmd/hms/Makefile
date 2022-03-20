@@ -3,10 +3,10 @@ GC=go build
 .PHONY: default build run test clean
 default: build run
 build:
-	$(GC) -o hes *.go
+	$(GC) -o hms *.go
 run:
-	./hes	
+	./hms	
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -rf hes hes.cfg hes.db
+	rm -rf hms hms.cfg hms.db

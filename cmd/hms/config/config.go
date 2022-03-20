@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/number571/go-peer/cmd/hes/utils"
+	"github.com/number571/go-peer/cmd/hms/utils"
 )
 
 var (
@@ -13,7 +13,7 @@ type sConfig struct {
 }
 
 const (
-	// create local hes
+	// create local hms
 	cAddress = "localhost:9572"
 )
 

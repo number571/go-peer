@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hes/config"
-	"github.com/number571/go-peer/cmd/hes/database"
+	"github.com/number571/go-peer/cmd/hms/config"
+	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/robfig/cron/v3"
 )
 
-func hesDefaultInit() error {
-	gConfig = config.NewConfig("hes.cfg")
-	gDB = database.NewKeyValueDB("hes.db")
+func hmsDefaultInit() error {
+	gConfig = config.NewConfig("hms.cfg")
+	gDB = database.NewKeyValueDB("hms.db")
 
 	jakartaTime, err := time.LoadLocation("Asia/Jakarta")
 	if err != nil {

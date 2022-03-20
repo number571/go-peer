@@ -1,13 +1,16 @@
 # go-peer
 
-> Framework for create secure decentralized applications. Version: 1.4
+> Framework for create secure and anonymity decentralized networks. Version: 1.4
 
 ## Research Article
 * Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
 
 ## Framework based applications
-* Hidden Lake: [github.com/number571/hiddenlake](https://github.com/number571/hiddenlake "HL");
-* Hidden Lake Service: [github.com/number571/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
+* Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
+* Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
+
+## Deprecated framework based applications
+* Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
 ## Description

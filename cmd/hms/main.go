@@ -1,4 +1,4 @@
-// HES - Hidden Email Service
+// HMS - Hidden Message Service
 package main
 
 import (
@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	err := hesDefaultInit()
+	err := hmsDefaultInit()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -32,7 +32,7 @@ func main() {
 }
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
-	response(w, 0, []byte("hidden email service"))
+	response(w, 0, []byte("hidden message service"))
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
