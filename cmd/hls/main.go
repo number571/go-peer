@@ -9,6 +9,7 @@ import (
 	"os"
 
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
+	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/network"
 )
@@ -20,9 +21,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// create node from client
 	node := network.NewNode(gClient).
 		Handle([]byte(cPatternHLS), routeHLS)
 
+	// turn on f2f mode
+	node.F2F().Set(gConfig.F2F())
+	for _, pubKey := range gConfig.PubKeys() {
+		node.F2F().Append(pubKey)
+	}
+
+	// connect to open nodes
 	for _, conn := range gConfig.Connections() {
 		err := node.Connect(conn)
 		if err != nil {
@@ -41,20 +50,35 @@ func main() {
 	}
 }
 
-func routeHLS(client local.IClient, msg local.IMessage) []byte {
+func routeHLS(node network.INode, msg local.IMessage) []byte {
 	request := hlsnet.LoadRequest(msg.Body().Data())
 	if request == nil {
 		return nil
 	}
 
-	addr, ok := gConfig.GetService(request.Host())
+	hash := crypto.NewHasher(request.Body()).Bytes()
+	if gDB.Exist(hash) {
+		return nil
+	}
+	gDB.Push(hash)
+
+	info, ok := gConfig.GetService(request.Host())
 	if !ok {
 		return nil
 	}
 
+	if info.IsRedirect() {
+		for _, recv := range gConfig.PubKeys() {
+			go node.Request(
+				local.NewRoute(recv, nil, nil),
+				local.NewMessage([]byte(cPatternHLS), request.Body()),
+			)
+		}
+	}
+
 	req, err := http.NewRequest(
 		request.Method(),
-		addr+request.Path(),
+		info.Address()+request.Path(),
 		bytes.NewReader(request.Body()),
 	)
 	if err != nil {

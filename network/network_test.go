@@ -21,7 +21,7 @@ var (
 	tgRouteEcho = []byte("/echo")
 )
 
-func echoMessage(client local.IClient, msg local.IMessage) []byte {
+func echoMessage(node INode, msg local.IMessage) []byte {
 	return msg.Body().Data()
 }
 
@@ -96,8 +96,8 @@ func TestF2F(t *testing.T) {
 	nodes[0].Client().Settings().Set(settings.TimeWait, 1)
 	nodes[1].Client().Settings().Set(settings.TimeWait, 1)
 
-	nodes[0].F2F().Switch()
-	nodes[1].F2F().Switch()
+	nodes[0].F2F().Set(true)
+	nodes[1].F2F().Set(true)
 
 	_, err := nodes[0].Request(route, msg)
 	if err == nil {

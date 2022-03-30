@@ -26,7 +26,7 @@ const (
 	tcN        = 3
 	tcAKeySize = 1024
 
-	tcServiceAddress  = "localhost:8572"
+	tcServiceAddress  = "localhost:8573"
 	tcPatternTitleHMS = "store-message"
 	tcBodyOfMessage   = "hello, world!"
 	tcPathDB          = "test_hms.db"
@@ -48,7 +48,7 @@ func TestHMS(t *testing.T) {
 	defer srv.Close()
 
 	// client push
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	err := testClientDoPush()
 	if err != nil {
 		t.Error(err)
@@ -56,7 +56,6 @@ func TestHMS(t *testing.T) {
 	}
 
 	// client size
-	time.Sleep(100 * time.Millisecond)
 	err = testClientDoSize()
 	if err != nil {
 		t.Error(err)
@@ -64,7 +63,6 @@ func TestHMS(t *testing.T) {
 	}
 
 	// client load
-	time.Sleep(100 * time.Millisecond)
 	err = testClientDoLoad()
 	if err != nil {
 		t.Error(err)

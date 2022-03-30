@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/number571/go-peer/cmd/hls/config"
+	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/local"
 )
 
@@ -13,4 +14,5 @@ const (
 var (
 	gClient local.IClient
 	gConfig config.IConfig
+	gDB     database.IKeyValueDB
 )

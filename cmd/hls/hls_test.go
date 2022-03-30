@@ -48,7 +48,7 @@ func TestHLS(t *testing.T) {
 	defer node.Close()
 
 	// client
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
@@ -115,7 +115,7 @@ func testStartNodeHLS(t *testing.T) network.INode {
 	return node
 }
 
-func testRouteHLS(client local.IClient, msg local.IMessage) []byte {
+func testRouteHLS(node network.INode, msg local.IMessage) []byte {
 	request := hlsnet.LoadRequest(msg.Body().Data())
 
 	tgMutex.Lock()

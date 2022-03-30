@@ -4,12 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hls/config"
+	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/settings"
+	"github.com/robfig/cron/v3"
 )
 
 func hlsDefaultInit() error {
@@ -21,6 +24,17 @@ func hlsDefaultInit() error {
 	flag.Parse()
 
 	gConfig = config.NewConfig("hls.cfg")
+	gDB = database.NewKeyValueDB("hls.db")
+
+	jakartaTime, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		return err
+	}
+
+	scheduler := cron.New(cron.WithLocation(jakartaTime))
+	scheduler.AddFunc(gConfig.CleanCron(), func() {
+		gDB.Clean()
+	})
 
 	sett := settings.NewSettings()
 	privKey := getPrivKey(

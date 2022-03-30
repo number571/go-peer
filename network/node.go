@@ -45,6 +45,7 @@ func NewNode(client local.IClient) INode {
 		fConnections: make(map[string]net.Conn),
 		fActions:     make(map[string]chan []byte),
 		fF2F: &sF2F{
+			fEnabled: false,
 			fFriends: make(map[string]crypto.IPubKey),
 		},
 	}
@@ -217,6 +218,8 @@ func (node *sNode) handleConn(id string) {
 		}
 
 		msg := node.readMessage(conn)
+
+	REPEAT:
 		if msg == nil {
 			counter++
 			continue
@@ -224,7 +227,6 @@ func (node *sNode) handleConn(id string) {
 
 		counter = 0
 
-	REPEAT:
 		// check message in mapping by hash
 		if node.inMapping(msg.Body().Hash()) {
 			continue
@@ -237,18 +239,6 @@ func (node *sNode) handleConn(id string) {
 		// try decrypt message
 		decMsg, title := node.Client().Decrypt(msg)
 		if decMsg == nil {
-			continue
-		}
-
-		// decrypt sender of message
-		sender := crypto.LoadPubKey(decMsg.Head().Sender())
-		if sender == nil {
-			continue
-		}
-
-		// if mode is friend-to-friend and sender not in list of f2f
-		// then pass this request
-		if node.F2F().Status() && !node.F2F().InList(sender) {
 			continue
 		}
 
@@ -277,6 +267,13 @@ func (node *sNode) handleConn(id string) {
 			}
 			msg = local.LoadPackage(decMsg.Body().Data()).ToMessage()
 			goto REPEAT
+		}
+
+		// if mode is friend-to-friend and sender not in list of f2f
+		// then pass this request
+		sender := crypto.LoadPubKey(decMsg.Head().Sender())
+		if node.F2F().Status() && !node.F2F().InList(sender) {
+			continue
 		}
 
 		// send message to handler
@@ -321,7 +318,7 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 				},
 				[]byte{},
 			),
-			f(node.Client(), msg),
+			f(node, msg),
 		),
 	)
 	node.send(rmsg)
