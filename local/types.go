@@ -5,6 +5,12 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
+type ISelector interface {
+	Length() uint64
+	Shuffle() ISelector
+	Return(uint64) []crypto.IPubKey
+}
+
 type IRoute interface {
 	Receiver() crypto.IPubKey
 	PSender() crypto.IPrivKey
