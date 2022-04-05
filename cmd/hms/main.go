@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/settings"
 )
 
 func main() {
@@ -116,6 +117,12 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 	msg := local.LoadPackage(request.Package).ToMessage()
 	if msg == nil {
 		response(w, cErrorMessage, []byte("failed: decode message"))
+		return
+	}
+
+	puzzle := crypto.NewPuzzle(gSettings.Get(settings.SizeWork))
+	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
+		response(w, cErrorWorkSize, []byte("failed: incorrect work size"))
 		return
 	}
 

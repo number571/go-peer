@@ -8,6 +8,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
+	"github.com/number571/go-peer/cmd/hls/logger"
 	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
@@ -23,6 +24,7 @@ func hlsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
 	flag.Parse()
 
+	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")
 
@@ -52,12 +54,11 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed create client node")
 	}
 
-	fmt.Printf("Public key: %s\n", privKey.PubKey())
+	gLogger.Info(fmt.Sprintf("public key = \n%s", gClient.PubKey().String()))
 	if initOnly {
 		os.Exit(0)
 	}
 
-	fmt.Printf("Service is listening [%s]...\n", gConfig.Address())
 	return nil
 }
 

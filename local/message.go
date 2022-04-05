@@ -9,14 +9,14 @@ import (
 
 var (
 	_ IMessage = &sMessage{}
-	_ iHead    = &sHeadMessage{}
-	_ iBody    = &sBodyMessage{}
+	_ iHead    = sHeadMessage{}
+	_ iBody    = sBodyMessage{}
 )
 
 // Basic structure of transport package.
 type sMessage struct {
-	FHead *sHeadMessage `json:"head"`
-	FBody *sBodyMessage `json:"body"`
+	FHead sHeadMessage `json:"head"`
+	FBody sBodyMessage `json:"body"`
 }
 
 type sHeadMessage struct {
@@ -36,8 +36,8 @@ type sBodyMessage struct {
 
 func NewMessage(title, data []byte) IMessage {
 	return &sMessage{
-		FHead: &sHeadMessage{},
-		FBody: &sBodyMessage{
+		FHead: sHeadMessage{},
+		FBody: sBodyMessage{
 			FData: bytes.Join([][]byte{
 				encoding.Uint64ToBytes(uint64(len(title))),
 				title,
@@ -84,32 +84,32 @@ func (msg *sMessage) ToPackage() IPackage {
 
 // IHead
 
-func (head *sHeadMessage) Sender() []byte {
+func (head sHeadMessage) Sender() []byte {
 	return head.FSender
 }
 
-func (head *sHeadMessage) Session() []byte {
+func (head sHeadMessage) Session() []byte {
 	return head.FSession
 }
 
-func (head *sHeadMessage) Salt() []byte {
+func (head sHeadMessage) Salt() []byte {
 	return head.FSalt
 }
 
 // IBody
 
-func (body *sBodyMessage) Data() []byte {
+func (body sBodyMessage) Data() []byte {
 	return body.FData
 }
 
-func (body *sBodyMessage) Hash() []byte {
+func (body sBodyMessage) Hash() []byte {
 	return body.FHash
 }
 
-func (body *sBodyMessage) Sign() []byte {
+func (body sBodyMessage) Sign() []byte {
 	return body.FSign
 }
 
-func (body *sBodyMessage) Proof() uint64 {
+func (body sBodyMessage) Proof() uint64 {
 	return body.FProof
 }

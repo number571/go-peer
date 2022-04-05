@@ -6,10 +6,12 @@ import (
 
 	"github.com/number571/go-peer/cmd/hms/config"
 	"github.com/number571/go-peer/cmd/hms/database"
+	"github.com/number571/go-peer/settings"
 	"github.com/robfig/cron/v3"
 )
 
 func hmsDefaultInit() error {
+	gSettings = settings.NewSettings()
 	gConfig = config.NewConfig("hms.cfg")
 	gDB = database.NewKeyValueDB("hms.db")
 

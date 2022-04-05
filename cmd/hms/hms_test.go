@@ -14,11 +14,10 @@ import (
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/settings"
 )
 
 var (
-	tgSettings       = testutils.NewSettings()
 	tgPubKeyReceiver = crypto.LoadPubKey(tcPubKeyReceiver)
 )
 
@@ -26,7 +25,7 @@ const (
 	tcN        = 3
 	tcAKeySize = 1024
 
-	tcServiceAddress  = "localhost:8573"
+	tcServiceAddress  = "localhost:8081"
 	tcPatternTitleHMS = "store-message"
 	tcBodyOfMessage   = "hello, world!"
 	tcPathDB          = "test_hms.db"
@@ -36,6 +35,7 @@ const (
 )
 
 func testHmsDefaultInit(path string) {
+	gSettings = settings.NewSettings()
 	gDB = database.NewKeyValueDB(path)
 }
 
@@ -92,7 +92,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 
 func testClientDoPush() error {
 	priv := crypto.NewPrivKey(tcAKeySize)
-	client := local.NewClient(priv, tgSettings)
+	client := local.NewClient(priv, gSettings)
 
 	hashRecv := crypto.NewHasher(tgPubKeyReceiver.Bytes()).Bytes()
 
@@ -131,7 +131,6 @@ func testClientDoPush() error {
 		if response.Return != cErrorNone {
 			return fmt.Errorf("%v", string(response.Result))
 		}
-
 	}
 
 	return nil
@@ -176,7 +175,7 @@ func testClientDoSize() error {
 
 func testClientDoLoad() error {
 	priv := crypto.LoadPrivKey(tcPrivKeyReceiver)
-	client := local.NewClient(priv, tgSettings)
+	client := local.NewClient(priv, gSettings)
 
 	hashRecv := crypto.NewHasher(tgPubKeyReceiver.Bytes()).Bytes()
 

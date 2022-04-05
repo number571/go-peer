@@ -97,12 +97,12 @@ func (client *sClient) onceEncrypt(receiver crypto.IPubKey, msg IMessage) (IMess
 
 	cipher := crypto.NewCipher(session)
 	return &sMessage{
-		FHead: &sHeadMessage{
+		FHead: sHeadMessage{
 			FSender:  cipher.Encrypt(client.PubKey().Bytes()),
 			FSession: receiver.Encrypt(session),
 			FSalt:    cipher.Encrypt(salt),
 		},
-		FBody: &sBodyMessage{
+		FBody: sBodyMessage{
 			FData:  cipher.Encrypt(data),
 			FHash:  hash,
 			FSign:  cipher.Encrypt(client.PrivKey().Sign(hash)),
@@ -205,12 +205,12 @@ func (client *sClient) Decrypt(msg IMessage) (IMessage, Title) {
 	}
 
 	decMsg := &sMessage{
-		FHead: &sHeadMessage{
+		FHead: sHeadMessage{
 			FSender:  publicBytes,
 			FSession: session,
 			FSalt:    salt,
 		},
-		FBody: &sBodyMessage{
+		FBody: sBodyMessage{
 			FData:  allData[:mustLen],
 			FHash:  msg.Body().Hash(),
 			FSign:  sign,

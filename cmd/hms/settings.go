@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/number571/go-peer/cmd/hms/config"
 	"github.com/number571/go-peer/cmd/hms/database"
+	"github.com/number571/go-peer/settings"
 )
 
 const (
@@ -13,9 +14,11 @@ const (
 	cErrorLoad
 	cErrorPush
 	cErrorMessage
+	cErrorWorkSize
 )
 
 var (
-	gDB     database.IKeyValueDB
-	gConfig config.IConfig
+	gSettings settings.ISettings
+	gConfig   config.IConfig
+	gDB       database.IKeyValueDB
 )
