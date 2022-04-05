@@ -23,9 +23,9 @@ var (
 		`Pub(go-peer\rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}`,
 	}
 	tgServices = map[string]*sBlock{
-		"test_service1": &sBlock{false, "test_address1"},
-		"test_service2": &sBlock{true, "test_address2"},
-		"test_service3": &sBlock{true, "test_address3"},
+		"test_service1": {false, "test_address1"},
+		"test_service2": {true, "test_address2"},
+		"test_service3": {true, "test_address3"},
 	}
 )
 

@@ -53,7 +53,7 @@ var (
 
 	// crypto-address -> network-address
 	gDefaultServices = map[string]*sBlock{
-		"hidden-default-service": &sBlock{
+		"hidden-default-service": {
 			FRedirect: true,
 			FAddress:  "http://localhost:8080",
 		},

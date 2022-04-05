@@ -1,3 +1,3 @@
 # HLS
 
-> Hidden lake service. Version 1.0.1.
+> Hidden Lake Service.

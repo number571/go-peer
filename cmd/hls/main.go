@@ -59,14 +59,15 @@ func main() {
 }
 
 func routeHLS(node network.INode, msg local.IMessage) []byte {
-	// load from message request info
-	request := hlsnet.LoadRequest(msg.Body().Data())
+	// load request from message's body
+	requestBytes := msg.Body().Data()
+	request := hlsnet.LoadRequest(requestBytes)
 	if request == nil {
 		return nil
 	}
 
 	// check already received data by hash
-	hash := crypto.NewHasher(request.Body()).Bytes()
+	hash := crypto.NewHasher(requestBytes).Bytes()
 	if gDB.Exist(hash) {
 		return nil
 	}
@@ -83,7 +84,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 		for _, recv := range gConfig.PubKeys() {
 			go node.Request(
 				local.NewRoute(recv, nil, nil),
-				local.NewMessage([]byte(cPatternHLS), request.ToBytes()),
+				local.NewMessage([]byte(cPatternHLS), requestBytes),
 			)
 		}
 	}
@@ -91,7 +92,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 	// generate new request to serivce
 	req, err := http.NewRequest(
 		request.Method(),
-		fmt.Sprintf("%s://%s/%s", cProto, info.Address(), request.Path()),
+		fmt.Sprintf("%s://%s%s", cProto, info.Address(), request.Path()),
 		bytes.NewReader(request.Body()),
 	)
 	if err != nil {

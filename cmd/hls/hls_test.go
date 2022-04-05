@@ -174,7 +174,7 @@ func testStartClientHLS() error {
 
 	msg := local.NewMessage(
 		[]byte(cPatternHLS),
-		hlsnet.NewRequest(tcServiceInHLS, "echo", "GET").
+		hlsnet.NewRequest(tcServiceInHLS, "/echo", "GET").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
