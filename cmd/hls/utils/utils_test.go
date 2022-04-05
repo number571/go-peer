@@ -14,7 +14,10 @@ type tsMessage struct {
 
 const (
 	tcUtilsFile = "utils_test.txt"
-	tcFileData  = `test text
+)
+
+const (
+	tcFileData = `test text
 for utils package
 `
 	tcJSON = `{

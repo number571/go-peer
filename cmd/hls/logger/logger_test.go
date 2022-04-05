@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	tcPathInfo    = "test_info.txt"
-	tcPathWarning = "test_warning.txt"
-	tcPathError   = "test_error.txt"
+	tcPathInfo    = "logger_info_test.txt"
+	tcPathWarning = "logger_warning_test.txt"
+	tcPathError   = "logger_error_test.txt"
 )
 
 const (

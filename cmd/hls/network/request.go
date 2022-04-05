@@ -12,18 +12,18 @@ var (
 
 type sRequest struct {
 	fMutex  sync.Mutex
+	FMethod string            `json:"methos"`
 	FHost   string            `json:"host"`
 	FPath   string            `json:"path"`
-	FMethod string            `json:"methos"`
 	FHead   map[string]string `json:"head"`
 	FBody   []byte            `json:"body"`
 }
 
-func NewRequest(host, path, method string) IRequest {
+func NewRequest(method, host, path string) IRequest {
 	return &sRequest{
+		FMethod: method,
 		FHost:   host,
 		FPath:   path,
-		FMethod: method,
 	}
 }
 

@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	tcPathDB = "test_hms.db"
-	tcKey    = "test-key"
+	tcPathDB = "database_test.db"
+)
 
+const (
+	tcKey              = "test-key"
 	tcMessageTitle     = "test-title"
 	tcMessageBody      = "test-body"
 	tcMessageRawConcat = tcMessageTitle + tcMessageBody

@@ -55,7 +55,7 @@ var (
 	gDefaultServices = map[string]*sBlock{
 		"hidden-default-service": {
 			FRedirect: true,
-			FAddress:  "http://localhost:8080",
+			FAddress:  "localhost:8080",
 		},
 	}
 )

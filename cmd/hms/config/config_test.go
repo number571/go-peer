@@ -1,14 +1,36 @@
 package config
 
-import "testing"
+import (
+	"os"
+	"testing"
+
+	"github.com/number571/go-peer/cmd/hms/utils"
+)
 
 const (
 	tcConfigFile = "config_test.txt"
-	tcAddress    = "test_address"
-	tcCleanCron  = "0 0 0 0 0"
 )
 
+const (
+	tcAddress   = "test_address"
+	tcCleanCron = "0 0 0 0 0"
+)
+
+const (
+	tcConfig = `{
+	"address": "test_address",
+	"clean_cron": "0 0 0 0 0"
+}`
+)
+
+func testConfigDefaultInit(configPath string) {
+	utils.WriteFile(configPath, []byte(tcConfig))
+}
+
 func TestConfig(t *testing.T) {
+	testConfigDefaultInit(tcConfigFile)
+	defer os.Remove(tcConfigFile)
+
 	cfg := NewConfig(tcConfigFile)
 
 	if cfg.Address() != tcAddress {

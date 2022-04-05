@@ -23,9 +23,11 @@ var (
 )
 
 const (
-	tcPathDB     = "test_hls.db"
-	tcPathConfig = "test_hls.cfg"
+	tcPathDB     = "hls_test.db"
+	tcPathConfig = "hls_test.cfg"
+)
 
+const (
 	tcAKeySize     = 1024
 	tcServiceInHLS = "hidden-echo-service"
 
@@ -174,7 +176,7 @@ func testStartClientHLS() error {
 
 	msg := local.NewMessage(
 		[]byte(cPatternHLS),
-		hlsnet.NewRequest(tcServiceInHLS, "/echo", "GET").
+		hlsnet.NewRequest("GET", tcServiceInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).

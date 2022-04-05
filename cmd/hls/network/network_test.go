@@ -32,7 +32,7 @@ var (
 )
 
 func TestRequest(t *testing.T) {
-	request := NewRequest(tcHost, tcPath, tcMethod).
+	request := NewRequest(tcMethod, tcHost, tcPath).
 		WithHead(tgHead).
 		WithBody(tgBody)
 
@@ -64,7 +64,7 @@ func TestRequest(t *testing.T) {
 }
 
 func TestLoadRequest(t *testing.T) {
-	brequest := NewRequest(tcHost, tcPath, tcMethod).
+	brequest := NewRequest(tcMethod, tcHost, tcPath).
 		WithHead(tgHead).
 		WithBody(tgBody).ToBytes()
 

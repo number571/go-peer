@@ -6,9 +6,11 @@ import (
 )
 
 const (
-	tcPathDB = "test_hls.db"
-	tcHash   = "test-hash"
+	tcPathDB = "database_test.db"
+)
 
+const (
+	tcHash             = "test-hash"
 	tcMessageTitle     = "test-title"
 	tcMessageBody      = "test-body"
 	tcMessageRawConcat = tcMessageTitle + tcMessageBody
