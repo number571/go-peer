@@ -53,13 +53,9 @@ type iKeeper interface {
 	Settings() settings.ISettings
 }
 
-type (
-	Session = []byte
-	Title   = []byte
-)
 type iCipher interface {
-	Encrypt(IRoute, IMessage) (IMessage, Session)
-	Decrypt(IMessage) (IMessage, Title)
+	Encrypt(IRoute, IMessage) (IMessage, []byte)
+	Decrypt(IMessage) (IMessage, []byte)
 }
 
 type IClient interface {
@@ -67,12 +63,8 @@ type IClient interface {
 	iCipher
 }
 
-type (
-	Identifier = string
-	Password   = string
-)
 type IStorage interface {
-	Write(Identifier, Password, []byte) error
-	Read(Identifier, Password) ([]byte, error)
-	Delete(Identifier, Password) error
+	Write(string, string, []byte) error
+	Read(string, string) ([]byte, error)
+	Delete(string, string) error
 }

@@ -1,10 +1,6 @@
 package settings
 
-type (
-	Key   = uint64
-	Value = uint64
-)
 type ISettings interface {
-	Set(Key, Value) ISettings
-	Get(Key) Value
+	Set(uint64, uint64) ISettings
+	Get(uint64) uint64
 }

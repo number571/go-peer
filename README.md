@@ -22,8 +22,8 @@ At the moment, the framework is able to recreate the five stage of anonymity, bu
 ## Specifications of go-peer
 
 1. Prefix 's'/'S' - structure type
-2. Prefix 'i'/'I' - interface type
+2. Prefix 'i'/'I' - interface type / function type
 3. Prefix 'f'/'F' - field of structure
 4. Prefix 'c'/'C' - constant
 5. Prrfix 'g'/'G' - global variable
-6. Prefix 't'/'T' - test constant/variable/structure
+6. Prefix 't'/'T' - test constant / test variable / test structure / ...

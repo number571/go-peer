@@ -3,7 +3,7 @@ package settings
 import "sync"
 
 const (
-	MaskRout Key = iota + 1
+	MaskRout uint64 = iota + 1
 	TimeWait
 	TimePsdo
 	SizePsdo
@@ -21,7 +21,7 @@ var (
 
 type sSettings struct {
 	fMutex   sync.Mutex
-	fMapping map[Key]Value
+	fMapping map[uint64]uint64
 }
 
 func NewSettings() ISettings {
@@ -30,7 +30,7 @@ func NewSettings() ISettings {
 	}
 }
 
-func (s *sSettings) Set(k Key, v Value) ISettings {
+func (s *sSettings) Set(k uint64, v uint64) ISettings {
 	s.fMutex.Lock()
 	defer s.fMutex.Unlock()
 
@@ -38,7 +38,7 @@ func (s *sSettings) Set(k Key, v Value) ISettings {
 	return s
 }
 
-func (s *sSettings) Get(k Key) Value {
+func (s *sSettings) Get(k uint64) uint64 {
 	s.fMutex.Lock()
 	defer s.fMutex.Unlock()
 
@@ -50,11 +50,11 @@ func (s *sSettings) Get(k Key) Value {
 	return v
 }
 
-func defaultSettings() map[Key]Value {
+func defaultSettings() map[uint64]uint64 {
 	// H - hash = len(base64(sha256(data))) = 44B
 	// B - byte
 	// b - bit
-	return map[Key]Value{
+	return map[uint64]uint64{
 		MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
 		TimeWait: 20,                 // seconds
 		TimePsdo: 5000,               // milliseconds

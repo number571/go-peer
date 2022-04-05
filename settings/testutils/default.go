@@ -14,8 +14,8 @@ func NewSettings() settings.ISettings {
 }
 
 // for fast tests
-func defaultSettings() map[settings.Key]settings.Value {
-	return map[settings.Key]settings.Value{
+func defaultSettings() map[uint64]uint64 {
+	return map[uint64]uint64{
 		settings.MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
 		settings.TimeWait: 50,                 // seconds
 		settings.TimePsdo: 1000,               // milliseconds

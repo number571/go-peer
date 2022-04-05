@@ -26,7 +26,7 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-func NewStorage(sett settings.ISettings, path string, pasw Password) IStorage {
+func NewStorage(sett settings.ISettings, path string, pasw string) IStorage {
 	store := &sStorage{
 		fSettings: sett,
 		fPath:     path,
@@ -57,7 +57,7 @@ func NewStorage(sett settings.ISettings, path string, pasw Password) IStorage {
 	return store
 }
 
-func (store *sStorage) Write(id Identifier, pasw Password, secret []byte) error {
+func (store *sStorage) Write(id string, pasw string, secret []byte) error {
 	var (
 		mapping storageData
 		err     error
@@ -104,7 +104,7 @@ func (store *sStorage) Write(id Identifier, pasw Password, secret []byte) error 
 	return nil
 }
 
-func (store *sStorage) Read(id Identifier, pasw Password) ([]byte, error) {
+func (store *sStorage) Read(id string, pasw string) ([]byte, error) {
 	// If storage not exists.
 	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
@@ -136,7 +136,7 @@ func (store *sStorage) Read(id Identifier, pasw Password) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *sStorage) Delete(id Identifier, pasw Password) error {
+func (store *sStorage) Delete(id string, pasw string) error {
 	// If storage not exists.
 	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")

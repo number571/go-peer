@@ -5,27 +5,23 @@ import (
 	"github.com/number571/go-peer/local"
 )
 
-type (
-	Title    = []byte
-	Response = []byte
-	Address  = string
-	Handler  func(INode, local.IMessage) []byte
-)
+type iHandler func(INode, local.IMessage) []byte
+
 type INode interface {
-	Listen(Address) error
+	Listen(string) error
 	Close()
 
 	Client() local.IClient
 	F2F() iF2F
 
-	Handle(Title, Handler) INode
-	Request(local.IRoute, local.IMessage) (Response, error)
+	Handle([]byte, iHandler) INode
+	Request(local.IRoute, local.IMessage) ([]byte, error)
 
-	Connect(Address) error
-	Disconnect(Address)
+	Connect(string) error
+	Disconnect(string)
 
-	InConnections(Address) bool
-	Connections() []Address
+	InConnections(string) bool
+	Connections() []string
 }
 
 type iF2F interface {

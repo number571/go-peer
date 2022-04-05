@@ -24,7 +24,7 @@ type sNode struct {
 	fF2F         iF2F
 	fMutex       sync.Mutex
 	fListener    net.Listener
-	fHRoutes     map[string]Handler
+	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
 	fActions     map[string]chan []byte
@@ -40,7 +40,7 @@ func NewNode(client local.IClient) INode {
 	return &sNode{
 		fClient:      client,
 		fPReceiver:   pseudo.PubKey(),
-		fHRoutes:     make(map[string]Handler),
+		fHRoutes:     make(map[string]iHandler),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
 		fActions:     make(map[string]chan []byte),
@@ -105,14 +105,14 @@ func (node *sNode) Listen(address string) error {
 }
 
 // Add function to mapping for route use.
-func (node *sNode) Handle(title []byte, handle Handler) INode {
+func (node *sNode) Handle(title []byte, handle iHandler) INode {
 	node.setFunction(title, handle)
 	return node
 }
 
 // Send message by public key of receiver.
 // Function supported multiple routing with pseudo sender.
-func (node *sNode) Request(route local.IRoute, msg local.IMessage) (Response, error) {
+func (node *sNode) Request(route local.IRoute, msg local.IMessage) ([]byte, error) {
 	var (
 		result []byte
 		err    error
@@ -354,7 +354,7 @@ func (node *sNode) response(nonce []byte, data []byte) {
 	}
 }
 
-func (node *sNode) setFunction(name []byte, handle Handler) {
+func (node *sNode) setFunction(name []byte, handle iHandler) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -362,7 +362,7 @@ func (node *sNode) setFunction(name []byte, handle Handler) {
 	node.fHRoutes[skey] = handle
 }
 
-func (node *sNode) getFunction(name []byte) Handler {
+func (node *sNode) getFunction(name []byte) iHandler {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 

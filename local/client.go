@@ -47,7 +47,7 @@ func (client *sClient) Settings() settings.ISettings {
 
 // Function wrap message in multiple route encryption.
 // Need use pseudo sender if route not null.
-func (client *sClient) Encrypt(route IRoute, msg IMessage) (IMessage, Session) {
+func (client *sClient) Encrypt(route IRoute, msg IMessage) (IMessage, []byte) {
 	var (
 		psender       = NewClient(route.PSender(), client.Settings())
 		rmsg, session = client.onceEncrypt(route.Receiver(), msg)
@@ -113,7 +113,7 @@ func (client *sClient) onceEncrypt(receiver crypto.IPubKey, msg IMessage) (IMess
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *sClient) Decrypt(msg IMessage) (IMessage, Title) {
+func (client *sClient) Decrypt(msg IMessage) (IMessage, []byte) {
 	const (
 		SizeUint64 = 8 // bytes
 	)
