@@ -51,7 +51,7 @@ func initSimple() ([3]INode, local.IRoute, local.IMessage) {
 	client2.Connect(tcNodeAddress1)
 
 	return [3]INode{client1, client2, node1},
-		local.NewRoute(client2.Client().PubKey(), nil, nil),
+		local.NewRoute(client2.Client().PubKey()),
 		local.NewMessage(tgRouteEcho, []byte("hello, world!"))
 }
 
@@ -148,7 +148,7 @@ func initRoute() ([5]INode, local.IRoute, local.IMessage) {
 	}
 
 	return [5]INode{client1, client2, node1, node2, node3},
-		local.NewRoute(client2.Client().PubKey(), psender, routes),
+		local.NewRoute(client2.Client().PubKey()).WithRedirects(psender, routes),
 		local.NewMessage(tgRouteEcho, []byte("hello, world!"))
 }
 

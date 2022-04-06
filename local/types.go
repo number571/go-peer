@@ -12,6 +12,8 @@ type ISelector interface {
 }
 
 type IRoute interface {
+	WithRedirects(crypto.IPrivKey, []crypto.IPubKey) IRoute
+
 	Receiver() crypto.IPubKey
 	PSender() crypto.IPrivKey
 	List() []crypto.IPubKey

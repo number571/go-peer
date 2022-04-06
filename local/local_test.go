@@ -31,7 +31,7 @@ func TestEncrypt(t *testing.T) {
 	data := []byte("hello, world!")
 
 	msg := NewMessage(title, data)
-	encmsg, _ := client1.Encrypt(NewRoute(client2.PubKey(), nil, nil), msg)
+	encmsg, _ := client1.Encrypt(NewRoute(client2.PubKey()), msg)
 
 	decmsg, title1 := client2.Decrypt(encmsg)
 

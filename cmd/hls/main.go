@@ -83,7 +83,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 	if info.IsRedirect() {
 		for _, recv := range gConfig.PubKeys() {
 			go node.Request(
-				local.NewRoute(recv, nil, nil),
+				local.NewRoute(recv),
 				local.NewMessage([]byte(cPatternHLS), requestBytes),
 			)
 		}

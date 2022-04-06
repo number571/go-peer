@@ -101,7 +101,7 @@ func testClientDoPush() error {
 
 	for i := 0; i < tcN; i++ {
 		encMsg, _ := client.Encrypt(
-			local.NewRoute(tgPubKeyReceiver, nil, nil),
+			local.NewRoute(tgPubKeyReceiver),
 			local.NewMessage(
 				[]byte(tcPatternTitleHMS),
 				[]byte(tcBodyOfMessage),

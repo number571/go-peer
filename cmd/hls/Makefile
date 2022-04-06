@@ -1,4 +1,4 @@
-N=1
+T=1
 GC=go build
 .PHONY: default build run test clean
 default: build run
@@ -7,6 +7,6 @@ build:
 run:
 	./hls	
 test:
-	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
+	for i in {1..$(T)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f hls hls.cfg hls.stg

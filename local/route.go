@@ -14,12 +14,18 @@ type sRoute struct {
 }
 
 // Create route object with receiver.
-func NewRoute(receiver crypto.IPubKey, psender crypto.IPrivKey, list []crypto.IPubKey) IRoute {
+func NewRoute(receiver crypto.IPubKey) IRoute {
 	if receiver == nil {
 		return nil
 	}
 	return &sRoute{
 		fReceiver: receiver,
+	}
+}
+
+func (route *sRoute) WithRedirects(psender crypto.IPrivKey, list []crypto.IPubKey) IRoute {
+	return &sRoute{
+		fReceiver: route.Receiver(),
 		fPsender:  psender,
 		fList:     list,
 	}

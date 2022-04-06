@@ -254,7 +254,7 @@ func (node *sNode) handleConn(id string) {
 			if rand.Uint64()%2 == 0 {
 				// send pseudo message
 				pMsg, _ := node.Client().Encrypt(
-					local.NewRoute(node.fPReceiver, nil, nil),
+					local.NewRoute(node.fPReceiver),
 					local.NewMessage(
 						rand.Bytes(16),
 						rand.Bytes(calcRandSize(len(decMsg.Body().Data()))),
@@ -308,7 +308,7 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 	}
 
 	rmsg, _ := node.Client().Encrypt(
-		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender()), nil, nil),
+		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender())),
 		local.NewMessage(
 			bytes.Join(
 				[][]byte{

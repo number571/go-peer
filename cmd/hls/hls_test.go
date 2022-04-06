@@ -185,7 +185,7 @@ func testStartClientHLS() error {
 	)
 
 	pubKey := crypto.LoadPubKey(tcPubKeyHLS)
-	route := local.NewRoute(pubKey, nil, nil)
+	route := local.NewRoute(pubKey)
 
 	res, err := node.Request(route, msg)
 	if err != nil {
