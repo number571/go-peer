@@ -21,7 +21,7 @@ func hlsDefaultInit() error {
 		initOnly bool
 	)
 
-	flag.BoolVar(&initOnly, "init-only", false, "run initialization only")
+	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
