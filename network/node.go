@@ -19,14 +19,16 @@ var (
 
 // Basic structure for network use.
 type sNode struct {
-	fClient      local.IClient
-	fPReceiver   crypto.IPubKey
-	fF2F         iF2F
 	fMutex       sync.Mutex
 	fListener    net.Listener
+	fClient      local.IClient
+	fPReceiver   crypto.IPubKey
 	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
+	fF2F         iF2F
+	fOnline      iOnline
+	fChecker     iChecker
 	fActions     map[string]chan []byte
 }
 
@@ -37,26 +39,44 @@ func NewNode(client local.IClient) INode {
 	}
 
 	pseudo := crypto.NewPrivKey(client.PubKey().Size())
-	return &sNode{
+	node := &sNode{
 		fClient:      client,
 		fPReceiver:   pseudo.PubKey(),
 		fHRoutes:     make(map[string]iHandler),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
-		fActions:     make(map[string]chan []byte),
 		fF2F: &sF2F{
-			fEnabled: false,
-			fFriends: make(map[string]crypto.IPubKey),
+			fMapping: make(map[string]crypto.IPubKey),
 		},
+		fOnline: &sOnline{},
+		fChecker: &sChecker{
+			fChannel: make(chan struct{}),
+			fMapping: make(map[string]iCheckerInfo),
+		},
+		fActions: make(map[string]chan []byte),
 	}
+
+	checker := node.fChecker.(*sChecker)
+	checker.fNode = node
+
+	online := node.fOnline.(*sOnline)
+	online.fNode = node
+
+	sett := node.Client().Settings()
+	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+
+	return node.Handle(patt, nil)
 }
 
-// Close listener and current connections.
+// Close online status, listener and current connections.
 func (node *sNode) Close() {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	node.fListener.Close()
+	if node.fListener != nil {
+		node.fListener.Close()
+	}
+
 	for id, conn := range node.fConnections {
 		conn.Close()
 		delete(node.fConnections, id)
@@ -66,6 +86,16 @@ func (node *sNode) Close() {
 // Return client structure.
 func (node *sNode) Client() local.IClient {
 	return node.fClient
+}
+
+// Return checker structure.
+func (node *sNode) Checker() iChecker {
+	return node.fChecker
+}
+
+// Return online structure.
+func (node *sNode) Online() iOnline {
+	return node.fOnline
 }
 
 // Return f2f structure.
@@ -123,6 +153,10 @@ func (node *sNode) Request(route local.IRoute, msg local.IMessage) ([]byte, erro
 		retryNum = node.Client().Settings().Get(settings.SizeRtry)
 		counter  = uint64(0)
 	)
+
+	if len(node.Connections()) == 0 {
+		return nil, errors.New("length of connections = 0")
+	}
 
 	routeMsg, session := node.Client().Encrypt(route, msg)
 	if routeMsg == nil {

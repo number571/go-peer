@@ -96,8 +96,8 @@ func TestF2F(t *testing.T) {
 	nodes[0].Client().Settings().Set(settings.TimeWait, 1)
 	nodes[1].Client().Settings().Set(settings.TimeWait, 1)
 
-	nodes[0].F2F().Set(true)
-	nodes[1].F2F().Set(true)
+	nodes[0].F2F().Switch(true)
+	nodes[1].F2F().Switch(true)
 
 	_, err := nodes[0].Request(route, msg)
 	if err == nil {
@@ -112,6 +112,25 @@ func TestF2F(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		return
+	}
+}
+
+// TEST CHECKER
+
+func TestChecker(t *testing.T) {
+	nodes, _, _ := initSimple()
+	defer nodes[2].Close()
+
+	nodes[1].Online().Switch(true)
+
+	nodes[0].Checker().Switch(true)
+	nodes[0].Checker().Append(nodes[1].Client().PubKey())
+
+	time.Sleep(1 * time.Second)
+
+	info := nodes[0].Checker().ListWithInfo()[0]
+	if !info.Online() {
+		t.Errorf("checker not working")
 	}
 }
 

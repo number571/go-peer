@@ -1,7 +1,7 @@
 # Hidden Lake Network
 .PHONY: default build run clean 
 default: build
-build: 
+build:
 	cp -r ../hls . 
 	cp -r ../hms . 
 	make build -C hls/ 

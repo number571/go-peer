@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
@@ -37,17 +36,23 @@ const (
 
 const (
 	configBody = `{
-	"f2f_mode": false,
-	"address": "localhost:9571",
-	"pub_keys": [],
-	"connects": [],
+	"clean_cron": "0 0 * * *",
+	"address": {
+		"hls": "localhost:9571",
+		"http": ""
+	},
+	"f2f_mode": {
+		"status": false,
+		"friends": []
+	},
+	"connections": [],
+	"check_online": [],
 	"services": {
 		"hidden-echo-service": {
 			"redirect": true,
 			"address": "localhost:8080"
 		}
-	},
-	"clean_cron": "0 0 * * *"
+	}
 }`
 )
 
@@ -76,7 +81,6 @@ func TestHLS(t *testing.T) {
 	defer node.Close()
 
 	// client
-	time.Sleep(200 * time.Millisecond)
 	err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
@@ -138,8 +142,8 @@ func testStartNodeHLS(t *testing.T) network.INode {
 	node := network.NewNode(client).
 		Handle([]byte(cPatternHLS), routeHLS)
 
-	node.F2F().Set(gConfig.F2F())
-	for _, pubKey := range gConfig.PubKeys() {
+	node.F2F().Switch(gConfig.F2F().Status())
+	for _, pubKey := range gConfig.F2F().Friends() {
 		node.F2F().Append(pubKey)
 	}
 
@@ -151,7 +155,7 @@ func testStartNodeHLS(t *testing.T) network.INode {
 	}
 
 	go func() {
-		err := node.Listen(gConfig.Address())
+		err := node.Listen(gConfig.Address().HLS())
 		if err != nil {
 			t.Error(err)
 		}
@@ -169,7 +173,7 @@ func testStartClientHLS() error {
 	node := network.NewNode(client).
 		Handle([]byte(cPatternHLS), nil)
 
-	err := node.Connect(gConfig.Address())
+	err := node.Connect(gConfig.Address().HLS())
 	if err != nil {
 		return err
 	}
@@ -193,7 +197,7 @@ func testStartClientHLS() error {
 	}
 
 	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		return fmt.Errorf("result does not match")
+		return fmt.Errorf("result does not match; get '%s'", string(res))
 	}
 
 	return nil

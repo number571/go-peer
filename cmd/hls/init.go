@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
 	"github.com/robfig/cron/v3"
 )
@@ -49,12 +50,11 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gClient = local.NewClient(privKey, sett)
-	if gClient == nil {
+	gNode = network.NewNode(local.NewClient(privKey, sett))
+	if gNode == nil {
 		return fmt.Errorf("failed create client node")
 	}
 
-	gLogger.Info(fmt.Sprintf("public key = \n%s", gClient.PubKey().String()))
 	if initOnly {
 		os.Exit(0)
 	}

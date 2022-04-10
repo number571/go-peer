@@ -1,16 +1,19 @@
-T=1
-B=0
-.PHONY: default build clean test  
+N=1
+.PHONY: default build clean test bench
 default: build
 build:
-	make build -C cmd/hls
-	make build -C cmd/hms
+	make build -C cmd/hln
 clean:
-	make clean -C cmd/hls
-	make clean -C cmd/hms
+	make clean -C cmd/hln
 test:
-	if [ $(B) == 0 ]; then \
-		for i in {1..$(T)}; do go clean -testcache; echo $$i; go test ./...; done \
-	else \
-		go clean -testcache; go test -bench=. -benchmem -benchtime=$(B)x ./...; \
-	fi
+	for i in {1..$(N)}; do \
+		go clean -testcache; \
+		echo $$i; \
+		go test ./...; \
+		if [ $$? != 0 ]; then \
+			exit; \
+		fi \
+	done
+bench:
+	go clean -testcache
+	go test -cover -bench=. -benchmem -benchtime=$(N)x ./...

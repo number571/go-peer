@@ -33,11 +33,11 @@ func main() {
 }
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
-	response(w, 0, []byte("hidden message service"))
+	response(w, cErrorNone, []byte("hidden message service"))
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
-	var request struct {
+	var vRequest struct {
 		Receiver []byte `json:"receiver"`
 	}
 
@@ -46,23 +46,23 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
 		response(w, cErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
-	if len(request.Receiver) != crypto.HashSize {
+	if len(vRequest.Receiver) != crypto.HashSize {
 		response(w, cErrorSize, []byte("failed: receiver size"))
 		return
 	}
 
-	size := gDB.Size(request.Receiver)
+	size := gDB.Size(vRequest.Receiver)
 	response(w, cErrorNone, encoding.Uint64ToBytes(size))
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {
-	var request struct {
+	var vRequest struct {
 		Receiver []byte `json:"receiver"`
 		Index    uint64 `json:"index"`
 	}
@@ -72,18 +72,18 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
 		response(w, cErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
-	if len(request.Receiver) != crypto.HashSize {
+	if len(vRequest.Receiver) != crypto.HashSize {
 		response(w, cErrorSize, []byte("failed: receiver size"))
 		return
 	}
 
-	msg := gDB.Load(request.Receiver, request.Index)
+	msg := gDB.Load(vRequest.Receiver, vRequest.Index)
 	if msg == nil {
 		response(w, cErrorLoad, []byte("failed: load message"))
 		return
@@ -93,7 +93,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
-	var request struct {
+	var vRequest struct {
 		Receiver []byte `json:"receiver"`
 		Package  []byte `json:"package"`
 	}
@@ -103,18 +103,18 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
 		response(w, cErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
-	if len(request.Receiver) != crypto.HashSize {
+	if len(vRequest.Receiver) != crypto.HashSize {
 		response(w, cErrorSize, []byte("failed: receiver size"))
 		return
 	}
 
-	msg := local.LoadPackage(request.Package).ToMessage()
+	msg := local.LoadPackage(vRequest.Package).ToMessage()
 	if msg == nil {
 		response(w, cErrorMessage, []byte("failed: decode message"))
 		return
@@ -126,7 +126,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gDB.Push(request.Receiver, msg)
+	err = gDB.Push(vRequest.Receiver, msg)
 	if err != nil {
 		response(w, cErrorPush, []byte("failed: push message"))
 		return

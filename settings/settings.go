@@ -4,8 +4,10 @@ import "sync"
 
 const (
 	MaskRout uint64 = iota + 1
+	MaskPing
 	TimeWait
 	TimePsdo
+	TimeChck
 	SizePsdo
 	SizeRtry
 	SizeWork
@@ -56,8 +58,10 @@ func defaultSettings() map[uint64]uint64 {
 	// b - bit
 	return map[uint64]uint64{
 		MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
+		MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
 		TimeWait: 20,                 // seconds
 		TimePsdo: 5000,               // milliseconds
+		TimeChck: 60,                 // seconds
 		SizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
 		SizeRtry: 3,                  // quantity
 		SizeWork: 20,                 // bits

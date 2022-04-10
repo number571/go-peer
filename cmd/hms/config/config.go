@@ -15,7 +15,7 @@ type sConfig struct {
 
 const (
 	// create local hms
-	cDefaultAddress = "localhost:9572"
+	cDefaultAddress = "localhost:8080"
 
 	// cron of clean database
 	cDefaultCleanCron = "0 0 * * *"

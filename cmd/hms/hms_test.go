@@ -7,14 +7,13 @@ import (
 	"net/http"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/number571/go-peer/cmd/hms/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 var (
@@ -38,7 +37,9 @@ const (
 )
 
 func testHmsDefaultInit(path string) {
-	gSettings = settings.NewSettings()
+	os.RemoveAll(tcPathDB)
+
+	gSettings = testutils.NewSettings()
 	gDB = database.NewKeyValueDB(path)
 }
 
@@ -51,7 +52,6 @@ func TestHMS(t *testing.T) {
 	defer srv.Close()
 
 	// client push
-	time.Sleep(200 * time.Millisecond)
 	err := testClientDoPush()
 	if err != nil {
 		t.Error(err)
@@ -169,8 +169,7 @@ func testClientDoSize() error {
 
 	num := encoding.BytesToUint64(response.Result)
 	if num != tcN {
-		fmt.Println(num)
-		return fmt.Errorf("num != tcN")
+		return fmt.Errorf("num(%d) != tcN(%d)", num, tcN)
 	}
 
 	return nil

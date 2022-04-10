@@ -4,18 +4,29 @@ import (
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/logger"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/network"
 )
 
 const (
-	cAKeySize   = 4096
+	cErrorNone = iota + 1
+	cErrorMethod
+	cErrorDecodeRequest
+	cErrorDecodePubKey
+	cErrorResponseMessage
+)
+
+const (
 	cPatternHLS = "hidden-lake-service"
-	cProto      = "http"
+)
+
+const (
+	cAKeySize = 4096
+	cProto    = "http"
 )
 
 var (
 	gLogger logger.ILogger
-	gClient local.IClient
+	gNode   network.INode
 	gConfig config.IConfig
 	gDB     database.IKeyValueDB
 )

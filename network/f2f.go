@@ -14,11 +14,11 @@ var (
 type sF2F struct {
 	fMutex   sync.Mutex
 	fEnabled bool
-	fFriends map[string]crypto.IPubKey
+	fMapping map[string]crypto.IPubKey
 }
 
 // Set state = bool.
-func (f2f *sF2F) Set(state bool) {
+func (f2f *sF2F) Switch(state bool) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
@@ -38,7 +38,7 @@ func (f2f *sF2F) InList(pub crypto.IPubKey) bool {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	_, ok := f2f.fFriends[string(pub.Address())]
+	_, ok := f2f.fMapping[pub.Address()]
 	return ok
 }
 
@@ -48,7 +48,7 @@ func (f2f *sF2F) List() []crypto.IPubKey {
 	defer f2f.fMutex.Unlock()
 
 	var list []crypto.IPubKey
-	for _, pub := range f2f.fFriends {
+	for _, pub := range f2f.fMapping {
 		list = append(list, pub)
 	}
 
@@ -60,7 +60,7 @@ func (f2f *sF2F) Append(pub crypto.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	f2f.fFriends[string(pub.Address())] = pub
+	f2f.fMapping[pub.Address()] = pub
 }
 
 // Delete public key from list of friends.
@@ -68,5 +68,5 @@ func (f2f *sF2F) Remove(pub crypto.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	delete(f2f.fFriends, string(pub.Address()))
+	delete(f2f.fMapping, pub.Address())
 }

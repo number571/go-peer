@@ -3,12 +3,22 @@ package config
 import "github.com/number571/go-peer/crypto"
 
 type IConfig interface {
-	F2F() bool
-	Address() string
-	Connections() []string
-	PubKeys() []crypto.IPubKey
-	GetService(string) (iBlock, bool)
 	CleanCron() string
+	Address() iAddress
+	F2F() iF2F
+	Connections() []string
+	CheckOnline() []crypto.IPubKey
+	GetService(string) (iBlock, bool)
+}
+
+type iF2F interface {
+	Status() bool
+	Friends() []crypto.IPubKey
+}
+
+type iAddress interface {
+	HLS() string
+	HTTP() string
 }
 
 type iBlock interface {

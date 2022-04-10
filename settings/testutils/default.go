@@ -17,8 +17,11 @@ func NewSettings() settings.ISettings {
 func defaultSettings() map[uint64]uint64 {
 	return map[uint64]uint64{
 		settings.MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
+		settings.MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
 		settings.TimeWait: 50,                 // seconds
 		settings.TimePsdo: 1000,               // milliseconds
+		settings.TimeChck: 1,                  // seconds
+		settings.SizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
 		settings.SizeRtry: 1,                  // quantity
 		settings.SizeWork: 10,                 // bits
 		settings.SizeConn: 10,                 // quantity

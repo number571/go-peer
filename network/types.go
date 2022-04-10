@@ -8,29 +8,51 @@ import (
 type iHandler func(INode, local.IMessage) []byte
 
 type INode interface {
+	Request(local.IRoute, local.IMessage) ([]byte, error)
+	Handle([]byte, iHandler) INode
 	Listen(string) error
 	Close()
 
-	Client() local.IClient
-	F2F() iF2F
-
-	Handle([]byte, iHandler) INode
-	Request(local.IRoute, local.IMessage) ([]byte, error)
-
+	InConnections(string) bool
+	Connections() []string
 	Connect(string) error
 	Disconnect(string)
 
-	InConnections(string) bool
-	Connections() []string
+	Client() local.IClient
+	Checker() iChecker
+	Online() iOnline
+	F2F() iF2F
+}
+
+type iOnline interface {
+	iStatus
+}
+
+type iChecker interface {
+	ListWithInfo() []iCheckerInfo
+
+	iStatus
+	iListPubKey
+}
+
+type iCheckerInfo interface {
+	Online() bool
+	PubKey() crypto.IPubKey
 }
 
 type iF2F interface {
-	Set(bool)
+	iStatus
+	iListPubKey
+}
+
+type iStatus interface {
+	Switch(bool)
 	Status() bool
+}
 
-	Append(crypto.IPubKey)
-	Remove(crypto.IPubKey)
-
+type iListPubKey interface {
 	InList(crypto.IPubKey) bool
 	List() []crypto.IPubKey
+	Append(crypto.IPubKey)
+	Remove(crypto.IPubKey)
 }
