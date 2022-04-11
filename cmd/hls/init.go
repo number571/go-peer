@@ -25,6 +25,7 @@ func hlsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
+	gPPrivKey = crypto.NewPrivKey(cAKeySize)
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")

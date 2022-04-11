@@ -21,8 +21,14 @@ func main() {
 
 	// turn on f2f mode
 	gNode.F2F().Switch(gConfig.F2F().Status())
-	for _, pubKey := range gConfig.F2F().Friends() {
+	for _, pubKey := range gConfig.F2F().PubKeys() {
 		gNode.F2F().Append(pubKey)
+	}
+
+	// turn on online checker
+	gNode.Checker().Switch(gConfig.OnlineChecker().Status())
+	for _, pubKey := range gConfig.OnlineChecker().PubKeys() {
+		gNode.Checker().Append(pubKey)
 	}
 
 	// connect to open nodes
@@ -39,7 +45,6 @@ func main() {
 		gLogger.Info(fmt.Sprintf("connected to '%s'", address))
 	}
 
-	// Online checker
 	go func() {
 		timer := time.Second * 5
 		for {

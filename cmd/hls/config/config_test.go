@@ -13,10 +13,11 @@ const (
 )
 
 const (
-	tcF2F         = true
-	tcAddressHLS  = "test_address_hls"
-	tcAddressHTTP = "test_address_http"
-	tcCleanCron   = "0 0 0 0 0"
+	tcOnlineChecker = true
+	tcF2F           = true
+	tcAddressHLS    = "test_address_hls"
+	tcAddressHTTP   = "test_address_http"
+	tcCleanCron     = "0 0 0 0 0"
 )
 
 const (
@@ -26,20 +27,23 @@ const (
 		"hls": "test_address_hls",
 		"http": "test_address_http"
 	},
-	"f2f_mode": {
-		"status": true,
-		"friends": [
-			"Pub(go-peer\\rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
-		]
-	},
 	"connections": [
 		"test_connect1",
 		"test_connect2",
 		"test_connect3"
 	],
-	"check_online": [
-		"Pub(go-peer\\rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
-	],
+	"f2f_mode": {
+		"status": true,
+		"pub_keys": [
+			"Pub(go-peer\\rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
+		]
+	},
+	"online_checker": {
+		"status": true,
+		"pub_keys": [
+			"Pub(go-peer\\rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
+		]
+	},
 	"services": {
 		"test_service1": {
 			"redirect": false,
@@ -87,6 +91,10 @@ func TestConfig(t *testing.T) {
 		t.Errorf("f2f_mode is invalid")
 	}
 
+	if cfg.OnlineChecker().Status() != tcOnlineChecker {
+		t.Errorf("online_checker is invalid")
+	}
+
 	if cfg.Address().HLS() != tcAddressHLS {
 		t.Errorf("address_hls is invalid")
 	}
@@ -115,13 +123,13 @@ func TestConfig(t *testing.T) {
 	}
 
 	for i, v := range tgPubKeys {
-		v1 := cfg.F2F().Friends()[i]
+		v1 := cfg.F2F().PubKeys()[i]
 		pubKey := crypto.LoadPubKey(v)
 		if pubKey.Address() != v1.Address() {
 			t.Errorf("public key is invalid '%s'", v1)
 		}
 
-		v2 := cfg.CheckOnline()[i]
+		v2 := cfg.OnlineChecker().PubKeys()[i]
 		if pubKey.Address() != v2.Address() {
 			t.Errorf("public key is invalid '%s'", v2)
 		}

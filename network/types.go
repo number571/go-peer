@@ -5,9 +5,12 @@ import (
 	"github.com/number571/go-peer/local"
 )
 
+type iRouter func() []crypto.IPubKey
 type iHandler func(INode, local.IMessage) []byte
 
 type INode interface {
+	WithRouter(iRouter)
+
 	Request(local.IRoute, local.IMessage) ([]byte, error)
 	Handle([]byte, iHandler) INode
 	Listen(string) error

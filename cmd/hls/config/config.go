@@ -9,27 +9,33 @@ import (
 )
 
 var (
-	_ IConfig  = &sConfig{}
-	_ iF2F     = &sF2F{}
-	_ iAddress = &sAddress{}
-	_ iBlock   = &sBlock{}
+	_ IConfig        = &sConfig{}
+	_ iF2F           = &sF2F{}
+	_ iOnlineChecker = &sOnlineChecker{}
+	_ iAddress       = &sAddress{}
+	_ iBlock         = &sBlock{}
 )
 
 type sConfig struct {
-	fMutex       sync.Mutex
-	FCleanCron   string    `json:"clean_cron"`
-	FAddress     *sAddress `json:"address"`
-	FF2F         *sF2F     `json:"f2f_mode"`
-	FConnections []string  `json:"connections"`
-	fPubKeys     []crypto.IPubKey
-	FCheckOnline []string           `json:"check_online"`
-	FServices    map[string]*sBlock `json:"services"`
+	fMutex         sync.Mutex
+	FCleanCron     string             `json:"clean_cron"`
+	FAddress       *sAddress          `json:"address"`
+	FConnections   []string           `json:"connections"`
+	FF2F           *sF2F              `json:"f2f_mode"`
+	FOnlineChecker *sOnlineChecker    `json:"online_checker"`
+	FServices      map[string]*sBlock `json:"services"`
 }
 
 type sF2F struct {
 	FStatus  bool `json:"status"`
 	fPubKeys []crypto.IPubKey
-	FFriends []string `json:"friends"`
+	FPubKeys []string `json:"pub_keys"`
+}
+
+type sOnlineChecker struct {
+	FStatus  bool `json:"status"`
+	fPubKeys []crypto.IPubKey
+	FPubKeys []string `json:"pub_keys"`
 }
 
 type sAddress struct {
@@ -51,7 +57,13 @@ var (
 	// friend-to-friend option
 	cDefaultF2FMode = &sF2F{
 		FStatus:  true,
-		FFriends: gDefaultPubKeys,
+		FPubKeys: gDefaultPubKeys,
+	}
+
+	// online checker option
+	cDefaultOnlineChecker = &sOnlineChecker{
+		FStatus:  true,
+		FPubKeys: gDefaultPubKeys,
 	}
 
 	// create local hls
@@ -84,12 +96,12 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.FileIsExist(filepath) {
 		cfg = &sConfig{
-			FCleanCron:   cDefaultCleanCron,
-			FAddress:     cDefaultAddress,
-			FF2F:         cDefaultF2FMode,
-			FConnections: gDefaultConnects,
-			FCheckOnline: gDefaultPubKeys,
-			FServices:    gDefaultServices,
+			FCleanCron:     cDefaultCleanCron,
+			FAddress:       cDefaultAddress,
+			FF2F:           cDefaultF2FMode,
+			FConnections:   gDefaultConnects,
+			FOnlineChecker: cDefaultOnlineChecker,
+			FServices:      gDefaultServices,
 		}
 		err := utils.WriteFile(filepath, utils.Serialize(cfg))
 		if err != nil {
@@ -102,20 +114,20 @@ func NewConfig(filepath string) IConfig {
 		}
 	}
 
-	for _, val := range cfg.FCheckOnline {
+	for _, val := range cfg.FOnlineChecker.FPubKeys {
 		pubKey := crypto.LoadPubKey(val)
 		if pubKey == nil {
 			panic(fmt.Sprintf("public key is nil: '%s'", val))
 		}
-		cfg.fPubKeys = append(cfg.fPubKeys, pubKey)
+		cfg.FOnlineChecker.fPubKeys = append(cfg.FOnlineChecker.fPubKeys, pubKey)
 	}
 
-	for _, val := range cfg.FF2F.FFriends {
+	for _, val := range cfg.FF2F.FPubKeys {
 		pubKey := crypto.LoadPubKey(val)
 		if pubKey == nil {
 			panic(fmt.Sprintf("public key is nil: '%s'", val))
 		}
-		cfg.FF2F.fPubKeys = append(cfg.fPubKeys, pubKey)
+		cfg.FF2F.fPubKeys = append(cfg.FF2F.fPubKeys, pubKey)
 	}
 
 	return cfg
@@ -129,7 +141,7 @@ func (f2f *sF2F) Status() bool {
 	return f2f.FStatus
 }
 
-func (f2f *sF2F) Friends() []crypto.IPubKey {
+func (f2f *sF2F) PubKeys() []crypto.IPubKey {
 	return f2f.fPubKeys
 }
 
@@ -137,8 +149,16 @@ func (cfg *sConfig) Address() iAddress {
 	return cfg.FAddress
 }
 
-func (cfg *sConfig) CheckOnline() []crypto.IPubKey {
-	return cfg.fPubKeys
+func (cfg *sConfig) OnlineChecker() iOnlineChecker {
+	return cfg.FOnlineChecker
+}
+
+func (onl *sOnlineChecker) Status() bool {
+	return onl.FStatus
+}
+
+func (onl *sOnlineChecker) PubKeys() []crypto.IPubKey {
+	return onl.fPubKeys
 }
 
 func (cfg *sConfig) Connections() []string {

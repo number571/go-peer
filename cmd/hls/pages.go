@@ -45,8 +45,25 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	inOnline := []crypto.IPubKey{}
+	for _, val := range gNode.Checker().ListWithInfo() {
+		if !val.Online() {
+			continue
+		}
+		inOnline = append(inOnline, val.PubKey())
+	}
+
+	rand := crypto.NewPRNG()
+	randSizeRoute := rand.Uint64() % cSizeRoute
+
 	resp, err := gNode.Request(
-		local.NewRoute(pubKey),
+		local.NewRoute(pubKey).
+			WithRedirects(
+				gPPrivKey,
+				local.NewSelector(inOnline).
+					Shuffle().
+					Return(randSizeRoute),
+			),
 		local.NewMessage(vRequest.Title, vRequest.Data),
 	)
 	if err != nil {

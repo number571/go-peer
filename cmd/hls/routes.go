@@ -35,7 +35,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 
 	// redirect bytes of request to another nodes
 	if info.IsRedirect() {
-		for _, recv := range gConfig.F2F().Friends() {
+		for _, recv := range gConfig.F2F().PubKeys() {
 			go node.Request(
 				local.NewRoute(recv),
 				local.NewMessage([]byte(cPatternHLS), requestBytes),

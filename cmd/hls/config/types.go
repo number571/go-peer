@@ -5,15 +5,20 @@ import "github.com/number571/go-peer/crypto"
 type IConfig interface {
 	CleanCron() string
 	Address() iAddress
-	F2F() iF2F
 	Connections() []string
-	CheckOnline() []crypto.IPubKey
+	F2F() iF2F
+	OnlineChecker() iOnlineChecker
 	GetService(string) (iBlock, bool)
+}
+
+type iOnlineChecker interface {
+	Status() bool
+	PubKeys() []crypto.IPubKey
 }
 
 type iF2F interface {
 	Status() bool
-	Friends() []crypto.IPubKey
+	PubKeys() []crypto.IPubKey
 }
 
 type iAddress interface {

@@ -43,10 +43,13 @@ const (
 	},
 	"f2f_mode": {
 		"status": false,
-		"friends": []
+		"pub_keys": []
+	},
+	"online_checker": {
+		"status": false,
+		"pub_keys": []
 	},
 	"connections": [],
-	"check_online": [],
 	"services": {
 		"hidden-echo-service": {
 			"redirect": true,
@@ -143,7 +146,7 @@ func testStartNodeHLS(t *testing.T) network.INode {
 		Handle([]byte(cPatternHLS), routeHLS)
 
 	node.F2F().Switch(gConfig.F2F().Status())
-	for _, pubKey := range gConfig.F2F().Friends() {
+	for _, pubKey := range gConfig.F2F().PubKeys() {
 		node.F2F().Append(pubKey)
 	}
 

@@ -22,13 +22,14 @@ type sNode struct {
 	fMutex       sync.Mutex
 	fListener    net.Listener
 	fClient      local.IClient
-	fPReceiver   crypto.IPubKey
+	fPseudo      crypto.IPrivKey
 	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
 	fF2F         iF2F
 	fOnline      iOnline
 	fChecker     iChecker
+	fRouter      iRouter
 	fActions     map[string]chan []byte
 }
 
@@ -38,10 +39,9 @@ func NewNode(client local.IClient) INode {
 		return nil
 	}
 
-	pseudo := crypto.NewPrivKey(client.PubKey().Size())
 	node := &sNode{
 		fClient:      client,
-		fPReceiver:   pseudo.PubKey(),
+		fPseudo:      crypto.NewPrivKey(client.PubKey().Size()),
 		fHRoutes:     make(map[string]iHandler),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
@@ -53,19 +53,26 @@ func NewNode(client local.IClient) INode {
 			fChannel: make(chan struct{}),
 			fMapping: make(map[string]iCheckerInfo),
 		},
+		fRouter:  func() []crypto.IPubKey { return nil },
 		fActions: make(map[string]chan []byte),
 	}
 
-	checker := node.fChecker.(*sChecker)
-	checker.fNode = node
+	// recurrent structures
+	{
+		checker := node.fChecker.(*sChecker)
+		online := node.fOnline.(*sOnline)
 
-	online := node.fOnline.(*sOnline)
-	online.fNode = node
+		checker.fNode = node
+		online.fNode = node
+	}
 
 	sett := node.Client().Settings()
 	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
-
 	return node.Handle(patt, nil)
+}
+
+func (node *sNode) WithRouter(router iRouter) {
+	node.fRouter = router
 }
 
 // Close online status, listener and current connections.
@@ -288,7 +295,7 @@ func (node *sNode) handleConn(id string) {
 			if rand.Uint64()%2 == 0 {
 				// send pseudo message
 				pMsg, _ := node.Client().Encrypt(
-					local.NewRoute(node.fPReceiver),
+					local.NewRoute(node.fPseudo.PubKey()),
 					local.NewMessage(
 						rand.Bytes(16),
 						rand.Bytes(calcRandSize(len(decMsg.Body().Data()))),
@@ -342,7 +349,8 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 	}
 
 	rmsg, _ := node.Client().Encrypt(
-		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender())),
+		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender())).
+			WithRedirects(node.fPseudo, node.fRouter()),
 		local.NewMessage(
 			bytes.Join(
 				[][]byte{
