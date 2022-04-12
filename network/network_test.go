@@ -159,6 +159,14 @@ func initRoute() ([5]INode, local.IRoute, local.IMessage) {
 	client1.Connect(tcNodeAddress1)
 	client2.Connect(tcNodeAddress3)
 
+	client2.WithRouter(func() []crypto.IPubKey {
+		return []crypto.IPubKey{
+			node2.Client().PubKey(),
+			node3.Client().PubKey(),
+			node1.Client().PubKey(),
+		}
+	})
+
 	psender := crypto.NewPrivKey(client1.Client().PubKey().Size())
 	routes := []crypto.IPubKey{
 		node1.Client().PubKey(),
