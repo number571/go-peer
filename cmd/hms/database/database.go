@@ -3,35 +3,30 @@ package database
 import (
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
-	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/number571/go-peer/storage"
 )
 
 type sKeyValueDB struct {
-	fMutex sync.Mutex
-	fPath  string
-	fDB    *leveldb.DB
+	fPath    string
+	fStorage storage.IKeyValueStorage
 }
 
 func NewKeyValueDB(path string) IKeyValueDB {
-	db, err := leveldb.OpenFile(path, nil)
-	if err != nil {
-		panic(err)
+	stg := storage.NewLevelDBStorage(path)
+	if stg == nil {
+		panic("storage is nil")
 	}
 	return &sKeyValueDB{
-		fPath: path,
-		fDB:   db,
+		fPath:    path,
+		fStorage: stg,
 	}
 }
 
 func (db *sKeyValueDB) Size(key []byte) uint64 {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
-	data, err := db.fDB.Get(GetKeySize(key), nil)
+	data, err := db.fStorage.Get(GetKeySize(key))
 	if err != nil {
 		return 0
 	}
@@ -40,45 +35,41 @@ func (db *sKeyValueDB) Size(key []byte) uint64 {
 }
 
 func (db *sKeyValueDB) Push(key []byte, msg local.IMessage) error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
 	// store hash
 	hash := msg.Body().Hash()
-	_, err := db.fDB.Get(GetKeyHash(hash), nil)
+	_, err := db.fStorage.Get(GetKeyHash(hash))
 	if err == nil {
 		return fmt.Errorf("hash already exists")
 	}
 
-	err = db.fDB.Put(GetKeyHash(hash), []byte{1}, nil)
+	err = db.fStorage.Set(GetKeyHash(hash), []byte{1})
 	if err != nil {
 		return err
 	}
 
 	// update size
 	size := uint64(0)
-	bnum, err := db.fDB.Get(GetKeySize(key), nil)
+	bnum, err := db.fStorage.Get(GetKeySize(key))
 	if err == nil {
 		size = encoding.BytesToUint64(bnum)
 	}
 
-	err = db.fDB.Put(GetKeySize(key), encoding.Uint64ToBytes(size+1), nil)
+	err = db.fStorage.Set(GetKeySize(key), encoding.Uint64ToBytes(size+1))
 	if err != nil {
 		return err
 	}
 
 	// push message
-	err = db.fDB.Put(
+	err = db.fStorage.Set(
 		GetKeyMessage(key, size),
 		msg.ToPackage().Bytes(),
-		nil,
 	)
 	if err != nil {
-		err := db.fDB.Delete(GetKeyHash(hash), nil)
+		err := db.fStorage.Del(GetKeyHash(hash))
 		if err != nil {
 			panic(err)
 		}
-		err = db.fDB.Delete(GetKeySize(key), nil)
+		err = db.fStorage.Del(GetKeySize(key))
 		if err != nil {
 			panic(err)
 		}
@@ -88,10 +79,7 @@ func (db *sKeyValueDB) Push(key []byte, msg local.IMessage) error {
 }
 
 func (db *sKeyValueDB) Load(key []byte, i uint64) local.IMessage {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
-	data, err := db.fDB.Get(GetKeyMessage(key, i), nil)
+	data, err := db.fStorage.Get(GetKeyMessage(key, i))
 	if err != nil {
 		return nil
 	}
@@ -99,27 +87,21 @@ func (db *sKeyValueDB) Load(key []byte, i uint64) local.IMessage {
 }
 
 func (db *sKeyValueDB) Close() error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
-	return db.fDB.Close()
+	return db.fStorage.Close()
 }
 
 func (db *sKeyValueDB) Clean() error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
-	db.fDB.Close()
+	db.fStorage.Close()
 
 	err := os.RemoveAll(db.fPath)
 	if err != nil {
 		return err
 	}
 
-	db.fDB = NewKeyValueDB(db.fPath).dbPointer()
-	return nil
-}
+	db.fStorage = storage.NewLevelDBStorage(db.fPath)
+	if db.fStorage == nil {
+		panic("storage is nil")
+	}
 
-func (db *sKeyValueDB) dbPointer() *leveldb.DB {
-	return db.fDB
+	return nil
 }

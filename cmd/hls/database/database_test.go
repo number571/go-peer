@@ -3,6 +3,8 @@ package database
 import (
 	"os"
 	"testing"
+
+	"github.com/number571/go-peer/crypto"
 )
 
 const (
@@ -10,14 +12,14 @@ const (
 )
 
 const (
-	tcHash             = "test-hash"
 	tcMessageTitle     = "test-title"
 	tcMessageBody      = "test-body"
 	tcMessageRawConcat = tcMessageTitle + tcMessageBody
 )
 
 var (
-	tgDB IKeyValueDB
+	tgHash = crypto.NewHasher([]byte("test-hash")).Bytes()
+	tgDB   IKeyValueDB
 )
 
 func testHmsDefaultInit(path string) {
@@ -28,12 +30,12 @@ func TestDB(t *testing.T) {
 	testHmsDefaultInit(tcPathDB)
 	defer os.RemoveAll(tcPathDB)
 
-	err := tgDB.Push([]byte(tcHash))
+	err := tgDB.Push(tgHash)
 	if err != nil {
 		t.Error(err)
 	}
 
-	exist := tgDB.Exist([]byte(tcHash))
+	exist := tgDB.Exist(tgHash)
 	if !exist {
 		t.Errorf("load msg is nil")
 	}

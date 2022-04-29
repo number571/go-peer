@@ -92,9 +92,11 @@ func TestF2F(t *testing.T) {
 	nodes, route, msg := initSimple()
 	defer nodes[2].Close()
 
-	// time wait = 1 second
-	nodes[0].Client().Settings().Set(settings.TimeWait, 1)
-	nodes[1].Client().Settings().Set(settings.TimeWait, 1)
+	// time wait = timePseudo+1 second
+	timeOut := nodes[0].Client().Settings().Get(settings.TimePsdo) + 1
+
+	nodes[0].Client().Settings().Set(settings.TimeWait, timeOut)
+	nodes[1].Client().Settings().Set(settings.TimeWait, timeOut)
 
 	nodes[0].F2F().Switch(true)
 	nodes[1].F2F().Switch(true)
@@ -126,7 +128,9 @@ func TestChecker(t *testing.T) {
 	nodes[0].Checker().Switch(true)
 	nodes[0].Checker().Append(nodes[1].Client().PubKey())
 
-	time.Sleep(1 * time.Second)
+	// sleep = timePseudo+1 second
+	timeOut := nodes[0].Client().Settings().Get(settings.TimePsdo) + 1
+	time.Sleep(time.Duration(timeOut) * time.Second)
 
 	info := nodes[0].Checker().ListWithInfo()[0]
 	if !info.Online() {

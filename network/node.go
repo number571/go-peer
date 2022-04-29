@@ -57,6 +57,9 @@ func NewNode(client local.IClient) INode {
 		fActions: make(map[string]chan []byte),
 	}
 
+	sett := node.Client().Settings()
+	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+
 	// recurrent structures
 	{
 		checker := node.fChecker.(*sChecker)
@@ -66,12 +69,13 @@ func NewNode(client local.IClient) INode {
 		online.fNode = node
 	}
 
-	sett := node.Client().Settings()
-	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
 	return node.Handle(patt, nil)
 }
 
 func (node *sNode) WithRouter(router iRouter) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
 	node.fRouter = router
 }
 
@@ -79,6 +83,8 @@ func (node *sNode) WithRouter(router iRouter) {
 func (node *sNode) Close() {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
+
+	node.fChecker.Switch(false)
 
 	if node.fListener != nil {
 		node.fListener.Close()
@@ -148,48 +154,13 @@ func (node *sNode) Handle(title []byte, handle iHandler) INode {
 }
 
 // Send message by public key of receiver.
-// Function supported multiple routing with pseudo sender.
 func (node *sNode) Request(route local.IRoute, msg local.IMessage) ([]byte, error) {
-	var (
-		result []byte
-		err    error
+	return node.doRequest(
+		route,
+		msg,
+		node.Client().Settings().Get(settings.SizeRtry),
+		node.Client().Settings().Get(settings.TimeWait),
 	)
-
-	var (
-		waitTime = time.Duration(node.Client().Settings().Get(settings.TimeWait))
-		retryNum = node.Client().Settings().Get(settings.SizeRtry)
-		counter  = uint64(0)
-	)
-
-	if len(node.Connections()) == 0 {
-		return nil, errors.New("length of connections = 0")
-	}
-
-	routeMsg, session := node.Client().Encrypt(route, msg)
-	if routeMsg == nil {
-		return nil, errors.New("psender is nil and routes not nil")
-	}
-
-	node.setAction(session)
-	defer node.delAction(session)
-
-LOOP:
-	for counter = 0; counter < retryNum; counter++ {
-		node.send(routeMsg)
-
-		select {
-		case result = <-node.getAction(session):
-			break LOOP
-		case <-time.After(waitTime * time.Second):
-			continue LOOP
-		}
-	}
-
-	if counter == retryNum {
-		err = errors.New("time is over")
-	}
-
-	return result, err
 }
 
 // Get list of connection addresses.
@@ -317,6 +288,10 @@ func (node *sNode) handleConn(id string) {
 			continue
 		}
 
+		// sleep random milliseconds
+		wtime := node.Client().Settings().Get(settings.TimePsdo)
+		time.Sleep(time.Millisecond * calcRandTime(wtime))
+
 		// send message to handler
 		node.handleFunc(decMsg, title)
 	}
@@ -364,6 +339,45 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 		),
 	)
 	node.send(rmsg)
+}
+
+// Request with retry number and time out.
+func (node *sNode) doRequest(route local.IRoute, msg local.IMessage, retryNum, timeOut uint64) ([]byte, error) {
+	var (
+		result  []byte
+		err     error
+		counter = uint64(0)
+	)
+
+	if len(node.Connections()) == 0 {
+		return nil, errors.New("length of connections = 0")
+	}
+
+	routeMsg, session := node.Client().Encrypt(route, msg)
+	if routeMsg == nil {
+		return nil, errors.New("psender is nil and routes not nil")
+	}
+
+	node.setAction(session)
+	defer node.delAction(session)
+
+LOOP:
+	for counter = 0; counter < retryNum; counter++ {
+		node.send(routeMsg)
+
+		select {
+		case result = <-node.getAction(session):
+			break LOOP
+		case <-time.After(time.Duration(timeOut) * time.Second):
+			continue LOOP
+		}
+	}
+
+	if counter == retryNum {
+		err = errors.New("time is over")
+	}
+
+	return result, err
 }
 
 func (node *sNode) send(msg local.IMessage) {
@@ -497,7 +511,7 @@ func calcRandSize(len int) uint64 {
 	return ulen + rand.Uint64()%(10<<10) // +[0;10]KiB
 }
 
-func calcRandTime(wtime uint64) time.Duration {
+func calcRandTime(seconds uint64) time.Duration {
 	rand := crypto.NewPRNG()
-	return time.Duration(rand.Uint64() % wtime) // +[0;wtime]MS
+	return time.Duration(rand.Uint64() % (seconds * 1000)) // random[0;S*1000]MS
 }

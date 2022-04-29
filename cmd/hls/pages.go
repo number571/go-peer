@@ -4,44 +4,81 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hms/utils"
 	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
 )
 
+type sDefaultResponse struct {
+	Result string `json:"result"`
+	Return int    `json:"return"`
+}
+
 func pageIndex(w http.ResponseWriter, r *http.Request) {
-	response(w, cErrorNone, []byte("hidden lake service"))
+	defaultHeaders(w)
+	defaultResponse(w, cErrorNone, "hidden lake service")
 }
 
 func pageStatus(w http.ResponseWriter, r *http.Request) {
-	response(w, cErrorNone, utils.Serialize(struct {
-		PubKey []byte `json:"pubkey"`
-	}{
-		PubKey: gNode.Client().PubKey().Bytes(),
-	}))
+	defaultHeaders(w)
+
+	type sStatus struct {
+		PubKey string `json:"pub_key"`
+		Online bool   `json:"online"`
+	}
+
+	type sCustomResponse struct {
+		PubKey  string     `json:"pub_key"`
+		Network []*sStatus `json:"network"`
+		sDefaultResponse
+	}
+
+	if r.Method != "GET" {
+		defaultResponse(w, cErrorMethod, "failed: method GET")
+		return
+	}
+
+	var network []*sStatus
+	for _, info := range gNode.Checker().ListWithInfo() {
+		network = append(network, &sStatus{
+			PubKey: info.PubKey().String(),
+			Online: info.Online(),
+		})
+	}
+
+	json.NewEncoder(w).Encode(sCustomResponse{
+		PubKey:  gNode.Client().PubKey().String(),
+		Network: network,
+		sDefaultResponse: sDefaultResponse{
+			Result: "success",
+			Return: cErrorNone,
+		},
+	})
 }
 
 func pageMessage(w http.ResponseWriter, r *http.Request) {
+	defaultHeaders(w)
+
 	var vRequest struct {
-		Receiver []byte `json:"receiver"`
+		Receiver string `json:"receiver"` // public key
 		Title    []byte `json:"title"`
 		Data     []byte `json:"data"`
 	}
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: method POST"))
+		defaultResponse(w, cErrorMethod, "failed: method POST")
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
-		response(w, cErrorDecodeRequest, []byte("failed: decode request"))
+		defaultResponse(w, cErrorDecodeRequest, "failed: decode request")
 		return
 	}
 
 	pubKey := crypto.LoadPubKey(vRequest.Receiver)
 	if pubKey == nil {
-		response(w, cErrorDecodePubKey, []byte("failed: decode public key"))
+		defaultResponse(w, cErrorDecodePubKey, "failed: decode public key")
 		return
 	}
 
@@ -67,19 +104,19 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		local.NewMessage(vRequest.Title, vRequest.Data),
 	)
 	if err != nil {
-		response(w, cErrorResponseMessage, []byte("failed: response message"))
+		defaultResponse(w, cErrorResponseMessage, "failed: response message")
 		return
 	}
 
-	response(w, cErrorNone, resp)
+	defaultResponse(w, cErrorNone, encoding.Base64Encode(resp))
 }
 
-func response(w http.ResponseWriter, ret int, res []byte) {
+func defaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(struct {
-		Result []byte `json:"result"`
-		Return int    `json:"return"`
-	}{
+}
+
+func defaultResponse(w http.ResponseWriter, ret int, res string) {
+	json.NewEncoder(w).Encode(sDefaultResponse{
 		Result: res,
 		Return: ret,
 	})

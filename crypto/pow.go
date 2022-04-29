@@ -9,20 +9,20 @@ import (
 )
 
 var (
-	_ IPuzzle = &sPuzzle{}
+	_ IPuzzle = &sPowPuzzle{}
 )
 
-type sPuzzle struct {
+type sPowPuzzle struct {
 	fDiff uint8
 }
 
 func NewPuzzle(diff uint64) IPuzzle {
-	return &sPuzzle{uint8(diff)}
+	return &sPowPuzzle{uint8(diff)}
 }
 
 // Proof of work by the method of finding the desired hash.
 // Hash must start with 'diff' number of zero bits.
-func (puzzle *sPuzzle) Proof(packHash []byte) uint64 {
+func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
 	var (
 		Target  = big.NewInt(1)
 		intHash = big.NewInt(1)
@@ -48,7 +48,7 @@ func (puzzle *sPuzzle) Proof(packHash []byte) uint64 {
 }
 
 // Verifies the work of the proof of work function.
-func (puzzle *sPuzzle) Verify(packHash []byte, nonce uint64) bool {
+func (puzzle *sPowPuzzle) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	Target := big.NewInt(1)
 	hash := NewHasher(bytes.Join(

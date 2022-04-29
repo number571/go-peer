@@ -64,9 +64,3 @@ type IClient interface {
 	iKeeper
 	iCipher
 }
-
-type IStorage interface {
-	Write(string, string, []byte) error
-	Read(string, string) ([]byte, error)
-	Delete(string, string) error
-}

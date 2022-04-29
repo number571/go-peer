@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	_ IPrivKey = &sPrivKey{}
-	_ IPubKey  = &sPubKey{}
+	_ IPrivKey = &sRSAPrivKey{}
+	_ IPubKey  = &sRSAPubKey{}
 )
 
 const (
@@ -24,7 +24,7 @@ const (
  * PRIVATE KEY
  */
 
-type sPrivKey struct {
+type sRSAPrivKey struct {
 	priv *rsa.PrivateKey
 }
 
@@ -34,7 +34,7 @@ func NewPrivKey(bits uint64) IPrivKey {
 	if err != nil {
 		return nil
 	}
-	return &sPrivKey{priv}
+	return &sRSAPrivKey{priv}
 }
 
 func LoadPrivKey(privkey interface{}) IPrivKey {
@@ -44,7 +44,7 @@ func LoadPrivKey(privkey interface{}) IPrivKey {
 		if priv == nil {
 			return nil
 		}
-		return &sPrivKey{priv}
+		return &sRSAPrivKey{priv}
 	case string:
 		var (
 			prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
@@ -71,31 +71,31 @@ func LoadPrivKey(privkey interface{}) IPrivKey {
 	}
 }
 
-func (key *sPrivKey) Decrypt(msg []byte) []byte {
+func (key *sRSAPrivKey) Decrypt(msg []byte) []byte {
 	return decryptRSA(key.priv, msg)
 }
 
-func (key *sPrivKey) Sign(msg []byte) []byte {
+func (key *sRSAPrivKey) Sign(msg []byte) []byte {
 	return sign(key.priv, NewHasher(msg).Bytes())
 }
 
-func (key *sPrivKey) PubKey() IPubKey {
-	return &sPubKey{&key.priv.PublicKey}
+func (key *sRSAPrivKey) PubKey() IPubKey {
+	return &sRSAPubKey{&key.priv.PublicKey}
 }
 
-func (key *sPrivKey) Bytes() []byte {
+func (key *sRSAPrivKey) Bytes() []byte {
 	return privateKeyToBytes(key.priv)
 }
 
-func (key *sPrivKey) String() string {
+func (key *sRSAPrivKey) String() string {
 	return fmt.Sprintf("Priv(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *sPrivKey) Type() string {
+func (key *sRSAPrivKey) Type() string {
 	return AsymmKeyType
 }
 
-func (key *sPrivKey) Size() uint64 {
+func (key *sRSAPrivKey) Size() uint64 {
 	return key.PubKey().Size()
 }
 
@@ -134,7 +134,7 @@ func sign(priv *rsa.PrivateKey, hash []byte) []byte {
  * PUBLIC KEY
  */
 
-type sPubKey struct {
+type sRSAPubKey struct {
 	pub *rsa.PublicKey
 }
 
@@ -145,7 +145,7 @@ func LoadPubKey(pubkey interface{}) IPubKey {
 		if pub == nil {
 			return nil
 		}
-		return &sPubKey{pub}
+		return &sRSAPubKey{pub}
 	case string:
 		var (
 			prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
@@ -172,31 +172,31 @@ func LoadPubKey(pubkey interface{}) IPubKey {
 	}
 }
 
-func (key *sPubKey) Encrypt(msg []byte) []byte {
+func (key *sRSAPubKey) Encrypt(msg []byte) []byte {
 	return encryptRSA(key.pub, msg)
 }
 
-func (key *sPubKey) Address() string {
+func (key *sRSAPubKey) Address() string {
 	return NewHasher(key.Bytes()).String()
 }
 
-func (key *sPubKey) Verify(msg []byte, sig []byte) bool {
+func (key *sRSAPubKey) Verify(msg []byte, sig []byte) bool {
 	return verify(key.pub, NewHasher(msg).Bytes(), sig) == nil
 }
 
-func (key *sPubKey) Bytes() []byte {
+func (key *sRSAPubKey) Bytes() []byte {
 	return publicKeyToBytes(key.pub)
 }
 
-func (key *sPubKey) String() string {
+func (key *sRSAPubKey) String() string {
 	return fmt.Sprintf("Pub(%s){%X}", AsymmKeyType, key.Bytes())
 }
 
-func (key *sPubKey) Type() string {
+func (key *sRSAPubKey) Type() string {
 	return AsymmKeyType
 }
 
-func (key *sPubKey) Size() uint64 {
+func (key *sRSAPubKey) Size() uint64 {
 	return uint64(key.pub.N.BitLen())
 }
 

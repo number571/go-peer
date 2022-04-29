@@ -38,15 +38,14 @@ func (checker *sChecker) Switch(state bool) {
 	if checker.fEnabled == state {
 		return
 	}
+	checker.fEnabled = state
 
-	switch state {
+	switch checker.fEnabled {
 	case true:
 		checker.start()
 	case false:
 		checker.stop()
 	}
-
-	checker.fEnabled = state
 }
 
 // Get current state of online mode.
@@ -128,14 +127,16 @@ func (checkerInfo *sCheckerInfo) Online() bool {
 func (checker *sChecker) start() {
 	sett := checker.fNode.Client().Settings()
 	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
-
-	go func(checker *sChecker, patt []byte, tchk time.Duration) {
+	go func(checker *sChecker, patt []byte, timeOut, timePing uint64) {
+		node := checker.fNode.(*sNode)
 		for {
 			for _, recv := range checker.ListWithInfo() {
 				go func(recv *sCheckerInfo) {
-					resp, err := checker.fNode.Request(
+					resp, err := node.doRequest(
 						local.NewRoute(recv.fPubKey),
 						local.NewMessage(patt, patt),
+						1, // retry number
+						timeOut,
 					)
 					if err != nil || !bytes.Equal(resp, patt) {
 						recv.fOnline = false
@@ -147,11 +148,11 @@ func (checker *sChecker) start() {
 			select {
 			case <-checker.fChannel:
 				return
-			case <-time.After(time.Second * tchk):
+			case <-time.After(time.Second * time.Duration(timePing)):
 				continue
 			}
 		}
-	}(checker, patt, time.Duration(sett.Get(settings.TimeChck)))
+	}(checker, patt, sett.Get(settings.TimeWait), sett.Get(settings.TimePing))
 }
 
 func (checker *sChecker) stop() {

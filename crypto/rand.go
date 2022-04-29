@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	_ IPRNG = &tPRNG{}
+	_ IPRNG = &sStdRandPRNG{}
 )
 
-type tPRNG struct {
+type sStdRandPRNG struct {
 }
 
 func NewPRNG() IPRNG {
-	return &tPRNG{}
+	return &sStdRandPRNG{}
 }
 
 // Generates a cryptographically strong pseudo-random bytes.
-func (r *tPRNG) Bytes(n uint64) []byte {
+func (r *sStdRandPRNG) Bytes(n uint64) []byte {
 	slice := make([]byte, n)
 	_, err := rand.Read(slice)
 	if err != nil {
@@ -29,11 +29,11 @@ func (r *tPRNG) Bytes(n uint64) []byte {
 }
 
 // Generates a cryptographically strong pseudo-random string.
-func (r *tPRNG) String(n uint64) string {
+func (r *sStdRandPRNG) String(n uint64) string {
 	return encoding.Base64Encode(r.Bytes(n))[:n]
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.
-func (r *tPRNG) Uint64() uint64 {
+func (r *sStdRandPRNG) Uint64() uint64 {
 	return encoding.BytesToUint64(r.Bytes(8))
 }

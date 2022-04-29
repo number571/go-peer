@@ -2,7 +2,6 @@ package local
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"github.com/number571/go-peer/crypto"
@@ -41,31 +40,6 @@ func TestEncrypt(t *testing.T) {
 
 	if !bytes.Equal(title, title1) {
 		t.Errorf("title not equal with decrypted title")
-	}
-}
-
-func TestStorage(t *testing.T) {
-	const (
-		storageName = "storage.enc"
-		storagePasw = "storage-password"
-
-		subject  = "application_#1"
-		password = "privkey-password"
-	)
-
-	defer os.Remove(storageName)
-	secret1 := crypto.NewPrivKey(512).Bytes()
-
-	store := NewStorage(testutils.NewSettings(), storageName, storagePasw)
-	store.Write(subject, password, secret1)
-
-	secret2, err := store.Read(subject, password)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if !bytes.Equal(secret1, secret2) {
-		t.Errorf("saved and loaded values not equals")
 	}
 }
 

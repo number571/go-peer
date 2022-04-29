@@ -2,7 +2,6 @@ package database
 
 import (
 	"github.com/number571/go-peer/local"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type IKeyValueDB interface {
@@ -12,6 +11,4 @@ type IKeyValueDB interface {
 
 	Close() error
 	Clean() error
-
-	dbPointer() *leveldb.DB
 }

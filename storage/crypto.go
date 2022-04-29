@@ -1,4 +1,4 @@
-package local
+package storage
 
 import (
 	"bytes"
@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	_ IStorage = &sStorage{}
+	_ IKeyValueStorage = &sCryptoStorage{}
 )
 
-type sStorage struct {
+type sCryptoStorage struct {
 	fSettings settings.ISettings
 	fPath     string
 	fSalt     []byte
@@ -26,8 +26,8 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-func NewStorage(sett settings.ISettings, path string, pasw string) IStorage {
-	store := &sStorage{
+func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValueStorage {
+	store := &sCryptoStorage{
 		fSettings: sett,
 		fPath:     path,
 	}
@@ -42,11 +42,11 @@ func NewStorage(sett settings.ISettings, path string, pasw string) IStorage {
 		store.fSalt = crypto.NewPRNG().Bytes(store.fSettings.Get(settings.SizeSkey))
 	}
 
-	ekey := crypto.RaiseEntropy([]byte(pasw), store.fSalt, store.fSettings.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy(key, store.fSalt, store.fSettings.Get(settings.SizeWork))
 	store.fCipher = crypto.NewCipher(ekey)
 
 	if !store.exists() {
-		store.Write("", "", nil)
+		store.Set(nil, nil)
 	}
 
 	_, err := store.decrypt()
@@ -57,7 +57,7 @@ func NewStorage(sett settings.ISettings, path string, pasw string) IStorage {
 	return store
 }
 
-func (store *sStorage) Write(id string, pasw string, secret []byte) error {
+func (store *sCryptoStorage) Set(key, value []byte) error {
 	var (
 		mapping storageData
 		err     error
@@ -74,16 +74,12 @@ func (store *sStorage) Write(id string, pasw string, secret []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
-		[][]byte{
-			[]byte(id),
-			store.fSalt,
-		},
-		[]byte{}), store.fSettings.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy(key, store.fSalt,
+		store.fSettings.Get(settings.SizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
-	mapping.FSecrets[hash] = cipher.Encrypt(secret)
+	mapping.FSecrets[hash] = cipher.Encrypt(value)
 
 	// Encrypt and save storage
 	data, err := json.Marshal(&mapping)
@@ -92,10 +88,7 @@ func (store *sStorage) Write(id string, pasw string, secret []byte) error {
 	}
 
 	err = ioutil.WriteFile(store.fPath, bytes.Join(
-		[][]byte{
-			store.fSalt,
-			store.fCipher.Encrypt(data),
-		},
+		[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
 		[]byte{}), 0644)
 	if err != nil {
 		return err
@@ -104,7 +97,7 @@ func (store *sStorage) Write(id string, pasw string, secret []byte) error {
 	return nil
 }
 
-func (store *sStorage) Read(id string, pasw string) ([]byte, error) {
+func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	// If storage not exists.
 	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
@@ -117,12 +110,8 @@ func (store *sStorage) Read(id string, pasw string) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
-		[][]byte{
-			[]byte(id),
-			store.fSalt,
-		},
-		[]byte{}), store.fSettings.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy(key, store.fSalt,
+		store.fSettings.Get(settings.SizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	encsecret, ok := mapping.FSecrets[hash]
@@ -136,7 +125,7 @@ func (store *sStorage) Read(id string, pasw string) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *sStorage) Delete(id string, pasw string) error {
+func (store *sCryptoStorage) Del(key []byte) error {
 	// If storage not exists.
 	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")
@@ -149,12 +138,8 @@ func (store *sStorage) Delete(id string, pasw string) error {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy([]byte(pasw), bytes.Join(
-		[][]byte{
-			[]byte(id),
-			store.fSalt,
-		},
-		[]byte{}), store.fSettings.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy(key, store.fSalt,
+		store.fSettings.Get(settings.SizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	_, ok := mapping.FSecrets[hash]
@@ -163,15 +148,19 @@ func (store *sStorage) Delete(id string, pasw string) error {
 	}
 
 	delete(mapping.FSecrets, hash)
-
 	return nil
 }
 
-func (store *sStorage) exists() bool {
+// just pass
+func (store *sCryptoStorage) Close() error {
+	return nil
+}
+
+func (store *sCryptoStorage) exists() bool {
 	return utils.FileIsExist(store.fPath)
 }
 
-func (store *sStorage) decrypt() (storageData, error) {
+func (store *sCryptoStorage) decrypt() (storageData, error) {
 	var mapping storageData
 
 	encdata, err := ioutil.ReadFile(store.fPath)

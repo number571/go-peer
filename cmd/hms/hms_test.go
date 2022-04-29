@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/number571/go-peer/cmd/hms/utils"
@@ -52,6 +53,7 @@ func TestHMS(t *testing.T) {
 	defer srv.Close()
 
 	// client push
+	time.Sleep(200 * time.Millisecond)
 	err := testClientDoPush()
 	if err != nil {
 		t.Error(err)

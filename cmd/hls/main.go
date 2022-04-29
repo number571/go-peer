@@ -6,6 +6,11 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/settings"
 )
 
 func main() {
@@ -18,6 +23,14 @@ func main() {
 
 	// set handle functions
 	gNode.Handle([]byte(cPatternHLS), routeHLS)
+
+	// set response route
+	gNode.WithRouter(func() []crypto.IPubKey {
+		randSizeRoute := crypto.NewPRNG().Uint64() % cSizeRoute
+		return local.NewSelector(nodesInOnline(gNode)).
+			Shuffle().
+			Return(randSizeRoute)
+	})
 
 	// turn on f2f mode
 	gNode.F2F().Switch(gConfig.F2F().Status())
@@ -45,10 +58,13 @@ func main() {
 		gLogger.Info(fmt.Sprintf("connected to '%s'", address))
 	}
 
+	// network checker
 	go func() {
-		timer := time.Second * 5
+		sett := gNode.Client().Settings()
+		tchk := time.Duration(sett.Get(settings.TimePing))
+
 		for {
-			time.Sleep(timer)
+			time.Sleep(time.Second * tchk)
 			for _, address := range gConfig.Connections() {
 				if address == gConfig.Address().HLS() {
 					continue
@@ -92,4 +108,15 @@ func main() {
 		gLogger.Error(err.Error())
 		os.Exit(2)
 	}
+}
+
+func nodesInOnline(node network.INode) []crypto.IPubKey {
+	inOnline := []crypto.IPubKey{}
+	for _, info := range gNode.Checker().ListWithInfo() {
+		if !info.Online() {
+			continue
+		}
+		inOnline = append(inOnline, info.PubKey())
+	}
+	return inOnline
 }
