@@ -60,6 +60,7 @@ const (
 )
 
 func testHlsDefaultInit(dbPath, configPath string) {
+	os.RemoveAll(tcPathDB)
 	utils.WriteFile(configPath, []byte(configBody))
 
 	gDB = database.NewKeyValueDB(dbPath)

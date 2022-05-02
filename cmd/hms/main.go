@@ -42,7 +42,7 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: method POST"))
+		response(w, cErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
@@ -52,12 +52,12 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(vRequest.Receiver) != crypto.HashSize {
-		response(w, cErrorSize, []byte("failed: receiver size"))
+	size, err := gDB.Size(vRequest.Receiver)
+	if err != nil {
+		response(w, cErrorLoad, []byte("failed: load size"))
 		return
 	}
 
-	size := gDB.Size(vRequest.Receiver)
 	response(w, cErrorNone, encoding.Uint64ToBytes(size))
 }
 
@@ -68,7 +68,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: method POST"))
+		response(w, cErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
@@ -78,13 +78,8 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(vRequest.Receiver) != crypto.HashSize {
-		response(w, cErrorSize, []byte("failed: receiver size"))
-		return
-	}
-
-	msg := gDB.Load(vRequest.Receiver, vRequest.Index)
-	if msg == nil {
+	msg, err := gDB.Load(vRequest.Receiver, vRequest.Index)
+	if err != nil {
 		response(w, cErrorLoad, []byte("failed: load message"))
 		return
 	}
@@ -99,18 +94,13 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: method POST"))
+		response(w, cErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
 		response(w, cErrorDecode, []byte("failed: decode request"))
-		return
-	}
-
-	if len(vRequest.Receiver) != crypto.HashSize {
-		response(w, cErrorSize, []byte("failed: receiver size"))
 		return
 	}
 

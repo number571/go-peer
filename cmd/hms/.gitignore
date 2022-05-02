@@ -1,3 +1,6 @@
 hms
 hms.cfg 
 hms.db/
+hms_test.db
+hms_test.cfg
+database_test.db 

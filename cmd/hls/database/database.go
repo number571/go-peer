@@ -31,14 +31,14 @@ func (db *sKeyValueDB) Push(hash []byte) error {
 	if db.Exist(hash) {
 		return fmt.Errorf("hash already exists")
 	}
-	return db.fStorage.Set(GetKeyHash(hash), []byte{1})
+	return db.fStorage.Set(getKeyHash(hash), []byte{1})
 }
 
 func (db *sKeyValueDB) Exist(hash []byte) bool {
 	if len(hash) != crypto.HashSize {
 		return false
 	}
-	_, err := db.fStorage.Get(GetKeyHash(hash))
+	_, err := db.fStorage.Get(getKeyHash(hash))
 	return err == nil
 }
 

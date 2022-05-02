@@ -3,19 +3,19 @@ package database
 import "fmt"
 
 const (
-	KeySize    = "database.users[%s].size"
-	KeyMessage = "database.users[%s].messages[%d]"
-	KeyHash    = "database.hashes[%s]"
+	keySize    = "database.users[%s].size"
+	keyMessage = "database.users[%s].messages[%d]"
+	keyHash    = "database.hashes[%s]"
 )
 
-func GetKeySize(key []byte) []byte {
-	return []byte(fmt.Sprintf(KeySize, key))
+func getKeySize(key []byte) []byte {
+	return []byte(fmt.Sprintf(keySize, key))
 }
 
-func GetKeyMessage(key []byte, i uint64) []byte {
-	return []byte(fmt.Sprintf(KeyMessage, key, i))
+func getKeyMessage(key []byte, i uint64) []byte {
+	return []byte(fmt.Sprintf(keyMessage, key, i))
 }
 
-func GetKeyHash(key []byte) []byte {
-	return []byte(fmt.Sprintf(KeyHash, key))
+func getKeyHash(key []byte) []byte {
+	return []byte(fmt.Sprintf(keyHash, key))
 }

@@ -34,7 +34,7 @@ func pageStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != "GET" {
-		defaultResponse(w, cErrorMethod, "failed: method GET")
+		defaultResponse(w, cErrorMethod, "failed: incorrect method")
 		return
 	}
 
@@ -66,7 +66,7 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method != "POST" {
-		defaultResponse(w, cErrorMethod, "failed: method POST")
+		defaultResponse(w, cErrorMethod, "failed: incorrect method")
 		return
 	}
 

@@ -10,7 +10,6 @@ const (
 	cErrorNone = iota + 1
 	cErrorMethod
 	cErrorDecode
-	cErrorSize
 	cErrorLoad
 	cErrorPush
 	cErrorMessage

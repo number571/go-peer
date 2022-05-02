@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 )
 
@@ -13,14 +14,14 @@ const (
 )
 
 const (
-	tcKey              = "test-key"
 	tcMessageTitle     = "test-title"
 	tcMessageBody      = "test-body"
 	tcMessageRawConcat = tcMessageTitle + tcMessageBody
 )
 
 var (
-	tgDB IKeyValueDB
+	tgKey = crypto.NewHasher([]byte("test-key")).Bytes()
+	tgDB  IKeyValueDB
 )
 
 func testHmsDefaultInit(path string) {
@@ -31,23 +32,37 @@ func TestDB(t *testing.T) {
 	testHmsDefaultInit(tcPathDB)
 	defer os.RemoveAll(tcPathDB)
 
-	if tgDB.Size([]byte(tcKey)) != 0 {
+	size, err := tgDB.Size(tgKey)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if size != 0 {
 		t.Errorf("init size != 0")
+		return
 	}
 
 	msg := local.NewMessage([]byte(tcMessageTitle), []byte(tcMessageBody))
-	err := tgDB.Push([]byte(tcKey), msg)
+	err = tgDB.Push(tgKey, msg)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
-	if tgDB.Size([]byte(tcKey)) != 1 {
+	size, err = tgDB.Size(tgKey)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if size != 1 {
 		t.Errorf("after push size != 1")
+		return
 	}
 
-	loadMsg := tgDB.Load([]byte(tcKey), 0)
-	if loadMsg == nil {
-		t.Errorf("load msg is nil")
+	loadMsg, err := tgDB.Load(tgKey, 0)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	if !bytes.Equal(loadMsg.Body().Data(), []byte(msg.Body().Data())) {
@@ -59,7 +74,12 @@ func TestDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if tgDB.Size([]byte(tcKey)) != 0 {
+	size, err = tgDB.Size(tgKey)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if size != 0 {
 		t.Errorf("after clean size != 0")
 	}
 

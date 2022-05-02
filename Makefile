@@ -1,6 +1,6 @@
 N=1
 .PHONY: default build clean test bench
-default: build
+default: test
 build:
 	make build -C cmd/hln
 clean:

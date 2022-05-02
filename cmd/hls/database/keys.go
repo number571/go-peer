@@ -1,11 +1,13 @@
 package database
 
-import "fmt"
-
-const (
-	KeyHash = "database.hashes[%s]"
+import (
+	"fmt"
 )
 
-func GetKeyHash(key []byte) []byte {
-	return []byte(fmt.Sprintf(KeyHash, key))
+const (
+	keyHash = "database.hashes[%s]"
+)
+
+func getKeyHash(key []byte) []byte {
+	return []byte(fmt.Sprintf(keyHash, key))
 }
