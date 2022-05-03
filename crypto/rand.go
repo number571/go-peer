@@ -37,3 +37,8 @@ func (r *sStdRandPRNG) String(n uint64) string {
 func (r *sStdRandPRNG) Uint64() uint64 {
 	return encoding.BytesToUint64(r.Bytes(8))
 }
+
+// Generate cryptographically strong pseudo-random bool value.
+func (r *sStdRandPRNG) Bool() bool {
+	return r.Bytes(1)[0]%2 == 0
+}

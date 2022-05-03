@@ -93,7 +93,7 @@ func TestF2F(t *testing.T) {
 	defer nodes[2].Close()
 
 	// time wait = timePseudo+1 second
-	timeOut := nodes[0].Client().Settings().Get(settings.TimePsdo) + 1
+	timeOut := nodes[0].Client().Settings().Get(settings.TimePrsp) + 1
 
 	nodes[0].Client().Settings().Set(settings.TimeWait, timeOut)
 	nodes[1].Client().Settings().Set(settings.TimeWait, timeOut)
@@ -129,7 +129,7 @@ func TestChecker(t *testing.T) {
 	nodes[0].Checker().Append(nodes[1].Client().PubKey())
 
 	// sleep = timePseudo+1 second
-	timeOut := nodes[0].Client().Settings().Get(settings.TimePsdo) + 1
+	timeOut := nodes[0].Client().Settings().Get(settings.TimePrsp) + 1
 	time.Sleep(time.Duration(timeOut) * time.Second)
 
 	info := nodes[0].Checker().ListWithInfo()[0]
@@ -138,7 +138,26 @@ func TestChecker(t *testing.T) {
 	}
 }
 
-// Route testing
+// TEST PSEUDO
+
+func TestPseudo(t *testing.T) {
+	nodes, route, msg := initSimple()
+	defer nodes[2].Close()
+
+	for _, node := range nodes {
+		node.Pseudo().Switch(true)
+	}
+
+	for i := 0; i < 3; i++ {
+		_, err := nodes[0].Request(route, msg)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+	}
+}
+
+// TEST ROUTE
 
 func initRoute() ([5]INode, local.IRoute, local.IMessage) {
 	client1 := newNode()
@@ -163,7 +182,7 @@ func initRoute() ([5]INode, local.IRoute, local.IMessage) {
 	client1.Connect(tcNodeAddress1)
 	client2.Connect(tcNodeAddress3)
 
-	client2.WithRouter(func() []crypto.IPubKey {
+	client2.WithResponseRouter(func(_ INode) []crypto.IPubKey {
 		return []crypto.IPubKey{
 			node2.Client().PubKey(),
 			node3.Client().PubKey(),

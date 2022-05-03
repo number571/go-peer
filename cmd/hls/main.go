@@ -25,12 +25,15 @@ func main() {
 	gNode.Handle([]byte(cPatternHLS), routeHLS)
 
 	// set response route
-	gNode.WithRouter(func() []crypto.IPubKey {
+	gNode.WithResponseRouter(func(node network.INode) []crypto.IPubKey {
 		randSizeRoute := crypto.NewPRNG().Uint64() % cSizeRoute
-		return local.NewSelector(nodesInOnline(gNode)).
+		return local.NewSelector(nodesInOnline(node)).
 			Shuffle().
 			Return(randSizeRoute)
 	})
+
+	// turn on pseudo packages
+	gNode.Pseudo().Switch(true)
 
 	// turn on f2f mode
 	gNode.F2F().Switch(gConfig.F2F().Status())
@@ -39,7 +42,9 @@ func main() {
 	}
 
 	// turn on online checker
-	gNode.Checker().Switch(gConfig.OnlineChecker().Status())
+	isOnline := gConfig.OnlineChecker().Status()
+	gNode.Online().Switch(isOnline)
+	gNode.Checker().Switch(isOnline)
 	for _, pubKey := range gConfig.OnlineChecker().PubKeys() {
 		gNode.Checker().Append(pubKey)
 	}

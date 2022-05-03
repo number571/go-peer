@@ -13,12 +13,6 @@
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
-## Need TODO
-
-At the moment, the framework is able to recreate the five stage of anonymity, but is not suitable for the seven. This is due to the two pitfalls of the seven stage of anonymity that need to be corrected. The list is as follows:
-1. Request time. You need to implement a simulation of packet generation time, either on a request-based or routing-response basis.
-2. The period of states. This problem should be solved dynamically by the user and based on the framework it is quite impossible to fix the vulnerability.
-
 ## Specifications of go-peer
 
 1. Prefix 's'/'S' - structure type

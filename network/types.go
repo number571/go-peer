@@ -5,11 +5,11 @@ import (
 	"github.com/number571/go-peer/local"
 )
 
-type iRouter func() []crypto.IPubKey
+type iRouter func(INode) []crypto.IPubKey
 type iHandler func(INode, local.IMessage) []byte
 
 type INode interface {
-	WithRouter(iRouter)
+	WithResponseRouter(iRouter) INode
 
 	Request(local.IRoute, local.IMessage) ([]byte, error)
 	Handle([]byte, iHandler) INode
@@ -23,6 +23,7 @@ type INode interface {
 
 	Client() local.IClient
 	Checker() iChecker
+	Pseudo() iPseudo
 	Online() iOnline
 	F2F() iF2F
 }
@@ -48,14 +49,22 @@ type iF2F interface {
 	iListPubKey
 }
 
-type iStatus interface {
-	Switch(bool)
-	Status() bool
-}
-
 type iListPubKey interface {
 	InList(crypto.IPubKey) bool
 	List() []crypto.IPubKey
 	Append(crypto.IPubKey)
 	Remove(crypto.IPubKey)
+}
+
+type iPseudo interface {
+	iStatus
+	Request(int) iPseudo
+	Sleep() iPseudo
+	PubKey() crypto.IPubKey
+	PrivKey() crypto.IPrivKey
+}
+
+type iStatus interface {
+	Switch(bool)
+	Status() bool
 }

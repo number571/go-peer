@@ -6,7 +6,8 @@ const (
 	MaskRout uint64 = iota + 1
 	MaskPing
 	TimeWait
-	TimePsdo
+	TimePreq
+	TimePrsp
 	TimePing
 	SizePsdo
 	SizeRtry
@@ -60,7 +61,8 @@ func defaultSettings() map[uint64]uint64 {
 		MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
 		MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
 		TimeWait: 30,                 // seconds
-		TimePsdo: 5,                  // seconds
+		TimePreq: 10,                 // seconds
+		TimePrsp: 5,                  // seconds
 		TimePing: 60,                 // seconds
 		SizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
 		SizeRtry: 3,                  // quantity

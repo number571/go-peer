@@ -19,7 +19,8 @@ func defaultSettings() map[uint64]uint64 {
 		settings.MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
 		settings.MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
 		settings.TimeWait: 20,                 // seconds
-		settings.TimePsdo: 1,                  // seconds
+		settings.TimePreq: 1,                  // seconds
+		settings.TimePrsp: 1,                  // seconds
 		settings.TimePing: 1,                  // seconds
 		settings.SizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
 		settings.SizeRtry: 1,                  // quantity

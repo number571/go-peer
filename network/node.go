@@ -22,13 +22,13 @@ type sNode struct {
 	fMutex       sync.Mutex
 	fListener    net.Listener
 	fClient      local.IClient
-	fPseudo      crypto.IPrivKey
 	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
 	fF2F         iF2F
-	fOnline      iOnline
 	fChecker     iChecker
+	fPseudo      iPseudo
+	fOnline      iOnline
 	fRouter      iRouter
 	fActions     map[string]chan []byte
 }
@@ -41,42 +41,48 @@ func NewNode(client local.IClient) INode {
 
 	node := &sNode{
 		fClient:      client,
-		fPseudo:      crypto.NewPrivKey(client.PubKey().Size()),
 		fHRoutes:     make(map[string]iHandler),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
 		fF2F: &sF2F{
 			fMapping: make(map[string]crypto.IPubKey),
 		},
-		fOnline: &sOnline{},
 		fChecker: &sChecker{
 			fChannel: make(chan struct{}),
 			fMapping: make(map[string]iCheckerInfo),
 		},
-		fRouter:  func() []crypto.IPubKey { return nil },
+		fPseudo: &sPseudo{
+			fChannel: make(chan struct{}),
+			fPrivKey: crypto.NewPrivKey(client.PubKey().Size()),
+		},
+		fOnline:  &sOnline{},
+		fRouter:  func(_ INode) []crypto.IPubKey { return nil },
 		fActions: make(map[string]chan []byte),
+	}
+
+	// recurrent structures
+	{
+		checker := node.fChecker.(*sChecker)
+		pseudo := node.fPseudo.(*sPseudo)
+		online := node.fOnline.(*sOnline)
+
+		checker.fNode = node
+		pseudo.fNode = node
+		online.fNode = node
 	}
 
 	sett := node.Client().Settings()
 	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
 
-	// recurrent structures
-	{
-		checker := node.fChecker.(*sChecker)
-		online := node.fOnline.(*sOnline)
-
-		checker.fNode = node
-		online.fNode = node
-	}
-
 	return node.Handle(patt, nil)
 }
 
-func (node *sNode) WithRouter(router iRouter) {
+func (node *sNode) WithResponseRouter(router iRouter) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
 	node.fRouter = router
+	return node
 }
 
 // Close online status, listener and current connections.
@@ -104,6 +110,11 @@ func (node *sNode) Client() local.IClient {
 // Return checker structure.
 func (node *sNode) Checker() iChecker {
 	return node.fChecker
+}
+
+// Return pseudo structure.
+func (node *sNode) Pseudo() iPseudo {
+	return node.fPseudo
 }
 
 // Return online structure.
@@ -262,23 +273,18 @@ func (node *sNode) handleConn(id string) {
 		// 1/2 generate new pseudo-package and sleep rand time
 		// unpack and send new version of package
 		if bytes.Equal(title, encoding.Uint64ToBytes(routeMsg)) {
-			rand := crypto.NewPRNG()
-			if rand.Uint64()%2 == 0 {
-				// send pseudo message
-				pMsg, _ := node.Client().Encrypt(
-					local.NewRoute(node.fPseudo.PubKey()),
-					local.NewMessage(
-						rand.Bytes(16),
-						rand.Bytes(calcRandSize(len(decMsg.Body().Data()))),
-					),
-				)
-				node.send(pMsg)
-				// sleep random milliseconds
-				wtime := node.Client().Settings().Get(settings.TimePsdo)
-				time.Sleep(time.Millisecond * calcRandTime(wtime))
+			if node.Pseudo().Status() && crypto.NewPRNG().Bool() {
+				// send pseudo message with random sleep
+				size := len(decMsg.Body().Data())
+				node.Pseudo().Request(size).Sleep()
 			}
 			msg = local.LoadPackage(decMsg.Body().Data()).ToMessage()
 			goto REPEAT
+		}
+
+		// sleep random milliseconds
+		if node.Pseudo().Status() {
+			node.Pseudo().Sleep()
 		}
 
 		// if mode is friend-to-friend and sender not in list of f2f
@@ -287,10 +293,6 @@ func (node *sNode) handleConn(id string) {
 		if node.F2F().Status() && !node.F2F().InList(sender) {
 			continue
 		}
-
-		// sleep random milliseconds
-		wtime := node.Client().Settings().Get(settings.TimePsdo)
-		time.Sleep(time.Millisecond * calcRandTime(wtime))
 
 		// send message to handler
 		node.handleFunc(decMsg, title)
@@ -325,7 +327,7 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 
 	rmsg, _ := node.Client().Encrypt(
 		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender())).
-			WithRedirects(node.fPseudo, node.fRouter()),
+			WithRedirects(node.Pseudo().PrivKey(), node.fRouter(node)),
 		local.NewMessage(
 			bytes.Join(
 				[][]byte{
@@ -503,15 +505,4 @@ func (node *sNode) getConnection(id string) (net.Conn, bool) {
 
 	conn, ok := node.fConnections[id]
 	return conn, ok
-}
-
-func calcRandSize(len int) uint64 {
-	ulen := uint64(len)
-	rand := crypto.NewPRNG()
-	return ulen + rand.Uint64()%(10<<10) // +[0;10]KiB
-}
-
-func calcRandTime(seconds uint64) time.Duration {
-	rand := crypto.NewPRNG()
-	return time.Duration(rand.Uint64() % (seconds * 1000)) // random[0;S*1000]MS
 }
