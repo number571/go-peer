@@ -40,7 +40,7 @@ func (checker *sChecker) Switch(state bool) {
 	}
 	checker.fEnabled = state
 
-	switch checker.fEnabled {
+	switch state {
 	case true:
 		checker.start()
 	case false:
@@ -111,9 +111,6 @@ func (checker *sChecker) Remove(pub crypto.IPubKey) {
 }
 
 func (checkerInfo *sCheckerInfo) PubKey() crypto.IPubKey {
-	checkerInfo.fMutex.Lock()
-	defer checkerInfo.fMutex.Unlock()
-
 	return checkerInfo.fPubKey
 }
 
@@ -125,18 +122,22 @@ func (checkerInfo *sCheckerInfo) Online() bool {
 }
 
 func (checker *sChecker) start() {
-	sett := checker.fNode.Client().Settings()
-	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
-	go func(checker *sChecker, patt []byte, timeOut, timePing uint64) {
+	go func(checker *sChecker) {
 		node := checker.fNode.(*sNode)
+		sett := node.fClient.Settings()
+		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
 		for {
-			for _, recv := range checker.ListWithInfo() {
+			wg := sync.WaitGroup{}
+			list := checker.ListWithInfo()
+			wg.Add(len(list))
+			for _, recv := range list {
 				go func(recv *sCheckerInfo) {
+					defer wg.Done()
 					resp, err := node.doRequest(
 						local.NewRoute(recv.fPubKey),
 						local.NewMessage(patt, patt),
-						1, // retry number
-						timeOut,
+						0, // retry number
+						sett.Get(settings.TimeWait),
 					)
 					if err != nil || !bytes.Equal(resp, patt) {
 						recv.fOnline = false
@@ -145,16 +146,22 @@ func (checker *sChecker) start() {
 					recv.fOnline = true
 				}(recv.(*sCheckerInfo))
 			}
+			wg.Wait()
 			select {
 			case <-checker.fChannel:
 				return
-			case <-time.After(time.Second * time.Duration(timePing)):
+			case <-time.After(time.Second * time.Duration(
+				sett.Get(settings.TimePing),
+			)):
 				continue
 			}
+			// <-stop
 		}
-	}(checker, patt, sett.Get(settings.TimeWait), sett.Get(settings.TimePing))
+	}(checker)
 }
 
 func (checker *sChecker) stop() {
+	checker.fMutex.Unlock()
 	checker.fChannel <- struct{}{}
+	checker.fMutex.Lock()
 }

@@ -65,7 +65,7 @@ func defaultSettings() map[uint64]uint64 {
 		TimePrsp: 5,                  // seconds
 		TimePing: 60,                 // seconds
 		SizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
-		SizeRtry: 3,                  // quantity
+		SizeRtry: 2,                  // quantity
 		SizeWork: 20,                 // bits
 		SizeConn: 10,                 // quantity
 		SizePack: 8 << 20,            // 8*(2^20)B = 8MiB

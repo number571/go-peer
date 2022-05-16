@@ -31,7 +31,7 @@ func (psd *sPseudo) Switch(state bool) {
 	}
 	psd.fEnabled = state
 
-	switch psd.fEnabled {
+	switch state {
 	case true:
 		psd.start()
 	case false:
@@ -55,16 +55,7 @@ func (psd *sPseudo) Request(size int) iPseudo {
 		return psd
 	}
 
-	rand := crypto.NewPRNG()
-	pMsg, _ := psd.fNode.Client().Encrypt(
-		local.NewRoute(psd.fPrivKey.PubKey()),
-		local.NewMessage(
-			rand.Bytes(16),
-			rand.Bytes(calcRandSize(size)),
-		),
-	)
-
-	psd.fNode.(*sNode).send(pMsg)
+	psd.doRequest(size)
 	return psd
 }
 
@@ -76,7 +67,8 @@ func (psd *sPseudo) Sleep() iPseudo {
 		return psd
 	}
 
-	wtime := psd.fNode.Client().Settings().Get(settings.TimePrsp)
+	node := psd.fNode.(*sNode)
+	wtime := node.fClient.Settings().Get(settings.TimePrsp)
 	time.Sleep(time.Millisecond * calcRandTime(wtime))
 	return psd
 }
@@ -98,22 +90,42 @@ func (psd *sPseudo) PrivKey() crypto.IPrivKey {
 }
 
 func (psd *sPseudo) start() {
-	sett := psd.fNode.Client().Settings()
-	go func(psd *sPseudo, treq uint64) {
+	go func(psd *sPseudo) {
+		sett := psd.fNode.(*sNode).fClient.Settings()
 		for {
-			psd.Request(16)
+			psd.doRequest(16)
 			select {
 			case <-psd.fChannel:
 				return
-			case <-time.After(time.Second * time.Duration(treq)):
+			case <-time.After(time.Second * time.Duration(
+				sett.Get(settings.TimePreq),
+			)):
 				continue
 			}
 		}
-	}(psd, sett.Get(settings.TimePreq))
+	}(psd)
 }
 
 func (psd *sPseudo) stop() {
 	psd.fChannel <- struct{}{}
+}
+
+func (psd *sPseudo) doRequest(size int) {
+	node := psd.fNode.(*sNode)
+	rand := crypto.NewPRNG()
+	pMsg, _ := node.fClient.Encrypt(
+		local.NewRoute(psd.fPrivKey.PubKey()),
+		local.NewMessage(
+			rand.Bytes(16),
+			rand.Bytes(calcRandSize(size)),
+		),
+	)
+	ch := make(chan struct{})
+	go func(node *sNode, ch chan struct{}) {
+		node.send(pMsg)
+		ch <- struct{}{}
+	}(node, ch)
+	<-ch
 }
 
 func calcRandSize(len int) uint64 {

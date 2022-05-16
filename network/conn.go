@@ -9,18 +9,26 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
+/*
+	send может передавать информацию фрагментированно?
+	recv может принимать информацию фрагментированно?
+
+	A -> 512 [X] -> C ?
+	A -> 512 [X] -> B ?
+*/
+
 func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 	const (
 		SizeUint64 = 8 // bytes
 	)
 
 	var (
-		pack   []byte
-		size   = uint64(0)
-		buflen = make([]byte, SizeUint64)
+		pack    []byte
+		size    = uint64(0)
+		bufsize = make([]byte, SizeUint64)
 	)
 
-	length, err := conn.Read(buflen)
+	length, err := conn.Read(bufsize)
 	if err != nil {
 		return nil
 	}
@@ -28,14 +36,13 @@ func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 		return nil
 	}
 
-	mustLen := local.LoadPackage(buflen).BytesToSize()
-	if mustLen > node.Client().Settings().Get(settings.SizePack) {
+	mustLen := local.LoadPackage(bufsize).BytesToSize()
+	if mustLen > node.fClient.Settings().Get(settings.SizePack) {
 		return nil
 	}
 
+	buffer := make([]byte, mustLen)
 	for {
-		buffer := make([]byte, mustLen-size)
-
 		length, err = conn.Read(buffer)
 		if err != nil {
 			return nil
@@ -50,7 +57,7 @@ func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 		)
 
 		size += uint64(length)
-		if size == mustLen {
+		if size >= mustLen {
 			break
 		}
 	}
@@ -67,7 +74,7 @@ func (node *sNode) initialCheck(msg local.IMessage) local.IMessage {
 		return nil
 	}
 
-	diff := node.Client().Settings().Get(settings.SizeWork)
+	diff := node.fClient.Settings().Get(settings.SizeWork)
 	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil

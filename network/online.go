@@ -25,20 +25,14 @@ func (onl *sOnline) Switch(state bool) {
 	if onl.fEnabled == state {
 		return
 	}
-
-	sett := onl.fNode.Client().Settings()
-	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+	onl.fEnabled = state
 
 	switch state {
 	case true:
-		onl.fNode.Handle(patt, func(node INode, msg local.IMessage) []byte {
-			return patt
-		})
+		onl.start()
 	case false:
-		onl.fNode.Handle(patt, nil)
+		onl.stop()
 	}
-
-	onl.fEnabled = state
 }
 
 func (onl *sOnline) Status() bool {
@@ -46,4 +40,24 @@ func (onl *sOnline) Status() bool {
 	defer onl.fMutex.Unlock()
 
 	return onl.fEnabled
+}
+
+func (onl *sOnline) start() {
+	go func(node INode) {
+		sett := node.Client().Settings()
+		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+
+		node.Handle(patt, func(node INode, msg local.IMessage) []byte {
+			return patt
+		})
+	}(onl.fNode)
+}
+
+func (onl *sOnline) stop() {
+	go func(node INode) {
+		sett := node.Client().Settings()
+		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+
+		node.Handle(patt, nil)
+	}(onl.fNode)
 }

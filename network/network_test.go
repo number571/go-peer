@@ -34,7 +34,7 @@ func newNode() INode {
 
 // Simple broadcast testing
 
-func initSimple() ([3]INode, local.IRoute, local.IMessage) {
+func testInitSimple() ([3]INode, local.IRoute, local.IMessage) {
 	client1 := newNode()
 	client2 := newNode()
 
@@ -55,9 +55,15 @@ func initSimple() ([3]INode, local.IRoute, local.IMessage) {
 		local.NewMessage(tgRouteEcho, []byte("hello, world!"))
 }
 
+func testFreeNodes(nodes []INode) {
+	for _, node := range nodes {
+		node.Close()
+	}
+}
+
 func TestSimple(t *testing.T) {
-	nodes, route, msg := initSimple()
-	defer nodes[2].Close()
+	nodes, route, msg := testInitSimple()
+	defer testFreeNodes(nodes[:])
 
 	_, err := nodes[0].Request(route, msg)
 	if err != nil {
@@ -69,8 +75,8 @@ func TestSimple(t *testing.T) {
 func BenchmarkSimple(b *testing.B) {
 	var wg sync.WaitGroup
 
-	nodes, route, msg := initSimple()
-	defer nodes[2].Close()
+	nodes, route, msg := testInitSimple()
+	defer testFreeNodes(nodes[:])
 
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
@@ -89,8 +95,8 @@ func BenchmarkSimple(b *testing.B) {
 // F2F testing
 
 func TestF2F(t *testing.T) {
-	nodes, route, msg := initSimple()
-	defer nodes[2].Close()
+	nodes, route, msg := testInitSimple()
+	defer testFreeNodes(nodes[:])
 
 	// time wait = timePseudo+1 second
 	timeOut := nodes[0].Client().Settings().Get(settings.TimePrsp) + 1
@@ -120,8 +126,8 @@ func TestF2F(t *testing.T) {
 // TEST CHECKER
 
 func TestChecker(t *testing.T) {
-	nodes, _, _ := initSimple()
-	defer nodes[2].Close()
+	nodes, _, _ := testInitSimple()
+	defer testFreeNodes(nodes[:])
 
 	nodes[1].Online().Switch(true)
 
@@ -141,8 +147,8 @@ func TestChecker(t *testing.T) {
 // TEST PSEUDO
 
 func TestPseudo(t *testing.T) {
-	nodes, route, msg := initSimple()
-	defer nodes[2].Close()
+	nodes, route, msg := testInitSimple()
+	defer testFreeNodes(nodes[:])
 
 	for _, node := range nodes {
 		node.Pseudo().Switch(true)
@@ -151,7 +157,7 @@ func TestPseudo(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		_, err := nodes[0].Request(route, msg)
 		if err != nil {
-			t.Error(err)
+			t.Errorf("%s (%d)", err, i)
 			return
 		}
 	}
@@ -159,7 +165,7 @@ func TestPseudo(t *testing.T) {
 
 // TEST ROUTE
 
-func initRoute() ([5]INode, local.IRoute, local.IMessage) {
+func testInitRoute() ([5]INode, local.IRoute, local.IMessage) {
 	client1 := newNode()
 	client2 := newNode()
 
@@ -203,10 +209,8 @@ func initRoute() ([5]INode, local.IRoute, local.IMessage) {
 }
 
 func TestRoute(t *testing.T) {
-	nodes, route, msg := initRoute()
-	defer nodes[2].Close()
-	defer nodes[3].Close()
-	defer nodes[4].Close()
+	nodes, route, msg := testInitRoute()
+	defer testFreeNodes(nodes[:])
 
 	_, err := nodes[0].Request(route, msg)
 	if err != nil {
@@ -215,13 +219,19 @@ func TestRoute(t *testing.T) {
 	}
 }
 
-func BenchmarkRoute(b *testing.B) {
+func BenchmarkComplex(b *testing.B) {
 	var wg sync.WaitGroup
 
-	nodes, route, msg := initRoute()
+	nodes, route, msg := testInitRoute()
 	defer nodes[2].Close()
 	defer nodes[3].Close()
 	defer nodes[4].Close()
+
+	for _, node := range nodes {
+		node.Checker().Switch(true)
+		node.Pseudo().Switch(true)
+		node.Online().Switch(true)
+	}
 
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {

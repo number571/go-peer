@@ -12,7 +12,7 @@ test:
 		go test ./...; \
 		if [ $$? != 0 ]; then \
 			exit; \
-		fi \
+		fi; \
 	done
 bench:
 	go clean -testcache
