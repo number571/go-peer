@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/number571/go-peer/crypto"
@@ -248,22 +249,37 @@ func (node *sNode) handleConn(id string) {
 
 	var (
 		retryNum = node.Client().Settings().Get(settings.SizeRtry)
+		msgNum   = node.Client().Settings().Get(settings.SizeBmsg)
 		conn, _  = node.getConnection(id)
 	)
 
-	counter := uint64(0)
+	var (
+		retryCounter = uint64(0)
+		msgCounter   = int32(0)
+	)
+
 	for {
-		if counter > retryNum {
+		if atomic.LoadUint64(&retryCounter) > retryNum {
 			break
 		}
 
-		ok := node.handleMessage(node.readMessage(conn))
-		if !ok {
-			counter++
+		if uint64(atomic.LoadInt32(&msgCounter)) > msgNum {
+			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 
-		counter = 0
+		msg := node.readMessage(conn)
+		go func(msg local.IMessage) {
+			atomic.AddInt32(&msgCounter, 1)
+			defer atomic.AddInt32(&msgCounter, -1)
+
+			ok := node.handleMessage(msg)
+			if ok {
+				atomic.StoreUint64(&retryCounter, 0)
+				return
+			}
+			atomic.AddUint64(&retryCounter, 1)
+		}(msg)
 	}
 }
 
@@ -274,10 +290,9 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 	}
 
 	// check message in mapping by hash
-	if node.inMapping(msg.Body().Hash()) {
+	if node.inMappingWithSet(msg.Body().Hash()) {
 		return true
 	}
-	node.setMapping(msg.Body().Hash())
 
 	// redirect this message to connections
 	node.send(msg)
@@ -375,7 +390,7 @@ func (node *sNode) doRequest(route local.IRoute, msg local.IMessage, retryNum, t
 
 	routeMsg, session := node.Client().Encrypt(route, msg)
 	if routeMsg == nil {
-		return nil, errors.New("psender is nil and routes not nil")
+		return nil, errors.New("psender is nil with not nil routes")
 	}
 
 	node.setAction(session)
@@ -409,8 +424,11 @@ func (node *sNode) recv(session []byte, timeOut uint64) ([]byte, error) {
 }
 
 func (node *sNode) send(msg local.IMessage) {
-	node.fMutex.Lock() // TODO
+	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
+
+	skey := encoding.Base64Encode(msg.Body().Hash())
+	node.fMapping[skey] = true
 
 	pack := msg.ToPackage()
 	bytesMsg := bytes.Join(
@@ -421,9 +439,6 @@ func (node *sNode) send(msg local.IMessage) {
 		[]byte{},
 	)
 
-	skey := encoding.Base64Encode(msg.Body().Hash())
-	node.fMapping[skey] = true
-
 	for _, conn := range node.fConnections {
 		_, err := conn.Write(bytesMsg)
 		if err != nil {
@@ -433,8 +448,9 @@ func (node *sNode) send(msg local.IMessage) {
 }
 
 func (node *sNode) response(nonce []byte, data []byte) {
-	node.fMutex.Lock()
 	skey := encoding.Base64Encode(nonce)
+
+	node.fMutex.Lock()
 	ch, ok := node.fActions[skey]
 	if !ok {
 		return
@@ -495,10 +511,19 @@ func (node *sNode) delAction(nonce []byte) {
 	delete(node.fActions, skey)
 }
 
-func (node *sNode) setMapping(hash []byte) {
+func (node *sNode) inMappingWithSet(hash []byte) bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
+	skey := encoding.Base64Encode(hash)
+
+	// skey already exists
+	_, ok := node.fMapping[skey]
+	if ok {
+		return true
+	}
+
+	// push skey to mapping
 	if uint64(len(node.fMapping)) > node.fClient.Settings().Get(settings.SizeMapp) {
 		for k := range node.fMapping {
 			delete(node.fMapping, k)
@@ -506,17 +531,8 @@ func (node *sNode) setMapping(hash []byte) {
 		}
 	}
 
-	skey := encoding.Base64Encode(hash)
 	node.fMapping[skey] = true
-}
-
-func (node *sNode) inMapping(hash []byte) bool {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(hash)
-	_, ok := node.fMapping[skey]
-	return ok
+	return false
 }
 
 func (node *sNode) hasMaxConnSize() bool {

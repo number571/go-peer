@@ -107,7 +107,9 @@ func (psd *sPseudo) start() {
 }
 
 func (psd *sPseudo) stop() {
+	psd.fMutex.Unlock()
 	psd.fChannel <- struct{}{}
+	psd.fMutex.Lock()
 }
 
 func (psd *sPseudo) doRequest(size int) {

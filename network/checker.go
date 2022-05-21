@@ -155,7 +155,6 @@ func (checker *sChecker) start() {
 			)):
 				continue
 			}
-			// <-stop
 		}
 	}(checker)
 }

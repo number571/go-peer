@@ -23,11 +23,12 @@ func defaultSettings() map[uint64]uint64 {
 		settings.TimePrsp: 1,                  // seconds
 		settings.TimePing: 1,                  // seconds
 		settings.SizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
-		settings.SizeRtry: 0,                  // quantity
+		settings.SizeRtry: 1,                  // quantity
 		settings.SizeWork: 10,                 // bits
 		settings.SizeConn: 10,                 // quantity
 		settings.SizePack: 1 << 20,            // 1*(2^20)B = 1MiB
 		settings.SizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
 		settings.SizeSkey: 1 << 4,             // 2^4B = 16B
+		settings.SizeBmsg: 2,                  // quantity
 	}
 }
