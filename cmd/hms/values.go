@@ -6,16 +6,6 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-const (
-	cErrorNone = iota + 1
-	cErrorMethod
-	cErrorDecode
-	cErrorLoad
-	cErrorPush
-	cErrorMessage
-	cErrorWorkSize
-)
-
 var (
 	gSettings settings.ISettings
 	gConfig   config.IConfig

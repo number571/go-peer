@@ -11,6 +11,8 @@ import (
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/settings"
+
+	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 )
 
 func main() {
@@ -33,104 +35,93 @@ func main() {
 }
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
-	response(w, cErrorNone, []byte("hidden message service"))
+	response(w, hms_settings.CErrorNone, []byte("hidden message service"))
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
-	var vRequest struct {
-		Receiver []byte `json:"receiver"`
-	}
+	var vRequest hms_settings.SSizeRequest
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: incorrect method"))
+		response(w, hms_settings.CErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
-		response(w, cErrorDecode, []byte("failed: decode request"))
+		response(w, hms_settings.CErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
 	size, err := gDB.Size(vRequest.Receiver)
 	if err != nil {
-		response(w, cErrorLoad, []byte("failed: load size"))
+		response(w, hms_settings.CErrorLoad, []byte("failed: load size"))
 		return
 	}
 
-	response(w, cErrorNone, encoding.Uint64ToBytes(size))
+	response(w, hms_settings.CErrorNone, encoding.Uint64ToBytes(size))
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {
-	var vRequest struct {
-		Receiver []byte `json:"receiver"`
-		Index    uint64 `json:"index"`
-	}
+	var vRequest hms_settings.SLoadRequest
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: incorrect method"))
+		response(w, hms_settings.CErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
-		response(w, cErrorDecode, []byte("failed: decode request"))
+		response(w, hms_settings.CErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
 	msg, err := gDB.Load(vRequest.Receiver, vRequest.Index)
 	if err != nil {
-		response(w, cErrorLoad, []byte("failed: load message"))
+		response(w, hms_settings.CErrorLoad, []byte("failed: load message"))
 		return
 	}
 
-	response(w, cErrorNone, msg.ToPackage().Bytes())
+	response(w, hms_settings.CErrorNone, msg.ToPackage().Bytes())
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
-	var vRequest struct {
-		Receiver []byte `json:"receiver"`
-		Package  []byte `json:"package"`
-	}
+	var vRequest hms_settings.SPushRequest
 
 	if r.Method != "POST" {
-		response(w, cErrorMethod, []byte("failed: incorrect method"))
+		response(w, hms_settings.CErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
-		response(w, cErrorDecode, []byte("failed: decode request"))
+		response(w, hms_settings.CErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
 	msg := local.LoadPackage(vRequest.Package).ToMessage()
 	if msg == nil {
-		response(w, cErrorMessage, []byte("failed: decode message"))
+		response(w, hms_settings.CErrorMessage, []byte("failed: decode message"))
 		return
 	}
 
 	puzzle := crypto.NewPuzzle(gSettings.Get(settings.SizeWork))
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
-		response(w, cErrorWorkSize, []byte("failed: incorrect work size"))
+		response(w, hms_settings.CErrorWorkSize, []byte("failed: incorrect work size"))
 		return
 	}
 
 	err = gDB.Push(vRequest.Receiver, msg)
 	if err != nil {
-		response(w, cErrorPush, []byte("failed: push message"))
+		response(w, hms_settings.CErrorPush, []byte("failed: push message"))
 		return
 	}
 
-	response(w, cErrorNone, []byte("success"))
+	response(w, hms_settings.CErrorNone, []byte("success"))
 }
 
 func response(w http.ResponseWriter, ret int, res []byte) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(struct {
-		Result []byte `json:"result"`
-		Return int    `json:"return"`
-	}{
+	json.NewEncoder(w).Encode(hms_settings.SResponse{
 		Result: res,
 		Return: ret,
 	})
