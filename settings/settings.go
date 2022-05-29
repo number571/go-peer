@@ -72,6 +72,6 @@ func defaultSettings() map[uint64]uint64 {
 		SizePack: 8 << 20,            // 8*(2^20)B = 8MiB
 		SizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
 		SizeSkey: 1 << 5,             // 2^5B = 32B
-		SizeBmsg: 10,                 // quantity of messages
+		SizeBmsg: 20,                 // quantity of messages
 	}
 }

@@ -81,12 +81,12 @@ func BenchmarkSimple(b *testing.B) {
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
 		go func(i int, sender INode, route local.IRoute, msg local.IMessage) {
+			defer wg.Done()
 			_, err := sender.Request(route, msg)
 			if err != nil {
 				b.Error(err)
 				return
 			}
-			wg.Done()
 		}(i, nodes[0], route, msg)
 	}
 	wg.Wait()
@@ -220,12 +220,11 @@ func TestRoute(t *testing.T) {
 }
 
 func BenchmarkComplex(b *testing.B) {
+	time.Sleep(200 * time.Millisecond)
 	var wg sync.WaitGroup
 
 	nodes, route, msg := testInitRoute()
-	defer nodes[2].Close()
-	defer nodes[3].Close()
-	defer nodes[4].Close()
+	defer testFreeNodes(nodes[:])
 
 	for _, node := range nodes {
 		node.Checker().Switch(true)
@@ -236,12 +235,12 @@ func BenchmarkComplex(b *testing.B) {
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
 		go func(i int, sender INode, route local.IRoute, msg local.IMessage) {
+			defer wg.Done()
 			_, err := sender.Request(route, msg)
 			if err != nil {
 				b.Error(err)
 				return
 			}
-			wg.Done()
 		}(i, nodes[0], route, msg)
 	}
 	wg.Wait()

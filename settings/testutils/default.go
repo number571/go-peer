@@ -29,6 +29,6 @@ func defaultSettings() map[uint64]uint64 {
 		settings.SizePack: 1 << 20,            // 1*(2^20)B = 1MiB
 		settings.SizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
 		settings.SizeSkey: 1 << 4,             // 2^4B = 16B
-		settings.SizeBmsg: 2,                  // quantity
+		settings.SizeBmsg: 10,                 // quantity
 	}
 }
