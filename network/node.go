@@ -98,12 +98,12 @@ func (node *sNode) Close() {
 	}
 
 	node.fMutex.Lock()
-	if node.fListener != nil {
-		node.fListener.Close()
-	}
 	for id, conn := range node.fConnections {
 		conn.Close()
 		delete(node.fConnections, id)
+	}
+	if node.fListener != nil {
+		node.fListener.Close()
 	}
 	node.fMutex.Unlock()
 }
@@ -255,7 +255,7 @@ func (node *sNode) handleConn(id string) {
 
 	var (
 		retryCounter = uint64(0)
-		msgCounter   = int32(0)
+		msgCounter   = int64(0)
 	)
 
 	for {
@@ -263,15 +263,15 @@ func (node *sNode) handleConn(id string) {
 			break
 		}
 
-		if uint64(atomic.LoadInt32(&msgCounter)) > msgNum {
+		if uint64(atomic.LoadInt64(&msgCounter)) > msgNum {
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
 
 		msg := node.readMessage(conn)
 		go func(msg local.IMessage) {
-			atomic.AddInt32(&msgCounter, 1)
-			defer atomic.AddInt32(&msgCounter, -1)
+			atomic.AddInt64(&msgCounter, 1)
+			defer atomic.AddInt64(&msgCounter, -1)
 
 			ok := node.handleMessage(msg)
 			if ok {
@@ -439,12 +439,20 @@ func (node *sNode) send(msg local.IMessage) {
 		[]byte{},
 	)
 
-	for _, conn := range node.fConnections {
-		_, err := conn.Write(bytesMsg)
-		if err != nil {
-			conn.Close()
-		}
+	wg := sync.WaitGroup{}
+	wg.Add(len(node.fConnections))
+	for addr, conn := range node.fConnections {
+		go func(addr string, conn net.Conn) {
+			defer wg.Done()
+			conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
+			_, err := conn.Write(bytesMsg)
+			if err != nil {
+				conn.Close()
+				delete(node.fConnections, addr)
+			}
+		}(addr, conn)
 	}
+	wg.Wait()
 }
 
 func (node *sNode) response(nonce []byte, data []byte) {
@@ -453,6 +461,7 @@ func (node *sNode) response(nonce []byte, data []byte) {
 	node.fMutex.Lock()
 	ch, ok := node.fActions[skey]
 	if !ok {
+		node.fMutex.Unlock()
 		return
 	}
 	node.fMutex.Unlock()

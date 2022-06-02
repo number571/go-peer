@@ -9,14 +9,6 @@ import (
 	"github.com/number571/go-peer/settings"
 )
 
-/*
-	send может передавать информацию фрагментированно?
-	recv может принимать информацию фрагментированно?
-
-	A -> 512 [X] -> C ?
-	A -> 512 [X] -> B ?
-*/
-
 func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 	const (
 		SizeUint64 = 8 // bytes

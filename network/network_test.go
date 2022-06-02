@@ -220,9 +220,6 @@ func TestRoute(t *testing.T) {
 }
 
 func BenchmarkComplex(b *testing.B) {
-	time.Sleep(200 * time.Millisecond)
-	var wg sync.WaitGroup
-
 	nodes, route, msg := testInitRoute()
 	defer testFreeNodes(nodes[:])
 
@@ -232,6 +229,7 @@ func BenchmarkComplex(b *testing.B) {
 		node.Online().Switch(true)
 	}
 
+	wg := sync.WaitGroup{}
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
 		go func(i int, sender INode, route local.IRoute, msg local.IMessage) {

@@ -1,0 +1,474 @@
+
+goroutine 2566 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d726058, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc000684000, 0xc0004801f0, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc000684000, {0xc0004801f0, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc000684000, {0xc0004801f0, 0x7f997b5df5b8, 0x10})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc000686000, {0xc0004801f0, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c1b0, {0x61e068, 0xc000686000})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c1b0, {0xc0005a0030, 0x10})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Listen
+	/home/user/Documents/go-peer/network/node.go:177 +0x258
+
+goroutine 2628 [IO wait, 10 minutes]:
+internal/poll.runtime_pollWait(0x7f994d725da0, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc00013e200, 0x203000, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc00013e200)
+	/usr/lib/go/src/internal/poll/fd_unix.go:402 +0x22c
+net.(*netFD).accept(0xc00013e200)
+	/usr/lib/go/src/net/fd_unix.go:173 +0x35
+net.(*TCPListener).accept(0xc0001ce018)
+	/usr/lib/go/src/net/tcpsock_posix.go:140 +0x28
+net.(*TCPListener).Accept(0xc0001ce018)
+	/usr/lib/go/src/net/tcpsock.go:262 +0x3d
+github.com/number571/go-peer/network.(*sNode).Listen(0xc00065c1b0, {0x5db691, 0x0})
+	/home/user/Documents/go-peer/network/node.go:163 +0x13a
+created by github.com/number571/go-peer/network.testInitRoute
+	/home/user/Documents/go-peer/network/network_test.go:180 +0x1f0
+
+goroutine 9451 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xc0004b4200, 0x0, 0x0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc0006e0f30, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc00056c320})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc00056c320})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 9543 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x2c, 0x0, 0x41e480)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc0006071d0, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b3180})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b3180})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2575 [select]:
+github.com/number571/go-peer/network.(*sChecker).start.func1(0xc0003ae4e0)
+	/home/user/Documents/go-peer/network/checker.go:150 +0x19b
+created by github.com/number571/go-peer/network.(*sChecker).start
+	/home/user/Documents/go-peer/network/checker.go:125 +0x70
+
+goroutine 2576 [select]:
+github.com/number571/go-peer/network.(*sPseudo).start.func1(0xc0000646c0)
+	/home/user/Documents/go-peer/network/pseudo.go:97 +0xf9
+created by github.com/number571/go-peer/network.(*sPseudo).start
+	/home/user/Documents/go-peer/network/pseudo.go:93 +0x70
+
+goroutine 2642 [select]:
+github.com/number571/go-peer/network.(*sChecker).start.func1(0xc0003ae630)
+	/home/user/Documents/go-peer/network/checker.go:150 +0x19b
+created by github.com/number571/go-peer/network.(*sChecker).start
+	/home/user/Documents/go-peer/network/checker.go:125 +0x70
+
+goroutine 2643 [select]:
+github.com/number571/go-peer/network.(*sPseudo).start.func1(0xc000064700)
+	/home/user/Documents/go-peer/network/pseudo.go:97 +0xf9
+created by github.com/number571/go-peer/network.(*sPseudo).start
+	/home/user/Documents/go-peer/network/pseudo.go:93 +0x70
+
+goroutine 9425 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xc0004b4200, 0x0, 0x0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc00026c0c0, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b2140})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b2140})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2573 [select]:
+github.com/number571/go-peer/network.(*sPseudo).start.func1(0xc000064680)
+	/home/user/Documents/go-peer/network/pseudo.go:97 +0xf9
+created by github.com/number571/go-peer/network.(*sPseudo).start
+	/home/user/Documents/go-peer/network/pseudo.go:93 +0x70
+
+goroutine 2614 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d726140, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc00013e300, 0xc00049a040, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc00013e300, {0xc00049a040, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc00013e300, {0xc00049a040, 0x7f997b5dfa68, 0x10})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc0004fa000, {0xc00049a040, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c1b0, {0x61e068, 0xc0004fa000})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c1b0, {0x5db696, 0x5})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Connect
+	/home/user/Documents/go-peer/network/node.go:230 +0xf4
+
+goroutine 9429 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xc000684080, 0x0, 0x0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc00046a600, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b2820})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b2820})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 8807 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x0, 0x88, 0x40e734)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).Client(0x5ba460)
+	/home/user/Documents/go-peer/network/node.go:114 +0x5b
+github.com/number571/go-peer/network.(*sNode).handleFunc(0xc00065c000, {0x61ad70, 0xc000668460}, {0xc000538020, 0x1d, 0xc0005b8718})
+	/home/user/Documents/go-peer/network/node.go:344 +0x65
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b2000})
+	/home/user/Documents/go-peer/network/node.go:338 +0x33a
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b2000})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2645 [select]:
+github.com/number571/go-peer/network.(*sChecker).start.func1(0xc0003ae7e0)
+	/home/user/Documents/go-peer/network/checker.go:150 +0x19b
+created by github.com/number571/go-peer/network.(*sChecker).start
+	/home/user/Documents/go-peer/network/checker.go:125 +0x70
+
+goroutine 2646 [select]:
+github.com/number571/go-peer/network.(*sPseudo).start.func1(0xc000064740)
+	/home/user/Documents/go-peer/network/pseudo.go:97 +0xf9
+created by github.com/number571/go-peer/network.(*sPseudo).start
+	/home/user/Documents/go-peer/network/pseudo.go:93 +0x70
+
+goroutine 2570 [chan receive, 10 minutes]:
+github.com/number571/go-peer/network.(*sPseudo).doRequest(0xc000471f98, 0xc000247f80)
+	/home/user/Documents/go-peer/network/pseudo.go:130 +0x245
+github.com/number571/go-peer/network.(*sPseudo).start.func1(0xc000064000)
+	/home/user/Documents/go-peer/network/pseudo.go:96 +0x85
+created by github.com/number571/go-peer/network.(*sPseudo).start
+	/home/user/Documents/go-peer/network/pseudo.go:93 +0x70
+
+goroutine 2615 [sleep]:
+time.Sleep(0xbebc200)
+	/usr/lib/go/src/runtime/time.go:193 +0x12e
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c000, {0x5db68c, 0x5})
+	/home/user/Documents/go-peer/network/node.go:268 +0x199
+created by github.com/number571/go-peer/network.(*sNode).Connect
+	/home/user/Documents/go-peer/network/node.go:230 +0xf4
+
+goroutine 2626 [chan send, 10 minutes]:
+github.com/number571/go-peer/network.(*sPseudo).stop(0xc000064000)
+	/home/user/Documents/go-peer/network/pseudo.go:111 +0x4e
+github.com/number571/go-peer/network.(*sPseudo).Switch(0x8200eb958ac1d7c8, 0x0)
+	/home/user/Documents/go-peer/network/pseudo.go:38 +0xca
+github.com/number571/go-peer/network.(*sNode).Close(0xc00065c000)
+	/home/user/Documents/go-peer/network/node.go:98 +0xf5
+github.com/number571/go-peer/network.testFreeNodes({0xc000144e08, 0x5, 0xc000688430})
+	/home/user/Documents/go-peer/network/network_test.go:60 +0x54
+github.com/number571/go-peer/network.BenchmarkComplex(0xc00012eb40)
+	/home/user/Documents/go-peer/network/network_test.go:245 +0x3cf
+testing.(*B).runN(0xc00012eb40, 0x1e)
+	/usr/lib/go/src/testing/benchmark.go:192 +0x126
+testing.(*B).launch(0xc00012eb40)
+	/usr/lib/go/src/testing/benchmark.go:301 +0x85
+created by testing.(*B).doBench
+	/usr/lib/go/src/testing/benchmark.go:283 +0x7b
+
+goroutine 9624 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x75, 0xe8, 0xc0005cde00)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).send(0xc00065c000, {0x61ad70, 0xc0004b2960})
+	/home/user/Documents/go-peer/network/node.go:428 +0x7e
+github.com/number571/go-peer/network.(*sPseudo).doRequest.func1(0x61ad70, 0xc0004b2780)
+	/home/user/Documents/go-peer/network/pseudo.go:127 +0x33
+created by github.com/number571/go-peer/network.(*sPseudo).doRequest
+	/home/user/Documents/go-peer/network/pseudo.go:126 +0x22f
+
+goroutine 9513 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xd10000000000000c, 0x0, 0xd13ca962eab6aca0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc000702990, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0006686e0})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0006686e0})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2572 [select]:
+github.com/number571/go-peer/network.(*sChecker).start.func1(0xc0003ae330)
+	/home/user/Documents/go-peer/network/checker.go:150 +0x19b
+created by github.com/number571/go-peer/network.(*sChecker).start
+	/home/user/Documents/go-peer/network/checker.go:125 +0x70
+
+goroutine 2568 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d725f70, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc0004b4400, 0xc000480040, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc0004b4400, {0xc000480040, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc0004b4400, {0xc000480040, 0x7f997b5df5b8, 0x10})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc000686010, {0xc000480040, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c090, {0x61e068, 0xc000686010})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c090, {0x5db696, 0x5})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Connect
+	/home/user/Documents/go-peer/network/node.go:230 +0xf4
+
+goroutine 9545 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x670000000000002c, 0x0, 0xc0006e0060)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc0006e01e0, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc00056c280})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc00056c280})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2630 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d726310, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc0004b4200, 0xc000480120, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc0004b4200, {0xc000480120, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc0004b4200, {0xc000480120, 0x7f997b5df5b8, 0x10})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc000010068, {0xc000480120, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c120, {0x61e068, 0xc000010068})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c120, {0x5db691, 0x5})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Connect
+	/home/user/Documents/go-peer/network/node.go:230 +0xf4
+
+goroutine 9407 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xc0004b4480, 0x0, 0x0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc000702060, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc000668000})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc000668000})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2627 [IO wait, 10 minutes]:
+internal/poll.runtime_pollWait(0x7f994d7264e0, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc0004b4000, 0x10, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc0004b4000)
+	/usr/lib/go/src/internal/poll/fd_unix.go:402 +0x22c
+net.(*netFD).accept(0xc0004b4000)
+	/usr/lib/go/src/net/fd_unix.go:173 +0x35
+net.(*TCPListener).accept(0xc000286000)
+	/usr/lib/go/src/net/tcpsock_posix.go:140 +0x28
+net.(*TCPListener).Accept(0xc000286000)
+	/usr/lib/go/src/net/tcpsock.go:262 +0x3d
+github.com/number571/go-peer/network.(*sNode).Listen(0xc00065c120, {0x5db68c, 0x0})
+	/home/user/Documents/go-peer/network/node.go:163 +0x13a
+created by github.com/number571/go-peer/network.testInitRoute
+	/home/user/Documents/go-peer/network/network_test.go:179 +0x185
+
+goroutine 9433 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x7d0000000000000c, 0x0, 0x7d979b7ae14dc4de)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc00046a870, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b2a00})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b2a00})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2631 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d7265c8, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc00013e380, 0xc0004801a8, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc00013e380, {0xc0004801a8, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc00013e380, {0xc0004801a8, 0x7f997b5df5b8, 0x587c3e})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc000010080, {0xc0004801a8, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c240, {0x61e068, 0xc000010080})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c240, {0xc000018300, 0x10})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Listen
+	/home/user/Documents/go-peer/network/node.go:177 +0x258
+
+goroutine 9537 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0xc00013e380, 0x0, 0x0)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).inMappingWithSet(0xc00065c000, {0xc000430a50, 0x20, 0x21})
+	/home/user/Documents/go-peer/network/node.go:525 +0x90
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc000128fa0})
+	/home/user/Documents/go-peer/network/node.go:294 +0x93
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc000128fa0})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 2629 [IO wait, 10 minutes]:
+internal/poll.runtime_pollWait(0x7f994d7266b0, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc00013e180, 0x10, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0xc00013e180)
+	/usr/lib/go/src/internal/poll/fd_unix.go:402 +0x22c
+net.(*netFD).accept(0xc00013e180)
+	/usr/lib/go/src/net/fd_unix.go:173 +0x35
+net.(*TCPListener).accept(0xc0001ce000)
+	/usr/lib/go/src/net/tcpsock_posix.go:140 +0x28
+net.(*TCPListener).Accept(0xc0001ce000)
+	/usr/lib/go/src/net/tcpsock.go:262 +0x3d
+github.com/number571/go-peer/network.(*sNode).Listen(0xc00065c240, {0x5db696, 0x0})
+	/home/user/Documents/go-peer/network/node.go:163 +0x13a
+created by github.com/number571/go-peer/network.testInitRoute
+	/home/user/Documents/go-peer/network/network_test.go:181 +0x25b
+
+goroutine 2616 [IO wait]:
+internal/poll.runtime_pollWait(0x7f994d7263f8, 0x72)
+	/usr/lib/go/src/runtime/netpoll.go:234 +0x89
+internal/poll.(*pollDesc).wait(0xc0004b4480, 0xc0004800c8, 0x0)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:84 +0x32
+internal/poll.(*pollDesc).waitRead(...)
+	/usr/lib/go/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0xc0004b4480, {0xc0004800c8, 0x8, 0x8})
+	/usr/lib/go/src/internal/poll/fd_unix.go:167 +0x25a
+net.(*netFD).Read(0xc0004b4480, {0xc0004800c8, 0x7f997b5df5b8, 0x587c3e})
+	/usr/lib/go/src/net/fd_posix.go:56 +0x29
+net.(*conn).Read(0xc0004fa010, {0xc0004800c8, 0x5a6e00, 0x1})
+	/usr/lib/go/src/net/net.go:183 +0x45
+github.com/number571/go-peer/network.(*sNode).readMessage(0xc00065c240, {0x61e068, 0xc0004fa010})
+	/home/user/Documents/go-peer/network/conn.go:23 +0x82
+github.com/number571/go-peer/network.(*sNode).handleConn(0xc00065c240, {0xc00014c018, 0x10})
+	/home/user/Documents/go-peer/network/node.go:272 +0x1bc
+created by github.com/number571/go-peer/network.(*sNode).Listen
+	/home/user/Documents/go-peer/network/node.go:177 +0x258
+
+goroutine 8967 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x0, 0x88, 0x40e734)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).Client(0x5ba460)
+	/home/user/Documents/go-peer/network/node.go:114 +0x5b
+github.com/number571/go-peer/network.(*sNode).handleFunc(0xc00065c000, {0x61ad70, 0xc0004b26e0}, {0xc00046c6e0, 0x1d, 0xc00003df18})
+	/home/user/Documents/go-peer/network/node.go:344 +0x65
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc0004b25a0})
+	/home/user/Documents/go-peer/network/node.go:338 +0x33a
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc0004b25a0})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
+
+goroutine 9084 [semacquire, 10 minutes]:
+sync.runtime_SemacquireMutex(0x0, 0x88, 0x40e734)
+	/usr/lib/go/src/runtime/sema.go:71 +0x25
+sync.(*Mutex).lockSlow(0xc00065c000)
+	/usr/lib/go/src/sync/mutex.go:138 +0x165
+sync.(*Mutex).Lock(...)
+	/usr/lib/go/src/sync/mutex.go:81
+github.com/number571/go-peer/network.(*sNode).Client(0x5ba460)
+	/home/user/Documents/go-peer/network/node.go:114 +0x5b
+github.com/number571/go-peer/network.(*sNode).handleFunc(0xc00065c000, {0x61ad70, 0xc000128b40}, {0xc00046c9e0, 0x1d, 0xc0005ccf18})
+	/home/user/Documents/go-peer/network/node.go:344 +0x65
+github.com/number571/go-peer/network.(*sNode).handleMessage(0xc00065c000, {0x61ad70, 0xc000128aa0})
+	/home/user/Documents/go-peer/network/node.go:338 +0x33a
+github.com/number571/go-peer/network.(*sNode).handleConn.func1({0x61ad70, 0xc000128aa0})
+	/home/user/Documents/go-peer/network/node.go:277 +0x9f
+created by github.com/number571/go-peer/network.(*sNode).handleConn
+	/home/user/Documents/go-peer/network/node.go:273 +0x29d
