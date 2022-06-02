@@ -6,6 +6,6 @@ import (
 
 type IClient interface {
 	Size() (uint64, error)
-	Load(uint64) ([]byte, error)
+	Load(uint64) (crypto.IPubKey, []byte, error)
 	Push(crypto.IPubKey, []byte) error
 }

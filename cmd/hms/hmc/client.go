@@ -59,7 +59,7 @@ func (client *sClient) Size() (uint64, error) {
 	return encoding.BytesToUint64(response.Result), nil
 }
 
-func (client *sClient) Load(n uint64) ([]byte, error) {
+func (client *sClient) Load(n uint64) (crypto.IPubKey, []byte, error) {
 	pubBytes := client.client.PubKey().Bytes()
 	hashRecv := crypto.NewHasher(pubBytes).Bytes()
 
@@ -74,27 +74,27 @@ func (client *sClient) Load(n uint64) ([]byte, error) {
 		bytes.NewReader(utils.Serialize(request)),
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var response hms_settings.SResponse
 	json.NewDecoder(resp.Body).Decode(&response)
 
 	if response.Return != hms_settings.CErrorNone {
-		return nil, fmt.Errorf("%s", string(response.Result))
+		return nil, nil, fmt.Errorf("%s", string(response.Result))
 	}
 
 	msg := local.LoadPackage(response.Result).ToMessage()
 	if msg == nil {
-		return nil, fmt.Errorf("message is nil")
+		return nil, nil, fmt.Errorf("message is nil")
 	}
 
 	msg, title := client.client.Decrypt(msg)
 	if string(title) != hms_settings.CPatternTitle {
-		return nil, fmt.Errorf("title is not equal")
+		return nil, nil, fmt.Errorf("title is not equal")
 	}
 
-	return msg.Body().Data(), nil
+	return crypto.LoadPubKey(msg.Head().Sender()), msg.Body().Data(), nil
 }
 
 func (client *sClient) Push(receiver crypto.IPubKey, msg []byte) error {

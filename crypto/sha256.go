@@ -15,8 +15,8 @@ var (
 const (
 	TruncatedSize = 20
 	HashSize      = 32
-	HashKeyType   = "go-peer\\sha256"
-	HmacKeyType   = "go-peer\\hmac-sha256"
+	HashKeyType   = "go-peer/sha256"
+	HmacKeyType   = "go-peer/hmac-sha256"
 )
 
 type sSHA256Hasher struct {

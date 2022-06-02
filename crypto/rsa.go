@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	AsymmKeyType = "go-peer\\rsa"
+	AsymmKeyType = "go-peer/rsa"
 )
 
 /*
