@@ -45,7 +45,7 @@ func (onl *sOnline) Status() bool {
 func (onl *sOnline) start() {
 	go func(node INode) {
 		sett := node.Client().Settings()
-		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
 
 		node.Handle(patt, func(node INode, msg local.IMessage) []byte {
 			return patt
@@ -56,7 +56,7 @@ func (onl *sOnline) start() {
 func (onl *sOnline) stop() {
 	go func(node INode) {
 		sett := node.Client().Settings()
-		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
 
 		node.Handle(patt, nil)
 	}(onl.fNode)

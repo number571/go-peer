@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
@@ -15,7 +14,8 @@ import (
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/storage"
-	"github.com/robfig/cron/v3"
+
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
 func hlsDefaultInit() error {
@@ -26,22 +26,12 @@ func hlsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
-	gPPrivKey = crypto.NewPrivKey(cAKeySize)
+	gPPrivKey = crypto.NewPrivKey(hls_settings.CAKeySize)
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")
 
-	jakartaTime, err := time.LoadLocation("Asia/Jakarta")
-	if err != nil {
-		return err
-	}
-
-	scheduler := cron.New(cron.WithLocation(jakartaTime))
-	scheduler.AddFunc(gConfig.CleanCron(), func() {
-		gDB.Clean()
-	})
-
-	sett := settings.NewSettings()
+	sett := hls_settings.NewSettings()
 	privKey := getPrivKey(
 		sett,
 		"hls.stg",
@@ -79,7 +69,7 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 		return crypto.LoadPrivKey(bpriv)
 	}
 
-	priv := crypto.NewPrivKey(cAKeySize)
+	priv := crypto.NewPrivKey(hls_settings.CAKeySize)
 	err = storage.Set(objectKey, priv.Bytes())
 	if err != nil {
 		return nil

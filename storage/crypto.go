@@ -37,12 +37,12 @@ func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValu
 		if err != nil {
 			return nil
 		}
-		store.fSalt = encdata[:store.fSettings.Get(settings.SizeSkey)]
+		store.fSalt = encdata[:store.fSettings.Get(settings.CSizeSkey)]
 	} else {
-		store.fSalt = crypto.NewPRNG().Bytes(store.fSettings.Get(settings.SizeSkey))
+		store.fSalt = crypto.NewPRNG().Bytes(store.fSettings.Get(settings.CSizeSkey))
 	}
 
-	ekey := crypto.RaiseEntropy(key, store.fSalt, store.fSettings.Get(settings.SizeWork))
+	ekey := crypto.RaiseEntropy(key, store.fSalt, store.fSettings.Get(settings.CSizeWork))
 	store.fCipher = crypto.NewCipher(ekey)
 
 	if !store.exists() {
@@ -75,7 +75,7 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 
 	// Encrypt and save private key into storage
 	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.SizeWork))
+		store.fSettings.Get(settings.CSizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
@@ -111,7 +111,7 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 
 	// Open and decrypt private key
 	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.SizeWork))
+		store.fSettings.Get(settings.CSizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	encsecret, ok := mapping.FSecrets[hash]
@@ -139,7 +139,7 @@ func (store *sCryptoStorage) Del(key []byte) error {
 
 	// Open and decrypt private key
 	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.SizeWork))
+		store.fSettings.Get(settings.CSizeWork))
 	hash := crypto.NewHasher(ekey).String()
 
 	_, ok := mapping.FSecrets[hash]
@@ -168,7 +168,7 @@ func (store *sCryptoStorage) decrypt() (storageData, error) {
 		return storageData{}, err
 	}
 
-	data := store.fCipher.Decrypt(encdata[store.fSettings.Get(settings.SizeSkey):])
+	data := store.fCipher.Decrypt(encdata[store.fSettings.Get(settings.CSizeSkey):])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
 		return storageData{}, err

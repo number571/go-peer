@@ -125,7 +125,7 @@ func (checker *sChecker) start() {
 	go func(checker *sChecker) {
 		node := checker.fNode.(*sNode)
 		sett := node.fClient.Settings()
-		patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
 		for {
 			wg := sync.WaitGroup{}
 			list := checker.ListWithInfo()
@@ -137,7 +137,7 @@ func (checker *sChecker) start() {
 						local.NewRoute(recv.fPubKey),
 						local.NewMessage(patt, patt),
 						0, // retry number
-						sett.Get(settings.TimeWait),
+						sett.Get(settings.CTimeWait),
 					)
 					if err != nil || !bytes.Equal(resp, patt) {
 						recv.fOnline = false
@@ -151,7 +151,7 @@ func (checker *sChecker) start() {
 			case <-checker.fChannel:
 				return
 			case <-time.After(time.Second * time.Duration(
-				sett.Get(settings.TimePing),
+				sett.Get(settings.CTimePing),
 			)):
 				continue
 			}

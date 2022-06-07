@@ -9,8 +9,9 @@ var (
 )
 
 type sConfig struct {
-	FAddress   string `json:"address"`
-	FCleanCron string `json:"clean_cron"`
+	FAddress     string   `json:"address"`
+	FCleanCron   string   `json:"clean_cron"`
+	FConnections []string `json:"connections"`
 }
 
 const (
@@ -19,6 +20,9 @@ const (
 
 	// cron of clean database
 	cDefaultCleanCron = "0 0 * * *"
+
+	// connection
+	cDefaultConnection = "http://localhost:8081"
 )
 
 func NewConfig(filepath string) IConfig {
@@ -26,8 +30,9 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.FileIsExist(filepath) {
 		cfg = &sConfig{
-			FAddress:   cDefaultAddress,
-			FCleanCron: cDefaultCleanCron,
+			FAddress:     cDefaultAddress,
+			FCleanCron:   cDefaultCleanCron,
+			FConnections: []string{cDefaultConnection},
 		}
 		err := utils.WriteFile(filepath, utils.Serialize(cfg))
 		if err != nil {
@@ -49,4 +54,8 @@ func (cfg *sConfig) Address() string {
 
 func (cfg *sConfig) CleanCron() string {
 	return cfg.FCleanCron
+}
+
+func (cfg *sConfig) Connections() []string {
+	return cfg.FConnections
 }

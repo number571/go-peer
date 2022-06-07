@@ -12,14 +12,18 @@ const (
 )
 
 const (
-	tcAddress   = "test_address"
-	tcCleanCron = "0 0 0 0 0"
+	tcAddress    = "test_address"
+	tcCleanCron  = "0 0 0 0 0"
+	tcConnection = "test_connection"
 )
 
 const (
 	tcConfig = `{
 	"address": "test_address",
-	"clean_cron": "0 0 0 0 0"
+	"clean_cron": "0 0 0 0 0",
+	"connections": [
+		"test_connection"
+	]
 }`
 )
 
@@ -39,5 +43,9 @@ func TestConfig(t *testing.T) {
 
 	if cfg.CleanCron() != tcCleanCron {
 		t.Errorf("clean_cron is invalid")
+	}
+
+	if cfg.Connections()[0] != tcConnection {
+		t.Errorf("connections is invalid")
 	}
 }

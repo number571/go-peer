@@ -16,19 +16,19 @@ func NewSettings() settings.ISettings {
 // for fast tests
 func defaultSettings() map[uint64]uint64 {
 	return map[uint64]uint64{
-		settings.MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
-		settings.MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
-		settings.TimeWait: 20,                 // seconds
-		settings.TimePreq: 1,                  // seconds
-		settings.TimePrsp: 1,                  // seconds
-		settings.TimePing: 1,                  // seconds
-		settings.SizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
-		settings.SizeRtry: 0,                  // quantity
-		settings.SizeWork: 10,                 // bits
-		settings.SizeConn: 10,                 // quantity
-		settings.SizePack: 1 << 20,            // 1*(2^20)B = 1MiB
-		settings.SizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
-		settings.SizeSkey: 1 << 4,             // 2^4B = 16B
-		settings.SizeBmsg: 10,                 // quantity
+		settings.CMaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
+		settings.CMaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
+		settings.CTimeWait: 20,                 // seconds
+		settings.CTimePreq: 1,                  // seconds
+		settings.CTimePrsp: 1,                  // seconds
+		settings.CTimePing: 1,                  // seconds
+		settings.CSizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
+		settings.CSizeRtry: 0,                  // quantity
+		settings.CSizeWork: 10,                 // bits
+		settings.CSizeConn: 10,                 // quantity
+		settings.CSizePack: 1 << 20,            // 1*(2^20)B = 1MiB
+		settings.CSizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
+		settings.CSizeSkey: 1 << 4,             // 2^4B = 16B
+		settings.CSizeBmsg: 10,                 // quantity
 	}
 }

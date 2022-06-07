@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/encoding"
@@ -10,28 +11,51 @@ import (
 	"github.com/number571/go-peer/storage"
 )
 
-type sKeyValueDB struct {
+type sStorage struct {
 	fPath    string
 	fStorage storage.IKeyValueStorage
 }
 
+type sKeyValueDB struct {
+	fMutex    sync.Mutex
+	fHashes   *sStorage
+	fMessages *sStorage
+}
+
 func NewKeyValueDB(path string) IKeyValueDB {
-	stg := storage.NewLevelDBStorage(path)
-	if stg == nil {
-		panic("storage is nil")
+	var (
+		hPath = fmt.Sprintf("%s/hashes", path)
+		mPath = fmt.Sprintf("%s/messages", path)
+	)
+	sHashes := storage.NewLevelDBStorage(hPath)
+	if sHashes == nil {
+		panic("storage (hashes) is nil")
+	}
+	sMessages := storage.NewLevelDBStorage(mPath)
+	if sMessages == nil {
+		panic("storage (messages) is nil")
 	}
 	return &sKeyValueDB{
-		fPath:    path,
-		fStorage: stg,
+		fHashes: &sStorage{
+			fPath:    hPath,
+			fStorage: sHashes,
+		},
+		fMessages: &sStorage{
+			fPath:    mPath,
+			fStorage: sMessages,
+		},
 	}
 }
 
 func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
 	if len(key) != crypto.HashSize {
 		return 0, fmt.Errorf("key size invalid")
 	}
 
-	data, err := db.fStorage.Get(getKeySize(key))
+	data, err := db.fMessages.fStorage.Get(getKeySize(key))
 	if err != nil {
 		return 0, nil
 	}
@@ -40,59 +64,66 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 }
 
 func (db *sKeyValueDB) Push(key []byte, msg local.IMessage) error {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
 	if len(key) != crypto.HashSize {
 		return fmt.Errorf("key size invalid")
 	}
 
 	// store hash
 	hash := msg.Body().Hash()
-	_, err := db.fStorage.Get(getKeyHash(hash))
+	_, err := db.fHashes.fStorage.Get(getKeyHash(hash))
 	if err == nil {
 		return fmt.Errorf("hash already exists")
 	}
 
-	err = db.fStorage.Set(getKeyHash(hash), []byte{1})
+	err = db.fHashes.fStorage.Set(getKeyHash(hash), []byte{1})
 	if err != nil {
 		return err
 	}
 
 	// update size
 	size := uint64(0)
-	bnum, err := db.fStorage.Get(getKeySize(key))
+	bnum, err := db.fMessages.fStorage.Get(getKeySize(key))
 	if err == nil {
 		size = encoding.BytesToUint64(bnum)
 	}
 
-	err = db.fStorage.Set(getKeySize(key), encoding.Uint64ToBytes(size+1))
+	err = db.fMessages.fStorage.Set(getKeySize(key), encoding.Uint64ToBytes(size+1))
 	if err != nil {
 		return err
 	}
 
 	// push message
-	err = db.fStorage.Set(
+	err = db.fMessages.fStorage.Set(
 		getKeyMessage(key, size),
 		msg.ToPackage().Bytes(),
 	)
 	if err != nil {
-		err := db.fStorage.Del(getKeyHash(hash))
-		if err != nil {
+		err1 := db.fHashes.fStorage.Del(getKeyHash(hash))
+		if err1 != nil {
 			panic(err)
 		}
-		err = db.fStorage.Del(getKeySize(key))
-		if err != nil {
+		err2 := db.fMessages.fStorage.Del(getKeySize(key))
+		if err2 != nil {
 			panic(err)
 		}
+		return err
 	}
 
 	return nil
 }
 
 func (db *sKeyValueDB) Load(key []byte, i uint64) (local.IMessage, error) {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
 	if len(key) != crypto.HashSize {
 		return nil, fmt.Errorf("key size invalid")
 	}
 
-	data, err := db.fStorage.Get(getKeyMessage(key, i))
+	data, err := db.fMessages.fStorage.Get(getKeyMessage(key, i))
 	if err != nil {
 		return nil, fmt.Errorf("message undefined")
 	}
@@ -101,19 +132,38 @@ func (db *sKeyValueDB) Load(key []byte, i uint64) (local.IMessage, error) {
 }
 
 func (db *sKeyValueDB) Close() error {
-	return db.fStorage.Close()
-}
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
 
-func (db *sKeyValueDB) Clean() error {
-	db.fStorage.Close()
-
-	err := os.RemoveAll(db.fPath)
+	err := db.fMessages.fStorage.Close()
 	if err != nil {
 		return err
 	}
 
-	db.fStorage = storage.NewLevelDBStorage(db.fPath)
-	if db.fStorage == nil {
+	err = db.fHashes.fStorage.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *sKeyValueDB) Clean() error {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
+	err := db.fMessages.fStorage.Close()
+	if err != nil {
+		return err
+	}
+
+	err = os.RemoveAll(db.fMessages.fPath)
+	if err != nil {
+		return err
+	}
+
+	db.fMessages.fStorage = storage.NewLevelDBStorage(db.fMessages.fPath)
+	if db.fMessages.fStorage == nil {
 		panic("storage is nil")
 	}
 

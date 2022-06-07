@@ -24,12 +24,12 @@ func NewPuzzle(diff uint64) IPuzzle {
 // Hash must start with 'diff' number of zero bits.
 func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
 	var (
-		Target  = big.NewInt(1)
+		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.fDiff))
+	target.Lsh(target, sizeInBits(HashSize)-uint(puzzle.fDiff))
 	for nonce < math.MaxUint64 {
 		hash = NewHasher(bytes.Join(
 			[][]byte{
@@ -39,7 +39,7 @@ func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
 			[]byte{},
 		)).Bytes()
 		intHash.SetBytes(hash)
-		if intHash.Cmp(Target) == -1 {
+		if intHash.Cmp(target) == -1 {
 			return nonce
 		}
 		nonce++
@@ -50,7 +50,7 @@ func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
 // Verifies the work of the proof of work function.
 func (puzzle *sPowPuzzle) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
-	Target := big.NewInt(1)
+	target := big.NewInt(1)
 	hash := NewHasher(bytes.Join(
 		[][]byte{
 			packHash,
@@ -59,6 +59,10 @@ func (puzzle *sPowPuzzle) Verify(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	)).Bytes()
 	intHash.SetBytes(hash)
-	Target.Lsh(Target, sizeInBits(HashSize)-uint(puzzle.fDiff))
-	return intHash.Cmp(Target) == -1
+	target.Lsh(target, sizeInBits(HashSize)-uint(puzzle.fDiff))
+	return intHash.Cmp(target) == -1
+}
+
+func sizeInBits(n uint) uint {
+	return n * 8
 }

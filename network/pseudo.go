@@ -68,7 +68,7 @@ func (psd *sPseudo) Sleep() iPseudo {
 	}
 
 	node := psd.fNode.(*sNode)
-	wtime := node.fClient.Settings().Get(settings.TimePrsp)
+	wtime := node.fClient.Settings().Get(settings.CTimePrsp)
 	time.Sleep(time.Millisecond * calcRandTime(wtime))
 	return psd
 }
@@ -98,7 +98,7 @@ func (psd *sPseudo) start() {
 			case <-psd.fChannel:
 				return
 			case <-time.After(time.Second * time.Duration(
-				sett.Get(settings.TimePreq),
+				sett.Get(settings.CTimePreq),
 			)):
 				continue
 			}

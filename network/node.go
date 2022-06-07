@@ -73,7 +73,7 @@ func NewNode(client local.IClient) INode {
 	}
 
 	sett := node.Client().Settings()
-	patt := encoding.Uint64ToBytes(sett.Get(settings.MaskPing))
+	patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
 
 	return node.Handle(patt, nil)
 }
@@ -169,7 +169,7 @@ func (node *sNode) Listen(address string) error {
 			continue
 		}
 
-		rsize := node.Client().Settings().Get(settings.SizeSkey)
+		rsize := node.Client().Settings().Get(settings.CSizeSkey)
 		id := crypto.NewPRNG().String(rsize)
 
 		node.setConnection(id, conn)
@@ -189,8 +189,8 @@ func (node *sNode) Request(route local.IRoute, msg local.IMessage) ([]byte, erro
 	return node.doRequest(
 		route,
 		msg,
-		node.Client().Settings().Get(settings.SizeRtry),
-		node.Client().Settings().Get(settings.TimeWait),
+		node.Client().Settings().Get(settings.CSizeRtry),
+		node.Client().Settings().Get(settings.CTimeWait),
 	)
 }
 
@@ -248,8 +248,8 @@ func (node *sNode) handleConn(id string) {
 	defer node.Disconnect(id)
 
 	var (
-		retryNum = node.Client().Settings().Get(settings.SizeRtry)
-		msgNum   = node.Client().Settings().Get(settings.SizeBmsg)
+		retryNum = node.Client().Settings().Get(settings.CSizeRtry)
+		msgNum   = node.Client().Settings().Get(settings.CSizeBmsg)
 		conn, _  = node.getConnection(id)
 	)
 
@@ -305,7 +305,7 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 
 	// if this message is just route message
 	// then try procedures again
-	routeMsg := node.Client().Settings().Get(settings.MaskRout)
+	routeMsg := node.Client().Settings().Get(settings.CMaskRout)
 
 	// if is route package then
 	// 1/2 generate new pseudo-package and sleep rand time
@@ -340,8 +340,8 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 
 func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 	var (
-		skeySize  = node.Client().Settings().Get(settings.SizeSkey)
-		respNum   = node.Client().Settings().Get(settings.MaskRout)
+		skeySize  = node.Client().Settings().Get(settings.CSizeSkey)
+		respNum   = node.Client().Settings().Get(settings.CMaskRout)
 		respBytes = encoding.Uint64ToBytes(respNum)
 	)
 
@@ -533,7 +533,7 @@ func (node *sNode) inMappingWithSet(hash []byte) bool {
 	}
 
 	// push skey to mapping
-	if uint64(len(node.fMapping)) > node.fClient.Settings().Get(settings.SizeMapp) {
+	if uint64(len(node.fMapping)) > node.fClient.Settings().Get(settings.CSizeMapp) {
 		for k := range node.fMapping {
 			delete(node.fMapping, k)
 			break
@@ -548,7 +548,7 @@ func (node *sNode) hasMaxConnSize() bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	return uint64(len(node.fConnections)) > node.fClient.Settings().Get(settings.SizeConn)
+	return uint64(len(node.fConnections)) > node.fClient.Settings().Get(settings.CSizeConn)
 }
 
 func (node *sNode) setConnection(id string, conn net.Conn) {

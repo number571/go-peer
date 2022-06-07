@@ -13,10 +13,9 @@ var (
 )
 
 const (
-	TruncatedSize = 20
-	HashSize      = 32
-	HashKeyType   = "go-peer/sha256"
-	HmacKeyType   = "go-peer/hmac-sha256"
+	HashSize    = 32
+	HashKeyType = "go-peer/sha256"
+	HmacKeyType = "go-peer/hmac-sha256"
 )
 
 type sSHA256Hasher struct {
@@ -33,7 +32,7 @@ func NewHasher(data []byte) IHasher {
 
 func (h *sSHA256Hasher) String() string {
 	bytes := h.Bytes()
-	return encoding.Base64Encode(bytes)[:TruncatedSize]
+	return encoding.Base64Encode(bytes)
 }
 
 func (h *sSHA256Hasher) Bytes() []byte {
@@ -62,7 +61,7 @@ func NewHasherMAC(key []byte, data []byte) IHasher {
 
 func (h *sHMAC256Hasher) String() string {
 	bytes := h.Bytes()
-	return encoding.Base64Encode(bytes)[:TruncatedSize]
+	return encoding.Base64Encode(bytes)
 }
 
 func (h *sHMAC256Hasher) Bytes() []byte {
@@ -75,8 +74,4 @@ func (h *sHMAC256Hasher) Type() string {
 
 func (h *sHMAC256Hasher) Size() uint64 {
 	return HashSize
-}
-
-func sizeInBits(n uint) uint {
-	return n * 8
 }

@@ -99,10 +99,10 @@ func TestF2F(t *testing.T) {
 	defer testFreeNodes(nodes[:])
 
 	// time wait = timePseudo+1 second
-	timeOut := nodes[0].Client().Settings().Get(settings.TimePrsp) + 1
+	timeOut := nodes[0].Client().Settings().Get(settings.CTimePrsp) + 1
 
-	nodes[0].Client().Settings().Set(settings.TimeWait, timeOut)
-	nodes[1].Client().Settings().Set(settings.TimeWait, timeOut)
+	nodes[0].Client().Settings().Set(settings.CTimeWait, timeOut)
+	nodes[1].Client().Settings().Set(settings.CTimeWait, timeOut)
 
 	nodes[0].F2F().Switch(true)
 	nodes[1].F2F().Switch(true)
@@ -135,7 +135,7 @@ func TestChecker(t *testing.T) {
 	nodes[0].Checker().Append(nodes[1].Client().PubKey())
 
 	// sleep = timePseudo+1 second
-	timeOut := nodes[0].Client().Settings().Get(settings.TimePrsp) + 1
+	timeOut := nodes[0].Client().Settings().Get(settings.CTimePrsp) + 1
 	time.Sleep(time.Duration(timeOut) * time.Second)
 
 	info := nodes[0].Checker().ListWithInfo()[0]

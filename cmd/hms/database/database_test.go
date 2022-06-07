@@ -10,10 +10,7 @@ import (
 )
 
 const (
-	tcPathDB = "database_test.db"
-)
-
-const (
+	tcPathDB           = "test.db"
 	tcMessageTitle     = "test-title"
 	tcMessageBody      = "test-body"
 	tcMessageRawConcat = tcMessageTitle + tcMessageBody
@@ -24,13 +21,17 @@ var (
 	tgDB  IKeyValueDB
 )
 
-func testHmsDefaultInit(path string) {
-	tgDB = NewKeyValueDB(path)
+func testHmsDefaultInit(dbPath string) {
+	os.RemoveAll(dbPath)
+	tgDB = NewKeyValueDB(dbPath)
 }
 
 func TestDB(t *testing.T) {
 	testHmsDefaultInit(tcPathDB)
-	defer os.RemoveAll(tcPathDB)
+	defer func() {
+		tgDB.Close()
+		os.RemoveAll(tcPathDB)
+	}()
 
 	size, err := tgDB.Size(tgKey)
 	if err != nil {

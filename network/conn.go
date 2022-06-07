@@ -29,7 +29,7 @@ func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 	}
 
 	mustLen := local.LoadPackage(bufsize).BytesToSize()
-	if mustLen > node.fClient.Settings().Get(settings.SizePack) {
+	if mustLen > node.fClient.Settings().Get(settings.CSizePack) {
 		return nil
 	}
 
@@ -66,7 +66,7 @@ func (node *sNode) initialCheck(msg local.IMessage) local.IMessage {
 		return nil
 	}
 
-	diff := node.fClient.Settings().Get(settings.SizeWork)
+	diff := node.fClient.Settings().Get(settings.CSizeWork)
 	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/network"
@@ -38,7 +39,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 		for _, recv := range gConfig.F2F().PubKeys() {
 			go node.Request(
 				local.NewRoute(recv),
-				local.NewMessage([]byte(cPatternHLS), requestBytes),
+				local.NewMessage([]byte(hls_settings.CTitlePattern), requestBytes),
 			)
 		}
 	}
@@ -46,7 +47,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 	// generate new request to serivce
 	req, err := http.NewRequest(
 		request.Method(),
-		fmt.Sprintf("%s://%s%s", cProto, info.Address(), request.Path()),
+		fmt.Sprintf("http://%s%s", info.Address(), request.Path()),
 		bytes.NewReader(request.Body()),
 	)
 	if err != nil {

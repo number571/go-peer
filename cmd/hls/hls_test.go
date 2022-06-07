@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
@@ -144,7 +145,7 @@ func testStartNodeHLS(t *testing.T) network.INode {
 	client := local.NewClient(privKey, tgSettings)
 
 	node := network.NewNode(client).
-		Handle([]byte(cPatternHLS), routeHLS)
+		Handle([]byte(hls_settings.CTitlePattern), routeHLS)
 
 	node.F2F().Switch(gConfig.F2F().Status())
 	for _, pubKey := range gConfig.F2F().PubKeys() {
@@ -175,7 +176,7 @@ func testStartClientHLS() error {
 	client := local.NewClient(priv, tgSettings)
 
 	node := network.NewNode(client).
-		Handle([]byte(cPatternHLS), nil)
+		Handle([]byte(hls_settings.CTitlePattern), nil)
 
 	err := node.Connect(gConfig.Address().HLS())
 	if err != nil {
@@ -183,7 +184,7 @@ func testStartClientHLS() error {
 	}
 
 	msg := local.NewMessage(
-		[]byte(cPatternHLS),
+		[]byte(hls_settings.CTitlePattern),
 		hlsnet.NewRequest("GET", tcServiceInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",

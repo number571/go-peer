@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	tcPathDB = "database_test.db"
+	tcPathDB = "test.db"
 )
 
 const (
@@ -38,11 +38,6 @@ func TestDB(t *testing.T) {
 	exist := tgDB.Exist(tgHash)
 	if !exist {
 		t.Errorf("load msg is nil")
-	}
-
-	err = tgDB.Clean()
-	if err != nil {
-		t.Error(err)
 	}
 
 	err = tgDB.Close()

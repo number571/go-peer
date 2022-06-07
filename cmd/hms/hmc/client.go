@@ -1,17 +1,11 @@
 package hmc
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
-
-	"github.com/number571/go-peer/cmd/hms/utils"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
+	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/local"
 )
 
 var (
@@ -19,113 +13,39 @@ var (
 )
 
 type sClient struct {
-	host   string
-	client local.IClient
+	builder   IBuilder
+	requester IRequester
 }
 
-func NewClient(client local.IClient, host string) IClient {
+func NewClient(builder IBuilder, requester IRequester) IClient {
 	return &sClient{
-		host:   host,
-		client: client,
+		builder:   builder,
+		requester: requester,
 	}
 }
 
 func (client *sClient) Size() (uint64, error) {
-	pubBytes := client.client.PubKey().Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
-
-	request := struct {
-		Receiver []byte `json:"receiver"`
-	}{
-		Receiver: hashRecv,
-	}
-
-	resp, err := http.Post(
-		fmt.Sprintf("%s/size", client.host),
-		"application/json",
-		bytes.NewReader(utils.Serialize(request)),
-	)
-	if err != nil {
-		return 0, err
-	}
-
-	var response hms_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.Return != hms_settings.CErrorNone {
-		return 0, fmt.Errorf("%s", string(response.Result))
-	}
-
-	return encoding.BytesToUint64(response.Result), nil
+	return client.requester.Size(client.builder.Size())
 }
 
-func (client *sClient) Load(n uint64) (crypto.IPubKey, []byte, error) {
-	pubBytes := client.client.PubKey().Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
-
-	request := hms_settings.SLoadRequest{
-		Receiver: hashRecv,
-		Index:    n,
-	}
-
-	resp, err := http.Post(
-		fmt.Sprintf("%s/load", client.host),
-		"application/json",
-		bytes.NewReader(utils.Serialize(request)),
-	)
+func (client *sClient) Load(i uint64) (local.IMessage, error) {
+	msg, err := client.requester.Load(client.builder.Load(i))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	var response hms_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.Return != hms_settings.CErrorNone {
-		return nil, nil, fmt.Errorf("%s", string(response.Result))
-	}
-
-	msg := local.LoadPackage(response.Result).ToMessage()
+	msg, title := client.builder.(*sBuiler).client.Decrypt(msg)
 	if msg == nil {
-		return nil, nil, fmt.Errorf("message is nil")
+		return nil, fmt.Errorf("message is nil")
 	}
 
-	msg, title := client.client.Decrypt(msg)
-	if string(title) != hms_settings.CPatternTitle {
-		return nil, nil, fmt.Errorf("title is not equal")
+	if string(title) != hms_settings.CTitlePattern {
+		return nil, fmt.Errorf("title is not equal")
 	}
 
-	return crypto.LoadPubKey(msg.Head().Sender()), msg.Body().Data(), nil
+	return msg, nil
 }
 
-func (client *sClient) Push(receiver crypto.IPubKey, msg []byte) error {
-	pubBytes := receiver.Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
-
-	encMsg, _ := client.client.Encrypt(
-		local.NewRoute(receiver),
-		local.NewMessage([]byte(hms_settings.CPatternTitle), msg),
-	)
-
-	request := hms_settings.SPushRequest{
-		Receiver: hashRecv,
-		Package:  encMsg.ToPackage().Bytes(),
-	}
-
-	resp, err := http.Post(
-		fmt.Sprintf("%s/push", client.host),
-		"application/json",
-		bytes.NewReader(utils.Serialize(request)),
-	)
-	if err != nil {
-		return err
-	}
-
-	var response hms_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.Return != hms_settings.CErrorNone {
-		return fmt.Errorf("%s", string(response.Result))
-	}
-
-	return nil
+func (client *sClient) Push(receiver crypto.IPubKey, body []byte) error {
+	return client.requester.Push(client.builder.Push(receiver, body))
 }

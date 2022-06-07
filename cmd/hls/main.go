@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/network"
@@ -22,11 +23,11 @@ func main() {
 	}
 
 	// set handle functions
-	gNode.Handle([]byte(cPatternHLS), routeHLS)
+	gNode.Handle([]byte(hls_settings.CTitlePattern), routeHLS)
 
 	// set response route
 	gNode.WithResponseRouter(func(node network.INode) []crypto.IPubKey {
-		randSizeRoute := crypto.NewPRNG().Uint64() % cSizeRoute
+		randSizeRoute := crypto.NewPRNG().Uint64() % hls_settings.CSizeRoute
 		return local.NewSelector(nodesInOnline(node)).
 			Shuffle().
 			Return(randSizeRoute)
@@ -66,7 +67,7 @@ func main() {
 	// network checker
 	go func() {
 		sett := gNode.Client().Settings()
-		tchk := time.Duration(sett.Get(settings.TimePing))
+		tchk := time.Duration(sett.Get(settings.CTimePing))
 
 		for {
 			time.Sleep(time.Second * tchk)

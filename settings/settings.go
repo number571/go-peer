@@ -3,20 +3,20 @@ package settings
 import "sync"
 
 const (
-	MaskRout uint64 = iota + 1
-	MaskPing
-	TimeWait
-	TimePreq
-	TimePrsp
-	TimePing
-	SizePsdo
-	SizeRtry
-	SizeWork
-	SizeConn
-	SizePack
-	SizeMapp
-	SizeSkey
-	SizeBmsg
+	CMaskRout uint64 = iota + 1
+	CMaskPing
+	CTimeWait
+	CTimePreq
+	CTimePrsp
+	CTimePing
+	CSizePsdo
+	CSizeRtry
+	CSizeWork
+	CSizeConn
+	CSizePack
+	CSizeMapp
+	CSizeSkey
+	CSizeBmsg
 )
 
 var (
@@ -59,19 +59,19 @@ func defaultSettings() map[uint64]uint64 {
 	// B - byte
 	// b - bit
 	return map[uint64]uint64{
-		MaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
-		MaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
-		TimeWait: 30,                 // seconds
-		TimePreq: 10,                 // seconds
-		TimePrsp: 5,                  // seconds
-		TimePing: 60,                 // seconds
-		SizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
-		SizeRtry: 2,                  // quantity
-		SizeWork: 20,                 // bits
-		SizeConn: 10,                 // quantity
-		SizePack: 8 << 20,            // 8*(2^20)B = 8MiB
-		SizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
-		SizeSkey: 1 << 5,             // 2^5B = 32B
-		SizeBmsg: 20,                 // quantity of messages
+		CMaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
+		CMaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
+		CTimeWait: 30,                 // seconds
+		CTimePreq: 10,                 // seconds
+		CTimePrsp: 5,                  // seconds
+		CTimePing: 60,                 // seconds
+		CSizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
+		CSizeRtry: 2,                  // quantity
+		CSizeWork: 20,                 // bits
+		CSizeConn: 20,                 // quantity
+		CSizePack: 8 << 20,            // 8*(2^20)B = 8MiB
+		CSizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
+		CSizeSkey: 1 << 5,             // 2^5B = 32B
+		CSizeBmsg: 20,                 // quantity of messages
 	}
 }

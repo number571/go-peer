@@ -5,80 +5,57 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
+
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
-type sDefaultResponse struct {
-	Result string `json:"result"`
-	Return int    `json:"return"`
-}
-
 func pageIndex(w http.ResponseWriter, r *http.Request) {
-	defaultHeaders(w)
-	defaultResponse(w, cErrorNone, "hidden lake service")
+	response(w, hls_settings.CErrorNone, []byte(hls_settings.CTitlePattern))
 }
 
 func pageStatus(w http.ResponseWriter, r *http.Request) {
-	defaultHeaders(w)
-
-	type sStatus struct {
-		PubKey string `json:"pub_key"`
-		Online bool   `json:"online"`
-	}
-
-	type sCustomResponse struct {
-		PubKey  string     `json:"pub_key"`
-		Network []*sStatus `json:"network"`
-		sDefaultResponse
-	}
-
 	if r.Method != "GET" {
-		defaultResponse(w, cErrorMethod, "failed: incorrect method")
+		response(w, hls_settings.CErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
-	var network []*sStatus
+	var network []hls_settings.SStatusNetwork
 	for _, info := range gNode.Checker().ListWithInfo() {
-		network = append(network, &sStatus{
+		network = append(network, hls_settings.SStatusNetwork{
 			PubKey: info.PubKey().String(),
 			Online: info.Online(),
 		})
 	}
 
-	json.NewEncoder(w).Encode(sCustomResponse{
+	w.Header().Set("Content-Type", hls_settings.CContentType)
+	json.NewEncoder(w).Encode(&hls_settings.SStatusResponse{
 		PubKey:  gNode.Client().PubKey().String(),
 		Network: network,
-		sDefaultResponse: sDefaultResponse{
-			Result: "success",
-			Return: cErrorNone,
+		SResponse: hls_settings.SResponse{
+			Result: []byte("success"),
+			Return: hls_settings.CErrorNone,
 		},
 	})
 }
 
 func pageMessage(w http.ResponseWriter, r *http.Request) {
-	defaultHeaders(w)
-
-	var vRequest struct {
-		Receiver string `json:"receiver"` // public key
-		Title    []byte `json:"title"`
-		Data     []byte `json:"data"`
-	}
+	var vRequest hls_settings.SRequest
 
 	if r.Method != "POST" {
-		defaultResponse(w, cErrorMethod, "failed: incorrect method")
+		response(w, hls_settings.CErrorMethod, []byte("failed: incorrect method"))
 		return
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&vRequest)
 	if err != nil {
-		defaultResponse(w, cErrorDecodeRequest, "failed: decode request")
+		response(w, hls_settings.CErrorDecode, []byte("failed: decode request"))
 		return
 	}
 
 	pubKey := crypto.LoadPubKey(vRequest.Receiver)
 	if pubKey == nil {
-		defaultResponse(w, cErrorDecodePubKey, "failed: decode public key")
+		response(w, hls_settings.CErrorPubKey, []byte("failed: load public key"))
 		return
 	}
 
@@ -91,7 +68,7 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rand := crypto.NewPRNG()
-	randSizeRoute := rand.Uint64() % cSizeRoute
+	randSizeRoute := rand.Uint64() % hls_settings.CSizeRoute
 
 	resp, err := gNode.Request(
 		local.NewRoute(pubKey).
@@ -104,19 +81,16 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		local.NewMessage(vRequest.Title, vRequest.Data),
 	)
 	if err != nil {
-		defaultResponse(w, cErrorResponseMessage, "failed: response message")
+		response(w, hls_settings.CErrorResponse, []byte("failed: response message"))
 		return
 	}
 
-	defaultResponse(w, cErrorNone, encoding.Base64Encode(resp))
+	response(w, hls_settings.CErrorNone, resp)
 }
 
-func defaultHeaders(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-}
-
-func defaultResponse(w http.ResponseWriter, ret int, res string) {
-	json.NewEncoder(w).Encode(sDefaultResponse{
+func response(w http.ResponseWriter, ret int, res []byte) {
+	w.Header().Set("Content-Type", hls_settings.CContentType)
+	json.NewEncoder(w).Encode(&hls_settings.SResponse{
 		Result: res,
 		Return: ret,
 	})

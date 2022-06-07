@@ -2,13 +2,14 @@ package database
 
 import (
 	"fmt"
-	"os"
+	"sync"
 
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/storage"
 )
 
 type sKeyValueDB struct {
+	fMutex   sync.Mutex
 	fPath    string
 	fStorage storage.IKeyValueStorage
 }
@@ -24,40 +25,40 @@ func NewKeyValueDB(path string) IKeyValueDB {
 	}
 }
 
-func (db *sKeyValueDB) Push(hash []byte) error {
-	if len(hash) != crypto.HashSize {
+func (db *sKeyValueDB) Push(key []byte) error {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
+	if len(key) != crypto.HashSize {
 		return fmt.Errorf("hash size invalid")
 	}
-	if db.Exist(hash) {
+
+	if db.isExist(key) {
 		return fmt.Errorf("hash already exists")
 	}
-	return db.fStorage.Set(getKeyHash(hash), []byte{1})
+
+	return db.fStorage.Set(getKeyHash(key), []byte{1})
 }
 
-func (db *sKeyValueDB) Exist(hash []byte) bool {
-	if len(hash) != crypto.HashSize {
+func (db *sKeyValueDB) Exist(key []byte) bool {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
+	if len(key) != crypto.HashSize {
 		return false
 	}
-	_, err := db.fStorage.Get(getKeyHash(hash))
-	return err == nil
+
+	return db.isExist(key)
 }
 
 func (db *sKeyValueDB) Close() error {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
 	return db.fStorage.Close()
 }
 
-func (db *sKeyValueDB) Clean() error {
-	db.fStorage.Close()
-
-	err := os.RemoveAll(db.fPath)
-	if err != nil {
-		return err
-	}
-
-	db.fStorage = storage.NewLevelDBStorage(db.fPath)
-	if db.fStorage == nil {
-		panic("storage is nil")
-	}
-
-	return nil
+func (db *sKeyValueDB) isExist(key []byte) bool {
+	_, err := db.fStorage.Get(getKeyHash(key))
+	return err == nil
 }

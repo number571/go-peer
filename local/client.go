@@ -59,7 +59,7 @@ func (client *sClient) Encrypt(route IRoute, msg IMessage) (IMessage, []byte) {
 		rmsg, _ = psender.(*sClient).onceEncrypt(
 			pub,
 			NewMessage(
-				encoding.Uint64ToBytes(client.Settings().Get(settings.MaskRout)),
+				encoding.Uint64ToBytes(client.Settings().Get(settings.CMaskRout)),
 				rmsg.ToPackage().Bytes(),
 			),
 		)
@@ -72,15 +72,15 @@ func (client *sClient) Encrypt(route IRoute, msg IMessage) (IMessage, []byte) {
 func (client *sClient) onceEncrypt(receiver crypto.IPubKey, msg IMessage) (IMessage, []byte) {
 	var (
 		rand    = crypto.NewPRNG()
-		salt    = rand.Bytes(client.Settings().Get(settings.SizeSkey))
-		session = rand.Bytes(client.Settings().Get(settings.SizeSkey))
+		salt    = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
+		session = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
 	)
 
 	data := bytes.Join(
 		[][]byte{
 			encoding.Uint64ToBytes(uint64(len(msg.Body().Data()))),
 			msg.Body().Data(),
-			encoding.Uint64ToBytes(rand.Uint64() % (settings.SizePack / 4)),
+			encoding.Uint64ToBytes(rand.Uint64() % (settings.CSizePack / 4)),
 		},
 		[]byte{},
 	)
@@ -106,7 +106,7 @@ func (client *sClient) onceEncrypt(receiver crypto.IPubKey, msg IMessage) (IMess
 			FData:  cipher.Encrypt(data),
 			FHash:  hash,
 			FSign:  cipher.Encrypt(client.PrivKey().Sign(hash)),
-			FProof: crypto.NewPuzzle(client.Settings().Get(settings.SizeWork)).Proof(hash),
+			FProof: crypto.NewPuzzle(client.Settings().Get(settings.CSizeWork)).Proof(hash),
 		},
 	}, session
 }
@@ -128,7 +128,7 @@ func (client *sClient) Decrypt(msg IMessage) (IMessage, []byte) {
 	}
 
 	// Proof of work. Prevent spam.
-	diff := client.Settings().Get(settings.SizeWork)
+	diff := client.Settings().Get(settings.CSizeWork)
 	puzzle := crypto.NewPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil, nil
