@@ -50,3 +50,7 @@ type IPRNG interface {
 	Uint64() uint64
 	Bool() bool
 }
+
+type IEntropy interface {
+	Raise([]byte, []byte) []byte
+}

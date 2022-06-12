@@ -11,11 +11,11 @@ import (
 	"github.com/number571/go-peer/cmd/hls/database"
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/utils"
 )
 
 var (

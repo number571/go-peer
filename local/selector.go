@@ -26,9 +26,13 @@ func (s *sSelector) Length() uint64 {
 }
 
 func (s *sSelector) Return(n uint64) []crypto.IPubKey {
+	s.fMutex.Lock()
+	defer s.fMutex.Unlock()
+
 	if n > s.Length() {
 		n = s.Length()
 	}
+
 	return s.fValues[:n]
 }
 

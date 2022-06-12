@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/cmd/hms/utils"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/utils"
 )
 
 var (

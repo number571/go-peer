@@ -26,12 +26,12 @@ type sNode struct {
 	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
+	fActions     map[string]chan []byte
 	fF2F         iF2F
 	fChecker     iChecker
 	fPseudo      iPseudo
 	fOnline      iOnline
 	fRouter      iRouter
-	fActions     map[string]chan []byte
 }
 
 // Create client by private key as identification.
@@ -45,6 +45,7 @@ func NewNode(client local.IClient) INode {
 		fHRoutes:     make(map[string]iHandler),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
+		fActions:     make(map[string]chan []byte),
 		fF2F: &sF2F{
 			fMapping: make(map[string]crypto.IPubKey),
 		},
@@ -56,9 +57,8 @@ func NewNode(client local.IClient) INode {
 			fChannel: make(chan struct{}),
 			fPrivKey: crypto.NewPrivKey(client.PubKey().Size()),
 		},
-		fOnline:  &sOnline{},
-		fRouter:  func(_ INode) []crypto.IPubKey { return nil },
-		fActions: make(map[string]chan []byte),
+		fOnline: &sOnline{},
+		fRouter: func(_ INode) []crypto.IPubKey { return nil },
 	}
 
 	// recurrent structures

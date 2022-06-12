@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/utils"
 )
 
 var (
@@ -42,7 +42,8 @@ func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValu
 		store.fSalt = crypto.NewPRNG().Bytes(store.fSettings.Get(settings.CSizeSkey))
 	}
 
-	ekey := crypto.RaiseEntropy(key, store.fSalt, store.fSettings.Get(settings.CSizeWork))
+	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	ekey := entropy.Raise(key, store.fSalt)
 	store.fCipher = crypto.NewCipher(ekey)
 
 	if !store.exists() {
@@ -74,8 +75,8 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.CSizeWork))
+	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	ekey := entropy.Raise(key, store.fSalt)
 	hash := crypto.NewHasher(ekey).String()
 
 	cipher := crypto.NewCipher(ekey)
@@ -110,8 +111,8 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.CSizeWork))
+	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	ekey := entropy.Raise(key, store.fSalt)
 	hash := crypto.NewHasher(ekey).String()
 
 	encsecret, ok := mapping.FSecrets[hash]
@@ -138,8 +139,8 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	// Open and decrypt private key
-	ekey := crypto.RaiseEntropy(key, store.fSalt,
-		store.fSettings.Get(settings.CSizeWork))
+	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	ekey := entropy.Raise(key, store.fSalt)
 	hash := crypto.NewHasher(ekey).String()
 
 	_, ok := mapping.FSecrets[hash]

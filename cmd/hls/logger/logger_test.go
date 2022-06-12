@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/hms/utils"
+	"github.com/number571/go-peer/utils"
 )
 
 const (

@@ -8,12 +8,12 @@ import (
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/logger"
-	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
 	"github.com/number571/go-peer/local"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/storage"
+	"github.com/number571/go-peer/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
@@ -55,6 +55,8 @@ func hlsDefaultInit() error {
 }
 
 func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) crypto.IPrivKey {
+	fileAlreadyExist := utils.FileIsExist(filepath)
+
 	storage := storage.NewCryptoStorage(
 		sett,
 		filepath,
@@ -64,13 +66,16 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 		return nil
 	}
 
-	bpriv, err := storage.Get(objectKey)
-	if err == nil {
+	if fileAlreadyExist {
+		bpriv, err := storage.Get(objectKey)
+		if err != nil {
+			return nil
+		}
 		return crypto.LoadPrivKey(bpriv)
 	}
 
 	priv := crypto.NewPrivKey(hls_settings.CAKeySize)
-	err = storage.Set(objectKey, priv.Bytes())
+	err := storage.Set(objectKey, priv.Bytes())
 	if err != nil {
 		return nil
 	}

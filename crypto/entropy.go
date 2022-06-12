@@ -2,17 +2,33 @@ package crypto
 
 import "bytes"
 
+var (
+	_ IEntropy = &sEntropy{}
+)
+
+type sEntropy struct {
+	bits uint64
+}
+
+func NewEntropy(bits uint64) IEntropy {
+	return &sEntropy{
+		bits: bits,
+	}
+}
+
 // Increase entropy by multiple hashing.
-func RaiseEntropy(info, salt []byte, bits uint64) []byte {
-	lim := uint64(1 << bits)
+func (entr *sEntropy) Raise(data, salt []byte) []byte {
+	lim := uint64(1 << entr.bits)
+
 	for i := uint64(0); i < lim; i++ {
-		info = NewHasher(bytes.Join(
+		data = NewHasher(bytes.Join(
 			[][]byte{
-				info,
+				data,
 				salt,
 			},
 			[]byte{},
 		)).Bytes()
 	}
-	return info
+
+	return data
 }

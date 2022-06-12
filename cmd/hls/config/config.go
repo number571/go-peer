@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hls/utils"
 	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/utils"
 )
 
 var (
