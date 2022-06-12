@@ -8,9 +8,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -22,7 +25,7 @@ var (
 type sNode struct {
 	fMutex       sync.Mutex
 	fListener    net.Listener
-	fClient      local.IClient
+	fClient      client.IClient
 	fHRoutes     map[string]iHandler
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
@@ -35,7 +38,7 @@ type sNode struct {
 }
 
 // Create client by private key as identification.
-func NewNode(client local.IClient) INode {
+func NewNode(client client.IClient) INode {
 	if client == nil {
 		return nil
 	}
@@ -47,7 +50,7 @@ func NewNode(client local.IClient) INode {
 		fConnections: make(map[string]net.Conn),
 		fActions:     make(map[string]chan []byte),
 		fF2F: &sF2F{
-			fMapping: make(map[string]crypto.IPubKey),
+			fMapping: make(map[string]asymmetric.IPubKey),
 		},
 		fChecker: &sChecker{
 			fChannel: make(chan struct{}),
@@ -55,10 +58,10 @@ func NewNode(client local.IClient) INode {
 		},
 		fPseudo: &sPseudo{
 			fChannel: make(chan struct{}),
-			fPrivKey: crypto.NewPrivKey(client.PubKey().Size()),
+			fPrivKey: asymmetric.NewRSAPrivKey(client.PubKey().Size()),
 		},
 		fOnline: &sOnline{},
-		fRouter: func(_ INode) []crypto.IPubKey { return nil },
+		fRouter: func(_ INode) []asymmetric.IPubKey { return nil },
 	}
 
 	// recurrent structures
@@ -109,7 +112,7 @@ func (node *sNode) Close() {
 }
 
 // Return client structure.
-func (node *sNode) Client() local.IClient {
+func (node *sNode) Client() client.IClient {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -170,7 +173,7 @@ func (node *sNode) Listen(address string) error {
 		}
 
 		rsize := node.Client().Settings().Get(settings.CSizeSkey)
-		id := crypto.NewPRNG().String(rsize)
+		id := random.NewStdPRNG().String(rsize)
 
 		node.setConnection(id, conn)
 		go node.handleConn(id)
@@ -185,7 +188,7 @@ func (node *sNode) Handle(title []byte, handle iHandler) INode {
 }
 
 // Send message by public key of receiver.
-func (node *sNode) Request(route local.IRoute, msg local.IMessage) ([]byte, error) {
+func (node *sNode) Request(route routing.IRoute, msg message.IMessage) ([]byte, error) {
 	return node.doRequest(
 		route,
 		msg,
@@ -269,7 +272,7 @@ func (node *sNode) handleConn(id string) {
 		}
 
 		msg := node.readMessage(conn)
-		go func(msg local.IMessage) {
+		go func(msg message.IMessage) {
 			atomic.AddInt64(&msgCounter, 1)
 			defer atomic.AddInt64(&msgCounter, -1)
 
@@ -283,7 +286,7 @@ func (node *sNode) handleConn(id string) {
 	}
 }
 
-func (node *sNode) handleMessage(msg local.IMessage) bool {
+func (node *sNode) handleMessage(msg message.IMessage) bool {
 	// null message from connection is error
 	if msg == nil {
 		return false
@@ -311,13 +314,13 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 	// 1/2 generate new pseudo-package and sleep rand time
 	// unpack and send new version of package
 	if bytes.Equal(title, encoding.Uint64ToBytes(routeMsg)) {
-		if node.fPseudo.Status() && crypto.NewPRNG().Bool() {
+		if node.fPseudo.Status() && random.NewStdPRNG().Bool() {
 			// send pseudo message with random sleep
 			size := len(decMsg.Body().Data())
 			node.fPseudo.Request(size).Sleep()
 		}
 		// recursive unpack message
-		msg = local.LoadPackage(decMsg.Body().Data()).ToMessage()
+		msg = message.LoadPackage(decMsg.Body().Data()).ToMessage()
 		return node.handleMessage(msg)
 	}
 
@@ -328,7 +331,7 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 
 	// if mode is friend-to-friend and sender not in list of f2f
 	// then pass this request
-	sender := crypto.LoadPubKey(decMsg.Head().Sender())
+	sender := asymmetric.LoadRSAPubKey(decMsg.Head().Sender())
 	if node.fF2F.Status() && !node.fF2F.InList(sender) {
 		return true
 	}
@@ -338,7 +341,7 @@ func (node *sNode) handleMessage(msg local.IMessage) bool {
 	return true
 }
 
-func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
+func (node *sNode) handleFunc(msg message.IMessage, title []byte) {
 	var (
 		skeySize  = node.Client().Settings().Get(settings.CSizeSkey)
 		respNum   = node.Client().Settings().Get(settings.CMaskRout)
@@ -365,9 +368,9 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 	}
 
 	rmsg, _ := node.Client().Encrypt(
-		local.NewRoute(crypto.LoadPubKey(msg.Head().Sender())).
+		routing.NewRoute(asymmetric.LoadRSAPubKey(msg.Head().Sender())).
 			WithRedirects(node.fPseudo.PrivKey(), node.fRouter(node)),
-		local.NewMessage(
+		message.NewMessage(
 			bytes.Join(
 				[][]byte{
 					respBytes,
@@ -383,7 +386,7 @@ func (node *sNode) handleFunc(msg local.IMessage, title []byte) {
 }
 
 // Request with retry number and time out.
-func (node *sNode) doRequest(route local.IRoute, msg local.IMessage, retryNum, timeOut uint64) ([]byte, error) {
+func (node *sNode) doRequest(route routing.IRoute, msg message.IMessage, retryNum, timeOut uint64) ([]byte, error) {
 	if len(node.Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
@@ -423,7 +426,7 @@ func (node *sNode) recv(session []byte, timeOut uint64) ([]byte, error) {
 	}
 }
 
-func (node *sNode) send(msg local.IMessage) {
+func (node *sNode) send(msg message.IMessage) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 

@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/random"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
+	"github.com/number571/go-peer/offline/selector"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
@@ -53,13 +56,13 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pubKey := crypto.LoadPubKey(vRequest.Receiver)
+	pubKey := asymmetric.LoadRSAPubKey(vRequest.Receiver)
 	if pubKey == nil {
 		response(w, hls_settings.CErrorPubKey, []byte("failed: load public key"))
 		return
 	}
 
-	inOnline := []crypto.IPubKey{}
+	inOnline := []asymmetric.IPubKey{}
 	for _, val := range gNode.Checker().ListWithInfo() {
 		if !val.Online() {
 			continue
@@ -67,18 +70,18 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		inOnline = append(inOnline, val.PubKey())
 	}
 
-	rand := crypto.NewPRNG()
+	rand := random.NewStdPRNG()
 	randSizeRoute := rand.Uint64() % hls_settings.CSizeRoute
 
 	resp, err := gNode.Request(
-		local.NewRoute(pubKey).
+		routing.NewRoute(pubKey).
 			WithRedirects(
 				gPPrivKey,
-				local.NewSelector(inOnline).
+				selector.NewSelector(inOnline).
 					Shuffle().
 					Return(randSizeRoute),
 			),
-		local.NewMessage(vRequest.Title, vRequest.Data),
+		message.NewMessage(vRequest.Title, vRequest.Data),
 	)
 	if err != nil {
 		response(w, hls_settings.CErrorResponse, []byte("failed: response message"))

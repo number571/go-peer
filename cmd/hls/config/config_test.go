@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -124,7 +124,7 @@ func TestConfig(t *testing.T) {
 
 	for i, v := range tgPubKeys {
 		v1 := cfg.F2F().PubKeys()[i]
-		pubKey := crypto.LoadPubKey(v)
+		pubKey := asymmetric.LoadRSAPubKey(v)
 		if pubKey.Address() != v1.Address() {
 			t.Errorf("public key is invalid '%s'", v1)
 		}

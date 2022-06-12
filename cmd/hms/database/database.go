@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/message"
 	"github.com/number571/go-peer/storage"
 )
 
@@ -51,7 +51,7 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != crypto.HashSize {
+	if len(key) != hashing.HashSize {
 		return 0, fmt.Errorf("key size invalid")
 	}
 
@@ -63,11 +63,11 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 	return encoding.BytesToUint64(data), nil
 }
 
-func (db *sKeyValueDB) Push(key []byte, msg local.IMessage) error {
+func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != crypto.HashSize {
+	if len(key) != hashing.HashSize {
 		return fmt.Errorf("key size invalid")
 	}
 
@@ -115,11 +115,11 @@ func (db *sKeyValueDB) Push(key []byte, msg local.IMessage) error {
 	return nil
 }
 
-func (db *sKeyValueDB) Load(key []byte, i uint64) (local.IMessage, error) {
+func (db *sKeyValueDB) Load(key []byte, i uint64) (message.IMessage, error) {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != crypto.HashSize {
+	if len(key) != hashing.HashSize {
 		return nil, fmt.Errorf("key size invalid")
 	}
 
@@ -128,7 +128,7 @@ func (db *sKeyValueDB) Load(key []byte, i uint64) (local.IMessage, error) {
 		return nil, fmt.Errorf("message undefined")
 	}
 
-	return local.LoadPackage(data).ToMessage(), nil
+	return message.LoadPackage(data).ToMessage(), nil
 }
 
 func (db *sKeyValueDB) Close() error {

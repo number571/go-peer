@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/storage"
 )
 
@@ -29,7 +29,7 @@ func (db *sKeyValueDB) Push(key []byte) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != crypto.HashSize {
+	if len(key) != hashing.HashSize {
 		return fmt.Errorf("hash size invalid")
 	}
 
@@ -44,7 +44,7 @@ func (db *sKeyValueDB) Exist(key []byte) bool {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != crypto.HashSize {
+	if len(key) != hashing.HashSize {
 		return false
 	}
 

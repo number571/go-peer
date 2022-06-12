@@ -1,4 +1,4 @@
-package crypto
+package asymmetric
 
 import (
 	"crypto"
@@ -9,6 +9,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+
+	"github.com/number571/go-peer/crypto/hashing"
 )
 
 var (
@@ -29,7 +31,7 @@ type sRSAPrivKey struct {
 }
 
 // Create private key by number of bits.
-func NewPrivKey(bits uint64) IPrivKey {
+func NewRSAPrivKey(bits uint64) IPrivKey {
 	priv, err := rsa.GenerateKey(rand.Reader, int(bits))
 	if err != nil {
 		return nil
@@ -37,7 +39,7 @@ func NewPrivKey(bits uint64) IPrivKey {
 	return &sRSAPrivKey{priv}
 }
 
-func LoadPrivKey(privkey interface{}) IPrivKey {
+func LoadRSAPrivKey(privkey interface{}) IPrivKey {
 	switch x := privkey.(type) {
 	case []byte:
 		priv := bytesToPrivateKey(x)
@@ -65,7 +67,7 @@ func LoadPrivKey(privkey interface{}) IPrivKey {
 		if err != nil {
 			return nil
 		}
-		return LoadPrivKey(pbytes)
+		return LoadRSAPrivKey(pbytes)
 	default:
 		panic("unsupported type")
 	}
@@ -76,7 +78,7 @@ func (key *sRSAPrivKey) Decrypt(msg []byte) []byte {
 }
 
 func (key *sRSAPrivKey) Sign(msg []byte) []byte {
-	return sign(key.priv, NewHasher(msg).Bytes())
+	return sign(key.priv, hashing.NewSHA256Hasher(msg).Bytes())
 }
 
 func (key *sRSAPrivKey) PubKey() IPubKey {
@@ -138,7 +140,7 @@ type sRSAPubKey struct {
 	pub *rsa.PublicKey
 }
 
-func LoadPubKey(pubkey interface{}) IPubKey {
+func LoadRSAPubKey(pubkey interface{}) IPubKey {
 	switch x := pubkey.(type) {
 	case []byte:
 		pub := bytesToPublicKey(x)
@@ -166,7 +168,7 @@ func LoadPubKey(pubkey interface{}) IPubKey {
 		if err != nil {
 			return nil
 		}
-		return LoadPubKey(pbytes)
+		return LoadRSAPubKey(pbytes)
 	default:
 		panic("unsupported type")
 	}
@@ -177,11 +179,11 @@ func (key *sRSAPubKey) Encrypt(msg []byte) []byte {
 }
 
 func (key *sRSAPubKey) Address() string {
-	return NewHasher(key.Bytes()).String()
+	return hashing.NewSHA256Hasher(key.Bytes()).String()
 }
 
 func (key *sRSAPubKey) Verify(msg []byte, sig []byte) bool {
-	return verify(key.pub, NewHasher(msg).Bytes(), sig) == nil
+	return verify(key.pub, hashing.NewSHA256Hasher(msg).Bytes(), sig) == nil
 }
 
 func (key *sRSAPubKey) Bytes() []byte {

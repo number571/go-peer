@@ -1,17 +1,19 @@
 package network
 
 import (
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 )
 
-type iRouter func(INode) []crypto.IPubKey
-type iHandler func(INode, local.IMessage) []byte
+type iRouter func(INode) []asymmetric.IPubKey
+type iHandler func(INode, message.IMessage) []byte
 
 type INode interface {
 	WithResponseRouter(iRouter) INode
 
-	Request(local.IRoute, local.IMessage) ([]byte, error)
+	Request(routing.IRoute, message.IMessage) ([]byte, error)
 	Handle([]byte, iHandler) INode
 	Listen(string) error
 	Close()
@@ -21,7 +23,7 @@ type INode interface {
 	Connect(string) error
 	Disconnect(string)
 
-	Client() local.IClient
+	Client() client.IClient
 	Checker() iChecker
 	Pseudo() iPseudo
 	Online() iOnline
@@ -30,6 +32,31 @@ type INode interface {
 
 type iOnline interface {
 	iStatus
+}
+
+type iF2F interface {
+	iStatus
+	iListPubKey
+}
+
+type iListPubKey interface {
+	InList(asymmetric.IPubKey) bool
+	List() []asymmetric.IPubKey
+	Append(asymmetric.IPubKey)
+	Remove(asymmetric.IPubKey)
+}
+
+type iPseudo interface {
+	iStatus
+	Request(int) iPseudo
+	Sleep() iPseudo
+	PubKey() asymmetric.IPubKey
+	PrivKey() asymmetric.IPrivKey
+}
+
+type iStatus interface {
+	Switch(bool)
+	Status() bool
 }
 
 type iChecker interface {
@@ -41,30 +68,5 @@ type iChecker interface {
 
 type iCheckerInfo interface {
 	Online() bool
-	PubKey() crypto.IPubKey
-}
-
-type iF2F interface {
-	iStatus
-	iListPubKey
-}
-
-type iListPubKey interface {
-	InList(crypto.IPubKey) bool
-	List() []crypto.IPubKey
-	Append(crypto.IPubKey)
-	Remove(crypto.IPubKey)
-}
-
-type iPseudo interface {
-	iStatus
-	Request(int) iPseudo
-	Sleep() iPseudo
-	PubKey() crypto.IPubKey
-	PrivKey() crypto.IPrivKey
-}
-
-type iStatus interface {
-	Switch(bool)
-	Status() bool
+	PubKey() asymmetric.IPubKey
 }

@@ -1,4 +1,4 @@
-package crypto
+package random
 
 import (
 	"crypto/rand"
@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	_ IPRNG = &sStdRandPRNG{}
+	_ IPRNG = &sStdPRNG{}
 )
 
-type sStdRandPRNG struct {
+type sStdPRNG struct {
 }
 
-func NewPRNG() IPRNG {
-	return &sStdRandPRNG{}
+func NewStdPRNG() IPRNG {
+	return &sStdPRNG{}
 }
 
 // Generates a cryptographically strong pseudo-random bytes.
-func (r *sStdRandPRNG) Bytes(n uint64) []byte {
+func (r *sStdPRNG) Bytes(n uint64) []byte {
 	slice := make([]byte, n)
 	_, err := rand.Read(slice)
 	if err != nil {
@@ -29,16 +29,16 @@ func (r *sStdRandPRNG) Bytes(n uint64) []byte {
 }
 
 // Generates a cryptographically strong pseudo-random string.
-func (r *sStdRandPRNG) String(n uint64) string {
+func (r *sStdPRNG) String(n uint64) string {
 	return encoding.Base64Encode(r.Bytes(n))[:n]
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.
-func (r *sStdRandPRNG) Uint64() uint64 {
+func (r *sStdPRNG) Uint64() uint64 {
 	return encoding.BytesToUint64(r.Bytes(8))
 }
 
 // Generate cryptographically strong pseudo-random bool value.
-func (r *sStdRandPRNG) Bool() bool {
+func (r *sStdPRNG) Bool() bool {
 	return r.Bytes(1)[0]%2 == 0
 }

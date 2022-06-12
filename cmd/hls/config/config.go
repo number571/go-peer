@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -28,13 +29,13 @@ type sConfig struct {
 
 type sF2F struct {
 	FStatus  bool `json:"status"`
-	fPubKeys []crypto.IPubKey
+	fPubKeys []asymmetric.IPubKey
 	FPubKeys []string `json:"pub_keys"`
 }
 
 type sOnlineChecker struct {
 	FStatus  bool `json:"status"`
-	fPubKeys []crypto.IPubKey
+	fPubKeys []asymmetric.IPubKey
 	FPubKeys []string `json:"pub_keys"`
 }
 
@@ -103,19 +104,19 @@ func NewConfig(filepath string) IConfig {
 			FOnlineChecker: cDefaultOnlineChecker,
 			FServices:      gDefaultServices,
 		}
-		err := utils.WriteFile(filepath, utils.Serialize(cfg))
+		err := utils.WriteFile(filepath, encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		err := utils.Deserialize(utils.ReadFile(filepath), cfg)
+		err := encoding.Deserialize(utils.ReadFile(filepath), cfg)
 		if err != nil {
 			panic(err)
 		}
 	}
 
 	for _, val := range cfg.FOnlineChecker.FPubKeys {
-		pubKey := crypto.LoadPubKey(val)
+		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
 			panic(fmt.Sprintf("public key is nil: '%s'", val))
 		}
@@ -123,7 +124,7 @@ func NewConfig(filepath string) IConfig {
 	}
 
 	for _, val := range cfg.FF2F.FPubKeys {
-		pubKey := crypto.LoadPubKey(val)
+		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
 			panic(fmt.Sprintf("public key is nil: '%s'", val))
 		}
@@ -141,7 +142,7 @@ func (f2f *sF2F) Status() bool {
 	return f2f.FStatus
 }
 
-func (f2f *sF2F) PubKeys() []crypto.IPubKey {
+func (f2f *sF2F) PubKeys() []asymmetric.IPubKey {
 	return f2f.fPubKeys
 }
 
@@ -157,7 +158,7 @@ func (onl *sOnlineChecker) Status() bool {
 	return onl.FStatus
 }
 
-func (onl *sOnlineChecker) PubKeys() []crypto.IPubKey {
+func (onl *sOnlineChecker) PubKeys() []asymmetric.IPubKey {
 	return onl.fPubKeys
 }
 

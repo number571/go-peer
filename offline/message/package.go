@@ -1,4 +1,4 @@
-package local
+package message
 
 import (
 	"encoding/json"
@@ -38,7 +38,7 @@ func (pack sPackage) BytesToSize() uint64 {
 
 // Deserialize with JSON format.
 func (pack sPackage) ToMessage() IMessage {
-	var msg = new(sMessage)
+	var msg = new(SMessage)
 	err := json.Unmarshal(pack, msg)
 	if err != nil {
 		return nil

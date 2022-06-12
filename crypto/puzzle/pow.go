@@ -1,37 +1,38 @@
-package crypto
+package puzzle
 
 import (
 	"bytes"
 	"math"
 	"math/big"
 
+	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/encoding"
 )
 
 var (
-	_ IPuzzle = &sPowPuzzle{}
+	_ IPuzzle = &sPoWPuzzle{}
 )
 
-type sPowPuzzle struct {
+type sPoWPuzzle struct {
 	fDiff uint8
 }
 
-func NewPuzzle(diff uint64) IPuzzle {
-	return &sPowPuzzle{uint8(diff)}
+func NewPoWPuzzle(diff uint64) IPuzzle {
+	return &sPoWPuzzle{uint8(diff)}
 }
 
 // Proof of work by the method of finding the desired hash.
 // Hash must start with 'diff' number of zero bits.
-func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
+func (puzzle *sPoWPuzzle) Proof(packHash []byte) uint64 {
 	var (
 		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	target.Lsh(target, sizeInBits(HashSize)-uint(puzzle.fDiff))
+	target.Lsh(target, sizeInBits(hashing.HashSize)-uint(puzzle.fDiff))
 	for nonce < math.MaxUint64 {
-		hash = NewHasher(bytes.Join(
+		hash = hashing.NewSHA256Hasher(bytes.Join(
 			[][]byte{
 				packHash,
 				encoding.Uint64ToBytes(nonce),
@@ -48,10 +49,10 @@ func (puzzle *sPowPuzzle) Proof(packHash []byte) uint64 {
 }
 
 // Verifies the work of the proof of work function.
-func (puzzle *sPowPuzzle) Verify(packHash []byte, nonce uint64) bool {
+func (puzzle *sPoWPuzzle) Verify(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	target := big.NewInt(1)
-	hash := NewHasher(bytes.Join(
+	hash := hashing.NewSHA256Hasher(bytes.Join(
 		[][]byte{
 			packHash,
 			encoding.Uint64ToBytes(nonce),
@@ -59,7 +60,7 @@ func (puzzle *sPowPuzzle) Verify(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	)).Bytes()
 	intHash.SetBytes(hash)
-	target.Lsh(target, sizeInBits(HashSize)-uint(puzzle.fDiff))
+	target.Lsh(target, sizeInBits(hashing.HashSize)-uint(puzzle.fDiff))
 	return intHash.Cmp(target) == -1
 }
 

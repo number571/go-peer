@@ -4,15 +4,23 @@ import (
 	"sync"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 var (
 	_ IKeyValueStorage = &sLevelDBStorage{}
+	_ iIterator        = &sLevelDBIterator{}
 )
 
 type sLevelDBStorage struct {
 	fMutex sync.Mutex
 	fDB    *leveldb.DB
+}
+
+type sLevelDBIterator struct {
+	fMutex sync.Mutex
+	ptr    iterator.Iterator
 }
 
 func NewLevelDBStorage(path string) IKeyValueStorage {
@@ -51,4 +59,41 @@ func (db *sLevelDBStorage) Close() error {
 	defer db.fMutex.Unlock()
 
 	return db.fDB.Close()
+}
+
+func (db *sLevelDBStorage) Iter(prefix []byte) iIterator {
+	db.fMutex.Lock()
+	defer db.fMutex.Unlock()
+
+	return &sLevelDBIterator{
+		ptr: db.fDB.NewIterator(util.BytesPrefix(prefix), nil),
+	}
+}
+
+func (iter *sLevelDBIterator) Next() bool {
+	iter.fMutex.Lock()
+	defer iter.fMutex.Unlock()
+
+	return iter.ptr.Next()
+}
+
+func (iter *sLevelDBIterator) Key() []byte {
+	iter.fMutex.Lock()
+	defer iter.fMutex.Unlock()
+
+	return iter.ptr.Key()
+}
+
+func (iter *sLevelDBIterator) Value() []byte {
+	iter.fMutex.Lock()
+	defer iter.fMutex.Unlock()
+
+	return iter.ptr.Value()
+}
+
+func (iter *sLevelDBIterator) Close() {
+	iter.fMutex.Lock()
+	defer iter.fMutex.Unlock()
+
+	iter.ptr.Release()
 }

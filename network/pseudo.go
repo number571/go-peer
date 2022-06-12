@@ -4,8 +4,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/random"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -18,7 +20,7 @@ type sPseudo struct {
 	fNode    INode
 	fEnabled bool
 	fChannel chan struct{}
-	fPrivKey crypto.IPrivKey
+	fPrivKey asymmetric.IPrivKey
 }
 
 // Set state = bool.
@@ -74,7 +76,7 @@ func (psd *sPseudo) Sleep() iPseudo {
 }
 
 // Get pseudo public key.
-func (psd *sPseudo) PubKey() crypto.IPubKey {
+func (psd *sPseudo) PubKey() asymmetric.IPubKey {
 	psd.fMutex.Lock()
 	defer psd.fMutex.Unlock()
 
@@ -82,7 +84,7 @@ func (psd *sPseudo) PubKey() crypto.IPubKey {
 }
 
 // Get pseudo private key.
-func (psd *sPseudo) PrivKey() crypto.IPrivKey {
+func (psd *sPseudo) PrivKey() asymmetric.IPrivKey {
 	psd.fMutex.Lock()
 	defer psd.fMutex.Unlock()
 
@@ -114,10 +116,10 @@ func (psd *sPseudo) stop() {
 
 func (psd *sPseudo) doRequest(size int) {
 	node := psd.fNode.(*sNode)
-	rand := crypto.NewPRNG()
+	rand := random.NewStdPRNG()
 	pMsg, _ := node.fClient.Encrypt(
-		local.NewRoute(psd.fPrivKey.PubKey()),
-		local.NewMessage(
+		routing.NewRoute(psd.fPrivKey.PubKey()),
+		message.NewMessage(
 			rand.Bytes(16),
 			rand.Bytes(calcRandSize(size)),
 		),
@@ -132,11 +134,11 @@ func (psd *sPseudo) doRequest(size int) {
 
 func calcRandSize(len int) uint64 {
 	ulen := uint64(len)
-	rand := crypto.NewPRNG()
+	rand := random.NewStdPRNG()
 	return ulen + rand.Uint64()%(10<<10) // +[0;10]KiB
 }
 
 func calcRandTime(seconds uint64) time.Duration {
-	rand := crypto.NewPRNG()
+	rand := random.NewStdPRNG()
 	return time.Duration(rand.Uint64() % (seconds * 1000)) // random[0;S*1000]MS
 }

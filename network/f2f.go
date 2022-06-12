@@ -3,7 +3,7 @@ package network
 import (
 	"sync"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/asymmetric"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 type sF2F struct {
 	fMutex   sync.Mutex
 	fEnabled bool
-	fMapping map[string]crypto.IPubKey
+	fMapping map[string]asymmetric.IPubKey
 }
 
 // Set state = bool.
@@ -34,7 +34,7 @@ func (f2f *sF2F) Status() bool {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (f2f *sF2F) InList(pub crypto.IPubKey) bool {
+func (f2f *sF2F) InList(pub asymmetric.IPubKey) bool {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
@@ -43,11 +43,11 @@ func (f2f *sF2F) InList(pub crypto.IPubKey) bool {
 }
 
 // Get a list of friends public keys.
-func (f2f *sF2F) List() []crypto.IPubKey {
+func (f2f *sF2F) List() []asymmetric.IPubKey {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	var list []crypto.IPubKey
+	var list []asymmetric.IPubKey
 	for _, pub := range f2f.fMapping {
 		list = append(list, pub)
 	}
@@ -56,7 +56,7 @@ func (f2f *sF2F) List() []crypto.IPubKey {
 }
 
 // Add public key to list of friends.
-func (f2f *sF2F) Append(pub crypto.IPubKey) {
+func (f2f *sF2F) Append(pub asymmetric.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
@@ -64,7 +64,7 @@ func (f2f *sF2F) Append(pub crypto.IPubKey) {
 }
 
 // Delete public key from list of friends.
-func (f2f *sF2F) Remove(pub crypto.IPubKey) {
+func (f2f *sF2F) Remove(pub asymmetric.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 

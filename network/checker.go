@@ -5,9 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -27,7 +28,7 @@ type sChecker struct {
 type sCheckerInfo struct {
 	fMutex  sync.Mutex
 	fOnline bool
-	fPubKey crypto.IPubKey
+	fPubKey asymmetric.IPubKey
 }
 
 // Set state = bool.
@@ -57,7 +58,7 @@ func (checker *sChecker) Status() bool {
 }
 
 // Check the existence in the list by the public key.
-func (checker *sChecker) InList(pub crypto.IPubKey) bool {
+func (checker *sChecker) InList(pub asymmetric.IPubKey) bool {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
@@ -66,11 +67,11 @@ func (checker *sChecker) InList(pub crypto.IPubKey) bool {
 }
 
 // Get a list of checks public keys.
-func (checker *sChecker) List() []crypto.IPubKey {
+func (checker *sChecker) List() []asymmetric.IPubKey {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
-	var list []crypto.IPubKey
+	var list []asymmetric.IPubKey
 	for _, chk := range checker.fMapping {
 		list = append(list, chk.PubKey())
 	}
@@ -92,7 +93,7 @@ func (checker *sChecker) ListWithInfo() []iCheckerInfo {
 }
 
 // Add public key to list of checks.
-func (checker *sChecker) Append(pub crypto.IPubKey) {
+func (checker *sChecker) Append(pub asymmetric.IPubKey) {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
@@ -103,14 +104,14 @@ func (checker *sChecker) Append(pub crypto.IPubKey) {
 }
 
 // Delete public key from list of checks.
-func (checker *sChecker) Remove(pub crypto.IPubKey) {
+func (checker *sChecker) Remove(pub asymmetric.IPubKey) {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
 	delete(checker.fMapping, pub.Address())
 }
 
-func (checkerInfo *sCheckerInfo) PubKey() crypto.IPubKey {
+func (checkerInfo *sCheckerInfo) PubKey() asymmetric.IPubKey {
 	return checkerInfo.fPubKey
 }
 
@@ -134,8 +135,8 @@ func (checker *sChecker) start() {
 				go func(recv *sCheckerInfo) {
 					defer wg.Done()
 					resp, err := node.doRequest(
-						local.NewRoute(recv.fPubKey),
-						local.NewMessage(patt, patt),
+						routing.NewRoute(recv.fPubKey),
+						message.NewMessage(patt, patt),
 						0, // retry number
 						sett.Get(settings.CTimeWait),
 					)

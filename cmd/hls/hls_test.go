@@ -11,9 +11,11 @@ import (
 	"github.com/number571/go-peer/cmd/hls/database"
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 	"github.com/number571/go-peer/settings/testutils"
 	"github.com/number571/go-peer/utils"
 )
@@ -141,8 +143,8 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 // HLS
 
 func testStartNodeHLS(t *testing.T) network.INode {
-	privKey := crypto.LoadPrivKey(tcPrivKeyHLS)
-	client := local.NewClient(privKey, tgSettings)
+	privKey := asymmetric.LoadRSAPrivKey(tcPrivKeyHLS)
+	client := client.NewClient(privKey, tgSettings)
 
 	node := network.NewNode(client).
 		Handle([]byte(hls_settings.CTitlePattern), routeHLS)
@@ -172,8 +174,8 @@ func testStartNodeHLS(t *testing.T) network.INode {
 // CLIENT
 
 func testStartClientHLS() error {
-	priv := crypto.NewPrivKey(tcAKeySize)
-	client := local.NewClient(priv, tgSettings)
+	priv := asymmetric.NewRSAPrivKey(tcAKeySize)
+	client := client.NewClient(priv, tgSettings)
 
 	node := network.NewNode(client).
 		Handle([]byte(hls_settings.CTitlePattern), nil)
@@ -183,7 +185,7 @@ func testStartClientHLS() error {
 		return err
 	}
 
-	msg := local.NewMessage(
+	msg := message.NewMessage(
 		[]byte(hls_settings.CTitlePattern),
 		hlsnet.NewRequest("GET", tcServiceInHLS, "/echo").
 			WithHead(map[string]string{
@@ -193,8 +195,8 @@ func testStartClientHLS() error {
 			ToBytes(),
 	)
 
-	pubKey := crypto.LoadPubKey(tcPubKeyHLS)
-	route := local.NewRoute(pubKey)
+	pubKey := asymmetric.LoadRSAPubKey(tcPubKeyHLS)
+	route := routing.NewRoute(pubKey)
 
 	res, err := node.Request(route, msg)
 	if err != nil {

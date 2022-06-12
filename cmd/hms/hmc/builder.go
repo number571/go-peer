@@ -1,8 +1,11 @@
 package hmc
 
 import (
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 )
@@ -12,10 +15,10 @@ var (
 )
 
 type sBuiler struct {
-	client local.IClient
+	client client.IClient
 }
 
-func NewBuiler(client local.IClient) IBuilder {
+func NewBuiler(client client.IClient) IBuilder {
 	return &sBuiler{
 		client: client,
 	}
@@ -23,7 +26,7 @@ func NewBuiler(client local.IClient) IBuilder {
 
 func (builder *sBuiler) Size() *hms_settings.SSizeRequest {
 	pubBytes := builder.client.PubKey().Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
+	hashRecv := hashing.NewSHA256Hasher(pubBytes).Bytes()
 
 	return &hms_settings.SSizeRequest{
 		Receiver: hashRecv,
@@ -32,7 +35,7 @@ func (builder *sBuiler) Size() *hms_settings.SSizeRequest {
 
 func (builder *sBuiler) Load(n uint64) *hms_settings.SLoadRequest {
 	pubBytes := builder.client.PubKey().Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
+	hashRecv := hashing.NewSHA256Hasher(pubBytes).Bytes()
 
 	return &hms_settings.SLoadRequest{
 		Receiver: hashRecv,
@@ -40,13 +43,13 @@ func (builder *sBuiler) Load(n uint64) *hms_settings.SLoadRequest {
 	}
 }
 
-func (builder *sBuiler) Push(receiver crypto.IPubKey, msg []byte) *hms_settings.SPushRequest {
+func (builder *sBuiler) Push(receiver asymmetric.IPubKey, msg []byte) *hms_settings.SPushRequest {
 	pubBytes := receiver.Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
+	hashRecv := hashing.NewSHA256Hasher(pubBytes).Bytes()
 
 	encMsg, _ := builder.client.Encrypt(
-		local.NewRoute(receiver),
-		local.NewMessage([]byte(hms_settings.CTitlePattern), msg),
+		routing.NewRoute(receiver),
+		message.NewMessage([]byte(hms_settings.CTitlePattern), msg),
 	)
 
 	return &hms_settings.SPushRequest{

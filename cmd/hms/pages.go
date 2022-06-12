@@ -6,9 +6,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/message"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -81,13 +81,13 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg := local.LoadPackage(vRequest.Package).ToMessage()
+	msg := message.LoadPackage(vRequest.Package).ToMessage()
 	if msg == nil {
 		response(w, hms_settings.CErrorMessage, []byte("failed: decode message"))
 		return
 	}
 
-	puzzle := crypto.NewPuzzle(gSettings.Get(settings.CSizeWork))
+	puzzle := puzzle.NewPoWPuzzle(gSettings.Get(settings.CSizeWork))
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		response(w, hms_settings.CErrorWorkSize, []byte("failed: incorrect work size"))
 		return

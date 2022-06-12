@@ -1,13 +1,13 @@
 package database
 
 import (
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/message"
 )
 
 type IKeyValueDB interface {
 	Size([]byte) (uint64, error)
-	Push([]byte, local.IMessage) error
-	Load([]byte, uint64) (local.IMessage, error)
+	Push([]byte, message.IMessage) error
+	Load([]byte, uint64) (message.IMessage, error)
 
 	Close() error
 	Clean() error

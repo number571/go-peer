@@ -5,8 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/settings/testutils"
 )
@@ -21,20 +23,20 @@ var (
 	tgRouteEcho = []byte("/echo")
 )
 
-func echoMessage(node INode, msg local.IMessage) []byte {
+func echoMessage(node INode, msg message.IMessage) []byte {
 	return msg.Body().Data()
 }
 
 func newNode() INode {
 	sett := testutils.NewSettings()
-	privKey := crypto.NewPrivKey(1024)
-	client := local.NewClient(privKey, sett)
+	privKey := asymmetric.NewRSAPrivKey(1024)
+	client := client.NewClient(privKey, sett)
 	return NewNode(client)
 }
 
 // Simple broadcast testing
 
-func testInitSimple() ([3]INode, local.IRoute, local.IMessage) {
+func testInitSimple() ([3]INode, routing.IRoute, message.IMessage) {
 	client1 := newNode()
 	client2 := newNode()
 
@@ -51,8 +53,8 @@ func testInitSimple() ([3]INode, local.IRoute, local.IMessage) {
 	client2.Connect(tcNodeAddress1)
 
 	return [3]INode{client1, client2, node1},
-		local.NewRoute(client2.Client().PubKey()),
-		local.NewMessage(tgRouteEcho, []byte("hello, world!"))
+		routing.NewRoute(client2.Client().PubKey()),
+		message.NewMessage(tgRouteEcho, []byte("hello, world!"))
 }
 
 func testFreeNodes(nodes []INode) {
@@ -80,7 +82,7 @@ func BenchmarkSimple(b *testing.B) {
 
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
-		go func(i int, sender INode, route local.IRoute, msg local.IMessage) {
+		go func(i int, sender INode, route routing.IRoute, msg message.IMessage) {
 			defer wg.Done()
 			_, err := sender.Request(route, msg)
 			if err != nil {
@@ -165,7 +167,7 @@ func TestPseudo(t *testing.T) {
 
 // TEST ROUTE
 
-func testInitRoute() ([5]INode, local.IRoute, local.IMessage) {
+func testInitRoute() ([5]INode, routing.IRoute, message.IMessage) {
 	client1 := newNode()
 	client2 := newNode()
 
@@ -188,24 +190,24 @@ func testInitRoute() ([5]INode, local.IRoute, local.IMessage) {
 	client1.Connect(tcNodeAddress1)
 	client2.Connect(tcNodeAddress3)
 
-	client2.WithResponseRouter(func(_ INode) []crypto.IPubKey {
-		return []crypto.IPubKey{
+	client2.WithResponseRouter(func(_ INode) []asymmetric.IPubKey {
+		return []asymmetric.IPubKey{
 			node2.Client().PubKey(),
 			node3.Client().PubKey(),
 			node1.Client().PubKey(),
 		}
 	})
 
-	psender := crypto.NewPrivKey(client1.Client().PubKey().Size())
-	routes := []crypto.IPubKey{
+	psender := asymmetric.NewRSAPrivKey(client1.Client().PubKey().Size())
+	routes := []asymmetric.IPubKey{
 		node1.Client().PubKey(),
 		node2.Client().PubKey(),
 		node3.Client().PubKey(),
 	}
 
 	return [5]INode{client1, client2, node1, node2, node3},
-		local.NewRoute(client2.Client().PubKey()).WithRedirects(psender, routes),
-		local.NewMessage(tgRouteEcho, []byte("hello, world!"))
+		routing.NewRoute(client2.Client().PubKey()).WithRedirects(psender, routes),
+		message.NewMessage(tgRouteEcho, []byte("hello, world!"))
 }
 
 func TestRoute(t *testing.T) {
@@ -232,7 +234,7 @@ func BenchmarkComplex(b *testing.B) {
 	wg := sync.WaitGroup{}
 	wg.Add(b.N)
 	for i := 0; i < b.N; i++ {
-		go func(i int, sender INode, route local.IRoute, msg local.IMessage) {
+		go func(i int, sender INode, route routing.IRoute, msg message.IMessage) {
 			defer wg.Done()
 			_, err := sender.Request(route, msg)
 			if err != nil {

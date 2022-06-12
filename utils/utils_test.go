@@ -4,31 +4,18 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/random"
 )
-
-type tsMessage struct {
-	Result string `json:"result"`
-	Return int    `json:"return"`
-}
 
 const (
 	tcUtilsFile = "utils_test.txt"
-)
-
-const (
-	tcFileData = `test text
+	tcFileData  = `test text
 for utils package
 `
-	tcJSON = `{
-	"result": "hello",
-	"return": 5
-}`
 )
 
 var (
-	tgMessage  = tsMessage{"hello", 5}
-	tgRandFile = crypto.NewPRNG().String(20)
+	tgRandFile = random.NewStdPRNG().String(20)
 )
 
 func TestFileIsExist(t *testing.T) {
@@ -72,24 +59,5 @@ func TestWriteFile(t *testing.T) {
 
 	if string(res) != tcFileData {
 		t.Errorf("invalid read text from '%s'", tgRandFile)
-	}
-}
-
-func TestSerialize(t *testing.T) {
-	if string(Serialize(tgMessage)) != tcJSON {
-		t.Errorf("serialize string is invalid")
-	}
-}
-
-func TestDeserialize(t *testing.T) {
-	res := new(tsMessage)
-
-	err := Deserialize([]byte(tcJSON), res)
-	if err != nil {
-		t.Errorf("deserialize failed")
-	}
-
-	if res.Result != "hello" || res.Return != 5 {
-		t.Errorf("fields not equals")
 	}
 }

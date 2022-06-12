@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/offline/message"
 )
 
 var (
@@ -28,7 +28,7 @@ func (client *sClient) Size() (uint64, error) {
 	return client.requester.Size(client.builder.Size())
 }
 
-func (client *sClient) Load(i uint64) (local.IMessage, error) {
+func (client *sClient) Load(i uint64) (message.IMessage, error) {
 	msg, err := client.requester.Load(client.builder.Load(i))
 	if err != nil {
 		return nil, err
@@ -46,6 +46,6 @@ func (client *sClient) Load(i uint64) (local.IMessage, error) {
 	return msg, nil
 }
 
-func (client *sClient) Push(receiver crypto.IPubKey, body []byte) error {
+func (client *sClient) Push(receiver asymmetric.IPubKey, body []byte) error {
 	return client.requester.Push(client.builder.Push(receiver, body))
 }

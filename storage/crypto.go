@@ -6,21 +6,28 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/entropy"
+	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/crypto/random"
+	"github.com/number571/go-peer/crypto/symmetric"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
 
 var (
 	_ IKeyValueStorage = &sCryptoStorage{}
+	_ iIterator        = &sCryptoIterator{}
 )
 
 type sCryptoStorage struct {
 	fSettings settings.ISettings
 	fPath     string
 	fSalt     []byte
-	fCipher   crypto.ICipher
+	fCipher   symmetric.ICipher
 }
+
+// not used
+type sCryptoIterator struct{}
 
 type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
@@ -39,12 +46,12 @@ func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValu
 		}
 		store.fSalt = encdata[:store.fSettings.Get(settings.CSizeSkey)]
 	} else {
-		store.fSalt = crypto.NewPRNG().Bytes(store.fSettings.Get(settings.CSizeSkey))
+		store.fSalt = random.NewStdPRNG().Bytes(store.fSettings.Get(settings.CSizeSkey))
 	}
 
-	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	entropy := entropy.NewEntropy(store.fSettings.Get(settings.CSizeWork))
 	ekey := entropy.Raise(key, store.fSalt)
-	store.fCipher = crypto.NewCipher(ekey)
+	store.fCipher = symmetric.NewAESCipher(ekey)
 
 	if !store.exists() {
 		store.Set(nil, nil)
@@ -75,11 +82,11 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	entropy := entropy.NewEntropy(store.fSettings.Get(settings.CSizeWork))
 	ekey := entropy.Raise(key, store.fSalt)
-	hash := crypto.NewHasher(ekey).String()
+	hash := hashing.NewSHA256Hasher(ekey).String()
 
-	cipher := crypto.NewCipher(ekey)
+	cipher := symmetric.NewAESCipher(ekey)
 	mapping.FSecrets[hash] = cipher.Encrypt(value)
 
 	// Encrypt and save storage
@@ -111,16 +118,16 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	entropy := entropy.NewEntropy(store.fSettings.Get(settings.CSizeWork))
 	ekey := entropy.Raise(key, store.fSalt)
-	hash := crypto.NewHasher(ekey).String()
+	hash := hashing.NewSHA256Hasher(ekey).String()
 
 	encsecret, ok := mapping.FSecrets[hash]
 	if !ok {
 		return nil, fmt.Errorf("error: key undefined")
 	}
 
-	cipher := crypto.NewCipher(ekey)
+	cipher := symmetric.NewAESCipher(ekey)
 	secret := cipher.Decrypt(encsecret)
 
 	return secret, nil
@@ -139,9 +146,9 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	// Open and decrypt private key
-	entropy := crypto.NewEntropy(store.fSettings.Get(settings.CSizeWork))
+	entropy := entropy.NewEntropy(store.fSettings.Get(settings.CSizeWork))
 	ekey := entropy.Raise(key, store.fSalt)
-	hash := crypto.NewHasher(ekey).String()
+	hash := hashing.NewSHA256Hasher(ekey).String()
 
 	_, ok := mapping.FSecrets[hash]
 	if !ok {
@@ -149,11 +156,6 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	delete(mapping.FSecrets, hash)
-	return nil
-}
-
-// just pass
-func (store *sCryptoStorage) Close() error {
 	return nil
 }
 
@@ -176,4 +178,30 @@ func (store *sCryptoStorage) decrypt() (storageData, error) {
 	}
 
 	return mapping, nil
+}
+
+// NOT IMPLEMENTS
+// Specific of this storage
+
+func (store *sCryptoStorage) Close() error {
+	return nil
+}
+
+func (db *sCryptoStorage) Iter(prefix []byte) iIterator {
+	return nil
+}
+
+func (iter *sCryptoIterator) Next() bool {
+	return false
+}
+
+func (iter *sCryptoIterator) Key() []byte {
+	return nil
+}
+
+func (iter *sCryptoIterator) Value() []byte {
+	return nil
+}
+
+func (iter *sCryptoIterator) Close() {
 }

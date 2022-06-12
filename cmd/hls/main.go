@@ -8,9 +8,10 @@ import (
 	"time"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/offline/selector"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -26,9 +27,9 @@ func main() {
 	gNode.Handle([]byte(hls_settings.CTitlePattern), routeHLS)
 
 	// set response route
-	gNode.WithResponseRouter(func(node network.INode) []crypto.IPubKey {
-		randSizeRoute := crypto.NewPRNG().Uint64() % hls_settings.CSizeRoute
-		return local.NewSelector(nodesInOnline(node)).
+	gNode.WithResponseRouter(func(node network.INode) []asymmetric.IPubKey {
+		randSizeRoute := random.NewStdPRNG().Uint64() % hls_settings.CSizeRoute
+		return selector.NewSelector(nodesInOnline(node)).
 			Shuffle().
 			Return(randSizeRoute)
 	})
@@ -116,8 +117,8 @@ func main() {
 	}
 }
 
-func nodesInOnline(node network.INode) []crypto.IPubKey {
-	inOnline := []crypto.IPubKey{}
+func nodesInOnline(node network.INode) []asymmetric.IPubKey {
+	inOnline := []asymmetric.IPubKey{}
 	for _, info := range gNode.Checker().ListWithInfo() {
 		if !info.Online() {
 			continue

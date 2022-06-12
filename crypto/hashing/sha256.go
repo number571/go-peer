@@ -1,4 +1,4 @@
-package crypto
+package hashing
 
 import (
 	"crypto/hmac"
@@ -9,7 +9,7 @@ import (
 
 var (
 	_ IHasher = &sSHA256Hasher{}
-	_ IHasher = &sHMAC256Hasher{}
+	_ IHasher = &sHMACSHA256Hasher{}
 )
 
 const (
@@ -22,7 +22,7 @@ type sSHA256Hasher struct {
 	fHash []byte
 }
 
-func NewHasher(data []byte) IHasher {
+func NewSHA256Hasher(data []byte) IHasher {
 	h := sha256.New()
 	h.Write(data)
 	return &sSHA256Hasher{
@@ -47,31 +47,31 @@ func (h *sSHA256Hasher) Size() uint64 {
 	return HashSize
 }
 
-type sHMAC256Hasher struct {
+type sHMACSHA256Hasher struct {
 	fHash []byte
 }
 
-func NewHasherMAC(key []byte, data []byte) IHasher {
+func NewHMACSHA256Hasher(key []byte, data []byte) IHasher {
 	h := hmac.New(sha256.New, key)
 	h.Write(data)
-	return &sHMAC256Hasher{
+	return &sHMACSHA256Hasher{
 		fHash: h.Sum(nil),
 	}
 }
 
-func (h *sHMAC256Hasher) String() string {
+func (h *sHMACSHA256Hasher) String() string {
 	bytes := h.Bytes()
 	return encoding.Base64Encode(bytes)
 }
 
-func (h *sHMAC256Hasher) Bytes() []byte {
+func (h *sHMACSHA256Hasher) Bytes() []byte {
 	return h.fHash
 }
 
-func (h *sHMAC256Hasher) Type() string {
+func (h *sHMACSHA256Hasher) Type() string {
 	return HmacKeyType
 }
 
-func (h *sHMAC256Hasher) Size() uint64 {
+func (h *sHMACSHA256Hasher) Size() uint64 {
 	return HashSize
 }

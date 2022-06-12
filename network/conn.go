@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"net"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/crypto/puzzle"
+	"github.com/number571/go-peer/offline/message"
 	"github.com/number571/go-peer/settings"
 )
 
-func (node *sNode) readMessage(conn net.Conn) local.IMessage {
+func (node *sNode) readMessage(conn net.Conn) message.IMessage {
 	const (
 		SizeUint64 = 8 // bytes
 	)
@@ -28,7 +29,7 @@ func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 		return nil
 	}
 
-	mustLen := local.LoadPackage(bufsize).BytesToSize()
+	mustLen := message.LoadPackage(bufsize).BytesToSize()
 	if mustLen > node.fClient.Settings().Get(settings.CSizePack) {
 		return nil
 	}
@@ -54,20 +55,20 @@ func (node *sNode) readMessage(conn net.Conn) local.IMessage {
 		}
 	}
 
-	return node.initialCheck(local.LoadPackage(pack).ToMessage())
+	return node.initialCheck(message.LoadPackage(pack).ToMessage())
 }
 
-func (node *sNode) initialCheck(msg local.IMessage) local.IMessage {
+func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 	if msg == nil {
 		return nil
 	}
 
-	if len(msg.Body().Hash()) != crypto.HashSize {
+	if len(msg.Body().Hash()) != hashing.HashSize {
 		return nil
 	}
 
 	diff := node.fClient.Settings().Get(settings.CSizeWork)
-	puzzle := crypto.NewPuzzle(diff)
+	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil
 	}

@@ -10,8 +10,8 @@ import (
 	"github.com/number571/go-peer/cmd/hms/config"
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/number571/go-peer/cmd/hms/hmc"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/offline/client"
 	"github.com/number571/go-peer/settings/testutils"
 )
 
@@ -94,8 +94,8 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 }
 
 func testClientDoPush() error {
-	priv := crypto.LoadPrivKey(tcPrivKeyReceiver)
-	client := local.NewClient(priv, gSettings)
+	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
+	client := client.NewClient(priv, gSettings)
 
 	for i := 0; i < tcN; i++ {
 		err := hmc.NewClient(
@@ -114,8 +114,8 @@ func testClientDoPush() error {
 }
 
 func testClientDoSize() error {
-	priv := crypto.LoadPrivKey(tcPrivKeyReceiver)
-	client := local.NewClient(priv, gSettings)
+	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
+	client := client.NewClient(priv, gSettings)
 
 	size, err := hmc.NewClient(
 		hmc.NewBuiler(client),
@@ -133,8 +133,8 @@ func testClientDoSize() error {
 }
 
 func testClientDoLoad() error {
-	priv := crypto.LoadPrivKey(tcPrivKeyReceiver)
-	client := local.NewClient(priv, gSettings)
+	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
+	client := client.NewClient(priv, gSettings)
 
 	for i := 0; i < tcN; i++ {
 		msg, err := hmc.NewClient(
@@ -150,7 +150,7 @@ func testClientDoLoad() error {
 			return fmt.Errorf("body is not equal")
 		}
 
-		pubKey := crypto.LoadPubKey(msg.Head().Sender())
+		pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
 		if pubKey.Address() != client.PubKey().Address() {
 			return fmt.Errorf("public key is not equal")
 		}

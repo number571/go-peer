@@ -1,11 +1,9 @@
-package local
+package selector
 
 import (
-	"bytes"
 	"testing"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/crypto/asymmetric"
 )
 
 var (
@@ -16,37 +14,10 @@ var (
 	}
 )
 
-func testNewClient() IClient {
-	sett := testutils.NewSettings()
-	privKey := crypto.NewPrivKey(1024)
-	return NewClient(privKey, sett)
-}
-
-func TestEncrypt(t *testing.T) {
-	client1 := testNewClient()
-	client2 := testNewClient()
-
-	title := []byte("header")
-	data := []byte("hello, world!")
-
-	msg := NewMessage(title, data)
-	encmsg, _ := client1.Encrypt(NewRoute(client2.PubKey()), msg)
-
-	decmsg, title1 := client2.Decrypt(encmsg)
-
-	if !bytes.Equal(data, decmsg.Body().Data()) {
-		t.Errorf("data not equal with decrypted data")
-	}
-
-	if !bytes.Equal(title, title1) {
-		t.Errorf("title not equal with decrypted title")
-	}
-}
-
 func TestSelector(t *testing.T) {
-	pubKeys := []crypto.IPubKey{}
+	pubKeys := []asymmetric.IPubKey{}
 	for _, sPubKey := range tgPubKeys {
-		pubKeys = append(pubKeys, crypto.LoadPubKey(sPubKey))
+		pubKeys = append(pubKeys, asymmetric.LoadRSAPubKey(sPubKey))
 	}
 
 	selector := NewSelector(pubKeys)
@@ -66,7 +37,7 @@ func TestSelector(t *testing.T) {
 	t.Errorf("selector's shuffle does not work")
 }
 
-func testAreUniq(pubKeys []crypto.IPubKey) bool {
+func testAreUniq(pubKeys []asymmetric.IPubKey) bool {
 	for i := 0; i < len(pubKeys); i++ {
 		for j := i + 1; j < len(pubKeys); j++ {
 			if pubKeys[i].Address() == pubKeys[j].Address() {

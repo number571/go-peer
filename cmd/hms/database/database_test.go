@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/offline/message"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	tgKey = crypto.NewHasher([]byte("test-key")).Bytes()
+	tgKey = hashing.NewSHA256Hasher([]byte("test-key")).Bytes()
 	tgDB  IKeyValueDB
 )
 
@@ -43,7 +43,7 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	msg := local.NewMessage([]byte(tcMessageTitle), []byte(tcMessageBody))
+	msg := message.NewMessage([]byte(tcMessageTitle), []byte(tcMessageBody))
 	err = tgDB.Push(tgKey, msg)
 	if err != nil {
 		t.Error(err)

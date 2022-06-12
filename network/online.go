@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/offline/message"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -47,7 +47,7 @@ func (onl *sOnline) start() {
 		sett := node.Client().Settings()
 		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
 
-		node.Handle(patt, func(node INode, msg local.IMessage) []byte {
+		node.Handle(patt, func(node INode, msg message.IMessage) []byte {
 			return patt
 		})
 	}(onl.fNode)

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,16 +32,4 @@ func ReadFile(file string) []byte {
 
 func WriteFile(file string, data []byte) error {
 	return ioutil.WriteFile(file, data, 0644)
-}
-
-func Serialize(data interface{}) []byte {
-	res, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		return nil
-	}
-	return res
-}
-
-func Deserialize(data []byte, res interface{}) error {
-	return json.Unmarshal(data, res)
 }

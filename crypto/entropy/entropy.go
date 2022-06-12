@@ -1,6 +1,10 @@
-package crypto
+package entropy
 
-import "bytes"
+import (
+	"bytes"
+
+	"github.com/number571/go-peer/crypto/hashing"
+)
 
 var (
 	_ IEntropy = &sEntropy{}
@@ -21,7 +25,7 @@ func (entr *sEntropy) Raise(data, salt []byte) []byte {
 	lim := uint64(1 << entr.bits)
 
 	for i := uint64(0); i < lim; i++ {
-		data = NewHasher(bytes.Join(
+		data = hashing.NewSHA256Hasher(bytes.Join(
 			[][]byte{
 				data,
 				salt,

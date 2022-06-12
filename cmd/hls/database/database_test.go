@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/crypto"
+	"github.com/number571/go-peer/crypto/hashing"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	tgHash = crypto.NewHasher([]byte("test-hash")).Bytes()
+	tgHash = hashing.NewSHA256Hasher([]byte("test-hash")).Bytes()
 	tgDB   IKeyValueDB
 )
 

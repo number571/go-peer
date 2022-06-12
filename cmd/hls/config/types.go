@@ -1,6 +1,8 @@
 package config
 
-import "github.com/number571/go-peer/crypto"
+import (
+	"github.com/number571/go-peer/crypto/asymmetric"
+)
 
 type IConfig interface {
 	CleanCron() string
@@ -13,12 +15,12 @@ type IConfig interface {
 
 type iOnlineChecker interface {
 	Status() bool
-	PubKeys() []crypto.IPubKey
+	PubKeys() []asymmetric.IPubKey
 }
 
 type iF2F interface {
 	Status() bool
-	PubKeys() []crypto.IPubKey
+	PubKeys() []asymmetric.IPubKey
 }
 
 type iAddress interface {

@@ -8,8 +8,7 @@ import (
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/offline/message"
 )
 
 var (
@@ -30,7 +29,7 @@ func (r *sRequester) Size(request *hms_settings.SSizeRequest) (uint64, error) {
 	resp, err := http.Post(
 		fmt.Sprintf(hms_settings.CSizeTemplate, r.host),
 		hms_settings.CContentType,
-		bytes.NewReader(utils.Serialize(request)),
+		bytes.NewReader(encoding.Serialize(request)),
 	)
 	if err != nil {
 		return 0, err
@@ -46,11 +45,11 @@ func (r *sRequester) Size(request *hms_settings.SSizeRequest) (uint64, error) {
 	return encoding.BytesToUint64(response.Result), nil
 }
 
-func (r *sRequester) Load(request *hms_settings.SLoadRequest) (local.IMessage, error) {
+func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage, error) {
 	resp, err := http.Post(
 		fmt.Sprintf(hms_settings.CLoadTemplate, r.host),
 		hms_settings.CContentType,
-		bytes.NewReader(utils.Serialize(request)),
+		bytes.NewReader(encoding.Serialize(request)),
 	)
 	if err != nil {
 		return nil, err
@@ -63,7 +62,7 @@ func (r *sRequester) Load(request *hms_settings.SLoadRequest) (local.IMessage, e
 		return nil, fmt.Errorf("%s", string(response.Result))
 	}
 
-	msg := local.LoadPackage(response.Result).ToMessage()
+	msg := message.LoadPackage(response.Result).ToMessage()
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")
 	}
@@ -75,7 +74,7 @@ func (r *sRequester) Push(request *hms_settings.SPushRequest) error {
 	resp, err := http.Post(
 		fmt.Sprintf(hms_settings.CPushTemplate, r.host),
 		hms_settings.CContentType,
-		bytes.NewReader(utils.Serialize(request)),
+		bytes.NewReader(encoding.Serialize(request)),
 	)
 	if err != nil {
 		return err

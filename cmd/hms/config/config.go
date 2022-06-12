@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -34,12 +35,12 @@ func NewConfig(filepath string) IConfig {
 			FCleanCron:   cDefaultCleanCron,
 			FConnections: []string{cDefaultConnection},
 		}
-		err := utils.WriteFile(filepath, utils.Serialize(cfg))
+		err := utils.WriteFile(filepath, encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		err := utils.Deserialize(utils.ReadFile(filepath), cfg)
+		err := encoding.Deserialize(utils.ReadFile(filepath), cfg)
 		if err != nil {
 			panic(err)
 		}

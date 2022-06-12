@@ -1,4 +1,4 @@
-package crypto
+package symmetric
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+
+	"github.com/number571/go-peer/crypto/hashing"
 )
 
 var (
@@ -21,14 +23,14 @@ type sAESCipher struct {
 	fKey []byte
 }
 
-func NewCipher(key []byte) ICipher {
-	switch HashSize {
+func NewAESCipher(key []byte) ICipher {
+	switch hashing.HashSize {
 	case 16, 24, 32: // AES keys
 	default:
 		return nil
 	}
 	return &sAESCipher{
-		fKey: NewHasher(key).Bytes(),
+		fKey: hashing.NewSHA256Hasher(key).Bytes(),
 	}
 }
 
@@ -81,7 +83,7 @@ func (cph *sAESCipher) Type() string {
 }
 
 func (cph *sAESCipher) Size() uint64 {
-	return HashSize
+	return hashing.HashSize
 }
 
 func paddingPKCS5(ciphertext []byte, blockSize int) []byte {

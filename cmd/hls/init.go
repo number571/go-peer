@@ -8,9 +8,9 @@ import (
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/logger"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/offline/client"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/storage"
 	"github.com/number571/go-peer/utils"
@@ -26,7 +26,7 @@ func hlsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
-	gPPrivKey = crypto.NewPrivKey(hls_settings.CAKeySize)
+	gPPrivKey = asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")
@@ -42,7 +42,7 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gNode = network.NewNode(local.NewClient(privKey, sett))
+	gNode = network.NewNode(client.NewClient(privKey, sett))
 	if gNode == nil {
 		return fmt.Errorf("failed create client node")
 	}
@@ -54,7 +54,7 @@ func hlsDefaultInit() error {
 	return nil
 }
 
-func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) crypto.IPrivKey {
+func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
 	fileAlreadyExist := utils.FileIsExist(filepath)
 
 	storage := storage.NewCryptoStorage(
@@ -71,10 +71,10 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 		if err != nil {
 			return nil
 		}
-		return crypto.LoadPrivKey(bpriv)
+		return asymmetric.LoadRSAPrivKey(bpriv)
 	}
 
-	priv := crypto.NewPrivKey(hls_settings.CAKeySize)
+	priv := asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
 	err := storage.Set(objectKey, priv.Bytes())
 	if err != nil {
 		return nil

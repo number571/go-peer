@@ -3,7 +3,7 @@ package network
 import (
 	"sync"
 
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/encoding"
 )
 
 var (
@@ -29,12 +29,12 @@ func NewRequest(method, host, path string) IRequest {
 
 func LoadRequest(data []byte) IRequest {
 	var request = new(sRequest)
-	utils.Deserialize(data, request)
+	encoding.Deserialize(data, request)
 	return request
 }
 
 func (r *sRequest) ToBytes() []byte {
-	return utils.Serialize(r)
+	return encoding.Serialize(r)
 }
 
 func (r *sRequest) WithHead(head map[string]string) IRequest {

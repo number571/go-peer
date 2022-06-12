@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/offline/message"
 	"github.com/number571/go-peer/settings/testutils"
 )
 
@@ -16,13 +18,13 @@ const (
 )
 
 func TestBuilder(t *testing.T) {
-	client := local.NewClient(
-		crypto.LoadPrivKey(tcPrivKeyClient),
+	client := client.NewClient(
+		asymmetric.LoadRSAPrivKey(tcPrivKeyClient),
 		testutils.NewSettings(),
 	)
 
 	pubBytes := client.PubKey().Bytes()
-	hashRecv := crypto.NewHasher(pubBytes).Bytes()
+	hashRecv := hashing.NewSHA256Hasher(pubBytes).Bytes()
 
 	builder := NewBuiler(client)
 
@@ -41,7 +43,7 @@ func TestBuilder(t *testing.T) {
 		t.Errorf("builder push error (hash receiver)")
 	}
 
-	msg := local.LoadPackage(bPush.Package).ToMessage()
+	msg := message.LoadPackage(bPush.Package).ToMessage()
 	if msg == nil {
 		t.Errorf("builder push error (message is nil [1])")
 	}
@@ -60,7 +62,7 @@ func TestBuilder(t *testing.T) {
 		t.Errorf("builder push error (body is not equal)")
 	}
 
-	pubKey := crypto.LoadPubKey(msg.Head().Sender())
+	pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
 	if pubKey.Address() != client.PubKey().Address() {
 		t.Errorf("builder push error (public key is not equal)")
 	}

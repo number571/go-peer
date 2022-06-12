@@ -8,12 +8,13 @@ import (
 
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/crypto"
-	"github.com/number571/go-peer/local"
+	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/offline/routing"
 )
 
-func routeHLS(node network.INode, msg local.IMessage) []byte {
+func routeHLS(node network.INode, msg message.IMessage) []byte {
 	// load request from message's body
 	requestBytes := msg.Body().Data()
 	request := hlsnet.LoadRequest(requestBytes)
@@ -22,7 +23,7 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 	}
 
 	// check already received data by hash
-	hash := crypto.NewHasher(requestBytes).Bytes()
+	hash := hashing.NewSHA256Hasher(requestBytes).Bytes()
 	if gDB.Exist(hash) {
 		return nil
 	}
@@ -38,8 +39,8 @@ func routeHLS(node network.INode, msg local.IMessage) []byte {
 	if info.IsRedirect() {
 		for _, recv := range gConfig.F2F().PubKeys() {
 			go node.Request(
-				local.NewRoute(recv),
-				local.NewMessage([]byte(hls_settings.CTitlePattern), requestBytes),
+				routing.NewRoute(recv),
+				message.NewMessage([]byte(hls_settings.CTitlePattern), requestBytes),
 			)
 		}
 	}
