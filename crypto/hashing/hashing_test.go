@@ -7,11 +7,11 @@ func TestSHA256(t *testing.T) {
 
 	hash := NewSHA256Hasher(msg).String()
 	if hash != NewSHA256Hasher(msg).String() {
-		t.Errorf("hash is not determined")
+		t.Error("hash is not determined")
 	}
 
 	msg[3] = msg[3] ^ 8
 	if hash == NewSHA256Hasher(msg).String() {
-		t.Errorf("bit didn't change the result ")
+		t.Error("bit didn't change the result ")
 	}
 }

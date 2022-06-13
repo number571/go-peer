@@ -16,10 +16,10 @@ func TestEntropy(t *testing.T) {
 	hash := NewEntropy(10).Raise(msg, salt)
 
 	if bytes.Equal(hash, hashing.NewSHA256Hasher(msg).Bytes()) {
-		t.Errorf("hash is correct?")
+		t.Error("hash is correct?")
 	}
 
 	if !bytes.Equal(hash, NewEntropy(10).Raise(msg, salt)) {
-		t.Errorf("hash is not determined")
+		t.Error("hash is not determined")
 	}
 }

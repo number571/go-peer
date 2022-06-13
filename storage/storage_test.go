@@ -32,7 +32,7 @@ func TestCryptoStorage(t *testing.T) {
 	}
 
 	if !bytes.Equal(secret1, secret2) {
-		t.Errorf("saved and loaded values not equals")
+		t.Error("saved and loaded values not equals")
 		return
 	}
 
@@ -67,7 +67,7 @@ func TestLevelDBStorage(t *testing.T) {
 	}
 
 	if !bytes.Equal(secret1, secret2) {
-		t.Errorf("saved and loaded values not equals")
+		t.Error("saved and loaded values not equals")
 		return
 	}
 

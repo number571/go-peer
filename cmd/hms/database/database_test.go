@@ -39,7 +39,7 @@ func TestDB(t *testing.T) {
 		return
 	}
 	if size != 0 {
-		t.Errorf("init size != 0")
+		t.Error("init size != 0")
 		return
 	}
 
@@ -56,7 +56,7 @@ func TestDB(t *testing.T) {
 		return
 	}
 	if size != 1 {
-		t.Errorf("after push size != 1")
+		t.Error("after push size != 1")
 		return
 	}
 
@@ -67,7 +67,7 @@ func TestDB(t *testing.T) {
 	}
 
 	if !bytes.Equal(loadMsg.Body().Data(), []byte(msg.Body().Data())) {
-		t.Errorf("load msg (title||body) != init (title||body)")
+		t.Error("load msg (title||body) != init (title||body)")
 	}
 
 	err = tgDB.Clean()
@@ -81,7 +81,7 @@ func TestDB(t *testing.T) {
 		return
 	}
 	if size != 0 {
-		t.Errorf("after clean size != 0")
+		t.Error("after clean size != 0")
 	}
 
 	err = tgDB.Close()

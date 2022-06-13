@@ -15,6 +15,6 @@ func TestAESEncrypt(t *testing.T) {
 	emsg := cipher.Encrypt(msg)
 
 	if !bytes.Equal(msg, cipher.Decrypt(emsg)) {
-		t.Errorf("decrypted message is invalid")
+		t.Error("decrypted message is invalid")
 	}
 }

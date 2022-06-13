@@ -27,7 +27,7 @@ func main() {
 	gNode.Handle([]byte(hls_settings.CTitlePattern), routeHLS)
 
 	// set response route
-	gNode.WithResponseRouter(func(node network.INode) []asymmetric.IPubKey {
+	gNode.WithResponse(func(node network.INode) []asymmetric.IPubKey {
 		randSizeRoute := random.NewStdPRNG().Uint64() % hls_settings.CSizeRoute
 		return selector.NewSelector(nodesInOnline(node)).
 			Shuffle().

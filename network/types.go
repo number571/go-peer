@@ -7,27 +7,37 @@ import (
 	"github.com/number571/go-peer/offline/routing"
 )
 
-type iRouter func(INode) []asymmetric.IPubKey
-type iHandler func(INode, message.IMessage) []byte
+type iRouterF func(INode) []asymmetric.IPubKey
+type iHandlerF func(INode, message.IMessage) []byte
 
 type INode interface {
-	WithResponseRouter(iRouter) INode
-
-	Request(routing.IRoute, message.IMessage) ([]byte, error)
-	Handle([]byte, iHandler) INode
-	Listen(string) error
-	Close()
-
-	InConnections(string) bool
-	Connections() []string
-	Connect(string) error
-	Disconnect(string)
-
 	Client() client.IClient
+
+	iModifier
+	iHandler
+	iConnect
+}
+
+type iModifier interface {
 	Checker() iChecker
 	Pseudo() iPseudo
 	Online() iOnline
 	F2F() iF2F
+}
+
+type iHandler interface {
+	WithResponse(iRouterF) INode
+	Request(routing.IRoute, message.IMessage) ([]byte, error)
+	Handle([]byte, iHandlerF) INode
+	Listen(string) error
+	Close()
+}
+
+type iConnect interface {
+	InConnections(string) bool
+	Connections() []string
+	Connect(string) error
+	Disconnect(string)
 }
 
 type iOnline interface {

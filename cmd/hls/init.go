@@ -55,7 +55,7 @@ func hlsDefaultInit() error {
 }
 
 func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
-	fileAlreadyExist := utils.FileIsExist(filepath)
+	fileAlreadyExist := utils.NewFile(filepath).IsExist()
 
 	storage := storage.NewCryptoStorage(
 		sett,

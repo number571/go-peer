@@ -95,7 +95,7 @@ var (
 func NewConfig(filepath string) IConfig {
 	var cfg = new(sConfig)
 
-	if !utils.FileIsExist(filepath) {
+	if !utils.NewFile(filepath).IsExist() {
 		cfg = &sConfig{
 			FCleanCron:     cDefaultCleanCron,
 			FAddress:       cDefaultAddress,
@@ -104,12 +104,16 @@ func NewConfig(filepath string) IConfig {
 			FOnlineChecker: cDefaultOnlineChecker,
 			FServices:      gDefaultServices,
 		}
-		err := utils.WriteFile(filepath, encoding.Serialize(cfg))
+		err := utils.NewFile(filepath).Write(encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		err := encoding.Deserialize(utils.ReadFile(filepath), cfg)
+		bytes, err := utils.NewFile(filepath).Read()
+		if err != nil {
+			panic(err)
+		}
+		err = encoding.Deserialize(bytes, cfg)
 		if err != nil {
 			panic(err)
 		}

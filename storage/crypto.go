@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/number571/go-peer/crypto/entropy"
 	"github.com/number571/go-peer/crypto/hashing"
@@ -40,7 +39,7 @@ func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValu
 	}
 
 	if store.exists() {
-		encdata, err := ioutil.ReadFile(path)
+		encdata, err := utils.NewFile(path).Read()
 		if err != nil {
 			return nil
 		}
@@ -95,9 +94,12 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(store.fPath, bytes.Join(
-		[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
-		[]byte{}), 0644)
+	err = utils.NewFile(store.fPath).Write(
+		bytes.Join(
+			[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
+			[]byte{},
+		),
+	)
 	if err != nil {
 		return err
 	}
@@ -160,13 +162,13 @@ func (store *sCryptoStorage) Del(key []byte) error {
 }
 
 func (store *sCryptoStorage) exists() bool {
-	return utils.FileIsExist(store.fPath)
+	return utils.NewFile(store.fPath).IsExist()
 }
 
 func (store *sCryptoStorage) decrypt() (storageData, error) {
 	var mapping storageData
 
-	encdata, err := ioutil.ReadFile(store.fPath)
+	encdata, err := utils.NewFile(store.fPath).Read()
 	if err != nil {
 		return storageData{}, err
 	}

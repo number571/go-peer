@@ -24,7 +24,7 @@ func TestSelector(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		checkPubKeys := selector.Shuffle().Return(selector.Length())
 		if !testAreUniq(checkPubKeys) {
-			t.Errorf("selector's list's values not unique")
+			t.Error("selector's list's values not unique")
 			return
 		}
 		for i := range pubKeys {
@@ -34,7 +34,7 @@ func TestSelector(t *testing.T) {
 		}
 	}
 
-	t.Errorf("selector's shuffle does not work")
+	t.Error("selector's shuffle does not work")
 }
 
 func testAreUniq(pubKeys []asymmetric.IPubKey) bool {

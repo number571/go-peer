@@ -30,40 +30,40 @@ func TestBuilder(t *testing.T) {
 
 	bSize := builder.Size()
 	if !bytes.Equal(bSize.Receiver, hashRecv) {
-		t.Errorf("builder size error (hash receiver)")
+		t.Error("builder size error (hash receiver)")
 	}
 
 	bLoad := builder.Load(1)
 	if bLoad.Index != 1 || !bytes.Equal(bLoad.Receiver, hashRecv) {
-		t.Errorf("builder load error (index, hash receiver)")
+		t.Error("builder load error (index, hash receiver)")
 	}
 
 	bPush := builder.Push(client.PubKey(), []byte(tcBodyOfMessage))
 	if !bytes.Equal(bPush.Receiver, hashRecv) {
-		t.Errorf("builder push error (hash receiver)")
+		t.Error("builder push error (hash receiver)")
 	}
 
 	msg := message.LoadPackage(bPush.Package).ToMessage()
 	if msg == nil {
-		t.Errorf("builder push error (message is nil [1])")
+		t.Error("builder push error (message is nil [1])")
 	}
 
 	msg, title := client.Decrypt(msg)
 	if msg == nil {
-		t.Errorf("builder push error (message is nil [2])")
+		t.Error("builder push error (message is nil [2])")
 	}
 
 	if string(title) != hms_settings.CTitlePattern {
-		t.Errorf("builder push error (title is not equal)")
+		t.Error("builder push error (title is not equal)")
 	}
 
 	body := msg.Body().Data()
 	if string(body) != tcBodyOfMessage {
-		t.Errorf("builder push error (body is not equal)")
+		t.Error("builder push error (body is not equal)")
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
 	if pubKey.Address() != client.PubKey().Address() {
-		t.Errorf("builder push error (public key is not equal)")
+		t.Error("builder push error (public key is not equal)")
 	}
 }

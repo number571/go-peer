@@ -29,19 +29,19 @@ func TestLogger(t *testing.T) {
 
 	fileInfo, err := os.OpenFile(tcPathInfo, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 		return
 	}
 
 	fileWarning, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 		return
 	}
 
 	fileError, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 		return
 	}
 
@@ -51,15 +51,27 @@ func TestLogger(t *testing.T) {
 	logger.Warning(tcTestWarning)
 	logger.Error(tcTestError)
 
-	if !strings.Contains(string(utils.ReadFile(tcPathInfo)), tcTestInfo) {
-		t.Errorf("info does not contains tcTestInfo")
+	res, err := utils.NewFile(tcPathInfo).Read()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if !strings.Contains(string(res), tcTestInfo) {
+		t.Error("info does not contains tcTestInfo")
 	}
 
-	if !strings.Contains(string(utils.ReadFile(tcPathWarning)), tcTestWarning) {
-		t.Errorf("warning does not contains tcTestWarning")
+	res, err = utils.NewFile(tcPathWarning).Read()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if !strings.Contains(string(res), tcTestWarning) {
+		t.Error("warning does not contains tcTestWarning")
 	}
 
-	if !strings.Contains(string(utils.ReadFile(tcPathError)), tcTestError) {
-		t.Errorf("error does not contains tcTestError")
+	res, err = utils.NewFile(tcPathError).Read()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if !strings.Contains(string(res), tcTestError) {
+		t.Error("error does not contains tcTestError")
 	}
 }

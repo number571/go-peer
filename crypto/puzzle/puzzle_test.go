@@ -16,15 +16,15 @@ func TestPuzzle(t *testing.T) {
 	proof := puzzle.Proof(hash)
 
 	if !puzzle.Verify(hash, proof) {
-		t.Errorf("proof is invalid")
+		t.Error("proof is invalid")
 	}
 
 	if NewPoWPuzzle(25).Verify(hash, proof) {
-		t.Errorf("proof 10 with 25 bits is valid?")
+		t.Error("proof 10 with 25 bits is valid?")
 	}
 
 	hash[3] = hash[3] ^ 8
 	if puzzle.Verify(hash, proof) {
-		t.Errorf("proof is correct?")
+		t.Error("proof is correct?")
 	}
 }

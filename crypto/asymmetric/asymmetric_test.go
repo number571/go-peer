@@ -15,7 +15,7 @@ func TestRSASign(t *testing.T) {
 	sign := priv.Sign(msg)
 
 	if !pub.Verify(msg, sign) {
-		t.Errorf("signature is invalid")
+		t.Error("signature is invalid")
 	}
 }
 
@@ -29,6 +29,6 @@ func TestRSAEncrypt(t *testing.T) {
 	emsg := pub.Encrypt(msg)
 
 	if !bytes.Equal(msg, priv.Decrypt(emsg)) {
-		t.Errorf("decrypted message is invalid")
+		t.Error("decrypted message is invalid")
 	}
 }

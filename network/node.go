@@ -26,7 +26,7 @@ type sNode struct {
 	fMutex       sync.Mutex
 	fListener    net.Listener
 	fClient      client.IClient
-	fHRoutes     map[string]iHandler
+	fHRoutes     map[string]iHandlerF
 	fMapping     map[string]bool
 	fConnections map[string]net.Conn
 	fActions     map[string]chan []byte
@@ -34,7 +34,7 @@ type sNode struct {
 	fChecker     iChecker
 	fPseudo      iPseudo
 	fOnline      iOnline
-	fRouter      iRouter
+	fRouter      iRouterF
 }
 
 // Create client by private key as identification.
@@ -45,7 +45,7 @@ func NewNode(client client.IClient) INode {
 
 	node := &sNode{
 		fClient:      client,
-		fHRoutes:     make(map[string]iHandler),
+		fHRoutes:     make(map[string]iHandlerF),
 		fMapping:     make(map[string]bool),
 		fConnections: make(map[string]net.Conn),
 		fActions:     make(map[string]chan []byte),
@@ -81,7 +81,7 @@ func NewNode(client client.IClient) INode {
 	return node.Handle(patt, nil)
 }
 
-func (node *sNode) WithResponseRouter(router iRouter) INode {
+func (node *sNode) WithResponse(router iRouterF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -183,7 +183,7 @@ func (node *sNode) Listen(address string) error {
 }
 
 // Add function to mapping for route use.
-func (node *sNode) Handle(title []byte, handle iHandler) INode {
+func (node *sNode) Handle(title []byte, handle iHandlerF) INode {
 	return node.setFunction(title, handle)
 }
 
@@ -473,7 +473,7 @@ func (node *sNode) response(nonce []byte, data []byte) {
 	close(ch)
 }
 
-func (node *sNode) setFunction(name []byte, handle iHandler) INode {
+func (node *sNode) setFunction(name []byte, handle iHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -482,7 +482,7 @@ func (node *sNode) setFunction(name []byte, handle iHandler) INode {
 	return node
 }
 
-func (node *sNode) getFunction(name []byte) iHandler {
+func (node *sNode) getFunction(name []byte) iHandlerF {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 

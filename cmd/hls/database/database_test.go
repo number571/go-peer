@@ -37,7 +37,7 @@ func TestDB(t *testing.T) {
 
 	exist := tgDB.Exist(tgHash)
 	if !exist {
-		t.Errorf("load msg is nil")
+		t.Error("load msg is nil")
 	}
 
 	err = tgDB.Close()

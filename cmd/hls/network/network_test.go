@@ -37,15 +37,15 @@ func TestRequest(t *testing.T) {
 		WithBody(tgBody)
 
 	if request.Host() != tcHost {
-		t.Errorf("host is not equals")
+		t.Error("host is not equals")
 	}
 
 	if request.Path() != tcPath {
-		t.Errorf("path is not equals")
+		t.Error("path is not equals")
 	}
 
 	if request.Method() != tcMethod {
-		t.Errorf("method is not equals")
+		t.Error("method is not equals")
 	}
 
 	for k, v := range request.Head() {
@@ -59,7 +59,7 @@ func TestRequest(t *testing.T) {
 	}
 
 	if !bytes.Equal(request.Body(), tgBody) {
-		t.Errorf("body is not equals")
+		t.Error("body is not equals")
 	}
 }
 
@@ -72,15 +72,15 @@ func TestLoadRequest(t *testing.T) {
 	request2 := LoadRequest(tgBRequest)
 
 	if request1.Host() != request2.Host() {
-		t.Errorf("host is not equals")
+		t.Error("host is not equals")
 	}
 
 	if request1.Path() != request2.Path() {
-		t.Errorf("path is not equals")
+		t.Error("path is not equals")
 	}
 
 	if request1.Method() != request2.Method() {
-		t.Errorf("method is not equals")
+		t.Error("method is not equals")
 	}
 
 	for k, v := range request1.Head() {
@@ -94,6 +94,6 @@ func TestLoadRequest(t *testing.T) {
 	}
 
 	if !bytes.Equal(request1.Body(), request2.Body()) {
-		t.Errorf("body is not equals")
+		t.Error("body is not equals")
 	}
 }

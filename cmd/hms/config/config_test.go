@@ -28,7 +28,7 @@ const (
 )
 
 func testConfigDefaultInit(configPath string) {
-	utils.WriteFile(configPath, []byte(tcConfig))
+	utils.NewFile(configPath).Write([]byte(tcConfig))
 }
 
 func TestConfig(t *testing.T) {
@@ -38,14 +38,14 @@ func TestConfig(t *testing.T) {
 	cfg := NewConfig(tcConfigFile)
 
 	if cfg.Address() != tcAddress {
-		t.Errorf("address is invalid")
+		t.Error("address is invalid")
 	}
 
 	if cfg.CleanCron() != tcCleanCron {
-		t.Errorf("clean_cron is invalid")
+		t.Error("clean_cron is invalid")
 	}
 
 	if cfg.Connections()[0] != tcConnection {
-		t.Errorf("connections is invalid")
+		t.Error("connections is invalid")
 	}
 }

@@ -111,7 +111,7 @@ func TestF2F(t *testing.T) {
 
 	_, err := nodes[0].Request(route, msg)
 	if err == nil {
-		t.Errorf("f2f mode not working")
+		t.Error("f2f mode not working")
 		return
 	}
 
@@ -142,7 +142,7 @@ func TestChecker(t *testing.T) {
 
 	info := nodes[0].Checker().ListWithInfo()[0]
 	if !info.Online() {
-		t.Errorf("checker not working")
+		t.Error("checker not working")
 	}
 }
 
@@ -190,7 +190,8 @@ func testInitRoute() ([5]INode, routing.IRoute, message.IMessage) {
 	client1.Connect(tcNodeAddress1)
 	client2.Connect(tcNodeAddress3)
 
-	client2.WithResponseRouter(func(_ INode) []asymmetric.IPubKey {
+	client2.WithResponse(func(_ INode) []asymmetric.IPubKey {
+		// response -> node2 -> node3 -> node1 -> sender
 		return []asymmetric.IPubKey{
 			node2.Client().PubKey(),
 			node3.Client().PubKey(),

@@ -29,10 +29,10 @@ func TestEncrypt(t *testing.T) {
 	decmsg, title1 := client2.Decrypt(encmsg)
 
 	if !bytes.Equal(data, decmsg.Body().Data()) {
-		t.Errorf("data not equal with decrypted data")
+		t.Error("data not equal with decrypted data")
 	}
 
 	if !bytes.Equal(title, title1) {
-		t.Errorf("title not equal with decrypted title")
+		t.Error("title not equal with decrypted title")
 	}
 }
