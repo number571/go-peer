@@ -6,8 +6,8 @@ import (
 
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/random"
-	"github.com/number571/go-peer/offline/message"
-	"github.com/number571/go-peer/offline/routing"
+	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
 )
 

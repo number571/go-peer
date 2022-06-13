@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/settings"
 )
 

@@ -7,8 +7,8 @@ import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/offline/client"
-	"github.com/number571/go-peer/offline/message"
+	"github.com/number571/go-peer/local/client"
+	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/settings/testutils"
 )
 

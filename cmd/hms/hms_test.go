@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/offline/client"
+	"github.com/number571/go-peer/local/client"
 	"github.com/number571/go-peer/settings/testutils"
 )
 

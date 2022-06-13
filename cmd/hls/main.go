@@ -10,8 +10,8 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/random"
+	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/offline/selector"
 	"github.com/number571/go-peer/settings"
 )
 

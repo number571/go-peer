@@ -9,9 +9,9 @@ import (
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/offline/message"
-	"github.com/number571/go-peer/offline/routing"
 )
 
 func routeHLS(node network.INode, msg message.IMessage) []byte {
