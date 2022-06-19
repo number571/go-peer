@@ -1,6 +1,14 @@
+T=update
 N=1
 .PHONY: default build clean test bench
 default: test
+push: test 
+	if [ $$? != 0 ]; then \
+		exit; \
+	fi; \
+	git add .
+	git commit -m "$(T)"
+	git push 
 build:
 	make build -C cmd/hln
 clean:
