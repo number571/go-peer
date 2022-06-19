@@ -21,3 +21,8 @@
 4. Prefix 'c'/'C' - constant
 5. Prrfix 'g'/'G' - global variable
 6. Prefix 't'/'T' - test constant / test variable / test structure / ...
+
+## TODO
+
+1. Wrap all standart errors to "errors" package from go-peer
+2. Write tests with comment "TODO"

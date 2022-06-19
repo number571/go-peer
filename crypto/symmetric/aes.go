@@ -16,7 +16,7 @@ var (
 )
 
 const (
-	SymmKeyType = "go-peer/aes"
+	GAESKeyType = "go-peer/aes"
 )
 
 type sAESCipher struct {
@@ -24,7 +24,7 @@ type sAESCipher struct {
 }
 
 func NewAESCipher(key []byte) ICipher {
-	switch hashing.HashSize {
+	switch hashing.GSHA256Size {
 	case 16, 24, 32: // AES keys
 	default:
 		return nil
@@ -71,7 +71,7 @@ func (cph *sAESCipher) Decrypt(msg []byte) []byte {
 }
 
 func (cph *sAESCipher) String() string {
-	return fmt.Sprintf("Key(%s){%X}", SymmKeyType, cph.Bytes())
+	return fmt.Sprintf("Key(%s){%X}", cph.Type(), cph.Bytes())
 }
 
 func (cph *sAESCipher) Bytes() []byte {
@@ -79,11 +79,11 @@ func (cph *sAESCipher) Bytes() []byte {
 }
 
 func (cph *sAESCipher) Type() string {
-	return SymmKeyType
+	return GAESKeyType
 }
 
 func (cph *sAESCipher) Size() uint64 {
-	return hashing.HashSize
+	return hashing.GSHA256Size
 }
 
 func paddingPKCS5(ciphertext []byte, blockSize int) []byte {

@@ -38,7 +38,7 @@ func (f2f *sF2F) InList(pub asymmetric.IPubKey) bool {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	_, ok := f2f.fMapping[pub.Address()]
+	_, ok := f2f.fMapping[pub.Address().String()]
 	return ok
 }
 
@@ -60,7 +60,7 @@ func (f2f *sF2F) Append(pub asymmetric.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	f2f.fMapping[pub.Address()] = pub
+	f2f.fMapping[pub.Address().String()] = pub
 }
 
 // Delete public key from list of friends.
@@ -68,5 +68,5 @@ func (f2f *sF2F) Remove(pub asymmetric.IPubKey) {
 	f2f.fMutex.Lock()
 	defer f2f.fMutex.Unlock()
 
-	delete(f2f.fMapping, pub.Address())
+	delete(f2f.fMapping, pub.Address().String())
 }

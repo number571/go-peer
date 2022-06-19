@@ -62,7 +62,7 @@ func (checker *sChecker) InList(pub asymmetric.IPubKey) bool {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
-	_, ok := checker.fMapping[pub.Address()]
+	_, ok := checker.fMapping[pub.Address().String()]
 	return ok
 }
 
@@ -97,7 +97,7 @@ func (checker *sChecker) Append(pub asymmetric.IPubKey) {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
-	checker.fMapping[pub.Address()] = &sCheckerInfo{
+	checker.fMapping[pub.Address().String()] = &sCheckerInfo{
 		fOnline: false,
 		fPubKey: pub,
 	}
@@ -108,7 +108,7 @@ func (checker *sChecker) Remove(pub asymmetric.IPubKey) {
 	checker.fMutex.Lock()
 	defer checker.fMutex.Unlock()
 
-	delete(checker.fMapping, pub.Address())
+	delete(checker.fMapping, pub.Address().String())
 }
 
 func (checkerInfo *sCheckerInfo) PubKey() asymmetric.IPubKey {

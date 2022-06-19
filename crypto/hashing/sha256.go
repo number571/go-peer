@@ -3,6 +3,7 @@ package hashing
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"fmt"
 
 	"github.com/number571/go-peer/encoding"
 )
@@ -13,9 +14,9 @@ var (
 )
 
 const (
-	HashSize    = 32
-	HashKeyType = "go-peer/sha256"
-	HmacKeyType = "go-peer/hmac-sha256"
+	GSHA256Size            = 32
+	GSHA256KeyType         = "go-peer/sha256"
+	GHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
 )
 
 type sSHA256Hasher struct {
@@ -31,8 +32,7 @@ func NewSHA256Hasher(data []byte) IHasher {
 }
 
 func (h *sSHA256Hasher) String() string {
-	bytes := h.Bytes()
-	return encoding.Base64Encode(bytes)
+	return fmt.Sprintf("Hash(%s){%X}", h.Type(), h.Bytes())
 }
 
 func (h *sSHA256Hasher) Bytes() []byte {
@@ -40,11 +40,11 @@ func (h *sSHA256Hasher) Bytes() []byte {
 }
 
 func (h *sSHA256Hasher) Type() string {
-	return HashKeyType
+	return GSHA256KeyType
 }
 
 func (h *sSHA256Hasher) Size() uint64 {
-	return HashSize
+	return GSHA256Size
 }
 
 type sHMACSHA256Hasher struct {
@@ -69,9 +69,9 @@ func (h *sHMACSHA256Hasher) Bytes() []byte {
 }
 
 func (h *sHMACSHA256Hasher) Type() string {
-	return HmacKeyType
+	return GHMACSHA256HmacKeyType
 }
 
 func (h *sHMACSHA256Hasher) Size() uint64 {
-	return HashSize
+	return GSHA256Size
 }

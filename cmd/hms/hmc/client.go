@@ -1,10 +1,9 @@
 package hmc
 
 import (
-	"fmt"
-
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/errors"
 	"github.com/number571/go-peer/local/message"
 )
 
@@ -31,16 +30,16 @@ func (client *sClient) Size() (uint64, error) {
 func (client *sClient) Load(i uint64) (message.IMessage, error) {
 	msg, err := client.requester.Load(client.builder.Load(i))
 	if err != nil {
-		return nil, err
+		return nil, errors.NewError(errors.CErrorServer, "message not loaded")
 	}
 
 	msg, title := client.builder.(*sBuiler).client.Decrypt(msg)
 	if msg == nil {
-		return nil, fmt.Errorf("message is nil")
+		return nil, errors.NewError(errors.CErrorDecrypt, "message not decrypted")
 	}
 
 	if string(title) != hms_settings.CTitlePattern {
-		return nil, fmt.Errorf("title is not equal")
+		return nil, errors.NewError(errors.CErrorNotEqual, "title is not equal")
 	}
 
 	return msg, nil

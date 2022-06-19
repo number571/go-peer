@@ -125,12 +125,12 @@ func TestConfig(t *testing.T) {
 	for i, v := range tgPubKeys {
 		v1 := cfg.F2F().PubKeys()[i]
 		pubKey := asymmetric.LoadRSAPubKey(v)
-		if pubKey.Address() != v1.Address() {
+		if pubKey.Address().String() != v1.Address().String() {
 			t.Errorf("public key is invalid '%s'", v1)
 		}
 
 		v2 := cfg.OnlineChecker().PubKeys()[i]
-		if pubKey.Address() != v2.Address() {
+		if pubKey.Address().String() != v2.Address().String() {
 			t.Errorf("public key is invalid '%s'", v2)
 		}
 	}

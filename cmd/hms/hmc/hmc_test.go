@@ -63,7 +63,7 @@ func TestBuilder(t *testing.T) {
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
-	if pubKey.Address() != client.PubKey().Address() {
+	if pubKey.Address().String() != client.PubKey().Address().String() {
 		t.Error("builder push error (public key is not equal)")
 	}
 }

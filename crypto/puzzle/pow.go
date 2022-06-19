@@ -30,7 +30,7 @@ func (puzzle *sPoWPuzzle) Proof(packHash []byte) uint64 {
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	target.Lsh(target, sizeInBits(hashing.HashSize)-uint(puzzle.fDiff))
+	target.Lsh(target, hashSizeInBits()-uint(puzzle.fDiff))
 	for nonce < math.MaxUint64 {
 		hash = hashing.NewSHA256Hasher(bytes.Join(
 			[][]byte{
@@ -60,10 +60,10 @@ func (puzzle *sPoWPuzzle) Verify(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	)).Bytes()
 	intHash.SetBytes(hash)
-	target.Lsh(target, sizeInBits(hashing.HashSize)-uint(puzzle.fDiff))
+	target.Lsh(target, hashSizeInBits()-uint(puzzle.fDiff))
 	return intHash.Cmp(target) == -1
 }
 
-func sizeInBits(n uint) uint {
-	return n * 8
+func hashSizeInBits() uint {
+	return uint(hashing.GSHA256Size * 8)
 }

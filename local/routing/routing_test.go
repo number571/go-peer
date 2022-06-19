@@ -6,14 +6,14 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 )
 
-func TestDefault(t *testing.T) {
+func TestRouting(t *testing.T) {
 	privKey := asymmetric.NewRSAPrivKey(1024)
 	pubKey := privKey.PubKey()
 
 	route := NewRoute(pubKey).
 		WithRedirects(privKey, []asymmetric.IPubKey{pubKey})
 
-	if route.Receiver().Address() != pubKey.Address() {
+	if route.Receiver().Address().String() != pubKey.Address().String() {
 		t.Error("receiver address not equal address of public key")
 		return
 	}
@@ -23,7 +23,7 @@ func TestDefault(t *testing.T) {
 		return
 	}
 
-	if route.List()[0].Address() != pubKey.Address() {
+	if route.List()[0].Address().String() != pubKey.Address().String() {
 		t.Error("address in list not equal address of public key")
 		return
 	}

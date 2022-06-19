@@ -3,9 +3,9 @@ package database
 import "fmt"
 
 const (
-	cKeySizeTemplate    = "database.users[%s].size"
-	cKeyMessageTemplate = "database.users[%s].messages[%d]"
-	cKeyHashTemplate    = "database.hashes[%s]"
+	cKeySizeTemplate    = "database.users[%X].size"
+	cKeyMessageTemplate = "database.users[%X].messages[%d]"
+	cKeyHashTemplate    = "database.hashes[%X]"
 )
 
 func getKeySize(key []byte) []byte {

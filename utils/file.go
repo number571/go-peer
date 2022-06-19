@@ -10,17 +10,17 @@ var (
 )
 
 type sFile struct {
-	path string
+	fPath string
 }
 
 func NewFile(path string) IFile {
 	return &sFile{
-		path: path,
+		fPath: path,
 	}
 }
 
 func (file *sFile) Read() ([]byte, error) {
-	data, err := ioutil.ReadFile(file.path)
+	data, err := ioutil.ReadFile(file.fPath)
 	if err != nil {
 		return nil, err
 	}
@@ -28,10 +28,10 @@ func (file *sFile) Read() ([]byte, error) {
 }
 
 func (file *sFile) Write(data []byte) error {
-	return ioutil.WriteFile(file.path, data, 0644)
+	return ioutil.WriteFile(file.fPath, data, 0644)
 }
 
 func (file *sFile) IsExist() bool {
-	_, err := os.Stat(file.path)
+	_, err := os.Stat(file.fPath)
 	return !os.IsNotExist(err)
 }

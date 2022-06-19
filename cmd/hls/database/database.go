@@ -5,23 +5,23 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/storage"
+	gp_database "github.com/number571/go-peer/database"
 )
 
 type sKeyValueDB struct {
-	fMutex   sync.Mutex
-	fPath    string
-	fStorage storage.IKeyValueStorage
+	fMutex sync.Mutex
+	fPath  string
+	fDB    gp_database.IKeyValueDB
 }
 
 func NewKeyValueDB(path string) IKeyValueDB {
-	stg := storage.NewLevelDBStorage(path)
-	if stg == nil {
+	db := gp_database.NewLevelDB(path)
+	if db == nil {
 		panic("storage is nil")
 	}
 	return &sKeyValueDB{
-		fPath:    path,
-		fStorage: stg,
+		fPath: path,
+		fDB:   db,
 	}
 }
 
@@ -29,7 +29,7 @@ func (db *sKeyValueDB) Push(key []byte) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != hashing.HashSize {
+	if len(key) != hashing.GSHA256Size {
 		return fmt.Errorf("hash size invalid")
 	}
 
@@ -37,14 +37,14 @@ func (db *sKeyValueDB) Push(key []byte) error {
 		return fmt.Errorf("hash already exists")
 	}
 
-	return db.fStorage.Set(getKeyHash(key), []byte{1})
+	return db.fDB.Set(getKeyHash(key), []byte{1})
 }
 
 func (db *sKeyValueDB) Exist(key []byte) bool {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != hashing.HashSize {
+	if len(key) != hashing.GSHA256Size {
 		return false
 	}
 
@@ -55,10 +55,10 @@ func (db *sKeyValueDB) Close() error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	return db.fStorage.Close()
+	return db.fDB.Close()
 }
 
 func (db *sKeyValueDB) isExist(key []byte) bool {
-	_, err := db.fStorage.Get(getKeyHash(key))
+	_, err := db.fDB.Get(getKeyHash(key))
 	return err == nil
 }

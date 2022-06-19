@@ -151,7 +151,7 @@ func testClientDoLoad() error {
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
-		if pubKey.Address() != client.PubKey().Address() {
+		if pubKey.Address().String() != client.PubKey().Address().String() {
 			return fmt.Errorf("public key is not equal")
 		}
 	}

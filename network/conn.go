@@ -63,7 +63,7 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 		return nil
 	}
 
-	if len(msg.Body().Hash()) != hashing.HashSize {
+	if len(msg.Body().Hash()) != hashing.GSHA256Size {
 		return nil
 	}
 

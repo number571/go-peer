@@ -15,7 +15,6 @@ import (
 
 var (
 	_ IKeyValueStorage = &sCryptoStorage{}
-	_ iIterator        = &sCryptoIterator{}
 )
 
 type sCryptoStorage struct {
@@ -24,9 +23,6 @@ type sCryptoStorage struct {
 	fSalt     []byte
 	fCipher   symmetric.ICipher
 }
-
-// not used
-type sCryptoIterator struct{}
 
 type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
@@ -180,30 +176,4 @@ func (store *sCryptoStorage) decrypt() (storageData, error) {
 	}
 
 	return mapping, nil
-}
-
-// NOT IMPLEMENTS
-// Specific of this storage
-
-func (store *sCryptoStorage) Close() error {
-	return nil
-}
-
-func (db *sCryptoStorage) Iter(prefix []byte) iIterator {
-	return nil
-}
-
-func (iter *sCryptoIterator) Next() bool {
-	return false
-}
-
-func (iter *sCryptoIterator) Key() []byte {
-	return nil
-}
-
-func (iter *sCryptoIterator) Value() []byte {
-	return nil
-}
-
-func (iter *sCryptoIterator) Close() {
 }

@@ -16,10 +16,11 @@ import (
 var (
 	_ IPrivKey = &sRSAPrivKey{}
 	_ IPubKey  = &sRSAPubKey{}
+	_ iAddress = &sAddress{}
 )
 
 const (
-	AsymmKeyType = "go-peer/rsa"
+	GRSAKeyType = "go-peer/rsa"
 )
 
 /*
@@ -27,29 +28,37 @@ const (
  */
 
 type sRSAPrivKey struct {
-	priv *rsa.PrivateKey
+	fPubKey  IPubKey
+	fPrivKey *rsa.PrivateKey
+}
+
+func newPrivKey(privKey *rsa.PrivateKey) IPrivKey {
+	return &sRSAPrivKey{
+		fPubKey:  newPubKey(&privKey.PublicKey),
+		fPrivKey: privKey,
+	}
 }
 
 // Create private key by number of bits.
 func NewRSAPrivKey(bits uint64) IPrivKey {
-	priv, err := rsa.GenerateKey(rand.Reader, int(bits))
+	privKey, err := rsa.GenerateKey(rand.Reader, int(bits))
 	if err != nil {
 		return nil
 	}
-	return &sRSAPrivKey{priv}
+	return newPrivKey(privKey)
 }
 
-func LoadRSAPrivKey(privkey interface{}) IPrivKey {
-	switch x := privkey.(type) {
+func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
+	switch x := typePrivKey.(type) {
 	case []byte:
-		priv := bytesToPrivateKey(x)
-		if priv == nil {
+		privKey := bytesToPrivateKey(x)
+		if privKey == nil {
 			return nil
 		}
-		return &sRSAPrivKey{priv}
+		return newPrivKey(privKey)
 	case string:
 		var (
-			prefix = fmt.Sprintf("Priv(%s){", AsymmKeyType)
+			prefix = fmt.Sprintf("Priv(%s){", GRSAKeyType)
 			suffix = "}"
 		)
 
@@ -74,27 +83,27 @@ func LoadRSAPrivKey(privkey interface{}) IPrivKey {
 }
 
 func (key *sRSAPrivKey) Decrypt(msg []byte) []byte {
-	return decryptRSA(key.priv, msg)
+	return decryptRSA(key.fPrivKey, msg)
 }
 
 func (key *sRSAPrivKey) Sign(msg []byte) []byte {
-	return sign(key.priv, hashing.NewSHA256Hasher(msg).Bytes())
+	return sign(key.fPrivKey, hashing.NewSHA256Hasher(msg).Bytes())
 }
 
 func (key *sRSAPrivKey) PubKey() IPubKey {
-	return &sRSAPubKey{&key.priv.PublicKey}
+	return key.fPubKey
 }
 
 func (key *sRSAPrivKey) Bytes() []byte {
-	return privateKeyToBytes(key.priv)
+	return privateKeyToBytes(key.fPrivKey)
 }
 
 func (key *sRSAPrivKey) String() string {
-	return fmt.Sprintf("Priv(%s){%X}", AsymmKeyType, key.Bytes())
+	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
 }
 
 func (key *sRSAPrivKey) Type() string {
-	return AsymmKeyType
+	return GRSAKeyType
 }
 
 func (key *sRSAPrivKey) Size() uint64 {
@@ -137,7 +146,15 @@ func sign(priv *rsa.PrivateKey, hash []byte) []byte {
  */
 
 type sRSAPubKey struct {
-	pub *rsa.PublicKey
+	fAddr   iAddress
+	fPubKey *rsa.PublicKey
+}
+
+func newPubKey(pubKey *rsa.PublicKey) IPubKey {
+	return &sRSAPubKey{
+		fAddr:   newAddress(pubKey),
+		fPubKey: pubKey,
+	}
 }
 
 func LoadRSAPubKey(pubkey interface{}) IPubKey {
@@ -147,10 +164,10 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 		if pub == nil {
 			return nil
 		}
-		return &sRSAPubKey{pub}
+		return newPubKey(pub)
 	case string:
 		var (
-			prefix = fmt.Sprintf("Pub(%s){", AsymmKeyType)
+			prefix = fmt.Sprintf("Pub(%s){", GRSAKeyType)
 			suffix = "}"
 		)
 
@@ -175,31 +192,63 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 }
 
 func (key *sRSAPubKey) Encrypt(msg []byte) []byte {
-	return encryptRSA(key.pub, msg)
+	return encryptRSA(key.fPubKey, msg)
 }
 
-func (key *sRSAPubKey) Address() string {
-	return hashing.NewSHA256Hasher(key.Bytes()).String()
+func (key *sRSAPubKey) Address() iAddress {
+	return key.fAddr
 }
 
 func (key *sRSAPubKey) Verify(msg []byte, sig []byte) bool {
-	return verify(key.pub, hashing.NewSHA256Hasher(msg).Bytes(), sig) == nil
+	return verify(key.fPubKey, hashing.NewSHA256Hasher(msg).Bytes(), sig) == nil
 }
 
 func (key *sRSAPubKey) Bytes() []byte {
-	return publicKeyToBytes(key.pub)
+	return publicKeyToBytes(key.fPubKey)
 }
 
 func (key *sRSAPubKey) String() string {
-	return fmt.Sprintf("Pub(%s){%X}", AsymmKeyType, key.Bytes())
+	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
 }
 
 func (key *sRSAPubKey) Type() string {
-	return AsymmKeyType
+	return GRSAKeyType
 }
 
 func (key *sRSAPubKey) Size() uint64 {
-	return uint64(key.pub.N.BitLen())
+	return uint64(key.fPubKey.N.BitLen())
+}
+
+/*
+ * Address
+ */
+
+type sAddress struct {
+	fBytes []byte
+}
+
+func newAddress(pubKey *rsa.PublicKey) iAddress {
+	return &sAddress{
+		fBytes: hashing.NewSHA256Hasher(
+			publicKeyToBytes(pubKey),
+		).Bytes(),
+	}
+}
+
+func (addr *sAddress) Bytes() []byte {
+	return addr.fBytes
+}
+
+func (addr *sAddress) String() string {
+	return fmt.Sprintf("Address(%s){%X}", addr.Type(), addr.Bytes())
+}
+
+func (addr *sAddress) Type() string {
+	return GRSAKeyType
+}
+
+func (addr *sAddress) Size() uint64 {
+	return hashing.GSHA256Size
 }
 
 // Used RSA(OAEP).

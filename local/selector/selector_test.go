@@ -28,7 +28,7 @@ func TestSelector(t *testing.T) {
 			return
 		}
 		for i := range pubKeys {
-			if pubKeys[i].Address() != checkPubKeys[i].Address() {
+			if pubKeys[i].Address().String() != checkPubKeys[i].Address().String() {
 				return
 			}
 		}
@@ -40,7 +40,7 @@ func TestSelector(t *testing.T) {
 func testAreUniq(pubKeys []asymmetric.IPubKey) bool {
 	for i := 0; i < len(pubKeys); i++ {
 		for j := i + 1; j < len(pubKeys); j++ {
-			if pubKeys[i].Address() == pubKeys[j].Address() {
+			if pubKeys[i].Address().String() == pubKeys[j].Address().String() {
 				return false
 			}
 		}

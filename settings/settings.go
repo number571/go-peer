@@ -2,23 +2,6 @@ package settings
 
 import "sync"
 
-const (
-	CMaskRout uint64 = iota + 1
-	CMaskPing
-	CTimeWait
-	CTimePreq
-	CTimePrsp
-	CTimePing
-	CSizePsdo
-	CSizeRtry
-	CSizeWork
-	CSizeConn
-	CSizePack
-	CSizeMapp
-	CSizeSkey
-	CSizeBmsg
-)
-
 var (
 	_ ISettings = &sSettings{}
 )

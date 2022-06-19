@@ -129,7 +129,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) 
 	}
 
 	// Initial check.
-	if len(msg.Body().Hash()) != hashing.HashSize {
+	if len(msg.Body().Hash()) != hashing.GSHA256Size {
 		return nil, nil
 	}
 
