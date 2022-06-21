@@ -6,10 +6,9 @@ import (
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/local/client"
 	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/settings"
 )
 
 const (
@@ -19,13 +18,11 @@ const (
 
 func TestBuilder(t *testing.T) {
 	client := client.NewClient(
+		settings.NewSettings(),
 		asymmetric.LoadRSAPrivKey(tcPrivKeyClient),
-		testutils.NewSettings(),
 	)
 
-	pubBytes := client.PubKey().Bytes()
-	hashRecv := hashing.NewSHA256Hasher(pubBytes).Bytes()
-
+	hashRecv := client.PubKey().Address().Bytes()
 	builder := NewBuiler(client)
 
 	bSize := builder.Size()

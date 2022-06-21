@@ -1,7 +1,10 @@
 T=update
 N=1
-.PHONY: default build clean test bench
+
+.PHONY: default push build clean test bench
+
 default: test
+
 push: test 
 	if [ $$? != 0 ]; then \
 		exit; \
@@ -9,10 +12,7 @@ push: test
 	git add .
 	git commit -m "$(T)"
 	git push 
-build:
-	make build -C cmd/hln
-clean:
-	make clean -C cmd/hln
+
 test:
 	for i in {1..$(N)}; do \
 		go clean -testcache; \
@@ -22,6 +22,13 @@ test:
 			exit; \
 		fi; \
 	done
+
 bench:
 	go clean -testcache
 	go test -cover -bench=. -benchmem -benchtime=$(N)x ./...
+
+build:
+	make build -C cmd/hln
+	
+clean:
+	make clean -C cmd/hln

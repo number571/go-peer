@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/settings"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 func testHmsDefaultInit(dbPath, configPath string) {
 	os.RemoveAll(dbPath)
 
-	gSettings = testutils.NewSettings()
+	gSettings = settings.NewSettings()
 	gDB = database.NewKeyValueDB(dbPath)
 	gConfig = config.NewConfig(configPath)
 }
@@ -95,7 +95,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 
 func testClientDoPush() error {
 	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
-	client := client.NewClient(priv, gSettings)
+	client := client.NewClient(gSettings, priv)
 
 	for i := 0; i < tcN; i++ {
 		err := hmc.NewClient(
@@ -115,7 +115,7 @@ func testClientDoPush() error {
 
 func testClientDoSize() error {
 	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
-	client := client.NewClient(priv, gSettings)
+	client := client.NewClient(gSettings, priv)
 
 	size, err := hmc.NewClient(
 		hmc.NewBuiler(client),
@@ -134,7 +134,7 @@ func testClientDoSize() error {
 
 func testClientDoLoad() error {
 	priv := asymmetric.LoadRSAPrivKey(tcPrivKeyReceiver)
-	client := client.NewClient(priv, gSettings)
+	client := client.NewClient(gSettings, priv)
 
 	for i := 0; i < tcN; i++ {
 		msg, err := hmc.NewClient(

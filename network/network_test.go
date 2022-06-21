@@ -10,7 +10,6 @@ import (
 	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
-	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (
@@ -28,9 +27,9 @@ func echoMessage(node INode, msg message.IMessage) []byte {
 }
 
 func newNode() INode {
-	sett := testutils.NewSettings()
+	sett := settings.NewSettings()
 	privKey := asymmetric.NewRSAPrivKey(1024)
-	client := client.NewClient(privKey, sett)
+	client := client.NewClient(sett, privKey)
 	return NewNode(client)
 }
 

@@ -8,6 +8,7 @@ type ISettings interface {
 const (
 	CMaskRout uint64 = iota + 1
 	CMaskPing
+	CMaskPasw
 	CTimeWait
 	CTimePreq
 	CTimePrsp
@@ -20,4 +21,12 @@ const (
 	CSizeMapp
 	CSizeSkey
 	CSizeBmsg
+	CSizePasw
+)
+
+// 3-bit mask for password
+const (
+	CPaswAplh = 0b100
+	CPaswNumr = 0b010
+	CPaswSpec = 0b001
 )

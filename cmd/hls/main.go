@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
@@ -16,12 +18,17 @@ import (
 )
 
 func main() {
+	appIsRun := false
+
 	// read config, database, key
 	err := hlsDefaultInit()
 	if err != nil {
 		gLogger.Error(err.Error())
 		os.Exit(1)
 	}
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	// set handle functions
 	gNode.Handle([]byte(hls_settings.CTitlePattern), routeHLS)
@@ -90,31 +97,55 @@ func main() {
 	}()
 
 	// HTTP client
-	http.HandleFunc("/", pageIndex)
-	http.HandleFunc("/status", pageStatus)
-	http.HandleFunc("/message", pageMessage)
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", pageIndex)
+	mux.HandleFunc("/status", pageStatus)
+	mux.HandleFunc("/message", pageMessage)
+
+	srv := &http.Server{
+		Addr:    gConfig.Address().HTTP(),
+		Handler: mux,
+	}
+
 	go func() {
 		gLogger.Info(fmt.Sprintf("HTTP is listening [%s]...", gConfig.Address().HTTP()))
-		err := http.ListenAndServe(gConfig.Address().HTTP(), nil)
+		err := srv.ListenAndServe()
 		if err != nil {
-			gLogger.Error(err.Error())
+			gLogger.Warning(err.Error())
+			if !appIsRun {
+				os.Exit(1)
+			}
 		}
 	}()
 
-	// if node in client mode
-	// then run endless loop
-	if gConfig.Address().HLS() == "" {
-		gLogger.Info("HLS is listening...")
-		select {}
-	}
+	go func() {
+		// if node in client mode
+		// then run endless loop
+		if gConfig.Address().HLS() == "" {
+			gLogger.Info("HLS is listening...")
+			select {}
+		}
 
-	// run node in server mode
-	gLogger.Info(fmt.Sprintf("HLS is listening [%s]...", gConfig.Address().HLS()))
-	err = gNode.Listen(gConfig.Address().HLS())
-	if err != nil {
-		gLogger.Error(err.Error())
-		os.Exit(2)
-	}
+		// run node in server mode
+		gLogger.Info(fmt.Sprintf("HLS is listening [%s]...", gConfig.Address().HLS()))
+		err = gNode.Listen(gConfig.Address().HLS())
+		if err != nil {
+			gLogger.Error(err.Error())
+			if !appIsRun {
+				os.Exit(2)
+			}
+		}
+	}()
+
+	appIsRun = true
+
+	<-shutdown
+	fmt.Println("Shutting down...")
+
+	srv.Close()
+	gDB.Close()
+	gNode.Close()
 }
 
 func nodesInOnline(node network.INode) []asymmetric.IPubKey {

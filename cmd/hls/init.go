@@ -35,14 +35,14 @@ func hlsDefaultInit() error {
 	privKey := getPrivKey(
 		sett,
 		"hls.stg",
-		[]byte(utils.InputString("Storage password: ")),
-		[]byte(utils.InputString("Object password: ")),
+		[]byte(utils.InputPassword(sett, "Password#Stg: ")),
+		[]byte(utils.InputPassword(sett, "Password#Obj: ")),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gNode = network.NewNode(client.NewClient(privKey, sett))
+	gNode = network.NewNode(client.NewClient(sett, privKey))
 	if gNode == nil {
 		return fmt.Errorf("failed create client node")
 	}

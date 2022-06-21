@@ -37,6 +37,7 @@ func (s *sSettings) Get(k uint64) uint64 {
 	return v
 }
 
+// Need to change the default settings!
 func defaultSettings() map[uint64]uint64 {
 	// H - hash = len(base64(sha256(data))) = 44B
 	// B - byte
@@ -44,17 +45,19 @@ func defaultSettings() map[uint64]uint64 {
 	return map[uint64]uint64{
 		CMaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
 		CMaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
-		CTimeWait: 30,                 // seconds
-		CTimePreq: 10,                 // seconds
-		CTimePrsp: 5,                  // seconds
-		CTimePing: 60,                 // seconds
-		CSizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
-		CSizeRtry: 2,                  // quantity
-		CSizeWork: 20,                 // bits
-		CSizeConn: 20,                 // quantity
-		CSizePack: 8 << 20,            // 8*(2^20)B = 8MiB
-		CSizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
-		CSizeSkey: 1 << 5,             // 2^5B = 32B
-		CSizeBmsg: 20,                 // quantity of messages
+		CMaskPasw: 0b000,              // 0b111 = (alpha, numeric, special)
+		CTimeWait: 20,                 // seconds
+		CTimePreq: 1,                  // seconds
+		CTimePrsp: 1,                  // seconds
+		CTimePing: 1,                  // seconds
+		CSizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
+		CSizeRtry: 0,                  // quantity
+		CSizeWork: 10,                 // bits
+		CSizeConn: 10,                 // quantity
+		CSizePack: 1 << 20,            // 1*(2^20)B = 1MiB
+		CSizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
+		CSizeSkey: 1 << 4,             // 2^4B = 16B
+		CSizeBmsg: 10,                 // quantity
+		CSizePasw: 4,                  // chars
 	}
 }

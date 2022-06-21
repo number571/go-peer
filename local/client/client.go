@@ -26,7 +26,8 @@ type sClient struct {
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-func NewClient(priv asymmetric.IPrivKey, sett settings.ISettings) IClient {
+// Settings must contain (CMaskRout, CSizeSkey, CSizePack, CSizeWork)
+func NewClient(sett settings.ISettings, priv asymmetric.IPrivKey) IClient {
 	if priv == nil {
 		return nil
 	}
@@ -55,7 +56,7 @@ func (client *sClient) Settings() settings.ISettings {
 // Need use pseudo sender if route not null.
 func (client *sClient) Encrypt(route routing.IRoute, msg message.IMessage) (message.IMessage, []byte) {
 	var (
-		psender       = NewClient(route.PSender(), client.Settings())
+		psender       = NewClient(client.Settings(), route.PSender())
 		rmsg, session = client.onceEncrypt(route.Receiver(), msg)
 	)
 	if psender == nil && len(route.List()) != 0 {

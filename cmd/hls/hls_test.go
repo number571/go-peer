@@ -16,12 +16,12 @@ import (
 	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
 
 var (
-	tgSettings = testutils.NewSettings()
+	tgSettings = settings.NewSettings()
 )
 
 const (
@@ -144,7 +144,7 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 func testStartNodeHLS(t *testing.T) network.INode {
 	privKey := asymmetric.LoadRSAPrivKey(tcPrivKeyHLS)
-	client := client.NewClient(privKey, tgSettings)
+	client := client.NewClient(tgSettings, privKey)
 
 	node := network.NewNode(client).
 		Handle([]byte(hls_settings.CTitlePattern), routeHLS)
@@ -175,7 +175,7 @@ func testStartNodeHLS(t *testing.T) network.INode {
 
 func testStartClientHLS() error {
 	priv := asymmetric.NewRSAPrivKey(tcAKeySize)
-	client := client.NewClient(priv, tgSettings)
+	client := client.NewClient(tgSettings, priv)
 
 	node := network.NewNode(client).
 		Handle([]byte(hls_settings.CTitlePattern), nil)

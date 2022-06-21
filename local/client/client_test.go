@@ -7,13 +7,13 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/settings/testutils"
+	"github.com/number571/go-peer/settings"
 )
 
 func testNewClient() IClient {
-	sett := testutils.NewSettings()
+	sett := settings.NewSettings()
 	privKey := asymmetric.NewRSAPrivKey(1024)
-	return NewClient(privKey, sett)
+	return NewClient(sett, privKey)
 }
 
 func TestEncrypt(t *testing.T) {
