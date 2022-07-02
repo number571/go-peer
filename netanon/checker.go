@@ -1,4 +1,4 @@
-package network
+package netanon
 
 import (
 	"bytes"
@@ -7,8 +7,7 @@ import (
 
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/routing"
+	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -29,6 +28,12 @@ type sCheckerInfo struct {
 	fMutex  sync.Mutex
 	fOnline bool
 	fPubKey asymmetric.IPubKey
+}
+
+func newChecker(node INode) iChecker {
+	return &sChecker{
+		fNode: node,
+	}
 }
 
 // Set state = bool.
@@ -57,6 +62,19 @@ func (checker *sChecker) Status() bool {
 	return checker.fEnabled
 }
 
+// Get a list of checks public keys and online status.
+func (checker *sChecker) ListWithInfo() []iCheckerInfo {
+	checker.fMutex.Lock()
+	defer checker.fMutex.Unlock()
+
+	var list []iCheckerInfo
+	for _, chk := range checker.fMapping {
+		list = append(list, chk)
+	}
+
+	return list
+}
+
 // Check the existence in the list by the public key.
 func (checker *sChecker) InList(pub asymmetric.IPubKey) bool {
 	checker.fMutex.Lock()
@@ -74,19 +92,6 @@ func (checker *sChecker) List() []asymmetric.IPubKey {
 	var list []asymmetric.IPubKey
 	for _, chk := range checker.fMapping {
 		list = append(list, chk.PubKey())
-	}
-
-	return list
-}
-
-// Get a list of checks public keys and online status.
-func (checker *sChecker) ListWithInfo() []iCheckerInfo {
-	checker.fMutex.Lock()
-	defer checker.fMutex.Unlock()
-
-	var list []iCheckerInfo
-	for _, chk := range checker.fMapping {
-		list = append(list, chk)
 	}
 
 	return list
@@ -126,7 +131,12 @@ func (checker *sChecker) start() {
 	go func(checker *sChecker) {
 		node := checker.fNode.(*sNode)
 		sett := node.fClient.Settings()
-		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
+
+		timePing := sett.Get(settings.CTimePing)
+		timeWait := sett.Get(settings.CTimeWait)
+		maskPing := sett.Get(settings.CMaskPing)
+		maskPingBytes := encoding.Uint64ToBytes(maskPing)
+
 		for {
 			wg := sync.WaitGroup{}
 			list := checker.ListWithInfo()
@@ -135,12 +145,13 @@ func (checker *sChecker) start() {
 				go func(recv *sCheckerInfo) {
 					defer wg.Done()
 					resp, err := node.doRequest(
-						routing.NewRoute(recv.fPubKey),
-						message.NewMessage(patt, patt),
+						recv.fPubKey,
+						payload.NewPayload(maskPing, maskPingBytes),
+						node.fRouterF,
 						0, // retry number
-						sett.Get(settings.CTimeWait),
+						timeWait,
 					)
-					if err != nil || !bytes.Equal(resp, patt) {
+					if err != nil || !bytes.Equal(resp, maskPingBytes) {
 						recv.fOnline = false
 						return
 					}
@@ -151,9 +162,7 @@ func (checker *sChecker) start() {
 			select {
 			case <-checker.fChannel:
 				return
-			case <-time.After(time.Second * time.Duration(
-				sett.Get(settings.CTimePing),
-			)):
+			case <-time.After(time.Second * time.Duration(timePing)):
 				continue
 			}
 		}

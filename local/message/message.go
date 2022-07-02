@@ -1,10 +1,9 @@
 package message
 
 import (
-	"bytes"
 	"encoding/json"
 
-	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/local/payload"
 )
 
 var (
@@ -26,25 +25,21 @@ type SHeadMessage struct {
 }
 
 type SBodyMessage struct {
-	FData  []byte `json:"data"`
-	FHash  []byte `json:"hash"`
-	FSign  []byte `json:"sign"`
-	FProof uint64 `json:"proof"`
+	FPayload []byte `json:"payload"`
+	FHash    []byte `json:"hash"`
+	FSign    []byte `json:"sign"`
+	FProof   uint64 `json:"proof"`
 }
 
 // IMessage
 
-func NewMessage(title, data []byte) IMessage {
-	return &SMessage{
-		FHead: SHeadMessage{},
-		FBody: SBodyMessage{
-			FData: bytes.Join([][]byte{
-				encoding.Uint64ToBytes(uint64(len(title))),
-				title,
-				data,
-			}, []byte{}),
-		},
+func LoadMessage(bmsg []byte) IMessage {
+	var msg = new(SMessage)
+	err := json.Unmarshal(bmsg, msg)
+	if err != nil {
+		return nil
 	}
+	return msg
 }
 
 func (msg *SMessage) Head() iHead {
@@ -55,12 +50,12 @@ func (msg *SMessage) Body() iBody {
 	return msg.FBody
 }
 
-func (msg *SMessage) ToPackage() IPackage {
+func (msg *SMessage) Bytes() []byte {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil
 	}
-	return LoadPackage(jsonData)
+	return jsonData
 }
 
 // IHead
@@ -79,8 +74,8 @@ func (head SHeadMessage) Salt() []byte {
 
 // IBody
 
-func (body SBodyMessage) Data() []byte {
-	return body.FData
+func (body SBodyMessage) Payload() IPayload {
+	return payload.LoadPayload(body.FPayload)
 }
 
 func (body SBodyMessage) Hash() []byte {

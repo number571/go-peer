@@ -8,8 +8,8 @@ import (
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/crypto/symmetric"
-	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
 )
@@ -54,42 +54,45 @@ func (client *sClient) Settings() settings.ISettings {
 
 // Function wrap message in multiple route encryption.
 // Need use pseudo sender if route not null.
-func (client *sClient) Encrypt(route routing.IRoute, msg message.IMessage) (message.IMessage, []byte) {
+func (client *sClient) Encrypt(route routing.IRoute, pl payload.IPayload) message.IMessage {
 	var (
-		psender       = NewClient(client.Settings(), route.PSender())
-		rmsg, session = client.onceEncrypt(route.Receiver(), msg)
+		psender = NewClient(client.Settings(), route.PSender())
+		rmsg    = client.onceEncrypt(route.Receiver(), pl)
 	)
 	if psender == nil && len(route.List()) != 0 {
-		return nil, nil
+		return nil
 	}
 	for _, pub := range route.List() {
-		rmsg, _ = psender.(*sClient).onceEncrypt(
+		rmsg = psender.(*sClient).onceEncrypt(
 			pub,
-			message.NewMessage(
-				encoding.Uint64ToBytes(client.Settings().Get(settings.CMaskRout)),
-				rmsg.ToPackage().Bytes(),
+			payload.NewPayload(
+				client.Settings().Get(settings.CMaskRout),
+				rmsg.Bytes(),
 			),
 		)
 	}
-	return rmsg, session
+	return rmsg
 }
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, msg message.IMessage) (message.IMessage, []byte) {
+func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, pl payload.IPayload) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
 		session = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
 	)
 
-	data := bytes.Join(
-		[][]byte{
-			encoding.Uint64ToBytes(uint64(len(msg.Body().Data()))),
-			msg.Body().Data(),
-			encoding.Uint64ToBytes(rand.Uint64() % (settings.CSizePack / 4)),
-		},
-		[]byte{},
+	randBytes := rand.Bytes(rand.Uint64() % client.Settings().Get(settings.CSizePsdo))
+	doublePayload := payload.NewPayload(
+		uint64(len(pl.Bytes())), // head as size of (payload||random)
+		bytes.Join(
+			[][]byte{
+				pl.Bytes(),
+				randBytes,
+			},
+			[]byte{},
+		),
 	)
 
 	hash := hashing.NewSHA256Hasher(bytes.Join(
@@ -97,7 +100,7 @@ func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, msg message.IMes
 			salt,
 			client.PubKey().Bytes(),
 			receiver.Bytes(),
-			data,
+			doublePayload.Bytes(),
 		},
 		[]byte{},
 	)).Bytes()
@@ -110,21 +113,17 @@ func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, msg message.IMes
 			FSalt:    cipher.Encrypt(salt),
 		},
 		FBody: message.SBodyMessage{
-			FData:  cipher.Encrypt(data),
-			FHash:  hash,
-			FSign:  cipher.Encrypt(client.PrivKey().Sign(hash)),
-			FProof: puzzle.NewPoWPuzzle(client.Settings().Get(settings.CSizeWork)).Proof(hash),
+			FPayload: cipher.Encrypt(doublePayload.Bytes()),
+			FHash:    hash,
+			FSign:    cipher.Encrypt(client.PrivKey().Sign(hash)),
+			FProof:   puzzle.NewPoWPuzzle(client.Settings().Get(settings.CSizeWork)).Proof(hash),
 		},
-	}, session
+	}
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) {
-	const (
-		SizeUint64 = 8 // bytes
-	)
-
+func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payload.IPayload) {
 	if msg == nil {
 		return nil, nil
 	}
@@ -155,11 +154,11 @@ func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) 
 	}
 
 	// Load public key and check standart size.
-	public := asymmetric.LoadRSAPubKey(publicBytes)
-	if public == nil {
+	pubKey := asymmetric.LoadRSAPubKey(publicBytes)
+	if pubKey == nil {
 		return nil, nil
 	}
-	if public.Size() != client.PubKey().Size() {
+	if pubKey.Size() != client.PubKey().Size() {
 		return nil, nil
 	}
 
@@ -170,8 +169,12 @@ func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) 
 	}
 
 	// Decrypt main data of message by session key.
-	dataBytes := cipher.Decrypt(msg.Body().Data())
-	if dataBytes == nil {
+	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().Bytes())
+	if doublePayloadBytes == nil {
+		return nil, nil
+	}
+	doublePayload := payload.LoadPayload(doublePayloadBytes)
+	if doublePayload == nil {
 		return nil, nil
 	}
 
@@ -181,23 +184,11 @@ func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) 
 			salt,
 			publicBytes,
 			client.PubKey().Bytes(),
-			dataBytes,
+			doublePayload.Bytes(),
 		},
 		[]byte{},
 	)).Bytes()
 	if !bytes.Equal(check, msg.Body().Hash()) {
-		return nil, nil
-	}
-
-	// check size of data
-	if len(dataBytes) < SizeUint64 {
-		return nil, nil
-	}
-
-	// pass random bytes and get main data
-	mustLen := encoding.BytesToUint64(dataBytes[:SizeUint64])
-	allData := dataBytes[SizeUint64:]
-	if mustLen > uint64(len(allData)) {
 		return nil, nil
 	}
 
@@ -207,52 +198,20 @@ func (client *sClient) Decrypt(msg message.IMessage) (message.IMessage, []byte) 
 	if sign == nil {
 		return nil, nil
 	}
-	if !public.Verify(msg.Body().Hash(), sign) {
+	if !pubKey.Verify(msg.Body().Hash(), sign) {
 		return nil, nil
 	}
 
-	decMsg := &message.SMessage{
-		FHead: message.SHeadMessage{
-			FSender:  publicBytes,
-			FSession: session,
-			FSalt:    salt,
-		},
-		FBody: message.SBodyMessage{
-			FData:  allData[:mustLen],
-			FHash:  msg.Body().Hash(),
-			FSign:  sign,
-			FProof: msg.Body().Proof(),
-		},
+	// remove random bytes and get main data
+	mustLen := doublePayload.Head()
+	if mustLen > uint64(len(doublePayload.Body())) {
+		return nil, nil
 	}
-
-	// export title from (title||data)
-	title := exportMessage(decMsg)
-	if title == nil {
+	payload := payload.LoadPayload(doublePayload.Body()[:mustLen])
+	if payload == nil {
 		return nil, nil
 	}
 
-	// Return decrypted message with title.
-	return decMsg, title
-}
-
-// used in decrypt function from client
-// export title from (title||data)
-// store (title||data) <- data
-func exportMessage(msg *message.SMessage) []byte {
-	const (
-		SizeUint64 = 8 // bytes
-	)
-
-	if len(msg.FBody.FData) < SizeUint64 {
-		return nil
-	}
-
-	mustLen := encoding.BytesToUint64(msg.FBody.FData[:SizeUint64])
-	allData := msg.FBody.FData[SizeUint64:]
-	if mustLen > uint64(len(allData)) {
-		return nil
-	}
-
-	msg.FBody.FData = allData[mustLen:]
-	return allData[:mustLen]
+	// Return decrypted message with title
+	return pubKey, payload
 }

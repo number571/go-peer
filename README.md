@@ -1,6 +1,6 @@
 # go-peer
 
-> Framework for create secure and anonymity decentralized networks. Version: 1.4
+> Library for create secure and anonymity decentralized networks. Version: 1.5
 
 ## Research Article
 * Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
@@ -8,6 +8,7 @@
 ## Framework based applications
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
+* Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
 
 ## Deprecated framework based applications
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
@@ -26,3 +27,4 @@
 
 1. Wrap all standart errors to "errors" package from go-peer
 2. Write tests with comment "TODO"
+3. Need check for use wrappers (example hmc -> config wrapper)

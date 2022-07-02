@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/client"
+	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -99,11 +100,14 @@ func testClientDoPush() error {
 
 	for i := 0; i < tcN; i++ {
 		err := hmc.NewClient(
-			hmc.NewBuiler(client),
+			hmc.NewBuilder(client),
 			hmc.NewRequester(tcHost),
 		).Push(
 			client.PubKey(),
-			[]byte(fmt.Sprintf(tcBodyOfMessage, i)),
+			payload.NewPayload(
+				0x01,
+				[]byte(fmt.Sprintf(tcBodyOfMessage, i)),
+			),
 		)
 		if err != nil {
 			return err
@@ -118,7 +122,7 @@ func testClientDoSize() error {
 	client := client.NewClient(gSettings, priv)
 
 	size, err := hmc.NewClient(
-		hmc.NewBuiler(client),
+		hmc.NewBuilder(client),
 		hmc.NewRequester(tcHost),
 	).Size()
 	if err != nil {
@@ -137,20 +141,18 @@ func testClientDoLoad() error {
 	client := client.NewClient(gSettings, priv)
 
 	for i := 0; i < tcN; i++ {
-		msg, err := hmc.NewClient(
-			hmc.NewBuiler(client),
+		pubKey, pl, err := hmc.NewClient(
+			hmc.NewBuilder(client),
 			hmc.NewRequester(tcHost),
 		).Load(uint64(i))
 		if err != nil {
 			return err
 		}
 
-		body := msg.Body().Data()
-		if string(body) != fmt.Sprintf(tcBodyOfMessage, i) {
+		if string(pl.Body()) != fmt.Sprintf(tcBodyOfMessage, i) {
 			return fmt.Errorf("body is not equal")
 		}
 
-		pubKey := asymmetric.LoadRSAPubKey(msg.Head().Sender())
 		if pubKey.Address().String() != client.PubKey().Address().String() {
 			return fmt.Errorf("public key is not equal")
 		}

@@ -59,7 +59,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, hms_settings.CErrorNone, msg.ToPackage().Bytes())
+	response(w, hms_settings.CErrorNone, msg.Bytes())
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +81,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg := message.LoadPackage(vRequest.Package).ToMessage()
+	msg := message.LoadMessage(vRequest.Package)
 	if msg == nil {
 		response(w, hms_settings.CErrorMessage, []byte("failed: decode message"))
 		return

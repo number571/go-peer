@@ -1,19 +1,13 @@
 package network
 
 import (
-	"bytes"
-	"errors"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/routing"
+	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -23,132 +17,38 @@ var (
 
 // Basic structure for network use.
 type sNode struct {
-	fMutex       sync.Mutex
-	fListener    net.Listener
-	fClient      client.IClient
-	fHRoutes     map[string]iHandlerF
-	fMapping     map[string]bool
-	fConnections map[string]net.Conn
-	fActions     map[string]chan []byte
-	fF2F         iF2F
-	fChecker     iChecker
-	fPseudo      iPseudo
-	fOnline      iOnline
-	fRouter      iRouterF
+	fMutex        sync.Mutex
+	fListener     net.Listener
+	fSettings     settings.ISettings
+	fConnections  map[string]IConn
+	fHashMapping  map[string]struct{}
+	fHandleRoutes map[uint64]IHandlerF
 }
 
 // Create client by private key as identification.
-func NewNode(client client.IClient) INode {
-	if client == nil {
-		return nil
+func NewNode(sett settings.ISettings) INode {
+	return &sNode{
+		fSettings:     sett,
+		fConnections:  make(map[string]IConn),
+		fHashMapping:  make(map[string]struct{}),
+		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
-
-	node := &sNode{
-		fClient:      client,
-		fHRoutes:     make(map[string]iHandlerF),
-		fMapping:     make(map[string]bool),
-		fConnections: make(map[string]net.Conn),
-		fActions:     make(map[string]chan []byte),
-		fF2F: &sF2F{
-			fMapping: make(map[string]asymmetric.IPubKey),
-		},
-		fChecker: &sChecker{
-			fChannel: make(chan struct{}),
-			fMapping: make(map[string]iCheckerInfo),
-		},
-		fPseudo: &sPseudo{
-			fChannel: make(chan struct{}),
-			fPrivKey: asymmetric.NewRSAPrivKey(client.PubKey().Size()),
-		},
-		fOnline: &sOnline{},
-		fRouter: func(_ INode) []asymmetric.IPubKey { return nil },
-	}
-
-	// recurrent structures
-	{
-		checker := node.fChecker.(*sChecker)
-		pseudo := node.fPseudo.(*sPseudo)
-		online := node.fOnline.(*sOnline)
-
-		checker.fNode = node
-		pseudo.fNode = node
-		online.fNode = node
-	}
-
-	sett := node.Client().Settings()
-	patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
-
-	return node.Handle(patt, nil)
 }
 
-func (node *sNode) WithResponse(router iRouterF) INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (node *sNode) Broadcast(pl payload.IPayload) error {
+	// set this message to mapping
+	msg := NewMessage(pl)
+	node.inMappingWithSet(msg.Hash())
 
-	node.fRouter = router
-	return node
-}
-
-// Close checker, pseudo, online status, listener and current connections.
-func (node *sNode) Close() {
-	statuses := []iStatus{
-		node.fChecker,
-		node.fPseudo,
-		node.fOnline,
-	}
-	for _, status := range statuses {
-		status.Switch(false)
+	var err error
+	for _, conn := range node.Connections() {
+		e := conn.Write(msg)
+		if e != nil {
+			err = e
+		}
 	}
 
-	node.fMutex.Lock()
-	for id, conn := range node.fConnections {
-		conn.Close()
-		delete(node.fConnections, id)
-	}
-	if node.fListener != nil {
-		node.fListener.Close()
-	}
-	node.fMutex.Unlock()
-}
-
-// Return client structure.
-func (node *sNode) Client() client.IClient {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fClient
-}
-
-// Return checker structure.
-func (node *sNode) Checker() iChecker {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fChecker
-}
-
-// Return pseudo structure.
-func (node *sNode) Pseudo() iPseudo {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fPseudo
-}
-
-// Return online structure.
-func (node *sNode) Online() iOnline {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fOnline
-}
-
-// Return f2f structure.
-func (node *sNode) F2F() iF2F {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fF2F
+	return err
 }
 
 // Turn on listener by address.
@@ -167,102 +67,70 @@ func (node *sNode) Listen(address string) error {
 			break
 		}
 
-		if node.hasMaxConnSize() {
+		node.fMutex.Lock()
+		isConnLimit := node.hasMaxConnSize()
+		node.fMutex.Unlock()
+
+		if isConnLimit {
 			conn.Close()
 			continue
 		}
 
-		rsize := node.Client().Settings().Get(settings.CSizeSkey)
-		id := random.NewStdPRNG().String(rsize)
+		node.fMutex.Lock()
+		iconn := LoadConn(node.fSettings, conn)
+		node.fConnections[iconn.Socket().RemoteAddr().String()] = iconn
+		node.fMutex.Unlock()
 
-		node.setConnection(id, conn)
-		go node.handleConn(id)
+		go node.handleConn(iconn)
 	}
 
 	return nil
+}
+
+func (node *sNode) Close() error {
+	var err error
+
+	node.fMutex.Lock()
+	for id, conn := range node.fConnections {
+		e := conn.Close()
+		if e != nil {
+			err = e
+		}
+		delete(node.fConnections, id)
+	}
+	if node.fListener != nil {
+		e := node.fListener.Close()
+		if e != nil {
+			err = e
+		}
+	}
+	node.fMutex.Unlock()
+
+	return err
 }
 
 // Add function to mapping for route use.
-func (node *sNode) Handle(title []byte, handle iHandlerF) INode {
-	return node.setFunction(title, handle)
-}
-
-// Send message by public key of receiver.
-func (node *sNode) Request(route routing.IRoute, msg message.IMessage) ([]byte, error) {
-	return node.doRequest(
-		route,
-		msg,
-		node.Client().Settings().Get(settings.CSizeRtry),
-		node.Client().Settings().Get(settings.CTimeWait),
-	)
-}
-
-// Get list of connection addresses.
-func (node *sNode) Connections() []string {
+func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	var list []string
-	for addr := range node.fConnections {
-		list = append(list, addr)
-	}
-
-	return list
+	node.fHandleRoutes[head] = handle
+	return node
 }
 
-// Check the existence of an address in the list of connections.
-func (node *sNode) InConnections(address string) bool {
-	_, ok := node.getConnection(address)
-	return ok
-}
-
-// Connect to node by address.
-// Client handle function need be not null.
-func (node *sNode) Connect(address string) error {
-	if node.hasMaxConnSize() {
-		return errors.New("max conn")
-	}
-
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		return err
-	}
-
-	node.setConnection(address, conn)
-	go node.handleConn(address)
-
-	return nil
-}
-
-// Disconnect from node by address.
-func (node *sNode) Disconnect(address string) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	conn, ok := node.fConnections[address]
-	if ok {
-		conn.Close()
-	}
-
-	delete(node.fConnections, address)
-}
-
-func (node *sNode) handleConn(id string) {
-	defer node.Disconnect(id)
+func (node *sNode) handleConn(conn IConn) {
+	defer node.Disconnect(conn)
 
 	var (
-		retryNum = node.Client().Settings().Get(settings.CSizeRtry)
-		msgNum   = node.Client().Settings().Get(settings.CSizeBmsg)
-		conn, _  = node.getConnection(id)
-	)
+		retrySize = node.fSettings.Get(settings.CSizeRtry)
+		msgNum    = node.fSettings.Get(settings.CSizeBmsg)
 
-	var (
 		retryCounter = uint64(0)
 		msgCounter   = int64(0)
 	)
 
 	for {
-		if atomic.LoadUint64(&retryCounter) > retryNum {
+		if atomic.LoadUint64(&retryCounter) > retrySize {
 			break
 		}
 
@@ -271,256 +139,90 @@ func (node *sNode) handleConn(id string) {
 			continue
 		}
 
-		msg := node.readMessage(conn)
-		go func(msg message.IMessage) {
+		msg := conn.Read()
+		go func(msg IMessage) {
 			atomic.AddInt64(&msgCounter, 1)
 			defer atomic.AddInt64(&msgCounter, -1)
 
-			ok := node.handleMessage(msg)
+			ok := node.handleMessage(conn, msg)
 			if ok {
 				atomic.StoreUint64(&retryCounter, 0)
 				return
 			}
+
 			atomic.AddUint64(&retryCounter, 1)
 		}(msg)
 	}
 }
 
-func (node *sNode) handleMessage(msg message.IMessage) bool {
+// Get list of connection addresses.
+func (node *sNode) Connections() []IConn {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	var list []IConn
+	for _, conn := range node.fConnections {
+		list = append(list, conn)
+	}
+
+	return list
+}
+
+// Connect to node by address.
+// Client handle function need be not null.
+func (node *sNode) Connect(address string) IConn {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	if node.hasMaxConnSize() {
+		return nil
+	}
+
+	conn, err := net.Dial("tcp", address)
+	if err != nil {
+		return nil
+	}
+
+	iconn := LoadConn(node.fSettings, conn)
+	node.fConnections[iconn.Socket().RemoteAddr().String()] = iconn
+
+	go node.handleConn(iconn)
+
+	return iconn
+}
+
+func (node *sNode) Disconnect(conn IConn) error {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	delete(node.fConnections, conn.Socket().RemoteAddr().String())
+	return conn.Close()
+}
+
+func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {
 	// null message from connection is error
 	if msg == nil {
 		return false
 	}
 
 	// check message in mapping by hash
-	if node.inMappingWithSet(msg.Body().Hash()) {
+	if node.inMappingWithSet(msg.Hash()) {
 		return true
 	}
 
-	// redirect this message to connections
-	node.send(msg)
-
-	// try decrypt message
-	decMsg, title := node.Client().Decrypt(msg)
-	if decMsg == nil {
-		return true
+	// get function by head
+	f, ok := node.getFunction(msg.Payload().Head())
+	if !ok {
+		return false
 	}
 
-	// if this message is just route message
-	// then try procedures again
-	routeMsg := node.Client().Settings().Get(settings.CMaskRout)
-
-	// if is route package then
-	// 1/2 generate new pseudo-package and sleep rand time
-	// unpack and send new version of package
-	if bytes.Equal(title, encoding.Uint64ToBytes(routeMsg)) {
-		if node.fPseudo.Status() && random.NewStdPRNG().Bool() {
-			// send pseudo message with random sleep
-			size := len(decMsg.Body().Data())
-			node.fPseudo.Request(size).Sleep()
-		}
-		// recursive unpack message
-		msg = message.LoadPackage(decMsg.Body().Data()).ToMessage()
-		return node.handleMessage(msg)
-	}
-
-	// sleep random milliseconds
-	if node.fPseudo.Status() {
-		node.fPseudo.Sleep()
-	}
-
-	// if mode is friend-to-friend and sender not in list of f2f
-	// then pass this request
-	sender := asymmetric.LoadRSAPubKey(decMsg.Head().Sender())
-	if node.fF2F.Status() && !node.fF2F.InList(sender) {
-		return true
-	}
-
-	// send message to handler
-	node.handleFunc(decMsg, title)
+	f(node, conn, msg.Payload())
 	return true
 }
 
-func (node *sNode) handleFunc(msg message.IMessage, title []byte) {
-	var (
-		skeySize  = node.Client().Settings().Get(settings.CSizeSkey)
-		respNum   = node.Client().Settings().Get(settings.CMaskRout)
-		respBytes = encoding.Uint64ToBytes(respNum)
-	)
-
-	// receive response
-	if bytes.HasPrefix(title, respBytes) {
-		title = title[len(respBytes):]
-		if uint64(len(title)) < skeySize {
-			return
-		}
-		node.response(
-			title[:skeySize],
-			msg.Body().Data(),
-		)
-		return
-	}
-
-	// send response
-	f := node.getFunction(title)
-	if f == nil {
-		return
-	}
-
-	rmsg, _ := node.Client().Encrypt(
-		routing.NewRoute(asymmetric.LoadRSAPubKey(msg.Head().Sender())).
-			WithRedirects(node.fPseudo.PrivKey(), node.fRouter(node)),
-		message.NewMessage(
-			bytes.Join(
-				[][]byte{
-					respBytes,
-					msg.Head().Session(),
-					title,
-				},
-				[]byte{},
-			),
-			f(node, msg),
-		),
-	)
-	node.send(rmsg)
-}
-
-// Request with retry number and time out.
-func (node *sNode) doRequest(route routing.IRoute, msg message.IMessage, retryNum, timeOut uint64) ([]byte, error) {
-	if len(node.Connections()) == 0 {
-		return nil, errors.New("length of connections = 0")
-	}
-
-	routeMsg, session := node.Client().Encrypt(route, msg)
-	if routeMsg == nil {
-		return nil, errors.New("psender is nil with not nil routes")
-	}
-
-	node.setAction(session)
-	defer node.delAction(session)
-
-	for counter := uint64(0); counter <= retryNum; counter++ {
-		node.send(routeMsg)
-		resp, err := node.recv(session, timeOut)
-		if err != nil {
-			return nil, err
-		}
-		if resp == nil {
-			continue
-		}
-		return resp, nil
-	}
-
-	return nil, errors.New("time is over")
-}
-
-func (node *sNode) recv(session []byte, timeOut uint64) ([]byte, error) {
-	select {
-	case result, opened := <-node.getAction(session):
-		if !opened {
-			return nil, errors.New("chan is closed")
-		}
-		return result, nil
-	case <-time.After(time.Duration(timeOut) * time.Second):
-		return nil, nil
-	}
-}
-
-func (node *sNode) send(msg message.IMessage) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(msg.Body().Hash())
-	node.fMapping[skey] = true
-
-	pack := msg.ToPackage()
-	bytesMsg := bytes.Join(
-		[][]byte{
-			pack.SizeToBytes(),
-			pack.Bytes(),
-		},
-		[]byte{},
-	)
-
-	wg := sync.WaitGroup{}
-	wg.Add(len(node.fConnections))
-	for addr, conn := range node.fConnections {
-		go func(addr string, conn net.Conn) {
-			defer wg.Done()
-			conn.SetWriteDeadline(time.Now().Add(time.Second * 5))
-			_, err := conn.Write(bytesMsg)
-			if err != nil {
-				conn.Close()
-				delete(node.fConnections, addr)
-			}
-		}(addr, conn)
-	}
-	wg.Wait()
-}
-
-func (node *sNode) response(nonce []byte, data []byte) {
-	skey := encoding.Base64Encode(nonce)
-
-	node.fMutex.Lock()
-	ch, ok := node.fActions[skey]
-	if !ok {
-		node.fMutex.Unlock()
-		return
-	}
-	node.fMutex.Unlock()
-
-	ch <- data
-	close(ch)
-}
-
-func (node *sNode) setFunction(name []byte, handle iHandlerF) INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(name)
-	node.fHRoutes[skey] = handle
-	return node
-}
-
-func (node *sNode) getFunction(name []byte) iHandlerF {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(name)
-	f, ok := node.fHRoutes[skey]
-	if !ok {
-		return nil
-	}
-	return f
-}
-
-func (node *sNode) setAction(nonce []byte) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(nonce)
-	node.fActions[skey] = make(chan []byte)
-}
-
-func (node *sNode) getAction(nonce []byte) chan []byte {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(nonce)
-	ch, ok := node.fActions[skey]
-	if !ok {
-		panic("undefined key")
-	}
-
-	return ch
-}
-
-func (node *sNode) delAction(nonce []byte) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	skey := encoding.Base64Encode(nonce)
-	delete(node.fActions, skey)
+func (node *sNode) hasMaxConnSize() bool {
+	maxConns := node.fSettings.Get(settings.CSizeConn)
+	return uint64(len(node.fConnections)) > maxConns
 }
 
 func (node *sNode) inMappingWithSet(hash []byte) bool {
@@ -530,41 +232,28 @@ func (node *sNode) inMappingWithSet(hash []byte) bool {
 	skey := encoding.Base64Encode(hash)
 
 	// skey already exists
-	_, ok := node.fMapping[skey]
+	_, ok := node.fHashMapping[skey]
 	if ok {
 		return true
 	}
 
 	// push skey to mapping
-	if uint64(len(node.fMapping)) > node.fClient.Settings().Get(settings.CSizeMapp) {
-		for k := range node.fMapping {
-			delete(node.fMapping, k)
+	maxMapp := node.fSettings.Get(settings.CSizeMapp)
+	if uint64(len(node.fHashMapping)) > maxMapp {
+		for k := range node.fHashMapping {
+			delete(node.fHashMapping, k)
 			break
 		}
 	}
 
-	node.fMapping[skey] = true
+	node.fHashMapping[skey] = struct{}{}
 	return false
 }
 
-func (node *sNode) hasMaxConnSize() bool {
+func (node *sNode) getFunction(head uint64) (IHandlerF, bool) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	return uint64(len(node.fConnections)) > node.fClient.Settings().Get(settings.CSizeConn)
-}
-
-func (node *sNode) setConnection(id string, conn net.Conn) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	node.fConnections[id] = conn
-}
-
-func (node *sNode) getConnection(id string) (net.Conn, bool) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	conn, ok := node.fConnections[id]
-	return conn, ok
+	f, ok := node.fHandleRoutes[head]
+	return f, ok
 }

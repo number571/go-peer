@@ -36,7 +36,7 @@ func NewCryptoStorage(sett settings.ISettings, path string, key []byte) IKeyValu
 	}
 
 	if store.exists() {
-		encdata, err := utils.NewFile(path).Read()
+		encdata, err := utils.OpenFile(path).Read()
 		if err != nil {
 			return nil
 		}
@@ -91,7 +91,7 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 		return err
 	}
 
-	err = utils.NewFile(store.fPath).Write(
+	err = utils.OpenFile(store.fPath).Write(
 		bytes.Join(
 			[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
 			[]byte{},
@@ -159,13 +159,13 @@ func (store *sCryptoStorage) Del(key []byte) error {
 }
 
 func (store *sCryptoStorage) exists() bool {
-	return utils.NewFile(store.fPath).IsExist()
+	return utils.OpenFile(store.fPath).IsExist()
 }
 
 func (store *sCryptoStorage) decrypt() (storageData, error) {
 	var mapping storageData
 
-	encdata, err := utils.NewFile(store.fPath).Read()
+	encdata, err := utils.OpenFile(store.fPath).Read()
 	if err != nil {
 		return storageData{}, err
 	}

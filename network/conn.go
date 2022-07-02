@@ -3,75 +3,144 @@ package network
 import (
 	"bytes"
 	"net"
+	"sync"
+	"time"
 
-	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/crypto/puzzle"
-	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/settings"
 )
 
-func (node *sNode) readMessage(conn net.Conn) message.IMessage {
-	const (
-		SizeUint64 = 8 // bytes
-	)
+var (
+	_ IConn = &sConn{}
+)
 
-	var (
-		pack    []byte
-		size    = uint64(0)
-		bufsize = make([]byte, SizeUint64)
-	)
+type sConn struct {
+	fMutex    sync.Mutex
+	fSettings settings.ISettings
+	fSocket   net.Conn
+}
 
-	length, err := conn.Read(bufsize)
+func NewConn(sett settings.ISettings, address string) IConn {
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return nil
 	}
-	if length != SizeUint64 {
+	return LoadConn(sett, conn)
+}
+
+func LoadConn(sett settings.ISettings, conn net.Conn) IConn {
+	return &sConn{
+		fSettings: sett,
+		fSocket:   conn,
+	}
+}
+
+func (conn *sConn) Socket() net.Conn {
+	return conn.fSocket
+}
+
+func (conn *sConn) Request(msg IMessage) IMessage {
+	var (
+		chMsg    = make(chan IMessage)
+		timeWait = conn.fSettings.Get(settings.CTimeWait)
+	)
+
+	conn.Write(msg)
+	go readMessage(conn, chMsg)
+
+	select {
+	case rmsg := <-chMsg:
+		return rmsg
+	case <-time.After(time.Duration(timeWait) * time.Second):
 		return nil
 	}
+}
 
-	mustLen := message.LoadPackage(bufsize).BytesToSize()
-	if mustLen > node.fClient.Settings().Get(settings.CSizePack) {
-		return nil
-	}
+func (conn *sConn) Close() error {
+	return conn.fSocket.Close()
+}
 
-	buffer := make([]byte, mustLen)
+func (conn *sConn) Write(msg IMessage) error {
+	conn.fMutex.Lock()
+	defer conn.fMutex.Unlock()
+
+	msgBytes := msg.Bytes()
+	ptr := len(msgBytes)
+
 	for {
-		length, err = conn.Read(buffer)
+		n, err := conn.fSocket.Write(msgBytes[:ptr])
 		if err != nil {
-			return nil
+			return err
 		}
 
-		pack = bytes.Join(
-			[][]byte{
-				pack,
-				buffer[:length],
-			},
-			[]byte{},
-		)
+		msgBytes = msgBytes[:n]
+		ptr = ptr - n
 
-		size += uint64(length)
-		if size >= mustLen {
+		if ptr == 0 {
 			break
 		}
 	}
 
-	return node.initialCheck(message.LoadPackage(pack).ToMessage())
+	return nil
 }
 
-func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
-	if msg == nil {
-		return nil
+func (conn *sConn) Read() IMessage {
+	chMsg := make(chan IMessage)
+	go readMessage(conn, chMsg)
+	return <-chMsg
+}
+
+func readMessage(conn *sConn, chMsg chan IMessage) {
+	var msg IMessage
+	defer func() {
+		chMsg <- msg
+	}()
+
+	// bufLen = Size[u64] in bytes
+	bufLen := make([]byte, cSizeUint)
+	length, err := conn.fSocket.Read(bufLen)
+	if err != nil {
+		return
+	}
+	if length != cSizeUint {
+		return
 	}
 
-	if len(msg.Body().Hash()) != hashing.GSHA256Size {
-		return nil
+	// mustLen = Size[u64] in uint64
+	mustLen := newPackage(bufLen).BytesToSize()
+	if mustLen > conn.fSettings.Get(settings.CSizePack) {
+		return
 	}
 
-	diff := node.fClient.Settings().Get(settings.CSizeWork)
-	puzzle := puzzle.NewPoWPuzzle(diff)
-	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
-		return nil
+	stock := mustLen
+	msgRaw := []byte{}
+
+	for {
+		buffer := make([]byte, stock)
+		n, err := conn.fSocket.Read(buffer)
+		if err != nil {
+			return
+		}
+
+		msgRaw = bytes.Join(
+			[][]byte{
+				msgRaw,
+				buffer[:n],
+			},
+			[]byte{},
+		)
+
+		stock -= uint64(n)
+		if stock == 0 {
+			break
+		}
 	}
 
-	return msg
+	// try unpack message from bytes
+	msg = LoadMessage(bytes.Join(
+		[][]byte{
+			bufLen,
+			msgRaw,
+		},
+		[]byte{},
+	))
 }

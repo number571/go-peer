@@ -51,7 +51,7 @@ func TestLogger(t *testing.T) {
 	logger.Warning(tcTestWarning)
 	logger.Error(tcTestError)
 
-	res, err := utils.NewFile(tcPathInfo).Read()
+	res, err := utils.OpenFile(tcPathInfo).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -59,7 +59,7 @@ func TestLogger(t *testing.T) {
 		t.Error("info does not contains tcTestInfo")
 	}
 
-	res, err = utils.NewFile(tcPathWarning).Read()
+	res, err = utils.OpenFile(tcPathWarning).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -67,7 +67,7 @@ func TestLogger(t *testing.T) {
 		t.Error("warning does not contains tcTestWarning")
 	}
 
-	res, err = utils.NewFile(tcPathError).Read()
+	res, err = utils.OpenFile(tcPathError).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}

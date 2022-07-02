@@ -29,18 +29,18 @@ const (
 func NewConfig(filepath string) IConfig {
 	var cfg = new(sConfig)
 
-	if !utils.NewFile(filepath).IsExist() {
+	if !utils.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
 			FAddress:     cDefaultAddress,
 			FCleanCron:   cDefaultCleanCron,
 			FConnections: []string{cDefaultConnection},
 		}
-		err := utils.NewFile(filepath).Write(encoding.Serialize(cfg))
+		err := utils.OpenFile(filepath).Write(encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		bytes, err := utils.NewFile(filepath).Read()
+		bytes, err := utils.OpenFile(filepath).Read()
 		if err != nil {
 			panic(err)
 		}

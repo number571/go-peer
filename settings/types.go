@@ -6,7 +6,8 @@ type ISettings interface {
 }
 
 const (
-	CMaskRout uint64 = iota + 1
+	CMaskNetw uint64 = iota + 1
+	CMaskRout
 	CMaskPing
 	CMaskPasw
 	CTimeWait
@@ -29,4 +30,8 @@ const (
 	CPaswAplh = 0b100
 	CPaswNumr = 0b010
 	CPaswSpec = 0b001
+)
+
+const (
+	CSizeUint64 = 8
 )

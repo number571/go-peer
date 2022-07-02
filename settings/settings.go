@@ -43,10 +43,11 @@ func defaultSettings() map[uint64]uint64 {
 	// B - byte
 	// b - bit
 	return map[uint64]uint64{
-		CMaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
-		CMaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
+		CMaskNetw: 0xFFFFFFFFFFFFFFFF, // Network route
+		CMaskRout: 0xEEEEEEEEEEEEEEEE, // Include/Response package
+		CMaskPing: 0xDDDDDDDD00000000, // USED ONLY 32bits; Ping package
 		CMaskPasw: 0b000,              // 0b111 = (alpha, numeric, special)
-		CTimeWait: 20,                 // seconds
+		CTimeWait: 10,                 // seconds
 		CTimePreq: 1,                  // seconds
 		CTimePrsp: 1,                  // seconds
 		CTimePing: 1,                  // seconds
@@ -54,8 +55,8 @@ func defaultSettings() map[uint64]uint64 {
 		CSizeRtry: 0,                  // quantity
 		CSizeWork: 10,                 // bits
 		CSizeConn: 10,                 // quantity
-		CSizePack: 1 << 20,            // 1*(2^20)B = 1MiB
-		CSizeMapp: 1 << 10,            // 1*(2^10)H = 44KiB
+		CSizePack: 4 << 20,            // 1*(2^20)B = 1MiB
+		CSizeMapp: 1 << 10,            // quantity hashes in map
 		CSizeSkey: 1 << 4,             // 2^4B = 16B
 		CSizeBmsg: 10,                 // quantity
 		CSizePasw: 4,                  // chars

@@ -78,7 +78,7 @@ var (
 )
 
 func testConfigDefaultInit(configPath string) {
-	utils.NewFile(configPath).Write([]byte(tcConfig))
+	utils.OpenFile(configPath).Write([]byte(tcConfig))
 }
 
 func TestConfig(t *testing.T) {

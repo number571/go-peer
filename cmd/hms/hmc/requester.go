@@ -62,7 +62,7 @@ func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage,
 		return nil, fmt.Errorf("%s", string(response.Result))
 	}
 
-	msg := message.LoadPackage(response.Result).ToMessage()
+	msg := message.LoadMessage(response.Result)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")
 	}

@@ -1,4 +1,4 @@
-package network
+package netanon
 
 import (
 	"sync"
@@ -15,6 +15,12 @@ type sF2F struct {
 	fMutex   sync.Mutex
 	fEnabled bool
 	fMapping map[string]asymmetric.IPubKey
+}
+
+func newF2F() iF2F {
+	return &sF2F{
+		fMapping: make(map[string]asymmetric.IPubKey),
+	}
 }
 
 // Set state = bool.

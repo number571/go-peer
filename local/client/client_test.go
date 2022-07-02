@@ -5,34 +5,38 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
 )
 
+const (
+	tcHead = 0xDEADBEAF
+	tcBody = "hello, world!"
+)
+
 func testNewClient() IClient {
-	sett := settings.NewSettings()
-	privKey := asymmetric.NewRSAPrivKey(1024)
-	return NewClient(sett, privKey)
+	return NewClient(
+		settings.NewSettings(),
+		asymmetric.NewRSAPrivKey(1024),
+	)
 }
 
 func TestEncrypt(t *testing.T) {
 	client1 := testNewClient()
 	client2 := testNewClient()
 
-	title := []byte("header")
-	data := []byte("hello, world!")
+	pl := payload.NewPayload(uint64(tcHead), []byte(tcBody))
+	msg := client1.Encrypt(routing.NewRoute(client2.PubKey()), pl)
 
-	msg := message.NewMessage(title, data)
-	encmsg, _ := client1.Encrypt(routing.NewRoute(client2.PubKey()), msg)
-
-	decmsg, title1 := client2.Decrypt(encmsg)
-
-	if !bytes.Equal(data, decmsg.Body().Data()) {
-		t.Error("data not equal with decrypted data")
+	_, decPl := client2.Decrypt(msg)
+	if decPl == nil {
+		t.Error("decrypt payload is nil")
+		return
 	}
 
-	if !bytes.Equal(title, title1) {
-		t.Error("title not equal with decrypted title")
+	if !bytes.Equal([]byte(tcBody), decPl.Body()) {
+		t.Error("data not equal with decrypted data")
+		return
 	}
 }

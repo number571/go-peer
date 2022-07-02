@@ -5,15 +5,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/client"
+	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/local/routing"
+	"github.com/number571/go-peer/settings"
 )
 
 const (
-	tcPathDB           = "test.db"
-	tcMessageTitle     = "test-title"
-	tcMessageBody      = "test-body"
-	tcMessageRawConcat = tcMessageTitle + tcMessageBody
+	tcHeadPattern   = 0x01
+	tcBodyOfMessage = "hello, world!"
+	tcPathDB        = "test.db"
 )
 
 var (
@@ -43,8 +46,15 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	msg := message.NewMessage([]byte(tcMessageTitle), []byte(tcMessageBody))
-	err = tgDB.Push(tgKey, msg)
+	cl := client.NewClient(
+		settings.NewSettings(),
+		asymmetric.NewRSAPrivKey(1024),
+	)
+
+	err = tgDB.Push(tgKey, cl.Encrypt(
+		routing.NewRoute(cl.PubKey()),
+		payload.NewPayload(tcHeadPattern, []byte(tcBodyOfMessage)),
+	))
 	if err != nil {
 		t.Error(err)
 		return
@@ -66,8 +76,18 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(loadMsg.Body().Data(), []byte(msg.Body().Data())) {
-		t.Error("load msg (title||body) != init (title||body)")
+	pubKey, pl := cl.Decrypt(loadMsg)
+	if pubKey == nil {
+		t.Error("load message is nil")
+		return
+	}
+
+	if pl.Head() != tcHeadPattern {
+		t.Error("load msg head != init head")
+	}
+
+	if !bytes.Equal(pl.Body(), []byte(tcBodyOfMessage)) {
+		t.Error("load msg body != init body")
 	}
 
 	err = tgDB.Clean()

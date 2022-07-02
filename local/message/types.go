@@ -3,18 +3,13 @@ package message
 type IMessage interface {
 	Head() iHead
 	Body() iBody
-
-	ToPackage() IPackage
+	Bytes() []byte
 }
 
-type IPackage interface {
-	Size() uint64
+type IPayload interface {
+	Head() uint64
+	Body() []byte
 	Bytes() []byte
-
-	SizeToBytes() []byte
-	BytesToSize() uint64
-
-	ToMessage() IMessage
 }
 
 type iHead interface {
@@ -24,7 +19,7 @@ type iHead interface {
 }
 
 type iBody interface {
-	Data() []byte
+	Payload() IPayload
 	Hash() []byte
 	Sign() []byte
 	Proof() uint64

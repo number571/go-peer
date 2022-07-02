@@ -15,11 +15,10 @@ import (
 	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/utils"
 )
 
 func main() {
-	appIsRun := false
-
 	// read config, database, key
 	err := hlsDefaultInit()
 	if err != nil {
@@ -113,39 +112,28 @@ func main() {
 		err := srv.ListenAndServe()
 		if err != nil {
 			gLogger.Warning(err.Error())
-			if !appIsRun {
-				os.Exit(1)
-			}
 		}
 	}()
 
 	go func() {
+		gLogger.Info(fmt.Sprintf("HLS is listening [%s]...", gConfig.Address().HLS()))
+
 		// if node in client mode
 		// then run endless loop
 		if gConfig.Address().HLS() == "" {
-			gLogger.Info("HLS is listening...")
 			select {}
 		}
 
 		// run node in server mode
-		gLogger.Info(fmt.Sprintf("HLS is listening [%s]...", gConfig.Address().HLS()))
 		err = gNode.Listen(gConfig.Address().HLS())
 		if err != nil {
-			gLogger.Error(err.Error())
-			if !appIsRun {
-				os.Exit(2)
-			}
+			gLogger.Warning(err.Error())
 		}
 	}()
 
-	appIsRun = true
-
 	<-shutdown
 	fmt.Println("Shutting down...")
-
-	srv.Close()
-	gDB.Close()
-	gNode.Close()
+	utils.CloseAll([]utils.ICloser{srv, gDB, gNode})
 }
 
 func nodesInOnline(node network.INode) []asymmetric.IPubKey {

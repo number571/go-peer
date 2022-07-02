@@ -4,18 +4,19 @@ import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/local/payload"
 )
 
 type IClient interface {
 	Size() (uint64, error)
-	Load(uint64) (message.IMessage, error)
-	Push(asymmetric.IPubKey, []byte) error
+	Load(uint64) (asymmetric.IPubKey, payload.IPayload, error)
+	Push(asymmetric.IPubKey, payload.IPayload) error
 }
 
 type IBuilder interface {
 	Size() *hms_settings.SSizeRequest
 	Load(uint64) *hms_settings.SLoadRequest
-	Push(asymmetric.IPubKey, []byte) *hms_settings.SPushRequest
+	Push(asymmetric.IPubKey, payload.IPayload) *hms_settings.SPushRequest
 }
 
 type IRequester interface {

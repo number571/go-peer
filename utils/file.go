@@ -13,7 +13,7 @@ type sFile struct {
 	fPath string
 }
 
-func NewFile(path string) IFile {
+func OpenFile(path string) IFile {
 	return &sFile{
 		fPath: path,
 	}

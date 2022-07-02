@@ -98,7 +98,7 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	// push message
 	err = db.fMessages.fDB.Set(
 		getKeyMessage(key, size),
-		msg.ToPackage().Bytes(),
+		msg.Bytes(),
 	)
 	if err != nil {
 		err1 := db.fHashes.fDB.Del(getKeyHash(hash))
@@ -128,7 +128,7 @@ func (db *sKeyValueDB) Load(key []byte, i uint64) (message.IMessage, error) {
 		return nil, fmt.Errorf("message undefined")
 	}
 
-	return message.LoadPackage(data).ToMessage(), nil
+	return message.LoadMessage(data), nil
 }
 
 func (db *sKeyValueDB) Close() error {
