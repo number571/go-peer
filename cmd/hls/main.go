@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/local/selector"
-	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
@@ -30,12 +30,12 @@ func main() {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	// set handle functions
-	gNode.Handle([]byte(hls_settings.CTitlePattern), routeHLS)
+	gNode.Handle(hls_settings.CHeaderHLS, routeHLS)
 
 	// set response route
-	gNode.WithResponse(func(node network.INode) []asymmetric.IPubKey {
+	gNode.WithRouter(func() []asymmetric.IPubKey {
 		randSizeRoute := random.NewStdPRNG().Uint64() % hls_settings.CSizeRoute
-		return selector.NewSelector(nodesInOnline(node)).
+		return selector.NewSelector(nodesInOnline(gNode)).
 			Shuffle().
 			Return(randSizeRoute)
 	})
@@ -63,9 +63,9 @@ func main() {
 			gLogger.Warning(fmt.Sprintf("used own address '%s'", address))
 			continue
 		}
-		err := gNode.Connect(address)
-		if err != nil {
-			gLogger.Warning(err.Error())
+		conn := gNode.Network().Connect(address)
+		if conn == nil {
+			gLogger.Warning("conn is nil")
 			continue
 		}
 		gLogger.Info(fmt.Sprintf("connected to '%s'", address))
@@ -82,12 +82,14 @@ func main() {
 				if address == gConfig.Address().HLS() {
 					continue
 				}
-				if gNode.InConnections(address) {
-					continue
+				for _, conn := range gNode.Network().Connections() {
+					if conn.Socket().LocalAddr().String() == address {
+						continue
+					}
 				}
-				err := gNode.Connect(address)
-				if err != nil {
-					gLogger.Warning(err.Error())
+				conn := gNode.Network().Connect(address)
+				if conn == nil {
+					gLogger.Warning(fmt.Sprintf("conn is nil %s", address))
 					continue
 				}
 				gLogger.Info(fmt.Sprintf("connected to '%s'", address))
@@ -125,7 +127,7 @@ func main() {
 		}
 
 		// run node in server mode
-		err = gNode.Listen(gConfig.Address().HLS())
+		err = gNode.Network().Listen(gConfig.Address().HLS())
 		if err != nil {
 			gLogger.Warning(err.Error())
 		}
@@ -136,7 +138,7 @@ func main() {
 	utils.CloseAll([]utils.ICloser{srv, gDB, gNode})
 }
 
-func nodesInOnline(node network.INode) []asymmetric.IPubKey {
+func nodesInOnline(node netanon.INode) []asymmetric.IPubKey {
 	inOnline := []asymmetric.IPubKey{}
 	for _, info := range gNode.Checker().ListWithInfo() {
 		if !info.Online() {

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	tgAddrs = []string{":7070", ":8080", ":9090"}
+	tgAddrs = [2]string{":8080", ":9090"}
 )
 
 const (
@@ -67,7 +67,7 @@ func TestBroadcast(t *testing.T) {
 
 	select {
 	case <-ch:
-	case <-time.After(5 * time.Second):
+	case <-time.After(10 * time.Second):
 		t.Error("limit of waiting time for group")
 		return
 	}
@@ -106,24 +106,19 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		}
 	}()
 	go func() {
-		err := nodes[3].Listen(tgAddrs[1])
+		err := nodes[4].Listen(tgAddrs[1])
 		if err != nil {
 			panic(err)
 		}
 	}()
-	go func() {
-		err := nodes[4].Listen(tgAddrs[2])
-		if err != nil {
-			panic(err)
-		}
-	}()
+
 	time.Sleep(200 * time.Millisecond)
 
 	nodes[0].Connect(tgAddrs[0])
-	nodes[1].Connect(tgAddrs[2])
+	nodes[1].Connect(tgAddrs[1])
 
-	nodes[2].Connect(tgAddrs[1])
-	nodes[3].Connect(tgAddrs[2])
+	nodes[3].Connect(tgAddrs[0])
+	nodes[3].Connect(tgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {

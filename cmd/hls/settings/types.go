@@ -18,6 +18,5 @@ type SResponse struct {
 
 type SRequest struct {
 	Receiver string `json:"receiver"` // public key
-	Title    []byte `json:"title"`
 	Data     []byte `json:"data"`
 }

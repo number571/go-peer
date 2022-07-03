@@ -9,6 +9,7 @@ const (
 	CMaskNetw uint64 = iota + 1
 	CMaskRout
 	CMaskPing
+	CMaskPsdo
 	CMaskPasw
 	CTimeWait
 	CTimePreq

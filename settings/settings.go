@@ -1,6 +1,9 @@
 package settings
 
-import "sync"
+import (
+	"math"
+	"sync"
+)
 
 var (
 	_ ISettings = &sSettings{}
@@ -15,6 +18,13 @@ func NewSettings() ISettings {
 	return &sSettings{
 		fMapping: defaultSettings(),
 	}
+}
+
+func MustBeUint32(v uint64) uint32 {
+	if v > math.MaxUint32 {
+		panic("v > math.MaxUint32")
+	}
+	return uint32(v)
 }
 
 func (s *sSettings) Set(k uint64, v uint64) ISettings {
@@ -45,9 +55,10 @@ func defaultSettings() map[uint64]uint64 {
 	return map[uint64]uint64{
 		CMaskNetw: 0xFFFFFFFFFFFFFFFF, // Network route
 		CMaskRout: 0xEEEEEEEEEEEEEEEE, // Include/Response package
-		CMaskPing: 0xDDDDDDDD00000000, // USED ONLY 32bits; Ping package
+		CMaskPing: 0x00000000DDDDDDDD, // Must be 32bit; Ping package
+		CMaskPsdo: 0x0000000000000000, // Used for pseudo packages
 		CMaskPasw: 0b000,              // 0b111 = (alpha, numeric, special)
-		CTimeWait: 10,                 // seconds
+		CTimeWait: 20,                 // seconds
 		CTimePreq: 1,                  // seconds
 		CTimePrsp: 1,                  // seconds
 		CTimePing: 1,                  // seconds

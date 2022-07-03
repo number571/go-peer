@@ -1,11 +1,10 @@
-package netanon
+package network
 
 import (
 	"sync"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -17,12 +16,6 @@ type sOnline struct {
 	fMutex   sync.Mutex
 	fNode    INode
 	fEnabled bool
-}
-
-func newOnline(node INode) iOnline {
-	return &sOnline{
-		fNode: node,
-	}
 }
 
 func (onl *sOnline) Switch(state bool) {
@@ -50,16 +43,21 @@ func (onl *sOnline) Status() bool {
 }
 
 func (onl *sOnline) start() {
-	maskPing := onl.fNode.Client().Settings().Get(settings.CMaskPing)
-	onl.fNode.Handle(
-		settings.MustBeUint32(maskPing),
-		func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
-			return encoding.Uint64ToBytes(maskPing)
-		},
-	)
+	go func(node INode) {
+		sett := node.Client().Settings()
+		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
+
+		node.Handle(patt, func(node INode, msg message.IMessage) []byte {
+			return patt
+		})
+	}(onl.fNode)
 }
 
 func (onl *sOnline) stop() {
-	maskPing := onl.fNode.Client().Settings().Get(settings.CMaskPing)
-	onl.fNode.Handle(settings.MustBeUint32(maskPing), nil)
+	go func(node INode) {
+		sett := node.Client().Settings()
+		patt := encoding.Uint64ToBytes(sett.Get(settings.CMaskPing))
+
+		node.Handle(patt, nil)
+	}(onl.fNode)
 }

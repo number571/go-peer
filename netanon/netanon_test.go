@@ -14,50 +14,24 @@ import (
 )
 
 var (
-	tgAddrs = []string{":7071", ":8081", ":9091"}
+	tgAddrs = [2]string{":8081", ":9091"}
 )
 
 const (
-	tcHead = 0xDEADBEAF00000000
+	tcHead = 0xDEADBEAF
 	tcIter = 10
 	tcBody = "hello, world!"
 	tcResp = "response from node!"
 )
 
-func TestRequestWithoutF2F(t *testing.T) {
+func TestComplex(t *testing.T) {
 	nodes := testNewNodes()
 	defer testFreeNodes(nodes[:])
 
-	testRequestWithF2F(t, nodes, 0) // not use f2f
-}
-
-func TestRequestWithF2F(t *testing.T) {
-	nodes := testNewNodes()
-	defer testFreeNodes(nodes[:])
-
-	testRequestWithF2F(t, nodes, 1) // f2f with friends
-
-}
-
-func TestRequestWithF2FWithoutFriends(t *testing.T) {
-	nodes := testNewNodes()
-	defer testFreeNodes(nodes[:])
-
-	testRequestWithF2F(t, nodes, 2) // f2f without friends
-}
-
-func testRequestWithF2F(t *testing.T, nodes [5]INode, mode int) {
-	nodes[0].F2F().Switch(mode != 0)
-	nodes[1].F2F().Switch(mode != 0)
-
-	switch mode {
-	case 1:
-		nodes[0].F2F().Append(nodes[1].Client().PubKey())
-		nodes[1].F2F().Append(nodes[0].Client().PubKey())
-	case 2:
-		nodes[0].Client().Settings().Set(settings.CTimeWait, 1) // seconds
-	default:
-		// pass
+	for _, node := range nodes {
+		node.Pseudo().Switch(true)
+		node.Online().Switch(true)
+		node.Checker().Switch(true)
 	}
 
 	wg := sync.WaitGroup{}
@@ -66,7 +40,7 @@ func testRequestWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
-			reqBody := fmt.Sprintf("%s (%d, %d)", tcBody, mode, i)
+			reqBody := fmt.Sprintf("%s (%d)", tcBody, i)
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
@@ -74,10 +48,7 @@ func testRequestWithF2F(t *testing.T, nodes [5]INode, mode int) {
 				payload.NewPayload(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
-				if mode == 2 {
-					return
-				}
-				t.Errorf("%s (mode=%d) (%d)", err.Error(), mode, i)
+				t.Errorf("%s (%d)", err.Error(), i)
 				return
 			}
 
@@ -89,6 +60,100 @@ func testRequestWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	}
 
 	wg.Wait()
+}
+
+func TestPseudo(t *testing.T) {
+	nodes := testNewNodes()
+	defer testFreeNodes(nodes[:])
+
+	for _, node := range nodes {
+		node.Pseudo().Switch(true)
+	}
+
+	time.Sleep(1 * time.Second)
+	reqBody := "hello, world!"
+
+	resp, err := nodes[0].Request(
+		nodes[1].Client().PubKey(),
+		payload.NewPayload(tcHead, []byte(reqBody)),
+	)
+	if err != nil {
+		t.Error(err.Error())
+		return
+	}
+
+	if string(resp) != fmt.Sprintf("%s (response)", reqBody) {
+		t.Errorf("string(resp) != reqBody")
+		return
+	}
+}
+
+func TestOnlineChecker(t *testing.T) {
+	nodes := testNewNodes()
+	defer testFreeNodes(nodes[:])
+
+	for _, node := range nodes {
+		node.Online().Switch(true)
+		node.Checker().Switch(true)
+	}
+
+	nodes[0].Checker().Append(nodes[1].Client().PubKey())
+	time.Sleep(1 * time.Second)
+
+	list := nodes[0].Checker().ListWithInfo()
+	if !list[0].Online() {
+		t.Errorf("node is offline")
+		return
+	}
+}
+
+func TestF2F(t *testing.T) {
+	nodes := testNewNodes()
+	defer testFreeNodes(nodes[:])
+
+	testWithF2F(t, nodes, 1) // f2f with friends
+}
+
+func TestF2FWithoutFriends(t *testing.T) {
+	nodes := testNewNodes()
+	defer testFreeNodes(nodes[:])
+
+	testWithF2F(t, nodes, 2) // f2f without friends
+}
+
+func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
+	nodes[0].F2F().Switch(true)
+	nodes[1].F2F().Switch(true)
+
+	switch mode {
+	case 1:
+		nodes[0].F2F().Append(nodes[1].Client().PubKey())
+		nodes[1].F2F().Append(nodes[0].Client().PubKey())
+	case 2:
+		nodes[0].Client().Settings().Set(settings.CTimeWait, 1) // seconds
+	default:
+		// pass
+	}
+
+	reqBody := fmt.Sprintf("%s (%d)", tcBody, mode)
+
+	// nodes[1] -> nodes[0] -> nodes[2]
+	resp, err := nodes[0].Request(
+		nodes[1].Client().PubKey(),
+		payload.NewPayload(tcHead, []byte(reqBody)),
+	)
+	if err != nil {
+		if mode == 2 {
+			return
+		}
+		t.Errorf("%s (mode=%d)", err.Error(), mode)
+		return
+	}
+
+	if string(resp) != fmt.Sprintf("%s (response)", reqBody) {
+		t.Errorf("string(resp) != reqBody")
+		return
+	}
 }
 
 func testGetPubKeys(nodes []INode) []asymmetric.IPubKey {
@@ -115,8 +180,9 @@ func testNewNodes() [5]INode {
 				testGetPubKeys(nodes[2:]),
 			).Shuffle().Return(3)
 		})
+
 		node.Handle(
-			tcHead,
+			settings.MustBeUint32(tcHead),
 			func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
 				// send response
 				resp := fmt.Sprintf("%s (response)", string(pl.Body()))
@@ -132,28 +198,22 @@ func testNewNodes() [5]INode {
 		}
 	}()
 	go func() {
-		err := nodes[3].Network().Listen(tgAddrs[1])
+		err := nodes[4].Network().Listen(tgAddrs[1])
 		if err != nil {
 			panic(err)
 		}
 	}()
-	go func() {
-		err := nodes[4].Network().Listen(tgAddrs[2])
-		if err != nil {
-			panic(err)
-		}
-	}()
+
 	time.Sleep(200 * time.Millisecond)
 
 	// nodes to routes
 	nodes[0].Network().Connect(tgAddrs[0])
-	nodes[1].Network().Connect(tgAddrs[2])
+	nodes[1].Network().Connect(tgAddrs[1])
 
 	// routes to routes
-	nodes[2].Network().Connect(tgAddrs[1])
-	nodes[3].Network().Connect(tgAddrs[2])
+	nodes[3].Network().Connect(tgAddrs[0])
+	nodes[3].Network().Connect(tgAddrs[1])
 
-	time.Sleep(200 * time.Millisecond)
 	return nodes
 }
 

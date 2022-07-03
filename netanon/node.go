@@ -2,7 +2,6 @@ package netanon
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -24,7 +23,6 @@ var (
 
 type sNode struct {
 	fMutex         sync.Mutex
-	fPseudoClient  asymmetric.IPrivKey
 	fClient        client.IClient
 	fNetwork       network.INode
 	fRouterF       IRouterF
@@ -32,13 +30,13 @@ type sNode struct {
 	fHandleActions map[uint32]chan []byte
 	fF2F           iF2F
 	fOnline        iOnline
-	// fChecker       iChecker
+	fChecker       iChecker
+	fPseudo        iPseudo
 }
 
 func NewNode(client client.IClient) INode {
 	sett := client.Settings()
 	node := &sNode{
-		fPseudoClient:  asymmetric.NewRSAPrivKey(client.PrivKey().Size()),
 		fClient:        client,
 		fNetwork:       network.NewNode(sett),
 		fRouterF:       func() []asymmetric.IPubKey { return nil },
@@ -50,14 +48,11 @@ func NewNode(client client.IClient) INode {
 	// recurrent structures
 	{
 		node.fOnline = newOnline(node)
-		// node.fChecker = newChecker(node)
+		node.fChecker = newChecker(node)
+		node.fPseudo = newPseudo(node)
 	}
 
-	node.fNetwork.Handle(
-		sett.Get(settings.CMaskNetw),
-		node.handleWrapper(),
-	)
-
+	node.fNetwork.Handle(sett.Get(settings.CMaskNetw), node.handleWrapper())
 	return node
 }
 
@@ -92,8 +87,23 @@ func (node *sNode) Online() iOnline {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	// return node.fOnline
-	return nil
+	return node.fOnline
+}
+
+// Return checker structure.
+func (node *sNode) Checker() iChecker {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	return node.fChecker
+}
+
+// Return pseudo structure.
+func (node *sNode) Pseudo() iPseudo {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	return node.fPseudo
 }
 
 func (node *sNode) WithRouter(router IRouterF) INode {
@@ -104,12 +114,12 @@ func (node *sNode) WithRouter(router IRouterF) INode {
 	return node
 }
 
-func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
+func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
 	// used only 32bit from 64bit number
-	node.fHandleRoutes[loadHead(head).Routes()] = handle
+	node.fHandleRoutes[head] = handle
 	return node
 }
 
@@ -139,15 +149,15 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, fRout
 		return nil, errors.New("length of connections = 0")
 	}
 
-	headRoutes := loadHead(pl.Head()).Routes()
-	headAction := loadHead(random.NewStdPRNG().Uint64()).Actions()
+	headRoutes := settings.MustBeUint32(pl.Head())
+	headAction := uint32(random.NewStdPRNG().Uint64())
 
 	pl = payload.NewPayload(
 		joinHead(headRoutes, headAction).Uint64(),
 		pl.Body(),
 	)
 
-	route := routing.NewRoute(recv).WithRedirects(node.fPseudoClient, fRoute())
+	route := routing.NewRoute(recv).WithRedirects(node.Pseudo().privKey(), fRoute())
 	routeMsg := node.Client().Encrypt(route, pl)
 	if routeMsg == nil {
 		return nil, errors.New("psender is nil with not nil routes")
@@ -195,11 +205,6 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		// TODO: time.sleep(random)
-		// TODO: f2f mode
-		// TODO: random send pseudo message
-		// TODO: request/response message
-
 		for {
 			node.Broadcast(msg)
 
@@ -211,6 +216,13 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 
 			switch pld.Head() {
 			case node.Client().Settings().Get(settings.CMaskRout):
+				// if is route package then
+				// 1/2 generate new pseudo-package and sleep rand time
+				// unpack and send new version of package
+				if node.Pseudo().Status() && random.NewStdPRNG().Bool() {
+					// send pseudo message with random sleep
+					node.Pseudo().request(len(pld.Body())).sleep()
+				}
 				// redirect decrypt message
 				msg = message.LoadMessage(pld.Body())
 				if msg != nil {
@@ -219,8 +231,13 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				return
 			default:
 				// check f2f mode and sender in f2f list
-				if node.fF2F.Status() && !node.fF2F.InList(sender) {
+				if node.F2F().Status() && !node.F2F().InList(sender) {
 					return
+				}
+
+				// sleep random milliseconds
+				if node.Pseudo().Status() {
+					node.Pseudo().sleep()
 				}
 
 				// get session by payload head
@@ -240,13 +257,11 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 					return
 				}
 
-				fmt.Println(string(pld.Body()))
-
 				// send response
 				// problem - withredirects?
 				node.Broadcast(node.Client().Encrypt(
 					routing.NewRoute(sender).WithRedirects(
-						node.fPseudoClient,
+						node.Pseudo().privKey(),
 						node.fRouterF(),
 					),
 					payload.NewPayload(pld.Head(), f(node, sender, pld)),

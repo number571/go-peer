@@ -5,10 +5,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/random"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/local/selector"
+	"github.com/number571/go-peer/local/payload"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
@@ -62,26 +59,9 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	inOnline := []asymmetric.IPubKey{}
-	for _, val := range gNode.Checker().ListWithInfo() {
-		if !val.Online() {
-			continue
-		}
-		inOnline = append(inOnline, val.PubKey())
-	}
-
-	rand := random.NewStdPRNG()
-	randSizeRoute := rand.Uint64() % hls_settings.CSizeRoute
-
 	resp, err := gNode.Request(
-		routing.NewRoute(pubKey).
-			WithRedirects(
-				gPPrivKey,
-				selector.NewSelector(inOnline).
-					Shuffle().
-					Return(randSizeRoute),
-			),
-		message.NewMessage(vRequest.Title, vRequest.Data),
+		pubKey,
+		payload.NewPayload(hls_settings.CHeaderHLS, vRequest.Data),
 	)
 	if err != nil {
 		response(w, hls_settings.CErrorResponse, []byte("failed: response message"))

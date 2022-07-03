@@ -15,14 +15,16 @@ type INode interface {
 	Client() client.IClient
 	Network() network.INode
 
-	Handle(uint64, IHandlerF) INode
+	Handle(uint32, IHandlerF) INode
 	WithRouter(IRouterF) INode
 
 	Broadcast(message.IMessage) error
 	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
 
-	Online() iOnline
 	F2F() iF2F
+	Online() iOnline
+	Checker() iChecker
+	Pseudo() iPseudo
 
 	Close() error
 }
@@ -64,4 +66,12 @@ type iListPubKey interface {
 	List() []asymmetric.IPubKey
 	Append(asymmetric.IPubKey)
 	Remove(asymmetric.IPubKey)
+}
+
+type iPseudo interface {
+	iStatus
+
+	request(int) iPseudo
+	sleep() iPseudo
+	privKey() asymmetric.IPrivKey
 }

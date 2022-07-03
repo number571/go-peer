@@ -13,9 +13,8 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
@@ -142,27 +141,27 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 // HLS
 
-func testStartNodeHLS(t *testing.T) network.INode {
+func testStartNodeHLS(t *testing.T) netanon.INode {
 	privKey := asymmetric.LoadRSAPrivKey(tcPrivKeyHLS)
 	client := client.NewClient(tgSettings, privKey)
 
-	node := network.NewNode(client).
-		Handle([]byte(hls_settings.CTitlePattern), routeHLS)
+	node := netanon.NewNode(client).
+		Handle(hls_settings.CHeaderHLS, routeHLS)
 
 	node.F2F().Switch(gConfig.F2F().Status())
 	for _, pubKey := range gConfig.F2F().PubKeys() {
 		node.F2F().Append(pubKey)
 	}
 
-	for _, conn := range gConfig.Connections() {
-		err := node.Connect(conn)
-		if err != nil {
-			t.Error(err)
+	for _, addr := range gConfig.Connections() {
+		conn := node.Network().Connect(addr)
+		if conn == nil {
+			t.Error("conn is nil")
 		}
 	}
 
 	go func() {
-		err := node.Listen(gConfig.Address().HLS())
+		err := node.Network().Listen(gConfig.Address().HLS())
 		if err != nil {
 			t.Error(err)
 		}
@@ -177,16 +176,16 @@ func testStartClientHLS() error {
 	priv := asymmetric.NewRSAPrivKey(tcAKeySize)
 	client := client.NewClient(tgSettings, priv)
 
-	node := network.NewNode(client).
-		Handle([]byte(hls_settings.CTitlePattern), nil)
+	node := netanon.NewNode(client).
+		Handle(hls_settings.CHeaderHLS, nil)
 
-	err := node.Connect(gConfig.Address().HLS())
-	if err != nil {
-		return err
+	conn := node.Network().Connect(gConfig.Address().HLS())
+	if conn == nil {
+		return fmt.Errorf("conn is nil")
 	}
 
-	msg := message.NewMessage(
-		[]byte(hls_settings.CTitlePattern),
+	msg := payload.NewPayload(
+		hls_settings.CHeaderHLS,
 		hlsnet.NewRequest("GET", tcServiceInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
@@ -196,9 +195,7 @@ func testStartClientHLS() error {
 	)
 
 	pubKey := asymmetric.LoadRSAPubKey(tcPubKeyHLS)
-	route := routing.NewRoute(pubKey)
-
-	res, err := node.Request(route, msg)
+	res, err := node.Request(pubKey, msg)
 	if err != nil {
 		return err
 	}

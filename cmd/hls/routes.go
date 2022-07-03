@@ -8,15 +8,15 @@ import (
 
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
+	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/netanon"
 )
 
-func routeHLS(node network.INode, msg message.IMessage) []byte {
+func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
 	// load request from message's body
-	requestBytes := msg.Body().Data()
+	requestBytes := pld.Body()
 	request := hlsnet.LoadRequest(requestBytes)
 	if request == nil {
 		return nil
@@ -39,8 +39,8 @@ func routeHLS(node network.INode, msg message.IMessage) []byte {
 	if info.IsRedirect() {
 		for _, recv := range gConfig.F2F().PubKeys() {
 			go node.Request(
-				routing.NewRoute(recv),
-				message.NewMessage([]byte(hls_settings.CTitlePattern), requestBytes),
+				recv,
+				payload.NewPayload(hls_settings.CHeaderHLS, requestBytes),
 			)
 		}
 	}

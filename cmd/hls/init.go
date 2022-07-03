@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/logger"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/storage"
 	"github.com/number571/go-peer/utils"
@@ -26,7 +26,6 @@ func hlsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
-	gPPrivKey = asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")
@@ -42,7 +41,7 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gNode = network.NewNode(client.NewClient(sett, privKey))
+	gNode = netanon.NewNode(client.NewClient(sett, privKey))
 	if gNode == nil {
 		return fmt.Errorf("failed create client node")
 	}
