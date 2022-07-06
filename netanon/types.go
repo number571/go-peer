@@ -21,12 +21,15 @@ type INode interface {
 	Broadcast(message.IMessage) error
 	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
 
-	F2F() iF2F
-	Online() iOnline
+	Close() error
+	iModifier
+}
+
+type iModifier interface {
 	Checker() iChecker
 	Pseudo() iPseudo
-
-	Close() error
+	Online() iOnline
+	F2F() iF2F
 }
 
 type iOnline interface {

@@ -21,7 +21,6 @@ const (
 	tcHead = 0xDEADBEAF
 	tcIter = 10
 	tcBody = "hello, world!"
-	tcResp = "response from node!"
 )
 
 func TestComplex(t *testing.T) {

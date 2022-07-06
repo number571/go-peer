@@ -9,7 +9,7 @@ import (
 
 type IClient interface {
 	Size() (uint64, error)
-	Load(uint64) (asymmetric.IPubKey, payload.IPayload, error)
+	Load(uint64) (message.IMessage, error)
 	Push(asymmetric.IPubKey, payload.IPayload) error
 }
 

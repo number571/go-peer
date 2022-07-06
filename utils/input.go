@@ -13,8 +13,24 @@ import (
 	"golang.org/x/term"
 )
 
-func InputString(begin string) string {
-	fmt.Print(begin)
+var (
+	_ IInput = &sInput{}
+)
+
+type sInput struct {
+	fBegin string
+	fSett  settings.ISettings
+}
+
+func NewInput(sett settings.ISettings, begin string) IInput {
+	return &sInput{
+		fBegin: begin,
+		fSett:  sett,
+	}
+}
+
+func (inp *sInput) String() string {
+	fmt.Print(inp.fBegin)
 
 	msg, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	if err != nil {
@@ -24,27 +40,27 @@ func InputString(begin string) string {
 	return strings.TrimSpace(msg)
 }
 
-// Settings must contain (CSizePasw, CMaskPasw).
-func InputPassword(sett settings.ISettings, begin string) string {
-	fmt.Print(begin)
+// Settings must contain (CSizePasw, CMaskPasw)
+func (inp *sInput) Password() string {
+	fmt.Print(inp.fBegin)
 
-	bpsw, err := term.ReadPassword(syscall.Stdin)
+	bpasw, err := term.ReadPassword(syscall.Stdin)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println()
 
-	spsw := strings.TrimSpace(string(bpsw))
-	if uint64(len([]rune(spsw))) < sett.Get(settings.CSizePasw) {
+	spasw := strings.TrimSpace(string(bpasw))
+	if uint64(len([]rune(spasw))) < inp.fSett.Get(settings.CSizePasw) {
 		panic("length of password < min size")
 	}
 
-	maskPasw := sett.Get(settings.CMaskPasw)
-	if !passwordHasMask(maskPasw, spsw) {
+	maskPasw := inp.fSett.Get(settings.CMaskPasw)
+	if !passwordHasMask(maskPasw, spasw) {
 		panic(fmt.Sprintf("password mode should be = %03b", maskPasw))
 	}
 
-	return spsw
+	return spasw
 }
 
 func passwordHasMask(maskPasw uint64, pasw string) bool {

@@ -29,9 +29,16 @@ func TestEncrypt(t *testing.T) {
 	pl := payload.NewPayload(uint64(tcHead), []byte(tcBody))
 	msg := client1.Encrypt(routing.NewRoute(client2.PubKey()), pl)
 
+	msgBytes := msg.Bytes()
+
 	_, decPl := client2.Decrypt(msg)
 	if decPl == nil {
 		t.Error("decrypt payload is nil")
+		return
+	}
+
+	if !bytes.Equal(msgBytes, msg.Bytes()) {
+		t.Error("encrypted bytes not equal after action")
 		return
 	}
 

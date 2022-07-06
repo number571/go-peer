@@ -35,39 +35,43 @@ func NewAESCipher(key []byte) ICipher {
 }
 
 func (cph *sAESCipher) Encrypt(msg []byte) []byte {
+	nmsg := make([]byte, len(msg))
+	copy(nmsg, msg)
 	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
 	}
 	blockSize := block.BlockSize()
-	msg = paddingPKCS5(msg, blockSize)
-	cipherText := make([]byte, blockSize+len(msg))
+	nmsg = paddingPKCS5(nmsg, blockSize)
+	cipherText := make([]byte, blockSize+len(nmsg))
 	iv := cipherText[:blockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(cipherText[blockSize:], msg)
+	mode.CryptBlocks(cipherText[blockSize:], nmsg)
 	return cipherText
 }
 
 func (cph *sAESCipher) Decrypt(msg []byte) []byte {
+	nmsg := make([]byte, len(msg))
+	copy(nmsg, msg)
 	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
 	}
 	blockSize := block.BlockSize()
-	if len(msg) < blockSize {
+	if len(nmsg) < blockSize {
 		return nil
 	}
-	iv := msg[:blockSize]
-	msg = msg[blockSize:]
-	if len(msg)%blockSize != 0 {
+	iv := nmsg[:blockSize]
+	nmsg = nmsg[blockSize:]
+	if len(nmsg)%blockSize != 0 {
 		return nil
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(msg, msg)
-	return unpaddingPKCS5(msg)
+	mode.CryptBlocks(nmsg, nmsg)
+	return unpaddingPKCS5(nmsg)
 }
 
 func (cph *sAESCipher) String() string {

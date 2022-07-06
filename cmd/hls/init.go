@@ -34,8 +34,8 @@ func hlsDefaultInit() error {
 	privKey := getPrivKey(
 		sett,
 		"hls.stg",
-		[]byte(utils.InputPassword(sett, "Password#Stg: ")),
-		[]byte(utils.InputPassword(sett, "Password#Obj: ")),
+		[]byte(utils.NewInput(sett, "Password#Stg: ").Password()),
+		[]byte(utils.NewInput(sett, "Password#Obj: ").Password()),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")

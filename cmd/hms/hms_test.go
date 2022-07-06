@@ -141,7 +141,7 @@ func testClientDoLoad() error {
 	client := client.NewClient(gSettings, priv)
 
 	for i := 0; i < tcN; i++ {
-		pubKey, pl, err := hmc.NewClient(
+		msg, err := hmc.NewClient(
 			hmc.NewBuilder(client),
 			hmc.NewRequester(tcHost),
 		).Load(uint64(i))
@@ -149,7 +149,12 @@ func testClientDoLoad() error {
 			return err
 		}
 
-		if string(pl.Body()) != fmt.Sprintf(tcBodyOfMessage, i) {
+		pubKey, pld := client.Decrypt(msg)
+		if pubKey == nil {
+			panic("decrypted public key is nil")
+		}
+
+		if string(pld.Body()) != fmt.Sprintf(tcBodyOfMessage, i) {
 			return fmt.Errorf("body is not equal")
 		}
 
