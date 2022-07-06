@@ -8,6 +8,7 @@
 ## Framework based applications
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
+* Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
 * Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
 
 ## Deprecated framework based applications
@@ -25,6 +26,5 @@
 
 ## TODO
 
-1. Wrap all standart errors to "errors" package from go-peer
-2. Write tests with comment "TODO"
-3. Need check for use wrappers (example hmc -> config wrapper)
+1. Write tests with comment "TODO"
+2. Need check for use wrappers (example hmc -> config wrapper)
