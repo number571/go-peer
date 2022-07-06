@@ -11,16 +11,11 @@ import (
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/settings"
-)
-
-var (
-	tgAddrs = [2]string{":8081", ":9091"}
+	"github.com/number571/go-peer/testutils"
 )
 
 const (
-	tcHead = 0xDEADBEAF
 	tcIter = 10
-	tcBody = "hello, world!"
 )
 
 func TestComplex(t *testing.T) {
@@ -39,12 +34,12 @@ func TestComplex(t *testing.T) {
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
-			reqBody := fmt.Sprintf("%s (%d)", tcBody, i)
+			reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, i)
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
 				nodes[1].Client().PubKey(),
-				payload.NewPayload(tcHead, []byte(reqBody)),
+				payload.NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -74,7 +69,7 @@ func TestPseudo(t *testing.T) {
 
 	resp, err := nodes[0].Request(
 		nodes[1].Client().PubKey(),
-		payload.NewPayload(tcHead, []byte(reqBody)),
+		payload.NewPayload(testutils.TcHead, []byte(reqBody)),
 	)
 	if err != nil {
 		t.Error(err.Error())
@@ -134,12 +129,12 @@ func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
 		// pass
 	}
 
-	reqBody := fmt.Sprintf("%s (%d)", tcBody, mode)
+	reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, mode)
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	resp, err := nodes[0].Request(
 		nodes[1].Client().PubKey(),
-		payload.NewPayload(tcHead, []byte(reqBody)),
+		payload.NewPayload(testutils.TcHead, []byte(reqBody)),
 	)
 	if err != nil {
 		if mode == 2 {
@@ -181,7 +176,7 @@ func testNewNodes() [5]INode {
 		})
 
 		node.Handle(
-			settings.MustBeUint32(tcHead),
+			settings.MustBeUint32(testutils.TcHead),
 			func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
 				// send response
 				resp := fmt.Sprintf("%s (response)", string(pl.Body()))
@@ -191,13 +186,13 @@ func testNewNodes() [5]INode {
 	}
 
 	go func() {
-		err := nodes[2].Network().Listen(tgAddrs[0])
+		err := nodes[2].Network().Listen(testutils.TgAddrs[1][0])
 		if err != nil {
 			panic(err)
 		}
 	}()
 	go func() {
-		err := nodes[4].Network().Listen(tgAddrs[1])
+		err := nodes[4].Network().Listen(testutils.TgAddrs[1][1])
 		if err != nil {
 			panic(err)
 		}
@@ -206,12 +201,12 @@ func testNewNodes() [5]INode {
 	time.Sleep(200 * time.Millisecond)
 
 	// nodes to routes
-	nodes[0].Network().Connect(tgAddrs[0])
-	nodes[1].Network().Connect(tgAddrs[1])
+	nodes[0].Network().Connect(testutils.TgAddrs[1][0])
+	nodes[1].Network().Connect(testutils.TgAddrs[1][1])
 
 	// routes to routes
-	nodes[3].Network().Connect(tgAddrs[0])
-	nodes[3].Network().Connect(tgAddrs[1])
+	nodes[3].Network().Connect(testutils.TgAddrs[1][0])
+	nodes[3].Network().Connect(testutils.TgAddrs[1][1])
 
 	return nodes
 }

@@ -11,12 +11,11 @@ import (
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/testutils"
 )
 
 const (
-	tcHeadPattern   = 0x01
-	tcBodyOfMessage = "hello, world!"
-	tcPathDB        = "test.db"
+	tcPathDB = "test.db"
 )
 
 var (
@@ -53,7 +52,7 @@ func TestDB(t *testing.T) {
 
 	err = tgDB.Push(tgKey, cl.Encrypt(
 		routing.NewRoute(cl.PubKey()),
-		payload.NewPayload(tcHeadPattern, []byte(tcBodyOfMessage)),
+		payload.NewPayload(testutils.TcHead, []byte(testutils.TcBody)),
 	))
 	if err != nil {
 		t.Error(err)
@@ -82,11 +81,11 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	if pl.Head() != tcHeadPattern {
+	if pl.Head() != testutils.TcHead {
 		t.Error("load msg head != init head")
 	}
 
-	if !bytes.Equal(pl.Body(), []byte(tcBodyOfMessage)) {
+	if !bytes.Equal(pl.Body(), []byte(testutils.TcBody)) {
 		t.Error("load msg body != init body")
 	}
 

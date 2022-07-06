@@ -8,11 +8,7 @@ import (
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/settings"
-)
-
-const (
-	tcHead = 0xDEADBEAF
-	tcBody = "hello, world!"
+	"github.com/number571/go-peer/testutils"
 )
 
 func testNewClient() IClient {
@@ -26,7 +22,7 @@ func TestEncrypt(t *testing.T) {
 	client1 := testNewClient()
 	client2 := testNewClient()
 
-	pl := payload.NewPayload(uint64(tcHead), []byte(tcBody))
+	pl := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	msg := client1.Encrypt(routing.NewRoute(client2.PubKey()), pl)
 
 	msgBytes := msg.Bytes()
@@ -42,7 +38,7 @@ func TestEncrypt(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal([]byte(tcBody), decPl.Body()) {
+	if !bytes.Equal([]byte(testutils.TcBody), decPl.Body()) {
 		t.Error("data not equal with decrypted data")
 		return
 	}

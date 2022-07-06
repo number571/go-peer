@@ -3,15 +3,12 @@ package payload
 import (
 	"bytes"
 	"testing"
-)
 
-const (
-	tcHead = 0xDEADBEAF
-	tcBody = "hello, world!"
+	"github.com/number571/go-peer/testutils"
 )
 
 func TestPayload(t *testing.T) {
-	pl := NewPayload(tcHead, []byte(tcBody))
+	pl := NewPayload(testutils.TcHead, []byte(testutils.TcBody))
 
 	decPl := LoadPayload(pl.Bytes())
 	if decPl == nil {

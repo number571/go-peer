@@ -7,26 +7,26 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/testutils"
+)
+
+const (
+	storageName = "storage.db"
+	countOfIter = 10
 )
 
 func TestLevelDB(t *testing.T) {
-	const (
-		storageName = "storage.db"
-		storageKey  = "storage-key"
-		objectKey   = "[application#1]password"
-	)
-
 	defer os.RemoveAll(storageName)
 	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
 
 	store := NewLevelDB(storageName).
 		WithHashing(true).
-		WithEncryption([]byte(storageKey))
+		WithEncryption([]byte(testutils.TcKey1))
 	defer store.Close()
 
-	store.Set([]byte(objectKey), secret1)
+	store.Set([]byte(testutils.TcKey2), secret1)
 
-	secret2, err := store.Get([]byte(objectKey))
+	secret2, err := store.Get([]byte(testutils.TcKey2))
 	if err != nil {
 		t.Error(err)
 		return
@@ -37,7 +37,7 @@ func TestLevelDB(t *testing.T) {
 		return
 	}
 
-	err = store.Del([]byte(objectKey))
+	err = store.Del([]byte(testutils.TcKey2))
 	if err != nil {
 		t.Error(err)
 		return
@@ -45,24 +45,16 @@ func TestLevelDB(t *testing.T) {
 }
 
 func TestLevelDBIter(t *testing.T) {
-	const (
-		storageName   = "storage.db"
-		storageKey    = "storage-key"
-		objectKeyIter = "object-key-"
-		objectValIter = "object-value-"
-		countOfIter   = 10
-	)
-
 	defer os.RemoveAll(storageName)
 
 	store := NewLevelDB(storageName).
-		WithEncryption([]byte(storageKey))
+		WithEncryption([]byte(testutils.TcKey1))
 	defer store.Close()
 
 	for i := 0; i < countOfIter; i++ {
 		err := store.Set(
-			[]byte(fmt.Sprintf("%s%d", objectKeyIter, i)),
-			[]byte(fmt.Sprintf("%s%d", objectValIter, i)),
+			[]byte(fmt.Sprintf("%s%d", testutils.TcKey2, i)),
+			[]byte(fmt.Sprintf("%s%d", testutils.TcVal1, i)),
 		)
 		if err != nil {
 			t.Error(err)
@@ -71,12 +63,12 @@ func TestLevelDBIter(t *testing.T) {
 	}
 
 	count := 0
-	iter := store.Iter([]byte(objectKeyIter))
+	iter := store.Iter([]byte(testutils.TcKey2))
 	defer iter.Close()
 
 	for iter.Next() {
 		val := string(iter.Value())
-		if val != fmt.Sprintf("%s%d", objectValIter, count) {
+		if val != fmt.Sprintf("%s%d", testutils.TcVal1, count) {
 			t.Error("value not equal saved value")
 			return
 		}
