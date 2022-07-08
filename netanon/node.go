@@ -52,7 +52,7 @@ func NewNode(client client.IClient) INode {
 		node.fPseudo = newPseudo(node)
 	}
 
-	node.fNetwork.Handle(sett.Get(settings.CMaskNetw), node.handleWrapper())
+	node.Network().Handle(sett.Get(settings.CMaskNetw), node.handleWrapper())
 	return node
 }
 
@@ -118,7 +118,6 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	// used only 32bit from 64bit number
 	node.fHandleRoutes[head] = handle
 	return node
 }
@@ -258,7 +257,6 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				}
 
 				// send response
-				// problem - withredirects?
 				node.Broadcast(node.Client().Encrypt(
 					routing.NewRoute(sender).WithRedirects(
 						node.Pseudo().privKey(),

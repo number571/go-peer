@@ -5,13 +5,13 @@
 ## Research Article
 * Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
 
-## Framework based applications
+## Library based applications
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
 * Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
 * Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
 
-## Deprecated framework based applications
+## Deprecated library based applications
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 

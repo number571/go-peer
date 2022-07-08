@@ -1,0 +1,5 @@
+.DS_Store
+main
+*.db
+*.cfg
+*.stg 

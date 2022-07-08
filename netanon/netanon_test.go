@@ -126,7 +126,7 @@ func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	case 2:
 		nodes[0].Client().Settings().Set(settings.CTimeWait, 1) // seconds
 	default:
-		// pass
+		panic("undefined mode")
 	}
 
 	reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, mode)
