@@ -13,7 +13,7 @@ const (
 	CMaskPasw
 	CTimeWait
 	CTimePreq
-	CTimePrsp
+	CTimeRslp
 	CTimePing
 	CSizePsdo
 	CSizeRtry

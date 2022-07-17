@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/storage"
 )
 
 var (
@@ -20,17 +20,18 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     settings.ISettings
+	fHashMapping  storage.IKeyValueStorage
 	fConnections  map[string]IConn
-	fHashMapping  map[string]struct{}
 	fHandleRoutes map[uint64]IHandlerF
 }
 
 // Create client by private key as identification.
 func NewNode(sett settings.ISettings) INode {
+	sizeMapp := sett.Get(settings.CSizeMapp)
 	return &sNode{
 		fSettings:     sett,
+		fHashMapping:  storage.NewMemoryStorage(sizeMapp),
 		fConnections:  make(map[string]IConn),
-		fHashMapping:  make(map[string]struct{}),
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
 }
@@ -229,24 +230,14 @@ func (node *sNode) inMappingWithSet(hash []byte) bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	skey := encoding.Base64Encode(hash)
-
 	// skey already exists
-	_, ok := node.fHashMapping[skey]
-	if ok {
+	_, err := node.fHashMapping.Get(hash)
+	if err == nil {
 		return true
 	}
 
 	// push skey to mapping
-	maxMapp := node.fSettings.Get(settings.CSizeMapp)
-	if uint64(len(node.fHashMapping)) > maxMapp {
-		for k := range node.fHashMapping {
-			delete(node.fHashMapping, k)
-			break
-		}
-	}
-
-	node.fHashMapping[skey] = struct{}{}
+	node.fHashMapping.Set(hash, []byte{1})
 	return false
 }
 

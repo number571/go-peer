@@ -16,12 +16,14 @@ func defaultSettings() map[uint64]uint64 {
 	// B - byte
 	// b - bit
 	return map[uint64]uint64{
-		settings.CMaskRout: 0xFFFFFFFFFFFFFFFF, // Include/Response package
-		settings.CMaskPing: 0xEEEEEEEEEEEEEEEE, // Ping package
+		settings.CMaskNetw: 0xFFFFFFFFFFFFFFFF, // Network route
+		settings.CMaskRout: 0xEEEEEEEEEEEEEEEE, // Include/Response package
+		settings.CMaskPing: 0x00000000DDDDDDDD, // Must be 32bit; Ping package
+		settings.CMaskPsdo: 0x0000000000000000, // Used for pseudo packages
 		settings.CMaskPasw: fullPasswordMode(), // 0b111 = (alpha, numeric, special)
 		settings.CTimeWait: 60,                 // seconds
 		settings.CTimePreq: 10,                 // seconds
-		settings.CTimePrsp: 5,                  // seconds
+		settings.CTimeRslp: 5,                  // seconds
 		settings.CTimePing: 60,                 // seconds
 		settings.CSizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
 		settings.CSizeRtry: 2,                  // quantity
@@ -31,8 +33,10 @@ func defaultSettings() map[uint64]uint64 {
 		settings.CSizeMapp: 2 << 10,            // 2*(2^10)H = 88KiB
 		settings.CSizeSkey: 1 << 5,             // 2^5B = 32B
 		settings.CSizeBmsg: 20,                 // quantity of messages
+		settings.CSizePasw: 4,                  // chars
 	}
 }
+
 func fullPasswordMode() uint64 {
 	return settings.CPaswAplh | settings.CPaswNumr | settings.CPaswSpec
 }

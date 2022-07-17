@@ -1,14 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/hls/config"
-	"github.com/number571/go-peer/cmd/hls/database"
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
@@ -17,7 +17,6 @@ import (
 	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/testutils"
-	"github.com/number571/go-peer/utils"
 )
 
 var (
@@ -30,46 +29,12 @@ const (
 )
 
 const (
-	tcServiceInHLS = "hidden-echo-service"
+	tcServiceAddressInHLS = "hidden-echo-service"
 )
-
-const (
-	configBody = `{
-	"clean_cron": "0 0 * * *",
-	"address": {
-		"hls": "localhost:9571",
-		"http": ""
-	},
-	"f2f_mode": {
-		"status": false,
-		"pub_keys": []
-	},
-	"online_checker": {
-		"status": false,
-		"pub_keys": []
-	},
-	"connections": [],
-	"services": {
-		"hidden-echo-service": {
-			"redirect": true,
-			"address": "localhost:8081"
-		}
-	}
-}`
-)
-
-func testHlsDefaultInit(dbPath, configPath string) {
-	os.RemoveAll(tcPathDB)
-	utils.OpenFile(configPath).Write([]byte(configBody))
-
-	gDB = database.NewKeyValueDB(dbPath)
-	gConfig = config.NewConfig(configPath)
-}
 
 // client -> HLS -> server -\
 // client <- HLS <- server -/
 func TestHLS(t *testing.T) {
-	testHlsDefaultInit(tcPathDB, tcPathConfig)
 	defer func() {
 		os.RemoveAll(tcPathDB)
 		os.Remove(tcPathConfig)
@@ -96,13 +61,8 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/echo", testEchoPage)
 
-	info, ok := gConfig.GetService(tcServiceInHLS)
-	if !ok {
-		return nil
-	}
-
 	srv := &http.Server{
-		Addr:    info.Address(),
+		Addr:    testutils.TgAddrs[5],
 		Handler: mux,
 	}
 
@@ -143,28 +103,63 @@ func testStartNodeHLS(t *testing.T) netanon.INode {
 	client := client.NewClient(tgSettings, privKey)
 
 	node := netanon.NewNode(client).
-		Handle(hls_settings.CHeaderHLS, routeHLS)
-
-	node.F2F().Switch(gConfig.F2F().Status())
-	for _, pubKey := range gConfig.F2F().PubKeys() {
-		node.F2F().Append(pubKey)
-	}
-
-	for _, addr := range gConfig.Connections() {
-		conn := node.Network().Connect(addr)
-		if conn == nil {
-			t.Error("conn is nil")
-		}
-	}
+		Handle(hls_settings.CHeaderHLS, testRouteHLS)
 
 	go func() {
-		err := node.Network().Listen(gConfig.Address().HLS())
+		err := node.Network().Listen(testutils.TgAddrs[4])
 		if err != nil {
 			t.Error(err)
 		}
 	}()
 
 	return node
+}
+
+func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
+	mapping := map[string]string{
+		tcServiceAddressInHLS: testutils.TgAddrs[5],
+	}
+
+	// load request from message's body
+	requestBytes := pld.Body()
+	request := hlsnet.LoadRequest(requestBytes)
+	if request == nil {
+		return nil
+	}
+
+	// get service's address by name
+	addr, ok := mapping[request.Host()]
+	if !ok {
+		return nil
+	}
+
+	// generate new request to serivce
+	req, err := http.NewRequest(
+		request.Method(),
+		fmt.Sprintf("http://%s%s", addr, request.Path()),
+		bytes.NewReader(request.Body()),
+	)
+	if err != nil {
+		return nil
+	}
+	for key, val := range request.Head() {
+		req.Header.Add(key, val)
+	}
+
+	// send request to service
+	// and receive response from service
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	// send result to client
+	return data
 }
 
 // CLIENT
@@ -176,14 +171,14 @@ func testStartClientHLS() error {
 	node := netanon.NewNode(client).
 		Handle(hls_settings.CHeaderHLS, nil)
 
-	conn := node.Network().Connect(gConfig.Address().HLS())
+	conn := node.Network().Connect(testutils.TgAddrs[4])
 	if conn == nil {
 		return fmt.Errorf("conn is nil")
 	}
 
 	msg := payload.NewPayload(
-		hls_settings.CHeaderHLS,
-		hlsnet.NewRequest("GET", tcServiceInHLS, "/echo").
+		uint64(hls_settings.CHeaderHLS),
+		hlsnet.NewRequest("GET", tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).

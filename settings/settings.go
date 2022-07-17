@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"math"
 	"sync"
 )
 
@@ -18,13 +17,6 @@ func NewSettings() ISettings {
 	return &sSettings{
 		fMapping: defaultSettings(),
 	}
-}
-
-func MustBeUint32(v uint64) uint32 {
-	if v > math.MaxUint32 {
-		panic("v > math.MaxUint32")
-	}
-	return uint32(v)
 }
 
 func (s *sSettings) Set(k uint64, v uint64) ISettings {
@@ -59,9 +51,9 @@ func defaultSettings() map[uint64]uint64 {
 		CMaskPsdo: 0x0000000000000000, // Used for pseudo packages
 		CMaskPasw: 0b000,              // 0b111 = (alpha, numeric, special)
 		CTimeWait: 20,                 // seconds
-		CTimePreq: 1,                  // seconds
-		CTimePrsp: 1,                  // seconds
-		CTimePing: 1,                  // seconds
+		CTimePreq: 1,                  // seconds (used for pseudo requests)
+		CTimeRslp: 1,                  // seconds (used for random sleep)
+		CTimePing: 1,                  // seconds (used for online checker)
 		CSizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
 		CSizeRtry: 0,                  // quantity
 		CSizeWork: 10,                 // bits

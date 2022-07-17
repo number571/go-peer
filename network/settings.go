@@ -29,6 +29,6 @@ const (
 	cBeginHead = cPointHead
 	cEndHead   = cPointBody
 
-	cBeginBody = cPointBody
+	// cBeginBody = cPointBody
 	// cEndBody = [cBeginBody:]
 )

@@ -31,7 +31,7 @@ func TestBuilder(t *testing.T) {
 		t.Error("builder load error (index, hash receiver)")
 	}
 
-	pl := payload.NewPayload(testutils.TcHead, []byte(testutils.TcBody))
+	pl := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	bPush := builder.Push(client.PubKey(), pl)
 	if !bytes.Equal(bPush.Receiver, hashRecv) {
 		t.Error("builder push error (hash receiver)")
@@ -47,7 +47,7 @@ func TestBuilder(t *testing.T) {
 		t.Error("builder push error (message is nil [2])")
 	}
 
-	if pl.Head() != testutils.TcHead {
+	if pl.Head() != uint64(testutils.TcHead) {
 		t.Error("builder push error (head is not equal)")
 	}
 

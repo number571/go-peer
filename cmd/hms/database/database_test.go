@@ -52,7 +52,7 @@ func TestDB(t *testing.T) {
 
 	err = tgDB.Push(tgKey, cl.Encrypt(
 		routing.NewRoute(cl.PubKey()),
-		payload.NewPayload(testutils.TcHead, []byte(testutils.TcBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
 	))
 	if err != nil {
 		t.Error(err)
@@ -81,7 +81,7 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	if pl.Head() != testutils.TcHead {
+	if pl.Head() != uint64(testutils.TcHead) {
 		t.Error("load msg head != init head")
 	}
 

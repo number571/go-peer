@@ -8,7 +8,7 @@ import (
 )
 
 func TestPayload(t *testing.T) {
-	pl := NewPayload(testutils.TcHead, []byte(testutils.TcBody))
+	pl := NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
 
 	decPl := LoadPayload(pl.Bytes())
 	if decPl == nil {

@@ -39,7 +39,7 @@ func TestComplex(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
 				nodes[1].Client().PubKey(),
-				payload.NewPayload(testutils.TcHead, []byte(reqBody)),
+				payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -69,7 +69,7 @@ func TestPseudo(t *testing.T) {
 
 	resp, err := nodes[0].Request(
 		nodes[1].Client().PubKey(),
-		payload.NewPayload(testutils.TcHead, []byte(reqBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
 	)
 	if err != nil {
 		t.Error(err.Error())
@@ -92,7 +92,9 @@ func TestOnlineChecker(t *testing.T) {
 	}
 
 	nodes[0].Checker().Append(nodes[1].Client().PubKey())
-	time.Sleep(1 * time.Second)
+
+	timeWait := nodes[0].Client().Settings().Get(settings.CTimePing) + 1
+	time.Sleep(time.Duration(timeWait) * time.Second)
 
 	list := nodes[0].Checker().ListWithInfo()
 	if !list[0].Online() {
@@ -134,7 +136,7 @@ func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	resp, err := nodes[0].Request(
 		nodes[1].Client().PubKey(),
-		payload.NewPayload(testutils.TcHead, []byte(reqBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
 	)
 	if err != nil {
 		if mode == 2 {
@@ -176,7 +178,7 @@ func testNewNodes() [5]INode {
 		})
 
 		node.Handle(
-			settings.MustBeUint32(testutils.TcHead),
+			testutils.TcHead,
 			func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
 				// send response
 				resp := fmt.Sprintf("%s (response)", string(pl.Body()))
@@ -186,13 +188,13 @@ func testNewNodes() [5]INode {
 	}
 
 	go func() {
-		err := nodes[2].Network().Listen(testutils.TgAddrs[1][0])
+		err := nodes[2].Network().Listen(testutils.TgAddrs[2])
 		if err != nil {
 			panic(err)
 		}
 	}()
 	go func() {
-		err := nodes[4].Network().Listen(testutils.TgAddrs[1][1])
+		err := nodes[4].Network().Listen(testutils.TgAddrs[3])
 		if err != nil {
 			panic(err)
 		}
@@ -201,12 +203,12 @@ func testNewNodes() [5]INode {
 	time.Sleep(200 * time.Millisecond)
 
 	// nodes to routes
-	nodes[0].Network().Connect(testutils.TgAddrs[1][0])
-	nodes[1].Network().Connect(testutils.TgAddrs[1][1])
+	nodes[0].Network().Connect(testutils.TgAddrs[2])
+	nodes[1].Network().Connect(testutils.TgAddrs[3])
 
 	// routes to routes
-	nodes[3].Network().Connect(testutils.TgAddrs[1][0])
-	nodes[3].Network().Connect(testutils.TgAddrs[1][1])
+	nodes[3].Network().Connect(testutils.TgAddrs[2])
+	nodes[3].Network().Connect(testutils.TgAddrs[3])
 
 	return nodes
 }

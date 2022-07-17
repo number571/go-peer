@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	CHeaderHLS = 0x1750571
+	CHeaderHLS = uint32(0x1750571)
 	CSizeRoute = 3
 	CAKeySize  = 4096
 )

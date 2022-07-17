@@ -77,7 +77,7 @@ func (psd *sPseudo) sleep() iPseudo {
 		return psd
 	}
 
-	wtime := psd.fNode.Client().Settings().Get(settings.CTimePrsp)
+	wtime := psd.fNode.Client().Settings().Get(settings.CTimeRslp)
 	time.Sleep(time.Millisecond * calcRandTime(wtime))
 	return psd
 }

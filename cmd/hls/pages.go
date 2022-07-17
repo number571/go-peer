@@ -61,7 +61,7 @@ func pageMessage(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := gNode.Request(
 		pubKey,
-		payload.NewPayload(hls_settings.CHeaderHLS, vRequest.Data),
+		payload.NewPayload(uint64(hls_settings.CHeaderHLS), vRequest.Data),
 	)
 	if err != nil {
 		response(w, hls_settings.CErrorResponse, []byte("failed: response message"))

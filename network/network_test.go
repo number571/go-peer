@@ -44,13 +44,16 @@ func TestBroadcast(t *testing.T) {
 	}
 
 	for _, node := range nodes {
-		node.Handle(testutils.TcHead, handleF)
+		node.Handle(uint64(testutils.TcHead), handleF)
 	}
 
 	// nodes[0] -> nodes[1:]
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
-			pl := payload.NewPayload(testutils.TcHead, []byte(fmt.Sprintf(testutils.TcBigBodyTemplate, i)))
+			pl := payload.NewPayload(
+				uint64(testutils.TcHead),
+				[]byte(fmt.Sprintf(testutils.TcBigBodyTemplate, i)),
+			)
 			nodes[0].Broadcast(pl)
 		}(i)
 	}
@@ -96,13 +99,13 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 	}
 
 	go func() {
-		err := nodes[2].Listen(testutils.TgAddrs[0][0])
+		err := nodes[2].Listen(testutils.TgAddrs[0])
 		if err != nil {
 			panic(err)
 		}
 	}()
 	go func() {
-		err := nodes[4].Listen(testutils.TgAddrs[0][1])
+		err := nodes[4].Listen(testutils.TgAddrs[1])
 		if err != nil {
 			panic(err)
 		}
@@ -110,11 +113,11 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	nodes[0].Connect(testutils.TgAddrs[0][0])
-	nodes[1].Connect(testutils.TgAddrs[0][1])
+	nodes[0].Connect(testutils.TgAddrs[0])
+	nodes[1].Connect(testutils.TgAddrs[1])
 
-	nodes[3].Connect(testutils.TgAddrs[0][0])
-	nodes[3].Connect(testutils.TgAddrs[0][1])
+	nodes[3].Connect(testutils.TgAddrs[0])
+	nodes[3].Connect(testutils.TgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {

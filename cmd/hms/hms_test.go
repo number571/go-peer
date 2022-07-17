@@ -18,15 +18,16 @@ import (
 )
 
 const (
+	tcN = 3
+)
+
+const (
 	tcPathDB     = "hms_test.db"
 	tcPathConfig = "hms_test.cfg"
 )
 
-const (
-	tcN = 3
-
-	tcHost           = "http://" + tcServiceAddress
-	tcServiceAddress = "localhost:8080"
+var (
+	tgHost = fmt.Sprintf("http://%s", testutils.TgAddrs[6])
 )
 
 func testHmsDefaultInit(dbPath, configPath string) {
@@ -81,7 +82,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 	mux.HandleFunc("/push", pushPage)
 
 	srv := &http.Server{
-		Addr:    tcServiceAddress,
+		Addr:    testutils.TgAddrs[6],
 		Handler: mux,
 	}
 
@@ -99,7 +100,7 @@ func testClientDoPush() error {
 	for i := 0; i < tcN; i++ {
 		err := hmc.NewClient(
 			hmc.NewBuilder(client),
-			hmc.NewRequester(tcHost),
+			hmc.NewRequester(tgHost),
 		).Push(
 			client.PubKey(),
 			payload.NewPayload(
@@ -121,7 +122,7 @@ func testClientDoSize() error {
 
 	size, err := hmc.NewClient(
 		hmc.NewBuilder(client),
-		hmc.NewRequester(tcHost),
+		hmc.NewRequester(tgHost),
 	).Size()
 	if err != nil {
 		return err
@@ -141,7 +142,7 @@ func testClientDoLoad() error {
 	for i := 0; i < tcN; i++ {
 		msg, err := hmc.NewClient(
 			hmc.NewBuilder(client),
-			hmc.NewRequester(tcHost),
+			hmc.NewRequester(tgHost),
 		).Load(uint64(i))
 		if err != nil {
 			return err

@@ -9,7 +9,7 @@
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
 * Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
-* Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
+* In developing... Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
 
 ## Deprecated library based applications
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");

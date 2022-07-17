@@ -1,4 +1,5 @@
 # Hidden Lake Network
+# HLN = HLS + HMS
 .PHONY: default build run clean 
 default: build
 build:

@@ -40,7 +40,7 @@ func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []
 		for _, recv := range gConfig.F2F().PubKeys() {
 			go node.Request(
 				recv,
-				payload.NewPayload(hls_settings.CHeaderHLS, requestBytes),
+				payload.NewPayload(uint64(hls_settings.CHeaderHLS), requestBytes),
 			)
 		}
 	}
