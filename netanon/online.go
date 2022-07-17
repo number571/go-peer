@@ -7,6 +7,7 @@ import (
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/utils"
 )
 
 var (
@@ -52,7 +53,7 @@ func (onl *sOnline) Status() bool {
 func (onl *sOnline) start() {
 	maskPing := onl.fNode.Client().Settings().Get(settings.CMaskPing)
 	onl.fNode.Handle(
-		settings.MustBeUint32(maskPing),
+		utils.MustBeUint32(maskPing),
 		func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
 			return encoding.Uint64ToBytes(maskPing)
 		},
@@ -61,5 +62,5 @@ func (onl *sOnline) start() {
 
 func (onl *sOnline) stop() {
 	maskPing := onl.fNode.Client().Settings().Get(settings.CMaskPing)
-	onl.fNode.Handle(settings.MustBeUint32(maskPing), nil)
+	onl.fNode.Handle(utils.MustBeUint32(maskPing), nil)
 }

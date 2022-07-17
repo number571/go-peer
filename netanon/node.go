@@ -15,6 +15,7 @@ import (
 	"github.com/number571/go-peer/local/routing"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/utils"
 )
 
 var (
@@ -148,7 +149,7 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, fRout
 		return nil, errors.New("length of connections = 0")
 	}
 
-	headRoutes := settings.MustBeUint32(pl.Head())
+	headRoutes := utils.MustBeUint32(pl.Head())
 	headAction := uint32(random.NewStdPRNG().Uint64())
 
 	pl = payload.NewPayload(
