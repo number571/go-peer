@@ -74,7 +74,7 @@ func (head SHeadMessage) Salt() []byte {
 
 // IBody
 
-func (body SBodyMessage) Payload() IPayload {
+func (body SBodyMessage) Payload() payload.IPayload {
 	return payload.LoadPayload(body.FPayload)
 }
 

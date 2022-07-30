@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
@@ -54,8 +55,7 @@ func hlsDefaultInit() error {
 }
 
 func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
-	fileAlreadyExist := utils.OpenFile(filepath).IsExist()
-
+	// create/open storage
 	storage := storage.NewCryptoStorage(
 		sett,
 		filepath,
@@ -65,19 +65,28 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 		return nil
 	}
 
-	if fileAlreadyExist {
-		bpriv, err := storage.Get(objectKey)
-		if err != nil {
-			return nil
-		}
+	// get private key
+	bpriv, err := storage.Get(objectKey)
+	if err == nil {
 		return asymmetric.LoadRSAPrivKey(bpriv)
 	}
 
-	priv := asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
-	err := storage.Set(objectKey, priv.Bytes())
-	if err != nil {
+	// private key not exist
+	answ := utils.NewInput(nil, "Private key by password not exist.\nGenerate new? [y/n]: ").String()
+	switch strings.ToLower(answ) {
+	case "y", "yes":
+		// generate private key
+		priv := asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
+		err := storage.Set(objectKey, priv.Bytes())
+		if err != nil {
+			panic(err)
+		}
+		return priv
+	case "n", "no":
+		// exit from program
 		return nil
+	default:
+		// undefined answer
+		panic("input answer not equal [y/yes, n/no]")
 	}
-
-	return priv
 }

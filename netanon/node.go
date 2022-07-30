@@ -206,6 +206,8 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		for {
+			// msg can be decrypted for next route
+			// for this need use Broadcast from netanon
 			node.Broadcast(msg)
 
 			// try decrypt message
@@ -214,14 +216,15 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				return
 			}
 
-			switch pld.Head() {
+			head := pld.Head()
+			switch head {
 			case node.Client().Settings().Get(settings.CMaskRout):
 				// if is route package then
 				// 1/2 generate new pseudo-package and sleep rand time
 				// unpack and send new version of package
 				if node.Pseudo().Status() && random.NewStdPRNG().Bool() {
-					// send pseudo message with random sleep
-					node.Pseudo().request(len(pld.Body())).sleep()
+					// send pseudo message with random size and sleep
+					node.Pseudo().request().sleep()
 				}
 				// redirect decrypt message
 				msg = message.LoadMessage(pld.Body())
@@ -242,7 +245,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 
 				// get session by payload head
 				action, ok := node.getAction(
-					loadHead(pld.Head()).Actions(),
+					loadHead(head).Actions(),
 				)
 				if ok {
 					action <- pld.Body()
@@ -250,10 +253,15 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				}
 
 				// get function by payload head
-				f, ok := node.getFunction(
-					loadHead(pld.Head()).Routes(),
+				f, ok := node.getRoute(
+					loadHead(head).Routes(),
 				)
 				if !ok || f == nil {
+					return
+				}
+
+				resp := f(node, sender, pld)
+				if resp == nil {
 					return
 				}
 
@@ -263,7 +271,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 						node.Pseudo().privKey(),
 						node.fRouterF(),
 					),
-					payload.NewPayload(pld.Head(), f(node, sender, pld)),
+					payload.NewPayload(head, resp),
 				))
 				return
 			}
@@ -292,7 +300,7 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 	return msg
 }
 
-func (node *sNode) getFunction(head uint32) (IHandlerF, bool) {
+func (node *sNode) getRoute(head uint32) (IHandlerF, bool) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 

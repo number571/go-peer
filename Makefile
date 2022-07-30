@@ -23,10 +23,6 @@ test:
 		fi; \
 	done
 
-bench:
-	go clean -testcache
-	go test -cover -bench=. -benchmem -benchtime=$(N)x ./...
-
 build:
 	make build -C cmd/hln
 	

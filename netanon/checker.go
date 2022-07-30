@@ -134,41 +134,47 @@ func (checker *sChecker) start() {
 	sett := node.fClient.Settings()
 
 	go func(checker *sChecker, node *sNode, sett settings.ISettings) {
-		maskPing := sett.Get(settings.CMaskPing)
-		maskPingBytes := encoding.Uint64ToBytes(maskPing)
-
+		timeRslp := sett.Get(settings.CTimePing)
 		for {
-			wg := sync.WaitGroup{}
-			list := checker.ListWithInfo()
-			wg.Add(len(list))
-			for _, recv := range list {
-				go func(recv *sCheckerInfo) {
-					defer wg.Done()
-					resp, err := node.doRequest(
-						recv.fPubKey,
-						payload.NewPayload(maskPing, []byte{}),
-						node.fRouterF,
-						0, // retry number
-						sett.Get(settings.CTimeWait),
-					)
-					if err != nil || !bytes.Equal(resp, maskPingBytes) {
-						recv.fOnline = false
-						return
-					}
-					recv.fOnline = true
-				}(recv.(*sCheckerInfo))
-			}
-			wg.Wait()
+			broadcastOnline(checker, node, sett)
 			select {
 			case <-checker.fChannel:
 				return
-			case <-time.After(time.Second * time.Duration(
-				sett.Get(settings.CTimePing),
-			)):
+			case <-time.After(calcRandTimeInMS(1, timeRslp)):
 				continue
 			}
 		}
 	}(checker, node, sett)
+}
+
+func broadcastOnline(checker *sChecker, node *sNode, sett settings.ISettings) {
+	list := checker.ListWithInfo()
+
+	maskPing := sett.Get(settings.CMaskPing)
+	maskPingBytes := encoding.Uint64ToBytes(maskPing)
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(list))
+
+	for _, recv := range list {
+		go func(recv *sCheckerInfo) {
+			defer wg.Done()
+			resp, err := node.doRequest(
+				recv.fPubKey,
+				payload.NewPayload(maskPing, []byte{}),
+				node.fRouterF,
+				0, // retry number
+				sett.Get(settings.CTimeWait),
+			)
+			if err != nil || !bytes.Equal(resp, maskPingBytes) {
+				recv.fOnline = false
+				return
+			}
+			recv.fOnline = true
+		}(recv.(*sCheckerInfo))
+	}
+
+	wg.Wait()
 }
 
 func (checker *sChecker) stop() {

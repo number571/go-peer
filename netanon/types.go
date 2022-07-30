@@ -74,7 +74,7 @@ type iListPubKey interface {
 type iPseudo interface {
 	iStatus
 
-	request(int) iPseudo
+	request() iPseudo
 	sleep() iPseudo
 	privKey() asymmetric.IPrivKey
 }

@@ -57,7 +57,7 @@ func (psd *sPseudo) Status() bool {
 	return psd.fEnabled
 }
 
-func (psd *sPseudo) request(size int) iPseudo {
+func (psd *sPseudo) request() iPseudo {
 	psd.fMutex.Lock()
 	defer psd.fMutex.Unlock()
 
@@ -65,7 +65,7 @@ func (psd *sPseudo) request(size int) iPseudo {
 		return psd
 	}
 
-	psd.doRequest(size)
+	psd.doRequest()
 	return psd
 }
 
@@ -77,8 +77,9 @@ func (psd *sPseudo) sleep() iPseudo {
 		return psd
 	}
 
-	wtime := psd.fNode.Client().Settings().Get(settings.CTimeRslp)
-	time.Sleep(time.Millisecond * calcRandTime(wtime))
+	sett := psd.fNode.Client().Settings()
+	rslp := sett.Get(settings.CTimeRslp)
+	time.Sleep(calcRandTimeInMS(0, rslp))
 	return psd
 }
 
@@ -92,42 +93,44 @@ func (psd *sPseudo) privKey() asymmetric.IPrivKey {
 
 func (psd *sPseudo) start() {
 	sett := psd.fNode.Client().Settings()
-	go func(psd *sPseudo, sett settings.ISettings) {
+	wait := sett.Get(settings.CTimePreq)
+	go func(psd *sPseudo, wait uint64) {
 		for {
-			psd.doRequest(16)
+			psd.doRequest()
 			select {
 			case <-psd.fChannel:
 				return
-			case <-time.After(time.Second * time.Duration(
-				sett.Get(settings.CTimePreq),
-			)):
+			case <-time.After(calcRandTimeInMS(1, wait)):
 				continue
 			}
 		}
-	}(psd, sett)
+	}(psd, wait)
 }
 
 func (psd *sPseudo) stop() {
 	psd.fChannel <- struct{}{}
 }
 
-func (psd *sPseudo) doRequest(size int) {
+func (psd *sPseudo) doRequest() {
+	sett := psd.fNode.Client().Settings()
 	rand := random.NewStdPRNG()
 	psd.fNode.Broadcast(psd.fNode.Client().Encrypt(
 		routing.NewRoute(psd.fPrivKey.PubKey()),
 		payload.NewPayload(
-			psd.fNode.Client().Settings().Get(settings.CMaskPsdo),
-			rand.Bytes(calcRandSize(psd.fNode.Client().Settings(), size)),
+			sett.Get(settings.CMaskPsdo),
+			rand.Bytes(calcRandSize(sett)),
 		),
 	))
 }
 
-func calcRandSize(sett settings.ISettings, len int) uint64 {
+func calcRandSize(sett settings.ISettings) uint64 {
 	rand := random.NewStdPRNG()
-	return uint64(len) + rand.Uint64()%sett.Get(settings.CSizePsdo)
+	sizePack := sett.Get(settings.CSizePack)
+	return rand.Uint64() % (sizePack / 2)
 }
 
-func calcRandTime(seconds uint64) time.Duration {
-	rand := random.NewStdPRNG()
-	return time.Duration(rand.Uint64() % (seconds * 1000))
+func calcRandTimeInMS(minSeconds, addMaxSeconds uint64) time.Duration {
+	mnum := minSeconds * 1000
+	rnum := random.NewStdPRNG().Uint64() % (addMaxSeconds * 1000)
+	return time.Millisecond * time.Duration(int64(mnum)+int64(rnum))
 }

@@ -15,8 +15,8 @@ var (
 
 type sConn struct {
 	fMutex    sync.Mutex
-	fSettings settings.ISettings
 	fSocket   net.Conn
+	fSettings settings.ISettings
 }
 
 func NewConn(sett settings.ISettings, address string) IConn {

@@ -24,6 +24,7 @@ func TestChain(t *testing.T) {
 		chainName = "chain.db"
 	)
 
+	os.RemoveAll(chainName)
 	defer os.RemoveAll(chainName)
 
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)

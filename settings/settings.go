@@ -58,7 +58,7 @@ func defaultSettings() map[uint64]uint64 {
 		CSizeRtry: 0,                  // quantity
 		CSizeWork: 10,                 // bits
 		CSizeConn: 10,                 // quantity
-		CSizePack: 4 << 20,            // 1*(2^20)B = 1MiB
+		CSizePack: 1 << 20,            // 1*(2^20)B = 1MiB
 		CSizeMapp: 1 << 10,            // quantity hashes in map
 		CSizeSkey: 1 << 4,             // 2^4B = 16B
 		CSizeBmsg: 10,                 // quantity

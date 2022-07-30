@@ -1,14 +1,10 @@
 package message
 
+import "github.com/number571/go-peer/local/payload"
+
 type IMessage interface {
 	Head() iHead
 	Body() iBody
-	Bytes() []byte
-}
-
-type IPayload interface {
-	Head() uint64
-	Body() []byte
 	Bytes() []byte
 }
 
@@ -19,7 +15,7 @@ type iHead interface {
 }
 
 type iBody interface {
-	Payload() IPayload
+	Payload() payload.IPayload
 	Hash() []byte
 	Sign() []byte
 	Proof() uint64
