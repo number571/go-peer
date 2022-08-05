@@ -17,12 +17,10 @@ const (
 	tcF2F           = true
 	tcAddressHLS    = "test_address_hls"
 	tcAddressHTTP   = "test_address_http"
-	tcCleanCron     = "0 0 0 0 0"
 )
 
 const (
 	tcConfig = `{
-	"clean_cron": "0 0 0 0 0",
 	"address": {
 		"hls": "test_address_hls",
 		"http": "test_address_http"
@@ -133,9 +131,5 @@ func TestConfig(t *testing.T) {
 		if pubKey.Address().String() != v2.Address().String() {
 			t.Errorf("public key is invalid '%s'", v2)
 		}
-	}
-
-	if cfg.CleanCron() != tcCleanCron {
-		t.Errorf("clean_cron is invalid")
 	}
 }

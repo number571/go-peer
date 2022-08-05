@@ -25,6 +25,7 @@ func defaultSettings() map[uint64]uint64 {
 		settings.CTimePreq: 10,                 // seconds
 		settings.CTimeRslp: 5,                  // seconds
 		settings.CTimePing: 60,                 // seconds
+		settings.CSizeRout: 3,                  // max routes
 		settings.CSizePsdo: 10 << 10,           // 10*(2^10)B = 10KiB
 		settings.CSizeRtry: 2,                  // quantity
 		settings.CSizeWork: 20,                 // bits

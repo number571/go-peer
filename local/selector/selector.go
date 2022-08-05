@@ -41,6 +41,10 @@ func (s *sSelector) Shuffle() ISelector {
 	s.fMutex.Lock()
 	defer s.fMutex.Unlock()
 
+	if s.Length() == 0 {
+		return s
+	}
+
 	rand := random.NewStdPRNG()
 	for i := s.Length() - 1; i > 0; i-- {
 		j := int(rand.Uint64() % uint64(i+1))

@@ -19,7 +19,6 @@ var (
 
 type sConfig struct {
 	fMutex         sync.Mutex
-	FCleanCron     string             `json:"clean_cron"`
 	FAddress       *sAddress          `json:"address"`
 	FConnections   []string           `json:"connections"`
 	FF2F           *sF2F              `json:"f2f_mode"`
@@ -48,11 +47,6 @@ type sBlock struct {
 	FRedirect bool   `json:"redirect"`
 	FAddress  string `json:"address"`
 }
-
-const (
-	// cron of clean database
-	cDefaultCleanCron = "0 0 * * *"
-)
 
 var (
 	// friend-to-friend option
@@ -97,7 +91,6 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
-			FCleanCron:     cDefaultCleanCron,
 			FAddress:       cDefaultAddress,
 			FF2F:           cDefaultF2FMode,
 			FConnections:   gDefaultConnects,
@@ -176,10 +169,6 @@ func (cfg *sConfig) GetService(name string) (iBlock, bool) {
 
 	addr, ok := cfg.FServices[name]
 	return addr, ok
-}
-
-func (cfg *sConfig) CleanCron() string {
-	return cfg.FCleanCron
 }
 
 func (address *sAddress) HLS() string {

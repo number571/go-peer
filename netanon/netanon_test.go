@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/local/client"
 	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/testutils"
 )
@@ -93,7 +92,9 @@ func TestOnlineChecker(t *testing.T) {
 
 	nodes[0].Checker().Append(nodes[1].Client().PubKey())
 
-	timeWait := nodes[0].Client().Settings().Get(settings.CTimePing) + 1
+	// maxtime = 1 + random(0;tping)
+	// for test need maxtime+1
+	timeWait := nodes[0].Client().Settings().Get(settings.CTimePing) + 2
 	time.Sleep(time.Duration(timeWait) * time.Second)
 
 	list := nodes[0].Checker().ListWithInfo()
@@ -172,9 +173,7 @@ func testNewNodes() [5]INode {
 
 	for _, node := range nodes {
 		node.WithRouter(func() []asymmetric.IPubKey {
-			return selector.NewSelector(
-				testGetPubKeys(nodes[2:]),
-			).Shuffle().Return(3)
+			return testGetPubKeys(nodes[2:])
 		})
 
 		node.Handle(

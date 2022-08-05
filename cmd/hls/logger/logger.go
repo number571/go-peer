@@ -26,8 +26,8 @@ const (
 func NewLogger(infoOut, warningOut, errorOut *os.File) ILogger {
 	return &sLogger{
 		log.New(infoOut, fmt.Sprintf("%s%s%s", colorCyan, "[INFO]\t", colorReset), log.LstdFlags),
-		log.New(warningOut, fmt.Sprintf("%s%s%s", colorYellow, "[WARNING]\t", colorReset), log.LstdFlags),
-		log.New(errorOut, fmt.Sprintf("%s%s%s", colorRed, "[ERROR]\t", colorReset), log.LstdFlags),
+		log.New(warningOut, fmt.Sprintf("%s%s%s", colorYellow, "[WARN]\t", colorReset), log.LstdFlags),
+		log.New(errorOut, fmt.Sprintf("%s%s%s", colorRed, "[ERRO]\t", colorReset), log.LstdFlags),
 	}
 }
 

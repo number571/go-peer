@@ -11,10 +11,7 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/random"
-	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/netanon"
-	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -34,10 +31,7 @@ func main() {
 
 	// set response route
 	gNode.WithRouter(func() []asymmetric.IPubKey {
-		randSizeRoute := random.NewStdPRNG().Uint64() % hls_settings.CSizeRoute
-		return selector.NewSelector(nodesInOnline(gNode)).
-			Shuffle().
-			Return(randSizeRoute)
+		return nodesInOnline(gNode)
 	})
 
 	// turn on pseudo packages
@@ -73,11 +67,8 @@ func main() {
 
 	// network checker
 	go func() {
-		sett := gNode.Client().Settings()
-		tchk := time.Duration(sett.Get(settings.CTimePing))
-
 		for {
-			time.Sleep(time.Second * tchk)
+			time.Sleep(time.Minute)
 			for _, address := range gConfig.Connections() {
 				if address == gConfig.Address().HLS() {
 					continue
@@ -112,7 +103,7 @@ func main() {
 	go func() {
 		gLogger.Info(fmt.Sprintf("HTTP is listening [%s]...", gConfig.Address().HTTP()))
 		err := srv.ListenAndServe()
-		if err != nil {
+		if err != nil && err != http.ErrServerClosed {
 			gLogger.Warning(err.Error())
 		}
 	}()

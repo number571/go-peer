@@ -5,7 +5,6 @@ import (
 )
 
 type IConfig interface {
-	CleanCron() string
 	Address() iAddress
 	Connections() []string
 	F2F() iF2F

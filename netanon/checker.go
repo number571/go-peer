@@ -162,7 +162,6 @@ func broadcastOnline(checker *sChecker, node *sNode, sett settings.ISettings) {
 			resp, err := node.doRequest(
 				recv.fPubKey,
 				payload.NewPayload(maskPing, []byte{}),
-				node.fRouterF,
 				0, // retry number
 				sett.Get(settings.CTimeWait),
 			)

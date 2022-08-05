@@ -34,10 +34,16 @@ func LoadRequest(data []byte) IRequest {
 }
 
 func (r *sRequest) ToBytes() []byte {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	return encoding.Serialize(r)
 }
 
 func (r *sRequest) WithHead(head map[string]string) IRequest {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	r.FHead = make(map[string]string)
 	for k, v := range head {
 		r.FHead[k] = v
@@ -46,19 +52,31 @@ func (r *sRequest) WithHead(head map[string]string) IRequest {
 }
 
 func (r *sRequest) WithBody(body []byte) IRequest {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	r.FBody = body
 	return r
 }
 
 func (r *sRequest) Host() string {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	return r.FHost
 }
 
 func (r *sRequest) Path() string {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	return r.FPath
 }
 
 func (r *sRequest) Method() string {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	return r.FMethod
 }
 
@@ -75,5 +93,8 @@ func (r *sRequest) Head() map[string]string {
 }
 
 func (r *sRequest) Body() []byte {
+	r.fMutex.Lock()
+	defer r.fMutex.Unlock()
+
 	return r.FBody
 }

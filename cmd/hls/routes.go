@@ -65,6 +65,7 @@ func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []
 		return nil
 	}
 	defer resp.Body.Close()
+
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil

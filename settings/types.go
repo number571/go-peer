@@ -15,6 +15,7 @@ const (
 	CTimePreq
 	CTimeRslp
 	CTimePing
+	CSizeRout
 	CSizePsdo
 	CSizeRtry
 	CSizeWork

@@ -47,6 +47,7 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed create client node")
 	}
 
+	gLogger.Info(privKey.PubKey().String())
 	if initOnly {
 		os.Exit(0)
 	}

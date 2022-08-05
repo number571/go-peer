@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/local/message"
 	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/local/routing"
+	"github.com/number571/go-peer/local/selector"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
@@ -138,13 +139,12 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte
 	return node.doRequest(
 		recv,
 		pl,
-		node.fRouterF,
 		node.Client().Settings().Get(settings.CSizeRtry),
 		node.Client().Settings().Get(settings.CTimeWait),
 	)
 }
 
-func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, fRoute IRouterF, retryNum, timeWait uint64) ([]byte, error) {
+func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, retryNum, timeWait uint64) ([]byte, error) {
 	if len(node.Network().Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
@@ -157,7 +157,7 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, fRout
 		pl.Body(),
 	)
 
-	route := routing.NewRoute(recv).WithRedirects(node.Pseudo().privKey(), fRoute())
+	route := routing.NewRoute(recv).WithRedirects(node.Pseudo().privKey(), node.fRouterF())
 	routeMsg := node.Client().Encrypt(route, pl)
 	if routeMsg == nil {
 		return nil, errors.New("psender is nil with not nil routes")
@@ -266,10 +266,14 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				}
 
 				// send response
+				sett := node.Client().Settings()
+				numRoutes := random.NewStdPRNG().Uint64() % sett.Get(settings.CSizeRout)
 				node.Broadcast(node.Client().Encrypt(
 					routing.NewRoute(sender).WithRedirects(
 						node.Pseudo().privKey(),
-						node.fRouterF(),
+						selector.NewSelector(node.fRouterF()).
+							Shuffle().
+							Return(numRoutes),
 					),
 					payload.NewPayload(head, resp),
 				))

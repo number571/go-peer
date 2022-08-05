@@ -54,6 +54,7 @@ func defaultSettings() map[uint64]uint64 {
 		CTimePreq: 1,                  // seconds (used for pseudo requests)
 		CTimeRslp: 1,                  // seconds (used for random sleep)
 		CTimePing: 1,                  // seconds (used for online checker)
+		CSizeRout: 3,                  // Must be > 0; Max routes
 		CSizePsdo: 2 << 10,            // 2*(2^10)B = 2KiB
 		CSizeRtry: 0,                  // quantity
 		CSizeWork: 10,                 // bits
