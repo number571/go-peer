@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
@@ -14,32 +14,7 @@ func pageIndex(w http.ResponseWriter, r *http.Request) {
 	response(w, hls_settings.CErrorNone, []byte(hls_settings.CTitlePattern))
 }
 
-func pageStatus(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		response(w, hls_settings.CErrorMethod, []byte("failed: incorrect method"))
-		return
-	}
-
-	var network []hls_settings.SStatusNetwork
-	for _, info := range gNode.Checker().ListWithInfo() {
-		network = append(network, hls_settings.SStatusNetwork{
-			PubKey: info.PubKey().String(),
-			Online: info.Online(),
-		})
-	}
-
-	w.Header().Set("Content-Type", hls_settings.CContentType)
-	json.NewEncoder(w).Encode(&hls_settings.SStatusResponse{
-		PubKey:  gNode.Client().PubKey().String(),
-		Network: network,
-		SResponse: hls_settings.SResponse{
-			Result: []byte("success"),
-			Return: hls_settings.CErrorNone,
-		},
-	})
-}
-
-func pageMessage(w http.ResponseWriter, r *http.Request) {
+func pageSend(w http.ResponseWriter, r *http.Request) {
 	var vRequest hls_settings.SRequest
 
 	if r.Method != "POST" {

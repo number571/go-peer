@@ -4,17 +4,16 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/testutils"
 )
 
 func TestBuilder(t *testing.T) {
 	client := client.NewClient(
-		settings.NewSettings(),
+		client.NewSettings(10, 0),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)
 

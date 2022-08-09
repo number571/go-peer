@@ -6,26 +6,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/friends"
+	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/testutils"
 )
 
 const (
+	tcWait = 30
 	tcIter = 10
 )
 
 func TestComplex(t *testing.T) {
-	nodes := testNewNodes()
+	nodes := testNewNodes(tcWait)
 	defer testFreeNodes(nodes[:])
-
-	for _, node := range nodes {
-		node.Pseudo().Switch(true)
-		node.Online().Switch(true)
-		node.Checker().Switch(true)
-	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(tcIter)
@@ -55,83 +52,31 @@ func TestComplex(t *testing.T) {
 	wg.Wait()
 }
 
-func TestPseudo(t *testing.T) {
-	nodes := testNewNodes()
-	defer testFreeNodes(nodes[:])
-
-	for _, node := range nodes {
-		node.Pseudo().Switch(true)
-	}
-
-	time.Sleep(1 * time.Second)
-	reqBody := "hello, world!"
-
-	resp, err := nodes[0].Request(
-		nodes[1].Client().PubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
-	)
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-
-	if string(resp) != fmt.Sprintf("%s (response)", reqBody) {
-		t.Errorf("string(resp) != reqBody")
-		return
-	}
-}
-
-func TestOnlineChecker(t *testing.T) {
-	nodes := testNewNodes()
-	defer testFreeNodes(nodes[:])
-
-	for _, node := range nodes {
-		node.Online().Switch(true)
-		node.Checker().Switch(true)
-	}
-
-	nodes[0].Checker().Append(nodes[1].Client().PubKey())
-
-	// maxtime = 1 + random(0;tping)
-	// for test need maxtime+1
-	timeWait := nodes[0].Client().Settings().Get(settings.CTimePing) + 2
-	time.Sleep(time.Duration(timeWait) * time.Second)
-
-	list := nodes[0].Checker().ListWithInfo()
-	if !list[0].Online() {
-		t.Errorf("node is offline")
-		return
-	}
-}
-
 func TestF2F(t *testing.T) {
-	nodes := testNewNodes()
+	nodes := testNewNodes(tcWait)
 	defer testFreeNodes(nodes[:])
 
-	testWithF2F(t, nodes, 1) // f2f with friends
-}
-
-func TestF2FWithoutFriends(t *testing.T) {
-	nodes := testNewNodes()
-	defer testFreeNodes(nodes[:])
-
-	testWithF2F(t, nodes, 2) // f2f without friends
-}
-
-func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	nodes[0].F2F().Switch(true)
 	nodes[1].F2F().Switch(true)
 
-	switch mode {
-	case 1:
-		nodes[0].F2F().Append(nodes[1].Client().PubKey())
-		nodes[1].F2F().Append(nodes[0].Client().PubKey())
-	case 2:
-		nodes[0].Client().Settings().Set(settings.CTimeWait, 1) // seconds
-	default:
-		panic("undefined mode")
-	}
+	nodes[0].F2F().Append(nodes[1].Client().PubKey())
+	nodes[1].F2F().Append(nodes[0].Client().PubKey())
 
+	testRequest(t, 1, nodes)
+}
+
+func TestF2FWithoutFriends(t *testing.T) {
+	// 5 seconds for wait
+	nodes := testNewNodes(5)
+	defer testFreeNodes(nodes[:])
+
+	nodes[0].F2F().Switch(true)
+	nodes[1].F2F().Switch(true)
+
+	testRequest(t, 2, nodes)
+}
+
+func testRequest(t *testing.T, mode int, nodes [5]INode) {
 	reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, mode)
 
 	// nodes[1] -> nodes[0] -> nodes[2]
@@ -153,29 +98,18 @@ func testWithF2F(t *testing.T, nodes [5]INode, mode int) {
 	}
 }
 
-func testGetPubKeys(nodes []INode) []asymmetric.IPubKey {
-	pubKeys := []asymmetric.IPubKey{}
-	for _, node := range nodes {
-		pubKeys = append(pubKeys, node.Client().PubKey())
-	}
-	return pubKeys
-}
-
 // nodes[0], nodex[1] = clients
 // nodes[2], nodes[3], nodes[4] = routes
 // (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testNewNodes() [5]INode {
+func testNewNodes(secondsWait int) [5]INode {
 	nodes := [5]INode{}
 
+	clients := testNewClients()
 	for i := 0; i < 5; i++ {
-		nodes[i] = NewNode(testNewClient())
+		nodes[i] = testNewNode(i, secondsWait, clients)
 	}
 
 	for _, node := range nodes {
-		node.WithRouter(func() []asymmetric.IPubKey {
-			return testGetPubKeys(nodes[2:])
-		})
-
 		node.Handle(
 			testutils.TcHead,
 			func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
@@ -212,15 +146,60 @@ func testNewNodes() [5]INode {
 	return nodes
 }
 
+func testNewClients() [5]client.IClient {
+	clients := [5]client.IClient{}
+	for i := 0; i < 5; i++ {
+		clients[i] = client.NewClient(
+			client.NewSettings(10, (1<<10)),
+			asymmetric.NewRSAPrivKey(1024),
+		)
+	}
+	return clients
+}
+
+func testNewNode(i, secondsWait int, clients [5]client.IClient) INode {
+	msgSize := uint64(1 << 20)
+	return NewNode(
+		NewSettings(
+			1,
+			3,
+			time.Duration(secondsWait)*time.Second,
+		),
+		clients[i],
+		network.NewNode(network.NewSettings(
+			msgSize,
+			3,
+			1024,
+			10,
+			20,
+			5*time.Second,
+		)),
+		queue.NewQueue(
+			queue.NewSettings(
+				20,
+				10,
+				msgSize,
+				300*time.Millisecond,
+			),
+			clients[i],
+		),
+		friends.NewF2F(),
+		func() []asymmetric.IPubKey {
+			return testGetPubKeys(clients[2:])
+		},
+	)
+}
+
+func testGetPubKeys(clients []client.IClient) []asymmetric.IPubKey {
+	pubKeys := []asymmetric.IPubKey{}
+	for _, client := range clients {
+		pubKeys = append(pubKeys, client.PubKey())
+	}
+	return pubKeys
+}
+
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
 		node.Close()
 	}
-}
-
-func testNewClient() client.IClient {
-	return client.NewClient(
-		settings.NewSettings(),
-		asymmetric.NewRSAPrivKey(1024),
-	)
 }

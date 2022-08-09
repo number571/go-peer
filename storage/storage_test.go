@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/testutils"
 )
 
@@ -18,7 +17,7 @@ func TestCryptoStorage(t *testing.T) {
 	defer os.Remove(storageName)
 	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
 
-	store := NewCryptoStorage(settings.NewSettings(), storageName, []byte(testutils.TcKey1))
+	store := NewCryptoStorage(storageName, []byte(testutils.TcKey1))
 	store.Set([]byte(testutils.TcKey2), secret1)
 
 	secret2, err := store.Get([]byte(testutils.TcKey2))

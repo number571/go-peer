@@ -5,16 +5,17 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/crypto/random"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/local/selector"
+	"github.com/number571/go-peer/friends"
+	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/queue"
+	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 )
@@ -25,41 +26,60 @@ var (
 
 type sNode struct {
 	fMutex         sync.Mutex
+	fSettings      ISettings
 	fClient        client.IClient
+	fPseudo        asymmetric.IPrivKey
 	fNetwork       network.INode
+	fQueue         queue.IQueue
+	fF2F           friends.IF2F
 	fRouterF       IRouterF
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[uint32]chan []byte
-	fF2F           iF2F
-	fOnline        iOnline
-	fChecker       iChecker
-	fPseudo        iPseudo
 }
 
-func NewNode(client client.IClient) INode {
-	sett := client.Settings()
+func NewNode(
+	sett ISettings,
+	client client.IClient,
+	nnode network.INode,
+	queue queue.IQueue,
+	f2f friends.IF2F,
+	route IRouterF,
+) INode {
+	// queue.NewQueue(client, settings.CSizeDefaultCap, sett.Get(settings.CSizePerd))
+	newKey := asymmetric.NewRSAPrivKey(client.PrivKey().Size())
 	node := &sNode{
+		fSettings:      sett,
 		fClient:        client,
-		fNetwork:       network.NewNode(sett),
-		fRouterF:       func() []asymmetric.IPubKey { return nil },
+		fPseudo:        newKey,
+		fNetwork:       nnode,
+		fQueue:         queue,
+		fF2F:           f2f,
+		fRouterF:       route,
 		fHandleRoutes:  make(map[uint32]IHandlerF),
 		fHandleActions: make(map[uint32]chan []byte),
-		fF2F:           newF2F(),
 	}
 
-	// recurrent structures
-	{
-		node.fOnline = newOnline(node)
-		node.fChecker = newChecker(node)
-		node.fPseudo = newPseudo(node)
-	}
-
-	node.Network().Handle(sett.Get(settings.CMaskNetw), node.handleWrapper())
+	node.Queue().Start()
+	node.Network().Handle(settings.CMaskNetwork, node.handleWrapper())
 	return node
 }
 
 func (node *sNode) Close() error {
-	return node.Network().Close()
+	var lerr error
+	if err := node.Network().Close(); err != nil {
+		lerr = err
+	}
+	if err := node.Queue().Close(); err != nil {
+		lerr = err
+	}
+	return lerr
+}
+
+func (node *sNode) Settings() ISettings {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	return node.fSettings
 }
 
 func (node *sNode) Client() client.IClient {
@@ -76,36 +96,19 @@ func (node *sNode) Network() network.INode {
 	return node.fNetwork
 }
 
+func (node *sNode) Queue() queue.IQueue {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	return node.fQueue
+}
+
 // Return f2f structure.
-func (node *sNode) F2F() iF2F {
+func (node *sNode) F2F() friends.IF2F {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
 	return node.fF2F
-}
-
-// Return online structure.
-func (node *sNode) Online() iOnline {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fOnline
-}
-
-// Return checker structure.
-func (node *sNode) Checker() iChecker {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fChecker
-}
-
-// Return pseudo structure.
-func (node *sNode) Pseudo() iPseudo {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fPseudo
 }
 
 func (node *sNode) WithRouter(router IRouterF) INode {
@@ -129,7 +132,7 @@ func (node *sNode) Broadcast(msg message.IMessage) error {
 	defer node.fMutex.Unlock()
 
 	return node.fNetwork.Broadcast(payload.NewPayload(
-		node.fClient.Settings().Get(settings.CMaskNetw),
+		settings.CMaskNetwork,
 		msg.Bytes(),
 	))
 }
@@ -139,12 +142,11 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte
 	return node.doRequest(
 		recv,
 		pl,
-		node.Client().Settings().Get(settings.CSizeRtry),
-		node.Client().Settings().Get(settings.CTimeWait),
+		node.Settings().GetTimeWait(),
 	)
 }
 
-func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, retryNum, timeWait uint64) ([]byte, error) {
+func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, timeWait time.Duration) ([]byte, error) {
 	if len(node.Network().Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
@@ -157,7 +159,7 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, retry
 		pl.Body(),
 	)
 
-	route := routing.NewRoute(recv).WithRedirects(node.Pseudo().privKey(), node.fRouterF())
+	route := routing.NewRoute(recv).WithRedirects(node.fPseudo, node.fRouterF())
 	routeMsg := node.Client().Encrypt(route, pl)
 	if routeMsg == nil {
 		return nil, errors.New("psender is nil with not nil routes")
@@ -166,118 +168,115 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, retry
 	node.setAction(headAction)
 	defer node.delAction(headAction)
 
-	for counter := uint64(0); counter <= retryNum; counter++ {
-		node.Broadcast(routeMsg)
-		resp, err := node.recv(headAction, timeWait)
-		if err != nil {
-			return nil, err
-		}
-		if resp == nil {
+	for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
+		if err := node.Queue().Enqueue(settings.CNull, routeMsg); err != nil {
+			time.Sleep(node.Queue().Settings().GetDuration())
 			continue
 		}
-		return resp, nil
+		break
 	}
-
-	return nil, errors.New("time is over")
+	return node.recv(headAction, timeWait)
 }
 
-func (node *sNode) recv(head uint32, timeOut uint64) ([]byte, error) {
+func (node *sNode) recv(head uint32, timeOut time.Duration) ([]byte, error) {
 	action, ok := node.getAction(head)
 	if !ok {
 		return nil, errors.New("action undefined")
 	}
-
 	select {
 	case result, opened := <-action:
 		if !opened {
 			return nil, errors.New("chan is closed")
 		}
 		return result, nil
-	case <-time.After(time.Duration(timeOut) * time.Second):
-		return nil, nil
+	case <-time.After(timeOut):
+		return nil, errors.New("time is over")
 	}
 }
 
 func (node *sNode) handleWrapper() network.IHandlerF {
+	go func() {
+		for {
+			msg := <-node.Queue().Dequeue()
+			node.Broadcast(msg)
+		}
+	}()
+
 	return func(nnode network.INode, _ network.IConn, npld payload.IPayload) {
 		msg := node.initialCheck(message.LoadMessage(npld.Body()))
 		if msg == nil {
 			return
 		}
 
-		for {
-			// msg can be decrypted for next route
-			// for this need use Broadcast from netanon
-			node.Broadcast(msg)
+		// msg can be decrypted for next route
+		// for this need use Broadcast from netanon
+		node.Broadcast(msg)
 
-			// try decrypt message
-			sender, pld := node.Client().Decrypt(msg)
-			if pld == nil {
+		// try decrypt message
+		sender, pld := node.Client().Decrypt(msg)
+		if pld == nil {
+			return
+		}
+
+		head := pld.Head()
+		switch head {
+		case settings.CMaskRoute:
+			// redirect decrypt message
+			msg = message.LoadMessage(pld.Body())
+			if msg == nil {
+				return
+			}
+			for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
+				if err := node.Queue().Enqueue(settings.CNull, msg); err != nil {
+					time.Sleep(node.Queue().Settings().GetDuration())
+					continue
+				}
+				break
+			}
+		default:
+			// check f2f mode and sender in f2f list
+			if node.F2F().Status() && !node.F2F().InList(sender) {
 				return
 			}
 
-			head := pld.Head()
-			switch head {
-			case node.Client().Settings().Get(settings.CMaskRout):
-				// if is route package then
-				// 1/2 generate new pseudo-package and sleep rand time
-				// unpack and send new version of package
-				if node.Pseudo().Status() && random.NewStdPRNG().Bool() {
-					// send pseudo message with random size and sleep
-					node.Pseudo().request().sleep()
-				}
-				// redirect decrypt message
-				msg = message.LoadMessage(pld.Body())
-				if msg != nil {
-					break // switch
-				}
+			// get session by payload head
+			action, ok := node.getAction(
+				loadHead(head).Actions(),
+			)
+			if ok {
+				action <- pld.Body()
 				return
-			default:
-				// check f2f mode and sender in f2f list
-				if node.F2F().Status() && !node.F2F().InList(sender) {
-					return
-				}
+			}
 
-				// sleep random milliseconds
-				if node.Pseudo().Status() {
-					node.Pseudo().sleep()
-				}
-
-				// get session by payload head
-				action, ok := node.getAction(
-					loadHead(head).Actions(),
-				)
-				if ok {
-					action <- pld.Body()
-					return
-				}
-
-				// get function by payload head
-				f, ok := node.getRoute(
-					loadHead(head).Routes(),
-				)
-				if !ok || f == nil {
-					return
-				}
-
-				resp := f(node, sender, pld)
-				if resp == nil {
-					return
-				}
-
-				// send response
-				sett := node.Client().Settings()
-				numRoutes := random.NewStdPRNG().Uint64() % sett.Get(settings.CSizeRout)
-				node.Broadcast(node.Client().Encrypt(
-					routing.NewRoute(sender).WithRedirects(
-						node.Pseudo().privKey(),
-						selector.NewSelector(node.fRouterF()).
-							Shuffle().
-							Return(numRoutes),
-					),
-					payload.NewPayload(head, resp),
-				))
+			// get function by payload head
+			f, ok := node.getRoute(
+				loadHead(head).Routes(),
+			)
+			if !ok || f == nil {
 				return
+			}
+
+			resp := f(node, sender, pld)
+			if resp == nil {
+				return
+			}
+
+			msg := node.Client().Encrypt(
+				routing.NewRoute(sender).WithRedirects(
+					node.fPseudo,
+					node.fRouterF(),
+				),
+				payload.NewPayload(head, resp),
+			)
+
+			// send response with two append enqueue
+			for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
+				err := node.Queue().Enqueue(node.Settings().GetResponsePeriod(), msg)
+				if err != nil {
+					time.Sleep(node.Queue().Settings().GetDuration())
+					continue
+				}
+				break
 			}
 		}
 	}
@@ -295,7 +294,7 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 		return nil
 	}
 
-	diff := node.fClient.Settings().Get(settings.CSizeWork)
+	diff := node.fClient.Settings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil

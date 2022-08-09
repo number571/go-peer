@@ -22,6 +22,7 @@ func TestMempool(t *testing.T) {
 		mempoolName = "mempool.db"
 	)
 
+	os.RemoveAll(mempoolName)
 	defer os.RemoveAll(mempoolName)
 
 	mempool := NewMempool(mempoolName)

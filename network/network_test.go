@@ -6,8 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/testutils"
 )
 
@@ -95,7 +94,15 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 	nodes := [5]INode{}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = NewNode(settings.NewSettings())
+		sett := NewSettings(
+			(1 << 20),
+			10,
+			1024,
+			10,
+			20,
+			5*time.Second,
+		)
+		nodes[i] = NewNode(sett)
 	}
 
 	go func() {

@@ -5,15 +5,14 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/testutils"
 )
 
 func testNewClient() IClient {
 	return NewClient(
-		settings.NewSettings(),
+		NewSettings(10, (1<<10)),
 		asymmetric.NewRSAPrivKey(1024),
 	)
 }

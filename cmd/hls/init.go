@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/logger"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
+	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/netanon"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/storage"
 	"github.com/number571/go-peer/utils"
 
@@ -31,21 +34,48 @@ func hlsDefaultInit() error {
 	gConfig = config.NewConfig("hls.cfg")
 	gDB = database.NewKeyValueDB("hls.db")
 
-	sett := hls_settings.NewSettings()
 	privKey := getPrivKey(
-		sett,
 		"hls.stg",
-		[]byte(utils.NewInput(sett, "Password#Stg: ").Password()),
-		[]byte(utils.NewInput(sett, "Password#Obj: ").Password()),
+		[]byte(utils.NewInput("Password#Stg: ").Password()),
+		[]byte(utils.NewInput("Password#Obj: ").Password()),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gNode = netanon.NewNode(client.NewClient(sett, privKey))
-	if gNode == nil {
-		return fmt.Errorf("failed create client node")
-	}
+	client := client.NewClient(
+		client.NewSettings(hls_settings.CWorkSize, hls_settings.CRandBytes),
+		privKey,
+	)
+	gNode = netanon.NewNode(
+		netanon.NewSettings(
+			2,
+			3,
+			hls_settings.CWaitTime*time.Second,
+		),
+		client,
+		network.NewNode(network.NewSettings(
+			hls_settings.CPackSize,
+			10,   // retryNum for get message
+			1024, // capacity for hash storage
+			hls_settings.CMaxConns,
+			hls_settings.CMaxMsgs,
+			5*time.Second, // timeWait for request
+		)),
+		queue.NewQueue(
+			queue.NewSettings(
+				hls_settings.CQueueSize,
+				hls_settings.CQueuePull,
+				hls_settings.CPackSize,
+				hls_settings.CQueueTime*time.Millisecond,
+			),
+			client,
+		),
+		friends.NewF2F(),
+		func() []asymmetric.IPubKey {
+			return nil // TODO
+		},
+	)
 
 	gLogger.Info(privKey.PubKey().String())
 	if initOnly {
@@ -55,10 +85,9 @@ func hlsDefaultInit() error {
 	return nil
 }
 
-func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
+func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
 	// create/open storage
 	storage := storage.NewCryptoStorage(
-		sett,
 		filepath,
 		storageKey,
 	)
@@ -73,7 +102,7 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 	}
 
 	// private key not exist
-	answ := utils.NewInput(nil, "Private key by password not exist.\nGenerate new? [y/n]: ").String()
+	answ := utils.NewInput("Private key by password not exist.\nGenerate new? [y/n]: ").String()
 	switch strings.ToLower(answ) {
 	case "y", "yes":
 		// generate private key

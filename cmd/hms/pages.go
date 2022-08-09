@@ -8,8 +8,7 @@ import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/message"
 )
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +75,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if uint64(len(vRequest.Package)) > gSettings.Get(settings.CSizePack) {
+	if uint64(len(vRequest.Package)) > hms_settings.CSizePack {
 		response(w, hms_settings.CErrorPackSize, []byte("failed: incorrect package size"))
 		return
 	}
@@ -87,7 +86,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	puzzle := puzzle.NewPoWPuzzle(gSettings.Get(settings.CSizeWork))
+	puzzle := puzzle.NewPoWPuzzle(hms_settings.CSizeWork)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		response(w, hms_settings.CErrorWorkSize, []byte("failed: incorrect work size"))
 		return

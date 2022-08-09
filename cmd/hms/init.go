@@ -9,8 +9,6 @@ import (
 	"github.com/number571/go-peer/cmd/hms/config"
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/robfig/cron/v3"
-
-	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 )
 
 func hmsDefaultInit() error {
@@ -21,7 +19,6 @@ func hmsDefaultInit() error {
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
 	flag.Parse()
 
-	gSettings = hms_settings.NewSettings()
 	gConfig = config.NewConfig("hms.cfg")
 	gDB = database.NewKeyValueDB("hms.db")
 

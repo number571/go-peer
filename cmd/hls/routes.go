@@ -10,8 +10,8 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/netanon"
+	"github.com/number571/go-peer/payload"
 )
 
 func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {

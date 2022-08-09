@@ -10,8 +10,6 @@ import (
 	"time"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -29,26 +27,10 @@ func main() {
 	// set handle functions
 	gNode.Handle(hls_settings.CHeaderHLS, routeHLS)
 
-	// set response route
-	gNode.WithRouter(func() []asymmetric.IPubKey {
-		return nodesInOnline(gNode)
-	})
-
-	// turn on pseudo packages
-	gNode.Pseudo().Switch(true)
-
 	// turn on f2f mode
 	gNode.F2F().Switch(gConfig.F2F().Status())
 	for _, pubKey := range gConfig.F2F().PubKeys() {
 		gNode.F2F().Append(pubKey)
-	}
-
-	// turn on online checker
-	isOnline := gConfig.OnlineChecker().Status()
-	gNode.Online().Switch(isOnline)
-	gNode.Checker().Switch(isOnline)
-	for _, pubKey := range gConfig.OnlineChecker().PubKeys() {
-		gNode.Checker().Append(pubKey)
 	}
 
 	// connect to open nodes
@@ -92,8 +74,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", pageIndex)
-	mux.HandleFunc("/status", pageStatus)
-	mux.HandleFunc("/message", pageMessage)
+	mux.HandleFunc("/send", pageSend)
 
 	srv := &http.Server{
 		Addr:    gConfig.Address().HTTP(),
@@ -127,15 +108,4 @@ func main() {
 	<-shutdown
 	fmt.Println("Shutting down...")
 	utils.CloseAll([]utils.ICloser{srv, gDB, gNode})
-}
-
-func nodesInOnline(node netanon.INode) []asymmetric.IPubKey {
-	inOnline := []asymmetric.IPubKey{}
-	for _, info := range gNode.Checker().ListWithInfo() {
-		if !info.Online() {
-			continue
-		}
-		inOnline = append(inOnline, info.PubKey())
-	}
-	return inOnline
 }

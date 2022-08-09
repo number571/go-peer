@@ -4,9 +4,8 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/chain"
-	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/payload"
 )
 
 var (
@@ -21,9 +20,8 @@ type sNode struct {
 	fHandleRoutes map[uint64]IHandlerF
 }
 
-func NewNode(sett settings.ISettings, chain chain.IChain) INode {
+func NewNode(chain chain.IChain) INode {
 	node := &sNode{
-		fNetwork:      network.NewNode(sett),
 		fChain:        chain,
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}

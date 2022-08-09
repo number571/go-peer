@@ -3,8 +3,8 @@ package hmc
 import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/payload"
 )
 
 type IClient interface {

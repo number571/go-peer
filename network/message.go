@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 )
 
 var (
@@ -60,10 +60,10 @@ func (msg sMessage) Hash() []byte {
 	return msg[cBeginHash:cEndHash]
 }
 
-func (msg sMessage) Bytes() []byte {
-	return msg[:]
-}
-
 func (msg sMessage) Payload() payload.IPayload {
 	return payload.LoadPayload(msg[cBeginHead:])
+}
+
+func (msg sMessage) Bytes() []byte {
+	return msg[:]
 }

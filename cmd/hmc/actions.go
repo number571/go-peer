@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/number571/go-peer/cmd/hms/hmc"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/utils"
 )
 
@@ -158,7 +158,7 @@ func sizeAction() {
 }
 
 func listAction() {
-	page := utils.NewInput(nil, "Page: ").String()
+	page := utils.NewInput("Page: ").String()
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		fmt.Println(err)
@@ -199,7 +199,7 @@ func listAction() {
 }
 
 func readAction() {
-	id := utils.NewInput(nil, "ID: ").String()
+	id := utils.NewInput("ID: ").String()
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Println(err)
@@ -233,20 +233,20 @@ func readAction() {
 }
 
 func pushAction() {
-	name := utils.NewInput(nil, "Receiver: ").String()
+	name := utils.NewInput("Receiver: ").String()
 	pubKey, ok := gWrapper.Config().GetPubKeyByName(name)
 	if !ok {
 		fmt.Println("Receiver's public key undefined")
 		return
 	}
 
-	title := utils.NewInput(nil, "Title: ").String()
+	title := utils.NewInput("Title: ").String()
 	if title == "" {
 		fmt.Println("Title is nil")
 		return
 	}
 
-	msg := utils.NewInput(nil, "Message: ").String()
+	msg := utils.NewInput("Message: ").String()
 	if msg == "" {
 		fmt.Println("Message is nil")
 		return

@@ -1,6 +1,6 @@
 package message
 
-import "github.com/number571/go-peer/local/payload"
+import "github.com/number571/go-peer/payload"
 
 type IMessage interface {
 	Head() iHead

@@ -1,4 +1,4 @@
-package netanon
+package friends
 
 import (
 	"sync"
@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	_ iF2F = &sF2F{}
+	_ IF2F = &sF2F{}
 )
 
 // F2F connection mode.
@@ -17,7 +17,7 @@ type sF2F struct {
 	fMapping map[string]asymmetric.IPubKey
 }
 
-func newF2F() iF2F {
+func NewF2F() IF2F {
 	return &sF2F{
 		fMapping: make(map[string]asymmetric.IPubKey),
 	}

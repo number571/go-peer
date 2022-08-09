@@ -5,8 +5,8 @@ import (
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
 )
 
 var (

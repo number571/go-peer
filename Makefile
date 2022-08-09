@@ -1,7 +1,7 @@
 T=update
 N=1
 
-.PHONY: default push build clean test bench
+.PHONY: default push test
 
 default: test
 
@@ -22,9 +22,3 @@ test:
 			exit; \
 		fi; \
 	done
-
-build:
-	make build -C cmd/hln
-	
-clean:
-	make clean -C cmd/hln

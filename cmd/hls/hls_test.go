@@ -8,19 +8,18 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/number571/go-peer/client"
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/netanon"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/testutils"
-)
-
-var (
-	tgSettings = settings.NewSettings()
 )
 
 const (
@@ -100,9 +99,9 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 func testStartNodeHLS(t *testing.T) netanon.INode {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(tgSettings, privKey)
+	client := client.NewClient(client.NewSettings(10, (1<<10)), privKey)
 
-	node := netanon.NewNode(client).
+	node := testNewNode(client).
 		Handle(hls_settings.CHeaderHLS, testRouteHLS)
 
 	go func() {
@@ -165,10 +164,10 @@ func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload
 // CLIENT
 
 func testStartClientHLS() error {
-	priv := asymmetric.NewRSAPrivKey(testutils.TcAKeySize)
-	client := client.NewClient(tgSettings, priv)
+	privKey := asymmetric.NewRSAPrivKey(testutils.TcAKeySize)
+	client := client.NewClient(client.NewSettings(10, (1<<10)), privKey)
 
-	node := netanon.NewNode(client).
+	node := testNewNode(client).
 		Handle(hls_settings.CHeaderHLS, nil)
 
 	conn := node.Network().Connect(testutils.TgAddrs[4])
@@ -197,4 +196,37 @@ func testStartClientHLS() error {
 	}
 
 	return nil
+}
+
+func testNewNode(client client.IClient) netanon.INode {
+	msgSize := uint64(1 << 20)
+	return netanon.NewNode(
+		netanon.NewSettings(
+			1,
+			3,
+			20*time.Second,
+		),
+		client,
+		network.NewNode(network.NewSettings(
+			msgSize,
+			10,
+			1024,
+			10,
+			20,
+			5*time.Second,
+		)),
+		queue.NewQueue(
+			queue.NewSettings(
+				10,
+				5,
+				msgSize,
+				300*time.Millisecond,
+			),
+			client,
+		),
+		friends.NewF2F(),
+		func() []asymmetric.IPubKey {
+			return nil
+		},
+	)
 }

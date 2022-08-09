@@ -5,8 +5,6 @@ import (
 	"net"
 	"sync"
 	"time"
-
-	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -16,10 +14,10 @@ var (
 type sConn struct {
 	fMutex    sync.Mutex
 	fSocket   net.Conn
-	fSettings settings.ISettings
+	fSettings ISettings
 }
 
-func NewConn(sett settings.ISettings, address string) IConn {
+func NewConn(sett ISettings, address string) IConn {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return nil
@@ -27,7 +25,7 @@ func NewConn(sett settings.ISettings, address string) IConn {
 	return LoadConn(sett, conn)
 }
 
-func LoadConn(sett settings.ISettings, conn net.Conn) IConn {
+func LoadConn(sett ISettings, conn net.Conn) IConn {
 	return &sConn{
 		fSettings: sett,
 		fSocket:   conn,
@@ -41,7 +39,7 @@ func (conn *sConn) Socket() net.Conn {
 func (conn *sConn) Request(msg IMessage) IMessage {
 	var (
 		chMsg    = make(chan IMessage)
-		timeWait = conn.fSettings.Get(settings.CTimeWait)
+		timeWait = conn.fSettings.GetTimeWait()
 	)
 
 	conn.Write(msg)
@@ -50,7 +48,7 @@ func (conn *sConn) Request(msg IMessage) IMessage {
 	select {
 	case rmsg := <-chMsg:
 		return rmsg
-	case <-time.After(time.Duration(timeWait) * time.Second):
+	case <-time.After(timeWait):
 		return nil
 	}
 }
@@ -107,7 +105,7 @@ func readMessage(conn *sConn, chMsg chan IMessage) {
 
 	// mustLen = Size[u64] in uint64
 	mustLen := newPackage(bufLen).BytesToSize()
-	if mustLen > conn.fSettings.Get(settings.CSizePack) {
+	if mustLen > conn.fSettings.GetPackageSize() {
 		return
 	}
 

@@ -1,34 +1,47 @@
 package network
 
-import (
-	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/settings"
-)
+import "time"
 
-// in bytes
-const (
-	cSizeUint = settings.CSizeUint64
-	cSizeHash = hashing.GSHA256Size
-	cSizeHead = settings.CSizeUint64
-)
+type sSettings struct {
+	fRetryNum    uint64
+	fCapacity    uint64
+	fSizePack    uint64
+	fMaxConns    uint64
+	fMaxMessages uint64
+	fTimeWait    time.Duration
+}
 
-const (
-	cPointSize = 0
-	cPointHash = cPointSize + cSizeUint
-	cPointHead = cPointHash + cSizeHash
-	cPointBody = cPointHead + cSizeHead
-)
+func NewSettings(sizePack, retryNum, capacity, maxConns, maxMessages uint64, timeWait time.Duration) ISettings {
+	return &sSettings{
+		fRetryNum:    retryNum,
+		fCapacity:    capacity,
+		fSizePack:    sizePack,
+		fMaxConns:    maxConns,
+		fMaxMessages: maxMessages,
+		fTimeWait:    timeWait,
+	}
+}
 
-const (
-	// cBeginSize = cPointSize
-	// cEndSize   = cPointHash
+func (s *sSettings) GetRetryNum() uint64 {
+	return s.fCapacity
+}
 
-	cBeginHash = cPointHash
-	cEndHash   = cPointHead
+func (s *sSettings) GetCapacity() uint64 {
+	return s.fCapacity
+}
 
-	cBeginHead = cPointHead
-	cEndHead   = cPointBody
+func (s *sSettings) GetPackageSize() uint64 {
+	return s.fSizePack
+}
 
-	// cBeginBody = cPointBody
-	// cEndBody = [cBeginBody:]
-)
+func (s *sSettings) GetMaxConnects() uint64 {
+	return s.fMaxConns
+}
+
+func (s *sSettings) GetMaxMessages() uint64 {
+	return s.fMaxMessages
+}
+
+func (s *sSettings) GetTimeWait() time.Duration {
+	return s.fTimeWait
+}

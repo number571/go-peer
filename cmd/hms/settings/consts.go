@@ -18,6 +18,11 @@ const (
 )
 
 const (
+	CSizeWork = 20        // bits
+	CSizePack = (8 << 20) // 8MiB
+)
+
+const (
 	CErrorNone = iota + 1
 	CErrorMethod
 	CErrorDecode

@@ -22,7 +22,7 @@ func main() {
 	go func() {
 		gActions["load"].Do()
 		for {
-			cmd := utils.NewInput(nil, "> ").String()
+			cmd := utils.NewInput("> ").String()
 			f, ok := gActions[cmd]
 			if !ok {
 				fmt.Println("Undefined command")

@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/crypto/hashing"
 	gp_database "github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/message"
+	"github.com/number571/go-peer/message"
 )
 
 type sStorage struct {

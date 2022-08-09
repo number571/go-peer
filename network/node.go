@@ -6,8 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/storage"
 )
 
@@ -19,18 +18,17 @@ var (
 type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
-	fSettings     settings.ISettings
+	fSettings     ISettings
 	fHashMapping  storage.IKeyValueStorage
 	fConnections  map[string]IConn
 	fHandleRoutes map[uint64]IHandlerF
 }
 
 // Create client by private key as identification.
-func NewNode(sett settings.ISettings) INode {
-	sizeMapp := sett.Get(settings.CSizeMapp)
+func NewNode(sett ISettings) INode {
 	return &sNode{
 		fSettings:     sett,
-		fHashMapping:  storage.NewMemoryStorage(sizeMapp),
+		fHashMapping:  storage.NewMemoryStorage(sett.GetCapacity()),
 		fConnections:  make(map[string]IConn),
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
@@ -50,6 +48,10 @@ func (node *sNode) Broadcast(pl payload.IPayload) error {
 	}
 
 	return err
+}
+
+func (node *sNode) Settings() ISettings {
+	return node.fSettings
 }
 
 // Turn on listener by address.
@@ -123,19 +125,16 @@ func (node *sNode) handleConn(conn IConn) {
 	defer node.Disconnect(conn)
 
 	var (
-		retrySize = node.fSettings.Get(settings.CSizeRtry)
-		msgNum    = node.fSettings.Get(settings.CSizeBmsg)
-
 		retryCounter = uint64(0)
 		msgCounter   = int64(0)
 	)
 
 	for {
-		if atomic.LoadUint64(&retryCounter) > retrySize {
+		if atomic.LoadUint64(&retryCounter) > node.Settings().GetRetryNum() {
 			break
 		}
 
-		if uint64(atomic.LoadInt64(&msgCounter)) > msgNum {
+		if uint64(atomic.LoadInt64(&msgCounter)) > node.Settings().GetMaxMessages() {
 			time.Sleep(200 * time.Millisecond)
 			continue
 		}
@@ -222,7 +221,7 @@ func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {
 }
 
 func (node *sNode) hasMaxConnSize() bool {
-	maxConns := node.fSettings.Get(settings.CSizeConn)
+	maxConns := node.fSettings.GetMaxConnects()
 	return uint64(len(node.fConnections)) > maxConns
 }
 

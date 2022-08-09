@@ -8,9 +8,9 @@ import (
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/crypto/symmetric"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/local/routing"
+	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -20,14 +20,13 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings settings.ISettings
+	fSettings ISettings
 	fPrivKey  asymmetric.IPrivKey
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists. Can be null.
-// Settings must contain (CMaskRout, CSizeSkey, CSizePack, CSizeWork)
-func NewClient(sett settings.ISettings, priv asymmetric.IPrivKey) IClient {
+func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 	if priv == nil {
 		return nil
 	}
@@ -48,7 +47,7 @@ func (client *sClient) PrivKey() asymmetric.IPrivKey {
 }
 
 // Get settings from client object.
-func (client *sClient) Settings() settings.ISettings {
+func (client *sClient) Settings() ISettings {
 	return client.fSettings
 }
 
@@ -66,7 +65,7 @@ func (client *sClient) Encrypt(route routing.IRoute, pl payload.IPayload) messag
 		rmsg = psender.(*sClient).onceEncrypt(
 			pub,
 			payload.NewPayload(
-				client.Settings().Get(settings.CMaskRout),
+				settings.CMaskRoute,
 				rmsg.Bytes(),
 			),
 		)
@@ -79,11 +78,16 @@ func (client *sClient) Encrypt(route routing.IRoute, pl payload.IPayload) messag
 func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, pl payload.IPayload) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
-		salt    = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
-		session = rand.Bytes(client.Settings().Get(settings.CSizeSkey))
+		salt    = rand.Bytes(settings.CSizeSymmKey)
+		session = rand.Bytes(settings.CSizeSymmKey)
 	)
 
-	randBytes := rand.Bytes(rand.Uint64() % client.Settings().Get(settings.CSizePsdo))
+	maxRandSize := client.Settings().GetRandomSize()
+	if maxRandSize == 0 {
+		maxRandSize = 1
+	}
+
+	randBytes := rand.Bytes(rand.Uint64() % maxRandSize)
 	doublePayload := payload.NewPayload(
 		uint64(len(pl.Bytes())), // head as size of (payload||random)
 		bytes.Join(
@@ -116,7 +120,7 @@ func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, pl payload.IPayl
 			FPayload: cipher.Encrypt(doublePayload.Bytes()),
 			FHash:    hash,
 			FSign:    cipher.Encrypt(client.PrivKey().Sign(hash)),
-			FProof:   puzzle.NewPoWPuzzle(client.Settings().Get(settings.CSizeWork)).Proof(hash),
+			FProof:   puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash),
 		},
 	}
 }
@@ -134,7 +138,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 	}
 
 	// Proof of work. Prevent spam.
-	diff := client.Settings().Get(settings.CSizeWork)
+	diff := client.Settings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil, nil

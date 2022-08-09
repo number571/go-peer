@@ -8,8 +8,8 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/local/payload"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/settings"
 )
 

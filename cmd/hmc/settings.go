@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/number571/go-peer/client"
 	hms_database "github.com/number571/go-peer/cmd/hms/database"
-	"github.com/number571/go-peer/local/client"
 )
 
 const (

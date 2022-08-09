@@ -1,3 +1,0 @@
-# HLN
-
-> Hidden Lake Network.

@@ -1,80 +1,42 @@
 package netanon
 
 import (
+	"time"
+
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/friends"
+	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/queue"
 )
 
 type IRouterF func() []asymmetric.IPubKey
 type IHandlerF func(INode, asymmetric.IPubKey, payload.IPayload) []byte
 
 type INode interface {
+	Settings() ISettings
+	Close() error
+
 	Client() client.IClient
 	Network() network.INode
+	Queue() queue.IQueue
+	F2F() friends.IF2F
 
 	Handle(uint32, IHandlerF) INode
-	WithRouter(IRouterF) INode
-
 	Broadcast(message.IMessage) error
 	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
-
-	Close() error
-	iModifier
 }
 
-type iModifier interface {
-	Checker() iChecker
-	Pseudo() iPseudo
-	Online() iOnline
-	F2F() iF2F
-}
-
-type iOnline interface {
-	iStatus
-}
-
-type iF2F interface {
-	iStatus
-	iListPubKey
+type ISettings interface {
+	GetResponsePeriod() uint64
+	GetRetryEnqueue() uint64
+	GetTimeWait() time.Duration
 }
 
 type iHead interface {
 	Uint64() uint64
 	Routes() uint32
 	Actions() uint32
-}
-
-type iStatus interface {
-	Switch(bool)
-	Status() bool
-}
-
-type iChecker interface {
-	ListWithInfo() []iCheckerInfo
-
-	iStatus
-	iListPubKey
-}
-
-type iCheckerInfo interface {
-	Online() bool
-	PubKey() asymmetric.IPubKey
-}
-
-type iListPubKey interface {
-	InList(asymmetric.IPubKey) bool
-	List() []asymmetric.IPubKey
-	Append(asymmetric.IPubKey)
-	Remove(asymmetric.IPubKey)
-}
-
-type iPseudo interface {
-	iStatus
-
-	request() iPseudo
-	sleep() iPseudo
-	privKey() asymmetric.IPrivKey
 }

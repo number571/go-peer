@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hmc/config"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/storage"
 	"github.com/number571/go-peer/utils"
 
-	hmc_settings "github.com/number571/go-peer/cmd/hmc/settings"
 	hms_database "github.com/number571/go-peer/cmd/hms/database"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 )
@@ -22,27 +20,24 @@ func hmcDefaultInit() error {
 	)
 	gDB = hms_database.NewKeyValueDB("hmc.db")
 
-	storageSettings := hmc_settings.NewSettings()
 	privKey := getPrivKey(
-		storageSettings,
 		"hmc.stg",
-		[]byte(utils.NewInput(storageSettings, "Password#Stg: ").Password()),
-		[]byte(utils.NewInput(storageSettings, "Password#Obj: ").Password()),
+		[]byte(utils.NewInput("Password#Stg: ").Password()),
+		[]byte(utils.NewInput("Password#Obj: ").Password()),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")
 	}
 
 	gActions = newActions()
-	gClient = client.NewClient(hms_settings.NewSettings(), privKey)
+	gClient = client.NewClient(client.NewSettings(hms_settings.CSizeWork, 0), privKey)
 
 	return nil
 }
 
-func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
+func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
 	// create/open storage
 	storage := storage.NewCryptoStorage(
-		sett,
 		filepath,
 		storageKey,
 	)
@@ -57,7 +52,7 @@ func getPrivKey(sett settings.ISettings, filepath string, storageKey, objectKey 
 	}
 
 	// private key not exist
-	answ := utils.NewInput(nil, "Private key by password not exist.\nGenerate new? [y/n]: ").String()
+	answ := utils.NewInput("Private key by password not exist.\nGenerate new? [y/n]: ").String()
 	switch strings.ToLower(answ) {
 	case "y", "yes":
 		// generate private key

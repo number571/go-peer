@@ -2,8 +2,8 @@ package hmc
 
 import (
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/local/message"
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/payload"
 )
 
 var (

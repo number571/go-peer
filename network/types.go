@@ -2,13 +2,16 @@ package network
 
 import (
 	"net"
+	"time"
 
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 )
 
 type IHandlerF func(INode, IConn, payload.IPayload)
 
 type INode interface {
+	Settings() ISettings
+
 	Handle(uint64, IHandlerF) INode
 	Broadcast(payload.IPayload) error
 
@@ -19,6 +22,15 @@ type INode interface {
 	Disconnect(IConn) error
 
 	Connections() []IConn
+}
+
+type ISettings interface {
+	GetRetryNum() uint64
+	GetCapacity() uint64
+	GetPackageSize() uint64
+	GetMaxConnects() uint64
+	GetMaxMessages() uint64
+	GetTimeWait() time.Duration
 }
 
 type IConn interface {
@@ -32,8 +44,8 @@ type IConn interface {
 
 type IMessage interface {
 	Hash() []byte
-	Bytes() []byte
 	Payload() payload.IPayload
+	Bytes() []byte
 }
 
 type iPackage interface {

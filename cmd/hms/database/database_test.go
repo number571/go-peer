@@ -5,12 +5,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/local/client"
-	"github.com/number571/go-peer/local/payload"
-	"github.com/number571/go-peer/local/routing"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/testutils"
 )
 
@@ -46,7 +45,7 @@ func TestDB(t *testing.T) {
 	}
 
 	cl := client.NewClient(
-		settings.NewSettings(),
+		client.NewSettings(10, 0),
 		asymmetric.NewRSAPrivKey(1024),
 	)
 

@@ -3,7 +3,7 @@ package message
 import (
 	"encoding/json"
 
-	"github.com/number571/go-peer/local/payload"
+	"github.com/number571/go-peer/payload"
 )
 
 var (

@@ -1,39 +1,12 @@
 package settings
 
-type ISettings interface {
-	Set(uint64, uint64) ISettings
-	Get(uint64) uint64
-}
-
 const (
-	CMaskNetw uint64 = iota + 1
-	CMaskRout
-	CMaskPing
-	CMaskPsdo
-	CMaskPasw
-	CTimeWait
-	CTimePreq
-	CTimeRslp
-	CTimePing
-	CSizeRout
-	CSizePsdo
-	CSizeRtry
-	CSizeWork
-	CSizeConn
-	CSizePack
-	CSizeMapp
-	CSizeSkey
-	CSizeBmsg
-	CSizePasw
-)
-
-// 3-bit mask for password
-const (
-	CPaswAplh = 0b100
-	CPaswNumr = 0b010
-	CPaswSpec = 0b001
+	CMaskNetwork = 0xAFFFFFFFFFFFFFFA
+	CMaskRoute   = 0xBFFFFFFFFFFFFFFB
 )
 
 const (
-	CSizeUint64 = 8
+	CSizeSymmKey = 32 // bytes
+	CSizeUint64  = 8
+	CNull        = 0
 )
