@@ -49,8 +49,8 @@ func hlsDefaultInit() error {
 	)
 	gNode = netanon.NewNode(
 		netanon.NewSettings(
+			1,
 			2,
-			3,
 			hls_settings.CWaitTime*time.Second,
 		),
 		client,

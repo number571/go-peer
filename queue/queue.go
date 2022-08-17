@@ -101,8 +101,8 @@ func (q *sQueue) runFullPull() bool {
 	if q.fMsgPull.fEnable {
 		return false
 	}
-
 	q.fMsgPull.fEnable = true
+
 	go func() {
 		for {
 			select {
@@ -112,6 +112,7 @@ func (q *sQueue) runFullPull() bool {
 			default:
 				currLen := len(q.fMsgPull.fEnqueue)
 				if uint64(currLen) == q.Settings().GetPullCapacity() {
+					time.Sleep(q.Settings().GetDuration())
 					continue
 				}
 				q.fMsgPull.fEnqueue <- q.newPseudoMessage()
