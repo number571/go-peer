@@ -208,9 +208,8 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		// msg can be decrypted for next route
-		// for this need use Broadcast from netanon
-		node.Broadcast(msg)
+		// redirect to another nodes
+		nnode.Broadcast(npld)
 
 		// try decrypt message
 		sender, pld := node.Client().Decrypt(msg)

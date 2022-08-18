@@ -28,4 +28,3 @@
 
 1. Write tests with comment "TODO"
 2. Need check for use wrappers (example hmc -> config wrapper)
-3. Rename local -> modules
