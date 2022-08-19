@@ -27,7 +27,7 @@ type INode interface {
 type ISettings interface {
 	GetRetryNum() uint64
 	GetCapacity() uint64
-	GetPackageSize() uint64
+	GetMessageSize() uint64
 	GetMaxConnects() uint64
 	GetMaxMessages() uint64
 	GetTimeWait() time.Duration

@@ -9,14 +9,13 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/testutils"
 )
 
 func TestQueue(t *testing.T) {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(client.NewSettings(10, (1<<10)), privKey)
-	queue := NewQueue(NewSettings(10, 5, (1<<20), 500*time.Millisecond), client)
+	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
+	queue := NewQueue(NewSettings(10, 5, 500*time.Millisecond), client)
 
 	if err := queue.Start(); err != nil {
 		t.Error(err)
@@ -38,13 +37,13 @@ func TestQueue(t *testing.T) {
 	}
 
 	msg := client.Encrypt(
-		routing.NewRoute(client.PubKey()),
+		client.PubKey(),
 		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
 	hash := msg.Body().Hash()
 
 	for i := 0; i < 3; i++ {
-		queue.Enqueue(0, msg)
+		queue.Enqueue(msg)
 	}
 	for i := 0; i < 3; i++ {
 		msg := <-queue.Dequeue()

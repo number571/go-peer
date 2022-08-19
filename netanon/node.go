@@ -2,6 +2,7 @@ package netanon
 
 import (
 	"errors"
+	"math"
 	"sync"
 	"time"
 
@@ -15,9 +16,9 @@ import (
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/queue"
-	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/settings"
-	"github.com/number571/go-peer/utils"
+
+	payload_adapter "github.com/number571/go-peer/netanon/adapters/payload"
 )
 
 var (
@@ -28,11 +29,9 @@ type sNode struct {
 	fMutex         sync.Mutex
 	fSettings      ISettings
 	fClient        client.IClient
-	fPseudo        asymmetric.IPrivKey
 	fNetwork       network.INode
 	fQueue         queue.IQueue
 	fF2F           friends.IF2F
-	fRouterF       IRouterF
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[uint32]chan []byte
 }
@@ -43,22 +42,16 @@ func NewNode(
 	nnode network.INode,
 	queue queue.IQueue,
 	f2f friends.IF2F,
-	route IRouterF,
 ) INode {
-	// queue.NewQueue(client, settings.CSizeDefaultCap, sett.Get(settings.CSizePerd))
-	newKey := asymmetric.NewRSAPrivKey(client.PrivKey().Size())
 	node := &sNode{
 		fSettings:      sett,
 		fClient:        client,
-		fPseudo:        newKey,
 		fNetwork:       nnode,
 		fQueue:         queue,
 		fF2F:           f2f,
-		fRouterF:       route,
 		fHandleRoutes:  make(map[uint32]IHandlerF),
 		fHandleActions: make(map[uint32]chan []byte),
 	}
-
 	node.Queue().Start()
 	node.Network().Handle(settings.CMaskNetwork, node.handleWrapper())
 	return node
@@ -111,14 +104,6 @@ func (node *sNode) F2F() friends.IF2F {
 	return node.fF2F
 }
 
-func (node *sNode) WithRouter(router IRouterF) INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	node.fRouterF = router
-	return node
-}
-
 func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -138,20 +123,12 @@ func (node *sNode) Broadcast(msg message.IMessage) error {
 }
 
 // Send message by public key of receiver.
-func (node *sNode) Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error) {
-	return node.doRequest(
-		recv,
-		pl,
-		node.Settings().GetTimeWait(),
-	)
-}
-
-func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, timeWait time.Duration) ([]byte, error) {
+func (node *sNode) Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error) {
 	if len(node.Network().Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
 
-	headRoutes := utils.MustBeUint32(pl.Head())
+	headRoutes := mustBeUint32(pl.Head())
 	headAction := uint32(random.NewStdPRNG().Uint64())
 
 	pl = payload.NewPayload(
@@ -159,23 +136,19 @@ func (node *sNode) doRequest(recv asymmetric.IPubKey, pl payload.IPayload, timeW
 		pl.Body(),
 	)
 
-	route := routing.NewRoute(recv).WithRedirects(node.fPseudo, node.fRouterF())
-	routeMsg := node.Client().Encrypt(route, pl)
-	if routeMsg == nil {
-		return nil, errors.New("psender is nil with not nil routes")
-	}
+	msg := node.Client().Encrypt(recv, pl)
 
 	node.setAction(headAction)
 	defer node.delAction(headAction)
 
-	for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
-		if err := node.Queue().Enqueue(settings.CNull, routeMsg); err != nil {
+	for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
+		if err := node.Queue().Enqueue(msg); err != nil {
 			time.Sleep(node.Queue().Settings().GetDuration())
 			continue
 		}
 		break
 	}
-	return node.recv(headAction, timeWait)
+	return node.recv(headAction, node.Settings().GetTimeWait())
 }
 
 func (node *sNode) recv(head uint32, timeOut time.Duration) ([]byte, error) {
@@ -218,65 +191,47 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		head := pld.Head()
-		switch head {
-		case settings.CMaskRoute:
-			// redirect decrypt message
-			msg = message.LoadMessage(pld.Body())
-			if msg == nil {
-				return
-			}
-			for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
-				if err := node.Queue().Enqueue(settings.CNull, msg); err != nil {
-					time.Sleep(node.Queue().Settings().GetDuration())
-					continue
-				}
-				break
-			}
-		default:
-			// check f2f mode and sender in f2f list
-			if node.F2F().Status() && !node.F2F().InList(sender) {
-				return
-			}
 
-			// get session by payload head
-			action, ok := node.getAction(
-				loadHead(head).Actions(),
-			)
-			if ok {
-				action <- pld.Body()
-				return
-			}
+		// check f2f mode and sender in f2f list
+		if node.F2F().Status() && !node.F2F().InList(sender) {
+			return
+		}
 
-			// get function by payload head
-			f, ok := node.getRoute(
-				loadHead(head).Routes(),
-			)
-			if !ok || f == nil {
-				return
-			}
+		// get session by payload head
+		action, ok := node.getAction(
+			loadHead(head).Actions(),
+		)
+		if ok {
+			action <- pld.Body()
+			return
+		}
 
-			resp := f(node, sender, pld)
-			if resp == nil {
-				return
-			}
+		// get function by payload head
+		f, ok := node.getRoute(
+			loadHead(head).Routes(),
+		)
+		if !ok || f == nil {
+			return
+		}
 
-			msg := node.Client().Encrypt(
-				routing.NewRoute(sender).WithRedirects(
-					node.fPseudo,
-					node.fRouterF(),
-				),
-				payload.NewPayload(head, resp),
-			)
+		resp := f(node, sender, pld)
+		if resp == nil {
+			return
+		}
 
-			// send response with two append enqueue
-			for i := uint64(0); i < node.Settings().GetRetryEnqueue(); i++ {
-				err := node.Queue().Enqueue(node.Settings().GetResponsePeriod(), msg)
-				if err != nil {
-					time.Sleep(node.Queue().Settings().GetDuration())
-					continue
-				}
-				break
+		respMsg := node.Client().Encrypt(
+			sender,
+			payload.NewPayload(head, resp),
+		)
+
+		// send response with two append enqueue
+		for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
+			err := node.Queue().Enqueue(respMsg)
+			if err != nil {
+				time.Sleep(node.Queue().Settings().GetDuration())
+				continue
 			}
+			break
 		}
 	}
 }
@@ -330,4 +285,11 @@ func (node *sNode) delAction(head uint32) {
 	defer node.fMutex.Unlock()
 
 	delete(node.fHandleActions, head)
+}
+
+func mustBeUint32(v uint64) uint32 {
+	if v > math.MaxUint32 {
+		panic("v > math.MaxUint32")
+	}
+	return uint32(v)
 }

@@ -105,7 +105,7 @@ func readMessage(conn *sConn, chMsg chan IMessage) {
 
 	// mustLen = Size[u64] in uint64
 	mustLen := newPackage(bufLen).BytesToSize()
-	if mustLen > conn.fSettings.GetPackageSize() {
+	if mustLen > conn.fSettings.GetMessageSize() {
 		return
 	}
 

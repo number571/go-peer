@@ -1,14 +1,14 @@
 package client
 
 type sSettings struct {
-	fWorkSize uint64
-	fRandSize uint64
+	fWorkSize    uint64
+	fMessageSize uint64
 }
 
-func NewSettings(workSize, randSize uint64) ISettings {
+func NewSettings(workSize, msgSize uint64) ISettings {
 	return &sSettings{
-		fWorkSize: workSize,
-		fRandSize: randSize,
+		fWorkSize:    workSize,
+		fMessageSize: msgSize,
 	}
 }
 
@@ -16,6 +16,6 @@ func (s *sSettings) GetWorkSize() uint64 {
 	return s.fWorkSize
 }
 
-func (s *sSettings) GetRandomSize() uint64 {
-	return s.fRandSize
+func (s *sSettings) GetMessageSize() uint64 {
+	return s.fMessageSize
 }

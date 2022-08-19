@@ -95,7 +95,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 func testClientDoPush() error {
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, 0),
+		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
 		priv,
 	)
 
@@ -121,7 +121,7 @@ func testClientDoPush() error {
 func testClientDoSize() error {
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, 0),
+		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
 		priv,
 	)
 
@@ -143,7 +143,7 @@ func testClientDoSize() error {
 func testClientDoLoad() error {
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, 0),
+		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
 		priv,
 	)
 

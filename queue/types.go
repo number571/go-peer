@@ -12,13 +12,12 @@ type IQueue interface {
 	Start() error
 	Close() error
 
-	Enqueue(uint64, message.IMessage) error
+	Enqueue(message.IMessage) error
 	Dequeue() <-chan message.IMessage
 }
 
 type ISettings interface {
 	GetMainCapacity() uint64
 	GetPullCapacity() uint64
-	GetMessageSize() uint64
 	GetDuration() time.Duration
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/routing"
 )
 
 type sQueue struct {
@@ -61,7 +60,7 @@ func (q *sQueue) Close() error {
 	return nil
 }
 
-func (q *sQueue) Enqueue(n uint64, msg message.IMessage) error {
+func (q *sQueue) Enqueue(msg message.IMessage) error {
 	if uint64(len(q.fEnqueue)) == q.Settings().GetMainCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
@@ -70,12 +69,6 @@ func (q *sQueue) Enqueue(n uint64, msg message.IMessage) error {
 		q.fMutex.Lock()
 		defer q.fMutex.Unlock()
 
-		// append pseudo messages to enqueue
-		for i := uint64(0); i < n; i++ {
-			q.fEnqueue <- (<-q.fMsgPull.fEnqueue)
-		}
-
-		// append main message to enqueue
 		q.fEnqueue <- msg
 	}()
 
@@ -86,6 +79,9 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 	time.Sleep(q.Settings().GetDuration())
 
 	go func() {
+		q.fMutex.Lock()
+		defer q.fMutex.Unlock()
+
 		if len(q.fEnqueue) == 0 {
 			q.fEnqueue <- (<-q.fMsgPull.fEnqueue)
 		}
@@ -126,12 +122,7 @@ func (q *sQueue) runFullPull() bool {
 func (q *sQueue) newPseudoMessage() message.IMessage {
 	rand := random.NewStdPRNG()
 	return q.fClient.Encrypt(
-		routing.NewRoute(q.fClient.PubKey()),
-		payload.NewPayload(0, rand.Bytes(q.calcRandSize())),
+		q.fClient.PubKey(),
+		payload.NewPayload(0, rand.Bytes(1)),
 	)
-}
-
-func (q *sQueue) calcRandSize() uint64 {
-	msgSize := q.Settings().GetMessageSize()
-	return random.NewStdPRNG().Uint64() % (msgSize / 2)
 }

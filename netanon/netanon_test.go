@@ -13,11 +13,14 @@ import (
 	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/testutils"
+
+	payload_adapter "github.com/number571/go-peer/netanon/adapters/payload"
 )
 
 const (
-	tcWait = 30
-	tcIter = 10
+	tcWait  = 30
+	tcIter  = 10
+	msgSize = (10 << 10)
 )
 
 func TestComplex(t *testing.T) {
@@ -35,7 +38,7 @@ func TestComplex(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
 				nodes[1].Client().PubKey(),
-				payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
+				payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -67,7 +70,7 @@ func TestF2F(t *testing.T) {
 
 func TestF2FWithoutFriends(t *testing.T) {
 	// 5 seconds for wait
-	nodes := testNewNodes(5)
+	nodes := testNewNodes(2)
 	defer testFreeNodes(nodes[:])
 
 	nodes[0].F2F().Switch(true)
@@ -82,7 +85,7 @@ func testRequest(t *testing.T, mode int, nodes [5]INode) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	resp, err := nodes[0].Request(
 		nodes[1].Client().PubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(reqBody)),
+		payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
 	)
 	if err != nil {
 		if mode == 2 {
@@ -103,10 +106,8 @@ func testRequest(t *testing.T, mode int, nodes [5]INode) {
 // (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
 func testNewNodes(secondsWait int) [5]INode {
 	nodes := [5]INode{}
-
-	clients := testNewClients()
 	for i := 0; i < 5; i++ {
-		nodes[i] = testNewNode(i, secondsWait, clients)
+		nodes[i] = testNewNode(i, secondsWait)
 	}
 
 	for _, node := range nodes {
@@ -150,52 +151,41 @@ func testNewClients() [5]client.IClient {
 	clients := [5]client.IClient{}
 	for i := 0; i < 5; i++ {
 		clients[i] = client.NewClient(
-			client.NewSettings(10, (1<<10)),
+			client.NewSettings(10, msgSize),
 			asymmetric.NewRSAPrivKey(1024),
 		)
 	}
 	return clients
 }
 
-func testNewNode(i, secondsWait int, clients [5]client.IClient) INode {
-	msgSize := uint64(1 << 20)
-	return NewNode(
-		NewSettings(
-			1,
-			3,
-			time.Duration(secondsWait)*time.Second,
-		),
-		clients[i],
-		network.NewNode(network.NewSettings(
-			msgSize,
-			3,
-			1024,
-			10,
-			20,
-			5*time.Second,
-		)),
-		queue.NewQueue(
-			queue.NewSettings(
-				20,
-				10,
-				msgSize,
-				300*time.Millisecond,
-			),
-			clients[i],
-		),
-		friends.NewF2F(),
-		func() []asymmetric.IPubKey {
-			return testGetPubKeys(clients[2:])
-		},
+func testNewNode(i, secondsWait int) INode {
+	client := client.NewClient(
+		client.NewSettings(10, msgSize),
+		asymmetric.NewRSAPrivKey(1024),
 	)
-}
-
-func testGetPubKeys(clients []client.IClient) []asymmetric.IPubKey {
-	pubKeys := []asymmetric.IPubKey{}
-	for _, client := range clients {
-		pubKeys = append(pubKeys, client.PubKey())
-	}
-	return pubKeys
+	queue := queue.NewQueue(
+		queue.NewSettings(
+			20,
+			10,
+			300*time.Millisecond,
+		),
+		client,
+	)
+	nnode := network.NewNode(network.NewSettings(
+		msgSize,
+		3,
+		1024,
+		10,
+		20,
+		5*time.Second,
+	))
+	return NewNode(
+		NewSettings(0, time.Duration(secondsWait)*time.Second),
+		client,
+		nnode,
+		queue,
+		friends.NewF2F(),
+	)
 }
 
 func testFreeNodes(nodes []INode) {

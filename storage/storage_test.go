@@ -17,7 +17,7 @@ func TestCryptoStorage(t *testing.T) {
 	defer os.Remove(storageName)
 	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
 
-	store := NewCryptoStorage(storageName, []byte(testutils.TcKey1))
+	store := NewCryptoStorage(storageName, []byte(testutils.TcKey1), 10)
 	store.Set([]byte(testutils.TcKey2), secret1)
 
 	secret2, err := store.Get([]byte(testutils.TcKey2))

@@ -7,7 +7,8 @@ import (
 
 const (
 	cSeparator    = "=============================================="
-	cCountInPage  = 10                 // count of messages in one page
+	cCountInPage  = 10 // count of messages in one page
+	cWorkSize     = 20
 	cListLenTitle = 50                 // length of title in list
 	cAKeySize     = 4096               // size of asymmetric key
 	cReceiveSize  = 8192               // count of messages from server

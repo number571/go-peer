@@ -34,7 +34,7 @@ func TestTransaction(t *testing.T) {
 		return
 	}
 
-	loadBlock := LoadBlock(testutils.TcBigBody)
+	loadBlock := LoadBlock(testutils.TcLargeBody)
 	if loadBlock == nil {
 		t.Errorf("load block is nil")
 		return

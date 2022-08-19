@@ -17,14 +17,11 @@ var (
 	_ IKeyValueStorage = &sCryptoStorage{}
 )
 
-const (
-	cWorkSize = 20
-)
-
 type sCryptoStorage struct {
-	fPath   string
-	fSalt   []byte
-	fCipher symmetric.ICipher
+	fPath     string
+	fSalt     []byte
+	fWorkSize uint64
+	fCipher   symmetric.ICipher
 }
 
 type storageData struct {
@@ -32,9 +29,10 @@ type storageData struct {
 }
 
 // Settings must contain (CSizeSkey, CSizeWork).
-func NewCryptoStorage(path string, key []byte) IKeyValueStorage {
+func NewCryptoStorage(path string, key []byte, workSize uint64) IKeyValueStorage {
 	store := &sCryptoStorage{
-		fPath: path,
+		fPath:     path,
+		fWorkSize: workSize,
 	}
 
 	if store.exists() {
@@ -47,7 +45,7 @@ func NewCryptoStorage(path string, key []byte) IKeyValueStorage {
 		store.fSalt = random.NewStdPRNG().Bytes(settings.CSizeSymmKey)
 	}
 
-	entropy := entropy.NewEntropy(cWorkSize)
+	entropy := entropy.NewEntropy(store.fWorkSize)
 	ekey := entropy.Raise(key, store.fSalt)
 	store.fCipher = symmetric.NewAESCipher(ekey)
 
@@ -80,7 +78,7 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	entropy := entropy.NewEntropy(cWorkSize)
+	entropy := entropy.NewEntropy(store.fWorkSize)
 	ekey := entropy.Raise(key, store.fSalt)
 	hash := hashing.NewSHA256Hasher(ekey).String()
 
@@ -119,7 +117,7 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropy(cWorkSize)
+	entropy := entropy.NewEntropy(store.fWorkSize)
 	ekey := entropy.Raise(key, store.fSalt)
 	hash := hashing.NewSHA256Hasher(ekey).String()
 
@@ -147,7 +145,7 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropy(cWorkSize)
+	entropy := entropy.NewEntropy(store.fWorkSize)
 	ekey := entropy.Raise(key, store.fSalt)
 	hash := hashing.NewSHA256Hasher(ekey).String()
 

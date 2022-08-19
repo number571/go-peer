@@ -30,7 +30,7 @@ func hmcDefaultInit() error {
 	}
 
 	gActions = newActions()
-	gClient = client.NewClient(client.NewSettings(hms_settings.CSizeWork, 0), privKey)
+	gClient = client.NewClient(client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack), privKey)
 
 	return nil
 }
@@ -40,6 +40,7 @@ func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivK
 	storage := storage.NewCryptoStorage(
 		filepath,
 		storageKey,
+		cWorkSize,
 	)
 	if storage == nil {
 		return nil

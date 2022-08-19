@@ -13,9 +13,9 @@ var (
 
 type sPayload []byte
 
-func NewPayload(title uint64, data []byte) IPayload {
+func NewPayload(head uint64, data []byte) IPayload {
 	return sPayload(bytes.Join([][]byte{
-		encoding.Uint64ToBytes(title),
+		encoding.Uint64ToBytes(head),
 		data,
 	}, []byte{}))
 }

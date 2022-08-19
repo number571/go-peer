@@ -10,6 +10,8 @@ import (
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/queue"
+
+	adPayload "github.com/number571/go-peer/netanon/adapters/payload"
 )
 
 type IRouterF func() []asymmetric.IPubKey
@@ -26,13 +28,12 @@ type INode interface {
 
 	Handle(uint32, IHandlerF) INode
 	Broadcast(message.IMessage) error
-	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
+	Request(recv asymmetric.IPubKey, pl adPayload.IPayload) ([]byte, error)
 }
 
 type ISettings interface {
-	GetResponsePeriod() uint64
-	GetRetryEnqueue() uint64
 	GetTimeWait() time.Duration
+	GetRetryEnqueue() uint64
 }
 
 type iHead interface {

@@ -8,9 +8,9 @@ import (
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/crypto/random"
 	"github.com/number571/go-peer/crypto/symmetric"
+	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/settings"
 )
 
@@ -51,49 +51,42 @@ func (client *sClient) Settings() ISettings {
 	return client.fSettings
 }
 
-// Function wrap message in multiple route encryption.
-// Need use pseudo sender if route not null.
-func (client *sClient) Encrypt(route routing.IRoute, pl payload.IPayload) message.IMessage {
-	var (
-		psender = NewClient(client.Settings(), route.PSender())
-		rmsg    = client.onceEncrypt(route.Receiver(), pl)
-	)
-	if psender == nil && len(route.List()) != 0 {
-		return nil
-	}
-	for _, pub := range route.List() {
-		rmsg = psender.(*sClient).onceEncrypt(
-			pub,
-			payload.NewPayload(
-				settings.CMaskRoute,
-				rmsg.Bytes(),
-			),
-		)
-	}
-	return rmsg
-}
-
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, pl payload.IPayload) message.IMessage {
+func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) message.IMessage {
+	const (
+		additionalPadding = (1 << 10)
+	)
+
+	var (
+		pldSize               = uint64(len(pl.Bytes()))
+		maxMsgSize            = client.Settings().GetMessageSize() >> 1
+		maxMsgSizeWithoutPadd = maxMsgSize - additionalPadding
+	)
+
+	if maxMsgSize < additionalPadding {
+		return nil
+	}
+
+	if pldSize > maxMsgSizeWithoutPadd {
+		return nil
+	}
+
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.Bytes(settings.CSizeSymmKey)
 		session = rand.Bytes(settings.CSizeSymmKey)
 	)
 
-	maxRandSize := client.Settings().GetRandomSize()
-	if maxRandSize == 0 {
-		maxRandSize = 1
-	}
+	paddingSize := (maxMsgSizeWithoutPadd - pldSize)
+	paddingBytes := rand.Bytes(paddingSize)
 
-	randBytes := rand.Bytes(rand.Uint64() % maxRandSize)
 	doublePayload := payload.NewPayload(
-		uint64(len(pl.Bytes())), // head as size of (payload||random)
+		uint64(len(pl.Bytes())),
 		bytes.Join(
 			[][]byte{
 				pl.Bytes(),
-				randBytes,
+				paddingBytes,
 			},
 			[]byte{},
 		),
@@ -117,10 +110,10 @@ func (client *sClient) onceEncrypt(receiver asymmetric.IPubKey, pl payload.IPayl
 			FSalt:    cipher.Encrypt(salt),
 		},
 		FBody: message.SBodyMessage{
-			FPayload: cipher.Encrypt(doublePayload.Bytes()),
+			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.Bytes())),
 			FHash:    hash,
 			FSign:    cipher.Encrypt(client.PrivKey().Sign(hash)),
-			FProof:   puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash),
+			FProof:   encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash)),
 		},
 	}
 }

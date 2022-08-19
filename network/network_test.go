@@ -51,7 +51,7 @@ func TestBroadcast(t *testing.T) {
 		go func(i int) {
 			pl := payload.NewPayload(
 				uint64(testutils.TcHead),
-				[]byte(fmt.Sprintf(testutils.TcBigBodyTemplate, i)),
+				[]byte(fmt.Sprintf(testutils.TcLargeBodyTemplate, i)),
 			)
 			nodes[0].Broadcast(pl)
 		}(i)
@@ -76,7 +76,7 @@ func TestBroadcast(t *testing.T) {
 			continue
 		}
 		for i := 0; i < tcIter; i++ {
-			val := fmt.Sprintf(testutils.TcBigBodyTemplate, i)
+			val := fmt.Sprintf(testutils.TcLargeBodyTemplate, i)
 			flag, ok := mapp[node][val]
 			if !ok {
 				t.Errorf("result value '%s' undefined", val)
@@ -134,7 +134,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		}
 		mapp[node] = make(map[string]bool)
 		for i := 0; i < tcIter; i++ {
-			mapp[node][fmt.Sprintf(testutils.TcBigBodyTemplate, i)] = false
+			mapp[node][fmt.Sprintf(testutils.TcLargeBodyTemplate, i)] = false
 		}
 	}
 

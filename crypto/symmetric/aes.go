@@ -16,7 +16,8 @@ var (
 )
 
 const (
-	GAESKeyType = "go-peer/aes"
+	GAESBlockSize = 16
+	GAESKeyType   = "go-peer/aes"
 )
 
 type sAESCipher struct {
@@ -87,7 +88,7 @@ func (cph *sAESCipher) Type() string {
 }
 
 func (cph *sAESCipher) Size() uint64 {
-	return hashing.GSHA256Size
+	return GAESBlockSize
 }
 
 func paddingPKCS5(ciphertext []byte, blockSize int) []byte {

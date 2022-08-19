@@ -12,7 +12,6 @@ const (
 
 const (
 	CWorkSize  = 20        // bits
-	CRandBytes = (4 << 10) // 4KiB
 	CWaitTime  = 60        // seconds
 	CPackSize  = (8 << 20) // 8MiB
 	CMaxConns  = 10

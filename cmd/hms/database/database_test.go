@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/routing"
 	"github.com/number571/go-peer/testutils"
 )
 
@@ -45,12 +44,12 @@ func TestDB(t *testing.T) {
 	}
 
 	cl := client.NewClient(
-		client.NewSettings(10, 0),
+		client.NewSettings(10, (1<<20)),
 		asymmetric.NewRSAPrivKey(1024),
 	)
 
 	err = tgDB.Push(tgKey, cl.Encrypt(
-		routing.NewRoute(cl.PubKey()),
+		cl.PubKey(),
 		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
 	))
 	if err != nil {

@@ -99,7 +99,7 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 func testStartNodeHLS(t *testing.T) netanon.INode {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(client.NewSettings(10, (1<<10)), privKey)
+	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
 
 	node := testNewNode(client).
 		Handle(hls_settings.CHeaderHLS, testRouteHLS)
@@ -165,7 +165,7 @@ func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload
 
 func testStartClientHLS() error {
 	privKey := asymmetric.NewRSAPrivKey(testutils.TcAKeySize)
-	client := client.NewClient(client.NewSettings(10, (1<<10)), privKey)
+	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
 
 	node := testNewNode(client).
 		Handle(hls_settings.CHeaderHLS, nil)
@@ -202,7 +202,6 @@ func testNewNode(client client.IClient) netanon.INode {
 	msgSize := uint64(1 << 20)
 	return netanon.NewNode(
 		netanon.NewSettings(
-			1,
 			3,
 			20*time.Second,
 		),
@@ -219,14 +218,10 @@ func testNewNode(client client.IClient) netanon.INode {
 			queue.NewSettings(
 				10,
 				5,
-				msgSize,
 				300*time.Millisecond,
 			),
 			client,
 		),
 		friends.NewF2F(),
-		func() []asymmetric.IPubKey {
-			return nil
-		},
 	)
 }

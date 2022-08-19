@@ -44,12 +44,11 @@ func hlsDefaultInit() error {
 	}
 
 	client := client.NewClient(
-		client.NewSettings(hls_settings.CWorkSize, hls_settings.CRandBytes),
+		client.NewSettings(hls_settings.CWorkSize, hls_settings.CPackSize),
 		privKey,
 	)
 	gNode = netanon.NewNode(
 		netanon.NewSettings(
-			1,
 			2,
 			hls_settings.CWaitTime*time.Second,
 		),
@@ -66,15 +65,11 @@ func hlsDefaultInit() error {
 			queue.NewSettings(
 				hls_settings.CQueueSize,
 				hls_settings.CQueuePull,
-				hls_settings.CPackSize,
 				hls_settings.CQueueTime*time.Millisecond,
 			),
 			client,
 		),
 		friends.NewF2F(),
-		func() []asymmetric.IPubKey {
-			return nil // TODO
-		},
 	)
 
 	gLogger.Info(privKey.PubKey().String())
@@ -90,6 +85,7 @@ func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivK
 	storage := storage.NewCryptoStorage(
 		filepath,
 		storageKey,
+		hls_settings.CWorkSize,
 	)
 	if storage == nil {
 		return nil

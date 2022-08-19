@@ -4,7 +4,6 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/routing"
 )
 
 type IClient interface {
@@ -15,7 +14,7 @@ type IClient interface {
 }
 
 type ISettings interface {
-	GetRandomSize() uint64
+	GetMessageSize() uint64
 	GetWorkSize() uint64
 }
 
@@ -25,6 +24,6 @@ type iKeeper interface {
 }
 
 type iCipher interface {
-	Encrypt(routing.IRoute, payload.IPayload) message.IMessage
+	Encrypt(asymmetric.IPubKey, payload.IPayload) message.IMessage
 	Decrypt(message.IMessage) (asymmetric.IPubKey, payload.IPayload)
 }
