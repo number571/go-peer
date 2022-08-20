@@ -14,8 +14,9 @@ var (
 type sPayload []byte
 
 func NewPayload(head uint64, data []byte) IPayload {
+	bHead := encoding.Uint64ToBytes(head)
 	return sPayload(bytes.Join([][]byte{
-		encoding.Uint64ToBytes(head),
+		bHead[:],
 		data,
 	}, []byte{}))
 }
@@ -28,7 +29,9 @@ func LoadPayload(payloadBytes []byte) IPayload {
 }
 
 func (payload sPayload) Head() uint64 {
-	return encoding.BytesToUint64(payload[:settings.CSizeUint64])
+	bHead := [settings.CSizeUint64]byte{}
+	copy(bHead[:], payload[:settings.CSizeUint64])
+	return encoding.BytesToUint64(bHead)
 }
 
 func (payload sPayload) Body() []byte {

@@ -10,11 +10,12 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/settings"
 	"github.com/number571/go-peer/utils"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
+	ksettings "github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )
 
@@ -32,9 +33,9 @@ type sChain struct {
 
 func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (IChain, error) {
 	var (
-		blocksPath  = filepath.Join(path, settings.GSettings.Get(settings.CPathBlck).(string))
-		txsPath     = filepath.Join(path, settings.GSettings.Get(settings.CPathTrns).(string))
-		mempoolPath = filepath.Join(path, settings.GSettings.Get(settings.CPathMemp).(string))
+		blocksPath  = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathBlck).(string))
+		txsPath     = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathTrns).(string))
+		mempoolPath = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathMemp).(string))
 	)
 
 	if !genesis.IsValid() {
@@ -64,9 +65,9 @@ func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (ICha
 
 func LoadChain(priv asymmetric.IPrivKey, path string) (IChain, error) {
 	var (
-		blocksPath  = filepath.Join(path, settings.GSettings.Get(settings.CPathBlck).(string))
-		txsPath     = filepath.Join(path, settings.GSettings.Get(settings.CPathTrns).(string))
-		mempoolPath = filepath.Join(path, settings.GSettings.Get(settings.CPathMemp).(string))
+		blocksPath  = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathBlck).(string))
+		txsPath     = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathTrns).(string))
+		mempoolPath = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathMemp).(string))
 	)
 
 	if !utils.OpenFile(path).IsExist() {
@@ -182,7 +183,7 @@ func (chain *sChain) Merge(txs []transaction.ITransaction) bool {
 	}
 
 	// nothing new transactions, all passed
-	sizeTXs := settings.GSettings.Get(settings.CSizeTrns).(uint64)
+	sizeTXs := ksettings.GSettings.Get(ksettings.CSizeTrns).(uint64)
 	if uint64(len(resultTXs)) == sizeTXs {
 		return false
 	}
@@ -238,11 +239,14 @@ func (chain *sChain) getHeight() uint64 {
 	if err != nil {
 		panic("chain: height undefined")
 	}
-	return encoding.BytesToUint64(data)
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], data)
+	return encoding.BytesToUint64(res)
 }
 
 func (chain *sChain) setHeight(height uint64) {
-	chain.fBlocks.Set(getKeyHeight(), encoding.Uint64ToBytes(height))
+	res := encoding.Uint64ToBytes(height)
+	chain.fBlocks.Set(getKeyHeight(), res[:])
 }
 
 // Transaction

@@ -36,10 +36,14 @@ func TestQueue(t *testing.T) {
 		}
 	}
 
-	msg := client.Encrypt(
+	msg, err := client.Encrypt(
 		client.PubKey(),
 		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	hash := msg.Body().Hash()
 
 	for i := 0; i < 3; i++ {

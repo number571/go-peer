@@ -111,8 +111,8 @@ func loadAction() {
 				break
 			}
 
-			pubKey, pld := gClient.Decrypt(msg)
-			if pubKey == nil {
+			pubKey, pld, err := gClient.Decrypt(msg)
+			if err != nil {
 				continue
 			}
 
@@ -177,9 +177,9 @@ func listAction() {
 			break
 		}
 
-		pubKey, pld := gClient.Decrypt(msg)
-		if pubKey == nil {
-			panic("error decrypt message")
+		pubKey, pld, err := gClient.Decrypt(msg)
+		if err != nil {
+			panic(err)
 		}
 
 		title := []rune(strings.Split(string(pld.Body()), cSeparator)[0])
@@ -211,9 +211,9 @@ func readAction() {
 		return
 	}
 
-	pubKey, pld := gClient.Decrypt(msg)
-	if pubKey == nil {
-		panic("error decrypt message")
+	pubKey, pld, err := gClient.Decrypt(msg)
+	if err != nil {
+		panic(err)
 	}
 
 	from, _ := gWrapper.Config().GetNameByPubKey(pubKey)

@@ -9,6 +9,7 @@ import (
 	gp_database "github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/settings"
 )
 
 type sStorage struct {
@@ -60,7 +61,9 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 		return 0, nil
 	}
 
-	return encoding.BytesToUint64(data), nil
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], data)
+	return encoding.BytesToUint64(res), nil
 }
 
 func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
@@ -87,10 +90,13 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	size := uint64(0)
 	bnum, err := db.fMessages.fDB.Get(getKeySize(key))
 	if err == nil {
-		size = encoding.BytesToUint64(bnum)
+		res := [settings.CSizeUint64]byte{}
+		copy(res[:], bnum)
+		size = encoding.BytesToUint64(res)
 	}
 
-	err = db.fMessages.fDB.Set(getKeySize(key), encoding.Uint64ToBytes(size+1))
+	res := encoding.Uint64ToBytes(size + 1)
+	err = db.fMessages.fDB.Set(getKeySize(key), res[:])
 	if err != nil {
 		return err
 	}

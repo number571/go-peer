@@ -24,6 +24,6 @@ type iKeeper interface {
 }
 
 type iCipher interface {
-	Encrypt(asymmetric.IPubKey, payload.IPayload) message.IMessage
-	Decrypt(message.IMessage) (asymmetric.IPubKey, payload.IPayload)
+	Encrypt(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
+	Decrypt(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }

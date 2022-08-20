@@ -5,8 +5,9 @@ import (
 
 	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/settings"
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
+	ksettings "github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )
 
@@ -25,7 +26,8 @@ func NewMempool(path string) IMempool {
 	}
 	_, err := mempool.fDB.Get(getKeyHeight())
 	if err != nil {
-		err := mempool.fDB.Set(getKeyHeight(), encoding.Uint64ToBytes(0))
+		res := encoding.Uint64ToBytes(0)
+		err := mempool.fDB.Set(getKeyHeight(), res[:])
 		if err != nil {
 			panic(err)
 		}
@@ -65,7 +67,7 @@ func (mempool *sMempool) Clear() {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
-	prefixTXs := settings.GSettings.Get(settings.CMaskPref).(string)
+	prefixTXs := ksettings.GSettings.Get(ksettings.CMaskPref).(string)
 	iter := mempool.fDB.Iter([]byte(prefixTXs))
 	defer iter.Close()
 
@@ -92,7 +94,7 @@ func (mempool *sMempool) Push(tx transaction.ITransaction) {
 	)
 
 	// limit of height
-	sizeMempool := settings.GSettings.Get(settings.CSizeMemp).(uint64)
+	sizeMempool := ksettings.GSettings.Get(ksettings.CSizeMemp).(uint64)
 	if newHeight > sizeMempool {
 		return
 	}
@@ -102,7 +104,8 @@ func (mempool *sMempool) Push(tx transaction.ITransaction) {
 		return
 	}
 
-	mempool.fDB.Set(getKeyHeight(), encoding.Uint64ToBytes(newHeight))
+	res := encoding.Uint64ToBytes(newHeight)
+	mempool.fDB.Set(getKeyHeight(), res[:])
 	mempool.fDB.Set(getKeyTX(hash), tx.Bytes())
 }
 
@@ -111,7 +114,7 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 	defer mempool.fMutex.Unlock()
 
 	// count of tx need be = block size
-	sizeTXs := settings.GSettings.Get(settings.CSizeTrns).(uint64)
+	sizeTXs := ksettings.GSettings.Get(ksettings.CSizeTrns).(uint64)
 	if mempool.getHeight() < sizeTXs {
 		return nil
 	}
@@ -121,7 +124,7 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 		count uint64
 	)
 
-	sVal := settings.GSettings.Get(settings.CMaskPref).(string)
+	sVal := ksettings.GSettings.Get(ksettings.CMaskPref).(string)
 	iter := mempool.fDB.Iter([]byte(sVal))
 	defer iter.Close()
 
@@ -152,7 +155,9 @@ func (mempool *sMempool) getHeight() uint64 {
 	if err != nil {
 		panic("mempool: height undefined")
 	}
-	return encoding.BytesToUint64(data)
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], data)
+	return encoding.BytesToUint64(res)
 }
 
 func (mempool *sMempool) getTX(hash []byte) transaction.ITransaction {
@@ -172,6 +177,7 @@ func (mempool *sMempool) deleteTX(hash []byte) {
 		return
 	}
 
-	mempool.fDB.Set(getKeyHeight(), encoding.Uint64ToBytes(newHeight))
+	res := encoding.Uint64ToBytes(newHeight)
+	mempool.fDB.Set(getKeyHeight(), res[:])
 	mempool.fDB.Del(getKeyTX(hash))
 }

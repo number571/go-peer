@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -20,16 +21,16 @@ type SMessage struct {
 }
 
 type SHeadMessage struct {
-	FSalt    []byte `json:"salt"`
-	FSession []byte `json:"session"`
-	FSender  []byte `json:"sender"`
+	FSalt    string `json:"salt"`
+	FSession string `json:"session"`
+	FSender  string `json:"sender"`
 }
 
 type SBodyMessage struct {
 	FPayload string `json:"payload"`
-	FSign    []byte `json:"sign"`
-	FHash    []byte `json:"hash"`
-	FProof   []byte `json:"proof"`
+	FSign    string `json:"sign"`
+	FHash    string `json:"hash"`
+	FProof   string `json:"proof"`
 }
 
 // IMessage
@@ -62,15 +63,15 @@ func (msg *SMessage) Bytes() []byte {
 // IHead
 
 func (head SHeadMessage) Sender() []byte {
-	return head.FSender
+	return encoding.HexDecode(head.FSender)
 }
 
 func (head SHeadMessage) Session() []byte {
-	return head.FSession[:]
+	return encoding.HexDecode(head.FSession)
 }
 
 func (head SHeadMessage) Salt() []byte {
-	return head.FSalt[:]
+	return encoding.HexDecode(head.FSalt)
 }
 
 // IBody
@@ -80,13 +81,19 @@ func (body SBodyMessage) Payload() payload.IPayload {
 }
 
 func (body SBodyMessage) Hash() []byte {
-	return body.FHash[:]
+	return encoding.HexDecode(body.FHash)
 }
 
 func (body SBodyMessage) Sign() []byte {
-	return body.FSign
+	return encoding.HexDecode(body.FSign)
 }
 
 func (body SBodyMessage) Proof() uint64 {
-	return encoding.BytesToUint64(body.FProof[:])
+	bProof := encoding.HexDecode(body.FProof)
+	if len(bProof) != settings.CSizeUint64 {
+		return 0
+	}
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], bProof)
+	return encoding.BytesToUint64(res)
 }

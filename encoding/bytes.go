@@ -8,19 +8,20 @@ import (
 )
 
 // Uint64 to slice of bytes by big endian.
-func Uint64ToBytes(num uint64) []byte {
+func Uint64ToBytes(num uint64) [settings.CSizeUint64]byte {
+	res := [settings.CSizeUint64]byte{}
+
 	var data = new(bytes.Buffer)
 	err := binary.Write(data, binary.BigEndian, num)
 	if err != nil {
-		return nil
+		panic(err)
 	}
-	return data.Bytes()
+
+	copy(res[:], data.Bytes()[:])
+	return res
 }
 
 // Slice of bytes to uint64 by big endian.
-func BytesToUint64(bytes []byte) uint64 {
-	if len(bytes) != settings.CSizeUint64 {
-		panic("len(bytes) != settings.CSizeUint64")
-	}
-	return binary.BigEndian.Uint64(bytes)
+func BytesToUint64(bytes [settings.CSizeUint64]byte) uint64 {
+	return binary.BigEndian.Uint64(bytes[:])
 }

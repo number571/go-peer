@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
@@ -53,23 +54,28 @@ func (client *sClient) Settings() ISettings {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) message.IMessage {
-	const (
-		additionalPadding = (1 << 10)
-	)
-
+func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) (message.IMessage, error) {
 	var (
-		pldSize               = uint64(len(pl.Bytes()))
-		maxMsgSize            = client.Settings().GetMessageSize() >> 1
-		maxMsgSizeWithoutPadd = maxMsgSize - additionalPadding
+		maxMsgSize                                     = client.Settings().GetMessageSize() >> 1 // limit of bytes
+		curPldSize                                     = uint64(len(pl.Bytes()))
+		additionalPadding                              = // = max of usage bytes from static fields
+		(uint64(len((&message.SMessage{}).Bytes()))) + // size of void message
+			(client.PubKey().Size()/settings.CBitsInByte + symmetric.GAESBlockSize*2) + // sender = pubKey[bytes]+IV+BlockAES
+			(client.PubKey().Size() / settings.CBitsInByte) + // session key = pubKey[bytes]
+			(settings.CSizeSymmKey + symmetric.GAESBlockSize*2) + // salt = 32[bytes]+IV+BlockAES
+			(hashing.GSHA256Size) + // hash = size(SHA256)
+			(client.PubKey().Size()/settings.CBitsInByte + symmetric.GAESBlockSize*2) + // sign = pubKey[bytes]+IV+BlockAES
+			(settings.CSizeUint64) + // proof = uint64
+			(settings.CSizeUint64) + // head = uint64
+			(symmetric.GAESBlockSize * 2) // payload += IV+BlockAES
 	)
 
-	if maxMsgSize < additionalPadding {
-		return nil
-	}
-
-	if pldSize > maxMsgSizeWithoutPadd {
-		return nil
+	if maxMsgSize < curPldSize+additionalPadding {
+		return nil, fmt.Errorf(
+			"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
+			maxMsgSize,
+			curPldSize+additionalPadding,
+		)
 	}
 
 	var (
@@ -78,11 +84,9 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 		session = rand.Bytes(settings.CSizeSymmKey)
 	)
 
-	paddingSize := (maxMsgSizeWithoutPadd - pldSize)
-	paddingBytes := rand.Bytes(paddingSize)
-
+	paddingBytes := rand.Bytes(maxMsgSize - (curPldSize + additionalPadding))
 	doublePayload := payload.NewPayload(
-		uint64(len(pl.Bytes())),
+		curPldSize,
 		bytes.Join(
 			[][]byte{
 				pl.Bytes(),
@@ -103,76 +107,77 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 	)).Bytes()
 
 	cipher := symmetric.NewAESCipher(session)
+	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash))
 	return &message.SMessage{
 		FHead: message.SHeadMessage{
-			FSender:  cipher.Encrypt(client.PubKey().Bytes()),
-			FSession: receiver.Encrypt(session),
-			FSalt:    cipher.Encrypt(salt),
+			FSender:  encoding.HexEncode(cipher.Encrypt(client.PubKey().Bytes())),
+			FSession: encoding.HexEncode(receiver.Encrypt(session)),
+			FSalt:    encoding.HexEncode(cipher.Encrypt(salt)),
 		},
 		FBody: message.SBodyMessage{
 			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.Bytes())),
-			FHash:    hash,
-			FSign:    cipher.Encrypt(client.PrivKey().Sign(hash)),
-			FProof:   encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash)),
+			FHash:    encoding.HexEncode(hash),
+			FSign:    encoding.HexEncode(cipher.Encrypt(client.PrivKey().Sign(hash))),
+			FProof:   encoding.HexEncode(bProof[:]),
 		},
-	}
+	}, nil
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payload.IPayload) {
+func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
 	if msg == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("msg is nil")
 	}
 
 	// Initial check.
 	if len(msg.Body().Hash()) != hashing.GSHA256Size {
-		return nil, nil
+		return nil, nil, fmt.Errorf("msg hash != sha256 size")
 	}
 
 	// Proof of work. Prevent spam.
 	diff := client.Settings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid proof of msg")
 	}
 
 	// Decrypt session key by private key of receiver.
 	session := client.PrivKey().Decrypt(msg.Head().Session())
 	if session == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed decrypt session key")
 	}
 
 	// Decrypt public key of sender by decrypted session key.
 	cipher := symmetric.NewAESCipher(session)
 	publicBytes := cipher.Decrypt(msg.Head().Sender())
 	if publicBytes == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed decrypt public key")
 	}
 
 	// Load public key and check standart size.
 	pubKey := asymmetric.LoadRSAPubKey(publicBytes)
 	if pubKey == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed load public key")
 	}
 	if pubKey.Size() != client.PubKey().Size() {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid public key size")
 	}
 
 	// Decrypt salt.
 	salt := cipher.Decrypt(msg.Head().Salt())
 	if salt == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed decrypt salt")
 	}
 
 	// Decrypt main data of message by session key.
 	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().Bytes())
 	if doublePayloadBytes == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed decrypt double payload")
 	}
 	doublePayload := payload.LoadPayload(doublePayloadBytes)
 	if doublePayload == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed load double payload")
 	}
 
 	// Check received hash and generated hash.
@@ -186,29 +191,29 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 		[]byte{},
 	)).Bytes()
 	if !bytes.Equal(check, msg.Body().Hash()) {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid msg hash")
 	}
 
 	// Decrypt sign of message and verify this
 	// by public key of sender and hash of message.
 	sign := cipher.Decrypt(msg.Body().Sign())
 	if sign == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed decrypt sign")
 	}
 	if !pubKey.Verify(msg.Body().Hash(), sign) {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid msg sign")
 	}
 
 	// remove random bytes and get main data
 	mustLen := doublePayload.Head()
 	if mustLen > uint64(len(doublePayload.Body())) {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid size of payload")
 	}
 	payload := payload.LoadPayload(doublePayload.Body()[:mustLen])
 	if payload == nil {
-		return nil, nil
+		return nil, nil, fmt.Errorf("invalid load payload")
 	}
 
 	// Return decrypted message with title
-	return pubKey, payload
+	return pubKey, payload, nil
 }

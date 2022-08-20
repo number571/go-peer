@@ -48,10 +48,16 @@ func TestDB(t *testing.T) {
 		asymmetric.NewRSAPrivKey(1024),
 	)
 
-	err = tgDB.Push(tgKey, cl.Encrypt(
+	msg, err := cl.Encrypt(
 		cl.PubKey(),
 		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
-	))
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = tgDB.Push(tgKey, msg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,23 +79,31 @@ func TestDB(t *testing.T) {
 		return
 	}
 
-	pubKey, pl := cl.Decrypt(loadMsg)
-	if pubKey == nil {
-		t.Error("load message is nil")
+	pubKey, pl, err := cl.Decrypt(loadMsg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if pubKey.Address().String() != cl.PubKey().Address().String() {
+		t.Error("load public key != init public key")
 		return
 	}
 
 	if pl.Head() != uint64(testutils.TcHead) {
 		t.Error("load msg head != init head")
+		return
 	}
 
 	if !bytes.Equal(pl.Body(), []byte(testutils.TcBody)) {
 		t.Error("load msg body != init body")
+		return
 	}
 
 	err = tgDB.Clean()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	size, err = tgDB.Size(tgKey)
@@ -99,10 +113,12 @@ func TestDB(t *testing.T) {
 	}
 	if size != 0 {
 		t.Error("after clean size != 0")
+		return
 	}
 
 	err = tgDB.Close()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 }

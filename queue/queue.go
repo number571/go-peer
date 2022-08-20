@@ -121,8 +121,12 @@ func (q *sQueue) runFullPull() bool {
 
 func (q *sQueue) newPseudoMessage() message.IMessage {
 	rand := random.NewStdPRNG()
-	return q.fClient.Encrypt(
+	msg, err := q.fClient.Encrypt(
 		q.fClient.PubKey(),
 		payload.NewPayload(0, rand.Bytes(1)),
 	)
+	if err != nil {
+		panic(err)
+	}
+	return msg
 }

@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 
 	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -35,7 +36,9 @@ func (r *sStdPRNG) String(n uint64) string {
 
 // Generate cryptographically strong pseudo-random uint64 number.
 func (r *sStdPRNG) Uint64() uint64 {
-	return encoding.BytesToUint64(r.Bytes(8))
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], r.Bytes(8))
+	return encoding.BytesToUint64(res)
 }
 
 // Generate cryptographically strong pseudo-random bool value.

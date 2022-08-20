@@ -9,6 +9,7 @@ import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -42,7 +43,9 @@ func (r *sRequester) Size(request *hms_settings.SSizeRequest) (uint64, error) {
 		return 0, fmt.Errorf("%s", string(response.Result))
 	}
 
-	return encoding.BytesToUint64(response.Result), nil
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], response.Result)
+	return encoding.BytesToUint64(res), nil
 }
 
 func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage, error) {

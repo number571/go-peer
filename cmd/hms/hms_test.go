@@ -156,9 +156,9 @@ func testClientDoLoad() error {
 			return err
 		}
 
-		pubKey, pld := client.Decrypt(msg)
-		if pubKey == nil {
-			panic("decrypted public key is nil")
+		pubKey, pld, err := client.Decrypt(msg)
+		if err != nil {
+			panic(err)
 		}
 
 		if string(pld.Body()) != fmt.Sprintf(testutils.TcBodyTemplate, i) {

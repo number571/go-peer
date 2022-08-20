@@ -53,16 +53,19 @@ func (loader *sLoader) Height() (uint64, error) {
 		return 0, fmt.Errorf("len(rpld.Body()) != settings.CSizeUint64")
 	}
 
-	return encoding.BytesToUint64(rpld.Body()), nil
+	res := [settings.CSizeUint64]byte{}
+	copy(res[:], rpld.Body())
+	return encoding.BytesToUint64(res), nil
 }
 
 func (loader *sLoader) Block(i uint64) (block.IBlock, error) {
 	loader.fMutex.Lock()
 	defer loader.fMutex.Unlock()
 
+	res := encoding.Uint64ToBytes(i)
 	pld := payload.NewPayload(
 		cMaskLoadBlock,
-		encoding.Uint64ToBytes(i),
+		res[:],
 	)
 
 	msg := loader.fConn.Request(network.NewMessage(

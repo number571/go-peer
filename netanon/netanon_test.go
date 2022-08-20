@@ -20,7 +20,7 @@ import (
 const (
 	tcWait  = 30
 	tcIter  = 10
-	msgSize = (10 << 10)
+	msgSize = (100 << 10)
 )
 
 func TestComplex(t *testing.T) {
@@ -33,7 +33,7 @@ func TestComplex(t *testing.T) {
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
-			reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, i)
+			reqBody := fmt.Sprintf("%s (%d)", testutils.TcLargeBody, i)
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
@@ -80,7 +80,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 }
 
 func testRequest(t *testing.T, mode int, nodes [5]INode) {
-	reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, mode)
+	reqBody := fmt.Sprintf("%s (%d)", testutils.TcLargeBody, mode)
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	resp, err := nodes[0].Request(
@@ -145,17 +145,6 @@ func testNewNodes(secondsWait int) [5]INode {
 	nodes[3].Network().Connect(testutils.TgAddrs[3])
 
 	return nodes
-}
-
-func testNewClients() [5]client.IClient {
-	clients := [5]client.IClient{}
-	for i := 0; i < 5; i++ {
-		clients[i] = client.NewClient(
-			client.NewSettings(10, msgSize),
-			asymmetric.NewRSAPrivKey(1024),
-		)
-	}
-	return clients
 }
 
 func testNewNode(i, secondsWait int) INode {

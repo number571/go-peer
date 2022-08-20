@@ -35,7 +35,8 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, hms_settings.CErrorNone, encoding.Uint64ToBytes(size))
+	res := encoding.Uint64ToBytes(size)
+	response(w, hms_settings.CErrorNone, res[:])
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {

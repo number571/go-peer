@@ -136,7 +136,10 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload)
 		pl.Body(),
 	)
 
-	msg := node.Client().Encrypt(recv, pl)
+	msg, err := node.Client().Encrypt(recv, pl)
+	if err != nil {
+		return nil, err
+	}
 
 	node.setAction(headAction)
 	defer node.delAction(headAction)
@@ -185,8 +188,8 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		nnode.Broadcast(npld)
 
 		// try decrypt message
-		sender, pld := node.Client().Decrypt(msg)
-		if pld == nil {
+		sender, pld, err := node.Client().Decrypt(msg)
+		if err != nil {
 			return
 		}
 
@@ -219,10 +222,13 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		respMsg := node.Client().Encrypt(
+		respMsg, err := node.Client().Encrypt(
 			sender,
 			payload.NewPayload(head, resp),
 		)
+		if err != nil {
+			panic(err)
+		}
 
 		// send response with two append enqueue
 		for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
