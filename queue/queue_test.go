@@ -13,9 +13,21 @@ import (
 )
 
 func TestQueue(t *testing.T) {
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
-	queue := NewQueue(NewSettings(10, 5, 500*time.Millisecond), client)
+	client := client.NewClient(
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    10,
+			FMessageSize: (1 << 20),
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+	)
+	queue := NewQueue(
+		NewSettings(&SSettings{
+			FCapacity:     10,
+			FPullCapacity: 5,
+			FDuration:     500 * time.Millisecond,
+		}),
+		client,
+	)
 
 	if err := queue.Start(); err != nil {
 		t.Error(err)
@@ -44,8 +56,8 @@ func TestQueue(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	hash := msg.Body().Hash()
 
+	hash := msg.Body().Hash()
 	for i := 0; i < 3; i++ {
 		queue.Enqueue(msg)
 	}

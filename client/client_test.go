@@ -50,13 +50,6 @@ var (
 	}
 )
 
-func testNewClient() IClient {
-	return NewClient(
-		NewSettings(10, (100<<10)),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
-	)
-}
-
 func TestEncrypt(t *testing.T) {
 	client1 := testNewClient()
 	client2 := testNewClient()
@@ -104,4 +97,14 @@ func TestMessageSize(t *testing.T) {
 			return
 		}
 	}
+}
+
+func testNewClient() IClient {
+	return NewClient(
+		NewSettings(&SSettings{
+			FWorkSize:    10,
+			FMessageSize: (100 << 10),
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+	)
 }

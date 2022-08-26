@@ -28,14 +28,13 @@ func main() {
 	gNode.Handle(hls_settings.CHeaderHLS, routeHLS)
 
 	// turn on f2f mode
-	gNode.F2F().Switch(gConfig.F2F().Status())
-	for _, pubKey := range gConfig.F2F().PubKeys() {
+	for _, pubKey := range gConfig.Friends() {
 		gNode.F2F().Append(pubKey)
 	}
 
 	// connect to open nodes
 	for _, address := range gConfig.Connections() {
-		if address == gConfig.Address().HLS() {
+		if address == gConfig.Address().TCP() {
 			gLogger.Warning(fmt.Sprintf("used own address '%s'", address))
 			continue
 		}
@@ -52,7 +51,7 @@ func main() {
 		for {
 			time.Sleep(time.Minute)
 			for _, address := range gConfig.Connections() {
-				if address == gConfig.Address().HLS() {
+				if address == gConfig.Address().TCP() {
 					continue
 				}
 				for _, conn := range gNode.Network().Connections() {
@@ -90,16 +89,16 @@ func main() {
 	}()
 
 	go func() {
-		gLogger.Info(fmt.Sprintf("HLS is listening [%s]...", gConfig.Address().HLS()))
+		gLogger.Info(fmt.Sprintf("TCP is listening [%s]...", gConfig.Address().TCP()))
 
 		// if node in client mode
 		// then run endless loop
-		if gConfig.Address().HLS() == "" {
+		if gConfig.Address().TCP() == "" {
 			select {}
 		}
 
 		// run node in server mode
-		err = gNode.Network().Listen(gConfig.Address().HLS())
+		err = gNode.Network().Listen(gConfig.Address().TCP())
 		if err != nil {
 			gLogger.Warning(err.Error())
 		}
@@ -107,5 +106,5 @@ func main() {
 
 	<-shutdown
 	fmt.Println("Shutting down...")
-	utils.CloseAll([]utils.ICloser{srv, gDB, gNode})
+	utils.CloseAll([]utils.ICloser{srv, gNode})
 }

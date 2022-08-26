@@ -56,7 +56,7 @@ func (client *sClient) Settings() ISettings {
 // The message can be decrypted only if private key is known.
 func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) (message.IMessage, error) {
 	var (
-		maxMsgSize                                     = client.Settings().GetMessageSize() >> 1 // limit of bytes
+		maxMsgSize                                     = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
 		curPldSize                                     = uint64(len(pl.Bytes()))
 		additionalPadding                              = // = max of usage bytes from static fields
 		(uint64(len((&message.SMessage{}).Bytes()))) + // size of void message

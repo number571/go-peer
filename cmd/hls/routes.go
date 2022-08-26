@@ -9,25 +9,21 @@ import (
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/payload"
 )
 
-func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
+func routeHLS(
+	node netanon.INode,
+	_ asymmetric.IPubKey,
+	pld payload.IPayload,
+) []byte {
 	// load request from message's body
 	requestBytes := pld.Body()
 	request := hlsnet.LoadRequest(requestBytes)
 	if request == nil {
 		return nil
 	}
-
-	// check already received data by hash
-	hash := hashing.NewSHA256Hasher(requestBytes).Bytes()
-	if gDB.Exist(hash) {
-		return nil
-	}
-	gDB.Push(hash)
 
 	// get service's address by name
 	info, ok := gConfig.GetService(request.Host())
@@ -37,7 +33,7 @@ func routeHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []
 
 	// redirect bytes of request to another nodes
 	if info.IsRedirect() {
-		for _, recv := range gConfig.F2F().PubKeys() {
+		for _, recv := range gConfig.Friends() {
 			go node.Request(
 				recv,
 				payload.NewPayload(uint64(hls_settings.CHeaderHLS), requestBytes),

@@ -44,8 +44,11 @@ func TestDB(t *testing.T) {
 	}
 
 	cl := client.NewClient(
-		client.NewSettings(10, (1<<20)),
-		asymmetric.NewRSAPrivKey(1024),
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    10,
+			FMessageSize: (100 << 10),
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)
 
 	msg, err := cl.Encrypt(

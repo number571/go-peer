@@ -11,17 +11,19 @@ import (
 )
 
 const (
-	storageName = "storage.db"
+	tcPathDB    = "database_test.db"
 	countOfIter = 10
 )
 
 func TestLevelDB(t *testing.T) {
-	defer os.RemoveAll(storageName)
+	defer os.RemoveAll(tcPathDB)
 	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
 
-	store := NewLevelDB(storageName).
-		WithHashing(true).
-		WithEncryption([]byte(testutils.TcKey1))
+	store := NewLevelDB(&SSettings{
+		FPath:      tcPathDB,
+		FHashing:   true,
+		FCipherKey: []byte(testutils.TcKey1),
+	})
 	defer store.Close()
 
 	store.Set([]byte(testutils.TcKey2), secret1)
@@ -45,10 +47,13 @@ func TestLevelDB(t *testing.T) {
 }
 
 func TestLevelDBIter(t *testing.T) {
-	defer os.RemoveAll(storageName)
+	defer os.RemoveAll(tcPathDB)
 
-	store := NewLevelDB(storageName).
-		WithEncryption([]byte(testutils.TcKey1))
+	store := NewLevelDB(&SSettings{
+		FPath:      tcPathDB,
+		FHashing:   false,
+		FCipherKey: []byte(testutils.TcKey1),
+	})
 	defer store.Close()
 
 	for i := 0; i < countOfIter; i++ {

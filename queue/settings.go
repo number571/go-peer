@@ -1,29 +1,50 @@
 package queue
 
-import "time"
+import (
+	"time"
+)
 
-type sSettings struct {
-	fMainCapacity uint64
-	fPullCapacity uint64
-	fDuration     time.Duration
+const (
+	cCapacity     = (1 << 5)
+	cPullCapacity = (1 << 5)
+	cDuration     = time.Second
+)
+
+type SSettings struct {
+	FCapacity     uint64
+	FPullCapacity uint64
+	FDuration     time.Duration
 }
 
-func NewSettings(mCapacity, pCapacity uint64, duration time.Duration) ISettings {
-	return &sSettings{
-		fMainCapacity: mCapacity,
-		fPullCapacity: pCapacity,
-		fDuration:     duration,
+func NewSettings(sett *SSettings) ISettings {
+	return (&SSettings{
+		FCapacity:     sett.FCapacity,
+		FPullCapacity: sett.FPullCapacity,
+		FDuration:     sett.FDuration,
+	}).useDefaultValues()
+}
+
+func (s *SSettings) useDefaultValues() ISettings {
+	if s.FCapacity == 0 {
+		s.FCapacity = cCapacity
 	}
+	if s.FPullCapacity == 0 {
+		s.FPullCapacity = cPullCapacity
+	}
+	if s.FDuration == 0 {
+		s.FDuration = cDuration
+	}
+	return s
 }
 
-func (s *sSettings) GetMainCapacity() uint64 {
-	return s.fMainCapacity
+func (s *SSettings) GetCapacity() uint64 {
+	return s.FCapacity
 }
 
-func (s *sSettings) GetPullCapacity() uint64 {
-	return s.fPullCapacity
+func (s *SSettings) GetPullCapacity() uint64 {
+	return s.FPullCapacity
 }
 
-func (s *sSettings) GetDuration() time.Duration {
-	return s.fDuration
+func (s *SSettings) GetDuration() time.Duration {
+	return s.FDuration
 }

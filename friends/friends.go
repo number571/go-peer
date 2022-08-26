@@ -13,7 +13,6 @@ var (
 // F2F connection mode.
 type sF2F struct {
 	fMutex   sync.Mutex
-	fEnabled bool
 	fMapping map[string]asymmetric.IPubKey
 }
 
@@ -21,22 +20,6 @@ func NewF2F() IF2F {
 	return &sF2F{
 		fMapping: make(map[string]asymmetric.IPubKey),
 	}
-}
-
-// Set state = bool.
-func (f2f *sF2F) Switch(state bool) {
-	f2f.fMutex.Lock()
-	defer f2f.fMutex.Unlock()
-
-	f2f.fEnabled = state
-}
-
-// Get current state of f2f mode.
-func (f2f *sF2F) Status() bool {
-	f2f.fMutex.Lock()
-	defer f2f.fMutex.Unlock()
-
-	return f2f.fEnabled
 }
 
 // Check the existence of a friend in the list by the public key.

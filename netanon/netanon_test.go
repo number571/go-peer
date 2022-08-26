@@ -2,12 +2,14 @@ package netanon
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/payload"
@@ -18,9 +20,10 @@ import (
 )
 
 const (
-	tcWait  = 30
-	tcIter  = 10
-	msgSize = (100 << 10)
+	tcPathDBTemplate = "database_test_%d.db"
+	tcWait           = 30 * time.Second
+	tcIter           = 10
+	msgSize          = (100 << 10)
 )
 
 func TestComplex(t *testing.T) {
@@ -37,7 +40,7 @@ func TestComplex(t *testing.T) {
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
-				nodes[1].Client().PubKey(),
+				nodes[1].Queue().Client().PubKey(),
 				payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -55,60 +58,39 @@ func TestComplex(t *testing.T) {
 	wg.Wait()
 }
 
-func TestF2F(t *testing.T) {
-	nodes := testNewNodes(tcWait)
-	defer testFreeNodes(nodes[:])
-
-	nodes[0].F2F().Switch(true)
-	nodes[1].F2F().Switch(true)
-
-	nodes[0].F2F().Append(nodes[1].Client().PubKey())
-	nodes[1].F2F().Append(nodes[0].Client().PubKey())
-
-	testRequest(t, 1, nodes)
-}
-
 func TestF2FWithoutFriends(t *testing.T) {
 	// 5 seconds for wait
-	nodes := testNewNodes(2)
+	nodes := testNewNodes(2 * time.Second)
 	defer testFreeNodes(nodes[:])
 
-	nodes[0].F2F().Switch(true)
-	nodes[1].F2F().Switch(true)
+	nodes[0].F2F().Remove(nodes[1].Queue().Client().PubKey())
+	nodes[1].F2F().Remove(nodes[0].Queue().Client().PubKey())
 
-	testRequest(t, 2, nodes)
-}
-
-func testRequest(t *testing.T, mode int, nodes [5]INode) {
-	reqBody := fmt.Sprintf("%s (%d)", testutils.TcLargeBody, mode)
+	reqBody := fmt.Sprintf("%s", testutils.TcLargeBody)
 
 	// nodes[1] -> nodes[0] -> nodes[2]
-	resp, err := nodes[0].Request(
-		nodes[1].Client().PubKey(),
+	_, err := nodes[0].Request(
+		nodes[1].Queue().Client().PubKey(),
 		payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
 	)
 	if err != nil {
-		if mode == 2 {
-			return
-		}
-		t.Errorf("%s (mode=%d)", err.Error(), mode)
 		return
 	}
 
-	if string(resp) != fmt.Sprintf("%s (response)", reqBody) {
-		t.Errorf("string(resp) != reqBody")
-		return
-	}
+	t.Errorf("get response without list of friends")
 }
 
-// nodes[0], nodex[1] = clients
+// nodes[0], nodes[1] = clients
 // nodes[2], nodes[3], nodes[4] = routes
 // (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testNewNodes(secondsWait int) [5]INode {
+func testNewNodes(timeWait time.Duration) [5]INode {
 	nodes := [5]INode{}
 	for i := 0; i < 5; i++ {
-		nodes[i] = testNewNode(i, secondsWait)
+		nodes[i] = testNewNode(i, timeWait)
 	}
+
+	nodes[0].F2F().Append(nodes[1].Queue().Client().PubKey())
+	nodes[1].F2F().Append(nodes[0].Queue().Client().PubKey())
 
 	for _, node := range nodes {
 		node.Handle(
@@ -136,43 +118,53 @@ func testNewNodes(secondsWait int) [5]INode {
 
 	time.Sleep(200 * time.Millisecond)
 
-	// nodes to routes
+	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
 	nodes[0].Network().Connect(testutils.TgAddrs[2])
 	nodes[1].Network().Connect(testutils.TgAddrs[3])
 
-	// routes to routes
+	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
 	nodes[3].Network().Connect(testutils.TgAddrs[2])
 	nodes[3].Network().Connect(testutils.TgAddrs[3])
 
 	return nodes
 }
 
-func testNewNode(i, secondsWait int) INode {
-	client := client.NewClient(
-		client.NewSettings(10, msgSize),
-		asymmetric.NewRSAPrivKey(1024),
-	)
-	queue := queue.NewQueue(
-		queue.NewSettings(
-			20,
-			10,
-			300*time.Millisecond,
-		),
-		client,
-	)
-	nnode := network.NewNode(network.NewSettings(
-		msgSize,
-		3,
-		1024,
-		10,
-		20,
-		5*time.Second,
-	))
+func testNewNode(i int, timeWait time.Duration) INode {
 	return NewNode(
-		NewSettings(0, time.Duration(secondsWait)*time.Second),
-		client,
-		nnode,
-		queue,
+		NewSettings(&SSettings{
+			FTimeWait: timeWait,
+		}),
+		database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
+				FHashing:   true,
+				FCipherKey: []byte(testutils.TcKey1),
+			}),
+		),
+		network.NewNode(
+			network.NewSettings(&network.SSettings{
+				FRetryNum:    2,
+				FCapacity:    (1 << 10),
+				FMessageSize: (100 << 10),
+				FMaxConns:    10,
+				FMaxMessages: 20,
+				FTimeWait:    5 * time.Second,
+			}),
+		),
+		queue.NewQueue(
+			queue.NewSettings(&queue.SSettings{
+				FCapacity:     10,
+				FPullCapacity: 5,
+				FDuration:     500 * time.Millisecond,
+			}),
+			client.NewClient(
+				client.NewSettings(&client.SSettings{
+					FWorkSize:    10,
+					FMessageSize: (100 << 10),
+				}),
+				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+			),
+		),
 		friends.NewF2F(),
 	)
 }
@@ -180,5 +172,8 @@ func testNewNode(i, secondsWait int) INode {
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
 		node.Close()
+	}
+	for i := 0; i < 5; i++ {
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
 	}
 }

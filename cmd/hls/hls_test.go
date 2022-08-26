@@ -11,9 +11,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/client"
-	hlsnet "github.com/number571/go-peer/cmd/hls/network"
+	hls_network "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/network"
@@ -29,13 +30,15 @@ const (
 
 const (
 	tcServiceAddressInHLS = "hidden-echo-service"
+	tcPathDBTemplate      = "database_test_%d.db"
 )
 
-// client -> HLS -> server -\
-// client <- HLS <- server -/
+// client -> HLS -> server --\
+// client <- HLS <- server <-/
 func TestHLS(t *testing.T) {
 	defer func() {
-		os.RemoveAll(tcPathDB)
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, 0))
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, 1))
 		os.Remove(tcPathConfig)
 	}()
 
@@ -48,10 +51,11 @@ func TestHLS(t *testing.T) {
 	defer node.Close()
 
 	// client
-	err := testStartClientHLS()
+	nodeClient, err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
 	}
+	defer nodeClient.Close()
 }
 
 // SERVER
@@ -98,11 +102,10 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 // HLS
 
 func testStartNodeHLS(t *testing.T) netanon.INode {
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
-
-	node := testNewNode(client).
+	node := testNewNode(0).
 		Handle(hls_settings.CHeaderHLS, testRouteHLS)
+
+	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
 		err := node.Network().Listen(testutils.TgAddrs[4])
@@ -121,7 +124,7 @@ func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload
 
 	// load request from message's body
 	requestBytes := pld.Body()
-	request := hlsnet.LoadRequest(requestBytes)
+	request := hls_network.LoadRequest(requestBytes)
 	if request == nil {
 		return nil
 	}
@@ -163,21 +166,20 @@ func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload
 
 // CLIENT
 
-func testStartClientHLS() error {
-	privKey := asymmetric.NewRSAPrivKey(testutils.TcAKeySize)
-	client := client.NewClient(client.NewSettings(10, (1<<20)), privKey)
-
-	node := testNewNode(client).
+func testStartClientHLS() (netanon.INode, error) {
+	node := testNewNode(1).
 		Handle(hls_settings.CHeaderHLS, nil)
+
+	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	conn := node.Network().Connect(testutils.TgAddrs[4])
 	if conn == nil {
-		return fmt.Errorf("conn is nil")
+		return node, fmt.Errorf("conn is nil")
 	}
 
 	msg := payload.NewPayload(
 		uint64(hls_settings.CHeaderHLS),
-		hlsnet.NewRequest("GET", tcServiceAddressInHLS, "/echo").
+		hls_network.NewRequest("GET", tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
@@ -188,39 +190,52 @@ func testStartClientHLS() error {
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey()
 	res, err := node.Request(pubKey, msg)
 	if err != nil {
-		return err
+		return node, err
 	}
 
 	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		return fmt.Errorf("result does not match; get '%s'", string(res))
+		return node, fmt.Errorf("result does not match; get '%s'", string(res))
 	}
 
-	return nil
+	return node, nil
 }
 
-func testNewNode(client client.IClient) netanon.INode {
-	msgSize := uint64(1 << 20)
+func testNewNode(i int) netanon.INode {
+	msgSize := uint64(100 << 10)
 	return netanon.NewNode(
-		netanon.NewSettings(
-			3,
-			20*time.Second,
+		netanon.NewSettings(&netanon.SSettings{
+			FTimeWait: 30 * time.Second,
+		}),
+		database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
+				FHashing:   true,
+				FCipherKey: []byte(testutils.TcKey1),
+			}),
 		),
-		client,
-		network.NewNode(network.NewSettings(
-			msgSize,
-			10,
-			1024,
-			10,
-			20,
-			5*time.Second,
-		)),
+		network.NewNode(
+			network.NewSettings(&network.SSettings{
+				FRetryNum:    2,
+				FCapacity:    (1 << 10),
+				FMessageSize: msgSize,
+				FMaxConns:    10,
+				FMaxMessages: 20,
+				FTimeWait:    5 * time.Second,
+			}),
+		),
 		queue.NewQueue(
-			queue.NewSettings(
-				10,
-				5,
-				300*time.Millisecond,
+			queue.NewSettings(&queue.SSettings{
+				FCapacity:     10,
+				FPullCapacity: 5,
+				FDuration:     500 * time.Millisecond,
+			}),
+			client.NewClient(
+				client.NewSettings(&client.SSettings{
+					FWorkSize:    10,
+					FMessageSize: msgSize,
+				}),
+				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),
-			client,
 		),
 		friends.NewF2F(),
 	)

@@ -3,11 +3,13 @@ package queue
 import (
 	"time"
 
+	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/message"
 )
 
 type IQueue interface {
 	Settings() ISettings
+	Client() client.IClient
 
 	Start() error
 	Close() error
@@ -17,7 +19,7 @@ type IQueue interface {
 }
 
 type ISettings interface {
-	GetMainCapacity() uint64
+	GetCapacity() uint64
 	GetPullCapacity() uint64
 	GetDuration() time.Duration
 }

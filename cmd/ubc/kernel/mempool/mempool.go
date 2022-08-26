@@ -22,7 +22,11 @@ type sMempool struct {
 
 func NewMempool(path string) IMempool {
 	mempool := &sMempool{
-		fDB: database.NewLevelDB(path),
+		fDB: database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath: path,
+			}),
+		),
 	}
 	_, err := mempool.fDB.Get(getKeyHeight())
 	if err != nil {

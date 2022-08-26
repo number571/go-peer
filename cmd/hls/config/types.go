@@ -7,23 +7,12 @@ import (
 type IConfig interface {
 	Address() iAddress
 	Connections() []string
-	F2F() iF2F
-	OnlineChecker() iOnlineChecker
+	Friends() []asymmetric.IPubKey
 	GetService(string) (iBlock, bool)
 }
 
-type iOnlineChecker interface {
-	Status() bool
-	PubKeys() []asymmetric.IPubKey
-}
-
-type iF2F interface {
-	Status() bool
-	PubKeys() []asymmetric.IPubKey
-}
-
 type iAddress interface {
-	HLS() string
+	TCP() string
 	HTTP() string
 }
 

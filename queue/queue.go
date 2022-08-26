@@ -29,7 +29,7 @@ func NewQueue(sett ISettings, client client.IClient) IQueue {
 	return &sQueue{
 		fSettings: sett,
 		fClient:   client,
-		fEnqueue:  make(chan message.IMessage, sett.GetMainCapacity()),
+		fEnqueue:  make(chan message.IMessage, sett.GetCapacity()),
 		fMsgPull: &sPull{
 			fSignal:  make(chan struct{}),
 			fEnqueue: make(chan message.IMessage, sett.GetPullCapacity()),
@@ -39,6 +39,10 @@ func NewQueue(sett ISettings, client client.IClient) IQueue {
 
 func (q *sQueue) Settings() ISettings {
 	return q.fSettings
+}
+
+func (q *sQueue) Client() client.IClient {
+	return q.fClient
 }
 
 func (q *sQueue) Start() error {
@@ -61,7 +65,7 @@ func (q *sQueue) Close() error {
 }
 
 func (q *sQueue) Enqueue(msg message.IMessage) error {
-	if uint64(len(q.fEnqueue)) == q.Settings().GetMainCapacity() {
+	if uint64(len(q.fEnqueue)) == q.Settings().GetCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
 

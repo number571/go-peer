@@ -1,21 +1,32 @@
 package client
 
-type sSettings struct {
-	fWorkSize    uint64
-	fMessageSize uint64
+const (
+	cMessageSize = (1 << 20)
+)
+
+type SSettings struct {
+	FWorkSize    uint64
+	FMessageSize uint64
 }
 
-func NewSettings(workSize, msgSize uint64) ISettings {
-	return &sSettings{
-		fWorkSize:    workSize,
-		fMessageSize: msgSize,
+func NewSettings(sett *SSettings) ISettings {
+	return &SSettings{
+		FWorkSize:    sett.FWorkSize,
+		FMessageSize: sett.FMessageSize,
 	}
 }
 
-func (s *sSettings) GetWorkSize() uint64 {
-	return s.fWorkSize
+func (s *SSettings) useDefaultValues() ISettings {
+	if s.FMessageSize == 0 {
+		s.FMessageSize = cMessageSize
+	}
+	return s
 }
 
-func (s *sSettings) GetMessageSize() uint64 {
-	return s.fMessageSize
+func (s *SSettings) GetWorkSize() uint64 {
+	return s.FWorkSize
+}
+
+func (s *SSettings) GetMessageSize() uint64 {
+	return s.FMessageSize
 }

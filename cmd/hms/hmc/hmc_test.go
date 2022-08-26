@@ -13,7 +13,10 @@ import (
 
 func TestBuilder(t *testing.T) {
 	client := client.NewClient(
-		client.NewSettings(10, (1<<20)),
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    10,
+			FMessageSize: (100 << 10),
+		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)
 

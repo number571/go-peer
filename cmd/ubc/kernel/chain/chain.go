@@ -47,10 +47,18 @@ func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (ICha
 	}
 
 	chain := &sChain{
-		fPrivKey:      priv,
-		fBlocks:       database.NewLevelDB(blocksPath),
-		fTransactions: database.NewLevelDB(txsPath),
-		fMempool:      mempool.NewMempool(mempoolPath),
+		fPrivKey: priv,
+		fBlocks: database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath: blocksPath,
+			}),
+		),
+		fTransactions: database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath: txsPath,
+			}),
+		),
+		fMempool: mempool.NewMempool(mempoolPath),
 	}
 
 	if chain.fBlocks == nil || chain.fTransactions == nil {
@@ -75,10 +83,18 @@ func LoadChain(priv asymmetric.IPrivKey, path string) (IChain, error) {
 	}
 
 	chain := &sChain{
-		fPrivKey:      priv,
-		fBlocks:       database.NewLevelDB(blocksPath),
-		fTransactions: database.NewLevelDB(txsPath),
-		fMempool:      mempool.NewMempool(mempoolPath),
+		fPrivKey: priv,
+		fBlocks: database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath: blocksPath,
+			}),
+		),
+		fTransactions: database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath: txsPath,
+			}),
+		),
+		fMempool: mempool.NewMempool(mempoolPath),
 	}
 
 	if chain.fBlocks == nil || chain.fTransactions == nil {

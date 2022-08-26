@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hls/config"
-	"github.com/number571/go-peer/cmd/hls/database"
 	"github.com/number571/go-peer/cmd/hls/logger"
 	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/storage"
+	"github.com/number571/go-peer/testutils"
 	"github.com/number571/go-peer/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
@@ -32,7 +32,6 @@ func hlsDefaultInit() error {
 
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig("hls.cfg")
-	gDB = database.NewKeyValueDB("hls.db")
 
 	privKey := getPrivKey(
 		"hls.stg",
@@ -43,31 +42,40 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed load private key")
 	}
 
-	client := client.NewClient(
-		client.NewSettings(hls_settings.CWorkSize, hls_settings.CPackSize),
-		privKey,
-	)
 	gNode = netanon.NewNode(
-		netanon.NewSettings(
-			2,
-			hls_settings.CWaitTime*time.Second,
+		netanon.NewSettings(&netanon.SSettings{
+			FRetryEnqueue: hls_settings.CRetryEnqueue,
+			FTimeWait:     hls_settings.CWaitTime,
+		}),
+		database.NewLevelDB(
+			database.NewSettings(&database.SSettings{
+				FPath:    hls_settings.CPathDB,
+				FHashing: true,
+			}),
 		),
-		client,
-		network.NewNode(network.NewSettings(
-			hls_settings.CPackSize,
-			10,   // retryNum for get message
-			1024, // capacity for hash storage
-			hls_settings.CMaxConns,
-			hls_settings.CMaxMsgs,
-			5*time.Second, // timeWait for request
-		)),
+		network.NewNode(
+			network.NewSettings(&network.SSettings{
+				FRetryNum:    hls_settings.CNetworkRetry,
+				FCapacity:    hls_settings.CNetworkCapacity,
+				FMessageSize: hls_settings.CMessageSize,
+				FMaxConns:    hls_settings.CNetworkMaxConns,
+				FMaxMessages: hls_settings.CNetworkMaxMessages,
+				FTimeWait:    hls_settings.CNetworkWaitTime,
+			}),
+		),
 		queue.NewQueue(
-			queue.NewSettings(
-				hls_settings.CQueueSize,
-				hls_settings.CQueuePull,
-				hls_settings.CQueueTime*time.Millisecond,
+			queue.NewSettings(&queue.SSettings{
+				FCapacity:     hls_settings.CQueueCapacity,
+				FPullCapacity: hls_settings.CQueuePullCapacity,
+				FDuration:     hls_settings.CQueueDuration,
+			}),
+			client.NewClient(
+				client.NewSettings(&client.SSettings{
+					FWorkSize:    hls_settings.CWorkSize,
+					FMessageSize: hls_settings.CMessageSize,
+				}),
+				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),
-			client,
 		),
 		friends.NewF2F(),
 	)

@@ -1,18 +1,21 @@
 package database
 
-import "github.com/number571/go-peer/storage"
+import (
+	"github.com/number571/go-peer/storage"
+)
 
 type IKeyValueDB interface {
 	storage.IKeyValueStorage
-
-	// Turn on hashing keys, encryption values
-	WithHashing(bool) IKeyValueDB
-	WithEncryption([]byte) IKeyValueDB
-
-	// some databases are can be not implements this methods
-	// than they are return default values Iter=nil, Close=nil
-	Iter([]byte) iIterator
 	Close() error
+
+	Settings() ISettings
+	Iter([]byte) iIterator
+}
+
+type ISettings interface {
+	GetPath() string
+	GetHashing() bool
+	GetCipherKey() []byte
 }
 
 type iIterator interface {

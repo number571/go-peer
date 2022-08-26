@@ -2,22 +2,33 @@ package netanon
 
 import "time"
 
-type sSettings struct {
-	fRetryEnqueue uint64
-	fTimeWait     time.Duration
+const (
+	cTimeWait = time.Minute
+)
+
+type SSettings struct {
+	FRetryEnqueue uint64
+	FTimeWait     time.Duration
 }
 
-func NewSettings(retryNum uint64, timeWait time.Duration) ISettings {
-	return &sSettings{
-		fRetryEnqueue: retryNum,
-		fTimeWait:     timeWait,
+func NewSettings(sett *SSettings) ISettings {
+	return (&SSettings{
+		FRetryEnqueue: sett.FRetryEnqueue,
+		FTimeWait:     sett.FTimeWait,
+	}).useDefaultValue()
+}
+
+func (s *SSettings) useDefaultValue() ISettings {
+	if s.FTimeWait == 0 {
+		s.FTimeWait = cTimeWait
 	}
+	return s
 }
 
-func (s *sSettings) GetTimeWait() time.Duration {
-	return s.fTimeWait
+func (s *SSettings) GetTimeWait() time.Duration {
+	return s.FTimeWait
 }
 
-func (s *sSettings) GetRetryEnqueue() uint64 {
-	return s.fRetryEnqueue
+func (s *SSettings) GetRetryEnqueue() uint64 {
+	return s.FRetryEnqueue
 }

@@ -2,12 +2,11 @@ package utils
 
 // returns last error from slice
 func CloseAll(cs []ICloser) error {
-	var err error
+	var lastErr error
 	for _, c := range cs {
-		e := c.Close()
-		if e != nil {
-			err = e
+		if err := c.Close(); err != nil {
+			lastErr = err
 		}
 	}
-	return err
+	return lastErr
 }

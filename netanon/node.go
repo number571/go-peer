@@ -2,21 +2,23 @@ package netanon
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/crypto/puzzle"
 	"github.com/number571/go-peer/crypto/random"
+	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/network"
 	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/utils"
 
 	payload_adapter "github.com/number571/go-peer/netanon/adapters/payload"
 )
@@ -28,7 +30,7 @@ var (
 type sNode struct {
 	fMutex         sync.Mutex
 	fSettings      ISettings
-	fClient        client.IClient
+	fKeyValueDB    database.IKeyValueDB
 	fNetwork       network.INode
 	fQueue         queue.IQueue
 	fF2F           friends.IF2F
@@ -38,14 +40,14 @@ type sNode struct {
 
 func NewNode(
 	sett ISettings,
-	client client.IClient,
+	kvDB database.IKeyValueDB,
 	nnode network.INode,
 	queue queue.IQueue,
 	f2f friends.IF2F,
 ) INode {
 	node := &sNode{
 		fSettings:      sett,
-		fClient:        client,
+		fKeyValueDB:    kvDB,
 		fNetwork:       nnode,
 		fQueue:         queue,
 		fF2F:           f2f,
@@ -58,14 +60,11 @@ func NewNode(
 }
 
 func (node *sNode) Close() error {
-	var lerr error
-	if err := node.Network().Close(); err != nil {
-		lerr = err
-	}
-	if err := node.Queue().Close(); err != nil {
-		lerr = err
-	}
-	return lerr
+	return utils.CloseAll([]utils.ICloser{
+		node.KeyValueDB(),
+		node.Network(),
+		node.Queue(),
+	})
 }
 
 func (node *sNode) Settings() ISettings {
@@ -75,11 +74,11 @@ func (node *sNode) Settings() ISettings {
 	return node.fSettings
 }
 
-func (node *sNode) Client() client.IClient {
+func (node *sNode) KeyValueDB() database.IKeyValueDB {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	return node.fClient
+	return node.fKeyValueDB
 }
 
 func (node *sNode) Network() network.INode {
@@ -136,7 +135,7 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload)
 		pl.Body(),
 	)
 
-	msg, err := node.Client().Encrypt(recv, pl)
+	msg, err := node.Queue().Client().Encrypt(recv, pl)
 	if err != nil {
 		return nil, err
 	}
@@ -188,19 +187,25 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		nnode.Broadcast(npld)
 
 		// try decrypt message
-		sender, pld, err := node.Client().Decrypt(msg)
+		sender, pld, err := node.Queue().Client().Decrypt(msg)
 		if err != nil {
 			return
 		}
 
-		head := pld.Head()
-
-		// check f2f mode and sender in f2f list
-		if node.F2F().Status() && !node.F2F().InList(sender) {
+		// check sender in f2f list
+		if !node.F2F().InList(sender) {
 			return
 		}
 
+		// check already received data by hash
+		hash := []byte(fmt.Sprintf("recv_hash_%X", msg.Body().Hash()))
+		if _, err := node.KeyValueDB().Get(hash); err == nil {
+			return
+		}
+		node.KeyValueDB().Set(hash, []byte{})
+
 		// get session by payload head
+		head := pld.Head()
 		action, ok := node.getAction(
 			loadHead(head).Actions(),
 		)
@@ -222,7 +227,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		respMsg, err := node.Client().Encrypt(
+		respMsg, err := node.Queue().Client().Encrypt(
 			sender,
 			payload.NewPayload(head, resp),
 		)
@@ -243,9 +248,6 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 }
 
 func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	if msg == nil {
 		return nil
 	}
@@ -254,7 +256,7 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 		return nil
 	}
 
-	diff := node.fClient.Settings().GetWorkSize()
+	diff := node.Queue().Client().Settings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
 		return nil

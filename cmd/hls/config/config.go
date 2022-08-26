@@ -10,36 +10,23 @@ import (
 )
 
 var (
-	_ IConfig        = &sConfig{}
-	_ iF2F           = &sF2F{}
-	_ iOnlineChecker = &sOnlineChecker{}
-	_ iAddress       = &sAddress{}
-	_ iBlock         = &sBlock{}
+	_ IConfig  = &sConfig{}
+	_ iAddress = &sAddress{}
+	_ iBlock   = &sBlock{}
 )
 
 type sConfig struct {
-	fMutex         sync.Mutex
-	FAddress       *sAddress          `json:"address"`
-	FConnections   []string           `json:"connections"`
-	FF2F           *sF2F              `json:"f2f_mode"`
-	FOnlineChecker *sOnlineChecker    `json:"online_checker"`
-	FServices      map[string]*sBlock `json:"services"`
-}
+	FAddress     *sAddress          `json:"address"`
+	FConnections []string           `json:"connections"`
+	FFriends     []string           `json:"friends"`
+	FServices    map[string]*sBlock `json:"services"`
 
-type sF2F struct {
-	FStatus  bool `json:"status"`
-	fPubKeys []asymmetric.IPubKey
-	FPubKeys []string `json:"pub_keys"`
-}
-
-type sOnlineChecker struct {
-	FStatus  bool `json:"status"`
-	fPubKeys []asymmetric.IPubKey
-	FPubKeys []string `json:"pub_keys"`
+	fMutex   sync.Mutex
+	fFriends []asymmetric.IPubKey
 }
 
 type sAddress struct {
-	FHLS  string `json:"hls"`
+	FTCP  string `json:"tcp"`
 	FHTTP string `json:"http"`
 }
 
@@ -49,18 +36,6 @@ type sBlock struct {
 }
 
 var (
-	// friend-to-friend option
-	cDefaultF2FMode = &sF2F{
-		FStatus:  true,
-		FPubKeys: gDefaultPubKeys,
-	}
-
-	// online checker option
-	cDefaultOnlineChecker = &sOnlineChecker{
-		FStatus:  true,
-		FPubKeys: gDefaultPubKeys,
-	}
-
 	// create local hls
 	cDefaultAddress = &sAddress{
 		"localhost:9571",
@@ -69,7 +44,7 @@ var (
 
 	// connect to another hls's
 	gDefaultConnects = []string{
-		cDefaultAddress.FHLS,
+		cDefaultAddress.FTCP,
 	}
 
 	// another receivers of package
@@ -80,8 +55,8 @@ var (
 	// crypto-address -> network-address
 	gDefaultServices = map[string]*sBlock{
 		"hidden-default-service": {
-			FRedirect: true,
-			FAddress:  "localhost:8571",
+			FRedirect: false,
+			FAddress:  "localhost:8080",
 		},
 	}
 )
@@ -91,11 +66,10 @@ func NewConfig(filepath string) IConfig {
 
 	if !utils.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
-			FAddress:       cDefaultAddress,
-			FF2F:           cDefaultF2FMode,
-			FConnections:   gDefaultConnects,
-			FOnlineChecker: cDefaultOnlineChecker,
-			FServices:      gDefaultServices,
+			FAddress:     cDefaultAddress,
+			FFriends:     gDefaultPubKeys,
+			FConnections: gDefaultConnects,
+			FServices:    gDefaultServices,
 		}
 		err := utils.OpenFile(filepath).Write(encoding.Serialize(cfg))
 		if err != nil {
@@ -112,51 +86,23 @@ func NewConfig(filepath string) IConfig {
 		}
 	}
 
-	for _, val := range cfg.FOnlineChecker.FPubKeys {
+	for _, val := range cfg.FFriends {
 		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
 			panic(fmt.Sprintf("public key is nil: '%s'", val))
 		}
-		cfg.FOnlineChecker.fPubKeys = append(cfg.FOnlineChecker.fPubKeys, pubKey)
-	}
-
-	for _, val := range cfg.FF2F.FPubKeys {
-		pubKey := asymmetric.LoadRSAPubKey(val)
-		if pubKey == nil {
-			panic(fmt.Sprintf("public key is nil: '%s'", val))
-		}
-		cfg.FF2F.fPubKeys = append(cfg.FF2F.fPubKeys, pubKey)
+		cfg.fFriends = append(cfg.fFriends, pubKey)
 	}
 
 	return cfg
 }
 
-func (cfg *sConfig) F2F() iF2F {
-	return cfg.FF2F
-}
-
-func (f2f *sF2F) Status() bool {
-	return f2f.FStatus
-}
-
-func (f2f *sF2F) PubKeys() []asymmetric.IPubKey {
-	return f2f.fPubKeys
+func (cfg *sConfig) Friends() []asymmetric.IPubKey {
+	return cfg.fFriends
 }
 
 func (cfg *sConfig) Address() iAddress {
 	return cfg.FAddress
-}
-
-func (cfg *sConfig) OnlineChecker() iOnlineChecker {
-	return cfg.FOnlineChecker
-}
-
-func (onl *sOnlineChecker) Status() bool {
-	return onl.FStatus
-}
-
-func (onl *sOnlineChecker) PubKeys() []asymmetric.IPubKey {
-	return onl.fPubKeys
 }
 
 func (cfg *sConfig) Connections() []string {
@@ -171,8 +117,8 @@ func (cfg *sConfig) GetService(name string) (iBlock, bool) {
 	return addr, ok
 }
 
-func (address *sAddress) HLS() string {
-	return address.FHLS
+func (address *sAddress) TCP() string {
+	return address.FTCP
 }
 
 func (address *sAddress) HTTP() string {

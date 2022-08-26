@@ -93,11 +93,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 }
 
 func testClientDoPush() error {
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
-		priv,
-	)
+	client := testNewClient()
 
 	for i := 0; i < tcN; i++ {
 		err := hmc.NewClient(
@@ -119,11 +115,7 @@ func testClientDoPush() error {
 }
 
 func testClientDoSize() error {
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
-		priv,
-	)
+	client := testNewClient()
 
 	size, err := hmc.NewClient(
 		hmc.NewBuilder(client),
@@ -141,11 +133,7 @@ func testClientDoSize() error {
 }
 
 func testClientDoLoad() error {
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	client := client.NewClient(
-		client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack),
-		priv,
-	)
+	client := testNewClient()
 
 	for i := 0; i < tcN; i++ {
 		msg, err := hmc.NewClient(
@@ -171,4 +159,14 @@ func testClientDoLoad() error {
 	}
 
 	return nil
+}
+
+func testNewClient() client.IClient {
+	return client.NewClient(
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    hms_settings.CSizeWork,
+			FMessageSize: hms_settings.CSizePack,
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+	)
 }

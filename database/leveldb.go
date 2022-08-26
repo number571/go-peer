@@ -17,10 +17,10 @@ var (
 )
 
 type sLevelDB struct {
-	fMutex   sync.Mutex
-	fDB      *leveldb.DB
-	fCipher  symmetric.ICipher
-	fHashing bool
+	fMutex    sync.Mutex
+	fDB       *leveldb.DB
+	fSettings ISettings
+	fCipher   symmetric.ICipher
 }
 
 type sLevelDBIterator struct {
@@ -29,41 +29,34 @@ type sLevelDBIterator struct {
 	fCipher symmetric.ICipher
 }
 
-func NewLevelDB(path string) IKeyValueDB {
-	db, err := leveldb.OpenFile(path, nil)
+func NewLevelDB(sett ISettings) IKeyValueDB {
+	db, err := leveldb.OpenFile(sett.GetPath(), nil)
 	if err != nil {
 		return nil
 	}
 	return &sLevelDB{
-		fDB: db,
+		fDB:       db,
+		fSettings: sett,
+		fCipher:   symmetric.NewAESCipher(sett.GetCipherKey()),
 	}
 }
 
-func (db *sLevelDB) WithEncryption(key []byte) IKeyValueDB {
+func (db *sLevelDB) Settings() ISettings {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	var cipher symmetric.ICipher
-	if key != nil {
-		cipher = symmetric.NewAESCipher(key)
-	}
-	db.fCipher = cipher
-	return db
-}
-
-func (db *sLevelDB) WithHashing(state bool) IKeyValueDB {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
-	db.fHashing = state
-	return db
+	return db.fSettings
 }
 
 func (db *sLevelDB) Set(key []byte, value []byte) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	return db.fDB.Put(db.tryHash(key), db.tryEncrypt(value), nil)
+	return db.fDB.Put(
+		db.tryHash(key),
+		db.fCipher.Encrypt(value),
+		nil,
+	)
 }
 
 func (db *sLevelDB) Get(key []byte) ([]byte, error) {
@@ -75,7 +68,7 @@ func (db *sLevelDB) Get(key []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	decBytes := db.tryDecrypt(encBytes)
+	decBytes := db.fCipher.Decrypt(encBytes)
 	if decBytes == nil {
 		return nil, fmt.Errorf("failed decrypt message")
 	}
@@ -102,7 +95,7 @@ func (db *sLevelDB) Iter(prefix []byte) iIterator {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if db.fHashing {
+	if db.fSettings.GetHashing() {
 		return nil
 	}
 
@@ -145,22 +138,8 @@ func (iter *sLevelDBIterator) Close() {
 }
 
 func (db *sLevelDB) tryHash(key []byte) []byte {
-	if db.fHashing {
+	if db.fSettings.GetHashing() {
 		return hashing.NewSHA256Hasher(key).Bytes()
 	}
 	return key
-}
-
-func (db *sLevelDB) tryEncrypt(value []byte) []byte {
-	if db.fCipher != nil {
-		return db.fCipher.Encrypt(value)
-	}
-	return value
-}
-
-func (db *sLevelDB) tryDecrypt(value []byte) []byte {
-	if db.fCipher != nil {
-		return db.fCipher.Decrypt(value)
-	}
-	return value
 }

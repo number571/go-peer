@@ -30,7 +30,13 @@ func hmcDefaultInit() error {
 	}
 
 	gActions = newActions()
-	gClient = client.NewClient(client.NewSettings(hms_settings.CSizeWork, hms_settings.CSizePack), privKey)
+	gClient = client.NewClient(
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    hms_settings.CSizeWork,
+			FMessageSize: hms_settings.CSizePack,
+		}),
+		privKey,
+	)
 
 	return nil
 }
