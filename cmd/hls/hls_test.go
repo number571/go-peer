@@ -10,17 +10,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/client"
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/friends"
-	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/network/anonymity"
-	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/queue"
-	"github.com/number571/go-peer/storage/database"
-	"github.com/number571/go-peer/utils/testutils"
+	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/friends"
+	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/modules/queue"
+	"github.com/number571/go-peer/modules/storage/database"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (

@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	hlsnet "github.com/number571/go-peer/cmd/hls/network"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/network/anonymity"
-	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/modules/payload"
 )
 
 func handleTCP(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
@@ -20,8 +20,8 @@ func handleTCP(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload)
 		return nil
 	}
 
-	// get service's address by name
-	address, ok := gConfig.GetService(request.Host())
+	// get service's address by hostname
+	address, ok := gConfig.Service(request.Host())
 	if !ok {
 		return nil
 	}

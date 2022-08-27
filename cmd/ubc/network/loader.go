@@ -6,11 +6,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/settings"
+	"github.com/number571/go-peer/modules/crypto/hashing"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/payload"
 )
 
 var (
@@ -49,11 +48,11 @@ func (loader *sLoader) Height() (uint64, error) {
 		return 0, fmt.Errorf("rpld.Head() != cMaskLoadHeight")
 	}
 
-	if len(rpld.Body()) != settings.CSizeUint64 {
-		return 0, fmt.Errorf("len(rpld.Body()) != settings.CSizeUint64")
+	if len(rpld.Body()) != encoding.CSizeUint64 {
+		return 0, fmt.Errorf("len(rpld.Body()) != utils.CSizeUint64")
 	}
 
-	res := [settings.CSizeUint64]byte{}
+	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], rpld.Body())
 	return encoding.BytesToUint64(res), nil
 }

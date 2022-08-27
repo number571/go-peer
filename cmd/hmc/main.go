@@ -7,7 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/closer"
+	"github.com/number571/go-peer/modules/inputter"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 	go func() {
 		gActions["load"].Do()
 		for {
-			cmd := utils.NewInput("> ").String()
+			cmd := inputter.NewInputter("> ").String()
 			f, ok := gActions[cmd]
 			if !ok {
 				fmt.Println("Undefined command")
@@ -34,5 +35,5 @@ func main() {
 
 	<-shutdown
 	fmt.Println("Shutting down...")
-	utils.CloseAll([]utils.ICloser{gDB})
+	closer.CloseAll([]closer.ICloser{gDB})
 }

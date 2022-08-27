@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/number571/go-peer/client"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/message"
-	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/utils/testutils"
+	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/message"
+	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 func TestBuilder(t *testing.T) {

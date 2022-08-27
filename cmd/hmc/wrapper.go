@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/number571/go-peer/cmd/hmc/config"
-	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
 var (

@@ -3,9 +3,8 @@ package mempool
 import (
 	"sync"
 
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/settings"
-	"github.com/number571/go-peer/storage/database"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/storage/database"
 
 	ksettings "github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
@@ -159,7 +158,7 @@ func (mempool *sMempool) getHeight() uint64 {
 	if err != nil {
 		panic("mempool: height undefined")
 	}
-	res := [settings.CSizeUint64]byte{}
+	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
 	return encoding.BytesToUint64(res)
 }

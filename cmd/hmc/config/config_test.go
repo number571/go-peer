@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/filesystem"
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 )
 
 func testConfigDefaultInit(configPath string) {
-	utils.OpenFile(configPath).Write([]byte(tcConfig))
+	filesystem.OpenFile(configPath).Write([]byte(tcConfig))
 }
 
 func TestConfig(t *testing.T) {

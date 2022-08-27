@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/crypto/hashing"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"

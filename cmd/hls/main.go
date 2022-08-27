@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/closer"
 )
 
 func main() {
@@ -21,6 +21,7 @@ func main() {
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	<-shutdown
-	fmt.Println("Shutting down...")
-	utils.CloseAll([]utils.ICloser{gServerHTTP, gNode})
+	fmt.Println()
+	gLogger.Warning("Shutting down...")
+	closer.CloseAll([]closer.ICloser{gServerHTTP, gNode})
 }

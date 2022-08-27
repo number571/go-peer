@@ -3,9 +3,9 @@ package config
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/filesystem"
 )
 
 var (
@@ -39,7 +39,7 @@ const (
 func NewConfig(filepath string) IConfig {
 	var cfg = new(sConfig)
 
-	if !utils.OpenFile(filepath).IsExist() {
+	if !filesystem.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
 			FF2F:         false,
 			FConnections: []string{cDefaultConnection},
@@ -48,12 +48,12 @@ func NewConfig(filepath string) IConfig {
 				FPubKey: gDefaultPubKey,
 			}},
 		}
-		err := utils.OpenFile(filepath).Write(encoding.Serialize(cfg))
+		err := filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		bytes, err := utils.OpenFile(filepath).Read()
+		bytes, err := filesystem.OpenFile(filepath).Read()
 		if err != nil {
 			panic(err)
 		}

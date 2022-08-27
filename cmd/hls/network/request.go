@@ -3,7 +3,7 @@ package network
 import (
 	"sync"
 
-	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/modules/encoding"
 )
 
 var (

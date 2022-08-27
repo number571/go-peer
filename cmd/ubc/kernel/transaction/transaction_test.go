@@ -3,8 +3,8 @@ package transaction
 import (
 	"testing"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/utils/testutils"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (

@@ -1,14 +1,14 @@
 package config
 
 import (
-	"github.com/number571/go-peer/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
 type IConfig interface {
 	Address() iAddress
 	Connections() []string
 	Friends() []asymmetric.IPubKey
-	GetService(string) (string, bool)
+	Service(string) (string, bool)
 }
 
 type iAddress interface {

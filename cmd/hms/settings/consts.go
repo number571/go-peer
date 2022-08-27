@@ -1,7 +1,9 @@
 package settings
 
+import "github.com/number571/go-peer/settings"
+
 const (
-	CTitlePattern = "hidden-message-service"
+	CTitlePattern = settings.CGopeerPrefix + "hidden-message-service"
 	CContentType  = "application/json"
 )
 

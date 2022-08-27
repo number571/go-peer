@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/filesystem"
 )
 
 const (
@@ -56,7 +56,7 @@ var (
 )
 
 func testConfigDefaultInit(configPath string) {
-	utils.OpenFile(configPath).Write([]byte(tcConfig))
+	filesystem.OpenFile(configPath).Write([]byte(tcConfig))
 }
 
 func TestConfig(t *testing.T) {
@@ -80,7 +80,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	for k, v := range tgServices {
-		v1, ok := cfg.GetService(k)
+		v1, ok := cfg.Service(k)
 		if !ok {
 			t.Errorf("service undefined '%s'", k)
 		}

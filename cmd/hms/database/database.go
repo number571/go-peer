@@ -5,11 +5,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/message"
-	"github.com/number571/go-peer/settings"
-	gp_database "github.com/number571/go-peer/storage/database"
+	"github.com/number571/go-peer/modules/crypto/hashing"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/message"
+	gp_database "github.com/number571/go-peer/modules/storage/database"
 )
 
 type sStorage struct {
@@ -65,7 +64,7 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 		return 0, nil
 	}
 
-	res := [settings.CSizeUint64]byte{}
+	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
 	return encoding.BytesToUint64(res), nil
 }
@@ -94,7 +93,7 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	size := uint64(0)
 	bnum, err := db.fMessages.fDB.Get(getKeySize(key))
 	if err == nil {
-		res := [settings.CSizeUint64]byte{}
+		res := [encoding.CSizeUint64]byte{}
 		copy(res[:], bnum)
 		size = encoding.BytesToUint64(res)
 	}

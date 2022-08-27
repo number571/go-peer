@@ -3,16 +3,21 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/encoding"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/encoding"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
-	payload_adapter "github.com/number571/go-peer/network/anonymity/adapters/payload"
+	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
 )
 
 func handleIndexHTTP(w http.ResponseWriter, r *http.Request) {
 	response(w, hls_settings.CErrorNone, hls_settings.CTitlePattern)
+}
+
+func handleOnlineHTTP(w http.ResponseWriter, r *http.Request) {
+	response(w, hls_settings.CErrorNone, strings.Join(gConnKeeper.InOnline(), ","))
 }
 
 func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {

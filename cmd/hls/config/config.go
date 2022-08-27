@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/filesystem"
 )
 
 var (
@@ -16,9 +16,9 @@ var (
 
 type sConfig struct {
 	FAddress     *sAddress         `json:"address"`
+	FServices    map[string]string `json:"services"`
 	FConnections []string          `json:"connections"`
 	FFriends     []string          `json:"friends"`
-	FServices    map[string]string `json:"services"`
 
 	fMutex   sync.Mutex
 	fFriends []asymmetric.IPubKey
@@ -55,19 +55,19 @@ var (
 func NewConfig(filepath string) IConfig {
 	var cfg = new(sConfig)
 
-	if !utils.OpenFile(filepath).IsExist() {
+	if !filesystem.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
 			FAddress:     cDefaultAddress,
+			FServices:    gDefaultServices,
 			FFriends:     gDefaultPubKeys,
 			FConnections: gDefaultConnects,
-			FServices:    gDefaultServices,
 		}
-		err := utils.OpenFile(filepath).Write(encoding.Serialize(cfg))
+		err := filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		bytes, err := utils.OpenFile(filepath).Read()
+		bytes, err := filesystem.OpenFile(filepath).Read()
 		if err != nil {
 			panic(err)
 		}
@@ -100,7 +100,7 @@ func (cfg *sConfig) Connections() []string {
 	return cfg.FConnections
 }
 
-func (cfg *sConfig) GetService(name string) (string, bool) {
+func (cfg *sConfig) Service(name string) (string, bool) {
 	cfg.fMutex.Lock()
 	defer cfg.fMutex.Unlock()
 

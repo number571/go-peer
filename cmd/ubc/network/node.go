@@ -4,8 +4,8 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/chain"
-	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/payload"
 )
 
 var (

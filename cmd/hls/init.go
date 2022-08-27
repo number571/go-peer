@@ -10,18 +10,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hls/config"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/friends"
-	"github.com/number571/go-peer/logger"
-	"github.com/number571/go-peer/network"
-	"github.com/number571/go-peer/network/anonymity"
-	"github.com/number571/go-peer/network/conn_keeper"
-	"github.com/number571/go-peer/queue"
-	"github.com/number571/go-peer/storage"
-	"github.com/number571/go-peer/storage/database"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/friends"
+	"github.com/number571/go-peer/modules/inputter"
+	"github.com/number571/go-peer/modules/logger"
+	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/modules/network/conn_keeper"
+	"github.com/number571/go-peer/modules/queue"
+	"github.com/number571/go-peer/modules/storage"
+	"github.com/number571/go-peer/modules/storage/database"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
@@ -39,8 +39,8 @@ func hlsDefaultInit() error {
 
 	privKey := initPrivKey(
 		hls_settings.CPathSTG,
-		[]byte(utils.NewInput("Password#Stg: ").Password()),
-		[]byte(utils.NewInput("Password#Obj: ").Password()),
+		[]byte(inputter.NewInputter("Password#Stg: ").Password()),
+		[]byte(inputter.NewInputter("Password#Obj: ").Password()),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")
@@ -57,15 +57,18 @@ func hlsDefaultInit() error {
 		return err
 	}
 
-	return conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(
-			&conn_keeper.SSettings{
-				FConnections: gConfig.Connections(),
-				FDuration:    time.Minute,
-			},
-		),
+	gConnKeeper = conn_keeper.NewConnKeeper(
+		conn_keeper.NewSettings(&conn_keeper.SSettings{
+			FConnections: gConfig.Connections(),
+			FDuration:    time.Minute,
+		}),
 		gNode.Network(),
-	).Run()
+	)
+	if err := gConnKeeper.Run(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPrivKey) anonymity.INode {
@@ -136,7 +139,8 @@ func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", handleIndexHTTP)
-	mux.HandleFunc("/request", handleRequestHTTP)
+	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP)
+	mux.HandleFunc(hls_settings.CHandleRequest, handleRequestHTTP)
 
 	srv := &http.Server{
 		Addr:    cfg.Address().HTTP(),
@@ -172,7 +176,7 @@ func initPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPriv
 	}
 
 	// private key not exist
-	answ := utils.NewInput("Private key by password not exist.\nGenerate new? [y/n]: ").String()
+	answ := inputter.NewInputter("Private key by password not exist.\nGenerate new? [y/n]: ").String()
 	switch strings.ToLower(answ) {
 	case "y", "yes":
 		// generate private key

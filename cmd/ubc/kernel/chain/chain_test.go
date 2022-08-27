@@ -9,10 +9,10 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/crypto/hashing"
-	"github.com/number571/go-peer/crypto/random"
-	"github.com/number571/go-peer/utils/testutils"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/crypto/hashing"
+	"github.com/number571/go-peer/modules/crypto/random"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (

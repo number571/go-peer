@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hms/config"
 	"github.com/number571/go-peer/cmd/hms/database"
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/utils/testutils"
+	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (

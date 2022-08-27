@@ -6,9 +6,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/crypto/puzzle"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/message"
+	"github.com/number571/go-peer/modules/crypto/puzzle"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/message"
 )
 
 func indexPage(w http.ResponseWriter, r *http.Request) {

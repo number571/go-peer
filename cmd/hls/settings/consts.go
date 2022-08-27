@@ -1,10 +1,19 @@
 package settings
 
-import "time"
+import (
+	"time"
+
+	"github.com/number571/go-peer/settings"
+)
 
 const (
-	CTitlePattern = "hidden-lake-service"
+	CTitlePattern = settings.CGopeerPrefix + "hidden-lake-service"
 	CContentType  = "application/json"
+)
+
+const (
+	CHandleOnline  = "/online"
+	CHandleRequest = "/do/request"
 )
 
 const (

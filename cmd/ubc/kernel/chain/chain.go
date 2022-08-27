@@ -7,11 +7,11 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/settings"
-	"github.com/number571/go-peer/storage/database"
-	"github.com/number571/go-peer/utils"
+	"github.com/number571/go-peer/modules/closer"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/modules/storage/database"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
@@ -42,7 +42,7 @@ func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (ICha
 		return nil, fmt.Errorf("genesis block is invalid")
 	}
 
-	if utils.OpenFile(path).IsExist() {
+	if filesystem.OpenFile(path).IsExist() {
 		return nil, fmt.Errorf("chain already exists")
 	}
 
@@ -78,7 +78,7 @@ func LoadChain(priv asymmetric.IPrivKey, path string) (IChain, error) {
 		mempoolPath = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathMemp).(string))
 	)
 
-	if !utils.OpenFile(path).IsExist() {
+	if !filesystem.OpenFile(path).IsExist() {
 		return nil, fmt.Errorf("chain not exists")
 	}
 
@@ -108,7 +108,7 @@ func (chain *sChain) Close() error {
 	chain.fMutex.Lock()
 	defer chain.fMutex.Unlock()
 
-	return utils.CloseAll([]utils.ICloser{
+	return closer.CloseAll([]closer.ICloser{
 		chain.fBlocks,
 		chain.fTransactions,
 		chain.fMempool,
@@ -255,7 +255,7 @@ func (chain *sChain) getHeight() uint64 {
 	if err != nil {
 		panic("chain: height undefined")
 	}
-	res := [settings.CSizeUint64]byte{}
+	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
 	return encoding.BytesToUint64(res)
 }

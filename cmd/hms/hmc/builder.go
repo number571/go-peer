@@ -1,9 +1,9 @@
 package hmc
 
 import (
-	"github.com/number571/go-peer/client"
-	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/payload"
+	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/payload"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 )
