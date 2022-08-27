@@ -87,7 +87,7 @@ func (loader *sLoader) Transaction(hash []byte) (transaction.ITransaction, error
 	loader.fMutex.Lock()
 	defer loader.fMutex.Unlock()
 
-	if len(hash) != hashing.GSHA256Size {
+	if len(hash) != hashing.CSHA256Size {
 		return nil, fmt.Errorf("len(hash) != hashing.GSHA256Size")
 	}
 

@@ -10,6 +10,11 @@ import (
 	"golang.org/x/term"
 )
 
+type IInput interface {
+	String() string
+	Password() string
+}
+
 var (
 	_ IInput = &sInput{}
 )

@@ -14,7 +14,7 @@ import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 const (

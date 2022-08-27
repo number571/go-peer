@@ -14,13 +14,13 @@ import (
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
-	"github.com/number571/go-peer/netanon"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/network/anonymity"
 	"github.com/number571/go-peer/payload"
 	"github.com/number571/go-peer/queue"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/storage/database"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 const (
@@ -47,13 +47,18 @@ func TestHLS(t *testing.T) {
 	defer srv.Close()
 
 	// service
-	node := testStartNodeHLS(t)
+	node, err := testStartNodeHLS(t)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer node.Close()
 
 	// client
 	nodeClient, err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 	defer nodeClient.Close()
 }
@@ -101,10 +106,13 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 // HLS
 
-func testStartNodeHLS(t *testing.T) netanon.INode {
-	node := testNewNode(0).
-		Handle(hls_settings.CHeaderHLS, testRouteHLS)
+func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
+	node := testNewNode(0)
+	if node == nil {
+		return nil, fmt.Errorf("node is not running")
+	}
 
+	node.Handle(hls_settings.CHeaderHLS, testRouteHLS)
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
@@ -114,10 +122,10 @@ func testStartNodeHLS(t *testing.T) netanon.INode {
 		}
 	}()
 
-	return node
+	return node, nil
 }
 
-func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
+func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
 	mapping := map[string]string{
 		tcServiceAddressInHLS: testutils.TgAddrs[5],
 	}
@@ -166,10 +174,13 @@ func testRouteHLS(node netanon.INode, _ asymmetric.IPubKey, pld payload.IPayload
 
 // CLIENT
 
-func testStartClientHLS() (netanon.INode, error) {
-	node := testNewNode(1).
-		Handle(hls_settings.CHeaderHLS, nil)
+func testStartClientHLS() (anonymity.INode, error) {
+	node := testNewNode(1)
+	if node == nil {
+		return nil, fmt.Errorf("node is not running")
+	}
 
+	node.Handle(hls_settings.CHeaderHLS, nil)
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	conn := node.Network().Connect(testutils.TgAddrs[4])
@@ -200,10 +211,10 @@ func testStartClientHLS() (netanon.INode, error) {
 	return node, nil
 }
 
-func testNewNode(i int) netanon.INode {
+func testNewNode(i int) anonymity.INode {
 	msgSize := uint64(100 << 10)
-	return netanon.NewNode(
-		netanon.NewSettings(&netanon.SSettings{
+	node := anonymity.NewNode(
+		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
 		}),
 		database.NewLevelDB(
@@ -239,4 +250,8 @@ func testNewNode(i int) netanon.INode {
 		),
 		friends.NewF2F(),
 	)
+	if err := node.Run(); err != nil {
+		return nil
+	}
+	return node
 }

@@ -11,7 +11,7 @@ type IQueue interface {
 	Settings() ISettings
 	Client() client.IClient
 
-	Start() error
+	Run() error
 	Close() error
 
 	Enqueue(message.IMessage) error

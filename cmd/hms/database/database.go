@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/crypto/hashing"
-	gp_database "github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/encoding"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/settings"
+	gp_database "github.com/number571/go-peer/storage/database"
 )
 
 type sStorage struct {
@@ -56,7 +56,7 @@ func (db *sKeyValueDB) Size(key []byte) (uint64, error) {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != hashing.GSHA256Size {
+	if len(key) != hashing.CSHA256Size {
 		return 0, fmt.Errorf("key size invalid")
 	}
 
@@ -74,7 +74,7 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != hashing.GSHA256Size {
+	if len(key) != hashing.CSHA256Size {
 		return fmt.Errorf("key size invalid")
 	}
 
@@ -129,7 +129,7 @@ func (db *sKeyValueDB) Load(key []byte, i uint64) (message.IMessage, error) {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if len(key) != hashing.GSHA256Size {
+	if len(key) != hashing.CSHA256Size {
 		return nil, fmt.Errorf("key size invalid")
 	}
 

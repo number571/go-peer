@@ -14,9 +14,9 @@ var (
 )
 
 const (
-	GSHA256Size            = 32
-	GSHA256KeyType         = "go-peer/sha256"
-	GHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
+	CSHA256Size            = 32
+	CSHA256KeyType         = "go-peer/sha256"
+	CHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
 )
 
 type sSHA256Hasher struct {
@@ -40,11 +40,11 @@ func (h *sSHA256Hasher) Bytes() []byte {
 }
 
 func (h *sSHA256Hasher) Type() string {
-	return GSHA256KeyType
+	return CSHA256KeyType
 }
 
 func (h *sSHA256Hasher) Size() uint64 {
-	return GSHA256Size
+	return CSHA256Size
 }
 
 type sHMACSHA256Hasher struct {
@@ -69,9 +69,9 @@ func (h *sHMACSHA256Hasher) Bytes() []byte {
 }
 
 func (h *sHMACSHA256Hasher) Type() string {
-	return GHMACSHA256HmacKeyType
+	return CHMACSHA256HmacKeyType
 }
 
 func (h *sHMACSHA256Hasher) Size() uint64 {
-	return GSHA256Size
+	return CSHA256Size
 }

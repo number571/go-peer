@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/message"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 func TestQueue(t *testing.T) {
@@ -29,7 +29,7 @@ func TestQueue(t *testing.T) {
 		client,
 	)
 
-	if err := queue.Start(); err != nil {
+	if err := queue.Run(); err != nil {
 		t.Error(err)
 		return
 	}

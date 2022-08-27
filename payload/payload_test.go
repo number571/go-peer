@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 func TestPayload(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 const (

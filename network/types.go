@@ -11,6 +11,7 @@ type IHandlerF func(INode, IConn, payload.IPayload)
 
 type INode interface {
 	Settings() ISettings
+	Connections() []IConn
 
 	Handle(uint64, IHandlerF) INode
 	Broadcast(payload.IPayload) error
@@ -20,8 +21,11 @@ type INode interface {
 
 	Connect(string) IConn
 	Disconnect(IConn) error
+}
 
-	Connections() []IConn
+type IConnKeeper interface {
+	Run() error
+	Close() error
 }
 
 type ISettings interface {

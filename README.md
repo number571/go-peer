@@ -1,5 +1,4 @@
 # go-peer
-
 > Library for create secure and anonymity decentralized networks. Version: 1.5
 
 ## Research Article
@@ -16,7 +15,6 @@
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
 ## Specifications of go-peer
-
 1. Prefix 's'/'S' - structure type
 2. Prefix 'i'/'I' - interface type / function type
 3. Prefix 'f'/'F' - field of structure
@@ -25,6 +23,5 @@
 6. Prefix 't'/'T' - test constant / test variable / test structure / ...
 
 ## TODO
-
 1. Write tests with comment "TODO"
 2. Need check for use wrappers (example hmc -> config wrapper)

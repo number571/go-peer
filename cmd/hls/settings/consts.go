@@ -13,7 +13,9 @@ const (
 )
 
 const (
-	CPathDB = "hls.db"
+	CPathCFG = "hls.cfg"
+	CPathSTG = "hls.stg"
+	CPathDB  = "hls.db"
 )
 
 const (

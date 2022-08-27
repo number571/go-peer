@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/number571/go-peer/crypto/entropy"
 	"github.com/number571/go-peer/crypto/hashing"
@@ -18,6 +19,7 @@ var (
 )
 
 type sCryptoStorage struct {
+	fMutex    sync.Mutex
 	fPath     string
 	fSalt     []byte
 	fWorkSize uint64
@@ -62,6 +64,9 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) IKeyValueStorage
 }
 
 func (store *sCryptoStorage) Set(key, value []byte) error {
+	store.fMutex.Lock()
+	defer store.fMutex.Unlock()
+
 	var (
 		mapping storageData
 		err     error
@@ -105,6 +110,9 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 }
 
 func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
+	store.fMutex.Lock()
+	defer store.fMutex.Unlock()
+
 	// If storage not exists.
 	if !store.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
@@ -133,6 +141,9 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 }
 
 func (store *sCryptoStorage) Del(key []byte) error {
+	store.fMutex.Lock()
+	defer store.fMutex.Unlock()
+
 	// If storage not exists.
 	if !store.exists() {
 		return fmt.Errorf("error: storage undefined")

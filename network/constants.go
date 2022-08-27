@@ -8,7 +8,7 @@ import (
 // in bytes
 const (
 	cSizeUint = settings.CSizeUint64
-	cSizeHash = hashing.GSHA256Size
+	cSizeHash = hashing.CSHA256Size
 	cSizeHead = settings.CSizeUint64
 )
 

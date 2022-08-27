@@ -12,14 +12,13 @@ import (
 var (
 	_ IConfig  = &sConfig{}
 	_ iAddress = &sAddress{}
-	_ iBlock   = &sBlock{}
 )
 
 type sConfig struct {
-	FAddress     *sAddress          `json:"address"`
-	FConnections []string           `json:"connections"`
-	FFriends     []string           `json:"friends"`
-	FServices    map[string]*sBlock `json:"services"`
+	FAddress     *sAddress         `json:"address"`
+	FConnections []string          `json:"connections"`
+	FFriends     []string          `json:"friends"`
+	FServices    map[string]string `json:"services"`
 
 	fMutex   sync.Mutex
 	fFriends []asymmetric.IPubKey
@@ -28,11 +27,6 @@ type sConfig struct {
 type sAddress struct {
 	FTCP  string `json:"tcp"`
 	FHTTP string `json:"http"`
-}
-
-type sBlock struct {
-	FRedirect bool   `json:"redirect"`
-	FAddress  string `json:"address"`
 }
 
 var (
@@ -53,11 +47,8 @@ var (
 	}
 
 	// crypto-address -> network-address
-	gDefaultServices = map[string]*sBlock{
-		"hidden-default-service": {
-			FRedirect: false,
-			FAddress:  "localhost:8080",
-		},
+	gDefaultServices = map[string]string{
+		"hidden-default-service": "localhost:8080",
 	}
 )
 
@@ -109,7 +100,7 @@ func (cfg *sConfig) Connections() []string {
 	return cfg.FConnections
 }
 
-func (cfg *sConfig) GetService(name string) (iBlock, bool) {
+func (cfg *sConfig) GetService(name string) (string, bool) {
 	cfg.fMutex.Lock()
 	defer cfg.fMutex.Unlock()
 
@@ -123,12 +114,4 @@ func (address *sAddress) TCP() string {
 
 func (address *sAddress) HTTP() string {
 	return address.FHTTP
-}
-
-func (block *sBlock) Address() string {
-	return block.FAddress
-}
-
-func (block *sBlock) IsRedirect() bool {
-	return block.FRedirect
 }

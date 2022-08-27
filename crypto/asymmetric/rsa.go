@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/crypto/hashing"
+	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 )
 
 const (
-	GRSAKeyType = "go-peer/rsa"
+	CRSAKeyType = settings.CGopeerPrefix + "rsa"
 )
 
 /*
@@ -58,7 +59,7 @@ func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
 		return newPrivKey(privKey)
 	case string:
 		var (
-			prefix = fmt.Sprintf("Priv(%s){", GRSAKeyType)
+			prefix = fmt.Sprintf("Priv(%s){", CRSAKeyType)
 			suffix = "}"
 		)
 
@@ -103,7 +104,7 @@ func (key *sRSAPrivKey) String() string {
 }
 
 func (key *sRSAPrivKey) Type() string {
-	return GRSAKeyType
+	return CRSAKeyType
 }
 
 func (key *sRSAPrivKey) Size() uint64 {
@@ -167,7 +168,7 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 		return newPubKey(pub)
 	case string:
 		var (
-			prefix = fmt.Sprintf("Pub(%s){", GRSAKeyType)
+			prefix = fmt.Sprintf("Pub(%s){", CRSAKeyType)
 			suffix = "}"
 		)
 
@@ -212,7 +213,7 @@ func (key *sRSAPubKey) String() string {
 }
 
 func (key *sRSAPubKey) Type() string {
-	return GRSAKeyType
+	return CRSAKeyType
 }
 
 func (key *sRSAPubKey) Size() uint64 {
@@ -244,11 +245,11 @@ func (addr *sAddress) String() string {
 }
 
 func (addr *sAddress) Type() string {
-	return GRSAKeyType
+	return CRSAKeyType
 }
 
 func (addr *sAddress) Size() uint64 {
-	return hashing.GSHA256Size
+	return hashing.CSHA256Size
 }
 
 // Used RSA(OAEP).

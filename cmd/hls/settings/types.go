@@ -12,11 +12,11 @@ type SStatusResponse struct {
 }
 
 type SResponse struct {
-	Result []byte `json:"result"`
+	Result string `json:"result"`
 	Return int    `json:"return"`
 }
 
 type SRequest struct {
 	Receiver string `json:"receiver"` // public key
-	Data     []byte `json:"data"`
+	HexData  string `json:"hex_data"` // data in hex encode
 }

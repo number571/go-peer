@@ -1,22 +1,26 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/number571/go-peer/client"
 	"github.com/number571/go-peer/cmd/hls/config"
-	"github.com/number571/go-peer/cmd/hls/logger"
 	"github.com/number571/go-peer/crypto/asymmetric"
-	"github.com/number571/go-peer/database"
 	"github.com/number571/go-peer/friends"
-	"github.com/number571/go-peer/netanon"
+	"github.com/number571/go-peer/logger"
 	"github.com/number571/go-peer/network"
+	"github.com/number571/go-peer/network/anonymity"
+	"github.com/number571/go-peer/network/conn_keeper"
 	"github.com/number571/go-peer/queue"
 	"github.com/number571/go-peer/storage"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/storage/database"
 	"github.com/number571/go-peer/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
@@ -31,10 +35,10 @@ func hlsDefaultInit() error {
 	flag.Parse()
 
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
-	gConfig = config.NewConfig("hls.cfg")
+	gConfig = config.NewConfig(hls_settings.CPathCFG)
 
-	privKey := getPrivKey(
-		"hls.stg",
+	privKey := initPrivKey(
+		hls_settings.CPathSTG,
 		[]byte(utils.NewInput("Password#Stg: ").Password()),
 		[]byte(utils.NewInput("Password#Obj: ").Password()),
 	)
@@ -42,8 +46,31 @@ func hlsDefaultInit() error {
 		return fmt.Errorf("failed load private key")
 	}
 
-	gNode = netanon.NewNode(
-		netanon.NewSettings(&netanon.SSettings{
+	gLogger.Info(privKey.PubKey().String())
+	if initOnly {
+		os.Exit(0)
+	}
+
+	gServerHTTP = initServerHTTP(gConfig, gLogger)
+	gNode = initNode(gConfig, gLogger, privKey)
+	if err := gNode.Run(); err != nil {
+		return err
+	}
+
+	return conn_keeper.NewConnKeeper(
+		conn_keeper.NewSettings(
+			&conn_keeper.SSettings{
+				FConnections: gConfig.Connections(),
+				FDuration:    time.Minute,
+			},
+		),
+		gNode.Network(),
+	).Run()
+}
+
+func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPrivKey) anonymity.INode {
+	node := anonymity.NewNode(
+		anonymity.NewSettings(&anonymity.SSettings{
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
 			FTimeWait:     hls_settings.CWaitTime,
 		}),
@@ -74,21 +101,60 @@ func hlsDefaultInit() error {
 					FWorkSize:    hls_settings.CWorkSize,
 					FMessageSize: hls_settings.CMessageSize,
 				}),
-				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+				privKey,
 			),
 		),
-		friends.NewF2F(),
-	)
+		func() friends.IF2F {
+			f2f := friends.NewF2F()
+			for _, pubKey := range cfg.Friends() {
+				f2f.Append(pubKey)
+			}
+			return f2f
+		}(),
+	).Handle(hls_settings.CHeaderHLS, handleTCP)
 
-	gLogger.Info(privKey.PubKey().String())
-	if initOnly {
-		os.Exit(0)
-	}
+	go func() {
+		gLogger.Info(fmt.Sprintf("TCP is listening [%s]...", gConfig.Address().TCP()))
 
-	return nil
+		// if node in client mode
+		// then run endless loop
+		if gConfig.Address().TCP() == "" {
+			select {}
+		}
+
+		// run node in server mode
+		err := gNode.Network().Listen(gConfig.Address().TCP())
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			gLogger.Warning(err.Error())
+		}
+	}()
+
+	return node
 }
 
-func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
+func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", handleIndexHTTP)
+	mux.HandleFunc("/request", handleRequestHTTP)
+
+	srv := &http.Server{
+		Addr:    cfg.Address().HTTP(),
+		Handler: mux,
+	}
+
+	go func() {
+		logger.Info(fmt.Sprintf("HTTP is listening [%s]...", cfg.Address().HTTP()))
+		err := srv.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Warning(err.Error())
+		}
+	}()
+
+	return srv
+}
+
+func initPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
 	// create/open storage
 	storage := storage.NewCryptoStorage(
 		filepath,

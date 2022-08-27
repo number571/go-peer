@@ -1,8 +1,9 @@
 package settings
 
 const (
-	CMaskNetwork = 0xAFFFFFFFFFFFFFFA
-	CMaskRoute   = 0xBFFFFFFFFFFFFFFB
+	CGopeerPrefix = "go-peer/"
+	CMaskNetwork  = 0xAFFFFFFFFFFFFFFA
+	CMaskRoute    = 0xBFFFFFFFFFFFFFFB
 )
 
 const (
@@ -10,5 +11,4 @@ const (
 	CSizeUint64  = 8  // bytes
 	CBitsInByte  = 8
 	CNull        = 0
-	CHexMulty    = 2
 )

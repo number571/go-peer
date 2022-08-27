@@ -42,7 +42,7 @@ func NewBlock(priv asymmetric.IPrivKey, prevHash []byte, txs []transaction.ITran
 		fValidator: priv.PubKey(),
 	}
 
-	if len(prevHash) != hashing.GSHA256Size {
+	if len(prevHash) != hashing.CSHA256Size {
 		return nil
 	}
 

@@ -15,24 +15,24 @@ type sQueue struct {
 	fMutex    sync.Mutex
 	fSettings ISettings
 	fClient   client.IClient
-	fEnqueue  chan message.IMessage
+	fQueue    chan message.IMessage
 	fMsgPull  *sPull
 }
 
 type sPull struct {
-	fEnable  bool
-	fSignal  chan struct{}
-	fEnqueue chan message.IMessage
+	fEnable bool
+	fSignal chan struct{}
+	fQueue  chan message.IMessage
 }
 
 func NewQueue(sett ISettings, client client.IClient) IQueue {
 	return &sQueue{
 		fSettings: sett,
 		fClient:   client,
-		fEnqueue:  make(chan message.IMessage, sett.GetCapacity()),
+		fQueue:    make(chan message.IMessage, sett.GetCapacity()),
 		fMsgPull: &sPull{
-			fSignal:  make(chan struct{}),
-			fEnqueue: make(chan message.IMessage, sett.GetPullCapacity()),
+			fSignal: make(chan struct{}),
+			fQueue:  make(chan message.IMessage, sett.GetPullCapacity()),
 		},
 	}
 }
@@ -45,10 +45,32 @@ func (q *sQueue) Client() client.IClient {
 	return q.fClient
 }
 
-func (q *sQueue) Start() error {
-	if !q.runFullPull() {
+func (q *sQueue) Run() error {
+	q.fMutex.Lock()
+	defer q.fMutex.Unlock()
+
+	if q.fMsgPull.fEnable {
 		return errors.New("pull already enabled")
 	}
+	q.fMsgPull.fEnable = true
+
+	go func() {
+		for {
+			select {
+			case <-q.fMsgPull.fSignal:
+				q.fMsgPull.fEnable = false
+				return
+			default:
+				currLen := len(q.fMsgPull.fQueue)
+				if uint64(currLen) == q.Settings().GetPullCapacity() {
+					time.Sleep(q.Settings().GetDuration())
+					continue
+				}
+				q.fMsgPull.fQueue <- q.newPseudoMessage()
+			}
+		}
+	}()
+
 	return nil
 }
 
@@ -65,7 +87,7 @@ func (q *sQueue) Close() error {
 }
 
 func (q *sQueue) Enqueue(msg message.IMessage) error {
-	if uint64(len(q.fEnqueue)) == q.Settings().GetCapacity() {
+	if uint64(len(q.fQueue)) == q.Settings().GetCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
 
@@ -73,7 +95,7 @@ func (q *sQueue) Enqueue(msg message.IMessage) error {
 		q.fMutex.Lock()
 		defer q.fMutex.Unlock()
 
-		q.fEnqueue <- msg
+		q.fQueue <- msg
 	}()
 
 	return nil
@@ -86,41 +108,12 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 		q.fMutex.Lock()
 		defer q.fMutex.Unlock()
 
-		if len(q.fEnqueue) == 0 {
-			q.fEnqueue <- (<-q.fMsgPull.fEnqueue)
+		if len(q.fQueue) == 0 {
+			q.fQueue <- (<-q.fMsgPull.fQueue)
 		}
 	}()
 
-	return q.fEnqueue
-}
-
-func (q *sQueue) runFullPull() bool {
-	q.fMutex.Lock()
-	defer q.fMutex.Unlock()
-
-	if q.fMsgPull.fEnable {
-		return false
-	}
-	q.fMsgPull.fEnable = true
-
-	go func() {
-		for {
-			select {
-			case <-q.fMsgPull.fSignal:
-				q.fMsgPull.fEnable = false
-				return
-			default:
-				currLen := len(q.fMsgPull.fEnqueue)
-				if uint64(currLen) == q.Settings().GetPullCapacity() {
-					time.Sleep(q.Settings().GetDuration())
-					continue
-				}
-				q.fMsgPull.fEnqueue <- q.newPseudoMessage()
-			}
-		}
-	}()
-
-	return true
+	return q.fQueue
 }
 
 func (q *sQueue) newPseudoMessage() message.IMessage {

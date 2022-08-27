@@ -8,15 +8,10 @@ type IConfig interface {
 	Address() iAddress
 	Connections() []string
 	Friends() []asymmetric.IPubKey
-	GetService(string) (iBlock, bool)
+	GetService(string) (string, bool)
 }
 
 type iAddress interface {
 	TCP() string
 	HTTP() string
-}
-
-type iBlock interface {
-	Address() string
-	IsRedirect() bool
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/crypto/hashing"
 	"github.com/number571/go-peer/payload"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 const (

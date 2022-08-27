@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/crypto/asymmetric"
 	"github.com/number571/go-peer/encoding"
-	"github.com/number571/go-peer/testutils"
+	"github.com/number571/go-peer/utils/testutils"
 )
 
 const (

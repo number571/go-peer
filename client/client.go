@@ -60,14 +60,14 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 		curPldSize                                     = uint64(len(pl.Bytes()))
 		additionalPadding                              = // = max of usage bytes from static fields
 		(uint64(len((&message.SMessage{}).Bytes()))) + // size of void message
-			(client.PubKey().Size()/settings.CBitsInByte + symmetric.GAESBlockSize*2) + // sender = pubKey[bytes]+IV+BlockAES
+			(client.PubKey().Size()/settings.CBitsInByte + symmetric.CAESBlockSize*2) + // sender = pubKey[bytes]+IV+BlockAES
 			(client.PubKey().Size() / settings.CBitsInByte) + // session key = pubKey[bytes]
-			(settings.CSizeSymmKey + symmetric.GAESBlockSize*2) + // salt = 32[bytes]+IV+BlockAES
-			(hashing.GSHA256Size) + // hash = size(SHA256)
-			(client.PubKey().Size()/settings.CBitsInByte + symmetric.GAESBlockSize*2) + // sign = pubKey[bytes]+IV+BlockAES
+			(settings.CSizeSymmKey + symmetric.CAESBlockSize*2) + // salt = 32[bytes]+IV+BlockAES
+			(hashing.CSHA256Size) + // hash = size(SHA256)
+			(client.PubKey().Size()/settings.CBitsInByte + symmetric.CAESBlockSize*2) + // sign = pubKey[bytes]+IV+BlockAES
 			(settings.CSizeUint64) + // proof = uint64
 			(settings.CSizeUint64) + // head = uint64
-			(symmetric.GAESBlockSize * 2) // payload += IV+BlockAES
+			(symmetric.CAESBlockSize * 2) // payload += IV+BlockAES
 	)
 
 	if maxMsgSize < curPldSize+additionalPadding {
@@ -131,7 +131,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 	}
 
 	// Initial check.
-	if len(msg.Body().Hash()) != hashing.GSHA256Size {
+	if len(msg.Body().Hash()) != hashing.CSHA256Size {
 		return nil, nil, fmt.Errorf("msg hash != sha256 size")
 	}
 

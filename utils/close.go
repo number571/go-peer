@@ -1,5 +1,9 @@
 package utils
 
+type ICloser interface {
+	Close() error
+}
+
 // returns last error from slice
 func CloseAll(cs []ICloser) error {
 	var lastErr error
