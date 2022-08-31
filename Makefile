@@ -17,7 +17,7 @@ test:
 	for i in {1..$(N)}; do \
 		go clean -testcache; \
 		echo $$i; \
-		go test ./...; \
+		go test `go list ./... | grep -v examples`; \
 		if [ $$? != 0 ]; then \
 			exit; \
 		fi; \

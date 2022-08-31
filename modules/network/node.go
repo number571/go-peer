@@ -3,7 +3,6 @@ package network
 import (
 	"net"
 	"sync"
-	"time"
 
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/storage"
@@ -64,19 +63,18 @@ func (node *sNode) Listen(address string) error {
 
 	node.fListener = listen
 	for {
-		node.fMutex.Lock()
-		isConnLimit := node.hasMaxConnSize()
-		node.fMutex.Unlock()
-		if isConnLimit {
-			time.Sleep(200 * time.Millisecond)
-			continue
-		}
-
 		conn, err := listen.Accept()
 		if err != nil {
 			break
 		}
-		conn.SetDeadline(time.Time{})
+
+		node.fMutex.Lock()
+		isConnLimit := node.hasMaxConnSize()
+		node.fMutex.Unlock()
+		if isConnLimit {
+			conn.Close()
+			continue
+		}
 
 		node.fMutex.Lock()
 		iconn := LoadConn(node.fSettings, conn)
@@ -158,7 +156,6 @@ func (node *sNode) Connect(address string) IConn {
 	if err != nil {
 		return nil
 	}
-	conn.SetDeadline(time.Time{})
 
 	iconn := LoadConn(node.fSettings, conn)
 	node.fConnections[address] = iconn
