@@ -9,10 +9,13 @@ import (
 const (
 	CTitlePattern = settings.CGopeerPrefix + "hidden-lake-service"
 	CContentType  = "application/json"
+	CHeaderPubKey = "Sender-Public-Key"
 )
 
 const (
-	CHandleOnline  = "/online"
+	CHandleOnline  = "/network/online"
+	CHandleFriends = "/node/friends"
+	CHandlePubKey  = "/node/pubkey"
 	CHandleRequest = "/do/request"
 )
 
@@ -31,11 +34,11 @@ const (
 	CRetryEnqueue = 2
 	CWaitTime     = time.Minute
 	CWorkSize     = 20        // bits
-	CMessageSize  = (8 << 20) // 8MiB
+	CMessageSize  = (2 << 20) // 2MiB
 )
 
 const (
-	CNetworkCapacity    = (4 << 10) // hashes
+	CNetworkCapacity    = (1 << 10) // hashes
 	CNetworkRetry       = 10        // retryNum for get message
 	CNetworkMaxMessages = 20        // for one client
 	CNetworkMaxConns    = 10
@@ -43,8 +46,8 @@ const (
 )
 
 const (
-	CQueueCapacity     = (1 << 8) // 2n messages in queue
-	CQueuePullCapacity = (1 << 6) // generated fake messages
+	CQueueCapacity     = (1 << 6) // messages in queue
+	CQueuePullCapacity = (1 << 5) // generated fake messages
 	CQueueDuration     = 5 * time.Second
 )
 

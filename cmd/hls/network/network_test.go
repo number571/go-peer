@@ -66,7 +66,7 @@ func TestRequest(t *testing.T) {
 func TestLoadRequest(t *testing.T) {
 	brequest := NewRequest(tcMethod, tcHost, tcPath).
 		WithHead(tgHead).
-		WithBody(tgBody).ToBytes()
+		WithBody(tgBody).Bytes()
 
 	request1 := LoadRequest(brequest)
 	request2 := LoadRequest(tgBRequest)

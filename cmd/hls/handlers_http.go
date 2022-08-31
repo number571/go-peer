@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -17,7 +18,28 @@ func handleIndexHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleOnlineHTTP(w http.ResponseWriter, r *http.Request) {
-	response(w, hls_settings.CErrorNone, strings.Join(gConnKeeper.InOnline(), ","))
+	conns := gNode.Network().Connections()
+	inOnline := make([]string, 0, len(conns))
+	for _, conn := range conns {
+		inOnline = append(inOnline, conn.Socket().RemoteAddr().String())
+	}
+	sort.SliceStable(inOnline, func(i, j int) bool {
+		return inOnline[i] < inOnline[j]
+	})
+	response(w, hls_settings.CErrorNone, strings.Join(inOnline, ","))
+}
+
+func handlePubKeyHTTP(w http.ResponseWriter, r *http.Request) {
+	response(w, hls_settings.CErrorNone, gNode.Queue().Client().PubKey().String())
+}
+
+func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
+	listPubKeys := gNode.F2F().List()
+	listPubKeysStr := make([]string, 0, len(listPubKeys))
+	for _, pubKey := range listPubKeys {
+		listPubKeysStr = append(listPubKeysStr, pubKey.String())
+	}
+	response(w, hls_settings.CErrorNone, strings.Join(listPubKeysStr, ","))
 }
 
 func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
@@ -34,13 +56,13 @@ func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pubKey := asymmetric.LoadRSAPubKey(vRequest.Receiver)
+	pubKey := asymmetric.LoadRSAPubKey(vRequest.FReceiver)
 	if pubKey == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: load public key")
 		return
 	}
 
-	data := encoding.HexDecode(vRequest.HexData)
+	data := encoding.HexDecode(vRequest.FHexData)
 	if data == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: decode hex format data")
 		return
@@ -61,7 +83,7 @@ func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
 func response(w http.ResponseWriter, ret int, res string) {
 	w.Header().Set("Content-Type", hls_settings.CContentType)
 	json.NewEncoder(w).Encode(&hls_settings.SResponse{
-		Result: res,
-		Return: ret,
+		FResult: res,
+		FReturn: ret,
 	})
 }

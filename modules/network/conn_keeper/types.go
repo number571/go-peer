@@ -4,7 +4,6 @@ import "time"
 
 type IConnKeeper interface {
 	Settings() ISettings
-	InOnline() []string
 
 	Run() error
 	Close() error

@@ -16,7 +16,6 @@ type sConnKeeper struct {
 	fMutex    sync.Mutex
 	fEnable   bool
 	fSignal   chan struct{}
-	fInOnline []string
 	fNode     network.INode
 	fSettings ISettings
 }
@@ -31,10 +30,6 @@ func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
 
 func (connKeeper *sConnKeeper) Settings() ISettings {
 	return connKeeper.fSettings
-}
-
-func (connKeeper *sConnKeeper) InOnline() []string {
-	return connKeeper.fInOnline
 }
 
 func (connKeeper *sConnKeeper) Run() error {
@@ -53,7 +48,7 @@ func (connKeeper *sConnKeeper) Run() error {
 				connKeeper.fEnable = false
 				return
 			default:
-				connKeeper.fInOnline = connKeeper.tryConnectToAll()
+				connKeeper.tryConnectToAll()
 				time.Sleep(connKeeper.Settings().GetDuration())
 			}
 		}
@@ -74,21 +69,14 @@ func (connKeeper *sConnKeeper) Close() error {
 	return nil
 }
 
-func (connKeeper *sConnKeeper) tryConnectToAll() []string {
-	listOfOnline := make([]string, 0, len(connKeeper.Settings().GetConnections()))
+func (connKeeper *sConnKeeper) tryConnectToAll() {
+NEXT:
 	for _, address := range connKeeper.Settings().GetConnections() {
-		for _, conn := range connKeeper.fNode.Connections() {
-			connAddr := conn.Socket().RemoteAddr().String()
-			if connAddr == address {
-				listOfOnline = append(listOfOnline, connAddr)
-				continue
+		for addr := range connKeeper.fNode.Connections() {
+			if addr == address {
+				continue NEXT
 			}
 		}
-		conn := connKeeper.fNode.Connect(address)
-		if conn == nil {
-			continue
-		}
-		listOfOnline = append(listOfOnline, address)
+		connKeeper.fNode.Connect(address)
 	}
-	return listOfOnline
 }

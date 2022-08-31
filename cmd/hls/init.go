@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/filesystem"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/inputter"
 	"github.com/number571/go-peer/modules/logger"
@@ -29,21 +30,36 @@ import (
 func hlsDefaultInit() error {
 	var (
 		initOnly bool
+		inputKey string
 	)
 
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
+	flag.StringVar(&inputKey, "input-key", "", "[INSECURE] input private key from file")
 	flag.Parse()
 
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig(hls_settings.CPathCFG)
 
-	privKey := initPrivKey(
-		hls_settings.CPathSTG,
-		[]byte(inputter.NewInputter("Password#Stg: ").Password()),
-		[]byte(inputter.NewInputter("Password#Obj: ").Password()),
-	)
-	if privKey == nil {
-		return fmt.Errorf("failed load private key")
+	var privKey asymmetric.IPrivKey
+	switch inputKey {
+	case "":
+		privKey = initPrivKey(
+			hls_settings.CPathSTG,
+			[]byte(inputter.NewInputter("Password#Stg: ").Password()),
+			[]byte(inputter.NewInputter("Password#Obj: ").Password()),
+		)
+		if privKey == nil {
+			return fmt.Errorf("failed load private key")
+		}
+	default:
+		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
+		if err != nil {
+			return err
+		}
+		privKey = asymmetric.LoadRSAPrivKey(string(privKeyStr))
+		if privKey == nil {
+			return fmt.Errorf("private key is invalid")
+		}
 	}
 
 	gLogger.Info(privKey.PubKey().String())
@@ -51,12 +67,12 @@ func hlsDefaultInit() error {
 		os.Exit(0)
 	}
 
-	gServerHTTP = initServerHTTP(gConfig, gLogger)
 	gNode = initNode(gConfig, gLogger, privKey)
 	if err := gNode.Run(); err != nil {
 		return err
 	}
 
+	gServerHTTP = initServerHTTP(gConfig, gLogger)
 	gConnKeeper = conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
 			FConnections: gConfig.Connections(),
@@ -69,6 +85,31 @@ func hlsDefaultInit() error {
 	}
 
 	return nil
+}
+
+func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", handleIndexHTTP)
+	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP)
+	mux.HandleFunc(hls_settings.CHandlePubKey, handlePubKeyHTTP)
+	mux.HandleFunc(hls_settings.CHandleFriends, handleFriendsHTTP)
+	mux.HandleFunc(hls_settings.CHandleRequest, handleRequestHTTP)
+
+	srv := &http.Server{
+		Addr:    cfg.Address().HTTP(),
+		Handler: mux,
+	}
+
+	go func() {
+		logger.Info(fmt.Sprintf("HTTP is listening [%s]...", cfg.Address().HTTP()))
+		err := srv.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Warning(err.Error())
+		}
+	}()
+
+	return srv
 }
 
 func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPrivKey) anonymity.INode {
@@ -117,8 +158,6 @@ func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPri
 	).Handle(hls_settings.CHeaderHLS, handleTCP)
 
 	go func() {
-		gLogger.Info(fmt.Sprintf("TCP is listening [%s]...", gConfig.Address().TCP()))
-
 		// if node in client mode
 		// then run endless loop
 		if gConfig.Address().TCP() == "" {
@@ -126,6 +165,7 @@ func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPri
 		}
 
 		// run node in server mode
+		gLogger.Info(fmt.Sprintf("TCP is listening [%s]...", gConfig.Address().TCP()))
 		err := gNode.Network().Listen(gConfig.Address().TCP())
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			gLogger.Warning(err.Error())
@@ -133,29 +173,6 @@ func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPri
 	}()
 
 	return node
-}
-
-func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/", handleIndexHTTP)
-	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP)
-	mux.HandleFunc(hls_settings.CHandleRequest, handleRequestHTTP)
-
-	srv := &http.Server{
-		Addr:    cfg.Address().HTTP(),
-		Handler: mux,
-	}
-
-	go func() {
-		logger.Info(fmt.Sprintf("HTTP is listening [%s]...", cfg.Address().HTTP()))
-		err := srv.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Warning(err.Error())
-		}
-	}()
-
-	return srv
 }
 
 func initPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {

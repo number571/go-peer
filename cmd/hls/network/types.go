@@ -1,7 +1,7 @@
 package network
 
 type IRequest interface {
-	ToBytes() []byte
+	Bytes() []byte
 
 	WithHead(map[string]string) IRequest
 	WithBody([]byte) IRequest

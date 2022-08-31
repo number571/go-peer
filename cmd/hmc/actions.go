@@ -10,45 +10,46 @@ import (
 	"syscall"
 
 	"github.com/number571/go-peer/cmd/hms/hmc"
+	"github.com/number571/go-peer/modules/action"
 	"github.com/number571/go-peer/modules/inputter"
 	"github.com/number571/go-peer/modules/payload"
 )
 
-func newActions() iActions {
-	return iActions{
-		"": newAction(
+func newActions() action.IActions {
+	return action.IActions{
+		"": action.NewAction(
 			"",
 			func() {},
 		),
-		"exit": newAction(
+		"exit": action.NewAction(
 			"exit from application",
 			func() { syscall.Kill(os.Getpid(), syscall.SIGINT) },
 		),
-		"help": newAction(
+		"help": action.NewAction(
 			"get help information about this application",
 			helpAction,
 		),
-		"whoami": newAction(
+		"whoami": action.NewAction(
 			"get information about authorized user",
 			whoamiAction,
 		),
-		"size": newAction(
+		"size": action.NewAction(
 			"get count of emails and pages in user database",
 			sizeAction,
 		),
-		"list": newAction(
+		"list": action.NewAction(
 			"get list of emails by page (10 emails in 1 page)",
 			listAction,
 		),
-		"read": newAction(
+		"read": action.NewAction(
 			"get full information about 1 email by ID",
 			readAction,
 		),
-		"push": newAction(
+		"push": action.NewAction(
 			"create new email and push this to servers",
 			pushAction,
 		),
-		"load": newAction(
+		"load": action.NewAction(
 			"try load all emails to authorized user from servers",
 			loadAction,
 		),
@@ -58,7 +59,7 @@ func newActions() iActions {
 func helpAction() {
 	type sActionWithKey struct {
 		fKey    string
-		fAction iAction
+		fAction action.IAction
 	}
 
 	actions := []*sActionWithKey{}

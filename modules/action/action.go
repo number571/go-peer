@@ -1,7 +1,7 @@
-package main
+package action
 
 var (
-	_ iAction = &sAction{}
+	_ IAction = &sAction{}
 )
 
 type sAction struct {
@@ -9,7 +9,7 @@ type sAction struct {
 	fHandler     func()
 }
 
-func newAction(description string, handler func()) iAction {
+func NewAction(description string, handler func()) IAction {
 	return &sAction{
 		fDescription: description,
 		fHandler:     handler,

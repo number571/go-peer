@@ -5,13 +5,6 @@ import (
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
-type iActions map[string]iAction
-
-type iAction interface {
-	Description() string
-	Do()
-}
-
 type iWrapper interface {
 	Config() iConfigWrapper
 }

@@ -3,7 +3,6 @@ package network
 import (
 	"net"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/number571/go-peer/modules/payload"
@@ -65,26 +64,27 @@ func (node *sNode) Listen(address string) error {
 
 	node.fListener = listen
 	for {
+		node.fMutex.Lock()
+		isConnLimit := node.hasMaxConnSize()
+		node.fMutex.Unlock()
+		if isConnLimit {
+			time.Sleep(200 * time.Millisecond)
+			continue
+		}
+
 		conn, err := listen.Accept()
 		if err != nil {
 			break
 		}
-
-		node.fMutex.Lock()
-		isConnLimit := node.hasMaxConnSize()
-		node.fMutex.Unlock()
-
-		if isConnLimit {
-			conn.Close()
-			continue
-		}
+		conn.SetDeadline(time.Time{})
 
 		node.fMutex.Lock()
 		iconn := LoadConn(node.fSettings, conn)
-		node.fConnections[iconn.Socket().RemoteAddr().String()] = iconn
+		address := iconn.Socket().RemoteAddr().String()
+		node.fConnections[address] = iconn
 		node.fMutex.Unlock()
 
-		go node.handleConn(iconn)
+		go node.handleConn(address, iconn)
 	}
 
 	return nil
@@ -121,51 +121,27 @@ func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) handleConn(conn IConn) {
-	defer node.Disconnect(conn)
-
-	var (
-		retryCounter = uint64(0)
-		msgCounter   = int64(0)
-	)
-
+func (node *sNode) handleConn(address string, conn IConn) {
+	defer node.Disconnect(address)
 	for {
-		if atomic.LoadUint64(&retryCounter) > node.Settings().GetRetryNum() {
+		ok := node.handleMessage(conn, conn.Read())
+		if !ok {
 			break
 		}
-
-		if uint64(atomic.LoadInt64(&msgCounter)) > node.Settings().GetMaxMessages() {
-			time.Sleep(200 * time.Millisecond)
-			continue
-		}
-
-		msg := conn.Read()
-		go func(msg IMessage) {
-			atomic.AddInt64(&msgCounter, 1)
-			defer atomic.AddInt64(&msgCounter, -1)
-
-			ok := node.handleMessage(conn, msg)
-			if ok {
-				atomic.StoreUint64(&retryCounter, 0)
-				return
-			}
-
-			atomic.AddUint64(&retryCounter, 1)
-		}(msg)
 	}
 }
 
 // Get list of connection addresses.
-func (node *sNode) Connections() []IConn {
+func (node *sNode) Connections() map[string]IConn {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	var list []IConn
-	for _, conn := range node.fConnections {
-		list = append(list, conn)
+	var mapping = make(map[string]IConn)
+	for addr, conn := range node.fConnections {
+		mapping[addr] = conn
 	}
 
-	return list
+	return mapping
 }
 
 // Connect to node by address.
@@ -182,21 +158,26 @@ func (node *sNode) Connect(address string) IConn {
 	if err != nil {
 		return nil
 	}
+	conn.SetDeadline(time.Time{})
 
 	iconn := LoadConn(node.fSettings, conn)
-	node.fConnections[iconn.Socket().RemoteAddr().String()] = iconn
+	node.fConnections[address] = iconn
 
-	go node.handleConn(iconn)
-
+	go node.handleConn(address, iconn)
 	return iconn
 }
 
-func (node *sNode) Disconnect(conn IConn) error {
+func (node *sNode) Disconnect(address string) error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	delete(node.fConnections, conn.Socket().RemoteAddr().String())
-	return conn.Close()
+	conn, ok := node.fConnections[address]
+	if ok {
+		conn.Close()
+	}
+
+	delete(node.fConnections, address)
+	return nil
 }
 
 func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {

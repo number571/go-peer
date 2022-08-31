@@ -11,7 +11,7 @@ type IHandlerF func(INode, IConn, payload.IPayload)
 
 type INode interface {
 	Settings() ISettings
-	Connections() []IConn
+	Connections() map[string]IConn
 
 	Handle(uint64, IHandlerF) INode
 	Broadcast(payload.IPayload) error
@@ -20,7 +20,7 @@ type INode interface {
 	Close() error
 
 	Connect(string) IConn
-	Disconnect(IConn) error
+	Disconnect(string) error
 }
 
 type IConnKeeper interface {
@@ -29,11 +29,9 @@ type IConnKeeper interface {
 }
 
 type ISettings interface {
-	GetRetryNum() uint64
 	GetCapacity() uint64
 	GetMessageSize() uint64
 	GetMaxConnects() uint64
-	GetMaxMessages() uint64
 	GetTimeWait() time.Duration
 }
 

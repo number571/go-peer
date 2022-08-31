@@ -6,16 +6,17 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	hlsnet "github.com/number571/go-peer/cmd/hls/network"
+	hls_network "github.com/number571/go-peer/cmd/hls/network"
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/network/anonymity"
 	"github.com/number571/go-peer/modules/payload"
 )
 
-func handleTCP(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
+func handleTCP(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPayload) []byte {
 	// load request from message's body
 	requestBytes := pld.Body()
-	request := hlsnet.LoadRequest(requestBytes)
+	request := hls_network.LoadRequest(requestBytes)
 	if request == nil {
 		return nil
 	}
@@ -35,6 +36,9 @@ func handleTCP(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload)
 	if err != nil {
 		return nil
 	}
+
+	// set headers
+	req.Header.Add(hls_settings.CHeaderPubKey, sender.String())
 	for key, val := range request.Head() {
 		req.Header.Add(key, val)
 	}

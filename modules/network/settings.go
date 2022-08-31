@@ -53,10 +53,6 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetRetryNum() uint64 {
-	return s.FCapacity
-}
-
 func (s *SSettings) GetCapacity() uint64 {
 	return s.FCapacity
 }
@@ -67,10 +63,6 @@ func (s *SSettings) GetMessageSize() uint64 {
 
 func (s *SSettings) GetMaxConnects() uint64 {
 	return s.FMaxConns
-}
-
-func (s *SSettings) GetMaxMessages() uint64 {
-	return s.FMaxMessages
 }
 
 func (s *SSettings) GetTimeWait() time.Duration {

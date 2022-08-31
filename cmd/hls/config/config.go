@@ -16,16 +16,16 @@ var (
 
 type sConfig struct {
 	FAddress     *sAddress         `json:"address"`
-	FServices    map[string]string `json:"services"`
-	FConnections []string          `json:"connections"`
-	FFriends     []string          `json:"friends"`
+	FServices    map[string]string `json:"services,omitempty"`
+	FConnections []string          `json:"connections,omitempty"`
+	FFriends     []string          `json:"friends,omitempty"`
 
 	fMutex   sync.Mutex
 	fFriends []asymmetric.IPubKey
 }
 
 type sAddress struct {
-	FTCP  string `json:"tcp"`
+	FTCP  string `json:"tcp,omitempty"`
 	FHTTP string `json:"http"`
 }
 
