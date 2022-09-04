@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"io/ioutil"
 	"os"
 )
 
@@ -20,7 +19,7 @@ func OpenFile(path string) IFile {
 }
 
 func (file *sFile) Read() ([]byte, error) {
-	data, err := ioutil.ReadFile(file.fPath)
+	data, err := os.ReadFile(file.fPath)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +27,7 @@ func (file *sFile) Read() ([]byte, error) {
 }
 
 func (file *sFile) Write(data []byte) error {
-	return ioutil.WriteFile(file.fPath, data, 0644)
+	return os.WriteFile(file.fPath, data, 0644)
 }
 
 func (file *sFile) IsExist() bool {

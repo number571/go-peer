@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
@@ -16,7 +16,7 @@ func handlePushHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg, err := ioutil.ReadAll(r.Body)
+	msg, err := io.ReadAll(r.Body)
 	if err != nil {
 		response(w, hls_settings.CErrorResponse, "failed: response message")
 		return

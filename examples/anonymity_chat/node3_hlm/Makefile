@@ -9,6 +9,7 @@ run:
 	sleep .5
 	./prog_hlm3
 clean:
-	rm -f prog_hls3 prog_hlm3
 	pkill prog_hls3 || true
 	pkill prog_hlm3 || true
+	rm -f prog_hls3 prog_hlm3
+	

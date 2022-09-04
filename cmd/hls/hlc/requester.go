@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -104,7 +103,7 @@ func (requester *sRequester) PubKey() (asymmetric.IPubKey, error) {
 }
 
 func loadResponse(reader io.ReadCloser) (*hls_settings.SResponse, error) {
-	body, err := ioutil.ReadAll(reader)
+	body, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

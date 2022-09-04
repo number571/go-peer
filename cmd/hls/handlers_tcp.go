@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
@@ -51,7 +51,7 @@ func handleTCP(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPay
 	}
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil
 	}

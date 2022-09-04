@@ -7,5 +7,5 @@ run:
 	./prog_hls --input-key priv.key &
 	sleep .5
 clean:
-	rm -f prog_hls 
 	pkill prog_hls || true
+	rm -f prog_hls 

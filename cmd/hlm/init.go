@@ -21,7 +21,7 @@ func hlmDefaultInit() error {
 	)
 
 	flag.BoolVar(&initOnly, "init", false, "run initialization only")
-	flag.StringVar(&readOnly, "read-only", "", "read only mode with one friend")
+	flag.StringVar(&readOnly, "read-only", "", "read-only mode from one channel")
 	flag.Parse()
 
 	gConfig = config.NewConfig(hlm_settings.CPathCFG)
