@@ -20,8 +20,9 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings ISettings
-	fPrivKey  asymmetric.IPrivKey
+	fSettings    ISettings
+	fPrivKey     asymmetric.IPrivKey
+	fVoidMsgSize int
 }
 
 // Create client by private key as identification.
@@ -30,10 +31,24 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 	if priv == nil {
 		return nil
 	}
-	return &sClient{
+	client := &sClient{
 		fSettings: sett,
 		fPrivKey:  priv,
 	}
+	msg, err := client.encryptWithParams(
+		client.PubKey(),
+		payload.NewPayload(0, []byte{}),
+		0,
+		0,
+	)
+	if err != nil {
+		return nil
+	}
+	// saved message size with hex encoding
+	// because exists not encoded chars <{}",>
+	// of JSON format
+	client.fVoidMsgSize = len(msg.Bytes())
+	return client
 }
 
 // Get public key from client object.
@@ -54,45 +69,45 @@ func (client *sClient) Settings() ISettings {
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
 func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) (message.IMessage, error) {
-	const (
-		bitsInByte = 8
-	)
+	if receiver.Size() != client.PubKey().Size() {
+		return nil, fmt.Errorf("size of public keys sender and receiver not equal")
+	}
+
 	var (
-		maxMsgSize                                     = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
-		curPldSize                                     = uint64(len(pl.Bytes()))
-		additionalPadding                              = // = max of usage bytes from static fields
-		(uint64(len((&message.SMessage{}).Bytes()))) + // size of void message
-			(client.PubKey().Size()/bitsInByte + symmetric.CAESBlockSize*2) + // sender = pubKey[bytes]+IV+BlockAES
-			(client.PubKey().Size() / bitsInByte) + // session key = pubKey[bytes]
-			(symmetric.CAESKeySize + symmetric.CAESBlockSize*2) + // salt = 32[bytes]+IV+BlockAES
-			(hashing.CSHA256Size) + // hash = size(SHA256)
-			(client.PubKey().Size()/bitsInByte + symmetric.CAESBlockSize*2) + // sign = pubKey[bytes]+IV+BlockAES
-			(encoding.CSizeUint64) + // proof = uint64
-			(encoding.CSizeUint64) + // head = uint64
-			(symmetric.CAESBlockSize * 2) // payload += IV+BlockAES
+		maxMsgSize = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
+		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pl.Bytes()))
 	)
 
-	if maxMsgSize < curPldSize+additionalPadding {
+	if resultSize > maxMsgSize {
 		return nil, fmt.Errorf(
 			"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
 			maxMsgSize,
-			curPldSize+additionalPadding,
+			resultSize,
 		)
 	}
 
+	return client.encryptWithParams(
+		receiver,
+		pl,
+		client.Settings().GetWorkSize(),
+		maxMsgSize-resultSize,
+	)
+}
+
+func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload.IPayload, workSize, addPadd uint64) (message.IMessage, error) {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.Bytes(symmetric.CAESKeySize)
 		session = rand.Bytes(symmetric.CAESKeySize)
 	)
 
-	paddingBytes := rand.Bytes(maxMsgSize - (curPldSize + additionalPadding))
+	payloadBytes := pl.Bytes()
 	doublePayload := payload.NewPayload(
-		curPldSize,
+		uint64(len(payloadBytes)),
 		bytes.Join(
 			[][]byte{
-				pl.Bytes(),
-				paddingBytes,
+				payloadBytes,
+				rand.Bytes(addPadd),
 			},
 			[]byte{},
 		),
@@ -109,7 +124,7 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 	)).Bytes()
 
 	cipher := symmetric.NewAESCipher(session)
-	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(client.Settings().GetWorkSize()).Proof(hash))
+	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(workSize).Proof(hash))
 	return &message.SMessage{
 		FHead: message.SHeadMessage{
 			FSender:  encoding.HexEncode(cipher.Encrypt(client.PubKey().Bytes())),

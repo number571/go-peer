@@ -9,6 +9,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	"github.com/number571/go-peer/modules/action"
 	"github.com/number571/go-peer/modules/inputter"
@@ -100,7 +101,7 @@ func loadAction() {
 		}
 
 		// infinite loop protection
-		if size > cReceiveSize {
+		if size > settings.CReceiveSize {
 			fmt.Println("size of messages > limit")
 			continue
 		}
@@ -123,11 +124,11 @@ func loadAction() {
 				}
 			}
 
-			if pld.Head() != cHeadPayload {
+			if pld.Head() != settings.CHeadPayload {
 				continue
 			}
 
-			if len(strings.Split(string(pld.Body()), cSeparator)) < 2 {
+			if len(strings.Split(string(pld.Body()), settings.CSeparator)) < 2 {
 				continue
 			}
 
@@ -152,7 +153,7 @@ func sizeAction() {
 		return
 	}
 
-	pages := int(math.Ceil(float64(size) / float64(cCountInPage)))
+	pages := int(math.Ceil(float64(size) / float64(settings.CCountInPage)))
 
 	fmt.Printf("Count: %d\n", size)
 	fmt.Printf("Pages: %d\n", pages)
@@ -166,13 +167,13 @@ func listAction() {
 		return
 	}
 
-	start := (pageInt - 1) * cCountInPage
+	start := (pageInt - 1) * settings.CCountInPage
 	if start < 0 {
 		fmt.Println("Page can't be <= 0")
 		return
 	}
 
-	for pointer := start; pointer < start+cCountInPage; pointer++ {
+	for pointer := start; pointer < start+settings.CCountInPage; pointer++ {
 		msg, err := gDB.Load(gClient.PubKey().Address().Bytes(), uint64(pointer))
 		if err != nil {
 			break
@@ -183,14 +184,14 @@ func listAction() {
 			panic(err)
 		}
 
-		title := []rune(strings.Split(string(pld.Body()), cSeparator)[0])
-		if len(title) > cListLenTitle {
-			title = []rune(string(title[:cListLenTitle-3]) + "...")
+		title := []rune(strings.Split(string(pld.Body()), settings.CSeparator)[0])
+		if len(title) > settings.CListLenTitle {
+			title = []rune(string(title[:settings.CListLenTitle-3]) + "...")
 		}
 
 		name, _ := gWrapper.Config().GetNameByPubKey(pubKey)
 		fmt.Printf("%s\nID: %d;\nFrom: %s [%s];\nTitle: %s;\n",
-			cSeparator,
+			settings.CSeparator,
 			pointer,
 			pubKey.Address().String(),
 			name,
@@ -218,17 +219,17 @@ func readAction() {
 	}
 
 	from, _ := gWrapper.Config().GetNameByPubKey(pubKey)
-	splited := strings.Split(string(pld.Body()), cSeparator)
+	splited := strings.Split(string(pld.Body()), settings.CSeparator)
 
 	fmt.Printf("%s\nFROM:\n%s [%s]\n%s\nTITLE:\n%s\n%s\nMESSAGE:\n%s\n%s\nPUBLIC_KEY:\n%s\n",
-		cSeparator,
+		settings.CSeparator,
 		pubKey.Address().String(),
 		from,
-		cSeparator,
+		settings.CSeparator,
 		splited[0],
-		cSeparator,
-		strings.Join(splited[1:], cSeparator),
-		cSeparator,
+		settings.CSeparator,
+		strings.Join(splited[1:], settings.CSeparator),
+		settings.CSeparator,
 		pubKey.String(),
 	)
 }
@@ -257,8 +258,8 @@ func pushAction() {
 	pushReq := hmc.NewBuilder(gClient).Push(
 		pubKey,
 		payload.NewPayload(
-			cHeadPayload,
-			[]byte(fmt.Sprintf("%s%s%s", title, cSeparator, msg)),
+			settings.CHeadPayload,
+			[]byte(fmt.Sprintf("%s%s%s", title, settings.CSeparator, msg)),
 		),
 	)
 	for _, addr := range gWrapper.Config().Original().Connections() {

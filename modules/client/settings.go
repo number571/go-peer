@@ -10,10 +10,10 @@ type SSettings struct {
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return &SSettings{
+	return (&SSettings{
 		FWorkSize:    sett.FWorkSize,
 		FMessageSize: sett.FMessageSize,
-	}
+	}).useDefaultValues()
 }
 
 func (s *SSettings) useDefaultValues() ISettings {

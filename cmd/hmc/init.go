@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hmc/config"
+	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/inputter"
@@ -46,7 +47,7 @@ func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivK
 	storage := storage.NewCryptoStorage(
 		filepath,
 		storageKey,
-		cWorkSize,
+		settings.CWorkSize,
 	)
 	if storage == nil {
 		return nil
@@ -63,7 +64,7 @@ func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivK
 	switch strings.ToLower(answ) {
 	case "y", "yes":
 		// generate private key
-		priv := asymmetric.NewRSAPrivKey(cAKeySize)
+		priv := asymmetric.NewRSAPrivKey(settings.CAKeySize)
 		err := storage.Set(objectKey, priv.Bytes())
 		if err != nil {
 			panic(err)
