@@ -65,6 +65,7 @@ func (node *sNode) Run() error {
 }
 
 func (node *sNode) Close() error {
+	node.Network().Handle(settings.CMaskNetwork, nil)
 	return closer.CloseAll([]closer.ICloser{
 		node.KeyValueDB(),
 		node.Network(),

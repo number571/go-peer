@@ -190,7 +190,7 @@ func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {
 
 	// get function by head
 	f, ok := node.getFunction(msg.Payload().Head())
-	if !ok {
+	if !ok || f == nil {
 		return false
 	}
 

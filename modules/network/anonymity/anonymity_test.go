@@ -72,12 +72,10 @@ func TestF2FWithoutFriends(t *testing.T) {
 	nodes[0].F2F().Remove(nodes[1].Queue().Client().PubKey())
 	nodes[1].F2F().Remove(nodes[0].Queue().Client().PubKey())
 
-	reqBody := fmt.Sprintf("%s", testutils.TcLargeBody)
-
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].Request(
 		nodes[1].Queue().Client().PubKey(),
-		payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
+		payload_adapter.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err != nil {
 		return
