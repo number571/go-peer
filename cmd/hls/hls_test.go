@@ -175,6 +175,8 @@ func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPaylo
 // CLIENT
 
 func testStartClientHLS() (anonymity.INode, error) {
+	time.Sleep(200 * time.Millisecond)
+
 	node := testNewNode(1)
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")

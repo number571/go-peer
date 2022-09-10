@@ -14,6 +14,7 @@ push: test
 	git push 
 
 test:
+	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		go clean -testcache; \
 		echo $$i; \
@@ -21,4 +22,5 @@ test:
 		if [ $$? != 0 ]; then \
 			exit; \
 		fi; \
-	done
+	done; \
+	echo "Build took $$(($$(date +%s)-d)) seconds";
