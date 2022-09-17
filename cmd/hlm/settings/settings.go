@@ -8,7 +8,7 @@ const (
 
 const (
 	CPathCFG = "hlm.cfg"
-	// CPathDB  = "hlm.db"
+	CPathDB  = "hlm.db"
 )
 
 const (

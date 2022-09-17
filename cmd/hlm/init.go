@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/number571/go-peer/cmd/hlm/config"
+	"github.com/number571/go-peer/cmd/hlm/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
 	"github.com/number571/go-peer/cmd/hls/hlc"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -24,6 +25,7 @@ func hlmDefaultInit() error {
 	flag.StringVar(&readOnly, "read-only", "", "read-only mode from one channel")
 	flag.Parse()
 
+	gDB = database.NewKeyValueDB(hlm_settings.CPathDB)
 	gConfig = config.NewConfig(hlm_settings.CPathCFG)
 	if initOnly {
 		os.Exit(0)

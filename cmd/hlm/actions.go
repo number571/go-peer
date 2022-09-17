@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 
+	"github.com/number571/go-peer/cmd/hlm/database"
 	"github.com/number571/go-peer/cmd/hlm/settings"
 	"github.com/number571/go-peer/modules/action"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -42,6 +44,10 @@ func newActions() action.IActions {
 		"/channel": action.NewAction(
 			"change channel with friend",
 			channelAction,
+		),
+		"/history": action.NewAction(
+			"get history of messages by channel",
+			historyAction,
 		),
 	}
 }
@@ -143,6 +149,48 @@ func channelAction() {
 	fmt.Println("Success set channel's public key")
 }
 
+func historyAction() {
+	if gChannelPubKey == nil {
+		fmt.Println("Public key of channel is not set")
+		return
+	}
+
+	numStr := inputter.NewInputter("Num last messages: ").String()
+	num, err := strconv.Atoi(numStr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	myPubKey, err := gClient.PubKey()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	rel := database.NewRelation(myPubKey, gChannelPubKey)
+	size, err := gDB.Size(rel)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	start := uint64(0)
+	if uint64(num) < size {
+		start = size - uint64(num)
+	}
+
+	list, err := gDB.Load(rel, start, size)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, msg := range list {
+		fmt.Println(msg)
+	}
+}
+
 func sendActionDefault(msg string) {
 	if msg == "" {
 		return
@@ -174,6 +222,18 @@ func sendActionDefault(msg string) {
 
 	if resp.FReturn != hls_settings.CErrorNone {
 		fmt.Println(resp.FResult)
+		return
+	}
+
+	myPubKey, err := gClient.PubKey()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = gDB.Push(database.NewRelation(myPubKey, gChannelPubKey), fmt.Sprintf("[%s]: %s", "iam", msg))
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 }
