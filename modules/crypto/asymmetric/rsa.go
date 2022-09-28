@@ -21,7 +21,8 @@ var (
 )
 
 const (
-	CRSAKeyType = settings.CGopeerPrefix + "rsa"
+	cFormatBlock = 32
+	CRSAKeyType  = settings.CGopeerPrefix + "rsa"
 )
 
 /*
@@ -58,6 +59,7 @@ func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
 		}
 		return newPrivKey(privKey)
 	case string:
+		x = skipSpaceChars(x)
 		var (
 			prefix = fmt.Sprintf("Priv(%s){", CRSAKeyType)
 			suffix = "}"
@@ -101,6 +103,20 @@ func (key *sRSAPrivKey) Bytes() []byte {
 
 func (key *sRSAPrivKey) String() string {
 	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
+}
+
+func (key *sRSAPrivKey) Format() string {
+	s := fmt.Sprintf("Priv(%s){\n", key.Type())
+	b := key.Bytes()
+	for i := 0; i < len(b); i += cFormatBlock {
+		end := i + cFormatBlock
+		if end > len(b) {
+			end = len(b)
+		}
+		s += fmt.Sprintf("\t%X\n", b[i:end])
+	}
+	s += "}"
+	return s
 }
 
 func (key *sRSAPrivKey) Type() string {
@@ -167,6 +183,7 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 		}
 		return newPubKey(pub)
 	case string:
+		x = skipSpaceChars(x)
 		var (
 			prefix = fmt.Sprintf("Pub(%s){", CRSAKeyType)
 			suffix = "}"
@@ -210,6 +227,20 @@ func (key *sRSAPubKey) Bytes() []byte {
 
 func (key *sRSAPubKey) String() string {
 	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
+}
+
+func (key *sRSAPubKey) Format() string {
+	s := fmt.Sprintf("Pub(%s){\n", key.Type())
+	b := key.Bytes()
+	for i := 0; i < len(b); i += cFormatBlock {
+		end := i + cFormatBlock
+		if end > len(b) {
+			end = len(b)
+		}
+		s += fmt.Sprintf("\t%X\n", b[i:end])
+	}
+	s += "}"
+	return s
 }
 
 func (key *sRSAPubKey) Type() string {
@@ -278,4 +309,11 @@ func publicKeyToBytes(pub *rsa.PublicKey) []byte {
 // Used RSA(PSS).
 func verify(pub *rsa.PublicKey, hash, sign []byte) error {
 	return rsa.VerifyPSS(pub, crypto.SHA256, hash, sign, nil)
+}
+
+func skipSpaceChars(s string) string {
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\t", "")
+	s = strings.ReplaceAll(s, " ", "")
+	return s
 }

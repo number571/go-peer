@@ -27,6 +27,6 @@ func main() {
 		panic("generate key error")
 	}
 
-	fmt.Println(priv.PubKey().String())
-	fmt.Println(priv.String())
+	fmt.Println(priv.PubKey().Format())
+	fmt.Println(priv.Format())
 }
