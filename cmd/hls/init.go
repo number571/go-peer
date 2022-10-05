@@ -94,6 +94,7 @@ func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
 	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP)
 	mux.HandleFunc(hls_settings.CHandlePubKey, handlePubKeyHTTP)
 	mux.HandleFunc(hls_settings.CHandleFriends, handleFriendsHTTP)
+	mux.HandleFunc(hls_settings.CHandleBroadcast, handleBroadcastHTTP)
 	mux.HandleFunc(hls_settings.CHandleRequest, handleRequestHTTP)
 
 	srv := &http.Server{

@@ -12,9 +12,17 @@ var (
 	_ IConnKeeper = &sConnKeeper{}
 )
 
+type iState int
+
+const (
+	cIsInit iState = iota
+	cIsRun
+	cIsClose
+)
+
 type sConnKeeper struct {
 	fMutex    sync.Mutex
-	fEnable   bool
+	fState    iState
 	fSignal   chan struct{}
 	fNode     network.INode
 	fSettings ISettings
@@ -22,6 +30,7 @@ type sConnKeeper struct {
 
 func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
 	return &sConnKeeper{
+		fState:    cIsInit,
 		fSignal:   make(chan struct{}),
 		fNode:     node,
 		fSettings: sett,
@@ -36,16 +45,16 @@ func (connKeeper *sConnKeeper) Run() error {
 	connKeeper.fMutex.Lock()
 	defer connKeeper.fMutex.Unlock()
 
-	if connKeeper.fEnable {
-		return errors.New("conn keeper already enabled")
+	if connKeeper.fState != cIsInit {
+		return errors.New("conn keeper already started or closed")
 	}
-	connKeeper.fEnable = true
+	connKeeper.fState = cIsRun
 
 	go func() {
 		for {
 			select {
 			case <-connKeeper.fSignal:
-				connKeeper.fEnable = false
+				connKeeper.fState = cIsClose
 				return
 			default:
 				connKeeper.tryConnectToAll()
@@ -61,8 +70,8 @@ func (connKeeper *sConnKeeper) Close() error {
 	connKeeper.fMutex.Lock()
 	defer connKeeper.fMutex.Unlock()
 
-	if !connKeeper.fEnable {
-		return errors.New("pull already disabled")
+	if connKeeper.fState != cIsRun {
+		return errors.New("conn keeper already closed or not started")
 	}
 
 	connKeeper.fSignal <- struct{}{}

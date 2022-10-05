@@ -80,6 +80,49 @@ func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
 	response(w, hls_settings.CErrorNone, encoding.HexEncode(resp))
 }
 
+func handleBroadcastHTTP(w http.ResponseWriter, r *http.Request) {
+	var vRequest hls_settings.SRequest
+
+	if r.Method != "POST" {
+		response(w, hls_settings.CErrorMethod, "failed: incorrect method")
+		return
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&vRequest)
+	if err != nil {
+		response(w, hls_settings.CErrorDecode, "failed: decode request")
+		return
+	}
+
+	pubKey := asymmetric.LoadRSAPubKey(vRequest.FReceiver)
+	if pubKey == nil {
+		response(w, hls_settings.CErrorPubKey, "failed: load public key")
+		return
+	}
+
+	data := encoding.HexDecode(vRequest.FHexData)
+	if data == nil {
+		response(w, hls_settings.CErrorPubKey, "failed: decode hex format data")
+		return
+	}
+
+	msg, err := gNode.Queue().Client().Encrypt(
+		pubKey,
+		payload_adapter.NewPayload(hls_settings.CHeaderHLS, data),
+	)
+	if err != nil {
+		response(w, hls_settings.CErrorMessage, "failed: encrypt message with data")
+		return
+	}
+
+	if err := gNode.Broadcast(msg); err != nil {
+		response(w, hls_settings.CErrorBroadcast, "failed: broadcast message")
+		return
+	}
+
+	response(w, hls_settings.CErrorNone, "success: broadcast")
+}
+
 func response(w http.ResponseWriter, ret int, res string) {
 	w.Header().Set("Content-Type", hls_settings.CContentType)
 	json.NewEncoder(w).Encode(&hls_settings.SResponse{

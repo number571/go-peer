@@ -23,5 +23,5 @@ func main() {
 	<-shutdown
 	fmt.Println()
 	gLogger.Warning("Shutting down...")
-	closer.CloseAll([]closer.ICloser{gServerHTTP, gNode})
+	closer.CloseAll([]closer.ICloser{gServerHTTP, gNode, gConnKeeper})
 }

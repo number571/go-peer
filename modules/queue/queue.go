@@ -6,9 +6,20 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/crypto/random"
 	"github.com/number571/go-peer/modules/message"
 	"github.com/number571/go-peer/modules/payload"
+)
+
+var (
+	_ IQueue = &sQueue{}
+)
+
+type iState int
+
+const (
+	cIsInit iState = iota
+	cIsRun
+	cIsClose
 )
 
 type sQueue struct {
@@ -20,7 +31,7 @@ type sQueue struct {
 }
 
 type sPull struct {
-	fEnable bool
+	fState  iState
 	fSignal chan struct{}
 	fQueue  chan message.IMessage
 }
@@ -31,6 +42,7 @@ func NewQueue(sett ISettings, client client.IClient) IQueue {
 		fClient:   client,
 		fQueue:    make(chan message.IMessage, sett.GetCapacity()),
 		fMsgPull: &sPull{
+			fState:  cIsInit,
 			fSignal: make(chan struct{}),
 			fQueue:  make(chan message.IMessage, sett.GetPullCapacity()),
 		},
@@ -49,16 +61,16 @@ func (q *sQueue) Run() error {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
-	if q.fMsgPull.fEnable {
-		return errors.New("pull already enabled")
+	if q.fMsgPull.fState != cIsInit {
+		return errors.New("queue already started or closed")
 	}
-	q.fMsgPull.fEnable = true
+	q.fMsgPull.fState = cIsRun
 
 	go func() {
 		for {
 			select {
 			case <-q.fMsgPull.fSignal:
-				q.fMsgPull.fEnable = false
+				q.fMsgPull.fState = cIsClose
 				return
 			default:
 				currLen := len(q.fMsgPull.fQueue)
@@ -78,15 +90,21 @@ func (q *sQueue) Close() error {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
-	if !q.fMsgPull.fEnable {
-		return errors.New("pull already disabled")
+	if q.fMsgPull.fState != cIsRun {
+		return errors.New("queue already closed or not started")
 	}
-
 	q.fMsgPull.fSignal <- struct{}{}
+
+	close(q.fQueue)
+	close(q.fMsgPull.fQueue)
+
 	return nil
 }
 
 func (q *sQueue) Enqueue(msg message.IMessage) error {
+	q.fMutex.Lock()
+	defer q.fMutex.Unlock()
+
 	if uint64(len(q.fQueue)) == q.Settings().GetCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
@@ -94,6 +112,10 @@ func (q *sQueue) Enqueue(msg message.IMessage) error {
 	go func() {
 		q.fMutex.Lock()
 		defer q.fMutex.Unlock()
+
+		if q.fMsgPull.fState != cIsRun {
+			return
+		}
 
 		q.fQueue <- msg
 	}()
@@ -108,6 +130,10 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 		q.fMutex.Lock()
 		defer q.fMutex.Unlock()
 
+		if q.fMsgPull.fState != cIsRun {
+			return
+		}
+
 		if len(q.fQueue) == 0 {
 			q.fQueue <- (<-q.fMsgPull.fQueue)
 		}
@@ -117,10 +143,9 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 }
 
 func (q *sQueue) newPseudoMessage() message.IMessage {
-	rand := random.NewStdPRNG()
 	msg, err := q.fClient.Encrypt(
 		q.fClient.PubKey(),
-		payload.NewPayload(0, rand.Bytes(1)),
+		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
 		panic(err)

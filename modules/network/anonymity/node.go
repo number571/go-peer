@@ -178,7 +178,10 @@ func (node *sNode) recv(head uint32, timeOut time.Duration) ([]byte, error) {
 func (node *sNode) handleWrapper() network.IHandlerF {
 	go func() {
 		for {
-			msg := <-node.Queue().Dequeue()
+			msg, ok := <-node.Queue().Dequeue()
+			if !ok {
+				break
+			}
 			node.Broadcast(msg)
 		}
 	}()
@@ -241,7 +244,6 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			panic(err)
 		}
 
-		// send response with two append enqueue
 		for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
 			err := node.Queue().Enqueue(respMsg)
 			if err != nil {

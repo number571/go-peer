@@ -13,10 +13,11 @@ const (
 )
 
 const (
-	CHandleOnline  = "/network/online"
-	CHandleFriends = "/node/friends"
-	CHandlePubKey  = "/node/pubkey"
-	CHandleRequest = "/do/request"
+	CHandleOnline    = "/network/online"
+	CHandleFriends   = "/node/friends"
+	CHandlePubKey    = "/node/pubkey"
+	CHandleBroadcast = "/do/broadcast"
+	CHandleRequest   = "/do/request"
 )
 
 const (
@@ -56,5 +57,7 @@ const (
 	CErrorMethod
 	CErrorDecode
 	CErrorPubKey
+	CErrorMessage
 	CErrorResponse
+	CErrorBroadcast
 )

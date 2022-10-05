@@ -89,9 +89,11 @@ func (node *sNode) Listen(address string) error {
 }
 
 func (node *sNode) Close() error {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
 	var err error
 
-	node.fMutex.Lock()
 	for id, conn := range node.fConnections {
 		e := conn.Close()
 		if e != nil {
@@ -105,7 +107,6 @@ func (node *sNode) Close() error {
 			err = e
 		}
 	}
-	node.fMutex.Unlock()
 
 	return err
 }
