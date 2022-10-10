@@ -45,7 +45,7 @@ func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
 func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
 	var vRequest hls_settings.SRequest
 
-	if r.Method != "POST" {
+	if r.Method != "PUT" {
 		response(w, hls_settings.CErrorMethod, "failed: incorrect method")
 		return
 	}
@@ -81,26 +81,26 @@ func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBroadcastHTTP(w http.ResponseWriter, r *http.Request) {
-	var vRequest hls_settings.SRequest
+	var vBroadcast hls_settings.SBroadcast
 
-	if r.Method != "POST" {
+	if r.Method != "PUT" {
 		response(w, hls_settings.CErrorMethod, "failed: incorrect method")
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&vRequest)
+	err := json.NewDecoder(r.Body).Decode(&vBroadcast)
 	if err != nil {
-		response(w, hls_settings.CErrorDecode, "failed: decode request")
+		response(w, hls_settings.CErrorDecode, "failed: decode broadcast")
 		return
 	}
 
-	pubKey := asymmetric.LoadRSAPubKey(vRequest.FReceiver)
+	pubKey := asymmetric.LoadRSAPubKey(vBroadcast.FReceiver)
 	if pubKey == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: load public key")
 		return
 	}
 
-	data := encoding.HexDecode(vRequest.FHexData)
+	data := encoding.HexDecode(vBroadcast.FHexData)
 	if data == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: decode hex format data")
 		return

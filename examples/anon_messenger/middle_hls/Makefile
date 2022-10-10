@@ -8,4 +8,4 @@ run:
 	sleep .5
 clean:
 	pkill prog_hls || true
-	rm -f prog_hls 
+	rm -rf prog_hls hls.db

@@ -35,15 +35,12 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 		fSettings: sett,
 		fPrivKey:  priv,
 	}
-	msg, err := client.encryptWithParams(
+	msg := client.encryptWithParams(
 		client.PubKey(),
 		payload.NewPayload(0, []byte{}),
 		0,
 		0,
 	)
-	if err != nil {
-		return nil
-	}
 	// saved message size with hex encoding
 	// because exists not encoded chars <{}",>
 	// of JSON format
@@ -91,10 +88,10 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 		pl,
 		client.Settings().GetWorkSize(),
 		maxMsgSize-resultSize,
-	)
+	), nil
 }
 
-func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload.IPayload, workSize, addPadd uint64) (message.IMessage, error) {
+func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload.IPayload, workSize, addPadd uint64) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.Bytes(symmetric.CAESKeySize)
@@ -137,7 +134,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload
 			FSign:    encoding.HexEncode(cipher.Encrypt(client.PrivKey().Sign(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
 		},
-	}, nil
+	}
 }
 
 // Decrypt message with private key of receiver.

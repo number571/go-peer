@@ -12,7 +12,7 @@ var (
 
 type sRequest struct {
 	fMutex  sync.Mutex
-	FMethod string            `json:"methos"`
+	FMethod string            `json:"method"`
 	FHost   string            `json:"host"`
 	FPath   string            `json:"path"`
 	FHead   map[string]string `json:"head"`

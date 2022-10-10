@@ -11,5 +11,5 @@ run:
 clean:
 	pkill prog_hls3 || true
 	pkill prog_hlm3 || true
-	rm -f prog_hls3 prog_hlm3
+	rm -rf prog_hls3 prog_hlm3 hls.db hlm.db
 	
