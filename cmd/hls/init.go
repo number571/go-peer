@@ -39,6 +39,7 @@ func hlsDefaultInit() error {
 
 	gLogger = logger.NewLogger(os.Stdout, os.Stdout, os.Stdout)
 	gConfig = config.NewConfig(hls_settings.CPathCFG)
+	gEditor = config.NewEditor(&gConfig)
 
 	var privKey asymmetric.IPrivKey
 	switch inputKey {
@@ -75,7 +76,7 @@ func hlsDefaultInit() error {
 	gServerHTTP = initServerHTTP(gConfig, gLogger)
 	gConnKeeper = conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: gConfig.Connections(),
+			FConnections: func() []string { return gConfig.Connections() },
 			FDuration:    time.Minute,
 		}),
 		gNode.Network(),
@@ -91,10 +92,10 @@ func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", handleIndexHTTP)
+	mux.HandleFunc(hls_settings.CHandleConnects, handleConnectsHTTP)
+	mux.HandleFunc(hls_settings.CHandleFriends, handleFriendsHTTP)
 	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP)
 	mux.HandleFunc(hls_settings.CHandlePubKey, handlePubKeyHTTP)
-	mux.HandleFunc(hls_settings.CHandleFriends, handleFriendsHTTP)
-	mux.HandleFunc(hls_settings.CHandleBroadcast, handleBroadcastHTTP)
 	mux.HandleFunc(hls_settings.CHandleRequest, handleRequestHTTP)
 
 	srv := &http.Server{

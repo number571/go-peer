@@ -13,6 +13,7 @@ var (
 	gLogger     logger.ILogger
 	gNode       anonymity.INode
 	gConfig     config.IConfig
+	gEditor     config.IEditor
 	gConnKeeper conn_keeper.IConnKeeper
 	gServerHTTP *http.Server
 )

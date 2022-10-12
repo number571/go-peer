@@ -26,4 +26,4 @@ REQUEST_FORMAT="{
         \"hex_data\":\"$(str2hex "$JSON_DATA")\"
 }";
 
-curl localhost:7572/do/request -X PUT --data "${REQUEST_FORMAT}"
+curl -i -X POST -H 'Accept: application/json' http://localhost:7572/do/request --data "${REQUEST_FORMAT}"

@@ -7,6 +7,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
+// TODO: need update
 type IClient interface {
 	PubKey() (asymmetric.IPubKey, error)
 	Online() ([]string, error)

@@ -7,7 +7,7 @@ const (
 )
 
 type SSettings struct {
-	FConnections []string
+	FConnections func() []string
 	FDuration    time.Duration
 }
 
@@ -26,7 +26,7 @@ func (s *SSettings) useDefaultValue() ISettings {
 }
 
 func (s *SSettings) GetConnections() []string {
-	return s.FConnections
+	return s.FConnections()
 }
 
 func (s *SSettings) GetDuration() time.Duration {

@@ -15,10 +15,13 @@ var (
 )
 
 type sConfig struct {
-	FAddress     *sAddress         `json:"address"`
-	FServices    map[string]string `json:"services,omitempty"`
-	FConnections []string          `json:"connections,omitempty"`
-	FFriends     []string          `json:"friends,omitempty"`
+	fFilepath string
+
+	FAddress  *sAddress         `json:"address"`
+	FServices map[string]string `json:"services,omitempty"`
+
+	FConnections []string `json:"connections,omitempty"`
+	FFriends     []string `json:"friends,omitempty"`
 
 	fMutex   sync.Mutex
 	fFriends []asymmetric.IPubKey
@@ -77,6 +80,7 @@ func NewConfig(filepath string) IConfig {
 		}
 	}
 
+	cfg.fFilepath = filepath
 	for _, val := range cfg.FFriends {
 		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {

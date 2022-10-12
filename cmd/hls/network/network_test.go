@@ -21,7 +21,7 @@ var (
 	tgBRequest = []byte(`{
 		"host": "test_host",
 		"path": "test_path",
-		"methos": "test_method",
+		"method": "test_method",
 		"head": {
 			"test_header1": "test_value1",
 			"test_header2": "test_value2",
