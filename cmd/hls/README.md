@@ -139,7 +139,7 @@ Content-Length: 51
 {"result":"success: delete connection","return":1}
 ```
 
-### 2./config/friends
+### 2. /config/friends
 
 #### 2.1. GET Request
 
@@ -198,7 +198,7 @@ Content-Length: 47
 {"result":"success: delete friend","return":1}
 ```
 
-### 3./network/online
+### 3. /network/online
 
 #### 3.1. GET Request
 
@@ -219,7 +219,7 @@ Content-Length: 55
 {"result":"127.0.0.1:58708,127.0.0.1:58710","return":1}
 ```
 
-### 4.1. /node/pubkey
+### 4. /node/pubkey
 
 #### 4.1. GET Request
 
@@ -306,8 +306,8 @@ curl -i -X PUT -H 'Accept: application/json' http://localhost:7572/do/request --
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
-Date: Fri, 07 Oct 2022 12:18:34 GMT
-Content-Length: 97
+Date: Wed, 12 Oct 2022 09:44:59 GMT
+Content-Length: 43
 ```
 
 ```json

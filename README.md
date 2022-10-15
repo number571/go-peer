@@ -15,13 +15,18 @@
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
 
-## Specifications of go-peer
-1. Prefix 's'/'S' - structure type
-2. Prefix 'i'/'I' - interface type / function type
-3. Prefix 'f'/'F' - field of structure
-4. Prefix 'c'/'C' - constant
-5. Prrfix 'g'/'G' - global variable
-6. Prefix 't'/'T' - test constant / test variable / test structure / ...
+## Code specification
+1. Prefix 's'/'S' = structure type;
+2. Prefix 'i'/'I' = interface type / function type;
+3. Prefix 'f'/'F' = field of structure;
+4. Prefix 'c'/'C' = constant;
+5. Prrfix 'g'/'G' = global variable;
+6. Prefix 't'/'T' = test constant / test variable / test structure / ...;
 
 ## TODO
-1. Write tests with comment "TODO"
+1. Write tests with comment "TODO";
+2. Update hlc package in cmd/hls;
+3. Remake cmd/hlm from CLI to GUI;
+4. Remake cmd/hmc from CLI to GUI;
+5. Implement the cmd/ubc;
+6. Consider cmd/hls moving the fifth^ stage of anonymity to the sixth;

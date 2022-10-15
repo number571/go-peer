@@ -140,7 +140,8 @@ func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
 func testNewNode(i int, timeWait time.Duration) INode {
 	node := NewNode(
 		NewSettings(&SSettings{
-			FTimeWait: timeWait,
+			FRetryEnqueue: 0,
+			FTimeWait:     timeWait,
 		}),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
