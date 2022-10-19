@@ -30,3 +30,6 @@
 4. Remake cmd/hmc from CLI to GUI;
 5. Implement the cmd/ubc;
 6. Consider cmd/hls moving the fifth^ stage of anonymity to the sixth;
+7. Create README for cmd/hlm, cmd/hms, cmd/hmc;
+8. Comment functions in the code of library;
+9. ...
