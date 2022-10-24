@@ -169,13 +169,14 @@ func (node *sNode) Disconnect(address string) error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
+	var err error
 	conn, ok := node.fConnections[address]
 	if ok {
-		conn.Close()
+		err = conn.Close()
 	}
 
 	delete(node.fConnections, address)
-	return nil
+	return err
 }
 
 func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {

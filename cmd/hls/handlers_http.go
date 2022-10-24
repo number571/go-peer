@@ -23,15 +23,36 @@ func handlePubKeyHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleOnlineHTTP(w http.ResponseWriter, r *http.Request) {
-	conns := gNode.Network().Connections()
-	inOnline := make([]string, 0, len(conns))
-	for _, conn := range conns {
-		inOnline = append(inOnline, conn.Socket().RemoteAddr().String())
+	var vConnect hls_settings.SConnect
+
+	if r.Method != "GET" && r.Method != "DELETE" {
+		response(w, hls_settings.CErrorMethod, "failed: incorrect method")
+		return
 	}
-	sort.SliceStable(inOnline, func(i, j int) bool {
-		return inOnline[i] < inOnline[j]
-	})
-	response(w, hls_settings.CErrorNone, strings.Join(inOnline, ","))
+
+	if r.Method == "GET" {
+		conns := gNode.Network().Connections()
+		inOnline := make([]string, 0, len(conns))
+		for _, conn := range conns {
+			inOnline = append(inOnline, conn.Socket().RemoteAddr().String())
+		}
+		sort.SliceStable(inOnline, func(i, j int) bool {
+			return inOnline[i] < inOnline[j]
+		})
+		response(w, hls_settings.CErrorNone, strings.Join(inOnline, ","))
+		return
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
+		response(w, hls_settings.CErrorDecode, "failed: decode request")
+		return
+	}
+
+	if err := gNode.Network().Disconnect(vConnect.FConnect); err != nil {
+		response(w, hls_settings.CErrorNone, "failed: delete online connection")
+		return
+	}
+	response(w, hls_settings.CErrorNone, "success: delete online connection")
 }
 
 func handleConnectsHTTP(w http.ResponseWriter, r *http.Request) {
@@ -47,8 +68,7 @@ func handleConnectsHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&vConnect)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
 		response(w, hls_settings.CErrorDecode, "failed: decode request")
 		return
 	}
@@ -56,8 +76,7 @@ func handleConnectsHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "PUT":
 		connects := append(gConfig.Connections(), vConnect.FConnect)
-		err := gEditor.UpdateConnections(connects)
-		if err != nil {
+		if err := gEditor.UpdateConnections(connects); err != nil {
 			response(w, hls_settings.CErrorAction, "failed: update connections")
 			return
 		}
@@ -65,8 +84,7 @@ func handleConnectsHTTP(w http.ResponseWriter, r *http.Request) {
 		response(w, hls_settings.CErrorNone, "success: update connections")
 	case "DELETE":
 		connects := deleteConnect(gConfig, vConnect.FConnect)
-		err := gEditor.UpdateConnections(connects)
-		if err != nil {
+		if err := gEditor.UpdateConnections(connects); err != nil {
 			response(w, hls_settings.CErrorAction, "failed: delete connection")
 			return
 		}
@@ -93,8 +111,7 @@ func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&vFriend)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&vFriend); err != nil {
 		response(w, hls_settings.CErrorDecode, "failed: decode request")
 		return
 	}
@@ -108,8 +125,7 @@ func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "PUT":
 		friends := append(gConfig.Friends(), pubKey)
-		err := gEditor.UpdateFriends(friends)
-		if err != nil {
+		if err := gEditor.UpdateFriends(friends); err != nil {
 			response(w, hls_settings.CErrorAction, "failed: update friends")
 			return
 		}
@@ -117,8 +133,7 @@ func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
 		response(w, hls_settings.CErrorNone, "success: update friends")
 	case "DELETE":
 		friends := deleteFriend(gConfig, pubKey)
-		err := gEditor.UpdateFriends(friends)
-		if err != nil {
+		if err := gEditor.UpdateFriends(friends); err != nil {
 			response(w, hls_settings.CErrorAction, "failed: delete friend"+err.Error())
 			return
 		}
@@ -127,27 +142,26 @@ func handleFriendsHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleRequestHTTP(w http.ResponseWriter, r *http.Request) {
-	var vRequest hls_settings.SRequest
+func handlePushHTTP(w http.ResponseWriter, r *http.Request) {
+	var vPush hls_settings.SPush
 
 	if r.Method != "POST" && r.Method != "PUT" {
 		response(w, hls_settings.CErrorMethod, "failed: incorrect method")
 		return
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&vRequest)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&vPush); err != nil {
 		response(w, hls_settings.CErrorDecode, "failed: decode request")
 		return
 	}
 
-	pubKey := asymmetric.LoadRSAPubKey(vRequest.FReceiver)
+	pubKey := asymmetric.LoadRSAPubKey(vPush.FReceiver)
 	if pubKey == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: load public key")
 		return
 	}
 
-	data := encoding.HexDecode(vRequest.FHexData)
+	data := encoding.HexDecode(vPush.FHexData)
 	if data == nil {
 		response(w, hls_settings.CErrorPubKey, "failed: decode hex format data")
 		return

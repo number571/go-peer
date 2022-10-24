@@ -18,8 +18,8 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (builder *sBuilder) Request(recv asymmetric.IPubKey, req hls_network.IRequest) *hls_settings.SRequest {
-	return &hls_settings.SRequest{
+func (builder *sBuilder) Request(recv asymmetric.IPubKey, req hls_network.IRequest) *hls_settings.SPush {
+	return &hls_settings.SPush{
 		FReceiver: recv.String(),
 		FHexData:  encoding.HexEncode(req.Bytes()),
 	}

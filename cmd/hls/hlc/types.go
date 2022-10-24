@@ -16,12 +16,12 @@ type IClient interface {
 }
 
 type IBuilder interface {
-	Request(asymmetric.IPubKey, hls_network.IRequest) *hls_settings.SRequest
+	Request(asymmetric.IPubKey, hls_network.IRequest) *hls_settings.SPush
 }
 
 type IRequester interface {
 	PubKey() (asymmetric.IPubKey, error)
 	Online() ([]string, error)
 	Friends() ([]asymmetric.IPubKey, error)
-	Request(*hls_settings.SRequest) ([]byte, error)
+	Request(*hls_settings.SPush) ([]byte, error)
 }

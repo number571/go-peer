@@ -13,11 +13,11 @@ const (
 )
 
 const (
-	CHandleConnects = "/config/connects"
-	CHandleFriends  = "/config/friends"
-	CHandleOnline   = "/network/online"
-	CHandlePubKey   = "/node/pubkey"
-	CHandleRequest  = "/do/request"
+	CHandleConnects = "/api/config/connects"
+	CHandleFriends  = "/api/config/friends"
+	CHandleOnline   = "/api/network/online"
+	CHandlePush     = "/api/network/push"
+	CHandlePubKey   = "/api/node/pubkey"
 )
 
 const (

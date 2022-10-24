@@ -27,14 +27,14 @@ func NewRequester(host string) IRequester {
 	}
 }
 
-func (requester *sRequester) Request(req *hls_settings.SRequest) ([]byte, error) {
+func (requester *sRequester) Request(req *hls_settings.SPush) ([]byte, error) {
 	jsonValue, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
 	respPost, err := http.Post(
-		requester.host+hls_settings.CHandleRequest,
+		requester.host+hls_settings.CHandlePush,
 		hls_settings.CContentType,
 		bytes.NewBuffer(jsonValue),
 	)
