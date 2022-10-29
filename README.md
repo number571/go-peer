@@ -14,6 +14,7 @@
 ## Deprecated library based applications
 * Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
+* Hidden Lake Service (old version): [github.com/number571/hls](https://github.com/number571/hls "HLS");
 
 ## Code specification
 1. Prefix 's'/'S' = structure type;

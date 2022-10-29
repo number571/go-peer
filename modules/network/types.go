@@ -23,11 +23,6 @@ type INode interface {
 	Disconnect(string) error
 }
 
-type IConnKeeper interface {
-	Run() error
-	Close() error
-}
-
 type ISettings interface {
 	GetCapacity() uint64
 	GetMessageSize() uint64
