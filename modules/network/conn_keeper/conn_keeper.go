@@ -56,9 +56,8 @@ func (connKeeper *sConnKeeper) Run() error {
 			case <-connKeeper.fSignal:
 				connKeeper.fState = cIsClose
 				return
-			default:
+			case <-time.After(connKeeper.Settings().GetDuration()):
 				connKeeper.tryConnectToAll()
-				time.Sleep(connKeeper.Settings().GetDuration())
 			}
 		}
 	}()

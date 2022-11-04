@@ -109,11 +109,9 @@ func readMessage(conn *sConn, chMsg chan IMessage) {
 		return
 	}
 
-	stock := mustLen
-	msgRaw := []byte{}
-
+	msgRaw := make([]byte, 0, mustLen)
 	for {
-		buffer := make([]byte, stock)
+		buffer := make([]byte, mustLen)
 		n, err := conn.fSocket.Read(buffer)
 		if err != nil {
 			return
@@ -127,8 +125,8 @@ func readMessage(conn *sConn, chMsg chan IMessage) {
 			[]byte{},
 		)
 
-		stock -= uint64(n)
-		if stock == 0 {
+		mustLen -= uint64(n)
+		if mustLen == 0 {
 			break
 		}
 	}
