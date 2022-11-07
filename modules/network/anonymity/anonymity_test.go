@@ -152,11 +152,9 @@ func testNewNode(i int, timeWait time.Duration) INode {
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FRetryNum:    2,
 				FCapacity:    (1 << 10),
 				FMessageSize: (100 << 10),
-				FMaxConns:    10,
-				FMaxMessages: 20,
+				FMaxConnects: 10,
 				FTimeWait:    5 * time.Second,
 			}),
 		),

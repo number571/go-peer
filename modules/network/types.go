@@ -24,6 +24,7 @@ type INode interface {
 }
 
 type ISettings interface {
+	GetNetworkKey() string
 	GetCapacity() uint64
 	GetMessageSize() uint64
 	GetMaxConnects() uint64

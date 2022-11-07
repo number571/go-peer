@@ -125,7 +125,8 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	return node, nil
 }
 
-func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPayload) []byte {
+func testRouteHLS(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPayload) []byte {
+	// for test
 	mapping := map[string]string{
 		tcServiceAddressInHLS: testutils.TgAddrs[5],
 	}
@@ -138,7 +139,7 @@ func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPaylo
 	}
 
 	// get service's address by name
-	addr, ok := mapping[request.Host()]
+	address, ok := mapping[request.Host()]
 	if !ok {
 		return nil
 	}
@@ -146,12 +147,14 @@ func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPaylo
 	// generate new request to serivce
 	req, err := http.NewRequest(
 		request.Method(),
-		fmt.Sprintf("http://%s%s", addr, request.Path()),
+		fmt.Sprintf("http://%s%s", address, request.Path()),
 		bytes.NewReader(request.Body()),
 	)
 	if err != nil {
 		return nil
 	}
+
+	req.Header.Add(hls_settings.CHeaderPubKey, sender.String())
 	for key, val := range request.Head() {
 		req.Header.Add(key, val)
 	}
@@ -163,6 +166,7 @@ func testRouteHLS(node anonymity.INode, _ asymmetric.IPubKey, pld payload.IPaylo
 		return nil
 	}
 	defer resp.Body.Close()
+
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil
@@ -228,11 +232,9 @@ func testNewNode(i int) anonymity.INode {
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FRetryNum:    2,
 				FCapacity:    (1 << 10),
 				FMessageSize: msgSize,
-				FMaxConns:    10,
-				FMaxMessages: 20,
+				FMaxConnects: 10,
 				FTimeWait:    5 * time.Second,
 			}),
 		),

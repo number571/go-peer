@@ -138,5 +138,5 @@ func readMessage(conn *sConn, chMsg chan IMessage) {
 			msgRaw,
 		},
 		[]byte{},
-	))
+	), []byte(conn.fSettings.GetNetworkKey()))
 }

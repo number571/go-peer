@@ -128,11 +128,9 @@ func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPri
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FRetryNum:    hls_settings.CNetworkRetry,
 				FCapacity:    hls_settings.CNetworkCapacity,
 				FMessageSize: hls_settings.CMessageSize,
-				FMaxConns:    hls_settings.CNetworkMaxConns,
-				FMaxMessages: hls_settings.CNetworkMaxMessages,
+				FMaxConnects: hls_settings.CNetworkMaxConns,
 				FTimeWait:    hls_settings.CNetworkWaitTime,
 			}),
 		),

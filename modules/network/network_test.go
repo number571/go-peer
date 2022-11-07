@@ -95,11 +95,9 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
-			FRetryNum:    2,
 			FCapacity:    (1 << 10),
 			FMessageSize: (100 << 10),
-			FMaxConns:    10,
-			FMaxMessages: 20,
+			FMaxConnects: 10,
 			FTimeWait:    5 * time.Second,
 		})
 		nodes[i] = NewNode(sett)

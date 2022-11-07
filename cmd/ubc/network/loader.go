@@ -41,6 +41,7 @@ func (loader *sLoader) Height() (uint64, error) {
 			cMaskNetw,
 			pld.Bytes(),
 		),
+		[]byte{},
 	))
 
 	rpld := msg.Payload()
@@ -72,6 +73,7 @@ func (loader *sLoader) Block(i uint64) (block.IBlock, error) {
 			cMaskNetw,
 			pld.Bytes(),
 		),
+		[]byte{},
 	))
 
 	rpld := msg.Payload()
@@ -100,6 +102,7 @@ func (loader *sLoader) Transaction(hash []byte) (transaction.ITransaction, error
 			cMaskNetw,
 			pld.Bytes(),
 		),
+		[]byte{},
 	))
 
 	rpld := msg.Payload()

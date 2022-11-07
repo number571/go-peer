@@ -21,6 +21,7 @@ func handleLoadHeight(node INode, conn network.IConn, npld payload.IPayload) {
 			cMaskLoadHeight,
 			res[:],
 		),
+		[]byte{},
 	))
 }
 

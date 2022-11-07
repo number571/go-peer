@@ -34,7 +34,7 @@ func NewNode(sett ISettings) INode {
 
 func (node *sNode) Broadcast(pl payload.IPayload) error {
 	// set this message to mapping
-	msg := NewMessage(pl)
+	msg := NewMessage(pl, []byte(node.fSettings.GetNetworkKey()))
 	node.inMappingWithSet(msg.Hash())
 
 	var err error

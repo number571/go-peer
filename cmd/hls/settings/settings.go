@@ -39,11 +39,9 @@ const (
 )
 
 const (
-	CNetworkCapacity    = (1 << 10) // hashes
-	CNetworkRetry       = 10        // retryNum for get message
-	CNetworkMaxMessages = 20        // for one client
-	CNetworkMaxConns    = 10
-	CNetworkWaitTime    = 10 * time.Second
+	CNetworkCapacity = (1 << 10) // hashes
+	CNetworkMaxConns = 10
+	CNetworkWaitTime = 10 * time.Second
 )
 
 const (

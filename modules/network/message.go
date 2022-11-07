@@ -14,11 +14,11 @@ var (
 // Message = [Size[u64], Hash[uN], Head[u64], Body[u8...]]
 type sMessage []byte
 
-func NewMessage(pl payload.IPayload) IMessage {
+func NewMessage(pl payload.IPayload, key []byte) IMessage {
 	payloadBytes := pl.Bytes()
 	hashWithPayload := bytes.Join(
 		[][]byte{
-			hashing.NewSHA256Hasher(payloadBytes).Bytes(),
+			hashing.NewHMACSHA256Hasher(key, payloadBytes).Bytes(),
 			payloadBytes,
 		},
 		[]byte{},
@@ -33,7 +33,7 @@ func NewMessage(pl payload.IPayload) IMessage {
 	))
 }
 
-func LoadMessage(bmsg []byte) IMessage {
+func LoadMessage(bmsg []byte, key []byte) IMessage {
 	if len(bmsg) < (cSizeUint + cSizeHash + cSizeHead) {
 		return nil
 	}
@@ -48,7 +48,7 @@ func LoadMessage(bmsg []byte) IMessage {
 	hashRecv := bmsg[cBeginHash:cEndHash]
 	if !bytes.Equal(
 		hashRecv,
-		hashing.NewSHA256Hasher(bmsg[cBeginHead:]).Bytes(),
+		hashing.NewHMACSHA256Hasher(key, bmsg[cBeginHead:]).Bytes(),
 	) {
 		return nil
 	}
