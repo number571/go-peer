@@ -17,12 +17,12 @@ type sConn struct {
 	fSettings ISettings
 }
 
-func NewConn(sett ISettings, address string) IConn {
+func NewConn(sett ISettings, address string) (IConn, error) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return LoadConn(sett, conn)
+	return LoadConn(sett, conn), nil
 }
 
 func LoadConn(sett ISettings, conn net.Conn) IConn {

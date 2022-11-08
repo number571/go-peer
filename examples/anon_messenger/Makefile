@@ -24,11 +24,8 @@ build:
 run: 
 	# MAKEFILE RUN
 	make run -C middle_hls
-	sleep .5
 	make run -C node1_hlm
-	sleep .5
 	make run -C node2_hlm
-	sleep .5
 	make run -C node3_hlm
 clean:
 	# REMOVE HLS 

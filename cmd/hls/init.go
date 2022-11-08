@@ -73,7 +73,10 @@ func hlsDefaultInit() error {
 		return err
 	}
 
-	gServerHTTP = initServerHTTP(gConfig, gLogger)
+	gServerHTTP = &http.Server{}
+	if gConfig.Address().HTTP() != "" {
+		gServerHTTP = initServerHTTP(gConfig, gLogger)
+	}
 	gConnKeeper = conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
 			FConnections: func() []string { return gConfig.Connections() },
@@ -115,25 +118,27 @@ func initServerHTTP(cfg config.IConfig, logger logger.ILogger) *http.Server {
 }
 
 func initNode(cfg config.IConfig, logger logger.ILogger, privKey asymmetric.IPrivKey) anonymity.INode {
+	gLevelDB = database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath:    hls_settings.CPathDB,
+			FHashing: true,
+		}),
+	)
+	gNetworkNode = network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FCapacity:    hls_settings.CNetworkCapacity,
+			FMessageSize: hls_settings.CMessageSize,
+			FMaxConnects: hls_settings.CNetworkMaxConns,
+			FTimeWait:    hls_settings.CNetworkWaitTime,
+		}),
+	)
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
 			FTimeWait:     hls_settings.CWaitTime,
 		}),
-		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath:    hls_settings.CPathDB,
-				FHashing: true,
-			}),
-		),
-		network.NewNode(
-			network.NewSettings(&network.SSettings{
-				FCapacity:    hls_settings.CNetworkCapacity,
-				FMessageSize: hls_settings.CMessageSize,
-				FMaxConnects: hls_settings.CNetworkMaxConns,
-				FTimeWait:    hls_settings.CNetworkWaitTime,
-			}),
-		),
+		gLevelDB,
+		gNetworkNode,
 		queue.NewQueue(
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     hls_settings.CQueueCapacity,
@@ -188,7 +193,7 @@ func initPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPriv
 
 	// get private key
 	bpriv, err := storage.Get(objectKey)
-	if err == nil {
+	if err == nil && len(bpriv) != 0 {
 		return asymmetric.LoadRSAPrivKey(bpriv)
 	}
 

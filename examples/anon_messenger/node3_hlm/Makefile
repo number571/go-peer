@@ -6,7 +6,7 @@ build:
 	$(GC) -o prog_hlm3 hlm/*.go
 run:
 	./prog_hls3 --input-key priv.key &
-	sleep .5
+	sleep 1
 	./prog_hlm3
 clean:
 	pkill prog_hls3 || true

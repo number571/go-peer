@@ -38,16 +38,10 @@ func NewNode(chain chain.IChain) INode {
 }
 
 func (node *sNode) Network() network.INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fNetwork
 }
 
 func (node *sNode) Pusher() IPusher {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fPusher
 }
 

@@ -13,12 +13,14 @@ const (
 )
 
 const (
+	tcNetwork     = "test_network_key"
 	tcAddressTCP  = "test_address_tcp"
 	tcAddressHTTP = "test_address_http"
 )
 
 const (
 	tcConfig = `{
+	"network": "test_network_key",
 	"address": {
 		"tcp": "test_address_tcp",
 		"http": "test_address_http"
@@ -64,6 +66,10 @@ func TestConfig(t *testing.T) {
 	defer os.Remove(tcConfigFile)
 
 	cfg := NewConfig(tcConfigFile)
+
+	if cfg.Network() != tcNetwork {
+		t.Errorf("network is invalid")
+	}
 
 	if cfg.Address().TCP() != tcAddressTCP {
 		t.Errorf("address_tcp is invalid")

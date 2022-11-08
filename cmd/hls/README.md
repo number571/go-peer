@@ -19,6 +19,7 @@ interacting with the network. HLS is based on the fifth^ stage of anonymity and 
 
 ```json
 {
+	"network": "hls-network-key",
 	"address": {
 		"tcp": "localhost:9571",
 		"http": "localhost:9572"

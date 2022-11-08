@@ -15,9 +15,7 @@ build:
 run: 
 	# MAKEFILE RUN
 	make run -C middle_hls
-	sleep .5
 	make run -C recv_hls
-	sleep .5
 	make run -C send_hls
 clean:
 	# REMOVE HLS 

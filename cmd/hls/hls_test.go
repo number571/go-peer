@@ -13,6 +13,7 @@ import (
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/modules/client"
+	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
@@ -47,7 +48,7 @@ func TestHLS(t *testing.T) {
 	defer srv.Close()
 
 	// service
-	node, err := testStartNodeHLS(t)
+	db, nnode, node, err := testStartNodeHLS(t)
 	if err != nil {
 		t.Error(err)
 		return
@@ -55,12 +56,12 @@ func TestHLS(t *testing.T) {
 	defer node.Close()
 
 	// client
-	nodeClient, err := testStartClientHLS()
+	db, nnode, nodeClient, err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer nodeClient.Close()
+	defer closer.CloseAll([]closer.ICloser{db, nnode, nodeClient})
 }
 
 // SERVER
@@ -106,10 +107,10 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 // HLS
 
-func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
-	node := testNewNode(0)
+func testStartNodeHLS(t *testing.T) (database.IKeyValueDB, network.INode, anonymity.INode, error) {
+	db, nnode, node := testNewNode(0)
 	if node == nil {
-		return nil, fmt.Errorf("node is not running")
+		return nil, nil, nil, fmt.Errorf("node is not running")
 	}
 
 	node.Handle(hls_settings.CHeaderHLS, testRouteHLS)
@@ -122,7 +123,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		}
 	}()
 
-	return node, nil
+	return db, nnode, node, nil
 }
 
 func testRouteHLS(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPayload) []byte {
@@ -178,12 +179,12 @@ func testRouteHLS(node anonymity.INode, sender asymmetric.IPubKey, pld payload.I
 
 // CLIENT
 
-func testStartClientHLS() (anonymity.INode, error) {
-	time.Sleep(200 * time.Millisecond)
+func testStartClientHLS() (database.IKeyValueDB, network.INode, anonymity.INode, error) {
+	time.Sleep(time.Second)
 
-	node := testNewNode(1)
+	db, nnode, node := testNewNode(1)
 	if node == nil {
-		return nil, fmt.Errorf("node is not running")
+		return nil, nil, nil, fmt.Errorf("node is not running")
 	}
 
 	node.Handle(hls_settings.CHeaderHLS, nil)
@@ -191,7 +192,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 
 	conn := node.Network().Connect(testutils.TgAddrs[4])
 	if conn == nil {
-		return node, fmt.Errorf("conn is nil")
+		return db, nnode, node, fmt.Errorf("conn is nil")
 	}
 
 	msg := payload.NewPayload(
@@ -207,37 +208,39 @@ func testStartClientHLS() (anonymity.INode, error) {
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey()
 	res, err := node.Request(pubKey, msg)
 	if err != nil {
-		return node, err
+		return db, nnode, node, err
 	}
 
 	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		return node, fmt.Errorf("result does not match; get '%s'", string(res))
+		return db, nnode, node, fmt.Errorf("result does not match; get '%s'", string(res))
 	}
 
-	return node, nil
+	return db, nnode, node, nil
 }
 
-func testNewNode(i int) anonymity.INode {
+func testNewNode(i int) (database.IKeyValueDB, network.INode, anonymity.INode) {
 	msgSize := uint64(100 << 10)
+	db := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath:      fmt.Sprintf(tcPathDBTemplate, i),
+			FHashing:   true,
+			FCipherKey: []byte(testutils.TcKey1),
+		}),
+	)
+	nnode := network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FCapacity:    (1 << 10),
+			FMessageSize: msgSize,
+			FMaxConnects: 10,
+			FTimeWait:    5 * time.Second,
+		}),
+	)
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
 		}),
-		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
-				FHashing:   true,
-				FCipherKey: []byte(testutils.TcKey1),
-			}),
-		),
-		network.NewNode(
-			network.NewSettings(&network.SSettings{
-				FCapacity:    (1 << 10),
-				FMessageSize: msgSize,
-				FMaxConnects: 10,
-				FTimeWait:    5 * time.Second,
-			}),
-		),
+		db,
+		nnode,
 		queue.NewQueue(
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     10,
@@ -255,7 +258,7 @@ func testNewNode(i int) anonymity.INode {
 		friends.NewF2F(),
 	)
 	if err := node.Run(); err != nil {
-		return nil
+		return nil, nil, nil
 	}
-	return node
+	return db, nnode, node
 }

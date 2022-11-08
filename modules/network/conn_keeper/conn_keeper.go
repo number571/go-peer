@@ -12,17 +12,9 @@ var (
 	_ IConnKeeper = &sConnKeeper{}
 )
 
-type iState int
-
-const (
-	cIsInit iState = iota
-	cIsRun
-	cIsClose
-)
-
 type sConnKeeper struct {
+	fIsRun    bool
 	fMutex    sync.Mutex
-	fState    iState
 	fSignal   chan struct{}
 	fNode     network.INode
 	fSettings ISettings
@@ -30,8 +22,6 @@ type sConnKeeper struct {
 
 func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
 	return &sConnKeeper{
-		fState:    cIsInit,
-		fSignal:   make(chan struct{}),
 		fNode:     node,
 		fSettings: sett,
 	}
@@ -45,16 +35,18 @@ func (connKeeper *sConnKeeper) Run() error {
 	connKeeper.fMutex.Lock()
 	defer connKeeper.fMutex.Unlock()
 
-	if connKeeper.fState != cIsInit {
-		return errors.New("conn keeper already started or closed")
+	if connKeeper.fIsRun {
+		return errors.New("conn keeper already started")
 	}
-	connKeeper.fState = cIsRun
+	connKeeper.fIsRun = true
+
+	connKeeper.fSignal = make(chan struct{})
+	connKeeper.tryConnectToAll()
 
 	go func() {
 		for {
 			select {
 			case <-connKeeper.fSignal:
-				connKeeper.fState = cIsClose
 				return
 			case <-time.After(connKeeper.Settings().GetDuration()):
 				connKeeper.tryConnectToAll()
@@ -69,11 +61,12 @@ func (connKeeper *sConnKeeper) Close() error {
 	connKeeper.fMutex.Lock()
 	defer connKeeper.fMutex.Unlock()
 
-	if connKeeper.fState != cIsRun {
+	if !connKeeper.fIsRun {
 		return errors.New("conn keeper already closed or not started")
 	}
+	connKeeper.fIsRun = false
 
-	connKeeper.fSignal <- struct{}{}
+	close(connKeeper.fSignal)
 	return nil
 }
 

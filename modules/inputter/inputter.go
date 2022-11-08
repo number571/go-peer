@@ -44,5 +44,5 @@ func (inp *sInputter) Password() string {
 	}
 	fmt.Println()
 
-	return string(bpasw)
+	return strings.TrimSpace(string(bpasw))
 }

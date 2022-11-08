@@ -6,7 +6,7 @@ build:
 	$(GC) -o prog_service service/*.go
 run:
 	./prog_hls1 --input-key priv.key &
-	sleep .5
+	sleep 1
 	./prog_service &
 clean:
 	pkill prog_hls1 || true

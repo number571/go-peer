@@ -10,6 +10,7 @@ type IEditor interface {
 }
 
 type IConfig interface {
+	Network() string
 	Address() iAddress
 	Connections() []string
 	Friends() []asymmetric.IPubKey

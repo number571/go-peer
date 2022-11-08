@@ -15,24 +15,28 @@ var (
 )
 
 type sConfig struct {
-	fFilepath string
+	FNetwork string `json:"network,omitempty"`
 
-	FAddress  *sAddress         `json:"address"`
+	FAddress  *sAddress         `json:"address,omitempty"`
 	FServices map[string]string `json:"services,omitempty"`
 
 	FConnections []string `json:"connections,omitempty"`
 	FFriends     []string `json:"friends,omitempty"`
 
-	fMutex   sync.Mutex
-	fFriends []asymmetric.IPubKey
+	fFilepath string
+	fMutex    sync.Mutex
+	fFriends  []asymmetric.IPubKey
 }
 
 type sAddress struct {
 	FTCP  string `json:"tcp,omitempty"`
-	FHTTP string `json:"http"`
+	FHTTP string `json:"http,omitempty"`
 }
 
 var (
+	// network key
+	cNetworkKey = "hls-network-key"
+
 	// create local hls
 	cDefaultAddress = &sAddress{
 		"localhost:9571",
@@ -60,6 +64,7 @@ func NewConfig(filepath string) IConfig {
 
 	if !filesystem.OpenFile(filepath).IsExist() {
 		cfg = &sConfig{
+			FNetwork:     cNetworkKey,
 			FAddress:     cDefaultAddress,
 			FServices:    gDefaultServices,
 			FFriends:     gDefaultPubKeys,
@@ -92,6 +97,10 @@ func NewConfig(filepath string) IConfig {
 	return cfg
 }
 
+func (cfg *sConfig) Network() string {
+	return cfg.FNetwork
+}
+
 func (cfg *sConfig) Friends() []asymmetric.IPubKey {
 	return cfg.fFriends
 }
@@ -113,9 +122,15 @@ func (cfg *sConfig) Service(name string) (string, bool) {
 }
 
 func (address *sAddress) TCP() string {
+	if address == nil {
+		return ""
+	}
 	return address.FTCP
 }
 
 func (address *sAddress) HTTP() string {
+	if address == nil {
+		return ""
+	}
 	return address.FHTTP
 }

@@ -67,45 +67,28 @@ func (node *sNode) Run() error {
 func (node *sNode) Close() error {
 	node.Network().Handle(settings.CMaskNetwork, nil)
 	return closer.CloseAll([]closer.ICloser{
-		node.KeyValueDB(),
-		node.Network(),
 		node.Queue(),
 	})
 }
 
 func (node *sNode) Settings() ISettings {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fSettings
 }
 
 func (node *sNode) KeyValueDB() database.IKeyValueDB {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fKeyValueDB
 }
 
 func (node *sNode) Network() network.INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fNetwork
 }
 
 func (node *sNode) Queue() queue.IQueue {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fQueue
 }
 
 // Return f2f structure.
 func (node *sNode) F2F() friends.IF2F {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
 	return node.fF2F
 }
 
@@ -118,10 +101,7 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 }
 
 func (node *sNode) Broadcast(msg message.IMessage) error {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	return node.fNetwork.Broadcast(payload.NewPayload(
+	return node.Network().Broadcast(payload.NewPayload(
 		settings.CMaskNetwork,
 		msg.Bytes(),
 	))
