@@ -3,6 +3,7 @@ module github.com/number571/go-peer
 go 1.17
 
 require (
+	github.com/boombuler/barcode v1.0.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467

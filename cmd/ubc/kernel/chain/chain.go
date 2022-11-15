@@ -7,6 +7,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/encoding"
@@ -108,7 +109,7 @@ func (chain *sChain) Close() error {
 	chain.fMutex.Lock()
 	defer chain.fMutex.Unlock()
 
-	return closer.CloseAll([]closer.ICloser{
+	return closer.CloseAll([]modules.ICloser{
 		chain.fBlocks,
 		chain.fTransactions,
 		chain.fMempool,

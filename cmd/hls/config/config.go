@@ -4,116 +4,125 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/encoding"
 	"github.com/number571/go-peer/modules/filesystem"
 )
 
 var (
-	_ IConfig  = &sConfig{}
-	_ iAddress = &sAddress{}
+	_ IConfig  = &SConfig{}
+	_ iAddress = &SAddress{}
 )
 
-type sConfig struct {
+type SConfig struct {
 	FNetwork string `json:"network,omitempty"`
 
-	FAddress  *sAddress         `json:"address,omitempty"`
+	FAddress  *SAddress         `json:"address,omitempty"`
 	FServices map[string]string `json:"services,omitempty"`
 
-	FConnections []string `json:"connections,omitempty"`
-	FFriends     []string `json:"friends,omitempty"`
+	FConnections []string          `json:"connections,omitempty"`
+	FFriends     map[string]string `json:"friends,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
-	fFriends  []asymmetric.IPubKey
+	fFriends  map[string]asymmetric.IPubKey
 }
 
-type sAddress struct {
+type SAddress struct {
 	FTCP  string `json:"tcp,omitempty"`
 	FHTTP string `json:"http,omitempty"`
 }
 
-var (
-	// network key
-	cNetworkKey = "hls-network-key"
+func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
+	configFile := filesystem.OpenFile(filepath)
 
-	// create local hls
-	cDefaultAddress = &sAddress{
-		"localhost:9571",
-		"localhost:9572",
+	if configFile.IsExist() {
+		return nil, fmt.Errorf("config file '%s' already exist", filepath)
 	}
 
-	// connect to another hls's
-	gDefaultConnects = []string{
-		cDefaultAddress.FTCP,
-	}
-
-	// another receivers of package
-	gDefaultPubKeys = []string{
-		`Pub(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}`,
-	}
-
-	// crypto-address -> network-address
-	gDefaultServices = map[string]string{
-		"hidden-default-service": "localhost:8080",
-	}
-)
-
-func NewConfig(filepath string) IConfig {
-	var cfg = new(sConfig)
-
-	if !filesystem.OpenFile(filepath).IsExist() {
-		cfg = &sConfig{
-			FNetwork:     cNetworkKey,
-			FAddress:     cDefaultAddress,
-			FServices:    gDefaultServices,
-			FFriends:     gDefaultPubKeys,
-			FConnections: gDefaultConnects,
-		}
-		err := filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		bytes, err := filesystem.OpenFile(filepath).Read()
-		if err != nil {
-			panic(err)
-		}
-		err = encoding.Deserialize(bytes, cfg)
-		if err != nil {
-			panic(err)
-		}
+	if err := configFile.Write(encoding.Serialize(cfg)); err != nil {
+		return nil, err
 	}
 
 	cfg.fFilepath = filepath
-	for _, val := range cfg.FFriends {
-		pubKey := asymmetric.LoadRSAPubKey(val)
-		if pubKey == nil {
-			panic(fmt.Sprintf("public key is nil: '%s'", val))
-		}
-		cfg.fFriends = append(cfg.fFriends, pubKey)
+	if err := cfg.loadPubKeys(); err != nil {
+		return nil, err
 	}
 
-	return cfg
+	return cfg, nil
 }
 
-func (cfg *sConfig) Network() string {
+func LoadConfig(filepath string) (IConfig, error) {
+	configFile := filesystem.OpenFile(filepath)
+
+	if !configFile.IsExist() {
+		return nil, fmt.Errorf("config file '%s' does not exist", filepath)
+	}
+
+	bytes, err := configFile.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := new(SConfig)
+	if err := encoding.Deserialize(bytes, cfg); err != nil {
+		return nil, err
+	}
+
+	cfg.fFilepath = filepath
+	if err := cfg.loadPubKeys(); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
+}
+
+func (cfg *SConfig) loadPubKeys() error {
+	cfg.fFriends = make(map[string]asymmetric.IPubKey)
+
+	mapping := make(map[string]interface{})
+	for name, val := range cfg.FFriends {
+		if _, ok := mapping[val]; ok {
+			return fmt.Errorf("found public key duplicate '%s'", val)
+		}
+		pubKey := asymmetric.LoadRSAPubKey(val)
+		if pubKey == nil {
+			return fmt.Errorf("public key is nil for '%s'", name)
+		}
+		cfg.fFriends[name] = pubKey
+		if pubKey.Size() != settings.CAKeySize {
+			return fmt.Errorf("not supported key size for '%s'", name)
+		}
+	}
+
+	return nil
+}
+
+func (cfg *SConfig) Network() string {
 	return cfg.FNetwork
 }
 
-func (cfg *sConfig) Friends() []asymmetric.IPubKey {
-	return cfg.fFriends
+func (cfg *SConfig) Friends() map[string]asymmetric.IPubKey {
+	cfg.fMutex.Lock()
+	defer cfg.fMutex.Unlock()
+
+	result := make(map[string]asymmetric.IPubKey)
+	for k, v := range cfg.fFriends {
+		result[k] = v
+	}
+	return result
 }
 
-func (cfg *sConfig) Address() iAddress {
+func (cfg *SConfig) Address() iAddress {
 	return cfg.FAddress
 }
 
-func (cfg *sConfig) Connections() []string {
+func (cfg *SConfig) Connections() []string {
 	return cfg.FConnections
 }
 
-func (cfg *sConfig) Service(name string) (string, bool) {
+func (cfg *SConfig) Service(name string) (string, bool) {
 	cfg.fMutex.Lock()
 	defer cfg.fMutex.Unlock()
 
@@ -121,14 +130,14 @@ func (cfg *sConfig) Service(name string) (string, bool) {
 	return addr, ok
 }
 
-func (address *sAddress) TCP() string {
+func (address *SAddress) TCP() string {
 	if address == nil {
 		return ""
 	}
 	return address.FTCP
 }
 
-func (address *sAddress) HTTP() string {
+func (address *SAddress) HTTP() string {
 	if address == nil {
 		return ""
 	}

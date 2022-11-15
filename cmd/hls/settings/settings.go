@@ -13,6 +13,7 @@ const (
 )
 
 const (
+	CHandleRoot     = "/api"
 	CHandleConnects = "/api/config/connects"
 	CHandleFriends  = "/api/config/friends"
 	CHandleOnline   = "/api/network/online"
@@ -27,7 +28,6 @@ const (
 
 const (
 	CPathCFG = "hls.cfg"
-	CPathSTG = "hls.stg"
 	CPathDB  = "hls.db"
 )
 
@@ -58,5 +58,8 @@ const (
 	CErrorMessage
 	CErrorResponse
 	CErrorBroadcast
+	CErrorExist
+	CErrorNotExist
 	CErrorAction
+	CErrorValue
 )

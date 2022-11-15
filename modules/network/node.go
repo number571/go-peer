@@ -4,6 +4,7 @@ import (
 	"net"
 	"sync"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/storage"
@@ -88,7 +89,7 @@ func (node *sNode) Close() error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	toClose := make([]closer.ICloser, 0, len(node.fConnections)+1)
+	toClose := make([]modules.ICloser, 0, len(node.fConnections)+1)
 	if node.fListener != nil {
 		toClose = append(toClose, node.fListener)
 	}

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
@@ -66,7 +67,7 @@ func (node *sNode) Run() error {
 
 func (node *sNode) Close() error {
 	node.Network().Handle(settings.CMaskNetwork, nil)
-	return closer.CloseAll([]closer.ICloser{
+	return closer.CloseAll([]modules.ICloser{
 		node.Queue(),
 	})
 }

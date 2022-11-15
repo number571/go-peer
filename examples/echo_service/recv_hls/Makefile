@@ -5,7 +5,7 @@ build:
 	$(GC) -o prog_hls1 hls/*.go
 	$(GC) -o prog_service service/*.go
 run:
-	./prog_hls1 --input-key priv.key &
+	./prog_hls1 --key priv.key &
 	sleep 1
 	./prog_service &
 clean:

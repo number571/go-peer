@@ -1,12 +1,14 @@
 package conn_keeper
 
-import "time"
+import (
+	"time"
+
+	"github.com/number571/go-peer/modules"
+)
 
 type IConnKeeper interface {
 	Settings() ISettings
-
-	Run() error
-	Close() error
+	modules.IApp
 }
 
 type ISettings interface {

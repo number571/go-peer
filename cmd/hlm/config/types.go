@@ -1,6 +1,11 @@
 package config
 
 type IConfig interface {
-	Address() string
+	Address() iAddress
 	Connection() string
+}
+
+type iAddress interface {
+	WebLocal() string
+	Incoming() string
 }

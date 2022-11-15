@@ -27,79 +27,161 @@ func NewRequester(host string) IRequester {
 	}
 }
 
-func (requester *sRequester) Request(req *hls_settings.SPush) ([]byte, error) {
-	jsonValue, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-
-	respPost, err := http.Post(
+func (requester *sRequester) Request(push *hls_settings.SPush) ([]byte, error) {
+	res, err := doRequest(
+		http.MethodPost,
 		requester.host+hls_settings.CHandlePush,
-		hls_settings.CContentType,
-		bytes.NewBuffer(jsonValue),
+		push,
 	)
 	if err != nil {
 		return nil, err
 	}
-	defer respPost.Body.Close()
 
-	resp, err := loadResponse(respPost.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return encoding.HexDecode(resp.FResult), nil
+	return encoding.HexDecode(res), nil
 }
 
-func (requester *sRequester) Friends() ([]asymmetric.IPubKey, error) {
-	respGet, err := http.Get(requester.host + hls_settings.CHandleFriends)
-	if err != nil {
-		return nil, err
-	}
-	defer respGet.Body.Close()
-
-	resp, err := loadResponse(respGet.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	listPubKeysStr := strings.Split(resp.FResult, ",")
-	listPubKeys := make([]asymmetric.IPubKey, 0, len(listPubKeysStr))
-	for _, pubKeyStr := range listPubKeysStr {
-		listPubKeys = append(listPubKeys, asymmetric.LoadRSAPubKey(pubKeyStr))
-	}
-
-	return listPubKeys, nil
+func (requester *sRequester) Broadcast(push *hls_settings.SPush) error {
+	_, err := doRequest(
+		http.MethodPut,
+		requester.host+hls_settings.CHandlePush,
+		push,
+	)
+	return err
 }
 
-func (requester *sRequester) Online() ([]string, error) {
-	respGet, err := http.Get(requester.host + hls_settings.CHandleOnline)
-	if err != nil {
-		return nil, err
-	}
-	defer respGet.Body.Close()
-
-	resp, err := loadResponse(respGet.Body)
+func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
+	res, err := doRequest(
+		http.MethodGet,
+		requester.host+hls_settings.CHandleFriends,
+		nil,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return strings.Split(resp.FResult, ","), nil
+	listFriends := deleteVoidStrings(strings.Split(res, ","))
+	result := make(map[string]asymmetric.IPubKey, len(listFriends))
+	for _, friend := range listFriends {
+		splited := strings.Split(friend, ":")
+		if len(splited) != 2 {
+			panic("len splited != 2")
+		}
+		aliasName := splited[0]
+		pubKeyStr := splited[1]
+		result[aliasName] = asymmetric.LoadRSAPubKey(pubKeyStr)
+	}
+	return result, nil
+}
+
+func (requester *sRequester) AddFriend(friend *hls_settings.SFriend) error {
+	_, err := doRequest(
+		http.MethodPost,
+		requester.host+hls_settings.CHandleFriends,
+		friend,
+	)
+	return err
+}
+
+func (requester *sRequester) DelFriend(friend *hls_settings.SFriend) error {
+	_, err := doRequest(
+		http.MethodDelete,
+		requester.host+hls_settings.CHandleFriends,
+		friend,
+	)
+	return err
+}
+
+func (requester *sRequester) GetOnlines() ([]string, error) {
+	res, err := doRequest(
+		http.MethodGet,
+		requester.host+hls_settings.CHandleOnline,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return deleteVoidStrings(strings.Split(res, ",")), nil
+}
+
+func (requester *sRequester) DelOnline(connect *hls_settings.SConnect) error {
+	_, err := doRequest(
+		http.MethodDelete,
+		requester.host+hls_settings.CHandleOnline,
+		connect,
+	)
+	return err
+}
+
+func (requester *sRequester) GetConnections() ([]string, error) {
+	res, err := doRequest(
+		http.MethodGet,
+		requester.host+hls_settings.CHandleConnects,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return deleteVoidStrings(strings.Split(res, ",")), nil
+}
+
+func (requester *sRequester) AddConnection(connect *hls_settings.SConnect) error {
+	_, err := doRequest(
+		http.MethodPost,
+		requester.host+hls_settings.CHandleConnects,
+		connect,
+	)
+	return err
+}
+
+func (requester *sRequester) DelConnection(connect *hls_settings.SConnect) error {
+	_, err := doRequest(
+		http.MethodDelete,
+		requester.host+hls_settings.CHandleConnects,
+		connect,
+	)
+	return err
 }
 
 func (requester *sRequester) PubKey() (asymmetric.IPubKey, error) {
-	respGet, err := http.Get(requester.host + hls_settings.CHandlePubKey)
+	res, err := doRequest(
+		http.MethodGet,
+		requester.host+hls_settings.CHandlePubKey,
+		nil,
+	)
 	if err != nil {
 		return nil, err
 	}
-	defer respGet.Body.Close()
+	return asymmetric.LoadRSAPubKey(res), nil
+}
 
-	resp, err := loadResponse(respGet.Body)
+func doRequest(method, url string, data interface{}) (string, error) {
+	jsonValue, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return asymmetric.LoadRSAPubKey(resp.FResult), nil
+	req, err := http.NewRequest(
+		method,
+		url,
+		bytes.NewBuffer(jsonValue),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", hls_settings.CContentType)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	res, err := loadResponse(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return res.FResult, nil
 }
 
 func loadResponse(reader io.ReadCloser) (*hls_settings.SResponse, error) {
@@ -118,4 +200,16 @@ func loadResponse(reader io.ReadCloser) (*hls_settings.SResponse, error) {
 	}
 
 	return resp, nil
+}
+
+func deleteVoidStrings(s []string) []string {
+	result := make([]string, 0, len(s))
+	for _, v := range s {
+		r := strings.TrimSpace(v)
+		if r == "" {
+			continue
+		}
+		result = append(result, r)
+	}
+	return result
 }

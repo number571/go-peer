@@ -1,16 +1,20 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
 
-const (
-	cKeySizeTemplate    = "database.relations[%s-%s].size"
-	cKeyMessageTemplate = "database.relations[%s-%s].messages[%d]"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
-func getKeySize(rel IRelation) []byte {
-	return []byte(fmt.Sprintf(cKeySizeTemplate, rel.IAm().Address(), rel.Friend().Address()))
+const (
+	cKeySizeTemplate    = "database.friends[%s].size"
+	cKeyMessageTemplate = "database.friends[%s].messages[%d]"
+)
+
+func getKeySize(pubKey asymmetric.IPubKey) []byte {
+	return []byte(fmt.Sprintf(cKeySizeTemplate, pubKey.Address()))
 }
 
-func getKeyMessage(rel IRelation, i uint64) []byte {
-	return []byte(fmt.Sprintf(cKeyMessageTemplate, rel.IAm().Address(), rel.Friend().Address(), i))
+func getKeyMessage(pubKey asymmetric.IPubKey, i uint64) []byte {
+	return []byte(fmt.Sprintf(cKeyMessageTemplate, pubKey.Address(), i))
 }

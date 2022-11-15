@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/inputter"
 )
@@ -35,5 +36,5 @@ func main() {
 
 	<-shutdown
 	fmt.Println("Shutting down...")
-	closer.CloseAll([]closer.ICloser{gDB})
+	closer.CloseAll([]modules.ICloser{gDB})
 }

@@ -1,57 +1,73 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/number571/go-peer/modules/encoding"
 	"github.com/number571/go-peer/modules/filesystem"
 )
 
 var (
-	_ IConfig = &sConfig{}
+	_ IConfig  = &SConfig{}
+	_ iAddress = &SAddress{}
 )
 
-type sConfig struct {
-	FAddress    string `json:"address"`
-	FConnection string `json:"connection"`
+type SConfig struct {
+	FAddress    *SAddress `json:"address"`
+	FConnection string    `json:"connection"`
 }
 
-const (
-	// create local hlm
-	cDefaultAddress = "localhost:8080"
+type SAddress struct {
+	FWebLocal string `json:"web_local"`
+	FIncoming string `json:"incoming"`
+}
 
-	// create local hls
-	cDefaultConnection = "localhost:9572"
-)
+func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
+	configFile := filesystem.OpenFile(filepath)
 
-func NewConfig(filepath string) IConfig {
-	var cfg = new(sConfig)
-
-	if !filesystem.OpenFile(filepath).IsExist() {
-		cfg = &sConfig{
-			FAddress:    cDefaultAddress,
-			FConnection: cDefaultConnection,
-		}
-		err := filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		bytes, err := filesystem.OpenFile(filepath).Read()
-		if err != nil {
-			panic(err)
-		}
-		err = encoding.Deserialize(bytes, cfg)
-		if err != nil {
-			panic(err)
-		}
+	if configFile.IsExist() {
+		return nil, fmt.Errorf("config file '%s' already exist", filepath)
 	}
 
-	return cfg
+	if err := configFile.Write(encoding.Serialize(cfg)); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }
 
-func (cfg *sConfig) Address() string {
+func LoadConfig(filepath string) (IConfig, error) {
+	configFile := filesystem.OpenFile(filepath)
+
+	if !configFile.IsExist() {
+		return nil, fmt.Errorf("config file '%s' does not exist", filepath)
+	}
+
+	bytes, err := configFile.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := new(SConfig)
+	if err := encoding.Deserialize(bytes, cfg); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
+}
+
+func (cfg *SConfig) Address() iAddress {
 	return cfg.FAddress
 }
 
-func (cfg *sConfig) Connection() string {
+func (cfg *SConfig) Connection() string {
 	return cfg.FConnection
+}
+
+func (addr *SAddress) WebLocal() string {
+	return addr.FWebLocal
+}
+
+func (addr *SAddress) Incoming() string {
+	return addr.FIncoming
 }

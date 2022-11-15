@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -187,7 +188,7 @@ func testNewNode(i int, timeWait time.Duration) (database.IKeyValueDB, network.I
 }
 
 func testFreeNodes(dbs []database.IKeyValueDB, nnodes []network.INode, nodes []INode) {
-	toClose := make([]closer.ICloser, 0, len(dbs)+len(nnodes)+len(nodes))
+	toClose := make([]modules.ICloser, 0, len(dbs)+len(nnodes)+len(nodes))
 	for _, db := range dbs {
 		toClose = append(toClose, db)
 	}

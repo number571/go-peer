@@ -1,0 +1,48 @@
+{{define "title"}}
+About
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <h1 class="col-md-10 mb-3 mx-auto h3">About project</h1>
+    <div class="card mb-3">
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="pills-project-tab" data-toggle="pill" href="#pills-project" role="tab" aria-controls="pills-project" aria-selected="true">Project</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="pills-theory-tab" data-toggle="pill" href="#pills-theory" role="tab" aria-controls="pills-theory" aria-selected="false">Theory</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="pills-source-tab" data-toggle="pill" href="#pills-source" role="tab" aria-controls="pills-source" aria-selected="false">Source</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="pills-tabContent">
+            <div class="p-1 tab-pane fade show active" id="pills-project" role="tabpanel" aria-labelledby="pills-project-tab">
+                <p class="text-left">
+                    HLM is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
+                </p>
+                <p class="text-left">
+                    HLS is the core of an anonymous network with theoretically provable anonymity, built on the basis of friend-to-friend (F2F) connections. It is based on the "queues" model. In certain implementations, it may exhibit the property of "abstractness".
+                </p>
+            </div>
+            <div class="p-1 tab-pane fade" id="pills-theory" role="tabpanel" aria-labelledby="pills-theory-tab">
+                <p class="text-left">
+                    The theory of the structure of hidden systems is a scientific and theoretical article describing the development of anonymous communications and secure applications. The analysis is based on a dialectical approach that allows us to consider the patterns of development through the sum of accumulated contradictions.
+                </p>
+            </div>
+            <div class="p-1 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">
+                <p class="text-left">
+                    Project <a href="https://github.com/number571/go-peer/tree/master/cmd/hlm">HLM</a>;
+                </p>
+                <p class="text-left">
+                    Project <a href="https://github.com/number571/go-peer/tree/master/cmd/hls">HLS</a>;
+                </p>
+                <p class="text-left">
+                    Theory <a href="https://github.com/number571/go-peer/blob/master/hidden_systems.pdf">Hidden Systems</a>;
+                </p>
+            </div>
+          </div>
+    </div>
+</div>
+{{end}}

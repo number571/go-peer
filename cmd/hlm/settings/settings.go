@@ -12,5 +12,6 @@ const (
 )
 
 const (
-	CHandlePush = "/push"
+	CPathStatic    = "./views/static/"
+	CPathTemplates = "./views/templates/"
 )

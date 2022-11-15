@@ -4,7 +4,7 @@ default: clean build run
 build:
 	$(GC) -o prog_hls2 hls/*.go
 run:
-	./prog_hls2 --input-key priv.key &
+	./prog_hls2 --key priv.key &
 	sleep 1
 clean:
 	pkill prog_hls2 || true

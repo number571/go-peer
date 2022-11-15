@@ -10,7 +10,8 @@ type SConnect struct {
 }
 
 type SFriend struct {
-	FFriend string `json:"friend"`
+	FAliasName string `json:"alias_name"`
+	FPublicKey string `json:"public_key"`
 }
 
 type SPush struct {

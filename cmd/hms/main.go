@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 )
 
@@ -43,5 +44,5 @@ func main() {
 
 	<-shutdown
 	fmt.Println("Shutting down...")
-	closer.CloseAll([]closer.ICloser{srv, gDB})
+	closer.CloseAll([]modules.ICloser{srv, gDB})
 }

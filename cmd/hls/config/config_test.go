@@ -30,9 +30,9 @@ const (
 		"test_connect2",
 		"test_connect3"
 	],
-	"friends": [
-		"Pub(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
-	],
+	"friends": {
+		"test_name": "Pub(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
+	},
 	"services": {
 		"test_service1": "test_address1",
 		"test_service2": "test_address2",
@@ -47,8 +47,8 @@ var (
 		"test_connect2",
 		"test_connect3",
 	}
-	tgPubKeys = []string{
-		`Pub(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}`,
+	tgPubKeys = map[string]string{
+		"test_name": `Pub(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}`,
 	}
 	tgServices = map[string]string{
 		"test_service1": "test_address1",
@@ -65,7 +65,10 @@ func TestConfig(t *testing.T) {
 	testConfigDefaultInit(tcConfigFile)
 	defer os.Remove(tcConfigFile)
 
-	cfg := NewConfig(tcConfigFile)
+	cfg, err := LoadConfig(tcConfigFile)
+	if err != nil {
+		t.Error(err)
+	}
 
 	if cfg.Network() != tcNetwork {
 		t.Errorf("network is invalid")
@@ -95,11 +98,44 @@ func TestConfig(t *testing.T) {
 		}
 	}
 
-	for i, v := range tgPubKeys {
-		v1 := cfg.Friends()[i]
-		pubKey := asymmetric.LoadRSAPubKey(v)
+	for name, pubStr := range tgPubKeys {
+		v1 := cfg.Friends()[name]
+		pubKey := asymmetric.LoadRSAPubKey(pubStr)
 		if pubKey.Address().String() != v1.Address().String() {
 			t.Errorf("public key is invalid '%s'", v1)
 		}
+	}
+}
+
+func TestWrapper(t *testing.T) {
+	testConfigDefaultInit(tcConfigFile)
+	defer os.Remove(tcConfigFile)
+
+	cfg, err := LoadConfig(tcConfigFile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(cfg.Friends()) == 0 {
+		t.Errorf("list of friends should be is not nil for tests")
+		return
+	}
+
+	wrapper := NewWrapper(cfg)
+	wrapper.Editor().UpdateFriends(nil)
+
+	if len(cfg.Friends()) != 0 {
+		t.Errorf("friends is not nil for current config")
+		return
+	}
+
+	cfg, err = LoadConfig(tcConfigFile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(cfg.Friends()) != 0 {
+		t.Errorf("friends is not nil for loaded config")
+		return
 	}
 }

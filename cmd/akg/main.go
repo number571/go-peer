@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/modules/filesystem"
 )
 
 func main() {
@@ -35,10 +35,10 @@ func main() {
 
 	switch mode {
 	case "inline":
-		fmt.Println(priv.PubKey())
-		fmt.Println(priv)
+		filesystem.OpenFile("priv.key").Write([]byte(priv.String()))
+		filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().String()))
 	case "pretty":
-		fmt.Println(priv.PubKey().Format())
-		fmt.Println(priv.Format())
+		filesystem.OpenFile("priv.key").Write([]byte(priv.Format()))
+		filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().Format()))
 	}
 }

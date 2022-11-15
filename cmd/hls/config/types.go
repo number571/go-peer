@@ -4,16 +4,21 @@ import (
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
+type IWrapper interface {
+	Config() IConfig
+	Editor() IEditor
+}
+
 type IEditor interface {
 	UpdateConnections([]string) error
-	UpdateFriends([]asymmetric.IPubKey) error
+	UpdateFriends(map[string]asymmetric.IPubKey) error
 }
 
 type IConfig interface {
 	Network() string
 	Address() iAddress
 	Connections() []string
-	Friends() []asymmetric.IPubKey
+	Friends() map[string]asymmetric.IPubKey
 	Service(string) (string, bool)
 }
 

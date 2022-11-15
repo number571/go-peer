@@ -1,17 +1,17 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/cmd/hls/config"
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -25,22 +25,19 @@ import (
 )
 
 const (
-	tcPathDB     = "hls_test.db"
-	tcPathConfig = "hls_test.cfg"
-)
-
-const (
 	tcServiceAddressInHLS = "hidden-echo-service"
 	tcPathDBTemplate      = "database_test_%d.db"
+	tcPathConfig          = "config_test.cfg"
 )
 
 // client -> HLS -> server --\
 // client <- HLS <- server <-/
 func TestHLS(t *testing.T) {
 	defer func() {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, 0))
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, 1))
-		os.Remove(tcPathConfig)
+		os.RemoveAll(tcPathConfig)
+		for i := 0; i < 2; i++ {
+			os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
+		}
 	}()
 
 	// server
@@ -48,12 +45,12 @@ func TestHLS(t *testing.T) {
 	defer srv.Close()
 
 	// service
-	db, nnode, node, err := testStartNodeHLS(t)
+	db, nnode, nodeService, err := testStartNodeHLS(t)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer node.Close()
+	defer closer.CloseAll([]modules.ICloser{db, nnode, nodeService})
 
 	// client
 	db, nnode, nodeClient, err := testStartClientHLS()
@@ -61,7 +58,7 @@ func TestHLS(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer closer.CloseAll([]closer.ICloser{db, nnode, nodeClient})
+	defer closer.CloseAll([]modules.ICloser{db, nnode, nodeClient})
 }
 
 // SERVER
@@ -108,12 +105,26 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 // HLS
 
 func testStartNodeHLS(t *testing.T) (database.IKeyValueDB, network.INode, anonymity.INode, error) {
-	db, nnode, node := testNewNode(0)
+	rawCFG := &config.SConfig{
+		FAddress: &config.SAddress{
+			FTCP: testutils.TgAddrs[4],
+		},
+		FServices: map[string]string{
+			tcServiceAddressInHLS: testutils.TgAddrs[5],
+		},
+	}
+
+	cfg, err := config.NewConfig(tcPathConfig, rawCFG)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	db, nnode, node := testRunNewNode(0)
 	if node == nil {
 		return nil, nil, nil, fmt.Errorf("node is not running")
 	}
 
-	node.Handle(hls_settings.CHeaderHLS, testRouteHLS)
+	node.Handle(hls_settings.CHeaderHLS, handleServiceTCP(cfg))
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
@@ -126,68 +137,15 @@ func testStartNodeHLS(t *testing.T) (database.IKeyValueDB, network.INode, anonym
 	return db, nnode, node, nil
 }
 
-func testRouteHLS(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPayload) []byte {
-	// for test
-	mapping := map[string]string{
-		tcServiceAddressInHLS: testutils.TgAddrs[5],
-	}
-
-	// load request from message's body
-	requestBytes := pld.Body()
-	request := hls_network.LoadRequest(requestBytes)
-	if request == nil {
-		return nil
-	}
-
-	// get service's address by name
-	address, ok := mapping[request.Host()]
-	if !ok {
-		return nil
-	}
-
-	// generate new request to serivce
-	req, err := http.NewRequest(
-		request.Method(),
-		fmt.Sprintf("http://%s%s", address, request.Path()),
-		bytes.NewReader(request.Body()),
-	)
-	if err != nil {
-		return nil
-	}
-
-	req.Header.Add(hls_settings.CHeaderPubKey, sender.String())
-	for key, val := range request.Head() {
-		req.Header.Add(key, val)
-	}
-
-	// send request to service
-	// and receive response from service
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil
-	}
-
-	// send result to client
-	return data
-}
-
 // CLIENT
 
 func testStartClientHLS() (database.IKeyValueDB, network.INode, anonymity.INode, error) {
 	time.Sleep(time.Second)
 
-	db, nnode, node := testNewNode(1)
+	db, nnode, node := testRunNewNode(1)
 	if node == nil {
 		return nil, nil, nil, fmt.Errorf("node is not running")
 	}
-
-	node.Handle(hls_settings.CHeaderHLS, nil)
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	conn := node.Network().Connect(testutils.TgAddrs[4])
@@ -218,7 +176,7 @@ func testStartClientHLS() (database.IKeyValueDB, network.INode, anonymity.INode,
 	return db, nnode, node, nil
 }
 
-func testNewNode(i int) (database.IKeyValueDB, network.INode, anonymity.INode) {
+func testRunNewNode(i int) (database.IKeyValueDB, network.INode, anonymity.INode) {
 	msgSize := uint64(100 << 10)
 	db := database.NewLevelDB(
 		database.NewSettings(&database.SSettings{
@@ -256,7 +214,7 @@ func testNewNode(i int) (database.IKeyValueDB, network.INode, anonymity.INode) {
 			),
 		),
 		friends.NewF2F(),
-	)
+	).Handle(hls_settings.CHeaderHLS, nil)
 	if err := node.Run(); err != nil {
 		return nil, nil, nil
 	}

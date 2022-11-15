@@ -1,12 +1,13 @@
 package database
 
 import (
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/storage"
 )
 
 type IKeyValueDB interface {
 	storage.IKeyValueStorage
-	Close() error
+	modules.ICloser
 
 	Settings() ISettings
 	Iter([]byte) iIterator

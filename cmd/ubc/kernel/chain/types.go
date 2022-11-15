@@ -4,6 +4,7 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+	"github.com/number571/go-peer/modules"
 )
 
 type IChain interface {
@@ -16,5 +17,5 @@ type IChain interface {
 	Block(uint64) block.IBlock
 
 	Mempool() mempool.IMempool
-	Close() error
+	modules.ICloser
 }

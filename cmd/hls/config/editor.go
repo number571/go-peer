@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/cmd/hls/settings"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/encoding"
 	"github.com/number571/go-peer/modules/filesystem"
@@ -14,15 +16,19 @@ var (
 
 type sEditor struct {
 	fMutex  sync.Mutex
-	fConfig *IConfig
+	fConfig *SConfig
 }
 
-func NewEditor(cfg *IConfig) IEditor {
-	if cfg == nil || *cfg == nil {
+func newEditor(cfg IConfig) IEditor {
+	if cfg == nil {
+		return nil
+	}
+	v, ok := cfg.(*SConfig)
+	if !ok {
 		return nil
 	}
 	return &sEditor{
-		fConfig: cfg,
+		fConfig: v,
 	}
 }
 
@@ -30,44 +36,44 @@ func (edit *sEditor) UpdateConnections(conns []string) error {
 	edit.fMutex.Lock()
 	defer edit.fMutex.Unlock()
 
-	filepath := (*edit.fConfig).(*sConfig).fFilepath
-	bytes, err := filesystem.OpenFile(filepath).Read()
+	filepath := edit.fConfig.fFilepath
+	icfg, err := LoadConfig(filepath)
 	if err != nil {
 		return err
 	}
 
-	var cfg = new(sConfig)
-	err = encoding.Deserialize(bytes, cfg)
-	if err != nil {
-		return err
-	}
-
+	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(conns)
 	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
 	if err != nil {
 		return err
 	}
 
-	(*edit.fConfig).(*sConfig).FConnections = cfg.FConnections
+	edit.fConfig.fMutex.Lock()
+	defer edit.fConfig.fMutex.Unlock()
+
+	edit.fConfig.FConnections = cfg.FConnections
 	return nil
 }
 
-func (edit *sEditor) UpdateFriends(friends []asymmetric.IPubKey) error {
+func (edit *sEditor) UpdateFriends(friends map[string]asymmetric.IPubKey) error {
 	edit.fMutex.Lock()
 	defer edit.fMutex.Unlock()
 
-	filepath := (*edit.fConfig).(*sConfig).fFilepath
-	bytes, err := filesystem.OpenFile(filepath).Read()
+	for name, pubKey := range friends {
+		if pubKey.Size() == settings.CAKeySize {
+			continue
+		}
+		return fmt.Errorf("not supported key size for '%s'", name)
+	}
+
+	filepath := edit.fConfig.fFilepath
+	icfg, err := LoadConfig(filepath)
 	if err != nil {
 		return err
 	}
 
-	var cfg = new(sConfig)
-	err = encoding.Deserialize(bytes, cfg)
-	if err != nil {
-		return err
-	}
-
+	cfg := icfg.(*SConfig)
 	cfg.fFriends = deleteDuplicatePubKeys(friends)
 	cfg.FFriends = pubKeysToStrings(friends)
 	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
@@ -75,28 +81,32 @@ func (edit *sEditor) UpdateFriends(friends []asymmetric.IPubKey) error {
 		return err
 	}
 
-	(*edit.fConfig).(*sConfig).fFriends = cfg.fFriends
-	(*edit.fConfig).(*sConfig).FFriends = cfg.FFriends
+	edit.fConfig.fMutex.Lock()
+	defer edit.fConfig.fMutex.Unlock()
+
+	edit.fConfig.fFriends = cfg.fFriends
+	edit.fConfig.FFriends = cfg.FFriends
 	return nil
 }
 
-func pubKeysToStrings(pubKeys []asymmetric.IPubKey) []string {
-	result := make([]string, 0, len(pubKeys))
-	for _, pk := range pubKeys {
-		result = append(result, pk.String())
+func pubKeysToStrings(pubKeys map[string]asymmetric.IPubKey) map[string]string {
+	result := make(map[string]string, len(pubKeys))
+	for name, pubKey := range pubKeys {
+		result[name] = pubKey.String()
 	}
 	return result
 }
 
-func deleteDuplicatePubKeys(pubKeys []asymmetric.IPubKey) []asymmetric.IPubKey {
-	result := make([]asymmetric.IPubKey, 0, len(pubKeys))
+func deleteDuplicatePubKeys(pubKeys map[string]asymmetric.IPubKey) map[string]asymmetric.IPubKey {
+	result := make(map[string]asymmetric.IPubKey, len(pubKeys))
 	mapping := make(map[string]struct{})
-	for _, pk := range pubKeys {
-		if _, ok := mapping[pk.Address().String()]; ok {
+	for name, pubKey := range pubKeys {
+		pubStr := pubKey.Address().String()
+		if _, ok := mapping[pubStr]; ok {
 			continue
 		}
-		mapping[pk.Address().String()] = struct{}{}
-		result = append(result, pk)
+		mapping[pubStr] = struct{}{}
+		result[name] = pubKey
 	}
 	return result
 }

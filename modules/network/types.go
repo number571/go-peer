@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/payload"
 )
 
@@ -17,7 +18,7 @@ type INode interface {
 	Broadcast(payload.IPayload) error
 
 	Listen(string) error
-	Close() error
+	modules.ICloser
 
 	Connect(string) IConn
 	Disconnect(string) error
@@ -37,7 +38,7 @@ type IConn interface {
 
 	Write(IMessage) error
 	Read() IMessage
-	Close() error
+	modules.ICloser
 }
 
 type IMessage interface {

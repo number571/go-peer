@@ -3,6 +3,7 @@ package anonymity
 import (
 	"time"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/message"
@@ -17,6 +18,8 @@ import (
 type IHandlerF func(INode, asymmetric.IPubKey, payload.IPayload) []byte
 
 type INode interface {
+	modules.IApp
+
 	Settings() ISettings
 	KeyValueDB() database.IKeyValueDB
 	Network() network.INode
@@ -26,9 +29,6 @@ type INode interface {
 	Handle(uint32, IHandlerF) INode
 	Broadcast(message.IMessage) error
 	Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error)
-
-	Run() error
-	Close() error
 }
 
 type ISettings interface {

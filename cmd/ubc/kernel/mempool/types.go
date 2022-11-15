@@ -1,6 +1,9 @@
 package mempool
 
-import "github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+import (
+	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+	"github.com/number571/go-peer/modules"
+)
 
 type IMempool interface {
 	Height() uint64
@@ -11,5 +14,5 @@ type IMempool interface {
 
 	Delete([]byte)
 	Clear()
-	Close() error
+	modules.ICloser
 }

@@ -1,0 +1,56 @@
+{{define "title"}}
+  Chat
+{{end}}
+
+{{define "main"}}
+<script type="text/javascript" defer>
+  window.onload = function () {
+    var objDiv = document.getElementById("chat_body");
+    objDiv.scrollTop = objDiv.scrollHeight;
+    
+    var input = document.getElementById('input_message');
+    input.focus();
+    input.select();
+  }
+</script>
+
+<div id="chat_body" class="card-body" style="position: relative; height: 100%; overflow:auto;">
+  {{range .FMessages}}
+    {{if .FIsIncoming}}
+      <div class="d-flex flex-row justify-content-start">
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar 1"
+          style="width: 45px; height: 100%;">
+        <div>
+          <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">{{.FMessage}}</p>
+          <!-- <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">How are you ...???
+          </p>
+          <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">What are you doing
+            tomorrow? Can we come up a bar?</p>
+          <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p> -->
+        </div>
+      </div>
+    {{else}}
+      <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+        <div>
+          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{.FMessage}}</p>
+          <!-- <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">How are you doing?</p>
+          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Long time no see! Tomorrow
+            office. will
+            be free on sunday.</p>
+          <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:06</p> -->
+        </div>
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar 1"
+          style="width: 45px; height: 100%;">
+      </div>
+    {{end}}
+  {{end}}
+
+</div>
+  <form class="card-footer d-flex" method="POST">
+    <input hidden name="method" value="POST">
+    <input type="text" autocomplete="off" style="height:100%;" class="form-control form-control-lg" name="input_message"
+    placeholder="Type message" id="input_message">
+    <input type="submit" name="submit" value="Send message" style="height:100%;" class="btn btn-primary">
+</form>
+
+{{end}}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/encoding"
 	gp_database "github.com/number571/go-peer/modules/storage/database"
 )
@@ -18,21 +19,21 @@ func NewKeyValueDB(path string) IKeyValueDB {
 		FPath: path,
 	})
 	if db == nil {
-		panic("storage (messages) is nil")
+		return nil
 	}
 	return &sKeyValueDB{
 		fDB: db,
 	}
 }
 
-func (db *sKeyValueDB) Size(rel IRelation) (uint64, error) {
+func (db *sKeyValueDB) Size(pubKey asymmetric.IPubKey) uint64 {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	return db.getSize(rel)
+	return db.getSize(pubKey)
 }
 
-func (db *sKeyValueDB) Load(rel IRelation, start, end uint64) ([]string, error) {
+func (db *sKeyValueDB) Load(pubKey asymmetric.IPubKey, start, end uint64) ([]IMessage, error) {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
@@ -40,43 +41,39 @@ func (db *sKeyValueDB) Load(rel IRelation, start, end uint64) ([]string, error) 
 		return nil, fmt.Errorf("start > end")
 	}
 
-	size, err := db.getSize(rel)
-	if err != nil {
-		return nil, err
-	}
-
+	size := db.getSize(pubKey)
 	if end > size {
 		return nil, fmt.Errorf("end > size")
 	}
 
-	res := make([]string, 0, end-start+1)
+	res := make([]IMessage, 0, end-start)
 	for i := start; i < end; i++ {
-		data, err := db.fDB.Get(getKeyMessage(rel, i))
+		data, err := db.fDB.Get(getKeyMessage(pubKey, i))
 		if err != nil {
 			return nil, fmt.Errorf("message undefined")
 		}
-		res = append(res, string(data))
+		msg := LoadMessage(data)
+		if msg == nil {
+			return nil, fmt.Errorf("message is null")
+		}
+		res = append(res, msg)
 	}
 
 	return res, nil
 }
 
-func (db *sKeyValueDB) Push(rel IRelation, msg string) error {
+func (db *sKeyValueDB) Push(pubKey asymmetric.IPubKey, msg IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	size, err := db.getSize(rel)
-	if err != nil {
-		return err
-	}
-
-	err = db.fDB.Set(getKeyMessage(rel, size), []byte(msg))
+	size := db.getSize(pubKey)
+	err := db.fDB.Set(getKeyMessage(pubKey, size), msg.Bytes())
 	if err != nil {
 		return err
 	}
 
 	numBytes := encoding.Uint64ToBytes(size + 1)
-	return db.fDB.Set(getKeySize(rel), numBytes[:])
+	return db.fDB.Set(getKeySize(pubKey), numBytes[:])
 }
 
 func (db *sKeyValueDB) Close() error {
@@ -86,13 +83,13 @@ func (db *sKeyValueDB) Close() error {
 	return db.fDB.Close()
 }
 
-func (db *sKeyValueDB) getSize(rel IRelation) (uint64, error) {
-	data, err := db.fDB.Get(getKeySize(rel))
+func (db *sKeyValueDB) getSize(pubKey asymmetric.IPubKey) uint64 {
+	data, err := db.fDB.Get(getKeySize(pubKey))
 	if err != nil {
-		return 0, nil
+		return 0
 	}
 
 	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
-	return encoding.BytesToUint64(res), nil
+	return encoding.BytesToUint64(res)
 }

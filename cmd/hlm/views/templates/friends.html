@@ -1,0 +1,46 @@
+{{define "title"}}
+Friends
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <h1 class="col-md-10 mb-3 mx-auto h3">Communications</h1>
+    <div class="card mb-3">
+        <h5 class="card-header text-white bg-secondary">Friends</h5>
+        <div class="card-body">
+            <form class="mb-3" method="POST" action="/friends">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="POST"> 
+                <div class="row">
+                    <div class="col-md-5 w-50">
+                        <input type="text" name="alias_name" placeholder="Alias" class="text-center form-control w-100">
+                    </div>
+                    <div class="col-md-3 w-25">
+                        <input type="text" name="public_key" placeholder="PK" class="text-center form-control w-100">
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="+" class="btn btn-success w-100">
+                    </div>
+                </div>
+            </form>
+            {{range .FFriends}}
+            <form class="mb-3" method="POST" action="/friends">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="DELETE">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        <input hidden type="text" name="alias_name" value="{{.}}" class="text-center form-control w-100">
+                        <!-- GET -->
+                        <a href="/friends/chat?alias_name={{.}}" class="btn btn-primary button w-100">{{.}}</a>
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="-" class="btn btn-danger w-100">
+                    </div>
+                </div>
+            </form>
+            {{end}}
+            <!-- ... -->
+        </div>
+    </div>
+</div>
+{{end}}

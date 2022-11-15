@@ -3,6 +3,7 @@ package queue
 import (
 	"time"
 
+	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/message"
 )
@@ -11,11 +12,10 @@ type IQueue interface {
 	Settings() ISettings
 	Client() client.IClient
 
-	Run() error
-	Close() error
-
 	Enqueue(message.IMessage) error
 	Dequeue() <-chan message.IMessage
+
+	modules.IApp
 }
 
 type ISettings interface {
