@@ -12,9 +12,9 @@ const (
 )
 
 func getKeySize(pubKey asymmetric.IPubKey) []byte {
-	return []byte(fmt.Sprintf(cKeySizeTemplate, pubKey.Address()))
+	return []byte(fmt.Sprintf(cKeySizeTemplate, pubKey.Address().String()))
 }
 
 func getKeyMessage(pubKey asymmetric.IPubKey, i uint64) []byte {
-	return []byte(fmt.Sprintf(cKeyMessageTemplate, pubKey.Address(), i))
+	return []byte(fmt.Sprintf(cKeyMessageTemplate, pubKey.Address().String(), i))
 }

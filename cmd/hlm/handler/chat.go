@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hlm/database"
-	"github.com/number571/go-peer/cmd/hlm/settings"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
 	"github.com/number571/go-peer/cmd/hls/hlc"
 	hls_network "github.com/number571/go-peer/cmd/hls/network"
@@ -16,16 +15,20 @@ import (
 )
 
 const (
-	maxMessages = 1000
+	cChatLimitMessages = 1000
 )
 
-type sMessages struct {
-	FMessages []sMessage
-}
-
-type sMessage struct {
+type sChatMessage struct {
 	FIsIncoming bool
 	FMessage    string
+}
+type sChatAddress struct {
+	FClient string
+	FFriend string
+}
+type sChatMessages struct {
+	FAddress  sChatAddress
+	FMessages []sChatMessage
 }
 
 func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFunc {
@@ -47,7 +50,7 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 			return
 		}
 
-		pubKey, ok := friends[aliasName]
+		friendPubKey, ok := friends[aliasName]
 		if !ok {
 			fmt.Fprint(w, "undefined public key by alias name")
 			return
@@ -64,8 +67,8 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 			}
 
 			res, err := client.Request(
-				pubKey,
-				hls_network.NewRequest("POST", settings.CTitlePattern, "/push").
+				friendPubKey,
+				hls_network.NewRequest("POST", hlm_settings.CTitlePattern, "/push").
 					WithHead(map[string]string{
 						"Content-Type": "application/json",
 					}).
@@ -82,12 +85,12 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 				return
 			}
 
-			if resp.FResult != settings.CTitlePattern {
+			if resp.FResult != hlm_settings.CTitlePattern {
 				fmt.Fprint(w, "error: invalid response")
 				return
 			}
 
-			err = db.Push(pubKey, database.NewMessage(false, msg))
+			err = db.Push(friendPubKey, database.NewMessage(false, msg))
 			if err != nil {
 				fmt.Fprint(w, "error: add message to database")
 				return
@@ -99,20 +102,32 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 		}
 
 		start := uint64(0)
-		size := db.Size(pubKey)
-		if size > maxMessages {
-			start = size - maxMessages
+		size := db.Size(friendPubKey)
+		if size > cChatLimitMessages {
+			start = size - cChatLimitMessages
 		}
 
-		msgs, err := db.Load(pubKey, start, size)
+		msgs, err := db.Load(friendPubKey, start, size)
 		if err != nil {
 			fmt.Fprint(w, "error: read database")
 			return
 		}
 
-		res := &sMessages{FMessages: make([]sMessage, 0, len(msgs))}
+		clientPubKey, err := client.PubKey()
+		if err != nil {
+			fmt.Fprint(w, "error: read public key")
+			return
+		}
+
+		res := &sChatMessages{
+			FAddress: sChatAddress{
+				FClient: clientPubKey.Address().String(),
+				FFriend: friendPubKey.Address().String(),
+			},
+			FMessages: make([]sChatMessage, 0, len(msgs)),
+		}
 		for _, msg := range msgs {
-			res.FMessages = append(res.FMessages, sMessage{
+			res.FMessages = append(res.FMessages, sChatMessage{
 				FIsIncoming: msg.IsIncoming(),
 				FMessage:    msg.GetMessage(),
 			})

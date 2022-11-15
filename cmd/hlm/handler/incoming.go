@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/number571/go-peer/cmd/hlm/database"
 	"github.com/number571/go-peer/cmd/hlm/settings"
@@ -20,22 +21,29 @@ func HandleIncomigHTTP(client hlc.IClient, db database.IKeyValueDB) http.Handler
 			return
 		}
 
-		msg, err := io.ReadAll(r.Body)
+		msgBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			response(w, hls_settings.CErrorResponse, "failed: response message")
 			return
 		}
 
-		pubKeyStr := r.Header.Get(hls_settings.CHeaderPubKey)
-		err = db.Push(
-			asymmetric.LoadRSAPubKey(pubKeyStr),
-			database.NewMessage(true, string(msg)),
-		)
-		if err != nil {
+		msg := strings.TrimSpace(string(msgBytes))
+		if len(msg) == 0 {
+			response(w, hls_settings.CErrorResponse, "failed: message is null")
+			return
+		}
+
+		pubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
+		if pubKey == nil {
+			panic("public key is null (receive from hls)!")
+		}
+
+		if err := db.Push(pubKey, database.NewMessage(true, msg)); err != nil {
 			response(w, hls_settings.CErrorPubKey, "failed: push message to database")
 			return
 		}
 
+		gChatWS <- &sChatWS{pubKey.Address().String(), msg}
 		response(w, hls_settings.CErrorNone, settings.CTitlePattern)
 	}
 }

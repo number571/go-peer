@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/hlc"
 	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
+	"golang.org/x/net/websocket"
 )
 
 var (
@@ -97,6 +98,8 @@ func initWebServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKey
 	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(client))    // GET
 	mux.HandleFunc("/friends", handler.FriendsPage(client))              // GET, POST, DELETE
 	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(client, db)) // GET, POST
+
+	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
 	return &http.Server{
 		Addr:    cfg.Address().WebLocal(),

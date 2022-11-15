@@ -1,56 +1,111 @@
 {{define "title"}}
-  Chat
+Chat
 {{end}}
 
 {{define "main"}}
 <script type="text/javascript" defer>
   window.onload = function () {
+    replaceAvatars();
+    switchToInput();
+    turnOnWebSocket();
+  }
+</script>
+
+<script type="text/javascript" defer>
+  let friendImg = ""
+  let iamImg = ""
+
+  function replaceAvatars() {
+    friendImg = generateAvatar("F", "{{.FAddress.FFriend}}");
+    iamImg = generateAvatar("I", "{{.FAddress.FClient}}");
+
+    var elemsFriend = document.getElementsByClassName("img-friend");
+    for (var i = 0; i < elemsFriend.length; i += 1) {
+      elemsFriend[i].src = friendImg;
+    }
+
+    var elemsIam = document.getElementsByClassName("img-iam");
+    for (var i = 0; i < elemsIam.length; i += 1) {
+      elemsIam[i].src = iamImg;
+    }
+  }
+
+  function switchToInput() {
     var objDiv = document.getElementById("chat_body");
     objDiv.scrollTop = objDiv.scrollHeight;
-    
+
     var input = document.getElementById('input_message');
     input.focus();
     input.select();
+  }
+
+  function turnOnWebSocket() {
+    let s = "ws://" + window.location.host + "/friends/chat/ws";
+    let socket = new WebSocket(s);
+    socket.onopen = () => {
+      socket.send(JSON.stringify({
+        address: "{{.FAddress.FFriend}}"
+      }));
+    }
+    socket.onmessage = (e) => {
+      let obj = JSON.parse(e.data);
+      var d1 = document.getElementById('chat_body');
+      d1.insertAdjacentHTML('beforeend', `
+  <div class="d-flex flex-row justify-content-start">
+    <img src=`+ friendImg + ` class="img-friend p-1 rounded-circle" alt="avatar 1" style="width: 45px; height: 100%;">
+    <div>
+      <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">`+ obj.message + `</p>
+    </div>
+  </div>
+      `);
+    }
+    socket.onerror = (e) => {
+      socket.close();
+    }
+    socket.onclose = (e) => {
+      console.debug("socket closed");
+    }
+    window.onbeforeunload = function () {
+      socket.onclose = function () { }; // disable onclose handler first
+      socket.close();
+    };
   }
 </script>
 
 <div id="chat_body" class="card-body" style="position: relative; height: 100%; overflow:auto;">
   {{range .FMessages}}
-    {{if .FIsIncoming}}
-      <div class="d-flex flex-row justify-content-start">
-        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp" alt="avatar 1"
-          style="width: 45px; height: 100%;">
-        <div>
-          <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">{{.FMessage}}</p>
-          <!-- <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">How are you ...???
+  {{if .FIsIncoming}}
+  <div class="d-flex flex-row justify-content-start">
+    <img class="img-friend p-1 rounded-circle" alt="avatar 1" style="width: 45px; height: 100%;">
+    <div>
+      <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">{{.FMessage}}</p>
+      <!-- <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">How are you ...???
           </p>
           <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">What are you doing
-            tomorrow? Can we come up a bar?</p>
-          <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p> -->
-        </div>
-      </div>
-    {{else}}
-      <div class="d-flex flex-row justify-content-end mb-4 pt-1">
-        <div>
-          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{.FMessage}}</p>
-          <!-- <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">How are you doing?</p>
+            tomorrow? Can we come up a bar?</p> -->
+      <!-- <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p> -->
+    </div>
+  </div>
+  {{else}}
+  <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+    <div>
+      <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{.FMessage}}</p>
+      <!-- <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">How are you doing?</p>
           <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">Long time no see! Tomorrow
             office. will
-            be free on sunday.</p>
-          <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:06</p> -->
-        </div>
-        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp" alt="avatar 1"
-          style="width: 45px; height: 100%;">
-      </div>
-    {{end}}
+            be free on sunday.</p> -->
+      <!-- <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:06</p> -->
+    </div>
+    <img class="img-iam p-1 rounded-circle" alt="avatar 1" style="width: 45px; height: 100%;">
+  </div>
+  {{end}}
   {{end}}
 
 </div>
-  <form class="card-footer d-flex" method="POST">
-    <input hidden name="method" value="POST">
-    <input type="text" autocomplete="off" style="height:100%;" class="form-control form-control-lg" name="input_message"
+<form class="card-footer d-flex" method="POST">
+  <input hidden name="method" value="POST">
+  <input type="text" autocomplete="off" style="height:100%;" class="form-control form-control-lg" name="input_message"
     placeholder="Type message" id="input_message">
-    <input type="submit" name="submit" value="Send message" style="height:100%;" class="btn btn-primary">
+  <input type="submit" name="submit" value="Send message" style="height:100%;" class="btn btn-primary">
 </form>
-
 {{end}}
