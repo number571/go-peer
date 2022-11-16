@@ -11,23 +11,23 @@ var (
 )
 
 type sClient struct {
-	builder   IBuilder
-	requester IRequester
+	fBuilder   IBuilder
+	fRequester IRequester
 }
 
 func NewClient(builder IBuilder, requester IRequester) IClient {
 	return &sClient{
-		builder:   builder,
-		requester: requester,
+		fBuilder:   builder,
+		fRequester: requester,
 	}
 }
 
 func (client *sClient) Size() (uint64, error) {
-	return client.requester.Size(client.builder.Size())
+	return client.fRequester.Size(client.fBuilder.Size())
 }
 
 func (client *sClient) Load(i uint64) (message.IMessage, error) {
-	msg, err := client.requester.Load(client.builder.Load(i))
+	msg, err := client.fRequester.Load(client.fBuilder.Load(i))
 	if err != nil {
 		return nil, err
 	}
@@ -35,5 +35,5 @@ func (client *sClient) Load(i uint64) (message.IMessage, error) {
 }
 
 func (client *sClient) Push(recv asymmetric.IPubKey, pl payload.IPayload) error {
-	return client.requester.Push(client.builder.Push(recv, pl))
+	return client.fRequester.Push(client.fBuilder.Push(recv, pl))
 }

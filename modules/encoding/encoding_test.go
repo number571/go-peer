@@ -6,8 +6,8 @@ import (
 )
 
 type tsMessage struct {
-	Result string `json:"result"`
-	Return int    `json:"return"`
+	FResult string `json:"result"`
+	FReturn int    `json:"return"`
 }
 
 const (
@@ -49,7 +49,7 @@ func TestSerialize(t *testing.T) {
 		t.Error("deserialize failed")
 	}
 
-	if res.Result != "hello" || res.Return != 5 {
+	if res.FResult != "hello" || res.FReturn != 5 {
 		t.Error("fields not equals")
 	}
 }

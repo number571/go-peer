@@ -99,5 +99,5 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			}
 			return f2f
 		}(),
-	).Handle(hls_settings.CHeaderHLS, handleServiceTCP(cfg))
+	)
 }

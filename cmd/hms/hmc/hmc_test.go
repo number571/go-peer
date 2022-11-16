@@ -24,25 +24,25 @@ func TestBuilder(t *testing.T) {
 	builder := NewBuilder(client)
 
 	bSize := builder.Size()
-	if !bytes.Equal(bSize.Receiver, hashRecv) {
+	if !bytes.Equal(bSize.FReceiver, hashRecv) {
 		t.Error("builder size error (hash receiver)")
 		return
 	}
 
 	bLoad := builder.Load(1)
-	if bLoad.Index != 1 || !bytes.Equal(bLoad.Receiver, hashRecv) {
+	if bLoad.FIndex != 1 || !bytes.Equal(bLoad.FReceiver, hashRecv) {
 		t.Error("builder load error (index, hash receiver)")
 		return
 	}
 
 	pl := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	bPush := builder.Push(client.PubKey(), pl)
-	if !bytes.Equal(bPush.Receiver, hashRecv) {
+	if !bytes.Equal(bPush.FReceiver, hashRecv) {
 		t.Error("builder push error (hash receiver)")
 		return
 	}
 
-	msg := message.LoadMessage(bPush.Package)
+	msg := message.LoadMessage(bPush.FPackage)
 	if msg == nil {
 		t.Error("builder push error (message is nil [1])")
 		return

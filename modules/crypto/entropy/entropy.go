@@ -11,18 +11,18 @@ var (
 )
 
 type sEntropy struct {
-	bits uint64
+	fBits uint64
 }
 
 func NewEntropy(bits uint64) IEntropy {
 	return &sEntropy{
-		bits: bits,
+		fBits: bits,
 	}
 }
 
 // Increase entropy by multiple hashing.
 func (entr *sEntropy) Raise(data, salt []byte) []byte {
-	lim := uint64(1 << entr.bits)
+	lim := uint64(1 << entr.fBits)
 
 	for i := uint64(0); i < lim; i++ {
 		data = hashing.NewSHA256Hasher(bytes.Join(

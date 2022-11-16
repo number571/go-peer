@@ -29,7 +29,7 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	size, err := gDB.Size(vRequest.Receiver)
+	size, err := gDB.Size(vRequest.FReceiver)
 	if err != nil {
 		response(w, hms_settings.CErrorLoad, []byte("failed: load size"))
 		return
@@ -53,7 +53,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg, err := gDB.Load(vRequest.Receiver, vRequest.Index)
+	msg, err := gDB.Load(vRequest.FReceiver, vRequest.FIndex)
 	if err != nil {
 		response(w, hms_settings.CErrorLoad, []byte("failed: load message"))
 		return
@@ -76,12 +76,12 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if uint64(len(vRequest.Package)) > hms_settings.CSizePack {
+	if uint64(len(vRequest.FPackage)) > hms_settings.CSizePack {
 		response(w, hms_settings.CErrorPackSize, []byte("failed: incorrect package size"))
 		return
 	}
 
-	msg := message.LoadMessage(vRequest.Package)
+	msg := message.LoadMessage(vRequest.FPackage)
 	if msg == nil {
 		response(w, hms_settings.CErrorMessage, []byte("failed: decode message"))
 		return
@@ -93,7 +93,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gDB.Push(vRequest.Receiver, msg)
+	err = gDB.Push(vRequest.FReceiver, msg)
 	if err != nil {
 		response(w, hms_settings.CErrorPush, []byte("failed: push message"))
 		return
@@ -111,7 +111,7 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 func response(w http.ResponseWriter, ret int, res []byte) {
 	w.Header().Set("Content-Type", hms_settings.CContentType)
 	json.NewEncoder(w).Encode(&hms_settings.SResponse{
-		Result: res,
-		Return: ret,
+		FResult: res,
+		FReturn: ret,
 	})
 }

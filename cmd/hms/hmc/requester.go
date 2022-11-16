@@ -16,18 +16,18 @@ var (
 )
 
 type sRequester struct {
-	host string
+	fHost string
 }
 
 func NewRequester(host string) IRequester {
 	return &sRequester{
-		host: host,
+		fHost: host,
 	}
 }
 
 func (r *sRequester) Size(request *hms_settings.SSizeRequest) (uint64, error) {
 	resp, err := http.Post(
-		fmt.Sprintf(hms_settings.CSizeTemplate, r.host),
+		fmt.Sprintf(hms_settings.CSizeTemplate, r.fHost),
 		hms_settings.CContentType,
 		bytes.NewReader(encoding.Serialize(request)),
 	)
@@ -38,18 +38,18 @@ func (r *sRequester) Size(request *hms_settings.SSizeRequest) (uint64, error) {
 	var response hms_settings.SResponse
 	json.NewDecoder(resp.Body).Decode(&response)
 
-	if response.Return != hms_settings.CErrorNone {
-		return 0, fmt.Errorf("%s", string(response.Result))
+	if response.FReturn != hms_settings.CErrorNone {
+		return 0, fmt.Errorf("%s", string(response.FResult))
 	}
 
 	res := [encoding.CSizeUint64]byte{}
-	copy(res[:], response.Result)
+	copy(res[:], response.FResult)
 	return encoding.BytesToUint64(res), nil
 }
 
 func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage, error) {
 	resp, err := http.Post(
-		fmt.Sprintf(hms_settings.CLoadTemplate, r.host),
+		fmt.Sprintf(hms_settings.CLoadTemplate, r.fHost),
 		hms_settings.CContentType,
 		bytes.NewReader(encoding.Serialize(request)),
 	)
@@ -60,11 +60,11 @@ func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage,
 	var response hms_settings.SResponse
 	json.NewDecoder(resp.Body).Decode(&response)
 
-	if response.Return != hms_settings.CErrorNone {
-		return nil, fmt.Errorf("%s", string(response.Result))
+	if response.FReturn != hms_settings.CErrorNone {
+		return nil, fmt.Errorf("%s", string(response.FResult))
 	}
 
-	msg := message.LoadMessage(response.Result)
+	msg := message.LoadMessage(response.FResult)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")
 	}
@@ -74,7 +74,7 @@ func (r *sRequester) Load(request *hms_settings.SLoadRequest) (message.IMessage,
 
 func (r *sRequester) Push(request *hms_settings.SPushRequest) error {
 	resp, err := http.Post(
-		fmt.Sprintf(hms_settings.CPushTemplate, r.host),
+		fmt.Sprintf(hms_settings.CPushTemplate, r.fHost),
 		hms_settings.CContentType,
 		bytes.NewReader(encoding.Serialize(request)),
 	)
@@ -84,8 +84,8 @@ func (r *sRequester) Push(request *hms_settings.SPushRequest) error {
 	var response hms_settings.SResponse
 	json.NewDecoder(resp.Body).Decode(&response)
 
-	if response.Return != hms_settings.CErrorNone {
-		return fmt.Errorf("%s", string(response.Result))
+	if response.FReturn != hms_settings.CErrorNone {
+		return fmt.Errorf("%s", string(response.FResult))
 	}
 
 	return nil

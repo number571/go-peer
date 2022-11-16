@@ -10,57 +10,57 @@ var (
 )
 
 type sClient struct {
-	builder   IBuilder
-	requester IRequester
+	fBuilder   IBuilder
+	fRequester IRequester
 }
 
 func NewClient(requester IRequester) IClient {
 	return &sClient{
-		builder:   NewBuilder(),
-		requester: requester,
+		fBuilder:   NewBuilder(),
+		fRequester: requester,
 	}
 }
 
 func (client *sClient) Broadcast(recv asymmetric.IPubKey, data hls_network.IRequest) error {
-	return client.requester.Broadcast(client.builder.Push(recv, data))
+	return client.fRequester.Broadcast(client.fBuilder.Push(recv, data))
 }
 
 func (client *sClient) Request(recv asymmetric.IPubKey, data hls_network.IRequest) ([]byte, error) {
-	return client.requester.Request(client.builder.Push(recv, data))
+	return client.fRequester.Request(client.fBuilder.Push(recv, data))
 }
 
 func (client *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {
-	return client.requester.GetFriends()
+	return client.fRequester.GetFriends()
 }
 
 func (client *sClient) AddFriend(aliasName string, pubKey asymmetric.IPubKey) error {
-	return client.requester.AddFriend(client.builder.Friend(aliasName, pubKey))
+	return client.fRequester.AddFriend(client.fBuilder.Friend(aliasName, pubKey))
 }
 
 func (client *sClient) DelFriend(aliasName string) error {
-	return client.requester.DelFriend(client.builder.Friend(aliasName, nil))
+	return client.fRequester.DelFriend(client.fBuilder.Friend(aliasName, nil))
 }
 
 func (client *sClient) GetOnlines() ([]string, error) {
-	return client.requester.GetOnlines()
+	return client.fRequester.GetOnlines()
 }
 
 func (client *sClient) DelOnline(connect string) error {
-	return client.requester.DelOnline(client.builder.Connect(connect))
+	return client.fRequester.DelOnline(client.fBuilder.Connect(connect))
 }
 
 func (client *sClient) GetConnections() ([]string, error) {
-	return client.requester.GetConnections()
+	return client.fRequester.GetConnections()
 }
 
 func (client *sClient) AddConnection(connect string) error {
-	return client.requester.AddConnection(client.builder.Connect(connect))
+	return client.fRequester.AddConnection(client.fBuilder.Connect(connect))
 }
 
 func (client *sClient) DelConnection(connect string) error {
-	return client.requester.DelConnection(client.builder.Connect(connect))
+	return client.fRequester.DelConnection(client.fBuilder.Connect(connect))
 }
 
 func (client *sClient) PubKey() (asymmetric.IPubKey, error) {
-	return client.requester.PubKey()
+	return client.fRequester.PubKey()
 }

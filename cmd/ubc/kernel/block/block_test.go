@@ -12,7 +12,7 @@ import (
 )
 
 func TestTransaction(t *testing.T) {
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
 
 	txSize := settings.GSettings.Get(settings.CSizeTrns).(uint64)

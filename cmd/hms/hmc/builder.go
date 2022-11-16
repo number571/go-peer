@@ -13,36 +13,36 @@ var (
 )
 
 type sBuilder struct {
-	client client.IClient
+	fClient client.IClient
 }
 
 func NewBuilder(client client.IClient) IBuilder {
 	return &sBuilder{
-		client: client,
+		fClient: client,
 	}
 }
 
 func (builder *sBuilder) Size() *hms_settings.SSizeRequest {
 	return &hms_settings.SSizeRequest{
-		Receiver: builder.client.PubKey().Address().Bytes(),
+		FReceiver: builder.fClient.PubKey().Address().Bytes(),
 	}
 }
 
 func (builder *sBuilder) Load(n uint64) *hms_settings.SLoadRequest {
 	return &hms_settings.SLoadRequest{
-		Receiver: builder.client.PubKey().Address().Bytes(),
-		Index:    n,
+		FReceiver: builder.fClient.PubKey().Address().Bytes(),
+		FIndex:    n,
 	}
 }
 
 func (builder *sBuilder) Push(receiver asymmetric.IPubKey, pl payload.IPayload) *hms_settings.SPushRequest {
-	encMsg, err := builder.client.Encrypt(builder.client.PubKey(), pl)
+	encMsg, err := builder.fClient.Encrypt(builder.fClient.PubKey(), pl)
 	if err != nil {
 		panic(err)
 	}
 
 	return &hms_settings.SPushRequest{
-		Receiver: builder.client.PubKey().Address().Bytes(),
-		Package:  encMsg.Bytes(),
+		FReceiver: builder.fClient.PubKey().Address().Bytes(),
+		FPackage:  encMsg.Bytes(),
 	}
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/modules/network/anonymity"
 	"github.com/number571/go-peer/modules/network/conn_keeper"
 
+	"github.com/number571/go-peer/cmd/hls/handler"
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
@@ -62,6 +63,11 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
+		cfg := app.fWrapper.Config()
+		app.fNode.Handle(
+			hls_settings.CHeaderHLS,
+			handler.HandleServiceTCP(cfg),
+		)
 		if err := app.fNode.Run(); err != nil {
 			res <- err
 			return
@@ -92,6 +98,7 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Close() error {
+	app.fNode.Handle(hls_settings.CHeaderHLS, nil)
 	return closer.CloseAll([]modules.ICloser{
 		app.fNode,
 		app.fConnKeeper,
@@ -114,12 +121,11 @@ func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnK
 func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(hls_settings.CHandleRoot, handleIndexHTTP)
-	mux.HandleFunc(hls_settings.CHandlePubKey, handlePubKeyHTTP(node))
-	mux.HandleFunc(hls_settings.CHandleConnects, handleConnectsHTTP(wrapper, node))
-	mux.HandleFunc(hls_settings.CHandleFriends, handleFriendsHTTP(wrapper, node))
-	mux.HandleFunc(hls_settings.CHandleOnline, handleOnlineHTTP(node))
-	mux.HandleFunc(hls_settings.CHandlePush, handlePushHTTP(node))
+	mux.HandleFunc(hls_settings.CHandlePubKey, handler.HandlePubKeyAPI(node))
+	mux.HandleFunc(hls_settings.CHandleConnects, handler.HandleConnectionsAPI(wrapper, node))
+	mux.HandleFunc(hls_settings.CHandleFriends, handler.HandleFriendsAPI(wrapper, node))
+	mux.HandleFunc(hls_settings.CHandleOnline, handler.HandleOnlineAPI(node))
+	mux.HandleFunc(hls_settings.CHandlePush, handler.HandlePushAPI(node))
 
 	return &http.Server{
 		Addr:    wrapper.Config().Address().HTTP(),

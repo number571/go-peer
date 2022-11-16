@@ -46,7 +46,7 @@ func TestMempool(t *testing.T) {
 		return
 	}
 
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	txSize := settings.GSettings.Get(settings.CSizeTrns).(uint64)
 	for i := uint64(0); i < txSize-1; i++ {
 		tx := transaction.NewTransaction(priv,

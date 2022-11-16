@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 	"github.com/number571/go-peer/modules/payload"
 )
 
-func handleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
+func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
 	return func(node anonymity.INode, sender asymmetric.IPubKey, pld payload.IPayload) []byte {
 		// load request from message's body
 		requestBytes := pld.Body()

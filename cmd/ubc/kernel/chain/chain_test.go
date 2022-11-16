@@ -27,7 +27,7 @@ func TestChain(t *testing.T) {
 	os.RemoveAll(chainName)
 	defer os.RemoveAll(chainName)
 
-	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
 
 	// generate genesis block

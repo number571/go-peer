@@ -1,20 +1,20 @@
 package settings
 
 type SResponse struct {
-	Result []byte `json:"result"`
-	Return int    `json:"return"`
+	FResult []byte `json:"result"`
+	FReturn int    `json:"return"`
 }
 
 type SSizeRequest struct {
-	Receiver []byte `json:"receiver"`
+	FReceiver []byte `json:"receiver"`
 }
 
 type SLoadRequest struct {
-	Receiver []byte `json:"receiver"`
-	Index    uint64 `json:"index"`
+	FReceiver []byte `json:"receiver"`
+	FIndex    uint64 `json:"index"`
 }
 
 type SPushRequest struct {
-	Receiver []byte `json:"receiver"`
-	Package  []byte `json:"package"`
+	FReceiver []byte `json:"receiver"`
+	FPackage  []byte `json:"package"`
 }

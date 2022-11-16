@@ -13,37 +13,37 @@ var (
 // Wrapper
 
 type sWrapper struct {
-	cfg iConfigWrapper
+	fConfig iConfigWrapper
 }
 
 func newWrapper(cfg iConfigWrapper) iWrapper {
 	return &sWrapper{
-		cfg: cfg,
+		fConfig: cfg,
 	}
 }
 
 func (wrap *sWrapper) Config() iConfigWrapper {
-	return wrap.cfg
+	return wrap.fConfig
 }
 
 // Config wrapper
 
 type sConfigWrapper struct {
-	cfg config.IConfig
+	fConfig config.IConfig
 }
 
 func newConfigWrapper(cfg config.IConfig) iConfigWrapper {
 	return &sConfigWrapper{
-		cfg: cfg,
+		fConfig: cfg,
 	}
 }
 
 func (cfgw *sConfigWrapper) Original() config.IConfig {
-	return cfgw.cfg
+	return cfgw.fConfig
 }
 
 func (cfgw *sConfigWrapper) GetNameByPubKey(pubKey asymmetric.IPubKey) (string, bool) {
-	for _, friend := range cfgw.cfg.Friends() {
+	for _, friend := range cfgw.fConfig.Friends() {
 		if friend.PubKey().Address().String() == pubKey.Address().String() {
 			return friend.Name(), true
 		}
@@ -52,7 +52,7 @@ func (cfgw *sConfigWrapper) GetNameByPubKey(pubKey asymmetric.IPubKey) (string, 
 }
 
 func (cfgw *sConfigWrapper) GetPubKeyByName(name string) (asymmetric.IPubKey, bool) {
-	for _, friend := range cfgw.cfg.Friends() {
+	for _, friend := range cfgw.fConfig.Friends() {
 		if friend.Name() == name {
 			return friend.PubKey(), true
 		}

@@ -111,6 +111,6 @@ func testNewClient() IClient {
 			FWorkSize:    10,
 			FMessageSize: tcMessageSize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 }
