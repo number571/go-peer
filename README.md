@@ -5,6 +5,7 @@
 * Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
 
 ## Library based applications
+* Asymmetric key generator: [github.com/number571/go-peer/tree/master/cmd/akg](https://github.com/number571/go-peer/tree/master/cmd/akg "AKG");
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
 * Hidden Lake Messenger: [github.com/number571/go-peer/tree/master/cmd/hlm](https://github.com/number571/go-peer/tree/master/cmd/hlm "HLM");
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
@@ -26,11 +27,9 @@
 
 ## TODO
 1. Write tests with comment "TODO";
-2. Update hlc package in cmd/hls;
-3. Remake cmd/hlm from CLI to GUI;
-4. Remake cmd/hmc from CLI to GUI;
-5. Implement the cmd/ubc;
-6. Consider cmd/hls moving the fifth^ stage of anonymity to the sixth;
-7. Create README for cmd/hlm, cmd/hms, cmd/hmc;
-8. Comment functions in the code of library;
-9. ...
+2. Remake cmd/hmc from CLI to GUI;
+3. Implement the cmd/ubc;
+4. Consider cmd/hls moving the fifth^ stage of anonymity to the sixth;
+5. Create README for cmd/hlm, cmd/hms, cmd/hmc;
+6. Comment functions in the code of library;
+7. ...
