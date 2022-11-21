@@ -44,12 +44,12 @@ func hmcDefaultInit() error {
 
 func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivKey {
 	// create/open storage
-	storage := storage.NewCryptoStorage(
+	storage, err := storage.NewCryptoStorage(
 		filepath,
 		storageKey,
 		settings.CWorkSize,
 	)
-	if storage == nil {
+	if err != nil {
 		return nil
 	}
 

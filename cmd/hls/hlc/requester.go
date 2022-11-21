@@ -30,7 +30,7 @@ func NewRequester(host string) IRequester {
 func (requester *sRequester) Request(push *hls_settings.SPush) ([]byte, error) {
 	res, err := doRequest(
 		http.MethodPost,
-		requester.fHost+hls_settings.CHandlePush,
+		requester.fHost+hls_settings.CHandleNetworkPush,
 		push,
 	)
 	if err != nil {
@@ -43,7 +43,7 @@ func (requester *sRequester) Request(push *hls_settings.SPush) ([]byte, error) {
 func (requester *sRequester) Broadcast(push *hls_settings.SPush) error {
 	_, err := doRequest(
 		http.MethodPut,
-		requester.fHost+hls_settings.CHandlePush,
+		requester.fHost+hls_settings.CHandleNetworkPush,
 		push,
 	)
 	return err
@@ -52,7 +52,7 @@ func (requester *sRequester) Broadcast(push *hls_settings.SPush) error {
 func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+hls_settings.CHandleFriends,
+		requester.fHost+hls_settings.CHandleConfigFriends,
 		nil,
 	)
 	if err != nil {
@@ -76,7 +76,7 @@ func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error)
 func (requester *sRequester) AddFriend(friend *hls_settings.SFriend) error {
 	_, err := doRequest(
 		http.MethodPost,
-		requester.fHost+hls_settings.CHandleFriends,
+		requester.fHost+hls_settings.CHandleConfigFriends,
 		friend,
 	)
 	return err
@@ -85,7 +85,7 @@ func (requester *sRequester) AddFriend(friend *hls_settings.SFriend) error {
 func (requester *sRequester) DelFriend(friend *hls_settings.SFriend) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+hls_settings.CHandleFriends,
+		requester.fHost+hls_settings.CHandleConfigFriends,
 		friend,
 	)
 	return err
@@ -94,7 +94,7 @@ func (requester *sRequester) DelFriend(friend *hls_settings.SFriend) error {
 func (requester *sRequester) GetOnlines() ([]string, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+hls_settings.CHandleOnline,
+		requester.fHost+hls_settings.CHandleNetworkOnline,
 		nil,
 	)
 	if err != nil {
@@ -106,7 +106,7 @@ func (requester *sRequester) GetOnlines() ([]string, error) {
 func (requester *sRequester) DelOnline(connect *hls_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+hls_settings.CHandleOnline,
+		requester.fHost+hls_settings.CHandleNetworkOnline,
 		connect,
 	)
 	return err
@@ -115,7 +115,7 @@ func (requester *sRequester) DelOnline(connect *hls_settings.SConnect) error {
 func (requester *sRequester) GetConnections() ([]string, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+hls_settings.CHandleConnects,
+		requester.fHost+hls_settings.CHandleConfigConnects,
 		nil,
 	)
 	if err != nil {
@@ -127,7 +127,7 @@ func (requester *sRequester) GetConnections() ([]string, error) {
 func (requester *sRequester) AddConnection(connect *hls_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodPost,
-		requester.fHost+hls_settings.CHandleConnects,
+		requester.fHost+hls_settings.CHandleConfigConnects,
 		connect,
 	)
 	return err
@@ -136,7 +136,7 @@ func (requester *sRequester) AddConnection(connect *hls_settings.SConnect) error
 func (requester *sRequester) DelConnection(connect *hls_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+hls_settings.CHandleConnects,
+		requester.fHost+hls_settings.CHandleConfigConnects,
 		connect,
 	)
 	return err
@@ -145,7 +145,7 @@ func (requester *sRequester) DelConnection(connect *hls_settings.SConnect) error
 func (requester *sRequester) PubKey() (asymmetric.IPubKey, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+hls_settings.CHandlePubKey,
+		requester.fHost+hls_settings.CHandleNodePubkey,
 		nil,
 	)
 	if err != nil {

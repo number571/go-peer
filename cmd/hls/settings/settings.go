@@ -13,12 +13,11 @@ const (
 )
 
 const (
-	CHandleRoot     = "/api"
-	CHandleConnects = "/api/config/connects"
-	CHandleFriends  = "/api/config/friends"
-	CHandleOnline   = "/api/network/online"
-	CHandlePush     = "/api/network/push"
-	CHandlePubKey   = "/api/node/pubkey"
+	CHandleConfigConnects = "/api/config/connects"
+	CHandleConfigFriends  = "/api/config/friends"
+	CHandleNetworkOnline  = "/api/network/online"
+	CHandleNetworkPush    = "/api/network/push"
+	CHandleNodePubkey     = "/api/node/pubkey"
 )
 
 const (
@@ -55,6 +54,7 @@ const (
 	CErrorMethod
 	CErrorDecode
 	CErrorPubKey
+	CErrorPrivKey
 	CErrorMessage
 	CErrorResponse
 	CErrorBroadcast
@@ -62,4 +62,8 @@ const (
 	CErrorNotExist
 	CErrorAction
 	CErrorValue
+	CErrorOpen
+	CErrorRead
+	CErrorWrite
+	CErrorSize
 )

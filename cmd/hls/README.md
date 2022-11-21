@@ -1,6 +1,6 @@
 # HLS
 
-> Hidden Lake Service.
+> Hidden Lake Service
 
 ## Description
 

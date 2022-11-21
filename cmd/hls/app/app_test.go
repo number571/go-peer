@@ -7,21 +7,27 @@ import (
 
 	"github.com/number571/go-peer/cmd/hls/config"
 	"github.com/number571/go-peer/cmd/hls/hlc"
-	anon_testutils "github.com/number571/go-peer/modules/network/anonymity/testutils"
 	"github.com/number571/go-peer/settings/testutils"
+
+	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
+	anon_testutils "github.com/number571/go-peer/modules/network/anonymity/testutils"
 )
 
 const (
-	tcPathDB     = "database_test.db"
-	tcPathConfig = "config_test.cfg"
+	tcPathDB     = hls_settings.CPathDB
+	tcPathConfig = hls_settings.CPathCFG
 )
 
-func TestApp(t *testing.T) {
-	defer func() {
-		os.RemoveAll(tcPathDB)
-		os.RemoveAll(tcPathConfig)
-	}()
+func testDeleteFiles() {
+	os.RemoveAll(tcPathDB)
+	os.RemoveAll(tcPathConfig)
+}
 
+func TestApp(t *testing.T) {
+	testDeleteFiles()
+	defer testDeleteFiles()
+
+	// Run application
 	cfg, err := config.NewConfig(tcPathConfig, &config.SConfig{
 		FAddress: &config.SAddress{
 			FTCP:  testutils.TgAddrs[14],
@@ -49,6 +55,8 @@ func TestApp(t *testing.T) {
 	client := hlc.NewClient(
 		hlc.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[15])),
 	)
+
+	// Check public key of node
 	pubKey, err := client.PubKey()
 	if err != nil {
 		t.Error(err)

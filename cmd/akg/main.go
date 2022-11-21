@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +12,10 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		panic("usage: ./main [key-size] [inline|pretty]")
+		panic(fmt.Sprintf(
+			"usage: \n\t%s",
+			"./main [key-size] [inline|pretty]",
+		))
 	}
 
 	keySize, err := strconv.Atoi(os.Args[1])

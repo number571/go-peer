@@ -16,6 +16,10 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
+const (
+	initStart = 3 * time.Second
+)
+
 var (
 	_ IApp = &sApp{}
 )
@@ -64,6 +68,7 @@ func (app *sApp) Run() error {
 
 	go func() {
 		cfg := app.fWrapper.Config()
+
 		app.fNode.Handle(
 			hls_settings.CHeaderHLS,
 			handler.HandleServiceTCP(cfg),
@@ -75,7 +80,7 @@ func (app *sApp) Run() error {
 
 		// if node in client mode
 		// then run endless loop
-		tcpAddress := app.fWrapper.Config().Address().TCP()
+		tcpAddress := cfg.Address().TCP()
 		if tcpAddress == "" {
 			select {}
 		}
@@ -92,7 +97,7 @@ func (app *sApp) Run() error {
 	case err := <-res:
 		app.Close()
 		return err
-	case <-time.After(time.Second * 3):
+	case <-time.After(initStart):
 		return nil
 	}
 }
@@ -106,29 +111,4 @@ func (app *sApp) Close() error {
 		app.fNode.Network(),
 		app.fNode.KeyValueDB(),
 	})
-}
-
-func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnKeeper {
-	return conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: func() []string { return cfg.Connections() },
-			FDuration:    node.Settings().GetTimeWait(),
-		}),
-		node.Network(),
-	)
-}
-
-func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc(hls_settings.CHandlePubKey, handler.HandlePubKeyAPI(node))
-	mux.HandleFunc(hls_settings.CHandleConnects, handler.HandleConnectionsAPI(wrapper, node))
-	mux.HandleFunc(hls_settings.CHandleFriends, handler.HandleFriendsAPI(wrapper, node))
-	mux.HandleFunc(hls_settings.CHandleOnline, handler.HandleOnlineAPI(node))
-	mux.HandleFunc(hls_settings.CHandlePush, handler.HandlePushAPI(node))
-
-	return &http.Server{
-		Addr:    wrapper.Config().Address().HTTP(),
-		Handler: mux,
-	}
 }

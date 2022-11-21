@@ -30,7 +30,7 @@ type storageData struct {
 }
 
 // Settings must contain (CSizeSkey, CSizeWork).
-func NewCryptoStorage(path string, key []byte, workSize uint64) IKeyValueStorage {
+func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorage, error) {
 	store := &sCryptoStorage{
 		fPath:     path,
 		fWorkSize: workSize,
@@ -39,7 +39,7 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) IKeyValueStorage
 	if store.exists() {
 		encdata, err := filesystem.OpenFile(path).Read()
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		store.fSalt = encdata[:symmetric.CAESKeySize]
 	} else {
@@ -56,10 +56,10 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) IKeyValueStorage
 
 	_, err := store.decrypt()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return store
+	return store, nil
 }
 
 func (store *sCryptoStorage) Set(key, value []byte) error {
@@ -89,23 +89,7 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	cipher := symmetric.NewAESCipher(ekey)
 	mapping.FSecrets[hash] = cipher.Encrypt(value)
 
-	// Encrypt and save storage
-	data, err := json.Marshal(&mapping)
-	if err != nil {
-		return err
-	}
-
-	err = filesystem.OpenFile(store.fPath).Write(
-		bytes.Join(
-			[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
-			[]byte{},
-		),
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return store.encrypt(&mapping)
 }
 
 func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
@@ -165,11 +149,31 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	delete(mapping.FSecrets, hash)
-	return nil
+	return store.encrypt(&mapping)
 }
 
 func (store *sCryptoStorage) exists() bool {
 	return filesystem.OpenFile(store.fPath).IsExist()
+}
+
+func (store *sCryptoStorage) encrypt(mapping *storageData) error {
+	// Encrypt and save storage
+	data, err := json.Marshal(mapping)
+	if err != nil {
+		return err
+	}
+
+	err = filesystem.OpenFile(store.fPath).Write(
+		bytes.Join(
+			[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
+			[]byte{},
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (store *sCryptoStorage) decrypt() (storageData, error) {

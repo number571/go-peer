@@ -34,6 +34,11 @@ type SAddress struct {
 	FHTTP string `json:"http,omitempty"`
 }
 
+type SKey struct {
+	FStorage string `json:"storage,omitempty"`
+	FNetwork string `json:"network,omitempty"`
+}
+
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(filepath)
 
@@ -142,4 +147,18 @@ func (address *SAddress) HTTP() string {
 		return ""
 	}
 	return address.FHTTP
+}
+
+func (key *SKey) Storage() string {
+	if key == nil {
+		return ""
+	}
+	return key.FStorage
+}
+
+func (key *SKey) Network() string {
+	if key == nil {
+		return ""
+	}
+	return key.FNetwork
 }

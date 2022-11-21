@@ -69,11 +69,11 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(hls_settings.CHandlePubKey, HandlePubKeyAPI(node))
-	mux.HandleFunc(hls_settings.CHandleConnects, HandleConnectionsAPI(wcfg, node))
-	mux.HandleFunc(hls_settings.CHandleFriends, HandleFriendsAPI(wcfg, node))
-	mux.HandleFunc(hls_settings.CHandleOnline, HandleOnlineAPI(node))
-	mux.HandleFunc(hls_settings.CHandlePush, HandlePushAPI(node))
+	mux.HandleFunc(hls_settings.CHandleConfigConnects, HandleConnectionsAPI(wcfg, node))
+	mux.HandleFunc(hls_settings.CHandleConfigFriends, HandleFriendsAPI(wcfg, node))
+	mux.HandleFunc(hls_settings.CHandleNetworkOnline, HandleOnlineAPI(node))
+	mux.HandleFunc(hls_settings.CHandleNetworkPush, HandlePushAPI(node))
+	mux.HandleFunc(hls_settings.CHandleNodePubkey, HandlePubKeyAPI(node))
 
 	srv := &http.Server{
 		Addr:    addr,

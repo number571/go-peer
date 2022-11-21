@@ -14,9 +14,11 @@ type sKeyValueDB struct {
 	fDB    gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(path string) IKeyValueDB {
+func NewKeyValueDB(path, password string) IKeyValueDB {
 	db := gp_database.NewLevelDB(&gp_database.SSettings{
-		FPath: path,
+		FPath:      path,
+		FHashing:   true,
+		FCipherKey: []byte(password),
 	})
 	if db == nil {
 		return nil

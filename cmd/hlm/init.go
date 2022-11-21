@@ -18,7 +18,7 @@ func initValues() error {
 		return err
 	}
 
-	levelDB := database.NewKeyValueDB(hlm_settings.CPathDB)
+	levelDB := database.NewKeyValueDB(hlm_settings.CPathDB, "")
 	if levelDB == nil {
 		return fmt.Errorf("error: create/open database")
 	}

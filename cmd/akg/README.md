@@ -1,7 +1,8 @@
 # AKG
 
-> Asymmetric Keys Generator.
+> Asymmetric Keys Generator
 
 ```bash
-usage: ./main [key-size] [inline|pretty]
+usage: 
+    ./main [key-size] [inline|pretty]
 ```

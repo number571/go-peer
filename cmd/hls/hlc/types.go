@@ -11,15 +11,15 @@ type IClient interface {
 	PubKey() (asymmetric.IPubKey, error)
 
 	GetOnlines() ([]string, error)
-	DelOnline(connect string) error
+	DelOnline(string) error
 
 	GetFriends() (map[string]asymmetric.IPubKey, error)
-	AddFriend(aliasName string, pubKey asymmetric.IPubKey) error
-	DelFriend(aliasName string) error
+	AddFriend(string, asymmetric.IPubKey) error
+	DelFriend(string) error
 
 	GetConnections() ([]string, error)
-	AddConnection(connect string) error
-	DelConnection(connect string) error
+	AddConnection(string) error
+	DelConnection(string) error
 
 	Broadcast(asymmetric.IPubKey, hls_network.IRequest) error
 	Request(asymmetric.IPubKey, hls_network.IRequest) ([]byte, error)
@@ -44,7 +44,7 @@ type IRequester interface {
 }
 
 type IBuilder interface {
-	Connect(connect string) *hls_settings.SConnect
-	Friend(aliasName string, pubKey asymmetric.IPubKey) *hls_settings.SFriend
+	Connect(string) *hls_settings.SConnect
+	Friend(string, asymmetric.IPubKey) *hls_settings.SFriend
 	Push(asymmetric.IPubKey, hls_network.IRequest) *hls_settings.SPush
 }

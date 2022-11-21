@@ -175,9 +175,10 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 
 		// redirect to another nodes
 		nnode.Broadcast(npld)
+		client := node.Queue().Client()
 
 		// try decrypt message
-		sender, pld, err := node.Queue().Client().Decrypt(msg)
+		sender, pld, err := client.Decrypt(msg)
 		if err != nil {
 			return
 		}
@@ -217,7 +218,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		respMsg, err := node.Queue().Client().Encrypt(
+		respMsg, err := client.Encrypt(
 			sender,
 			payload.NewPayload(head, resp),
 		)

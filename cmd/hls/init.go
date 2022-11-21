@@ -36,7 +36,7 @@ func initValues() error {
 		return fmt.Errorf("private key is invalid")
 	}
 
-	cfg, err := getConfig()
+	cfg, err := initConfig()
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func initValues() error {
 	return nil
 }
 
-func getConfig() (config.IConfig, error) {
+func initConfig() (config.IConfig, error) {
 	if filesystem.OpenFile(hls_settings.CPathCFG).IsExist() {
 		return config.LoadConfig(hls_settings.CPathCFG)
 	}
