@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
 	"github.com/number571/go-peer/modules/crypto/puzzle"
 	"github.com/number571/go-peer/modules/crypto/random"
 	"github.com/number571/go-peer/modules/crypto/symmetric"
 	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/message"
 	"github.com/number571/go-peer/modules/payload"
 )
 
@@ -44,7 +44,7 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 	// saved message size with hex encoding
 	// because exists not encoded chars <{}",>
 	// of JSON format
-	client.fVoidMsgSize = len(msg.Bytes())
+	client.fVoidMsgSize = len(msg.ToBytes())
 	return client
 }
 
@@ -72,7 +72,7 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 
 	var (
 		maxMsgSize = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
-		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pl.Bytes()))
+		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pl.ToBytes()))
 	)
 
 	if resultSize > maxMsgSize {
@@ -98,7 +98,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload
 		session = rand.Bytes(symmetric.CAESKeySize)
 	)
 
-	payloadBytes := pl.Bytes()
+	payloadBytes := pl.ToBytes()
 	doublePayload := payload.NewPayload(
 		uint64(len(payloadBytes)),
 		bytes.Join(
@@ -115,7 +115,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload
 			salt,
 			client.PubKey().Bytes(),
 			receiver.Bytes(),
-			doublePayload.Bytes(),
+			doublePayload.ToBytes(),
 		},
 		[]byte{},
 	)).Bytes()
@@ -129,7 +129,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload
 			FSalt:    encoding.HexEncode(cipher.Encrypt(salt)),
 		},
 		FBody: message.SBodyMessage{
-			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.Bytes())),
+			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.ToBytes())),
 			FHash:    encoding.HexEncode(hash),
 			FSign:    encoding.HexEncode(cipher.Encrypt(client.PrivKey().Sign(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
@@ -185,7 +185,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 	}
 
 	// Decrypt main data of message by session key.
-	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().Bytes())
+	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().ToBytes())
 	if doublePayloadBytes == nil {
 		return nil, nil, fmt.Errorf("failed decrypt double payload")
 	}
@@ -200,7 +200,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 			salt,
 			publicBytes,
 			client.PubKey().Bytes(),
-			doublePayload.Bytes(),
+			doublePayload.ToBytes(),
 		},
 		[]byte{},
 	)).Bytes()

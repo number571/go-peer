@@ -1,11 +1,14 @@
 package network
 
 import (
+	"fmt"
 	"net"
 	"sync"
 
 	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
+	"github.com/number571/go-peer/modules/crypto/hashing"
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/storage"
 )
@@ -20,7 +23,7 @@ type sNode struct {
 	fListener     net.Listener
 	fSettings     ISettings
 	fHashMapping  storage.IKeyValueStorage
-	fConnections  map[string]IConn
+	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
 }
 
@@ -29,19 +32,19 @@ func NewNode(sett ISettings) INode {
 	return &sNode{
 		fSettings:     sett,
 		fHashMapping:  storage.NewMemoryStorage(sett.GetCapacity()),
-		fConnections:  make(map[string]IConn),
+		fConnections:  make(map[string]conn.IConn),
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
 }
 
-func (node *sNode) Broadcast(pl payload.IPayload) error {
+func (node *sNode) Broadcast(pld payload.IPayload) error {
 	// set this message to mapping
-	msg := NewMessage(pl, []byte(node.Settings().GetNetworkKey()))
-	node.inMappingWithSet(msg.Hash())
+	hash := hashing.NewSHA256Hasher(pld.ToBytes()).Bytes()
+	node.inMappingWithSet(hash)
 
 	var err error
 	for _, conn := range node.Connections() {
-		e := conn.Write(msg)
+		e := conn.Write(pld)
 		if e != nil {
 			err = e
 		}
@@ -75,7 +78,8 @@ func (node *sNode) Listen(address string) error {
 			continue
 		}
 
-		conn := LoadConn(node.Settings(), tconn)
+		sett := node.Settings().GetConnSettings()
+		conn := conn.LoadConn(sett, tconn)
 		address := tconn.RemoteAddr().String()
 
 		node.setConnection(address, conn)
@@ -111,7 +115,7 @@ func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) handleConn(address string, conn IConn) {
+func (node *sNode) handleConn(address string, conn conn.IConn) {
 	defer node.Disconnect(address)
 	for {
 		ok := node.handleMessage(conn, conn.Read())
@@ -122,11 +126,11 @@ func (node *sNode) handleConn(address string, conn IConn) {
 }
 
 // Get list of connection addresses.
-func (node *sNode) Connections() map[string]IConn {
+func (node *sNode) Connections() map[string]conn.IConn {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	var mapping = make(map[string]IConn, len(node.fConnections))
+	var mapping = make(map[string]conn.IConn, len(node.fConnections))
 	for addr, conn := range node.fConnections {
 		mapping[addr] = conn
 	}
@@ -136,20 +140,21 @@ func (node *sNode) Connections() map[string]IConn {
 
 // Connect to node by address.
 // Client handle function need be not null.
-func (node *sNode) Connect(address string) IConn {
+func (node *sNode) Connect(address string) (conn.IConn, error) {
 	if node.hasMaxConnSize() {
-		return nil
+		return nil, fmt.Errorf("has max connections size")
 	}
 
-	conn, err := NewConn(node.Settings(), address)
+	sett := node.Settings().GetConnSettings()
+	conn, err := conn.NewConn(sett, address)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	node.setConnection(address, conn)
 	go node.handleConn(address, conn)
 
-	return conn
+	return conn, nil
 }
 
 func (node *sNode) Disconnect(address string) error {
@@ -165,24 +170,25 @@ func (node *sNode) Disconnect(address string) error {
 	return conn.Close()
 }
 
-func (node *sNode) handleMessage(conn IConn, msg IMessage) bool {
+func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 	// null message from connection is error
-	if msg == nil {
+	if pld == nil {
 		return false
 	}
 
 	// check message in mapping by hash
-	if node.inMappingWithSet(msg.Hash()) {
+	hash := hashing.NewSHA256Hasher(pld.ToBytes()).Bytes()
+	if node.inMappingWithSet(hash) {
 		return true
 	}
 
 	// get function by head
-	f, ok := node.getFunction(msg.Payload().Head())
+	f, ok := node.getFunction(pld.Head())
 	if !ok || f == nil {
 		return false
 	}
 
-	f(node, conn, msg.Payload())
+	f(node, conn, pld)
 	return true
 }
 
@@ -209,7 +215,7 @@ func (node *sNode) inMappingWithSet(hash []byte) bool {
 	return false
 }
 
-func (node *sNode) setConnection(address string, conn IConn) {
+func (node *sNode) setConnection(address string, conn conn.IConn) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 

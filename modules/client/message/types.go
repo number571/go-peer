@@ -5,7 +5,7 @@ import "github.com/number571/go-peer/modules/payload"
 type IMessage interface {
 	Head() iHead
 	Body() iBody
-	Bytes() []byte
+	ToBytes() []byte
 }
 
 type iHead interface {

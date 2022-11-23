@@ -10,7 +10,7 @@ import (
 func TestPayload(t *testing.T) {
 	pl := NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
 
-	decPl := LoadPayload(pl.Bytes())
+	decPl := LoadPayload(pl.ToBytes())
 	if decPl == nil {
 		t.Error("decode payload is nil")
 		return

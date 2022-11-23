@@ -43,6 +43,6 @@ func (builder *sBuilder) Push(receiver asymmetric.IPubKey, pl payload.IPayload) 
 
 	return &hms_settings.SPushRequest{
 		FReceiver: builder.fClient.PubKey().Address().Bytes(),
-		FPackage:  encMsg.Bytes(),
+		FPackage:  encMsg.ToBytes(),
 	}
 }

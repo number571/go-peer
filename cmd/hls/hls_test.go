@@ -26,15 +26,18 @@ const (
 	tcPathConfig          = "config_test.cfg"
 )
 
+func testCleanHLS() {
+	os.RemoveAll(tcPathConfig)
+	for i := 0; i < 2; i++ {
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
+	}
+}
+
 // client -> HLS -> server --\
 // client <- HLS <- server <-/
 func TestHLS(t *testing.T) {
-	defer func() {
-		os.RemoveAll(tcPathConfig)
-		for i := 0; i < 2; i++ {
-			os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
-		}
-	}()
+	testCleanHLS()
+	defer testCleanHLS()
 
 	// server
 	srv := testStartServerHTTP(t)
@@ -126,9 +129,9 @@ func testStartClientHLS() (anonymity.INode, error) {
 	}
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
-	conn := node.Network().Connect(testutils.TgAddrs[4])
-	if conn == nil {
-		return node, fmt.Errorf("conn is nil")
+	_, err := node.Network().Connect(testutils.TgAddrs[4])
+	if err != nil {
+		return nil, err
 	}
 
 	msg := payload.NewPayload(

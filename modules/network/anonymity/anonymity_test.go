@@ -19,6 +19,7 @@ import (
 	"github.com/number571/go-peer/settings/testutils"
 
 	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
+	"github.com/number571/go-peer/modules/network/conn"
 )
 
 const (
@@ -64,8 +65,8 @@ func TestComplex(t *testing.T) {
 }
 
 func TestF2FWithoutFriends(t *testing.T) {
-	// 5 seconds for wait
-	nodes := testNewNodes(t, 2*time.Second)
+	// 3 seconds for wait
+	nodes := testNewNodes(t, 3*time.Second)
 	if nodes[0] == nil {
 		return
 	}
@@ -156,9 +157,11 @@ func testNewNode(i int, timeWait time.Duration) INode {
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FCapacity:    (1 << 10),
-				FMessageSize: (100 << 10),
 				FMaxConnects: 10,
-				FTimeWait:    5 * time.Second,
+				FConnSettings: &conn.SSettings{
+					FMessageSize: (100 << 10),
+					FTimeWait:    5 * time.Second,
+				},
 			}),
 		),
 		queue.NewQueue(

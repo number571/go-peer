@@ -34,7 +34,7 @@ func (pusher *sPusher) Block(block block.IBlock) error {
 	)
 	return pusher.fNetwork.Broadcast(payload.NewPayload(
 		cMaskNetw,
-		pld.Bytes(),
+		pld.ToBytes(),
 	))
 }
 
@@ -48,6 +48,6 @@ func (pusher *sPusher) Transaction(transaction transaction.ITransaction) error {
 	)
 	return pusher.fNetwork.Broadcast(payload.NewPayload(
 		cMaskNetw,
-		pld.Bytes(),
+		pld.ToBytes(),
 	))
 }

@@ -6,9 +6,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/puzzle"
 	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/message"
 )
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, hms_settings.CErrorNone, msg.Bytes())
+	response(w, hms_settings.CErrorNone, msg.ToBytes())
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {

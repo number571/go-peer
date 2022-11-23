@@ -51,7 +51,7 @@ func (msg *SMessage) Body() iBody {
 	return msg.FBody
 }
 
-func (msg *SMessage) Bytes() []byte {
+func (msg *SMessage) ToBytes() []byte {
 	jsonData, err := json.Marshal(msg)
 	if err != nil {
 		return nil

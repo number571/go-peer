@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/modules"
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
 	"github.com/number571/go-peer/modules/crypto/puzzle"
 	"github.com/number571/go-peer/modules/crypto/random"
 	"github.com/number571/go-peer/modules/friends"
-	"github.com/number571/go-peer/modules/message"
 	"github.com/number571/go-peer/modules/network"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"
@@ -22,6 +22,7 @@ import (
 	"github.com/number571/go-peer/settings"
 
 	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
+	"github.com/number571/go-peer/modules/network/conn"
 )
 
 var (
@@ -104,7 +105,7 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 func (node *sNode) Broadcast(msg message.IMessage) error {
 	return node.Network().Broadcast(payload.NewPayload(
 		settings.CMaskNetwork,
-		msg.Bytes(),
+		msg.ToBytes(),
 	))
 }
 
@@ -167,7 +168,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 	}()
 
-	return func(nnode network.INode, _ network.IConn, npld payload.IPayload) {
+	return func(nnode network.INode, _ conn.IConn, npld payload.IPayload) {
 		msg := node.initialCheck(message.LoadMessage(npld.Body()))
 		if msg == nil {
 			return

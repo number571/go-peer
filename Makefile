@@ -9,8 +9,8 @@ clean:
 	make -C ./cmd/hms clean
 	make -C ./cmd/hmc clean
 	make -C ./cmd/ubc clean
-	make -C ./examples/anon_messenger clean 
-	make -C ./examples/echo_service clean 
+	make -C ./examples/cmd/anon_messenger clean 
+	make -C ./examples/cmd/echo_service clean 
 
 test:
 	d=$$(date +%s); \

@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/message"
+	"github.com/number571/go-peer/modules/client/message"
 )
 
 type IKeyValueDB interface {

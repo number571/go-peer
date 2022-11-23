@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/settings/testutils"
 )
@@ -23,7 +24,7 @@ func TestBroadcast(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4 * tcIter)
 
-	handleF := func(node INode, conn IConn, pl payload.IPayload) {
+	handleF := func(node INode, conn conn.IConn, pl payload.IPayload) {
 		defer wg.Done()
 		defer node.Broadcast(pl)
 
@@ -96,9 +97,11 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
 			FCapacity:    (1 << 10),
-			FMessageSize: (100 << 10),
 			FMaxConnects: 10,
-			FTimeWait:    5 * time.Second,
+			FConnSettings: &conn.SSettings{
+				FMessageSize: (100 << 10),
+				FTimeWait:    5 * time.Second,
+			},
 		})
 		nodes[i] = NewNode(sett)
 	}

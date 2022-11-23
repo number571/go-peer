@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/modules"
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
-	"github.com/number571/go-peer/modules/message"
 	"github.com/number571/go-peer/modules/network"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"

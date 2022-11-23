@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/chain"
 	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 )
 
@@ -54,7 +55,7 @@ func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 }
 
 func (node *sNode) handleWrapper() network.IHandlerF {
-	return func(nnode network.INode, conn network.IConn, npld payload.IPayload) {
+	return func(nnode network.INode, conn conn.IConn, npld payload.IPayload) {
 		pld := payload.LoadPayload(npld.Body())
 
 		// get function by payload head

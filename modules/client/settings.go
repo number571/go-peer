@@ -1,6 +1,7 @@
 package client
 
 const (
+	cWorkSize    = 10
 	cMessageSize = (1 << 20)
 )
 
@@ -17,6 +18,9 @@ func NewSettings(sett *SSettings) ISettings {
 }
 
 func (s *SSettings) useDefaultValues() ISettings {
+	if s.FWorkSize == 0 {
+		s.FWorkSize = cWorkSize
+	}
 	if s.FMessageSize == 0 {
 		s.FMessageSize = cMessageSize
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/modules/crypto/hashing"
 	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 )
 
@@ -18,10 +18,10 @@ var (
 
 type sLoader struct {
 	fMutex sync.Mutex
-	fConn  network.IConn
+	fConn  conn.IConn
 }
 
-func NewLoader(conn network.IConn) ILoader {
+func NewLoader(conn conn.IConn) ILoader {
 	return &sLoader{
 		fConn: conn,
 	}
@@ -36,15 +36,14 @@ func (loader *sLoader) Height() (uint64, error) {
 		[]byte{},
 	)
 
-	msg := loader.fConn.Request(network.NewMessage(
-		payload.NewPayload(
-			cMaskNetw,
-			pld.Bytes(),
-		),
-		[]byte{},
+	rpld, err := loader.fConn.Request(payload.NewPayload(
+		cMaskNetw,
+		pld.ToBytes(),
 	))
+	if err != nil {
+		return 0, err
+	}
 
-	rpld := msg.Payload()
 	if rpld.Head() != cMaskLoadHeight {
 		return 0, fmt.Errorf("rpld.Head() != cMaskLoadHeight")
 	}
@@ -68,15 +67,14 @@ func (loader *sLoader) Block(i uint64) (block.IBlock, error) {
 		res[:],
 	)
 
-	msg := loader.fConn.Request(network.NewMessage(
-		payload.NewPayload(
-			cMaskNetw,
-			pld.Bytes(),
-		),
-		[]byte{},
+	rpld, err := loader.fConn.Request(payload.NewPayload(
+		cMaskNetw,
+		pld.ToBytes(),
 	))
+	if err != nil {
+		return nil, err
+	}
 
-	rpld := msg.Payload()
 	if rpld.Head() != cMaskLoadBlock {
 		return nil, fmt.Errorf("rpld.Head() != cMaskLoadBlock")
 	}
@@ -97,15 +95,14 @@ func (loader *sLoader) Transaction(hash []byte) (transaction.ITransaction, error
 		hash,
 	)
 
-	msg := loader.fConn.Request(network.NewMessage(
-		payload.NewPayload(
-			cMaskNetw,
-			pld.Bytes(),
-		),
-		[]byte{},
+	rpld, err := loader.fConn.Request(payload.NewPayload(
+		cMaskNetw,
+		pld.ToBytes(),
 	))
+	if err != nil {
+		return nil, err
+	}
 
-	rpld := msg.Payload()
 	if rpld.Head() != cMaskLoadTransaction {
 		return nil, fmt.Errorf("rpld.Head() != cMaskLoadTransaction")
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
 	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/queue"
 	"github.com/number571/go-peer/modules/storage/database"
 
@@ -73,9 +74,12 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FCapacity:    hls_settings.CNetworkCapacity,
-				FMessageSize: hls_settings.CMessageSize,
 				FMaxConnects: hls_settings.CNetworkMaxConns,
-				FTimeWait:    hls_settings.CNetworkWaitTime,
+				FConnSettings: &conn.SSettings{
+					FNetworkKey:  cfg.Network(),
+					FMessageSize: hls_settings.CMessageSize,
+					FTimeWait:    hls_settings.CNetworkWaitTime,
+				},
 			}),
 		),
 		queue.NewQueue(

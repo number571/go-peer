@@ -90,7 +90,7 @@ func TestMessageSize(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		sizes = append(sizes, len(msg.Bytes()))
+		sizes = append(sizes, len(msg.ToBytes()))
 	}
 
 	for i := 0; i < len(sizes)-1; i++ {

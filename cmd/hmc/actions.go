@@ -9,9 +9,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/number571/go-peer/cmd/hmc/action"
 	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/cmd/hms/hmc"
-	"github.com/number571/go-peer/modules/action"
 	"github.com/number571/go-peer/modules/inputter"
 	"github.com/number571/go-peer/modules/payload"
 )

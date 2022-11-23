@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/hashing"
 	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/message"
 	gp_database "github.com/number571/go-peer/modules/storage/database"
 )
 
@@ -107,7 +107,7 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	// push message
 	err = db.fMessages.fDB.Set(
 		getKeyMessage(key, size),
-		msg.Bytes(),
+		msg.ToBytes(),
 	)
 	if err != nil {
 		err1 := db.fHashes.fDB.Del(getKeyHash(hash))

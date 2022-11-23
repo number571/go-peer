@@ -4,10 +4,11 @@ import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/modules/network"
+	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 )
 
-type IHandlerF func(INode, network.IConn, payload.IPayload)
+type IHandlerF func(INode, conn.IConn, payload.IPayload)
 
 type INode interface {
 	Pusher() IPusher

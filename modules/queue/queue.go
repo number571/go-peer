@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/message"
+	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/payload"
 )
 
