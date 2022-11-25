@@ -8,12 +8,12 @@ init:
 	pkill --version
 build: 
 	# COPY HLS
-	cp -r ../../cmd/hls middle_hls 
-	cp -r ../../cmd/hls node1_hlm 
-	cp -r ../../cmd/hls node2_hlm 
+	cp -r ../../../cmd/hls middle_hls 
+	cp -r ../../../cmd/hls node1_hlm 
+	cp -r ../../../cmd/hls node2_hlm 
 	# COPY HLM 
-	cp -r ../../cmd/hlm node1_hlm 
-	cp -r ../../cmd/hlm node2_hlm 
+	cp -r ../../../cmd/hlm node1_hlm 
+	cp -r ../../../cmd/hlm node2_hlm 
 	# MAKEFILE BUILD
 	make build -C middle_hls
 	make build -C node1_hlm

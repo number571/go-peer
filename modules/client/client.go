@@ -65,14 +65,14 @@ func (client *sClient) Settings() ISettings {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload) (message.IMessage, error) {
+func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pld payload.IPayload) (message.IMessage, error) {
 	if receiver.Size() != client.PubKey().Size() {
 		return nil, fmt.Errorf("size of public keys sender and receiver not equal")
 	}
 
 	var (
 		maxMsgSize = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
-		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pl.ToBytes()))
+		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pld.ToBytes()))
 	)
 
 	if resultSize > maxMsgSize {
@@ -85,20 +85,20 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pl payload.IPayload)
 
 	return client.encryptWithParams(
 		receiver,
-		pl,
+		pld,
 		client.Settings().GetWorkSize(),
 		maxMsgSize-resultSize,
 	), nil
 }
 
-func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pl payload.IPayload, workSize, addPadd uint64) message.IMessage {
+func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payload.IPayload, workSize, addPadd uint64) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.Bytes(symmetric.CAESKeySize)
 		session = rand.Bytes(symmetric.CAESKeySize)
 	)
 
-	payloadBytes := pl.ToBytes()
+	payloadBytes := pld.ToBytes()
 	doublePayload := payload.NewPayload(
 		uint64(len(payloadBytes)),
 		bytes.Join(
@@ -178,12 +178,6 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 		return nil, nil, fmt.Errorf("invalid public key size")
 	}
 
-	// Decrypt salt.
-	salt := cipher.Decrypt(msg.Head().Salt())
-	if salt == nil {
-		return nil, nil, fmt.Errorf("failed decrypt salt")
-	}
-
 	// Decrypt main data of message by session key.
 	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().ToBytes())
 	if doublePayloadBytes == nil {
@@ -192,6 +186,12 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 	doublePayload := payload.LoadPayload(doublePayloadBytes)
 	if doublePayload == nil {
 		return nil, nil, fmt.Errorf("failed load double payload")
+	}
+
+	// Decrypt salt.
+	salt := cipher.Decrypt(msg.Head().Salt())
+	if salt == nil {
+		return nil, nil, fmt.Errorf("failed decrypt salt")
 	}
 
 	// Check received hash and generated hash.
@@ -218,16 +218,16 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 		return nil, nil, fmt.Errorf("invalid msg sign")
 	}
 
-	// remove random bytes and get main data
+	// Remove random bytes and get main data
 	mustLen := doublePayload.Head()
 	if mustLen > uint64(len(doublePayload.Body())) {
 		return nil, nil, fmt.Errorf("invalid size of payload")
 	}
-	payload := payload.LoadPayload(doublePayload.Body()[:mustLen])
-	if payload == nil {
+	pld := payload.LoadPayload(doublePayload.Body()[:mustLen])
+	if pld == nil {
 		return nil, nil, fmt.Errorf("invalid load payload")
 	}
 
 	// Return decrypted message with title
-	return pubKey, payload, nil
+	return pubKey, pld, nil
 }

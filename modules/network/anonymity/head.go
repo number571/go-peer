@@ -13,16 +13,16 @@ func loadHead(n uint64) iHead {
 	return sHead(n)
 }
 
-func joinHead(routes, actions uint32) iHead {
-	return sHead((uint64(routes) << 32) | uint64(actions))
+func joinHead(actions, routes uint32) iHead {
+	return sHead((uint64(actions) << 32) | uint64(routes))
 }
 
 func (k sHead) Routes() uint32 {
-	return uint32(k >> 32)
+	return uint32(k & 0x00000000FFFFFFFF)
 }
 
 func (k sHead) Actions() uint32 {
-	return uint32(k & 0x00000000FFFFFFFF)
+	return uint32(k >> 32)
 }
 
 func (k sHead) Uint64() uint64 {

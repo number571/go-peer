@@ -75,11 +75,11 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			network.NewSettings(&network.SSettings{
 				FCapacity:    hls_settings.CNetworkCapacity,
 				FMaxConnects: hls_settings.CNetworkMaxConns,
-				FConnSettings: &conn.SSettings{
+				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  cfg.Network(),
 					FMessageSize: hls_settings.CMessageSize,
 					FTimeWait:    hls_settings.CNetworkWaitTime,
-				},
+				}),
 			}),
 		),
 		queue.NewQueue(

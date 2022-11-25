@@ -21,8 +21,8 @@ func main() {
 		service2 = network.NewNode(network.NewSettings(&network.SSettings{}))
 	)
 
-	service1.Handle(serviceHeader, handlerPayload("#1"))
-	service2.Handle(serviceHeader, handlerPayload("#2"))
+	service1.Handle(serviceHeader, handler("#1"))
+	service2.Handle(serviceHeader, handler("#2"))
 
 	go service1.Listen(serviceAddress)
 	time.Sleep(time.Second) // wait
@@ -40,7 +40,7 @@ func main() {
 	select {}
 }
 
-func handlerPayload(serviceName string) network.IHandlerF {
+func handler(serviceName string) network.IHandlerF {
 	return func(n network.INode, c conn.IConn, p payload.IPayload) {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 

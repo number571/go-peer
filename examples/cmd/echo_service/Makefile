@@ -5,9 +5,9 @@ init:
 	pkill --version
 build: 
 	# COPY HLS
-	cp -r ../../cmd/hls middle_hls 
-	cp -r ../../cmd/hls recv_hls
-	cp -r ../../cmd/hls send_hls
+	cp -r ../../../cmd/hls middle_hls 
+	cp -r ../../../cmd/hls recv_hls
+	cp -r ../../../cmd/hls send_hls
 	# MAKEFILE BUILD
 	make build -C middle_hls
 	make build -C recv_hls

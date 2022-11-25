@@ -21,8 +21,8 @@ func main() {
 		service2 = network.NewNode(network.NewSettings(&network.SSettings{}))
 	)
 
-	service1.Handle(serviceHeader, handlerPayload("#1"))
-	service2.Handle(serviceHeader, handlerPayload("#2"))
+	service1.Handle(serviceHeader, handlerPingPong("#1"))
+	service2.Handle(serviceHeader, handlerPingPong("#2"))
 
 	go service1.Listen(serviceAddress)
 	time.Sleep(time.Second) // wait
@@ -51,7 +51,7 @@ func main() {
 	time.Sleep(time.Second)
 }
 
-func handlerPayload(serviceName string) network.IHandlerF {
+func handlerPingPong(serviceName string) network.IHandlerF {
 	return func(n network.INode, c conn.IConn, p payload.IPayload) {
 		defer n.Broadcast(p)
 		fmt.Printf("service '%s' got '%s'\n", serviceName, string(p.Body()))

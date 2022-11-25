@@ -102,7 +102,7 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) Broadcast(msg message.IMessage) error {
+func (node *sNode) broadcast(msg message.IMessage) error {
 	return node.Network().Broadcast(payload.NewPayload(
 		settings.CMaskNetwork,
 		msg.ToBytes(),
@@ -110,20 +110,20 @@ func (node *sNode) Broadcast(msg message.IMessage) error {
 }
 
 // Send message by public key of receiver.
-func (node *sNode) Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error) {
+func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload) ([]byte, error) {
 	if len(node.Network().Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
 
-	headRoutes := mustBeUint32(pl.Head())
 	headAction := uint32(random.NewStdPRNG().Uint64())
+	headRoutes := mustBeUint32(pld.Head())
 
-	pl = payload.NewPayload(
-		joinHead(headRoutes, headAction).Uint64(),
-		pl.Body(),
+	newPld := payload.NewPayload(
+		joinHead(headAction, headRoutes).Uint64(),
+		pld.Body(),
 	)
 
-	msg, err := node.Queue().Client().Encrypt(recv, pl)
+	msg, err := node.Queue().Client().Encrypt(recv, newPld)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			if !ok {
 				break
 			}
-			node.Broadcast(msg)
+			node.broadcast(msg)
 		}
 	}()
 
@@ -190,7 +190,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		// check already received data by hash
-		hash := []byte(fmt.Sprintf("recv_hash_%X", msg.Body().Hash()))
+		hash := []byte(fmt.Sprintf("_hash_%X", msg.Body().Hash()))
 		if _, err := node.KeyValueDB().Get(hash); err == nil {
 			return
 		}

@@ -158,10 +158,10 @@ func testNewNode(i int, timeWait time.Duration) INode {
 			network.NewSettings(&network.SSettings{
 				FCapacity:    (1 << 10),
 				FMaxConnects: 10,
-				FConnSettings: &conn.SSettings{
+				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSize: (100 << 10),
 					FTimeWait:    5 * time.Second,
-				},
+				}),
 			}),
 		),
 		queue.NewQueue(

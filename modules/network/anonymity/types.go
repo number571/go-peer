@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
@@ -27,7 +26,6 @@ type INode interface {
 	F2F() friends.IF2F
 
 	Handle(uint32, IHandlerF) INode
-	Broadcast(message.IMessage) error
 	Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error)
 }
 

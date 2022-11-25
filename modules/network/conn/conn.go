@@ -54,7 +54,7 @@ func (conn *sConn) Request(pld payload.IPayload) (payload.IPayload, error) {
 	if err := conn.Write(pld); err != nil {
 		return nil, err
 	}
-	go readMessage(conn, chPld)
+	go readPayload(conn, chPld)
 
 	select {
 	case rpld := <-chPld:
@@ -85,8 +85,8 @@ func (conn *sConn) Write(pld payload.IPayload) error {
 			return err
 		}
 
-		packBytes = packBytes[:n]
 		ptr = ptr - n
+		packBytes = packBytes[:ptr]
 
 		if ptr == 0 {
 			break
@@ -98,11 +98,11 @@ func (conn *sConn) Write(pld payload.IPayload) error {
 
 func (conn *sConn) Read() payload.IPayload {
 	chPld := make(chan payload.IPayload)
-	go readMessage(conn, chPld)
+	go readPayload(conn, chPld)
 	return <-chPld
 }
 
-func readMessage(conn *sConn, chPld chan payload.IPayload) {
+func readPayload(conn *sConn, chPld chan payload.IPayload) {
 	var pld payload.IPayload
 	defer func() {
 		chPld <- pld

@@ -98,10 +98,10 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		sett := NewSettings(&SSettings{
 			FCapacity:    (1 << 10),
 			FMaxConnects: 10,
-			FConnSettings: &conn.SSettings{
+			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSize: (100 << 10),
 				FTimeWait:    5 * time.Second,
-			},
+			}),
 		})
 		nodes[i] = NewNode(sett)
 	}
