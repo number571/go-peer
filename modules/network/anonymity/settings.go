@@ -6,29 +6,30 @@ const (
 	cTimeWait = time.Minute
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FRetryEnqueue uint64
 	FTimeWait     time.Duration
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FRetryEnqueue: sett.FRetryEnqueue,
 		FTimeWait:     sett.FTimeWait,
 	}).useDefaultValue()
 }
 
-func (s *SSettings) useDefaultValue() ISettings {
+func (s *sSettings) useDefaultValue() ISettings {
 	if s.FTimeWait == 0 {
 		s.FTimeWait = cTimeWait
 	}
 	return s
 }
 
-func (s *SSettings) GetTimeWait() time.Duration {
+func (s *sSettings) GetTimeWait() time.Duration {
 	return s.FTimeWait
 }
 
-func (s *SSettings) GetRetryEnqueue() uint64 {
+func (s *sSettings) GetRetryEnqueue() uint64 {
 	return s.FRetryEnqueue
 }

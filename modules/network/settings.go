@@ -7,21 +7,22 @@ const (
 	cMaxConnects = (1 << 6)
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FCapacity     uint64
 	FMaxConnects  uint64
 	FConnSettings conn.ISettings
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FCapacity:     sett.FCapacity,
 		FMaxConnects:  sett.FMaxConnects,
 		FConnSettings: sett.FConnSettings,
 	}).useDefaultValues()
 }
 
-func (s *SSettings) useDefaultValues() ISettings {
+func (s *sSettings) useDefaultValues() ISettings {
 	if s.FCapacity == 0 {
 		s.FCapacity = cCapacity
 	}
@@ -34,14 +35,14 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetCapacity() uint64 {
+func (s *sSettings) GetCapacity() uint64 {
 	return s.FCapacity
 }
 
-func (s *SSettings) GetMaxConnects() uint64 {
+func (s *sSettings) GetMaxConnects() uint64 {
 	return s.FMaxConnects
 }
 
-func (s *SSettings) GetConnSettings() conn.ISettings {
+func (s *sSettings) GetConnSettings() conn.ISettings {
 	return s.FConnSettings
 }

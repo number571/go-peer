@@ -5,21 +5,22 @@ const (
 	cCipherKey = "cipher-key"
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FPath      string
 	FHashing   bool
 	FCipherKey []byte
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FPath:      sett.FPath,
 		FHashing:   sett.FHashing,
 		FCipherKey: sett.FCipherKey,
 	}).useDefaultValues()
 }
 
-func (s *SSettings) useDefaultValues() ISettings {
+func (s *sSettings) useDefaultValues() ISettings {
 	if s.FPath == "" {
 		s.FPath = cPath
 	}
@@ -29,14 +30,14 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetPath() string {
+func (s *sSettings) GetPath() string {
 	return s.FPath
 }
 
-func (s *SSettings) GetHashing() bool {
+func (s *sSettings) GetHashing() bool {
 	return s.FHashing
 }
 
-func (s *SSettings) GetCipherKey() []byte {
+func (s *sSettings) GetCipherKey() []byte {
 	return s.FCipherKey
 }

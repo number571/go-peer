@@ -34,7 +34,7 @@ func NewApp(
 	return &sApp{
 		fDB:             db,
 		fWebServiceHTTP: initWebServiceHTTP(cfg, client, db),
-		fIncServiceHTTP: initIncServiceHTTP(cfg, client, db),
+		fIncServiceHTTP: initIncServiceHTTP(cfg, db),
 	}
 }
 
@@ -74,9 +74,9 @@ func (app *sApp) Close() error {
 	})
 }
 
-func initIncServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKeyValueDB) *http.Server {
+func initIncServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/push", handler.HandleIncomigHTTP(client, db))
+	mux.HandleFunc("/push", handler.HandleIncomigHTTP(db))
 
 	return &http.Server{
 		Addr:    cfg.Address().Incoming(),

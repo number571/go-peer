@@ -8,13 +8,12 @@ import (
 
 	"github.com/number571/go-peer/cmd/hlm/database"
 	"github.com/number571/go-peer/cmd/hlm/settings"
-	"github.com/number571/go-peer/cmd/hls/hlc"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
 )
 
-func HandleIncomigHTTP(client hlc.IClient, db database.IKeyValueDB) http.HandlerFunc {
+func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			response(w, hls_settings.CErrorMethod, "failed: incorrect method")

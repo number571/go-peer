@@ -5,19 +5,20 @@ const (
 	cMessageSize = (1 << 20)
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FWorkSize    uint64
 	FMessageSize uint64
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FWorkSize:    sett.FWorkSize,
 		FMessageSize: sett.FMessageSize,
 	}).useDefaultValues()
 }
 
-func (s *SSettings) useDefaultValues() ISettings {
+func (s *sSettings) useDefaultValues() ISettings {
 	if s.FWorkSize == 0 {
 		s.FWorkSize = cWorkSize
 	}
@@ -27,10 +28,10 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetWorkSize() uint64 {
+func (s *sSettings) GetWorkSize() uint64 {
 	return s.FWorkSize
 }
 
-func (s *SSettings) GetMessageSize() uint64 {
+func (s *sSettings) GetMessageSize() uint64 {
 	return s.FMessageSize
 }

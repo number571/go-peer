@@ -6,29 +6,30 @@ const (
 	cTimeWait = time.Minute
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FConnections func() []string
 	FDuration    time.Duration
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FConnections: sett.FConnections,
 		FDuration:    sett.FDuration,
 	}).useDefaultValue()
 }
 
-func (s *SSettings) useDefaultValue() ISettings {
+func (s *sSettings) useDefaultValue() ISettings {
 	if s.FDuration == 0 {
 		s.FDuration = cTimeWait
 	}
 	return s
 }
 
-func (s *SSettings) GetConnections() []string {
+func (s *sSettings) GetConnections() []string {
 	return s.FConnections()
 }
 
-func (s *SSettings) GetDuration() time.Duration {
+func (s *sSettings) GetDuration() time.Duration {
 	return s.FDuration
 }

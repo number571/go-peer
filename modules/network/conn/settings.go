@@ -8,21 +8,22 @@ const (
 	cTimeWait    = time.Minute
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FNetworkKey  string
 	FMessageSize uint64
 	FTimeWait    time.Duration
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FNetworkKey:  sett.FNetworkKey,
 		FMessageSize: sett.FMessageSize,
 		FTimeWait:    sett.FTimeWait,
 	}).useDefaultValues()
 }
 
-func (s *SSettings) useDefaultValues() ISettings {
+func (s *sSettings) useDefaultValues() ISettings {
 	if s.FNetworkKey == "" {
 		s.FNetworkKey = cNetworkKey
 	}
@@ -35,14 +36,14 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetNetworkKey() string {
+func (s *sSettings) GetNetworkKey() string {
 	return s.FNetworkKey
 }
 
-func (s *SSettings) GetMessageSize() uint64 {
+func (s *sSettings) GetMessageSize() uint64 {
 	return s.FMessageSize
 }
 
-func (s *SSettings) GetTimeWait() time.Duration {
+func (s *sSettings) GetTimeWait() time.Duration {
 	return s.FTimeWait
 }

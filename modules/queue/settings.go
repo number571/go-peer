@@ -10,21 +10,22 @@ const (
 	cDuration     = time.Second
 )
 
-type SSettings struct {
+type SSettings sSettings
+type sSettings struct {
 	FCapacity     uint64
 	FPullCapacity uint64
 	FDuration     time.Duration
 }
 
 func NewSettings(sett *SSettings) ISettings {
-	return (&SSettings{
+	return (&sSettings{
 		FCapacity:     sett.FCapacity,
 		FPullCapacity: sett.FPullCapacity,
 		FDuration:     sett.FDuration,
 	}).useDefaultValues()
 }
 
-func (s *SSettings) useDefaultValues() ISettings {
+func (s *sSettings) useDefaultValues() ISettings {
 	if s.FCapacity == 0 {
 		s.FCapacity = cCapacity
 	}
@@ -37,14 +38,14 @@ func (s *SSettings) useDefaultValues() ISettings {
 	return s
 }
 
-func (s *SSettings) GetCapacity() uint64 {
+func (s *sSettings) GetCapacity() uint64 {
 	return s.FCapacity
 }
 
-func (s *SSettings) GetPullCapacity() uint64 {
+func (s *sSettings) GetPullCapacity() uint64 {
 	return s.FPullCapacity
 }
 
-func (s *SSettings) GetDuration() time.Duration {
+func (s *sSettings) GetDuration() time.Duration {
 	return s.FDuration
 }
