@@ -40,6 +40,7 @@ type sLevelDBIterator struct {
 func NewLevelDB(sett ISettings) IKeyValueDB {
 	db, err := leveldb.OpenFile(sett.GetPath(), nil)
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	salt, err := db.Get([]byte(cSaltKey), nil)

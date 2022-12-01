@@ -1,5 +1,9 @@
 package client
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cWorkSize    = 10
 	cMessageSize = (1 << 20)

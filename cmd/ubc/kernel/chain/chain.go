@@ -3,7 +3,6 @@ package chain
 import (
 	"bytes"
 	"fmt"
-	"path/filepath"
 	"sort"
 	"sync"
 
@@ -16,7 +15,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
-	ksettings "github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )
 
@@ -26,44 +24,51 @@ var (
 
 type sChain struct {
 	fMutex        sync.Mutex
+	fSettings     ISettings
 	fPrivKey      asymmetric.IPrivKey
 	fBlocks       database.IKeyValueDB
 	fTransactions database.IKeyValueDB
 	fMempool      mempool.IMempool
 }
 
-func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (IChain, error) {
-	var (
-		blocksPath  = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathBlck).(string))
-		txsPath     = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathTrns).(string))
-		mempoolPath = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathMemp).(string))
-	)
-
+func NewChain(sett ISettings, priv asymmetric.IPrivKey, genesis block.IBlock) (IChain, error) {
 	if !genesis.IsValid() {
 		return nil, fmt.Errorf("genesis block is invalid")
 	}
 
-	if filesystem.OpenFile(path).IsExist() {
+	if filesystem.OpenFile(sett.GetRootPath()).IsExist() {
 		return nil, fmt.Errorf("chain already exists")
 	}
 
 	chain := &sChain{
-		fPrivKey: priv,
+		fSettings: sett,
+		fPrivKey:  priv,
 		fBlocks: database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath: blocksPath,
+				FPath: sett.GetBlocksPath(),
 			}),
 		),
 		fTransactions: database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath: txsPath,
+				FPath: sett.GetTransactionsPath(),
 			}),
 		),
-		fMempool: mempool.NewMempool(mempoolPath),
+		fMempool: mempool.NewMempool(
+			sett.GetMempoolSettings(),
+			sett.GetMempoolPath(),
+		),
 	}
 
-	if chain.fBlocks == nil || chain.fTransactions == nil {
-		panic("chain.blocks == nil || chain.txs == nil")
+	if chain.fBlocks == nil {
+		return nil, fmt.Errorf("chain.blocks == nil")
+	}
+
+	if chain.fTransactions == nil {
+		return nil, fmt.Errorf("chain.transactions == nil")
+	}
+
+	if chain.fMempool == nil {
+		return nil, fmt.Errorf("chain.mempool == nil")
 	}
 
 	chain.setHeight(0)
@@ -72,34 +77,40 @@ func NewChain(priv asymmetric.IPrivKey, path string, genesis block.IBlock) (ICha
 	return chain, nil
 }
 
-func LoadChain(priv asymmetric.IPrivKey, path string) (IChain, error) {
-	var (
-		blocksPath  = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathBlck).(string))
-		txsPath     = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathTrns).(string))
-		mempoolPath = filepath.Join(path, ksettings.GSettings.Get(ksettings.CPathMemp).(string))
-	)
-
-	if !filesystem.OpenFile(path).IsExist() {
+func LoadChain(sett ISettings, priv asymmetric.IPrivKey) (IChain, error) {
+	if !filesystem.OpenFile(sett.GetRootPath()).IsExist() {
 		return nil, fmt.Errorf("chain not exists")
 	}
 
 	chain := &sChain{
-		fPrivKey: priv,
+		fSettings: sett,
+		fPrivKey:  priv,
 		fBlocks: database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath: blocksPath,
+				FPath: sett.GetBlocksPath(),
 			}),
 		),
 		fTransactions: database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath: txsPath,
+				FPath: sett.GetTransactionsPath(),
 			}),
 		),
-		fMempool: mempool.NewMempool(mempoolPath),
+		fMempool: mempool.NewMempool(
+			sett.GetMempoolSettings(),
+			sett.GetMempoolPath(),
+		),
 	}
 
-	if chain.fBlocks == nil || chain.fTransactions == nil {
-		panic("chain.blocks == nil || chain.txs == nil")
+	if chain.fBlocks == nil {
+		return nil, fmt.Errorf("chain.blocks == nil")
+	}
+
+	if chain.fTransactions == nil {
+		return nil, fmt.Errorf("chain.transactions == nil")
+	}
+
+	if chain.fMempool == nil {
+		return nil, fmt.Errorf("chain.mempool == nil")
 	}
 
 	return chain, nil
@@ -200,8 +211,8 @@ func (chain *sChain) Merge(txs []transaction.ITransaction) bool {
 	}
 
 	// nothing new transactions, all passed
-	sizeTXs := ksettings.GSettings.Get(ksettings.CSizeTrns).(uint64)
-	if uint64(len(resultTXs)) == sizeTXs {
+	countTXs := chain.fSettings.GetMempoolSettings().GetBlockSettings().GetCountTXs()
+	if uint64(len(resultTXs)) == countTXs {
 		return false
 	}
 
@@ -209,14 +220,19 @@ func (chain *sChain) Merge(txs []transaction.ITransaction) bool {
 	sort.SliceStable(resultTXs, func(i, j int) bool {
 		return bytes.Compare(resultTXs[i].Hash(), resultTXs[j].Hash()) < 0
 	})
-	appendTXs := resultTXs[:sizeTXs]
-	deleteTXs := resultTXs[sizeTXs:]
+	appendTXs := resultTXs[:countTXs]
+	deleteTXs := resultTXs[countTXs:]
 
 	// create new block with appendTX transactions
 	// and delete from old block deleteTX transactions
 	chain.updateBlock(
 		chain.getHeight(),
-		block.NewBlock(chain.fPrivKey, lastBlock.PrevHash(), appendTXs),
+		block.NewBlock(
+			chain.fSettings.GetMempoolSettings().GetBlockSettings(),
+			chain.fPrivKey,
+			lastBlock.PrevHash(),
+			appendTXs,
+		),
 		deleteTXs,
 	)
 	return true
@@ -273,7 +289,10 @@ func (chain *sChain) getTransaction(hash []byte) transaction.ITransaction {
 	if err != nil {
 		return nil
 	}
-	return transaction.LoadTransaction(data)
+	return transaction.LoadTransaction(
+		chain.fSettings.GetMempoolSettings().GetBlockSettings().GetTransactionSettings(),
+		data,
+	)
 }
 
 func (chain *sChain) setTransaction(tx transaction.ITransaction) {
@@ -291,7 +310,10 @@ func (chain *sChain) getBlock(height uint64) block.IBlock {
 	if err != nil {
 		return nil
 	}
-	return block.LoadBlock(data)
+	return block.LoadBlock(
+		chain.fSettings.GetMempoolSettings().GetBlockSettings(),
+		data,
+	)
 }
 
 func (chain *sChain) setBlock(block block.IBlock) {

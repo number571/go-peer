@@ -39,7 +39,7 @@ func NewNode(sett ISettings) INode {
 
 func (node *sNode) Broadcast(pld payload.IPayload) error {
 	// set this message to mapping
-	hash := hashing.NewSHA256Hasher(pld.ToBytes()).Bytes()
+	hash := hashing.NewSHA256Hasher(pld.Bytes()).Bytes()
 	node.inMappingWithSet(hash)
 
 	var err error
@@ -177,7 +177,7 @@ func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 	}
 
 	// check message in mapping by hash
-	hash := hashing.NewSHA256Hasher(pld.ToBytes()).Bytes()
+	hash := hashing.NewSHA256Hasher(pld.Bytes()).Bytes()
 	if node.inMappingWithSet(hash) {
 		return true
 	}

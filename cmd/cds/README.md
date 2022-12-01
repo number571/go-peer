@@ -4,7 +4,7 @@
 
 ```bash
 usage: 
-    ./main (get|put|del) [path] [storage-password] [data-password]
+    ./main (get|put|del|gen) [path] [storage-password] [data-password]
 ```
 
 ## Example
@@ -15,4 +15,5 @@ $ go run main.go put file.stg some-password#1 some-password#2 < hello.txt
 $ go run main.go get file.stg some-password#1 some-password#2
 > hello, world!
 $ go run main.go del file.stg some-password#1 some-password#2
+$ go run main.go gen file.stg some-password#1 some-password#2
 ```

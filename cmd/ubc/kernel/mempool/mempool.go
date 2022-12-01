@@ -6,7 +6,6 @@ import (
 	"github.com/number571/go-peer/modules/encoding"
 	"github.com/number571/go-peer/modules/storage/database"
 
-	ksettings "github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )
 
@@ -15,12 +14,14 @@ var (
 )
 
 type sMempool struct {
-	fMutex sync.Mutex
-	fDB    database.IKeyValueDB
+	fMutex    sync.Mutex
+	fSettings ISettings
+	fDB       database.IKeyValueDB
 }
 
-func NewMempool(path string) IMempool {
+func NewMempool(sett ISettings, path string) IMempool {
 	mempool := &sMempool{
+		fSettings: sett,
 		fDB: database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FPath: path,
@@ -36,6 +37,10 @@ func NewMempool(path string) IMempool {
 		}
 	}
 	return mempool
+}
+
+func (mempool *sMempool) Settings() ISettings {
+	return mempool.fSettings
 }
 
 func (mempool *sMempool) Height() uint64 {
@@ -70,15 +75,17 @@ func (mempool *sMempool) Clear() {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
-	prefixTXs := ksettings.GSettings.Get(ksettings.CMaskPref).(string)
-	iter := mempool.fDB.Iter([]byte(prefixTXs))
+	iter := mempool.fDB.Iter([]byte(cPrefix))
 	defer iter.Close()
 
 	// TODO: iter.Key without load transaction
 	for iter.Next() {
 		txBytes := iter.Value()
 
-		tx := transaction.LoadTransaction(txBytes)
+		tx := transaction.LoadTransaction(
+			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
+			txBytes,
+		)
 		if tx == nil {
 			panic("mempool: tx is nil")
 		}
@@ -91,14 +98,17 @@ func (mempool *sMempool) Push(tx transaction.ITransaction) {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
+	if !tx.IsValid() {
+		return
+	}
+
 	var (
 		hash      = tx.Hash()
 		newHeight = uint64(mempool.getHeight() + 1)
 	)
 
 	// limit of height
-	sizeMempool := ksettings.GSettings.Get(ksettings.CSizeMemp).(uint64)
-	if newHeight > sizeMempool {
+	if newHeight > mempool.fSettings.GetCountTXs() {
 		return
 	}
 
@@ -117,8 +127,8 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 	defer mempool.fMutex.Unlock()
 
 	// count of tx need be = block size
-	sizeTXs := ksettings.GSettings.Get(ksettings.CSizeTrns).(uint64)
-	if mempool.getHeight() < sizeTXs {
+	blockCountTXs := mempool.fSettings.GetBlockSettings().GetCountTXs()
+	if mempool.getHeight() < blockCountTXs {
 		return nil
 	}
 
@@ -127,14 +137,16 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 		count uint64
 	)
 
-	sVal := ksettings.GSettings.Get(ksettings.CMaskPref).(string)
-	iter := mempool.fDB.Iter([]byte(sVal))
+	iter := mempool.fDB.Iter([]byte(cPrefix))
 	defer iter.Close()
 
-	for count = 0; iter.Next() && count < sizeTXs; count++ {
+	for count = 0; iter.Next() && count < blockCountTXs; count++ {
 		txBytes := iter.Value()
 
-		tx := transaction.LoadTransaction(txBytes)
+		tx := transaction.LoadTransaction(
+			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
+			txBytes,
+		)
 		if tx == nil {
 			return nil
 		}
@@ -142,7 +154,7 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 		txs = append(txs, tx)
 	}
 
-	if count != sizeTXs {
+	if count != blockCountTXs {
 		panic("count != settings.CSizeTrns")
 	}
 
@@ -168,7 +180,10 @@ func (mempool *sMempool) getTX(hash []byte) transaction.ITransaction {
 	if err != nil {
 		return nil
 	}
-	return transaction.LoadTransaction(data)
+	return transaction.LoadTransaction(
+		mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
+		data,
+	)
 }
 
 func (mempool *sMempool) deleteTX(hash []byte) {

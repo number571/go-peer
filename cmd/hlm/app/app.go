@@ -102,7 +102,7 @@ func initWebServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKey
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
 	return &http.Server{
-		Addr:    cfg.Address().WebLocal(),
+		Addr:    cfg.Address().Interface(),
 		Handler: mux,
 	}
 }

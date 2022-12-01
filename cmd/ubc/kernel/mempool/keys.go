@@ -2,16 +2,18 @@ package mempool
 
 import (
 	"fmt"
+)
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
+const (
+	cHeight     = "chain.blocks.height"
+	cTxTemplate = "chain.txs.tx[%X]"
+	cPrefix     = "chain.txs.tx["
 )
 
 func getKeyHeight() []byte {
-	key := settings.GSettings.Get(settings.CMaskHeig).(string)
-	return []byte(key)
+	return []byte(cHeight)
 }
 
 func getKeyTX(hash []byte) []byte {
-	key := settings.GSettings.Get(settings.CMaskTrns).(string)
-	return []byte(fmt.Sprintf(key, hash))
+	return []byte(fmt.Sprintf(cTxTemplate, hash))
 }

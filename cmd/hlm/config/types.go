@@ -6,6 +6,6 @@ type IConfig interface {
 }
 
 type iAddress interface {
-	WebLocal() string
+	Interface() string
 	Incoming() string
 }

@@ -35,7 +35,7 @@ func (store *sMemoryStorage) Set(key, value []byte) error {
 		}
 	}
 
-	store.fMapping[encoding.Base64Encode(key)] = value
+	store.fMapping[encoding.HexEncode(key)] = value
 	return nil
 }
 
@@ -43,7 +43,7 @@ func (store *sMemoryStorage) Get(key []byte) ([]byte, error) {
 	store.fMutex.Lock()
 	defer store.fMutex.Unlock()
 
-	value, ok := store.fMapping[encoding.Base64Encode(key)]
+	value, ok := store.fMapping[encoding.HexEncode(key)]
 	if !ok {
 		return nil, fmt.Errorf("undefined value by key")
 	}
@@ -55,11 +55,11 @@ func (store *sMemoryStorage) Del(key []byte) error {
 	store.fMutex.Lock()
 	defer store.fMutex.Unlock()
 
-	_, ok := store.fMapping[encoding.Base64Encode(key)]
+	_, ok := store.fMapping[encoding.HexEncode(key)]
 	if !ok {
 		return fmt.Errorf("undefined value by key")
 	}
 
-	delete(store.fMapping, encoding.Base64Encode(key))
+	delete(store.fMapping, encoding.HexEncode(key))
 	return nil
 }

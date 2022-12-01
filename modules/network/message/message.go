@@ -20,7 +20,7 @@ func NewMessage(pld payload.IPayload, key []byte) IMessage {
 	return &sMessage{
 		fHash: hashing.NewHMACSHA256Hasher(
 			key,
-			pld.ToBytes(),
+			pld.Bytes(),
 		).Bytes(),
 		fPayload: pld,
 	}
@@ -64,11 +64,11 @@ func (msg *sMessage) Payload() payload.IPayload {
 	return msg.fPayload
 }
 
-func (msg *sMessage) ToBytes() []byte {
+func (msg *sMessage) Bytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			msg.fHash,
-			msg.fPayload.ToBytes(),
+			msg.fPayload.Bytes(),
 		},
 		[]byte{},
 	)

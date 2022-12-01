@@ -4,5 +4,3 @@
 - `/cmd/*`
 2. proof_of_union:
 - `/cmd/ubc` (TODO)
-3. hidden_lake_service:
-- `/cmd/hls`

@@ -2,6 +2,10 @@ package conn
 
 import "time"
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cNetworkKey  = "network-key"
 	cMessageSize = (1 << 20)

@@ -7,6 +7,16 @@ import (
 	"github.com/number571/go-peer/modules"
 )
 
+type ISettings interface {
+	GetRootPath() string
+
+	GetBlocksPath() string
+	GetTransactionsPath() string
+	GetMempoolPath() string
+
+	GetMempoolSettings() mempool.ISettings
+}
+
 type IChain interface {
 	Accept(block.IBlock) bool
 	Merge([]transaction.ITransaction) bool

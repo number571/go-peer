@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/number571/go-peer/modules/crypto/random"
 	"github.com/number571/go-peer/modules/storage"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	if len(os.Args) != 5 {
 		panic(fmt.Sprintf(
 			"usage: \n\t%s",
-			"./main (get|put|del) [path] [storage-password] [data-password]",
+			"./main (get|put|del|gen) [path] [storage-password] [data-password]",
 		))
 	}
 
@@ -37,12 +38,25 @@ func main() {
 		}
 		fmt.Print(string(data))
 	case "PUT":
+		if _, err := stg.Get([]byte(dataPassword)); err == nil {
+			panic("password already exist")
+		}
 		err := stg.Set([]byte(dataPassword), readUntilEOF())
 		if err != nil {
 			panic(err)
 		}
 	case "DEL":
 		err := stg.Del([]byte(dataPassword))
+		if err != nil {
+			panic(err)
+		}
+	case "GEN":
+		if _, err := stg.Get([]byte(dataPassword)); err == nil {
+			panic("password already exist")
+		}
+		// 1char = 4bit entropy => 128bit
+		randStr := random.NewStdPRNG().String(32)
+		err := stg.Set([]byte(dataPassword), []byte(randStr))
 		if err != nil {
 			panic(err)
 		}

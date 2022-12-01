@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cCapacity     = (1 << 5)
 	cPullCapacity = (1 << 5)

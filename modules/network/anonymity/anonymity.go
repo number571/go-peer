@@ -19,7 +19,6 @@ import (
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"
 	"github.com/number571/go-peer/modules/storage/database"
-	"github.com/number571/go-peer/settings"
 
 	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/modules/network/conn"
@@ -62,12 +61,12 @@ func (node *sNode) Run() error {
 	if err := node.Queue().Run(); err != nil {
 		return err
 	}
-	node.Network().Handle(settings.CMaskNetwork, node.handleWrapper())
+	node.Network().Handle(node.fSettings.GetMaskNetwork(), node.handleWrapper())
 	return nil
 }
 
 func (node *sNode) Close() error {
-	node.Network().Handle(settings.CMaskNetwork, nil)
+	node.Network().Handle(node.fSettings.GetMaskNetwork(), nil)
 	return closer.CloseAll([]modules.ICloser{
 		node.Queue(),
 	})
@@ -104,8 +103,8 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 
 func (node *sNode) broadcast(msg message.IMessage) error {
 	return node.Network().Broadcast(payload.NewPayload(
-		settings.CMaskNetwork,
-		msg.ToBytes(),
+		node.fSettings.GetMaskNetwork(),
+		msg.Bytes(),
 	))
 }
 

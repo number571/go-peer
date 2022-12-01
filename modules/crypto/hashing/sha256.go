@@ -61,8 +61,7 @@ func NewHMACSHA256Hasher(key []byte, data []byte) IHasher {
 }
 
 func (h *sHMACSHA256Hasher) String() string {
-	bytes := h.Bytes()
-	return encoding.Base64Encode(bytes)
+	return encoding.HexEncode(h.Bytes())
 }
 
 func (h *sHMACSHA256Hasher) Bytes() []byte {

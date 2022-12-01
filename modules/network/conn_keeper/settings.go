@@ -2,6 +2,10 @@ package conn_keeper
 
 import "time"
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cTimeWait = time.Minute
 )

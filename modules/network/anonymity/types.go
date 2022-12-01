@@ -31,6 +31,7 @@ type INode interface {
 
 type ISettings interface {
 	GetTimeWait() time.Duration
+	GetMaskNetwork() uint64
 	GetRetryEnqueue() uint64
 }
 

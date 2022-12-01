@@ -37,6 +37,6 @@ func (payload sPayload) Body() []byte {
 	return payload[encoding.CSizeUint64:]
 }
 
-func (payload sPayload) ToBytes() []byte {
+func (payload sPayload) Bytes() []byte {
 	return payload[:]
 }

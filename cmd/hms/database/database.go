@@ -111,7 +111,7 @@ func (db *sKeyValueDB) Push(key []byte, msg message.IMessage) error {
 	// push message
 	err = db.fMessages.fDB.Set(
 		getKeyMessage(key, size),
-		msg.ToBytes(),
+		msg.Bytes(),
 	)
 	if err != nil {
 		err1 := db.fHashes.fDB.Del(getKeyHash(hash))

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
@@ -15,26 +14,33 @@ import (
 	"github.com/number571/go-peer/settings/testutils"
 )
 
-const (
-	numBlocks = 10
-)
-
 func TestChain(t *testing.T) {
 	const (
+		numBlocks = 10
 		chainName = "chain.db"
 	)
 
 	os.RemoveAll(chainName)
 	defer os.RemoveAll(chainName)
 
+	sett := NewSettings(&SSettings{FRootPath: chainName})
+
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
 
 	// generate genesis block
 	chain, err := NewChain(
+		sett,
 		priv,
-		chainName,
-		block.NewBlock(priv, hash, testGetNewTransactions(priv)),
+		block.NewBlock(
+			sett.GetMempoolSettings().GetBlockSettings(),
+			priv,
+			hash,
+			testGetNewTransactions(
+				sett.GetMempoolSettings().GetBlockSettings(),
+				priv,
+			),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -45,9 +51,13 @@ func TestChain(t *testing.T) {
 	// generate blocks
 	for i := 0; i < numBlocks; i++ {
 		newBlock := block.NewBlock(
+			sett.GetMempoolSettings().GetBlockSettings(),
 			priv,
 			testGetLastBlockHash(chain),
-			testGetNewTransactions(priv),
+			testGetNewTransactions(
+				sett.GetMempoolSettings().GetBlockSettings(),
+				priv,
+			),
 		)
 
 		// accept generated block to chain
@@ -81,9 +91,13 @@ func TestChain(t *testing.T) {
 	// merge another block with last block
 	lastBlock := chain.Block(chain.Height())
 	anotherBlock := block.NewBlock(
+		sett.GetMempoolSettings().GetBlockSettings(),
 		priv,
 		testGetLastBlockHash(chain),
-		testGetNewTransactions(priv),
+		testGetNewTransactions(
+			sett.GetMempoolSettings().GetBlockSettings(),
+			priv,
+		),
 	)
 
 	ok := chain.Merge(anotherBlock.Transactions())
@@ -130,13 +144,13 @@ func testGetLastBlockHash(chain IChain) []byte {
 	return chain.Block(chain.Height()).Hash()
 }
 
-func testGetNewTransactions(priv asymmetric.IPrivKey) []transaction.ITransaction {
-	txSize := settings.GSettings.Get(settings.CSizeTrns).(uint64)
+func testGetNewTransactions(sett block.ISettings, priv asymmetric.IPrivKey) []transaction.ITransaction {
 	txs := []transaction.ITransaction{}
-	for i := uint64(0); i < txSize; i++ {
+	for i := uint64(0); i < sett.GetCountTXs(); i++ {
 		txs = append(
 			txs,
 			transaction.NewTransaction(
+				sett.GetTransactionSettings(),
 				priv,
 				[]byte(fmt.Sprintf("transaction-%d-%X", i, random.NewStdPRNG().Bytes(20))),
 			),

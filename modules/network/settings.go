@@ -2,6 +2,10 @@ package network
 
 import "github.com/number571/go-peer/modules/network/conn"
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cCapacity    = (1 << 10)
 	cMaxConnects = (1 << 6)

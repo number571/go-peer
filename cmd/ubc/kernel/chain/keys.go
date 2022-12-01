@@ -2,21 +2,22 @@ package chain
 
 import (
 	"fmt"
+)
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
+const (
+	cHeight        = "chain.blocks.height"
+	cBlockTemplate = "chain.blocks.block[%d]"
+	cTxTemplate    = "chain.txs.tx[%X]"
 )
 
 func getKeyHeight() []byte {
-	key := settings.GSettings.Get(settings.CMaskHeig).(string)
-	return []byte(key)
+	return []byte(cBlockTemplate)
 }
 
 func getKeyBlock(height uint64) []byte {
-	key := settings.GSettings.Get(settings.CMaskBlck).(string)
-	return []byte(fmt.Sprintf(key, height))
+	return []byte(fmt.Sprintf(cBlockTemplate, height))
 }
 
 func getKeyTX(hash []byte) []byte {
-	key := settings.GSettings.Get(settings.CMaskTrns).(string)
-	return []byte(fmt.Sprintf(key, hash))
+	return []byte(fmt.Sprintf(cTxTemplate, hash))
 }

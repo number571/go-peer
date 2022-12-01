@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )
 
@@ -20,14 +19,10 @@ var (
 )
 
 type sBlock struct {
+	fSettings  ISettings
 	fTXs       []transaction.ITransaction
-	fPrevHash  []byte
-	fCurrHash  []byte
-	fSign      []byte
 	fValidator asymmetric.IPubKey
-}
 
-type sBlockJSON struct {
 	FTXs       [][]byte `json:"txs"`
 	FPrevHash  []byte   `json:"prev_hash"`
 	FCurrHash  []byte   `json:"curr_hash"`
@@ -35,11 +30,13 @@ type sBlockJSON struct {
 	FValidator []byte   `json:"validator"`
 }
 
-func NewBlock(priv asymmetric.IPrivKey, prevHash []byte, txs []transaction.ITransaction) IBlock {
+func NewBlock(sett ISettings, priv asymmetric.IPrivKey, prevHash []byte, txs []transaction.ITransaction) IBlock {
 	block := &sBlock{
+		fSettings:  sett,
 		fTXs:       txs,
-		fPrevHash:  prevHash,
 		fValidator: priv.PubKey(),
+		FPrevHash:  prevHash,
+		FValidator: priv.PubKey().Bytes(),
 	}
 
 	if len(prevHash) != hashing.CSHA256Size {
@@ -50,30 +47,39 @@ func NewBlock(priv asymmetric.IPrivKey, prevHash []byte, txs []transaction.ITran
 		return nil
 	}
 
-	block.fCurrHash = block.newHash()
-	block.fSign = priv.Sign(block.fCurrHash)
+	for _, tx := range txs {
+		block.FTXs = append(
+			block.FTXs,
+			tx.Bytes(),
+		)
+	}
+
+	block.FCurrHash = block.newHash()
+	block.FSign = priv.Sign(block.FCurrHash)
 
 	return block
 }
 
-func LoadBlock(rawBlock interface{}) IBlock {
+func LoadBlock(sett ISettings, rawBlock interface{}) IBlock {
 	switch x := rawBlock.(type) {
 	case []byte:
-		blockJSON := new(sBlockJSON)
-		err := json.Unmarshal(x, blockJSON)
+		block := new(sBlock)
+		err := json.Unmarshal(x, block)
 		if err != nil {
 			return nil
 		}
 
-		block := &sBlock{
-			fPrevHash:  blockJSON.FPrevHash,
-			fCurrHash:  blockJSON.FCurrHash,
-			fSign:      blockJSON.FSign,
-			fValidator: asymmetric.LoadRSAPubKey(blockJSON.FValidator),
-		}
+		block.fSettings = sett
+		block.fValidator = asymmetric.LoadRSAPubKey(block.FValidator)
 
-		for _, tx := range blockJSON.FTXs {
-			block.fTXs = append(block.fTXs, transaction.LoadTransaction(tx))
+		for _, tx := range block.FTXs {
+			block.fTXs = append(
+				block.fTXs,
+				transaction.LoadTransaction(
+					block.fSettings.GetTransactionSettings(),
+					tx,
+				),
+			)
 		}
 
 		if !block.IsValid() {
@@ -101,10 +107,14 @@ func LoadBlock(rawBlock interface{}) IBlock {
 		if err != nil {
 			return nil
 		}
-		return LoadBlock(pbytes)
+		return LoadBlock(sett, pbytes)
 	default:
 		panic("unsupported type")
 	}
+}
+
+func (block *sBlock) Settings() ISettings {
+	return block.fSettings
 }
 
 func (block *sBlock) Transactions() []transaction.ITransaction {
@@ -112,22 +122,11 @@ func (block *sBlock) Transactions() []transaction.ITransaction {
 }
 
 func (block *sBlock) PrevHash() []byte {
-	return block.fPrevHash
+	return block.FPrevHash
 }
 
 func (block *sBlock) Bytes() []byte {
-	blockJSON := &sBlockJSON{
-		FPrevHash:  block.PrevHash(),
-		FCurrHash:  block.Hash(),
-		FSign:      block.Sign(),
-		FValidator: block.Validator().Bytes(),
-	}
-
-	for _, tx := range block.fTXs {
-		blockJSON.FTXs = append(blockJSON.FTXs, tx.Bytes())
-	}
-
-	blockBytes, err := json.Marshal(blockJSON)
+	blockBytes, err := json.Marshal(block)
 	if err != nil {
 		return nil
 	}
@@ -140,11 +139,11 @@ func (block *sBlock) String() string {
 }
 
 func (block *sBlock) Hash() []byte {
-	return block.fCurrHash
+	return block.FCurrHash
 }
 
 func (block *sBlock) Sign() []byte {
-	return block.fSign
+	return block.FSign
 }
 
 func (block *sBlock) Validator() asymmetric.IPubKey {
@@ -168,8 +167,7 @@ func (block *sBlock) IsValid() bool {
 }
 
 func (block *sBlock) txsAreValid() bool {
-	txSize := settings.GSettings.Get(settings.CSizeTrns).(uint64)
-	if uint64(len(block.fTXs)) != txSize {
+	if uint64(len(block.fTXs)) != block.fSettings.GetCountTXs() {
 		return false
 	}
 

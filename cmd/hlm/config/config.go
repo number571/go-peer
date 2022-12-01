@@ -18,8 +18,8 @@ type SConfig struct {
 }
 
 type SAddress struct {
-	FWebLocal string `json:"web_local"`
-	FIncoming string `json:"incoming"`
+	FInterface string `json:"interface"`
+	FIncoming  string `json:"incoming"`
 }
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
@@ -64,8 +64,8 @@ func (cfg *SConfig) Connection() string {
 	return cfg.FConnection
 }
 
-func (addr *SAddress) WebLocal() string {
-	return addr.FWebLocal
+func (addr *SAddress) Interface() string {
+	return addr.FInterface
 }
 
 func (addr *SAddress) Incoming() string {

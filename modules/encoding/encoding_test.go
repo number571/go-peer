@@ -23,9 +23,9 @@ var (
 	tgMessage    = tsMessage{"hello", 5}
 )
 
-func TestBase64(t *testing.T) {
-	data := Base64Encode(tgNumInBytes)
-	if !bytes.Equal(tgNumInBytes, Base64Decode(data)) {
+func TestHex(t *testing.T) {
+	data := HexEncode(tgNumInBytes)
+	if !bytes.Equal(tgNumInBytes, HexDecode(data)) {
 		t.Error("bytes not equals")
 	}
 }

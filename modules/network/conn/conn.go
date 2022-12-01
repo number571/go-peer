@@ -75,20 +75,22 @@ func (conn *sConn) Write(pld payload.IPayload) error {
 	conn.fMutex.Lock()
 	defer conn.fMutex.Unlock()
 
-	msg := message.NewMessage(pld, []byte(conn.fSettings.GetNetworkKey()))
-	packBytes := message.NewPackage(msg.ToBytes()).ToBytes()
-	ptr := len(packBytes)
+	var (
+		msgBytes  = message.NewMessage(pld, []byte(conn.fSettings.GetNetworkKey())).Bytes()
+		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).Bytes()
+		packPtr   = len(packBytes)
+	)
 
 	for {
-		n, err := conn.fSocket.Write(packBytes[:ptr])
+		n, err := conn.fSocket.Write(packBytes[:packPtr])
 		if err != nil {
 			return err
 		}
 
-		ptr = ptr - n
-		packBytes = packBytes[:ptr]
+		packPtr = packPtr - n
+		packBytes = packBytes[:packPtr]
 
-		if ptr == 0 {
+		if packPtr == 0 {
 			break
 		}
 	}

@@ -9,8 +9,6 @@ import (
 
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
-
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 )
 
 var (
@@ -18,60 +16,44 @@ var (
 )
 
 type sTransaction struct {
-	fPayload   []byte
-	fHash      []byte
-	fSign      []byte
+	fSettings  ISettings
 	fValidator asymmetric.IPubKey
-}
 
-type sTransactionJSON struct {
 	FPayload   []byte `json:"payload"`
 	FHash      []byte `json:"hash"`
 	FSign      []byte `json:"sign"`
 	FValidator []byte `json:"validator"`
 }
 
-func NewTransaction(priv asymmetric.IPrivKey, payLoad []byte) ITransaction {
-	if priv == nil {
-		return nil
-	}
-
-	keySize := settings.GSettings.Get(settings.CSizeAkey).(uint64)
-	if priv.Size() != keySize {
-		return nil
-	}
-
-	payloadSize := settings.GSettings.Get(settings.CSizePayl).(uint64)
-	if uint64(len(payLoad)) > payloadSize {
-		return nil
-	}
-
+func NewTransaction(sett ISettings, priv asymmetric.IPrivKey, payLoad []byte) ITransaction {
 	tx := &sTransaction{
-		fPayload:   payLoad,
+		fSettings:  sett,
 		fValidator: priv.PubKey(),
+		FPayload:   payLoad,
+		FValidator: priv.PubKey().Bytes(),
 	}
 
-	tx.fHash = tx.newHash()
-	tx.fSign = priv.Sign(tx.fHash)
+	tx.FHash = tx.newHash()
+	tx.FSign = priv.Sign(tx.FHash)
+
+	if !tx.IsValid() {
+		return nil
+	}
 
 	return tx
 }
 
-func LoadTransaction(rawTX interface{}) ITransaction {
+func LoadTransaction(sett ISettings, rawTX interface{}) ITransaction {
 	switch x := rawTX.(type) {
 	case []byte:
-		txJSON := new(sTransactionJSON)
-		err := json.Unmarshal(x, txJSON)
+		tx := new(sTransaction)
+		err := json.Unmarshal(x, tx)
 		if err != nil {
 			return nil
 		}
 
-		tx := &sTransaction{
-			fPayload:   txJSON.FPayload,
-			fHash:      txJSON.FHash,
-			fSign:      txJSON.FSign,
-			fValidator: asymmetric.LoadRSAPubKey(txJSON.FValidator),
-		}
+		tx.fSettings = sett
+		tx.fValidator = asymmetric.LoadRSAPubKey(tx.FValidator)
 
 		if !tx.IsValid() {
 			return nil
@@ -98,22 +80,26 @@ func LoadTransaction(rawTX interface{}) ITransaction {
 		if err != nil {
 			return nil
 		}
-		return LoadTransaction(pbytes)
+		return LoadTransaction(sett, pbytes)
 	default:
 		panic("unsupported type")
 	}
 }
 
+func (tx *sTransaction) Settings() ISettings {
+	return tx.fSettings
+}
+
 func (tx *sTransaction) Payload() []byte {
-	return tx.fPayload
+	return tx.FPayload
 }
 
 func (tx *sTransaction) Hash() []byte {
-	return tx.fHash
+	return tx.FHash
 }
 
 func (tx *sTransaction) Sign() []byte {
-	return tx.fSign
+	return tx.FSign
 }
 
 func (tx *sTransaction) Validator() asymmetric.IPubKey {
@@ -121,14 +107,7 @@ func (tx *sTransaction) Validator() asymmetric.IPubKey {
 }
 
 func (tx *sTransaction) Bytes() []byte {
-	txJSON := &sTransactionJSON{
-		FPayload:   tx.Payload(),
-		FHash:      tx.Hash(),
-		FSign:      tx.Sign(),
-		FValidator: tx.Validator().Bytes(),
-	}
-
-	txbytes, err := json.Marshal(txJSON)
+	txbytes, err := json.Marshal(tx)
 	if err != nil {
 		return nil
 	}
@@ -141,8 +120,7 @@ func (tx *sTransaction) String() string {
 }
 
 func (tx *sTransaction) IsValid() bool {
-	payloadSize := settings.GSettings.Get(settings.CSizePayl).(uint64)
-	if uint64(len(tx.fPayload)) > payloadSize {
+	if uint64(len(tx.FPayload)) > tx.fSettings.GetMaxSize() {
 		return false
 	}
 

@@ -41,8 +41,8 @@ func getConfig() (config.IConfig, error) {
 	}
 	initCfg := &config.SConfig{
 		FAddress: &config.SAddress{
-			FWebLocal: "localhost:8080",
-			FIncoming: "localhost:8081",
+			FInterface: "localhost:8080",
+			FIncoming:  "localhost:8081",
 		},
 		FConnection: "localhost:9572",
 	}

@@ -44,7 +44,7 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 	// saved message size with hex encoding
 	// because exists not encoded chars <{}",>
 	// of JSON format
-	client.fVoidMsgSize = len(msg.ToBytes())
+	client.fVoidMsgSize = len(msg.Bytes())
 	return client
 }
 
@@ -72,7 +72,7 @@ func (client *sClient) Encrypt(receiver asymmetric.IPubKey, pld payload.IPayload
 
 	var (
 		maxMsgSize = client.Settings().GetMessageSize() >> 1 // limit of bytes without hex
-		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pld.ToBytes()))
+		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pld.Bytes()))
 	)
 
 	if resultSize > maxMsgSize {
@@ -98,7 +98,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 		session = rand.Bytes(symmetric.CAESKeySize)
 	)
 
-	payloadBytes := pld.ToBytes()
+	payloadBytes := pld.Bytes()
 	doublePayload := payload.NewPayload(
 		uint64(len(payloadBytes)),
 		bytes.Join(
@@ -115,7 +115,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 			salt,
 			client.PubKey().Bytes(),
 			receiver.Bytes(),
-			doublePayload.ToBytes(),
+			doublePayload.Bytes(),
 		},
 		[]byte{},
 	)).Bytes()
@@ -129,7 +129,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 			FSalt:    encoding.HexEncode(cipher.Encrypt(salt)),
 		},
 		FBody: message.SBodyMessage{
-			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.ToBytes())),
+			FPayload: encoding.HexEncode(cipher.Encrypt(doublePayload.Bytes())),
 			FHash:    encoding.HexEncode(hash),
 			FSign:    encoding.HexEncode(cipher.Encrypt(client.PrivKey().Sign(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
@@ -179,7 +179,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 	}
 
 	// Decrypt main data of message by session key.
-	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().ToBytes())
+	doublePayloadBytes := cipher.Decrypt(msg.Body().Payload().Bytes())
 	if doublePayloadBytes == nil {
 		return nil, nil, fmt.Errorf("failed decrypt double payload")
 	}
@@ -200,7 +200,7 @@ func (client *sClient) Decrypt(msg message.IMessage) (asymmetric.IPubKey, payloa
 			salt,
 			publicBytes,
 			client.PubKey().Bytes(),
-			doublePayload.ToBytes(),
+			doublePayload.Bytes(),
 		},
 		[]byte{},
 	)).Bytes()

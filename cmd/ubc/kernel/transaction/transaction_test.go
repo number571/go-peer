@@ -13,7 +13,9 @@ const (
 
 func TestTransaction(t *testing.T) {
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
-	newTX := NewTransaction(priv, []byte("hello, world!"))
+	sett := NewSettings(&SSettings{})
+
+	newTX := NewTransaction(sett, priv, []byte("hello, world!"))
 	if newTX == nil {
 		t.Errorf("new tx is nil")
 		return
@@ -24,7 +26,7 @@ func TestTransaction(t *testing.T) {
 		return
 	}
 
-	loadTX := LoadTransaction(tcTX)
+	loadTX := LoadTransaction(sett, tcTX)
 	if loadTX == nil {
 		t.Errorf("load tx is nil")
 		return

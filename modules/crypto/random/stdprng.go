@@ -30,7 +30,7 @@ func (r *sStdPRNG) Bytes(n uint64) []byte {
 
 // Generates a cryptographically strong pseudo-random string.
 func (r *sStdPRNG) String(n uint64) string {
-	return encoding.Base64Encode(r.Bytes(n))[:n]
+	return encoding.HexEncode(r.Bytes(n))[:n]
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.

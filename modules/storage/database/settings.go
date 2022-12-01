@@ -1,5 +1,9 @@
 package database
 
+var (
+	_ ISettings = &sSettings{}
+)
+
 const (
 	cPath      = "database.db"
 	cCipherKey = "cipher-key"

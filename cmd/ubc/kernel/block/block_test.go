@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/settings"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/crypto/hashing"
@@ -12,18 +11,22 @@ import (
 )
 
 func TestTransaction(t *testing.T) {
+	sett := NewSettings(&SSettings{})
+
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
 
-	txSize := settings.GSettings.Get(settings.CSizeTrns).(uint64)
 	txs := []transaction.ITransaction{}
-	for i := uint64(0); i < txSize; i++ {
-		tx := transaction.NewTransaction(priv,
-			[]byte(fmt.Sprintf("transaction-%d", i)))
+	for i := uint64(0); i < sett.GetCountTXs(); i++ {
+		tx := transaction.NewTransaction(
+			sett.GetTransactionSettings(),
+			priv,
+			[]byte(fmt.Sprintf("transaction-%d", i)),
+		)
 		txs = append(txs, tx)
 	}
 
-	newBlock := NewBlock(priv, hash, txs)
+	newBlock := NewBlock(sett, priv, hash, txs)
 	if newBlock == nil {
 		t.Errorf("new block is nil")
 		return
@@ -34,7 +37,7 @@ func TestTransaction(t *testing.T) {
 		return
 	}
 
-	loadBlock := LoadBlock(testutils.TcLargeBody)
+	loadBlock := LoadBlock(sett, testutils.TcLargeBody)
 	if loadBlock == nil {
 		t.Errorf("load block is nil")
 		return

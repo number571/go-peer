@@ -59,7 +59,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response(w, hms_settings.CErrorNone, msg.ToBytes())
+	response(w, hms_settings.CErrorNone, msg.Bytes())
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
