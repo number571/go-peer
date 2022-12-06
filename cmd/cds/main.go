@@ -12,56 +12,63 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 5 {
+	if len(os.Args) != 4 {
 		panic(fmt.Sprintf(
-			"usage: \n\t%s",
-			"./main (get|put|del|gen) [path] [storage-password] [data-password]",
+			"usage:\n\t%s\nstdin:\n\t%s\n",
+			"./main (get|put|del|new) [storage-path] [data-key]",
+			"[password]~[data]",
 		))
 	}
 
 	var (
-		pathToStorage   = os.Args[2]
-		storagePassword = os.Args[3]
-		dataPassword    = os.Args[4]
+		storagePath = os.Args[2]
+		dateKey     = os.Args[3]
 	)
 
-	stg, err := storage.NewCryptoStorage(pathToStorage, []byte(storagePassword), 20)
+	concatData := readUntilEOF()
+	splited := bytes.Split(concatData, []byte{'~'})
+	if len(splited) == 1 {
+		panic("len(splited) == 1")
+	}
+
+	storageKey := string(splited[0])
+	stg, err := storage.NewCryptoStorage(storagePath, []byte(storageKey), 20)
 	if err != nil {
 		panic(err)
 	}
 
 	switch strings.ToUpper(os.Args[1]) {
 	case "GET":
-		data, err := stg.Get([]byte(dataPassword))
+		data, err := stg.Get([]byte(dateKey))
 		if err != nil {
 			panic(err)
 		}
-		fmt.Print(string(data))
+		fmt.Printf("%s\n", string(data))
 	case "PUT":
-		if _, err := stg.Get([]byte(dataPassword)); err == nil {
+		if _, err := stg.Get([]byte(dateKey)); err == nil {
 			panic("password already exist")
 		}
-		err := stg.Set([]byte(dataPassword), readUntilEOF())
+		err := stg.Set([]byte(dateKey), bytes.Join(splited[1:], []byte{'~'}))
 		if err != nil {
 			panic(err)
 		}
 	case "DEL":
-		err := stg.Del([]byte(dataPassword))
+		err := stg.Del([]byte(dateKey))
 		if err != nil {
 			panic(err)
 		}
-	case "GEN":
-		if _, err := stg.Get([]byte(dataPassword)); err == nil {
+	case "NEW":
+		if _, err := stg.Get([]byte(dateKey)); err == nil {
 			panic("password already exist")
 		}
 		// 1char = 4bit entropy => 128bit
 		randStr := random.NewStdPRNG().String(32)
-		err := stg.Set([]byte(dataPassword), []byte(randStr))
+		err := stg.Set([]byte(dateKey), []byte(randStr))
 		if err != nil {
 			panic(err)
 		}
 	default:
-		panic("undefined option (get|put)")
+		panic("undefined option (get|put|del|new)")
 	}
 }
 

@@ -20,10 +20,9 @@ func TestLevelDB(t *testing.T) {
 	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
 
 	store := NewLevelDB(NewSettings(&SSettings{
-		FPath:      tcPathDB,
 		FHashing:   true,
 		FCipherKey: []byte(testutils.TcKey1),
-	}))
+	}), tcPathDB)
 	defer store.Close()
 
 	store.Set([]byte(testutils.TcKey2), secret1)
@@ -50,10 +49,9 @@ func TestLevelDBIter(t *testing.T) {
 	defer os.RemoveAll(tcPathDB)
 
 	store := NewLevelDB(NewSettings(&SSettings{
-		FPath:      tcPathDB,
 		FHashing:   false,
 		FCipherKey: []byte(testutils.TcKey1),
-	}))
+	}), tcPathDB)
 	defer store.Close()
 
 	for i := 0; i < countOfIter; i++ {

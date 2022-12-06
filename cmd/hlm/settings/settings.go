@@ -1,9 +1,7 @@
 package settings
 
-import "github.com/number571/go-peer/settings"
-
 const (
-	CTitlePattern = settings.CGopeerPrefix + "hidden-lake-messenger"
+	CTitlePattern = "go-peer/hidden-lake-messenger"
 )
 
 const (

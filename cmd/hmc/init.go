@@ -8,7 +8,6 @@ import (
 	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/inputter"
 	"github.com/number571/go-peer/modules/storage"
 
 	hms_database "github.com/number571/go-peer/cmd/hms/database"
@@ -23,8 +22,8 @@ func hmcDefaultInit() error {
 
 	privKey := getPrivKey(
 		"hmc.stg",
-		[]byte(inputter.NewInputter("Password#Stg: ").Password()),
-		[]byte(inputter.NewInputter("Password#Obj: ").Password()),
+		[]byte(newInputter("Password#Stg: ").Password()),
+		[]byte(newInputter("Password#Obj: ").Password()),
 	)
 	if privKey == nil {
 		return fmt.Errorf("failed load private key")
@@ -60,7 +59,7 @@ func getPrivKey(filepath string, storageKey, objectKey []byte) asymmetric.IPrivK
 	}
 
 	// private key not exist
-	answ := inputter.NewInputter("Private key by password not exist.\nGenerate new? [y/n]: ").String()
+	answ := newInputter("Private key by password not exist.\nGenerate new? [y/n]: ").String()
 	switch strings.ToLower(answ) {
 	case "y", "yes":
 		// generate private key

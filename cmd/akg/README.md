@@ -4,5 +4,5 @@
 
 ```bash
 usage: 
-    ./main [key-size] [inline|pretty]
+    ./main [key-size] (inline|pretty)
 ```

@@ -36,7 +36,7 @@ type sNode struct {
 	fQueue         queue.IQueue
 	fF2F           friends.IF2F
 	fHandleRoutes  map[uint32]IHandlerF
-	fHandleActions map[uint32]chan []byte
+	fHandleActions map[string]chan []byte
 }
 
 func NewNode(
@@ -53,7 +53,7 @@ func NewNode(
 		fQueue:         queue,
 		fF2F:           f2f,
 		fHandleRoutes:  make(map[uint32]IHandlerF),
-		fHandleActions: make(map[uint32]chan []byte),
+		fHandleActions: make(map[string]chan []byte),
 	}
 }
 
@@ -94,10 +94,7 @@ func (node *sNode) F2F() friends.IF2F {
 }
 
 func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
-
-	node.fHandleRoutes[head] = handle
+	node.setRoute(head, handle)
 	return node
 }
 
@@ -127,8 +124,10 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload
 		return nil, err
 	}
 
-	node.setAction(headAction)
-	defer node.delAction(headAction)
+	actionKey := newActionKey(recv, headAction)
+
+	node.setAction(actionKey)
+	defer node.delAction(actionKey)
 
 	for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
 		if err := node.Queue().Enqueue(msg); err != nil {
@@ -137,11 +136,11 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload
 		}
 		break
 	}
-	return node.recv(headAction, node.Settings().GetTimeWait())
+	return node.recv(actionKey, node.Settings().GetTimeWait())
 }
 
-func (node *sNode) recv(head uint32, timeOut time.Duration) ([]byte, error) {
-	action, ok := node.getAction(head)
+func (node *sNode) recv(actionKey string, timeOut time.Duration) ([]byte, error) {
+	action, ok := node.getAction(actionKey)
 	if !ok {
 		return nil, errors.New("action undefined")
 	}
@@ -195,20 +194,19 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 		node.KeyValueDB().Set(hash, []byte{})
 
+		// get header of payload
+		head := loadHead(pld.Head())
+
 		// get session by payload head
-		head := pld.Head()
-		action, ok := node.getAction(
-			loadHead(head).Actions(),
-		)
+		actionKey := newActionKey(sender, head.GetAction())
+		action, ok := node.getAction(actionKey)
 		if ok {
 			action <- pld.Body()
 			return
 		}
 
 		// get function by payload head
-		f, ok := node.getRoute(
-			loadHead(head).Routes(),
-		)
+		f, ok := node.getRoute(head.GetRoute())
 		if !ok || f == nil {
 			return
 		}
@@ -220,7 +218,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 
 		respMsg, err := client.Encrypt(
 			sender,
-			payload.NewPayload(head, resp),
+			payload.NewPayload(pld.Head(), resp),
 		)
 		if err != nil {
 			panic(err)
@@ -255,6 +253,13 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 	return msg
 }
 
+func (node *sNode) setRoute(head uint32, handle IHandlerF) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	node.fHandleRoutes[head] = handle
+}
+
 func (node *sNode) getRoute(head uint32) (IHandlerF, bool) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -263,26 +268,32 @@ func (node *sNode) getRoute(head uint32) (IHandlerF, bool) {
 	return f, ok
 }
 
-func (node *sNode) getAction(head uint32) (chan []byte, bool) {
+func (node *sNode) getAction(actionKey string) (chan []byte, bool) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	f, ok := node.fHandleActions[head]
+	f, ok := node.fHandleActions[actionKey]
 	return f, ok
 }
 
-func (node *sNode) setAction(head uint32) {
+func (node *sNode) setAction(actionKey string) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	node.fHandleActions[head] = make(chan []byte)
+	node.fHandleActions[actionKey] = make(chan []byte)
 }
 
-func (node *sNode) delAction(head uint32) {
+func (node *sNode) delAction(actionKey string) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	delete(node.fHandleActions, head)
+	delete(node.fHandleActions, actionKey)
+}
+
+func newActionKey(pubKey asymmetric.IPubKey, head uint32) string {
+	pubKeyAddr := pubKey.Address().String()
+	headString := fmt.Sprintf("%d", head)
+	return fmt.Sprintf("%s-%s", pubKeyAddr, headString)
 }
 
 func mustBeUint32(v uint64) uint32 {

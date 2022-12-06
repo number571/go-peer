@@ -14,3 +14,8 @@ type iConfigWrapper interface {
 	GetNameByPubKey(asymmetric.IPubKey) (string, bool)
 	GetPubKeyByName(string) (asymmetric.IPubKey, bool)
 }
+
+type iInputter interface {
+	String() string
+	Password() string
+}

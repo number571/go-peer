@@ -9,7 +9,6 @@ import (
 	"io"
 
 	"github.com/number571/go-peer/modules/crypto/hashing"
-	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -19,7 +18,7 @@ var (
 const (
 	CAESBlockSize = 16
 	CAESKeySize   = hashing.CSHA256Size
-	CAESKeyType   = settings.CGopeerPrefix + "aes"
+	CAESKeyType   = "go-peer/aes"
 )
 
 type sAESCipher struct {

@@ -2,7 +2,4 @@ package modules
 
 import "testing"
 
-// TODO
-func TestDefault(t *testing.T) {
-
-}
+func TestModules(t *testing.T) {}

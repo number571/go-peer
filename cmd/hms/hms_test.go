@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	tgHost = fmt.Sprintf("http://%s", testutils.TgAddrs[6])
+	tgHost = fmt.Sprintf("http://%s", testutils.TgAddrs[16])
 )
 
 func testHmsDefaultInit(dbPath, configPath string) {
@@ -81,7 +81,7 @@ func testStartServerHTTP(t *testing.T) *http.Server {
 	mux.HandleFunc("/push", pushPage)
 
 	srv := &http.Server{
-		Addr:    testutils.TgAddrs[6],
+		Addr:    testutils.TgAddrs[16],
 		Handler: mux,
 	}
 

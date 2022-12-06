@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
 	"github.com/number571/go-peer/modules/network/anonymity"
+	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"
@@ -64,7 +65,7 @@ func main() {
 
 	res, err := client.Request(
 		service.Queue().Client().PubKey(),
-		payload.NewPayload(serviceHeader, []byte("hello, world!")),
+		payload_adapter.NewPayload(serviceHeader, []byte("hello, world!")),
 	)
 	if err != nil {
 		panic(err)
@@ -76,9 +77,8 @@ func newNode(dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: dbPath,
-			}),
+			database.NewSettings(&database.SSettings{}),
+			dbPath,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

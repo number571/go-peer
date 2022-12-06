@@ -1,4 +1,4 @@
-package inputter
+package main
 
 import (
 	"bufio"
@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	_ IInputter = &sInputter{}
+	_ iInputter = &sInputter{}
 )
 
 type sInputter struct {
 	fBegin string
 }
 
-func NewInputter(begin string) IInputter {
+func newInputter(begin string) iInputter {
 	return &sInputter{
 		fBegin: begin,
 	}

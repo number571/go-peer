@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -16,8 +15,8 @@ var (
 
 const (
 	CSHA256Size            = 32
-	CSHA256KeyType         = settings.CGopeerPrefix + "sha256"
-	CHMACSHA256HmacKeyType = settings.CGopeerPrefix + "hmac-sha256"
+	CSHA256KeyType         = "go-peer/sha256"
+	CHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
 )
 
 type sSHA256Hasher struct {

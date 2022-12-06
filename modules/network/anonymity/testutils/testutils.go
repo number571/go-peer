@@ -22,10 +22,10 @@ func TestNewNode(pathDB string) anonymity.INode {
 		}),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath:      pathDB,
 				FHashing:   true,
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
+			pathDB,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

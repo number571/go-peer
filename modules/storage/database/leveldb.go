@@ -8,14 +8,13 @@ import (
 	"github.com/number571/go-peer/modules/crypto/hashing"
 	"github.com/number571/go-peer/modules/crypto/random"
 	"github.com/number571/go-peer/modules/crypto/symmetric"
-	"github.com/number571/go-peer/settings"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 const (
-	cSaltKey = settings.CGopeerPrefix + "salt"
+	cSaltKey = "go-peer/salt"
 )
 
 var (
@@ -37,8 +36,8 @@ type sLevelDBIterator struct {
 	fCipher symmetric.ICipher
 }
 
-func NewLevelDB(sett ISettings) IKeyValueDB {
-	db, err := leveldb.OpenFile(sett.GetPath(), nil)
+func NewLevelDB(sett ISettings, path string) IKeyValueDB {
+	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		fmt.Println(err)
 		return nil

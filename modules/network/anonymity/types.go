@@ -37,6 +37,6 @@ type ISettings interface {
 
 type iHead interface {
 	Uint64() uint64
-	Routes() uint32
-	Actions() uint32
+	GetRoute() uint32
+	GetAction() uint32
 }

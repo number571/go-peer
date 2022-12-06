@@ -14,7 +14,6 @@ type IKeyValueDB interface {
 }
 
 type ISettings interface {
-	GetPath() string
 	GetHashing() bool
 	GetCipherKey() []byte
 }

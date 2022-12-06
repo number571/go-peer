@@ -2,12 +2,10 @@ package settings
 
 import (
 	"time"
-
-	"github.com/number571/go-peer/settings"
 )
 
 const (
-	CTitlePattern = settings.CGopeerPrefix + "hidden-lake-service"
+	CTitlePattern = "go-peer/hidden-lake-service"
 	CContentType  = "application/json"
 	CHeaderPubKey = "Sender-Public-Key"
 )

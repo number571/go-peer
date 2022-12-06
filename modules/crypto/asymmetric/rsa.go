@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/modules/crypto/hashing"
-	"github.com/number571/go-peer/settings"
 )
 
 var (
@@ -22,7 +21,7 @@ var (
 
 const (
 	cFormatBlock = 32
-	CRSAKeyType  = settings.CGopeerPrefix + "rsa"
+	CRSAKeyType  = "go-peer/rsa"
 )
 
 /*

@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/inputter"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 	go func() {
 		gActions["load"].Do()
 		for {
-			cmd := inputter.NewInputter("> ").String()
+			cmd := newInputter("> ").String()
 			f, ok := gActions[cmd]
 			if !ok {
 				fmt.Println("Undefined command")

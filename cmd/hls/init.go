@@ -67,9 +67,9 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		}),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
-				FPath:    hls_settings.CPathDB,
 				FHashing: true,
 			}),
+			hls_settings.CPathDB,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

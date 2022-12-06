@@ -4,16 +4,19 @@
 
 ```bash
 usage: 
-    ./main (get|put|del|gen) [path] [storage-password] [data-password]
+    ./main (get|put|del|new) [storage-path] [storage-key] [data-key]
+stdin:
+    [password]~[data]
 ```
 
 ## Example
 
 ```bash
-$ echo hello, world! > hello.txt 
-$ go run main.go put file.stg some-password#1 some-password#2 < hello.txt
-$ go run main.go get file.stg some-password#1 some-password#2
-> hello, world!
-$ go run main.go del file.stg some-password#1 some-password#2
-$ go run main.go gen file.stg some-password#1 some-password#2
+$ echo $(cat password.txt;cat data.txt) | ./cds put storage.stg example.com 
+$ echo $(cat password.txt) | ./cds get storage.stg example.com 
+hello, world!
+$ echo $(cat password.txt) | ./cds del storage.stg example.com 
+$ echo $(cat password.txt) | ./cds new storage.stg example.com 
+$ echo $(cat password.txt) | ./cds get storage.stg example.com 
+d1c169963dc69b0d73ffb4a16f821640
 ```

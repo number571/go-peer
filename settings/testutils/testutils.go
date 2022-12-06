@@ -28,7 +28,6 @@ func TestEchoPage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// TODO: more constants, functions, variables for tests
 var (
 	TgAddrs = [20]string{
 		"localhost:8080",

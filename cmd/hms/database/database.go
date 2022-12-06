@@ -28,17 +28,15 @@ func NewKeyValueDB(path string) IKeyValueDB {
 		mPath = fmt.Sprintf("%s/messages", path)
 	)
 	dbHashes := gp_database.NewLevelDB(
-		gp_database.NewSettings(&gp_database.SSettings{
-			FPath: hPath,
-		}),
+		gp_database.NewSettings(&gp_database.SSettings{}),
+		hPath,
 	)
 	if dbHashes == nil {
 		panic("storage (hashes) is nil")
 	}
 	dbMessages := gp_database.NewLevelDB(
-		gp_database.NewSettings(&gp_database.SSettings{
-			FPath: mPath,
-		}),
+		gp_database.NewSettings(&gp_database.SSettings{}),
+		mPath,
 	)
 	if dbMessages == nil {
 		panic("storage (messages) is nil")
@@ -176,9 +174,8 @@ func (db *sKeyValueDB) Clean() error {
 	}
 
 	db.fMessages.fDB = gp_database.NewLevelDB(
-		gp_database.NewSettings(&gp_database.SSettings{
-			FPath: db.fMessages.fPath,
-		}),
+		gp_database.NewSettings(&gp_database.SSettings{}),
+		db.fMessages.fPath,
 	)
 	if db.fMessages.fDB == nil {
 		panic("storage is nil")

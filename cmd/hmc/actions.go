@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/cmd/hmc/action"
 	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/cmd/hms/hmc"
-	"github.com/number571/go-peer/modules/inputter"
 	"github.com/number571/go-peer/modules/payload"
 )
 
@@ -160,7 +159,7 @@ func sizeAction() {
 }
 
 func listAction() {
-	page := inputter.NewInputter("Page: ").String()
+	page := newInputter("Page: ").String()
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		fmt.Println(err)
@@ -201,7 +200,7 @@ func listAction() {
 }
 
 func readAction() {
-	id := inputter.NewInputter("ID: ").String()
+	id := newInputter("ID: ").String()
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Println(err)
@@ -235,20 +234,20 @@ func readAction() {
 }
 
 func pushAction() {
-	name := inputter.NewInputter("Receiver: ").String()
+	name := newInputter("Receiver: ").String()
 	pubKey, ok := gWrapper.Config().GetPubKeyByName(name)
 	if !ok {
 		fmt.Println("Receiver's public key undefined")
 		return
 	}
 
-	title := inputter.NewInputter("Title: ").String()
+	title := newInputter("Title: ").String()
 	if title == "" {
 		fmt.Println("Title is nil")
 		return
 	}
 
-	msg := inputter.NewInputter("Message: ").String()
+	msg := newInputter("Message: ").String()
 	if msg == "" {
 		fmt.Println("Message is nil")
 		return

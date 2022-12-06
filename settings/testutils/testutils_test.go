@@ -2,7 +2,4 @@ package testutils
 
 import "testing"
 
-// TODO
-func TestDefault(t *testing.T) {
-
-}
+func TestUtils(t *testing.T) {}

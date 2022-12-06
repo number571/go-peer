@@ -117,9 +117,8 @@ func newNode(dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: dbPath,
-			}),
+			database.NewSettings(&database.SSettings{}),
+			dbPath,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

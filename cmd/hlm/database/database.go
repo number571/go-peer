@@ -17,10 +17,10 @@ type sKeyValueDB struct {
 func NewKeyValueDB(path, password string) IKeyValueDB {
 	db := gp_database.NewLevelDB(
 		gp_database.NewSettings(&gp_database.SSettings{
-			FPath:      path,
 			FHashing:   true,
 			FCipherKey: []byte(password),
 		}),
+		path,
 	)
 	if db == nil {
 		return nil
