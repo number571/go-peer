@@ -20,6 +20,7 @@ const (
 
 type sChatMessage struct {
 	FIsIncoming bool
+	FTimestamp  string
 	FMessage    string
 }
 type sChatAddress struct {
@@ -129,6 +130,7 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 		for _, msg := range msgs {
 			res.FMessages = append(res.FMessages, sChatMessage{
 				FIsIncoming: msg.IsIncoming(),
+				FTimestamp:  msg.GetTimestamp(),
 				FMessage:    msg.GetMessage(),
 			})
 		}

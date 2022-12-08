@@ -37,13 +37,18 @@ func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 			panic("public key is null (receive from hls)!")
 		}
 
-		if err := db.Push(pubKey, database.NewMessage(true, msg)); err != nil {
+		dbMsg := database.NewMessage(true, msg)
+		if err := db.Push(pubKey, dbMsg); err != nil {
 			response(w, hls_settings.CErrorPubKey, "failed: push message to database")
 			return
 		}
 
 		response(w, hls_settings.CErrorNone, settings.CTitlePattern)
-		gChatWS <- &sChatWS{pubKey.Address().String(), msg}
+		gChatWS <- &sChatWS{
+			FAddress:   pubKey.Address().String(),
+			FTimestamp: dbMsg.GetTimestamp(),
+			FMessage:   msg,
+		}
 	}
 }
 

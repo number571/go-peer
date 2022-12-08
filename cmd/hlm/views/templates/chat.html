@@ -35,7 +35,7 @@ Chat
   <div class="d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
       <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-light">`+ obj.message +`</p>
-      <!-- <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p> -->
+      <p class="small ms-3 mb-3 rounded-3 text-muted">`+ obj.timestamp +`</p>
     </div>
   </div>
       `);
@@ -73,14 +73,14 @@ Chat
   <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
       <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-light">{{.FMessage}}</p>
-      <!-- <p class="small ms-3 mb-3 rounded-3 text-muted">23:58</p> -->
+      <p class="small ms-3 mb-3 rounded-3 text-muted">{{.FTimestamp}}</p>
     </div>
   </div>
   {{else}}
   <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
     <div>
       <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{.FMessage}}</p>
-      <!-- <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">00:06</p> -->
+      <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">{{.FTimestamp}}</p>
     </div>
   </div>
   {{end}}

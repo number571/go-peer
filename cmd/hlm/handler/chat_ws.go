@@ -7,8 +7,9 @@ import (
 )
 
 type sChatWS struct {
-	FAddress string `json:"address"`
-	FMessage string `json:"message"`
+	FAddress   string `json:"address"`
+	FTimestamp string `json:"timestamp"`
+	FMessage   string `json:"message"`
 }
 
 var (

@@ -16,5 +16,6 @@ type IKeyValueDB interface {
 type IMessage interface {
 	IsIncoming() bool
 	GetMessage() string
+	GetTimestamp() string
 	Bytes() []byte
 }
