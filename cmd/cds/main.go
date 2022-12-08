@@ -16,7 +16,7 @@ func main() {
 		panic(fmt.Sprintf(
 			"usage:\n\t%s\nstdin:\n\t%s\n",
 			"./main (get|put|del|new) [storage-path] [data-key]",
-			"[password]~[data]",
+			"[password]~[data]EOF",
 		))
 	}
 

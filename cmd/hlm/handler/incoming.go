@@ -42,8 +42,8 @@ func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 			return
 		}
 
-		gChatWS <- &sChatWS{pubKey.Address().String(), msg}
 		response(w, hls_settings.CErrorNone, settings.CTitlePattern)
+		gChatWS <- &sChatWS{pubKey.Address().String(), msg}
 	}
 }
 

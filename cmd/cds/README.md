@@ -6,7 +6,7 @@
 usage: 
     ./main (get|put|del|new) [storage-path] [storage-key] [data-key]
 stdin:
-    [password]~[data]
+    [password]~[data]EOF
 ```
 
 ## Example

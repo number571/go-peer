@@ -1,6 +1,8 @@
 package database
 
-import "bytes"
+import (
+	"bytes"
+)
 
 var (
 	_ IMessage = &sMessage{}

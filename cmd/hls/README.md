@@ -7,6 +7,15 @@
 The HLS is the core of the anonymous network, representing API functions for 
 interacting with the network. HLS is based on the fifth^ stage of anonymity and represents the implementation of an abstract anonymous network based on queues.
 
+## Cryptographic algorithms
+
+1. AES-256-CTR (Data encryption)
+2. RSA-4096-OAEP (Key encryption)
+3. RSA-4096-PSS (Hash signing)
+4. SHA-256 (Data hashing)
+5. HMAC-SHA-256 (Network hashing)
+6. PoW-20 (Hash proof)
+
 ## Config structure
 
 ```
