@@ -12,25 +12,15 @@
     <link href="/static/css/bootstrap.css" type="text/css" rel="stylesheet" />
 </head>
 
-<body>
-    <div class="card" style="height:100vh;">
+<body class="bg-dark text-white">
+    <div class="card bg-dark" style="height:100vh;">
         <div class="card-header d-flex justify-content-between align-items-center p-3">
             <div>
-                <a href="/about" class="btn btn-primary button">HLM</a>
+                <a href="/about" class="btn btn-secondary button"><b>HLM</b></a>
             </div>
             <div>
-                <a href="/friends" class="btn btn-primary button">Friends</a>
-                <a href="/settings" class="btn btn-primary button">Settings</a>
-            </div>
-        </div>
-        <div class="w-100">
-            <div id="message_copy" style="display: none" class="text-light mx-auto">
-                <div class="alert alert-success" role="alert">
-                    <button type="button" class="close" onclick="close_block('message_copy');">
-                        <span>&times;</span>
-                    </button>
-                    Key copied
-                </div>
+                <a href="/friends" class="btn btn-secondary button"><b>Friends</b></a>
+                <a href="/settings" class="btn btn-secondary button"><b>Settings</b></a>
             </div>
         </div>
         {{template "main" .}}

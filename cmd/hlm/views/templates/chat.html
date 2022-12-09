@@ -34,7 +34,7 @@ Chat
       d1.insertAdjacentHTML('beforeend', `
   <div class="d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
-      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-light">`+ obj.message +`</p>
+      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-secondary">`+ obj.message +`</p>
       <p class="small ms-3 mb-3 rounded-3 text-muted">`+ obj.timestamp +`</p>
     </div>
   </div>
@@ -72,14 +72,14 @@ Chat
   {{if .FIsIncoming}}
   <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
-      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-light">{{.FMessage}}</p>
+      <p class="small p-2 ms-3 mb-1 text-white rounded-3 bg-secondary">{{.FMessage}}</p>
       <p class="small ms-3 mb-3 rounded-3 text-muted">{{.FTimestamp}}</p>
     </div>
   </div>
   {{else}}
   <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
     <div>
-      <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{.FMessage}}</p>
+      <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-info">{{.FMessage}}</p></b>
       <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">{{.FTimestamp}}</p>
     </div>
   </div>
@@ -89,8 +89,8 @@ Chat
 
 <form class="card-footer d-flex" method="POST">
   <input hidden name="method" value="POST">
-  <input type="text" autocomplete="off" style="height:100%;" class="form-control form-control-lg" name="input_message"
-    placeholder="Type message" id="input_message">
-  <input type="submit" name="submit" value="Send message" style="height:100%;" class="btn btn-primary">
+  <input type="text" autocomplete="off" class="form-control form-control-lg bg-dark text-white m-1" name="input_message"
+    placeholder="Type message ..." id="input_message">
+  <input type="submit" name="submit" value="Send message" class="btn btn-info m-1">
 </form>
 {{end}}

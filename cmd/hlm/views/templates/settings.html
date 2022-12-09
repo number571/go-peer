@@ -4,35 +4,45 @@ Settings
 
 {{define "main"}}
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h1 class="col-md-10 mb-3 mx-auto h3">Base information</h1>
-    <div class="card mb-3">
-        <h5 class="card-header text-white bg-secondary">Public key</h5>
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Base information</h1>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">Public key</h5>
         <div class="card-body">
+            <div id="message_copy" class="form-group row" style="display: none" >
+                <div class="text-light mx-auto w-100">
+                    <div class="alert alert-info" role="alert">
+                        <button type="button" class="close" onclick="close_block('message_copy');">
+                            <span>&times;</span>
+                        </button>
+                        The public key was successfully copied to the clipboard
+                    </div>
+                </div>
+            </div>
             <div class="form-group row">
                 <div class="col-md-6 w-50">
-                    <button type="button" class="btn btn-primary w-100" onclick="copy_text('public_key');open_block('message_copy');">Copy</button>
+                    <button type="button" class="btn btn-secondary w-100" onclick="copy_text('public_key');open_block('message_copy');">Copy</button>
                 </div>
                 <div class="col-md-6 w-50">
-                    <a href="/qr/public_key" class="btn btn-primary button w-100">QR code</a>
+                    <a href="/qr/public_key" class="btn btn-secondary button w-100">QR code</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card mb-3">
-        <h5 class="card-header text-white bg-secondary">Connections</h5>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">Connections</h5>
         <div class="card-body">
             <form class="mb-3" method="POST" action="/settings">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST"> 
                 <div class="row">
                     <div class="col-md-5 w-50">
-                        <input type="text" name="host" placeholder="Host" class="text-center form-control w-100">
+                        <input type="text" name="host" placeholder="Host" class="text-center form-control bg-dark text-white w-100">
                     </div>
                     <div class="col-md-3 w-25">
-                        <input type="text" name="port" placeholder="PT" class="text-center form-control w-100">
+                        <input type="text" name="port" placeholder="PT" class="text-center form-control bg-dark text-white w-100">
                     </div>
                     <div class="col-md-4 w-25">
-                        <input type="submit" name="submit" value="+" class="btn btn-success w-100">
+                        <input type="submit" name="submit" value="+" class="btn btn-info w-100">
                     </div>
                 </div>
             </form>
@@ -43,10 +53,10 @@ Settings
                 <div class="row">
                     <div class="col-md-8 w-75">
                         <input hidden type="text" name="address" value="{{.}}" class="text-center form-control w-100">
-                        <button disabled type="button" class="btn btn-primary w-100" style="overflow: hidden;">{{.}}</button>
+                        <button disabled type="button" class="btn btn-secondary w-100" style="overflow: hidden;">{{.}}</button>
                     </div>
                     <div class="col-md-4 w-25">
-                        <input type="submit" name="submit" value="-" class="btn btn-danger w-100">
+                        <input type="submit" name="submit" value="-" class="btn btn-info w-100">
                     </div>
                 </div>
             </form>

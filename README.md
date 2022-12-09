@@ -10,7 +10,7 @@
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
 * Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
 * In developing... Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
-* Asymmetric key generator: [github.com/number571/go-peer/tree/master/cmd/akg](https://github.com/number571/go-peer/tree/master/cmd/akg "AKG");
+* Asymmetric Keys Generator: [github.com/number571/go-peer/tree/master/cmd/akg](https://github.com/number571/go-peer/tree/master/cmd/akg "AKG");
 * Cryptographic Data Storage: [github.com/number571/go-peer/tree/master/cmd/cds](https://github.com/number571/go-peer/tree/master/cmd/cds "CDS");
 
 ## Deprecated library based applications
