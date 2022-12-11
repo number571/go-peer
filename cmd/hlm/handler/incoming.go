@@ -42,13 +42,8 @@ func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 			response(w, hls_settings.CErrorPubKey, "failed: push message to database")
 			return
 		}
-
 		response(w, hls_settings.CErrorNone, settings.CTitlePattern)
-		gChatWS <- &sChatWS{
-			FAddress:   pubKey.Address().String(),
-			FTimestamp: dbMsg.GetTimestamp(),
-			FMessage:   msg,
-		}
+		gChatQueue.pushMessage(pubKey, dbMsg)
 	}
 }
 

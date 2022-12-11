@@ -2,53 +2,100 @@ package handler
 
 import (
 	"sync"
+	"time"
 
+	"github.com/number571/go-peer/cmd/hlm/database"
+	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"golang.org/x/net/websocket"
 )
 
-type sChatWS struct {
+type sMessage struct {
 	FAddress   string `json:"address"`
-	FTimestamp string `json:"timestamp"`
 	FMessage   string `json:"message"`
+	FTimestamp string `json:"timestamp"`
 }
 
-var (
-	gPrevConnWS *websocket.Conn
-	gMutexWS    sync.Mutex
+type sChatQueue struct {
+	fQueue  chan *sMessage
+	fMutex  sync.Mutex
+	fListen string
+}
+
+const (
+	queueSize = 1
 )
 
 var (
-	gSignalWS = make(chan struct{})
-	gChatWS   = make(chan *sChatWS)
+	gChatQueue = newChatQueue()
 )
 
 func FriendsChatWS(ws *websocket.Conn) {
 	defer ws.Close()
 
-	getIncoming := new(sChatWS)
-	if err := websocket.JSON.Receive(ws, getIncoming); err != nil {
+	subscribe := new(sMessage)
+	if err := websocket.JSON.Receive(ws, subscribe); err != nil {
 		return
 	}
 
-	gMutexWS.Lock()
-	if gPrevConnWS != nil {
-		gSignalWS <- struct{}{}
-	}
-	gPrevConnWS = ws
-	gMutexWS.Unlock()
+	gChatQueue.initQueue()
+	time.Sleep(200 * time.Millisecond)
 
 	for {
-		select {
-		case incoming := <-gChatWS:
-			if getIncoming.FAddress != incoming.FAddress {
-				continue
-			}
-			if err := websocket.JSON.Send(ws, incoming); err != nil {
-				gPrevConnWS = nil
-				return
-			}
-		case <-gSignalWS:
+		msg, ok := gChatQueue.loadMessage(subscribe.FAddress)
+		if !ok {
 			return
 		}
+		if err := websocket.JSON.Send(ws, msg); err != nil {
+			return
+		}
+	}
+}
+
+func newChatQueue() *sChatQueue {
+	return &sChatQueue{
+		fQueue: make(chan *sMessage, queueSize),
+	}
+}
+
+func (cq *sChatQueue) initQueue() {
+	cq.fMutex.Lock()
+	defer cq.fMutex.Unlock()
+
+	close(cq.fQueue)
+	cq.fQueue = make(chan *sMessage, queueSize)
+}
+
+func (cq *sChatQueue) loadMessage(addr string) (*sMessage, bool) {
+	defer func() {
+		cq.fMutex.Lock()
+		cq.fListen = ""
+		cq.fMutex.Unlock()
+	}()
+
+	cq.fMutex.Lock()
+	cq.fListen = addr
+	cq.fMutex.Unlock()
+
+	msg, ok := <-cq.fQueue
+	return msg, ok
+}
+
+func (cq *sChatQueue) pushMessage(pubKey asymmetric.IPubKey, msg database.IMessage) {
+	cq.fMutex.Lock()
+	defer cq.fMutex.Unlock()
+
+	if cq.fListen != pubKey.Address().String() {
+		return
+	}
+
+	// to prevent blocking response
+	if len(cq.fQueue) == queueSize {
+		return
+	}
+
+	cq.fQueue <- &sMessage{
+		FAddress:   pubKey.Address().String(),
+		FMessage:   msg.GetMessage(),
+		FTimestamp: msg.GetTimestamp(),
 	}
 }

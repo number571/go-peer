@@ -5,13 +5,13 @@ Chat
 {{define "main"}}
 <script type="text/javascript" defer>
   window.onload = function () {
-    switchToInput();
-    turnOnWebSocket();
+    switchToInputField();
+    connectToService();
   }
 </script>
 
 <script type="text/javascript" defer>
-  function switchToInput() {
+  function switchToInputField() {
     var objDiv = document.getElementById("chat_body");
     objDiv.scrollTop = objDiv.scrollHeight;
 
@@ -20,14 +20,17 @@ Chat
     input.select();
   }
 
-  function turnOnWebSocket() {
+  function connectToService() {
     let s = "ws://" + window.location.host + "/friends/chat/ws";
     let socket = new WebSocket(s);
+
     socket.onopen = () => {
+      console.log('Connection with {{.FAddress.FFriend}}');
       socket.send(JSON.stringify({
         address: "{{.FAddress.FFriend}}"
       }));
-    }
+    };
+
     socket.onmessage = (e) => {
       let obj = JSON.parse(e.data);
       var d1 = document.getElementById('chat_body');
@@ -39,15 +42,22 @@ Chat
     </div>
   </div>
       `);
-    }
-    socket.onerror = (e) => {
-      socket.close();
-    }
+    };
+
     socket.onclose = (e) => {
-      console.debug("socket closed");
-    }
+      console.warn('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+      setTimeout(function() {
+        connectToService();
+      }, 1000);
+    };
+
+    socket.onerror = (e) => {
+      console.warn('Socket encountered error: ', e.message, 'Closing socket');
+      socket.close();
+    };
+
     window.onbeforeunload = function () {
-      socket.onclose = function () { }; // disable onclose handler first
+      console.warn('Reloading page with socket');
       socket.close();
     };
   }

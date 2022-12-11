@@ -22,7 +22,7 @@ var (
 
 type sApp struct {
 	fDB             database.IKeyValueDB
-	fWebServiceHTTP *http.Server
+	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
 }
 
@@ -33,7 +33,7 @@ func NewApp(
 ) IApp {
 	return &sApp{
 		fDB:             db,
-		fWebServiceHTTP: initWebServiceHTTP(cfg, client, db),
+		fIntServiceHTTP: initIntServiceHTTP(cfg, client, db),
 		fIncServiceHTTP: initIncServiceHTTP(cfg, db),
 	}
 }
@@ -42,7 +42,7 @@ func (app *sApp) Run() error {
 	res := make(chan error)
 
 	go func() {
-		err := app.fWebServiceHTTP.ListenAndServe()
+		err := app.fIntServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err
 			return
@@ -68,7 +68,7 @@ func (app *sApp) Run() error {
 
 func (app *sApp) Close() error {
 	return closer.CloseAll([]modules.ICloser{
-		app.fWebServiceHTTP,
+		app.fIntServiceHTTP,
 		app.fIncServiceHTTP,
 		app.fDB,
 	})
@@ -84,7 +84,7 @@ func initIncServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Serve
 	}
 }
 
-func initWebServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKeyValueDB) *http.Server {
+func initIntServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKeyValueDB) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
