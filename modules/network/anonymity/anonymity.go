@@ -99,10 +99,15 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 }
 
 func (node *sNode) Broadcast(recv asymmetric.IPubKey, pld payload_adapter.IPayload) error {
+	if len(node.Network().Connections()) == 0 {
+		return errors.New("length of connections = 0")
+	}
+
 	msg, err := node.Queue().Client().Encrypt(recv, pld)
 	if err != nil {
 		return err
 	}
+
 	return node.send(msg)
 }
 
@@ -120,20 +125,15 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload
 		pld.Body(),
 	)
 
-	msg, err := node.Queue().Client().Encrypt(recv, newPld)
-	if err != nil {
-		return nil, err
-	}
-
 	actionKey := newActionKey(recv, headAction)
 
 	node.setAction(actionKey)
 	defer node.delAction(actionKey)
 
-	if err := node.send(msg); err != nil {
+	if err := node.Broadcast(recv, newPld); err != nil {
 		return nil, err
 	}
-	return node.recv(actionKey, node.Settings().GetTimeWait())
+	return node.recv(actionKey)
 }
 
 func (node *sNode) send(msg message.IMessage) error {
@@ -147,7 +147,7 @@ func (node *sNode) send(msg message.IMessage) error {
 	return fmt.Errorf("failed: enqueue message")
 }
 
-func (node *sNode) recv(actionKey string, timeOut time.Duration) ([]byte, error) {
+func (node *sNode) recv(actionKey string) ([]byte, error) {
 	action, ok := node.getAction(actionKey)
 	if !ok {
 		return nil, errors.New("action undefined")
@@ -158,7 +158,7 @@ func (node *sNode) recv(actionKey string, timeOut time.Duration) ([]byte, error)
 			return nil, errors.New("chan is closed")
 		}
 		return result, nil
-	case <-time.After(timeOut):
+	case <-time.After(node.Settings().GetTimeWait()):
 		return nil, errors.New("time is over")
 	}
 }
