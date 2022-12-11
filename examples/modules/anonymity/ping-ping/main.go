@@ -63,7 +63,7 @@ func main() {
 		panic(err)
 	}
 
-	msg, err := service2.Queue().Client().Encrypt(
+	err := service2.Broadcast(
 		service1.Queue().Client().PubKey(),
 		payload_adapter.NewPayload(
 			serviceHeader,
@@ -71,10 +71,6 @@ func main() {
 		),
 	)
 	if err != nil {
-		panic(err)
-	}
-
-	if err := service2.Queue().Enqueue(msg); err != nil {
 		panic(err)
 	}
 
@@ -95,7 +91,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
-		msg, err := node.Queue().Client().Encrypt(
+		err = node.Broadcast(
 			pubKey,
 			payload_adapter.NewPayload(
 				serviceHeader,
@@ -103,10 +99,6 @@ func handler(serviceName string) anonymity.IHandlerF {
 			),
 		)
 		if err != nil {
-			panic(err)
-		}
-
-		if err := node.Queue().Enqueue(msg); err != nil {
 			panic(err)
 		}
 		return nil

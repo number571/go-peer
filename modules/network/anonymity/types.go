@@ -26,6 +26,7 @@ type INode interface {
 	F2F() friends.IF2F
 
 	Handle(uint32, IHandlerF) INode
+	Broadcast(recv asymmetric.IPubKey, pl payload_adapter.IPayload) error
 	Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error)
 }
 

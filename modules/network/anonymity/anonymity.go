@@ -61,12 +61,12 @@ func (node *sNode) Run() error {
 	if err := node.Queue().Run(); err != nil {
 		return err
 	}
-	node.Network().Handle(node.fSettings.GetMaskNetwork(), node.handleWrapper())
+	node.Network().Handle(node.Settings().GetMaskNetwork(), node.handleWrapper())
 	return nil
 }
 
 func (node *sNode) Close() error {
-	node.Network().Handle(node.fSettings.GetMaskNetwork(), nil)
+	node.Network().Handle(node.Settings().GetMaskNetwork(), nil)
 	return closer.CloseAll([]modules.ICloser{
 		node.Queue(),
 	})
@@ -98,11 +98,12 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) broadcast(msg message.IMessage) error {
-	return node.Network().Broadcast(payload.NewPayload(
-		node.fSettings.GetMaskNetwork(),
-		msg.Bytes(),
-	))
+func (node *sNode) Broadcast(recv asymmetric.IPubKey, pld payload_adapter.IPayload) error {
+	msg, err := node.Queue().Client().Encrypt(recv, pld)
+	if err != nil {
+		return err
+	}
+	return node.send(msg)
 }
 
 // Send message by public key of receiver.
@@ -129,14 +130,21 @@ func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload
 	node.setAction(actionKey)
 	defer node.delAction(actionKey)
 
+	if err := node.send(msg); err != nil {
+		return nil, err
+	}
+	return node.recv(actionKey, node.Settings().GetTimeWait())
+}
+
+func (node *sNode) send(msg message.IMessage) error {
 	for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
 		if err := node.Queue().Enqueue(msg); err != nil {
 			time.Sleep(node.Queue().Settings().GetDuration())
 			continue
 		}
-		break
+		return nil
 	}
-	return node.recv(actionKey, node.Settings().GetTimeWait())
+	return fmt.Errorf("failed: enqueue message")
 }
 
 func (node *sNode) recv(actionKey string, timeOut time.Duration) ([]byte, error) {
@@ -162,7 +170,10 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			if !ok {
 				break
 			}
-			node.broadcast(msg)
+			node.Network().Broadcast(payload.NewPayload(
+				node.Settings().GetMaskNetwork(),
+				msg.Bytes(),
+			))
 		}
 	}()
 
@@ -216,22 +227,8 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		respMsg, err := client.Encrypt(
-			sender,
-			payload.NewPayload(pld.Head(), resp),
-		)
-		if err != nil {
-			panic(err)
-		}
-
-		for i := uint64(0); i <= node.Settings().GetRetryEnqueue(); i++ {
-			err := node.Queue().Enqueue(respMsg)
-			if err != nil {
-				time.Sleep(node.Queue().Settings().GetDuration())
-				continue
-			}
-			break
-		}
+		// create the message and put this to the queue
+		node.Broadcast(sender, payload.NewPayload(pld.Head(), resp))
 	}
 }
 

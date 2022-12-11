@@ -68,7 +68,7 @@ func (conn *sConn) Request(pld payload.IPayload) (payload.IPayload, error) {
 }
 
 func (conn *sConn) Close() error {
-	return conn.fSocket.Close()
+	return conn.Socket().Close()
 }
 
 func (conn *sConn) Write(pld payload.IPayload) error {
@@ -82,7 +82,7 @@ func (conn *sConn) Write(pld payload.IPayload) error {
 	)
 
 	for {
-		n, err := conn.fSocket.Write(packBytes[:packPtr])
+		n, err := conn.Socket().Write(packBytes[:packPtr])
 		if err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 
 	// bufLen = Size[u64] in bytes
 	bufLen := make([]byte, encoding.CSizeUint64)
-	length, err := conn.fSocket.Read(bufLen)
+	length, err := conn.Socket().Read(bufLen)
 	if err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 	msgRaw := make([]byte, 0, mustLen)
 	for {
 		buffer := make([]byte, mustLen)
-		n, err := conn.fSocket.Read(buffer)
+		n, err := conn.Socket().Read(buffer)
 		if err != nil {
 			return
 		}

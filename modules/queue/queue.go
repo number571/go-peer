@@ -126,8 +126,8 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 }
 
 func (q *sQueue) newPseudoMessage() message.IMessage {
-	msg, err := q.fClient.Encrypt(
-		q.fClient.PubKey(),
+	msg, err := q.Client().Encrypt(
+		q.Client().PubKey(),
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
