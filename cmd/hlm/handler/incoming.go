@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/chat_queue"
 	"github.com/number571/go-peer/cmd/hlm/database"
 	"github.com/number571/go-peer/cmd/hlm/settings"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
@@ -42,8 +43,13 @@ func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 			response(w, hls_settings.CErrorPubKey, "failed: push message to database")
 			return
 		}
+
+		gChatQueue.Push(&chat_queue.SMessage{
+			FAddress:   pubKey.Address().String(),
+			FMessage:   dbMsg.GetMessage(),
+			FTimestamp: dbMsg.GetTimestamp(),
+		})
 		response(w, hls_settings.CErrorNone, settings.CTitlePattern)
-		gChatQueue.pushMessage(pubKey, dbMsg)
 	}
 }
 
