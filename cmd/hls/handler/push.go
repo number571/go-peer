@@ -39,16 +39,12 @@ func HandlePushAPI(node anonymity.INode) http.HandlerFunc {
 
 		switch r.Method {
 		case http.MethodPut:
-			msg, err := node.Queue().Client().Encrypt(
+			err := node.Broadcast(
 				pubKey,
 				payload_adapter.NewPayload(hls_settings.CHeaderHLS, data),
 			)
 			if err != nil {
-				response(w, hls_settings.CErrorMessage, "failed: encrypt message with data")
-				return
-			}
-			if err := node.Queue().Enqueue(msg); err != nil {
-				response(w, hls_settings.CErrorBroadcast, "failed: broadcast message")
+				response(w, hls_settings.CErrorMessage, "failed: broadcast message")
 				return
 			}
 			response(w, hls_settings.CErrorNone, "success: broadcast")
