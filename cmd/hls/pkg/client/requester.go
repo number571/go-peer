@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/encoding"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (

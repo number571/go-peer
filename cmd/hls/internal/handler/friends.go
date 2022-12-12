@@ -8,8 +8,8 @@ import (
 
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {

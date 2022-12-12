@@ -6,12 +6,12 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/filesystem"
-	"github.com/number571/go-peer/modules/storage/database"
+	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
@@ -116,7 +116,7 @@ func (chain *sChain) Close() error {
 	chain.fMutex.Lock()
 	defer chain.fMutex.Unlock()
 
-	return closer.CloseAll([]modules.ICloser{
+	return closer.CloseAll([]types.ICloser{
 		chain.fBlocks,
 		chain.fTransactions,
 		chain.fMempool,

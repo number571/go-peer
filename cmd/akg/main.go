@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 func main() {

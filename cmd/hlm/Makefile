@@ -3,7 +3,7 @@ GC=go build
 .PHONY: default build run test clean
 default: build run
 build:
-	$(GC) -o hlm *.go
+	$(GC) -o hlm ./cmd/hlm
 run:
 	./hlm	
 test:

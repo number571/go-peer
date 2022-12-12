@@ -12,9 +12,9 @@ import (
 	"github.com/number571/go-peer/cmd/hms/hmc"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
 	"github.com/number571/go-peer/internal/testutils"
-	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (

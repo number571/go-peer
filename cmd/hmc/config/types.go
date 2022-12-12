@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 type IConfig interface {

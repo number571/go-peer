@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 var (

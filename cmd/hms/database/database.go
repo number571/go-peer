@@ -5,10 +5,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/number571/go-peer/modules/client/message"
-	"github.com/number571/go-peer/modules/crypto/hashing"
-	"github.com/number571/go-peer/modules/encoding"
-	gp_database "github.com/number571/go-peer/modules/storage/database"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
+	gp_database "github.com/number571/go-peer/pkg/storage/database"
 )
 
 type sStorage struct {

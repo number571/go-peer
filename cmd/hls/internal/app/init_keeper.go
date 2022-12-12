@@ -2,8 +2,8 @@ package app
 
 import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
-	"github.com/number571/go-peer/modules/network/anonymity"
-	"github.com/number571/go-peer/modules/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/conn_keeper"
 )
 
 func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnKeeper {

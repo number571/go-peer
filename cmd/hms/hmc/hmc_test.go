@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/internal/testutils"
-	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/client/message"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 func TestBuilder(t *testing.T) {

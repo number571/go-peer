@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 var (

@@ -3,8 +3,8 @@ package mempool
 import (
 	"sync"
 
-	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/storage/database"
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/storage/database"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
 )

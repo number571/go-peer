@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hls/internal/config"
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/network/anonymity"
-	"github.com/number571/go-peer/modules/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/cmd/hls/internal/handler"
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	_ modules.IApp = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
@@ -34,7 +34,7 @@ type sApp struct {
 func NewApp(
 	cfg config.IConfig,
 	node anonymity.INode,
-) modules.IApp {
+) types.IApp {
 	wrapper := config.NewWrapper(cfg)
 	return &sApp{
 		fWrapper:     wrapper,
@@ -104,7 +104,7 @@ func (app *sApp) Run() error {
 
 func (app *sApp) Close() error {
 	app.fNode.Handle(hls_settings.CHeaderHLS, nil)
-	return closer.CloseAll([]modules.ICloser{
+	return closer.CloseAll([]types.ICloser{
 		app.fNode,
 		app.fConnKeeper,
 		app.fServiceHTTP,

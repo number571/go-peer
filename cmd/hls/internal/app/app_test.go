@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/internal/testutils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
-	anon_testutils "github.com/number571/go-peer/modules/network/anonymity/testutils"
+	anon_testutils "github.com/number571/go-peer/pkg/network/anonymity/testutils"
 )
 
 const (

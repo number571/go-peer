@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/number571/go-peer/modules/network"
-	"github.com/number571/go-peer/modules/network/conn"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (

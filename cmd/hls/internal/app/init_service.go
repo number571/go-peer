@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	"github.com/number571/go-peer/cmd/hls/internal/handler"
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
-	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server {

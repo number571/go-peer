@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/number571/go-peer/cmd/hmc/action"
 	hms_database "github.com/number571/go-peer/cmd/hms/database"
-	hls_client "github.com/number571/go-peer/modules/client"
+	hls_client "github.com/number571/go-peer/pkg/client"
 )
 
 var (

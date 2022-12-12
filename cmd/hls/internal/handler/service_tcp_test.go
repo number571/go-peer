@@ -10,11 +10,11 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	"github.com/number571/go-peer/cmd/hls/pkg/request"
 
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/network/anonymity"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/internal/testutils"
 )
@@ -46,7 +46,7 @@ func TestHLS(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer closer.CloseAll([]modules.ICloser{
+	defer closer.CloseAll([]types.ICloser{
 		nodeService.KeyValueDB(),
 		nodeService.Network(),
 		nodeService,
@@ -58,7 +58,7 @@ func TestHLS(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer closer.CloseAll([]modules.ICloser{
+	defer closer.CloseAll([]types.ICloser{
 		nodeClient.KeyValueDB(),
 		nodeClient.Network(),
 		nodeClient,

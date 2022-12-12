@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
-	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleOnlineAPI(node anonymity.INode) http.HandlerFunc {

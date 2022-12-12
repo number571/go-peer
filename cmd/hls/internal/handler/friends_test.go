@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/internal/testutils"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 func TestHandleFriendsAPI(t *testing.T) {

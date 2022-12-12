@@ -3,7 +3,7 @@ package mempool
 import (
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/modules"
+	"github.com/number571/go-peer/pkg/types"
 )
 
 type ISettings interface {
@@ -22,5 +22,5 @@ type IMempool interface {
 
 	Delete([]byte)
 	Clear()
-	modules.ICloser
+	types.ICloser
 }

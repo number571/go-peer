@@ -10,10 +10,10 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/internal/testutils"
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/types"
 )
 
 func TestHandleOnlineAPI(t *testing.T) {
@@ -85,7 +85,7 @@ func testAllOnlineFree(node anonymity.INode) {
 	defer func() {
 		os.RemoveAll(tcPathConfig + "_push2")
 		os.RemoveAll(tcPathDB + "_push2")
-		closer.CloseAll([]modules.ICloser{
+		closer.CloseAll([]types.ICloser{
 			node,
 			node.KeyValueDB(),
 			node.Network(),

@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/client/message"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/types"
 )
 
 type IKeyValueDB interface {
@@ -11,5 +11,5 @@ type IKeyValueDB interface {
 	Load([]byte, uint64) (message.IMessage, error)
 
 	Clean() error
-	modules.ICloser
+	types.ICloser
 }

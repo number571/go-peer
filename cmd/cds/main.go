@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/number571/go-peer/modules/crypto/random"
-	"github.com/number571/go-peer/modules/storage"
+	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/storage"
 )
 
 func main() {

@@ -12,10 +12,10 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/cmd/hls/pkg/request"
 	"github.com/number571/go-peer/internal/testutils"
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/closer"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/network/anonymity"
+	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/types"
 )
 
 func TestHandlePushAPI(t *testing.T) {
@@ -85,7 +85,7 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 	defer func() {
 		os.RemoveAll(tcPathConfig + "_push1")
 		os.RemoveAll(tcPathDB + "_push1")
-		closer.CloseAll([]modules.ICloser{
+		closer.CloseAll([]types.ICloser{
 			node,
 			srv,
 			node.KeyValueDB(),

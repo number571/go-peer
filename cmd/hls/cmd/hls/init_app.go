@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/cmd/hls/internal/app"
-	"github.com/number571/go-peer/modules"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/types"
 )
 
-func initApp() (modules.IApp, error) {
+func initApp() (types.IApp, error) {
 	var (
 		inputKey string
 	)

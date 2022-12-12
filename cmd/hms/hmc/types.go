@@ -2,9 +2,9 @@ package hmc
 
 import (
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"
-	"github.com/number571/go-peer/modules/client/message"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 type IClient interface {

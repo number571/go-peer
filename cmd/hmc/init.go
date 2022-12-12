@@ -6,9 +6,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hmc/config"
 	"github.com/number571/go-peer/cmd/hmc/settings"
-	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/storage"
+	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/storage"
 
 	hms_database "github.com/number571/go-peer/cmd/hms/database"
 	hms_settings "github.com/number571/go-peer/cmd/hms/settings"

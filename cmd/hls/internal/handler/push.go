@@ -6,10 +6,10 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/encoding"
-	"github.com/number571/go-peer/modules/network/anonymity"
-	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
 )
 
 func HandlePushAPI(node anonymity.INode) http.HandlerFunc {

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
-	"github.com/number571/go-peer/modules/filesystem"
+	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 func initConfig() (config.IConfig, error) {

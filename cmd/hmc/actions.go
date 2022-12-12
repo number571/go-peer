@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hmc/action"
 	"github.com/number571/go-peer/cmd/hmc/settings"
 	"github.com/number571/go-peer/cmd/hms/hmc"
-	"github.com/number571/go-peer/modules/payload"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 func newActions() action.IActions {

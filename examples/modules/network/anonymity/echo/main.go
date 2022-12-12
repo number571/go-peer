@@ -5,15 +5,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/number571/go-peer/modules/client"
-	"github.com/number571/go-peer/modules/crypto/asymmetric"
-	"github.com/number571/go-peer/modules/friends"
-	"github.com/number571/go-peer/modules/network"
-	"github.com/number571/go-peer/modules/network/anonymity"
-	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
-	"github.com/number571/go-peer/modules/network/conn"
-	"github.com/number571/go-peer/modules/queue"
-	"github.com/number571/go-peer/modules/storage/database"
+	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
+	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/queue"
+	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 const (
