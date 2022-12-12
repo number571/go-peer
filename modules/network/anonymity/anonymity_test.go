@@ -7,16 +7,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/closer"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
-	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"
 	"github.com/number571/go-peer/modules/storage/database"
-	"github.com/number571/go-peer/settings/testutils"
 
 	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/modules/network/conn"
@@ -107,10 +106,9 @@ func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
 	for _, node := range nodes {
 		node.Handle(
 			testutils.TcHead,
-			func(node INode, sender asymmetric.IPubKey, pl payload.IPayload) []byte {
+			func(node INode, sender asymmetric.IPubKey, reqBytes []byte) []byte {
 				// send response
-				resp := fmt.Sprintf("%s (response)", string(pl.Body()))
-				return []byte(resp)
+				return []byte(fmt.Sprintf("%s (response)", string(reqBytes)))
 			},
 		)
 	}

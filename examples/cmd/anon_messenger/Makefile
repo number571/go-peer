@@ -7,15 +7,16 @@ init:
 	# CHECK PROGRAMS
 	pkill --version
 build: 
+	# MAKEFILE BUILD
+	make build -C ../../../cmd/hls
 	# COPY HLS
-	cp -r ../../../cmd/hls middle_hls 
-	cp -r ../../../cmd/hls node1_hlm 
-	cp -r ../../../cmd/hls node2_hlm 
+	cp -r ../../../cmd/hls/hls ./middle_hls/prog_hls
+	cp -r ../../../cmd/hls/hls ./node1_hlm/prog_hls1
+	cp -r ../../../cmd/hls/hls ./node2_hlm/prog_hls2
 	# COPY HLM 
 	cp -r ../../../cmd/hlm node1_hlm 
 	cp -r ../../../cmd/hlm node2_hlm 
 	# MAKEFILE BUILD
-	make build -C middle_hls
 	make build -C node1_hlm
 	make build -C node2_hlm
 run: 

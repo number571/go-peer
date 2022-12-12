@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
-	"github.com/number571/go-peer/cmd/hls/hlc"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 )
 
@@ -16,7 +16,7 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(client hlc.IClient) http.HandlerFunc {
+func FriendsPage(client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/friends" {
 			NotFoundPage(w, r)

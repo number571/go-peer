@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hlm/settings"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 
-	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
 func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {

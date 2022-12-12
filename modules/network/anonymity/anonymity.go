@@ -61,12 +61,12 @@ func (node *sNode) Run() error {
 	if err := node.Queue().Run(); err != nil {
 		return err
 	}
-	node.Network().Handle(node.Settings().GetMaskNetwork(), node.handleWrapper())
+	node.Network().Handle(node.Settings().GetNetworkMask(), node.handleWrapper())
 	return nil
 }
 
 func (node *sNode) Close() error {
-	node.Network().Handle(node.Settings().GetMaskNetwork(), nil)
+	node.Network().Handle(node.Settings().GetNetworkMask(), nil)
 	return closer.CloseAll([]modules.ICloser{
 		node.Queue(),
 	})
@@ -170,25 +170,21 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			if !ok {
 				break
 			}
-			node.Network().Broadcast(payload.NewPayload(
-				node.Settings().GetMaskNetwork(),
-				msg.Bytes(),
-			))
+			node.networkBroadcast(msg)
 		}
 	}()
 
-	return func(nnode network.INode, _ conn.IConn, npld payload.IPayload) {
-		msg := node.initialCheck(message.LoadMessage(npld.Body()))
+	return func(nnode network.INode, _ conn.IConn, reqBytes []byte) {
+		msg := node.initialCheck(message.LoadMessage(reqBytes))
 		if msg == nil {
 			return
 		}
 
 		// redirect to another nodes
-		nnode.Broadcast(npld)
-		client := node.Queue().Client()
+		node.networkBroadcast(msg)
 
 		// try decrypt message
-		sender, pld, err := client.Decrypt(msg)
+		sender, pld, err := node.Queue().Client().Decrypt(msg)
 		if err != nil {
 			return
 		}
@@ -222,7 +218,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		resp := f(node, sender, pld)
+		resp := f(node, sender, pld.Body())
 		if resp == nil {
 			return
 		}
@@ -248,6 +244,13 @@ func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
 	}
 
 	return msg
+}
+
+func (node *sNode) networkBroadcast(msg message.IMessage) error {
+	return node.Network().Broadcast(payload.NewPayload(
+		node.Settings().GetNetworkMask(),
+		msg.Bytes(),
+	))
 }
 
 func (node *sNode) setRoute(head uint32, handle IHandlerF) {

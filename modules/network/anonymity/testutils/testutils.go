@@ -3,6 +3,7 @@ package testutils
 import (
 	"time"
 
+	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
@@ -11,7 +12,6 @@ import (
 	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/queue"
 	"github.com/number571/go-peer/modules/storage/database"
-	"github.com/number571/go-peer/settings/testutils"
 )
 
 func TestNewNode(pathDB string) anonymity.INode {

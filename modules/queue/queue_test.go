@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/modules/client"
 	"github.com/number571/go-peer/modules/client/message"
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/payload"
-	"github.com/number571/go-peer/settings/testutils"
 )
 
 func TestQueue(t *testing.T) {

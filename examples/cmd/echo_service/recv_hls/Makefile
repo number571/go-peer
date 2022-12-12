@@ -2,7 +2,6 @@ GC=go build
 .PHONY: default build run clean 
 default: clean build run 
 build:
-	$(GC) -o prog_hls1 hls/*.go
 	$(GC) -o prog_service service/*.go
 run:
 	./prog_hls1 --key priv.key &

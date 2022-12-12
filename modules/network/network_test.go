@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/modules/network/conn"
 	"github.com/number571/go-peer/modules/payload"
-	"github.com/number571/go-peer/settings/testutils"
 )
 
 const (
@@ -24,14 +24,15 @@ func TestBroadcast(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4 * tcIter)
 
-	handleF := func(node INode, conn conn.IConn, pl payload.IPayload) {
+	headHandle := uint64(testutils.TcHead)
+	handleF := func(node INode, conn conn.IConn, reqBytes []byte) {
 		defer wg.Done()
-		defer node.Broadcast(pl)
+		defer node.Broadcast(payload.NewPayload(headHandle, reqBytes))
 
 		tcMutex.Lock()
 		defer tcMutex.Unlock()
 
-		val := string(pl.Body())
+		val := string(reqBytes)
 		flag, ok := mapp[node][val]
 		if !ok {
 			t.Errorf("incoming value '%s' undefined", val)
@@ -44,17 +45,17 @@ func TestBroadcast(t *testing.T) {
 	}
 
 	for _, node := range nodes {
-		node.Handle(uint64(testutils.TcHead), handleF)
+		node.Handle(headHandle, handleF)
 	}
 
 	// nodes[0] -> nodes[1:]
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
-			pl := payload.NewPayload(
-				uint64(testutils.TcHead),
+			pld := payload.NewPayload(
+				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcLargeBodyTemplate, i)),
 			)
-			nodes[0].Broadcast(pl)
+			nodes[0].Broadcast(pld)
 		}(i)
 	}
 

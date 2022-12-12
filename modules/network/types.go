@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/modules/payload"
 )
 
-type IHandlerF func(INode, conn.IConn, payload.IPayload)
+type IHandlerF func(INode, conn.IConn, []byte)
 
 type INode interface {
 	Settings() ISettings

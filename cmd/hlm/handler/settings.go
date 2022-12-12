@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
-	"github.com/number571/go-peer/cmd/hls/hlc"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
 type sSettings struct {
@@ -16,7 +16,7 @@ type sSettings struct {
 	FConnections []string
 }
 
-func SettingsPage(client hlc.IClient) http.HandlerFunc {
+func SettingsPage(client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/settings" {
 			NotFoundPage(w, r)

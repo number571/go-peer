@@ -1,8 +1,6 @@
 GC=go build
-.PHONY: default build run clean 
-default: clean build run 
-build:
-	$(GC) -o prog_hls hls/*.go
+.PHONY: default run clean 
+default: clean run 
 run:
 	./prog_hls --key priv.key &
 	sleep 5

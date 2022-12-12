@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hlm/database"
 	"github.com/number571/go-peer/cmd/hlm/handler"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
-	"github.com/number571/go-peer/cmd/hls/hlc"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/modules"
 	"github.com/number571/go-peer/modules/closer"
 	"golang.org/x/net/websocket"
@@ -28,7 +28,7 @@ type sApp struct {
 
 func NewApp(
 	cfg config.IConfig,
-	client hlc.IClient,
+	client hls_client.IClient,
 	db database.IKeyValueDB,
 ) IApp {
 	return &sApp{
@@ -84,7 +84,7 @@ func initIncServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Serve
 	}
 }
 
-func initIntServiceHTTP(cfg config.IConfig, client hlc.IClient, db database.IKeyValueDB) *http.Server {
+func initIntServiceHTTP(cfg config.IConfig, client hls_client.IClient, db database.IKeyValueDB) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",

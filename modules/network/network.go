@@ -188,7 +188,7 @@ func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 		return false
 	}
 
-	f(node, conn, pld)
+	f(node, conn, pld.Body())
 	return true
 }
 

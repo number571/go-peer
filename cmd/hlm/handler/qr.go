@@ -7,10 +7,10 @@ import (
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
-	"github.com/number571/go-peer/cmd/hls/hlc"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
-func QRPublicKeyPage(client hlc.IClient) http.HandlerFunc {
+func QRPublicKeyPage(client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/qr/public_key" {
 			NotFoundPage(w, r)

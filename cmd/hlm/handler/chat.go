@@ -9,9 +9,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hlm/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
-	"github.com/number571/go-peer/cmd/hls/hlc"
-	hls_network "github.com/number571/go-peer/cmd/hls/network"
-	hls_settings "github.com/number571/go-peer/cmd/hls/settings"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
+	"github.com/number571/go-peer/cmd/hls/pkg/request"
+	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
 const (
@@ -32,7 +32,7 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFunc {
+func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/friends/chat" {
 			NotFoundPage(w, r)
@@ -69,7 +69,7 @@ func FriendsChatPage(client hlc.IClient, db database.IKeyValueDB) http.HandlerFu
 
 			res, err := client.Request(
 				friendPubKey,
-				hls_network.NewRequest("POST", hlm_settings.CTitlePattern, "/push").
+				request.NewRequest("POST", hlm_settings.CTitlePattern, "/push").
 					WithHead(map[string]string{
 						"Content-Type": "application/json",
 					}).

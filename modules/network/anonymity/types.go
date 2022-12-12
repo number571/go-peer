@@ -7,14 +7,13 @@ import (
 	"github.com/number571/go-peer/modules/crypto/asymmetric"
 	"github.com/number571/go-peer/modules/friends"
 	"github.com/number571/go-peer/modules/network"
-	"github.com/number571/go-peer/modules/payload"
 	"github.com/number571/go-peer/modules/queue"
 	"github.com/number571/go-peer/modules/storage/database"
 
 	payload_adapter "github.com/number571/go-peer/modules/network/anonymity/adapters/payload"
 )
 
-type IHandlerF func(INode, asymmetric.IPubKey, payload.IPayload) []byte
+type IHandlerF func(INode, asymmetric.IPubKey, []byte) []byte
 
 type INode interface {
 	modules.IApp
@@ -32,7 +31,7 @@ type INode interface {
 
 type ISettings interface {
 	GetTimeWait() time.Duration
-	GetMaskNetwork() uint64
+	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
 }
 

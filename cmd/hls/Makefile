@@ -3,9 +3,9 @@ GC=go build
 .PHONY: default build run test clean
 default: build run
 build:
-	$(GC) -o hls *.go
+	$(GC) -o hls cmd/hls/*.go
 run:
-	./hls	
+	./hls
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:

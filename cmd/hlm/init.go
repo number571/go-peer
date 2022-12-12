@@ -6,10 +6,11 @@ import (
 	"github.com/number571/go-peer/cmd/hlm/app"
 	"github.com/number571/go-peer/cmd/hlm/config"
 	"github.com/number571/go-peer/cmd/hlm/database"
-	"github.com/number571/go-peer/cmd/hls/hlc"
+	"github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/modules/filesystem"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/settings"
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
 func initValues() error {
@@ -23,15 +24,15 @@ func initValues() error {
 		return fmt.Errorf("error: create/open database")
 	}
 
-	client := hlc.NewClient(
-		hlc.NewRequester(fmt.Sprintf("http://%s", cfg.Connection())),
+	hlsClient := hls_client.NewClient(
+		client.NewRequester(fmt.Sprintf("http://%s", cfg.Connection())),
 	)
 
-	if _, err := client.PubKey(); err != nil {
+	if _, err := hlsClient.PubKey(); err != nil {
 		return err
 	}
 
-	gApp = app.NewApp(cfg, client, levelDB)
+	gApp = app.NewApp(cfg, hlsClient, levelDB)
 	return nil
 }
 
