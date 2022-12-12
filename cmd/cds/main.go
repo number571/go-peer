@@ -16,7 +16,7 @@ func main() {
 		panic(fmt.Sprintf(
 			"usage:\n\t%s\nstdin:\n\t%s\n",
 			"./main (get|put|del|new) [storage-path] [data-key]",
-			"[password]~[data]EOF",
+			"[storage-password]~[data-value]EOF",
 		))
 	}
 
@@ -46,7 +46,7 @@ func main() {
 		fmt.Printf("%s\n", string(data))
 	case "PUT":
 		if _, err := stg.Get([]byte(dateKey)); err == nil {
-			panic("password already exist")
+			panic("data-key already exist")
 		}
 		err := stg.Set([]byte(dateKey), bytes.Join(splited[1:], []byte{'~'}))
 		if err != nil {
@@ -59,7 +59,7 @@ func main() {
 		}
 	case "NEW":
 		if _, err := stg.Get([]byte(dateKey)); err == nil {
-			panic("password already exist")
+			panic("data-key already exist")
 		}
 		// 1char = 4bit entropy => 128bit
 		randStr := random.NewStdPRNG().String(32)

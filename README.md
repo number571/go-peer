@@ -1,8 +1,9 @@
 # go-peer
 > Library for create secure and anonymity decentralized networks. Version: 1.5
 
-## Research Article
-* Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/Number571/go-peer/blob/master/hidden_systems.pdf "TSHS");
+## Research Articles
+* Theory of the structure of hidden systems: [hidden_systems.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_systems.pdf "TSHS");
+* In developing... Proof of Union: [proof_of_union.pdf](https://github.com/number571/go-peer/blob/master/docs/proof_of_union.pdf "POU");
 
 ## Library based applications
 * Hidden Lake Service: [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS");
@@ -14,9 +15,9 @@
 * Cryptographic Data Storage: [github.com/number571/go-peer/tree/master/cmd/cds](https://github.com/number571/go-peer/tree/master/cmd/cds "CDS");
 
 ## Deprecated library based applications
-* Hidden Lake: [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
-* Hidden Email Service: [github.com/number571/hes](https://github.com/number571/hes "HES");
-* Hidden Lake Service (old version): [github.com/number571/hls](https://github.com/number571/hls "HLS");
+* Hidden Lake (new release = cmd/hls+cmd/hlm+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
+* Hidden Email Service (new release = cmd/hms+cmd/hmc): [github.com/number571/hes](https://github.com/number571/hes "HES");
+* Hidden Lake Service (new release = cmd/hls): [github.com/number571/hls](https://github.com/number571/hls "HLS");
 
 ## Code specification
 1. Prefix 's'/'S' = structure type;
@@ -31,6 +32,6 @@
 2. Remake cmd/hmc from CLI to GUI;
 3. Implement the cmd/ubc;
 4. Consider cmd/hls moving the fifth^ stage of anonymity to the sixth;
-5. Write README for cmd/hlm, cmd/hms, cmd/hmc;
+5. Write README for cmd/hms, cmd/hmc;
 6. Comment functions in the code of library;
 7. ...

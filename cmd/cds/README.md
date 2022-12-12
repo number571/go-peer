@@ -4,9 +4,9 @@
 
 ```bash
 usage: 
-    ./main (get|put|del|new) [storage-path] [storage-key] [data-key]
+    ./main (get|put|del|new) [storage-path] [data-key]
 stdin:
-    [password]~[data]EOF
+    [storage-password]~[data-value]EOF
 ```
 
 ## Example
