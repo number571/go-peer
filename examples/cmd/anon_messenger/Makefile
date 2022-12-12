@@ -9,16 +9,17 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C ../../../cmd/hls
-	# COPY HLS
-	cp -r ../../../cmd/hls/hls ./middle_hls/prog_hls
-	cp -r ../../../cmd/hls/hls ./node1_hlm/prog_hls1
-	cp -r ../../../cmd/hls/hls ./node2_hlm/prog_hls2
-	# COPY HLM 
-	cp -r ../../../cmd/hlm node1_hlm 
-	cp -r ../../../cmd/hlm node2_hlm 
-	# MAKEFILE BUILD
-	make build -C node1_hlm
-	make build -C node2_hlm
+	make build -C ../../../cmd/hlm
+	# COPY HLS PROGRAM
+	cp ../../../cmd/hls/hls ./middle_hls/prog_hls
+	cp ../../../cmd/hls/hls ./node1_hlm/prog_hls1
+	cp ../../../cmd/hls/hls ./node2_hlm/prog_hls2
+	# COPY HLM PROGRAM
+	cp ../../../cmd/hlm/hlm ./node1_hlm/prog_hlm1
+	cp ../../../cmd/hlm/hlm ./node2_hlm/prog_hlm2
+	# COPY HLM WEB
+	cp -r ../../../cmd/hlm/web ./node1_hlm
+	cp -r ../../../cmd/hlm/web ./node2_hlm
 run: 
 	# MAKEFILE RUN
 	make run -C middle_hls
@@ -26,10 +27,6 @@ run:
 	make run -C node2_hlm
 	sleep 5
 clean:
-	# REMOVE HLS 
-	rm -rf middle_hls/hls node1_hlm/hls node2_hlm/hls
-	# REMOVE HLM 
-	rm -rf node1_hlm/hlm node2_hlm/hlm 
 	# MAKEFILE CLEAN 
 	make clean -C middle_hls
 	make clean -C node1_hlm
