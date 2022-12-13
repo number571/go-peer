@@ -10,8 +10,3 @@ const (
 	CPathCFG = "hlm.cfg"
 	CPathDB  = "hlm.db"
 )
-
-const (
-	CPathStatic    = "./web/static/"
-	CPathTemplates = "./web/templates/"
-)

@@ -9,5 +9,5 @@ run:
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -f hlm hlm.cfg
+	rm -f hlm hlm.cfg hlm.stg
 	rm -rf hlm.db

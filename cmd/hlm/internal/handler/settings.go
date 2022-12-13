@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
-	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
+	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
@@ -80,9 +80,10 @@ func SettingsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handl
 		}
 		result.FConnections = res
 
-		t, err := template.ParseFiles(
-			hlm_settings.CPathTemplates+"index.html",
-			hlm_settings.CPathTemplates+"settings.html",
+		t, err := template.ParseFS(
+			web.GetTemplatePath(),
+			"index.html",
+			"settings.html",
 		)
 		if err != nil {
 			panic("can't load hmtl files")

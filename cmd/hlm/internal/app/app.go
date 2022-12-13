@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	"github.com/number571/go-peer/cmd/hlm/internal/handler"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
+	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/storage"
@@ -112,7 +113,7 @@ func initIntServiceHTTP(
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
-		handleFileServer(wDB, http.Dir(hlm_settings.CPathStatic))),
+		handleFileServer(wDB, http.FS(web.GetStaticPath()))),
 	)
 
 	mux.HandleFunc("/", handler.IndexPage(wDB))                            // GET

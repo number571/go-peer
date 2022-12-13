@@ -14,6 +14,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
+	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
@@ -85,9 +86,10 @@ func SignInPage(wDB database.IWrapperDB, client hls_client.IClient, stg storage.
 			return
 		}
 
-		t, err := template.ParseFiles(
-			hlm_settings.CPathTemplates+"index.html",
-			hlm_settings.CPathTemplates+"signin.html",
+		t, err := template.ParseFS(
+			web.GetTemplatePath(),
+			"index.html",
+			"signin.html",
 		)
 		if err != nil {
 			fmt.Println(err)

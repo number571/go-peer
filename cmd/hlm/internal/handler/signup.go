@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
-	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
+	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
@@ -93,9 +93,10 @@ func SignUpPage(wDB database.IWrapperDB, stg storage.IKeyValueStorage) http.Hand
 			return
 		}
 
-		t, err := template.ParseFiles(
-			hlm_settings.CPathTemplates+"index.html",
-			hlm_settings.CPathTemplates+"signup.html",
+		t, err := template.ParseFS(
+			web.GetTemplatePath(),
+			"index.html",
+			"signup.html",
 		)
 		if err != nil {
 			panic("can't load hmtl files")

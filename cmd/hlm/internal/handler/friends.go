@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
-	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
+	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
@@ -78,9 +78,10 @@ func FriendsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handle
 		}
 		sort.Strings(result.FFriends)
 
-		t, err := template.ParseFiles(
-			hlm_settings.CPathTemplates+"index.html",
-			hlm_settings.CPathTemplates+"friends.html",
+		t, err := template.ParseFS(
+			web.GetTemplatePath(),
+			"index.html",
+			"friends.html",
 		)
 		if err != nil {
 			panic("can't load hmtl files")
