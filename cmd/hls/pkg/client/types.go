@@ -9,6 +9,7 @@ import (
 
 type IClient interface {
 	PubKey() (asymmetric.IPubKey, error)
+	PrivKey(asymmetric.IPrivKey) error
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error
@@ -27,6 +28,7 @@ type IClient interface {
 
 type IRequester interface {
 	PubKey() (asymmetric.IPubKey, error)
+	PrivKey(*pkg_settings.SPrivKey) error
 
 	GetOnlines() ([]string, error)
 	DelOnline(*pkg_settings.SConnect) error
@@ -44,6 +46,7 @@ type IRequester interface {
 }
 
 type IBuilder interface {
+	PrivKey(asymmetric.IPrivKey) *pkg_settings.SPrivKey
 	Connect(string) *pkg_settings.SConnect
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
 	Push(asymmetric.IPubKey, request.IRequest) *pkg_settings.SPush

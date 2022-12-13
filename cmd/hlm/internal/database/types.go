@@ -5,12 +5,24 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IKeyValueDB interface {
-	Size(asymmetric.IPubKey) uint64
-	Push(asymmetric.IPubKey, IMessage) error
-	Load(asymmetric.IPubKey, uint64, uint64) ([]IMessage, error)
+type IWrapperDB interface {
+	Get() IKeyValueDB
+	Update(IKeyValueDB) error
 
 	types.ICloser
+}
+
+type IKeyValueDB interface {
+	Size(IRelation) uint64
+	Push(IRelation, IMessage) error
+	Load(IRelation, uint64, uint64) ([]IMessage, error)
+
+	types.ICloser
+}
+
+type IRelation interface {
+	IAm() asymmetric.IPubKey
+	Friend() asymmetric.IPubKey
 }
 
 type IMessage interface {

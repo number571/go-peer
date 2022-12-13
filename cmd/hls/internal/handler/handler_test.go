@@ -9,10 +9,10 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 	"github.com/number571/go-peer/internal/testutils"
+	anon_testutils "github.com/number571/go-peer/internal/testutils/anonymity"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	anon_testutils "github.com/number571/go-peer/pkg/network/anonymity/testutils"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -87,11 +87,11 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(pkg_settings.CHandleConfigConnects, HandleConnectionsAPI(wcfg, node))
-	mux.HandleFunc(pkg_settings.CHandleConfigFriends, HandleFriendsAPI(wcfg, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkOnline, HandleOnlineAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkPush, HandlePushAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNodePubkey, HandlePubKeyAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleConfigConnects, HandleConfigConnectsAPI(wcfg, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigFriends, HandleConfigFriendsAPI(wcfg, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkOnline, HandleNetworkOnlineAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkPush, HandleNetworkPushAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNodeKey, HandleNodeKeyAPI(node))
 
 	srv := &http.Server{
 		Addr:    addr,

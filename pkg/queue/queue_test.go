@@ -2,6 +2,7 @@ package queue
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 )
 
 func TestQueue(t *testing.T) {
-	client := client.NewClient(
+	oldClient := client.NewClient(
 		client.NewSettings(&client.SSettings{
 			FWorkSize:    10,
 			FMessageSize: (1 << 20),
@@ -26,12 +27,32 @@ func TestQueue(t *testing.T) {
 			FPullCapacity: 5,
 			FDuration:     500 * time.Millisecond,
 		}),
-		client,
+		oldClient,
 	)
 
-	if err := queue.Run(); err != nil {
+	if err := testQueue(queue); err != nil {
 		t.Error(err)
 		return
+	}
+
+	newClient := client.NewClient(
+		client.NewSettings(&client.SSettings{
+			FWorkSize:    10,
+			FMessageSize: (1 << 20),
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2),
+	)
+	queue.UpdateClient(newClient)
+
+	if err := testQueue(queue); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func testQueue(queue IQueue) error {
+	if err := queue.Run(); err != nil {
+		return err
 	}
 
 	msgs := make([]message.IMessage, 0, 3)
@@ -42,19 +63,17 @@ func TestQueue(t *testing.T) {
 	for i := 0; i < len(msgs)-1; i++ {
 		for j := i + 1; j < len(msgs); j++ {
 			if bytes.Equal(msgs[i].Body().Hash(), msgs[j].Body().Hash()) {
-				t.Errorf("hash of messages equals (%d and %d)", i, i)
-				return
+				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
 			}
 		}
 	}
 
-	msg, err := client.Encrypt(
-		client.PubKey(),
+	msg, err := queue.Client().Encrypt(
+		queue.Client().PubKey(),
 		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		return err
 	}
 
 	hash := msg.Body().Hash()
@@ -64,13 +83,13 @@ func TestQueue(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		msg := <-queue.Dequeue()
 		if !bytes.Equal(msg.Body().Hash(), hash) {
-			t.Errorf("hash of messages not equals (%d)", i)
-			return
+			return fmt.Errorf("hash of messages not equals (%d)", i)
 		}
 	}
 
 	if err := queue.Close(); err != nil {
-		t.Error(err)
-		return
+		return err
 	}
+
+	return nil
 }

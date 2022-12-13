@@ -15,6 +15,7 @@ var (
 type SConfig struct {
 	FAddress    *SAddress `json:"address"`
 	FConnection string    `json:"connection"`
+	FStorageKey string    `json:"storage_key,omitempty"`
 }
 
 type SAddress struct {
@@ -58,6 +59,10 @@ func LoadConfig(filepath string) (IConfig, error) {
 
 func (cfg *SConfig) Address() iAddress {
 	return cfg.FAddress
+}
+
+func (cfg *SConfig) StorageKey() string {
+	return cfg.FStorageKey
 }
 
 func (cfg *SConfig) Connection() string {

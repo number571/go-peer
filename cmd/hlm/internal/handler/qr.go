@@ -7,13 +7,20 @@ import (
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
+	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
-func QRPublicKeyPage(client hls_client.IClient) http.HandlerFunc {
+func QRPublicKeyPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := wDB.Get()
 		if r.URL.Path != "/qr/public_key" {
-			NotFoundPage(w, r)
+			NotFoundPage(db)(w, r)
+			return
+		}
+
+		if db == nil {
+			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
 

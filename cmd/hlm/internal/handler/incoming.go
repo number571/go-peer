@@ -11,13 +11,20 @@ import (
 	"github.com/number571/go-peer/cmd/hlm/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
+	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
-func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
+func HandleIncomigHTTP(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			response(w, hls_settings.CErrorMethod, "failed: incorrect method")
+			return
+		}
+
+		db := wDB.Get()
+		if db == nil {
+			response(w, hls_settings.CErrorUnauth, "failed: client unauthorized")
 			return
 		}
 
@@ -29,23 +36,31 @@ func HandleIncomigHTTP(db database.IKeyValueDB) http.HandlerFunc {
 
 		msg := strings.TrimSpace(string(msgBytes))
 		if len(msg) == 0 {
-			response(w, hls_settings.CErrorResponse, "failed: message is null")
+			response(w, hls_settings.CErrorMessage, "failed: message is null")
 			return
 		}
 
-		pubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
-		if pubKey == nil {
-			panic("public key is null (receive from hls)!")
+		friendPubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
+		if friendPubKey == nil {
+			panic("public key is null (invalid data from HLS)!")
 		}
 
+		myPubKey, err := client.PubKey()
+		if err != nil {
+			response(w, hls_settings.CErrorPubKey, "failed: message is null")
+			return
+		}
+
+		rel := database.NewRelation(myPubKey, friendPubKey)
 		dbMsg := database.NewMessage(true, msg)
-		if err := db.Push(pubKey, dbMsg); err != nil {
-			response(w, hls_settings.CErrorPubKey, "failed: push message to database")
+
+		if err := db.Push(rel, dbMsg); err != nil {
+			response(w, hls_settings.CErrorWrite, "failed: push message to database")
 			return
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:   pubKey.Address().String(),
+			FAddress:   friendPubKey.Address().String(),
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})

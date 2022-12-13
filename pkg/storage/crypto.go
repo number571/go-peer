@@ -29,7 +29,6 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-// Settings must contain (CSizeSkey, CSizeWork).
 func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorage, error) {
 	store := &sCryptoStorage{
 		fPath:     path,

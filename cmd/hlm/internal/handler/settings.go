@@ -7,19 +7,27 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
 type sSettings struct {
+	*sTemplateData
 	FPublicKey   string
 	FConnections []string
 }
 
-func SettingsPage(client hls_client.IClient) http.HandlerFunc {
+func SettingsPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := wDB.Get()
 		if r.URL.Path != "/settings" {
-			NotFoundPage(w, r)
+			NotFoundPage(db)(w, r)
+			return
+		}
+
+		if db == nil {
+			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
 
@@ -56,10 +64,11 @@ func SettingsPage(client hls_client.IClient) http.HandlerFunc {
 		}
 
 		result := new(sSettings)
+		result.sTemplateData = newTemplateData(db)
 
 		pubKey, err := client.PubKey()
 		if err != nil {
-			fmt.Fprint(w, "error: read connections")
+			fmt.Fprint(w, "error: read public key")
 			return
 		}
 		result.FPublicKey = pubKey.String()

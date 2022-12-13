@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleConnectionsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {
+func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var vConnect pkg_settings.SConnect
 

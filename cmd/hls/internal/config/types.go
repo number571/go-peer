@@ -15,6 +15,7 @@ type IEditor interface {
 }
 
 type IConfig interface {
+	Logging() bool
 	Network() string
 	Address() iAddress
 	Connections() []string

@@ -1,7 +1,15 @@
 package logger
 
+import "os"
+
 type ILogger interface {
 	Info(string)
-	Warning(string)
-	Error(string)
+	Warn(string)
+	Erro(string)
+}
+
+type ISettings interface {
+	GetStreamInfo() *os.File
+	GetStreamWarn() *os.File
+	GetStreamErro() *os.File
 }

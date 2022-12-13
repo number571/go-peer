@@ -12,12 +12,12 @@ import (
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/queue"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
-	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -46,7 +46,7 @@ func TestComplex(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].Request(
 				nodes[1].Queue().Client().PubKey(),
-				payload_adapter.NewPayload(testutils.TcHead, []byte(reqBody)),
+				NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -77,7 +77,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].Request(
 		nodes[1].Queue().Client().PubKey(),
-		payload_adapter.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err != nil {
 		return
@@ -145,6 +145,7 @@ func testNewNode(i int, timeWait time.Duration) INode {
 			FRetryEnqueue: 0,
 			FTimeWait:     timeWait,
 		}),
+		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FHashing:   true,

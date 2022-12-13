@@ -10,6 +10,8 @@ import (
 
 type IQueue interface {
 	Settings() ISettings
+
+	UpdateClient(client.IClient)
 	Client() client.IClient
 
 	Enqueue(message.IMessage) error

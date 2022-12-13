@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
-	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 type IHandlerF func(INode, asymmetric.IPubKey, []byte) []byte
@@ -25,8 +25,8 @@ type INode interface {
 	F2F() friends.IF2F
 
 	Handle(uint32, IHandlerF) INode
-	Broadcast(recv asymmetric.IPubKey, pl payload_adapter.IPayload) error
-	Request(recv asymmetric.IPubKey, pl payload_adapter.IPayload) ([]byte, error)
+	Broadcast(recv asymmetric.IPubKey, pl payload.IPayload) error
+	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
 }
 
 type ISettings interface {

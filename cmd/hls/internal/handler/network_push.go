@@ -9,10 +9,9 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
 )
 
-func HandlePushAPI(node anonymity.INode) http.HandlerFunc {
+func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var vPush pkg_settings.SPush
 
@@ -42,7 +41,7 @@ func HandlePushAPI(node anonymity.INode) http.HandlerFunc {
 		case http.MethodPut:
 			err := node.Broadcast(
 				pubKey,
-				payload_adapter.NewPayload(hls_settings.CHeaderHLS, data),
+				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
 			)
 			if err != nil {
 				response(w, pkg_settings.CErrorMessage, "failed: broadcast message")
@@ -53,7 +52,7 @@ func HandlePushAPI(node anonymity.INode) http.HandlerFunc {
 		case http.MethodPost:
 			resp, err := node.Request(
 				pubKey,
-				payload_adapter.NewPayload(hls_settings.CHeaderHLS, data),
+				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
 			)
 			if err != nil {
 				response(w, pkg_settings.CErrorResponse, "failed: response message")

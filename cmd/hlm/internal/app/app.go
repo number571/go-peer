@@ -12,6 +12,7 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/types"
 	"golang.org/x/net/websocket"
 )
@@ -21,7 +22,8 @@ var (
 )
 
 type sApp struct {
-	fDB             database.IKeyValueDB
+	fStorage        storage.IKeyValueStorage
+	fDatabase       database.IWrapperDB
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
 }
@@ -29,12 +31,17 @@ type sApp struct {
 func NewApp(
 	cfg config.IConfig,
 	client hls_client.IClient,
-	db database.IKeyValueDB,
 ) types.IApp {
+	var wDB = database.NewWrapperDB()
+	stg, err := initCryptoStorage(cfg)
+	if err != nil {
+		panic(err)
+	}
 	return &sApp{
-		fDB:             db,
-		fIntServiceHTTP: initIntServiceHTTP(cfg, client, db),
-		fIncServiceHTTP: initIncServiceHTTP(cfg, db),
+		fStorage:        stg,
+		fDatabase:       wDB,
+		fIntServiceHTTP: initIntServiceHTTP(cfg, wDB, client, stg),
+		fIncServiceHTTP: initIncServiceHTTP(cfg, wDB, client),
 	}
 }
 
@@ -70,13 +77,25 @@ func (app *sApp) Close() error {
 	return closer.CloseAll([]types.ICloser{
 		app.fIntServiceHTTP,
 		app.fIncServiceHTTP,
-		app.fDB,
+		app.fDatabase,
 	})
 }
 
-func initIncServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Server {
+func initCryptoStorage(cfg config.IConfig) (storage.IKeyValueStorage, error) {
+	return storage.NewCryptoStorage(
+		hlm_settings.CPathSTG,
+		[]byte(cfg.StorageKey()),
+		hlm_settings.CWorkForKeys,
+	)
+}
+
+func initIncServiceHTTP(
+	cfg config.IConfig,
+	wDB database.IWrapperDB,
+	client hls_client.IClient,
+) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/push", handler.HandleIncomigHTTP(db))
+	mux.HandleFunc("/push", handler.HandleIncomigHTTP(wDB, client))
 
 	return &http.Server{
 		Addr:    cfg.Address().Incoming(),
@@ -84,20 +103,28 @@ func initIncServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Serve
 	}
 }
 
-func initIntServiceHTTP(cfg config.IConfig, client hls_client.IClient, db database.IKeyValueDB) *http.Server {
+func initIntServiceHTTP(
+	cfg config.IConfig,
+	wDB database.IWrapperDB,
+	client hls_client.IClient,
+	stg storage.IKeyValueStorage,
+) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
-		handleFileServer(http.Dir(hlm_settings.CPathStatic))),
+		handleFileServer(wDB, http.Dir(hlm_settings.CPathStatic))),
 	)
 
-	mux.HandleFunc("/", handler.IndexPage)                               // GET
-	mux.HandleFunc("/favicon.ico", handler.FaviconPage)                  // GET
-	mux.HandleFunc("/about", handler.AboutPage)                          // GET
-	mux.HandleFunc("/settings", handler.SettingsPage(client))            // GET, POST, DELETE
-	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(client))    // GET
-	mux.HandleFunc("/friends", handler.FriendsPage(client))              // GET, POST, DELETE
-	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(client, db)) // GET, POST
+	mux.HandleFunc("/", handler.IndexPage(wDB))                            // GET
+	mux.HandleFunc("/sign/out", handler.SignOutPage(wDB, client))          // GET
+	mux.HandleFunc("/sign/in", handler.SignInPage(wDB, client, stg))       // GET, POST
+	mux.HandleFunc("/sign/up", handler.SignUpPage(wDB, stg))               // GET, POST
+	mux.HandleFunc("/favicon.ico", handler.FaviconPage(wDB))               // GET
+	mux.HandleFunc("/about", handler.AboutPage(wDB))                       // GET
+	mux.HandleFunc("/settings", handler.SettingsPage(wDB, client))         // GET, POST, DELETE
+	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(wDB, client)) // GET
+	mux.HandleFunc("/friends", handler.FriendsPage(wDB, client))           // GET, POST, DELETE
+	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(wDB, client))  // GET, POST
 
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
@@ -107,10 +134,10 @@ func initIntServiceHTTP(cfg config.IConfig, client hls_client.IClient, db databa
 	}
 }
 
-func handleFileServer(fs http.FileSystem) http.Handler {
+func handleFileServer(wDB database.IWrapperDB, fs http.FileSystem) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fs.Open(r.URL.Path); os.IsNotExist(err) {
-			handler.NotFoundPage(w, r)
+			handler.NotFoundPage(wDB.Get())(w, r)
 			return
 		}
 		http.FileServer(fs).ServeHTTP(w, r)

@@ -18,6 +18,12 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
+func (builder *sBuilder) PrivKey(privKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
+	return &pkg_settings.SPrivKey{
+		FPrivKey: privKey.String(),
+	}
+}
+
 func (builder *sBuilder) Connect(connect string) *pkg_settings.SConnect {
 	return &pkg_settings.SConnect{
 		FConnect: connect,

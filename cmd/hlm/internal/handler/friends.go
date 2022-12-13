@@ -7,19 +7,27 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 type sFriends struct {
+	*sTemplateData
 	FFriends []string
 }
 
-func FriendsPage(client hls_client.IClient) http.HandlerFunc {
+func FriendsPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := wDB.Get()
 		if r.URL.Path != "/friends" {
-			NotFoundPage(w, r)
+			NotFoundPage(db)(w, r)
+			return
+		}
+
+		if db == nil {
+			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
 
@@ -63,6 +71,7 @@ func FriendsPage(client hls_client.IClient) http.HandlerFunc {
 		}
 
 		result := new(sFriends)
+		result.sTemplateData = newTemplateData(db)
 		result.FFriends = make([]string, 0, len(res))
 		for aliasName := range res {
 			result.FFriends = append(result.FFriends, aliasName)

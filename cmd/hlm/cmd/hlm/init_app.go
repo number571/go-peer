@@ -5,7 +5,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hlm/internal/app"
 	"github.com/number571/go-peer/cmd/hlm/internal/config"
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
 
@@ -19,11 +18,6 @@ func initApp() (types.IApp, error) {
 		return nil, err
 	}
 
-	levelDB := database.NewKeyValueDB(hlm_settings.CPathDB, "")
-	if levelDB == nil {
-		return nil, fmt.Errorf("error: create/open database")
-	}
-
 	hlsClient := hls_client.NewClient(
 		hls_client.NewRequester(fmt.Sprintf("http://%s", cfg.Connection())),
 	)
@@ -32,7 +26,7 @@ func initApp() (types.IApp, error) {
 		return nil, err
 	}
 
-	return app.NewApp(cfg, hlsClient, levelDB), nil
+	return app.NewApp(cfg, hlsClient), nil
 }
 
 func getConfig() (config.IConfig, error) {

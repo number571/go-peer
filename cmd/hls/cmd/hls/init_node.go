@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -19,6 +21,9 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
 			FTimeWait:     hls_settings.CWaitTime,
 		}),
+		// Insecure to use logging in real anonymity projects!
+		// Logging should only be used in overview or testing;
+		logger.NewLogger(loggerSettings(cfg.Logging())),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FHashing: true,
@@ -42,13 +47,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 				FPullCapacity: hls_settings.CQueuePullCapacity,
 				FDuration:     hls_settings.CQueueDuration,
 			}),
-			client.NewClient(
-				client.NewSettings(&client.SSettings{
-					FWorkSize:    hls_settings.CWorkSize,
-					FMessageSize: hls_settings.CMessageSize,
-				}),
-				privKey,
-			),
+			hls_settings.InitClient(privKey),
 		),
 		func() friends.IF2F {
 			f2f := friends.NewF2F()
@@ -58,4 +57,15 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			return f2f
 		}(),
 	)
+}
+
+func loggerSettings(enabled bool) logger.ISettings {
+	if !enabled {
+		return logger.NewSettings(&logger.SSettings{})
+	}
+	return logger.NewSettings(&logger.SSettings{
+		FInfo: os.Stdout,
+		FWarn: os.Stderr,
+		FErro: os.Stderr,
+	})
 }

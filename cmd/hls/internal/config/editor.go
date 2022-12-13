@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -61,7 +61,7 @@ func (edit *sEditor) UpdateFriends(friends map[string]asymmetric.IPubKey) error 
 	defer edit.fMutex.Unlock()
 
 	for name, pubKey := range friends {
-		if pubKey.Size() == hls_settings.CAKeySize {
+		if pubKey.Size() == pkg_settings.CAKeySize {
 			continue
 		}
 		return fmt.Errorf("not supported key size for '%s'", name)

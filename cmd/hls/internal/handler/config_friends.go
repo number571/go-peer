@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {
+func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var vFriend pkg_settings.SFriend
 

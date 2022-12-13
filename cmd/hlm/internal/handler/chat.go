@@ -28,20 +28,33 @@ type sChatAddress struct {
 	FFriend string
 }
 type sChatMessages struct {
+	*sTemplateData
 	FAddress  sChatAddress
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.HandlerFunc {
+func FriendsChatPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		db := wDB.Get()
 		if r.URL.Path != "/friends/chat" {
-			NotFoundPage(w, r)
+			NotFoundPage(db)(w, r)
+			return
+		}
+
+		if db == nil {
+			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
 
 		aliasName := r.URL.Query().Get("alias_name")
 		if aliasName == "" {
 			fmt.Fprint(w, "alias name is null")
+			return
+		}
+
+		myPubKey, err := client.PubKey()
+		if err != nil {
+			fmt.Fprint(w, "error: read public key")
 			return
 		}
 
@@ -57,6 +70,7 @@ func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.Ha
 			return
 		}
 
+		rel := database.NewRelation(myPubKey, friendPubKey)
 		r.ParseForm()
 
 		switch r.FormValue("method") {
@@ -91,7 +105,7 @@ func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.Ha
 				return
 			}
 
-			err = db.Push(friendPubKey, database.NewMessage(false, msg))
+			err = db.Push(rel, database.NewMessage(false, msg))
 			if err != nil {
 				fmt.Fprint(w, "error: add message to database")
 				return
@@ -103,12 +117,12 @@ func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.Ha
 		}
 
 		start := uint64(0)
-		size := db.Size(friendPubKey)
+		size := db.Size(rel)
 		if size > cChatLimitMessages {
 			start = size - cChatLimitMessages
 		}
 
-		msgs, err := db.Load(friendPubKey, start, size)
+		msgs, err := db.Load(rel, start, size)
 		if err != nil {
 			fmt.Fprint(w, "error: read database")
 			return
@@ -121,6 +135,7 @@ func FriendsChatPage(client hls_client.IClient, db database.IKeyValueDB) http.Ha
 		}
 
 		res := &sChatMessages{
+			sTemplateData: newTemplateData(db),
 			FAddress: sChatAddress{
 				FClient: clientPubKey.Address().String(),
 				FFriend: friendPubKey.Address().String(),

@@ -6,12 +6,16 @@ const (
 )
 
 const (
+	CAKeySize = 4096
+)
+
+const (
 	CHandleIndex          = "/api/index"
 	CHandleConfigConnects = "/api/config/connects"
 	CHandleConfigFriends  = "/api/config/friends"
 	CHandleNetworkOnline  = "/api/network/online"
 	CHandleNetworkPush    = "/api/network/push"
-	CHandleNodePubkey     = "/api/node/pubkey"
+	CHandleNodeKey        = "/api/node/key"
 )
 
 const (
@@ -31,4 +35,5 @@ const (
 	CErrorRead
 	CErrorWrite
 	CErrorSize
+	CErrorUnauth
 )

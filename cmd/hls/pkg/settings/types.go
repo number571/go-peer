@@ -5,6 +5,10 @@ type SResponse struct {
 	FReturn int    `json:"return"`
 }
 
+type SPrivKey struct {
+	FPrivKey string `json:"priv_key"`
+}
+
 type SConnect struct {
 	FConnect string `json:"connect"`
 }

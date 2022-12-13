@@ -33,23 +33,27 @@ func TestLogger(t *testing.T) {
 		return
 	}
 
-	fileWarning, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0644)
+	fileWarn, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		t.Error(err.Error())
 		return
 	}
 
-	fileError, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0644)
+	fileErro, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		t.Error(err.Error())
 		return
 	}
 
-	logger := NewLogger(fileInfo, fileWarning, fileError)
+	logger := NewLogger(NewSettings(&SSettings{
+		FInfo: fileInfo,
+		FWarn: fileWarn,
+		FErro: fileErro,
+	}))
 
 	logger.Info(tcTestInfo)
-	logger.Warning(tcTestWarning)
-	logger.Error(tcTestError)
+	logger.Warn(tcTestWarning)
+	logger.Erro(tcTestError)
 
 	res, err := filesystem.OpenFile(tcPathInfo).Read()
 	if err != nil {

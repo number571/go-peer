@@ -14,6 +14,7 @@ const (
 )
 
 const (
+	tcLogging      = true
 	tcNetwork      = "test_network_key"
 	tcAddressTCP   = "test_address_tcp"
 	tcAddressHTTP  = "test_address_http"
@@ -40,6 +41,7 @@ var (
 
 const (
 	tcConfigTemplate = `{
+	"logging": %t,
 	"network": "%s",
 	"address": {
 		"tcp": "%s",
@@ -63,6 +65,7 @@ const (
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
+		tcLogging,
 		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
@@ -90,6 +93,10 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+	}
+
+	if cfg.Logging() != tcLogging {
+		t.Errorf("logging is invalid")
 	}
 
 	if cfg.Network() != tcNetwork {

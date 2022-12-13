@@ -1,0 +1,27 @@
+{{define "title"}}
+Sign in
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Authentication</h1>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">Sign in</h5>
+        <div class="card-body">
+            <form method="POST" action="/sign/in">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="POST">
+                <div class="mb-3">
+                    <input type="text" class="form-control bg-dark text-white" name="login" placeholder="Login">
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Password">
+                </div>
+                <div class="mb-3">
+                    <input type="submit" name="submit" value="Confirm" class="btn btn-info w-100">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

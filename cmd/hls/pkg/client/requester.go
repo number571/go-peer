@@ -142,10 +142,19 @@ func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error
 	return err
 }
 
+func (requester *sRequester) PrivKey(privKey *pkg_settings.SPrivKey) error {
+	_, err := doRequest(
+		http.MethodPost,
+		requester.fHost+pkg_settings.CHandleNodeKey,
+		privKey,
+	)
+	return err
+}
+
 func (requester *sRequester) PubKey() (asymmetric.IPubKey, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+pkg_settings.CHandleNodePubkey,
+		requester.fHost+pkg_settings.CHandleNodeKey,
 		nil,
 	)
 	if err != nil {

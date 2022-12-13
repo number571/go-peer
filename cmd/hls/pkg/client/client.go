@@ -61,6 +61,10 @@ func (client *sClient) DelConnection(connect string) error {
 	return client.fRequester.DelConnection(client.fBuilder.Connect(connect))
 }
 
+func (client *sClient) PrivKey(privKey asymmetric.IPrivKey) error {
+	return client.fRequester.PrivKey(client.fBuilder.PrivKey(privKey))
+}
+
 func (client *sClient) PubKey() (asymmetric.IPubKey, error) {
 	return client.fRequester.PubKey()
 }

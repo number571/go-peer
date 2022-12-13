@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"log"
-	"os"
 )
 
 var (
@@ -11,9 +10,9 @@ var (
 )
 
 type sLogger struct {
-	fInfoOut    *log.Logger
-	fWarningOut *log.Logger
-	fErrorOut   *log.Logger
+	fInfoOut *log.Logger
+	fWarnOut *log.Logger
+	fErroOut *log.Logger
 }
 
 const (
@@ -23,22 +22,44 @@ const (
 	colorReset  = "\033[0m"
 )
 
-func NewLogger(infoOut, warningOut, errorOut *os.File) ILogger {
-	return &sLogger{
-		log.New(infoOut, fmt.Sprintf("%s%s%s", colorCyan, "[INFO]\t", colorReset), log.LstdFlags),
-		log.New(warningOut, fmt.Sprintf("%s%s%s", colorYellow, "[WARN]\t", colorReset), log.LstdFlags),
-		log.New(errorOut, fmt.Sprintf("%s%s%s", colorRed, "[ERRO]\t", colorReset), log.LstdFlags),
+func NewLogger(sett ISettings) ILogger {
+	logger := &sLogger{}
+
+	infoStream := sett.GetStreamInfo()
+	if infoStream != nil {
+		logger.fInfoOut = log.New(infoStream, fmt.Sprintf("%s[INFO] %s", colorCyan, colorReset), log.LstdFlags)
 	}
+
+	warnStream := sett.GetStreamWarn()
+	if warnStream != nil {
+		logger.fWarnOut = log.New(warnStream, fmt.Sprintf("%s[WARN] %s", colorYellow, colorReset), log.LstdFlags)
+	}
+
+	erroStream := sett.GetStreamErro()
+	if erroStream != nil {
+		logger.fErroOut = log.New(erroStream, fmt.Sprintf("%s[ERRO] %s", colorRed, colorReset), log.LstdFlags)
+	}
+
+	return logger
 }
 
 func (l *sLogger) Info(info string) {
+	if l.fInfoOut == nil {
+		return
+	}
 	l.fInfoOut.Println(info)
 }
 
-func (l *sLogger) Warning(info string) {
-	l.fWarningOut.Println(info)
+func (l *sLogger) Warn(warn string) {
+	if l.fWarnOut == nil {
+		return
+	}
+	l.fWarnOut.Println(warn)
 }
 
-func (l *sLogger) Error(info string) {
-	l.fErrorOut.Println(info)
+func (l *sLogger) Erro(erro string) {
+	if l.fErroOut == nil {
+		return
+	}
+	l.fErroOut.Println(erro)
 }

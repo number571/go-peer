@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -16,6 +16,7 @@ var (
 )
 
 type SConfig struct {
+	FLogging bool   `json:"logging,omitempty"`
 	FNetwork string `json:"network,omitempty"`
 
 	FAddress  *SAddress         `json:"address,omitempty"`
@@ -32,11 +33,6 @@ type SConfig struct {
 type SAddress struct {
 	FTCP  string `json:"tcp,omitempty"`
 	FHTTP string `json:"http,omitempty"`
-}
-
-type SKey struct {
-	FStorage string `json:"storage,omitempty"`
-	FNetwork string `json:"network,omitempty"`
 }
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
@@ -96,12 +92,16 @@ func (cfg *SConfig) loadPubKeys() error {
 			return fmt.Errorf("public key is nil for '%s'", name)
 		}
 		cfg.fFriends[name] = pubKey
-		if pubKey.Size() != hls_settings.CAKeySize {
+		if pubKey.Size() != pkg_settings.CAKeySize {
 			return fmt.Errorf("not supported key size for '%s'", name)
 		}
 	}
 
 	return nil
+}
+
+func (cfg *SConfig) Logging() bool {
+	return cfg.FLogging
 }
 
 func (cfg *SConfig) Network() string {
@@ -147,18 +147,4 @@ func (address *SAddress) HTTP() string {
 		return ""
 	}
 	return address.FHTTP
-}
-
-func (key *SKey) Storage() string {
-	if key == nil {
-		return ""
-	}
-	return key.FStorage
-}
-
-func (key *SKey) Network() string {
-	if key == nil {
-		return ""
-	}
-	return key.FNetwork
 }

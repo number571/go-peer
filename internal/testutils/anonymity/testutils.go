@@ -7,6 +7,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -20,6 +21,7 @@ func TestNewNode(pathDB string) anonymity.INode {
 		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
 		}),
+		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FHashing:   true,

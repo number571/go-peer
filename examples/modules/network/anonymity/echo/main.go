@@ -8,9 +8,9 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/queue"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -64,7 +64,7 @@ func main() {
 
 	res, err := client.Request(
 		service.Queue().Client().PubKey(),
-		payload_adapter.NewPayload(serviceHeader, []byte("hello, world!")),
+		anonymity.NewPayload(serviceHeader, []byte("hello, world!")),
 	)
 	if err != nil {
 		panic(err)
@@ -75,6 +75,7 @@ func main() {
 func newNode(dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
+		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{}),
 			dbPath,

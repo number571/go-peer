@@ -13,11 +13,11 @@ func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(pkg_settings.CHandleIndex, handler.HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleConfigConnects, handler.HandleConnectionsAPI(wrapper, node))
-	mux.HandleFunc(pkg_settings.CHandleConfigFriends, handler.HandleFriendsAPI(wrapper, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkOnline, handler.HandleOnlineAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkPush, handler.HandlePushAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNodePubkey, handler.HandlePubKeyAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleConfigConnects, handler.HandleConfigConnectsAPI(wrapper, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigFriends, handler.HandleConfigFriendsAPI(wrapper, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkOnline, handler.HandleNetworkOnlineAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkPush, handler.HandleNetworkPushAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNodeKey, handler.HandleNodeKeyAPI(node))
 
 	return &http.Server{
 		Addr:    wrapper.Config().Address().HTTP(),

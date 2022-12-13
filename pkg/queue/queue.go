@@ -43,6 +43,15 @@ func (q *sQueue) Settings() ISettings {
 	return q.fSettings
 }
 
+func (q *sQueue) UpdateClient(c client.IClient) {
+	q.fMutex.Lock()
+	defer q.fMutex.Unlock()
+
+	q.fClient = c
+	q.fQueue = make(chan message.IMessage, q.Settings().GetCapacity())
+	q.fMsgPull.fQueue = make(chan message.IMessage, q.Settings().GetPullCapacity())
+}
+
 func (q *sQueue) Client() client.IClient {
 	return q.fClient
 }

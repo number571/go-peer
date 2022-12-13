@@ -14,13 +14,13 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/queue"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
-	payload_adapter "github.com/number571/go-peer/pkg/network/anonymity/adapters/payload"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -31,6 +31,7 @@ var (
 type sNode struct {
 	fMutex         sync.Mutex
 	fSettings      ISettings
+	fLogger        logger.ILogger
 	fKeyValueDB    database.IKeyValueDB
 	fNetwork       network.INode
 	fQueue         queue.IQueue
@@ -41,6 +42,7 @@ type sNode struct {
 
 func NewNode(
 	sett ISettings,
+	log logger.ILogger,
 	kvDB database.IKeyValueDB,
 	nnode network.INode,
 	queue queue.IQueue,
@@ -48,6 +50,7 @@ func NewNode(
 ) INode {
 	return &sNode{
 		fSettings:      sett,
+		fLogger:        log,
 		fKeyValueDB:    kvDB,
 		fNetwork:       nnode,
 		fQueue:         queue,
@@ -98,7 +101,8 @@ func (node *sNode) Handle(head uint32, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) Broadcast(recv asymmetric.IPubKey, pld payload_adapter.IPayload) error {
+// Send message without response waiting.
+func (node *sNode) Broadcast(recv asymmetric.IPubKey, pld payload.IPayload) error {
 	if len(node.Network().Connections()) == 0 {
 		return errors.New("length of connections = 0")
 	}
@@ -111,17 +115,18 @@ func (node *sNode) Broadcast(recv asymmetric.IPubKey, pld payload_adapter.IPaylo
 	return node.send(msg)
 }
 
-// Send message by public key of receiver.
-func (node *sNode) Request(recv asymmetric.IPubKey, pld payload_adapter.IPayload) ([]byte, error) {
+// Send message with response waiting.
+// Payload head must be uint32.
+func (node *sNode) Request(recv asymmetric.IPubKey, pld payload.IPayload) ([]byte, error) {
 	if len(node.Network().Connections()) == 0 {
 		return nil, errors.New("length of connections = 0")
 	}
 
 	headAction := uint32(random.NewStdPRNG().Uint64())
-	headRoutes := mustBeUint32(pld.Head())
+	headRoute := mustBeUint32(pld.Head())
 
 	newPld := payload.NewPayload(
-		joinHead(headAction, headRoutes).Uint64(),
+		joinHead(headAction, headRoute).Uint64(),
 		pld.Body(),
 	)
 
@@ -170,36 +175,55 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			if !ok {
 				break
 			}
-			node.networkBroadcast(msg)
+
+			hash := msg.Body().Hash()
+			proof := msg.Body().Proof()
+
+			// redirect message to another nodes
+			_ = node.networkBroadcast(msg)
+
+			pubKey := node.fQueue.Client().PubKey()
+			node.fLogger.Info(fmtLog(cLogInfoBroadcast, hash, proof, pubKey, nil))
 		}
 	}()
 
-	return func(nnode network.INode, _ conn.IConn, reqBytes []byte) {
+	return func(nnode network.INode, conn conn.IConn, reqBytes []byte) {
 		msg := node.initialCheck(message.LoadMessage(reqBytes))
 		if msg == nil {
+			node.fLogger.Warn(fmtLog(cLogWarnMessageNull, nil, 0, nil, conn))
 			return
 		}
 
-		// redirect to another nodes
-		node.networkBroadcast(msg)
+		hash := msg.Body().Hash()
+		proof := msg.Body().Proof()
+
+		// redirect message to another nodes
+		_ = node.networkBroadcast(msg)
+
+		// check already received data by hash
+		if _, err := node.KeyValueDB().Get(hash); err == nil {
+			node.fLogger.Info(fmtLog(cLogInfoExist, hash, proof, nil, conn))
+			return
+		}
+
+		// set hash to database
+		if err := node.KeyValueDB().Set(hash, []byte{}); err != nil {
+			node.fLogger.Erro(fmtLog(cLogErroDatabaseSet, hash, proof, nil, conn))
+			return
+		}
 
 		// try decrypt message
 		sender, pld, err := node.Queue().Client().Decrypt(msg)
 		if err != nil {
+			node.fLogger.Info(fmtLog(cLogInfoUnencryptable, hash, proof, nil, conn))
 			return
 		}
 
 		// check sender in f2f list
 		if !node.F2F().InList(sender) {
+			node.fLogger.Warn(fmtLog(cLogWarnNotFriend, hash, proof, sender, conn))
 			return
 		}
-
-		// check already received data by hash
-		hash := []byte(fmt.Sprintf("_hash_%X", msg.Body().Hash()))
-		if _, err := node.KeyValueDB().Get(hash); err == nil {
-			return
-		}
-		node.KeyValueDB().Set(hash, []byte{})
 
 		// get header of payload
 		head := loadHead(pld.Head())
@@ -208,6 +232,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		actionKey := newActionKey(sender, head.GetAction())
 		action, ok := node.getAction(actionKey)
 		if ok {
+			node.fLogger.Info(fmtLog(cLogInfoAction, hash, proof, sender, conn))
 			action <- pld.Body()
 			return
 		}
@@ -215,16 +240,20 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		// get function by payload head
 		f, ok := node.getRoute(head.GetRoute())
 		if !ok || f == nil {
+			node.fLogger.Warn(fmtLog(cLogWarnUnknownRoute, hash, proof, sender, conn))
 			return
 		}
 
+		// response can be nil
 		resp := f(node, sender, pld.Body())
 		if resp == nil {
+			node.fLogger.Info(fmtLog(cLogInfoWithoutResp, hash, proof, sender, conn))
 			return
 		}
 
 		// create the message and put this to the queue
-		node.Broadcast(sender, payload.NewPayload(pld.Head(), resp))
+		_ = node.Broadcast(sender, payload.NewPayload(pld.Head(), resp))
+		node.fLogger.Info(fmtLog(cLogInfoEnqueueResp, hash, proof, sender, conn))
 	}
 }
 
