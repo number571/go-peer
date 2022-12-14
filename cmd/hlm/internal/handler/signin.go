@@ -92,7 +92,6 @@ func SignInPage(wDB database.IWrapperDB, client hls_client.IClient, stg storage.
 			"signin.html",
 		)
 		if err != nil {
-			fmt.Println(err)
 			panic("can't load hmtl files")
 		}
 		t.Execute(w, newTemplateData(db))

@@ -3,18 +3,27 @@ package web
 import (
 	"embed"
 	"io/fs"
+	"os"
+)
+
+const (
+	cUsedEmbedFS = true
 )
 
 var (
 	//go:embed static
-	embededStatic embed.FS
+	gEmbededStatic embed.FS
 
 	//go:embed template
-	embededTemplate embed.FS
+	gEmbededTemplate embed.FS
 )
 
 func GetStaticPath() fs.FS {
-	fsys, err := fs.Sub(embededStatic, "static")
+	const staticPath = "static"
+	if !cUsedEmbedFS {
+		return os.DirFS("./web/" + staticPath)
+	}
+	fsys, err := fs.Sub(gEmbededStatic, staticPath)
 	if err != nil {
 		panic(err)
 	}
@@ -22,7 +31,11 @@ func GetStaticPath() fs.FS {
 }
 
 func GetTemplatePath() fs.FS {
-	fsys, err := fs.Sub(embededTemplate, "template")
+	const templatePath = "template"
+	if !cUsedEmbedFS {
+		return os.DirFS("./web/" + templatePath)
+	}
+	fsys, err := fs.Sub(gEmbededTemplate, templatePath)
 	if err != nil {
 		panic(err)
 	}

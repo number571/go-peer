@@ -18,6 +18,10 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const (
+	initStart = time.Second * 3
+)
+
 var (
 	_ types.IApp = &sApp{}
 )
@@ -69,7 +73,7 @@ func (app *sApp) Run() error {
 	case err := <-res:
 		app.Close()
 		return err
-	case <-time.After(time.Second * 3):
+	case <-time.After(initStart):
 		return nil
 	}
 }

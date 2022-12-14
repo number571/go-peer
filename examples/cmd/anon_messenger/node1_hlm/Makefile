@@ -3,7 +3,7 @@ GC=go build
 default: clean run 
 run:
 	./prog_hls1 --key priv.key &
-	sleep 5
+	sleep 8
 	./prog_hlm1 &
 clean:
 	pkill prog_hls1 || true

@@ -19,6 +19,7 @@ interacting with the network. HLS is based on the fifth^ stage of anonymity and 
 ## Config structure
 
 ```
+"logging"      Enable loggins in/out actions in the network
 "network"      A network key created to encapsulate connections
 "address.tcp"  Connection address for anonymity network, may be void
 "address.http" Connection address for API functions
@@ -29,6 +30,7 @@ interacting with the network. HLS is based on the fifth^ stage of anonymity and 
 
 ```json
 {
+	"logging": true,
 	"network": "hls-network-key",
 	"address": {
 		"tcp": "localhost:9571",

@@ -1,4 +1,8 @@
 hlm 
 hlm.cfg
+hlm.stg
 hlm.db/
+prog_hls
+hls.cfg
+hls.db/ 
 !cmd/hlm 

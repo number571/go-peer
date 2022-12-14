@@ -25,7 +25,6 @@ run:
 	make run -C middle_hls
 	make run -C node1_hlm
 	make run -C node2_hlm
-	sleep 5
 clean:
 	# MAKEFILE CLEAN 
 	make clean -C middle_hls
