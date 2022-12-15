@@ -23,17 +23,17 @@ A feature of HLS (compared to many other anonymous networks) is its easy adaptat
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
 
-<img src="examples/images/hls_queue.png" alt="hls_queue.png"/>
+<img src="examples/images/hls_queue.jpg" alt="hls_queue.jpg"/>
 <p align="center">Figure 1. Queue and message generation in HLS.<p>
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
-<img src="examples/images/hls_view.png" alt="hls_view.png"/>
+<img src="examples/images/hls_view.jpg" alt="hls_view.jpg"/>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.<p>
 
 Data exchange between network participants is carried out using application services. HLS has a dual role: 1) packages traffic from pure to anonymizing and vice versa; 2) converts external traffic to internal and vice versa. The second property is the redirection of traffic from the network to the local service and back.
 
-<img src="examples/images/hls_service.png" alt="hls_service.png"/>
+<img src="examples/images/hls_service.jpg" alt="hls_service.jpg"/>
 <p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.<p>
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
@@ -143,7 +143,7 @@ Firstly, there is registration and authorization, which does not exist in the HL
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
-<img src="examples/images/hlm_auth.png" alt="hlm_auth.png"/>
+<img src="examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/>
 <p align="center">Figure 5. Data encryption with different types of input parameters.<p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
