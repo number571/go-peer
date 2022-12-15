@@ -1,5 +1,12 @@
 # go-peer
+
 > Library for create secure and anonymity decentralized networks
+
+<img src="examples/images/go-peer_logo.png" alt="go-peer_logo.png"/>
+
+The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes.
+
+> Examples of works in the directory [https://github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 
 ## Library based applications
 
@@ -7,7 +14,7 @@
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
 3. [Another applications](#3-another-applications) 
 
-### 1. Hidden Lake Service
+## 1. Hidden Lake Service
 
 > [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS")
 
@@ -19,7 +26,7 @@ A feature of HLS (compared to many other anonymous networks) is its easy adaptat
 
 > More information about HLS in the [habr.com/ru/post/696504](https://habr.com/ru/post/696504/ "Habr HLS")
 
-#### How it works
+### How it works
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
 
@@ -27,6 +34,8 @@ Each network participant sets a message generation period for himself (the perio
 <p align="center">Figure 1. Queue and message generation in HLS.</p>
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
+
+> Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/modules/client](https://github.com/number571/go-peer/tree/master/examples/modules/client "Module client");
 
 <p align="center"><img src="examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
@@ -40,9 +49,11 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 > More details in the work [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/hidden_systems.pdf "TSHS")
 
-#### Examples
+### Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
+
+The `recv_hls` node contains its `echo_service`, which performs the role of redirecting the request body back to the client as a response. Access to this service is carried out by its alias `hidden-echo-service`, put forward by the recv_hls node.
 
 ```go
 ...
@@ -63,7 +74,7 @@ func echoPage(w http.ResponseWriter, r *http.Request) {
 ...
 ```
 
-The `recv_hls` node contains its `echo_service`, which performs the role of redirecting the request body back to the client as a response. Access to this service is carried out by its alias `hidden-echo-service`, put forward by the recv_hls node.
+Identification between `recv_hls` and `send_hls` nodes is performed using public keys. This is the main method of identification and routing in the HLS network. IP addresses are only needed to connect to such a network and no more. Requests and responses structure are HEX encoded.
 
 Structure of request. The body `hello, world!` is encoded base64.
 ```bash
@@ -78,8 +89,6 @@ JSON_DATA='{
 }';
 ```
 
-Identification between `recv_hls` and `send_hls` nodes is performed using public keys. This is the main method of identification and routing in the HLS network. IP addresses are only needed to connect to such a network and no more. Requests and responses data are HEX encoded.
-
 Request format
 ```
 PUSH_FORMAT="{
@@ -87,8 +96,6 @@ PUSH_FORMAT="{
         \"hex_data\":\"$(str2hex "$JSON_DATA")\"
 }";
 ```
-
-> More examples API functions HLS are described in the file `cmd/hls/README.md`
 
 Build and run nodes
 ```bash
@@ -121,9 +128,9 @@ Decode response
 {"echo":"hello, world!","return":1}
 ```
 
-> Simple examples in the directory `examples/modules/network/anonymity`
+> Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/modules/network/anonymity "Module anonymity");
 
-### 2. Hidden Lake Messenger
+## 2. Hidden Lake Messenger
 
 > [github.com/number571/go-peer/tree/master/cmd/hlm](https://github.com/number571/go-peer/tree/master/cmd/hlm "HLM");
 
@@ -135,7 +142,7 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 > More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
-#### How it works
+### How it works
 
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
@@ -150,7 +157,7 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
-#### Examples
+### Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3`.
 
@@ -172,9 +179,9 @@ After the registration procedure, re-enter your `login/password`. After that, yo
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` and `node2_hlm`. This node will be Alice.
 
-> More example images about HLM pages in the the file `cmd/hlm/README.md`
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hlm/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 
-### 3. Another applications
+## 3. Another applications
 
 * Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
 * Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
@@ -182,7 +189,7 @@ To see the success of sending and receiving messages, you need to do all the sam
 * Cryptographic Data Storage: [github.com/number571/go-peer/tree/master/cmd/cds](https://github.com/number571/go-peer/tree/master/cmd/cds "CDS");
 * In developing... Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
 
-#### Deprecated applications
+### Deprecated applications
 
 * Hidden Lake (new release = cmd/hls+cmd/hlm+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service (new release = cmd/hms+cmd/hmc): [github.com/number571/hes](https://github.com/number571/hes "HES");

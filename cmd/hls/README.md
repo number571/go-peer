@@ -2,9 +2,117 @@
 
 > Hidden Lake Service
 
-## Description
+<img src="../../examples/images/hls_logo.png" alt="hls_logo.png"/>
 
-HLS is the core of an anonymous network with theoretically provable anonymity. HLS is based on the fifth stage of anonymity and is an implementation of an abstract anonymous network based on queues. It is a peer-to-peer network communication with trusted friend-to-friend participants. All transmitted and received messages are in the form of end-to-end encryption.
+The `Hidden Lake Service` is the core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
+
+A feature of HLS (compared to many other anonymous networks) is its easy adaptation to a hostile centralized environment. Anonymity can be restored literally from one node in the network, even if it is the only point of failure.
+
+> More information about HLS in the [habr.com/ru/post/696504](https://habr.com/ru/post/696504/ "Habr HLS")
+
+## How it works
+
+Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
+
+<p align="center"><img src="../../examples/images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
+<p align="center">Figure 1. Queue and message generation in HLS.</p>
+
+Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
+
+> Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/modules/client](https://github.com/number571/go-peer/tree/master/examples/modules/client "Module client");
+
+<p align="center"><img src="../../examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
+<p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
+
+Data exchange between network participants is carried out using application services. HLS has a dual role: 1) packages traffic from pure to anonymizing and vice versa; 2) converts external traffic to internal and vice versa. The second property is the redirection of traffic from the network to the local service and back.
+
+<p align="center"><img src="../../examples/images/hls_service.jpg" alt="hls_service.jpg"/></p>
+<p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.</p>
+
+As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
+
+> More details in the work [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/hidden_systems.pdf "TSHS")
+
+### Example
+
+There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
+
+The `recv_hls` node contains its `echo_service`, which performs the role of redirecting the request body back to the client as a response. Access to this service is carried out by its alias `hidden-echo-service`, put forward by the recv_hls node.
+
+```go
+...
+// handle: "/echo"
+// return format: {"echo":string,"return":int}
+func echoPage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		response(w, 2, "failed: incorrect method")
+		return
+	}
+	res, err := io.ReadAll(r.Body)
+	if err != nil {
+		response(w, 3, "failed: read body")
+		return
+	}
+	response(w, 1, string(res))
+}
+...
+```
+
+Identification between `recv_hls` and `send_hls` nodes is performed using public keys. This is the main method of identification and routing in the HLS network. IP addresses are only needed to connect to such a network and no more. Requests and responses structure are HEX encoded.
+
+Structure of request. The body `hello, world!` is encoded base64.
+```bash
+JSON_DATA='{
+        "method":"POST",
+        "host":"hidden-echo-service",
+        "path":"/echo",
+        "head":{
+            "Accept": "application/json"
+        },
+        "body":"aGVsbG8sIHdvcmxkIQ=="
+}';
+```
+
+Request format
+```
+PUSH_FORMAT="{
+        \"receiver\":\"Pub(go-peer/rsa){3082020A0282020100B752D35E81F4AEEC1A9C42EDED16E8924DD4D359663611DE2DCCE1A9611704A697B26254DD2AFA974A61A2CF94FAD016450FEF22F218CA970BFE41E6340CE3ABCBEE123E35A9DCDA6D23738DAC46AF8AC57902DDE7F41A03EB00A4818137E1BF4DFAE1EEDF8BB9E4363C15FD1C2278D86F2535BC3F395BE9A6CD690A5C852E6C35D6184BE7B9062AEE2AFC1A5AC81E7D21B7252A56C62BB5AC0BBAD36C7A4907C868704985E1754BAA3E8315E775A51B7BDC7ACB0D0675D29513D78CB05AB6119D3CA0A810A41F78150E3C5D9ACAFBE1533FC3533DECEC14387BF7478F6E229EB4CC312DC22436F4DB0D4CC308FB6EEA612F2F9E00239DE7902DE15889EE71370147C9696A5E7B022947ABB8AFBBC64F7840BED4CE69592CAF4085A1074475E365ED015048C89AE717BC259C42510F15F31DA3F9302EAD8F263B43D14886B2335A245C00871C041CBB683F1F047573F789673F9B11B6E6714C2A3360244757BB220C7952C6D3D9D65AA47511A63E2A59706B7A70846C930DCFB3D8CAFB3BD6F687CACF5A708692C26B363C80C460F54E59912D41D9BB359698051ABC049A0D0CFD7F23DC97DA940B1EDEAC6B84B194C8F8A56A46CE69EE7A0AEAA11C99508A368E64D27756AD0BA7146A6ADA3D5FA237B3B4EDDC84B71C27DE3A9F26A42197791C7DC09E2D7C4A7D8FCDC8F9A5D4983BB278FCE9513B1486D18F8560C3F31CC70203010001}\",
+        \"hex_data\":\"$(str2hex "$JSON_DATA")\"
+}";
+```
+
+Build and run nodes
+```bash
+$ cd examples/cmd/echo_service
+$ make
+```
+
+Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
+
+<p align="center"><img src="../../examples/images/hls_logger.png" alt="hls_logger.png"/></p>
+<p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
+
+Send request
+```bash
+$ ./request.sh
+```
+
+Get response
+```bash
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Thu, 15 Dec 2022 07:42:49 GMT
+Content-Length: 97
+
+{"result":"7b226563686f223a2268656c6c6f2c20776f726c6421222c2272657475726e223a317d0a","return":1}
+```
+
+Decode response
+```json
+{"echo":"hello, world!","return":1}
+```
+
+> Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/modules/network/anonymity "Module anonymity");
 
 ## Cryptographic algorithms and functions
 
