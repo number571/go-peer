@@ -6,6 +6,15 @@
 
 The HLM is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving). 
 
+## Cryptographic algorithms and functions
+
+1. AES-256-CTR (Data encryption)
+2. RSA-4096-OAEP (Key encryption)
+3. RSA-4096-PSS (Hash signing)
+4. SHA-256 (Data hashing)
+5. HMAC-SHA-256 (Network hashing)
+6. PoW-20 (Hash proof)
+
 ## Signup page
 
 Sign up login/password and additional private key. If field with private key is null than private key generated.

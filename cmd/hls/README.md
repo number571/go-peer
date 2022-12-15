@@ -4,8 +4,7 @@
 
 ## Description
 
-The HLS is the core of the anonymous network, representing API functions for 
-interacting with the network. HLS is based on the fifth^ stage of anonymity and represents the implementation of an abstract anonymous network based on queues.
+HLS is the core of an anonymous network with theoretically provable anonymity. HLS is based on the fifth stage of anonymity and is an implementation of an abstract anonymous network based on queues. It is a peer-to-peer network communication with trusted friend-to-friend participants. All transmitted and received messages are in the form of end-to-end encryption.
 
 ## Cryptographic algorithms and functions
 
