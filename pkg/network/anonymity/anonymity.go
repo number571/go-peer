@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -17,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/queue"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 

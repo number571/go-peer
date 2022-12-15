@@ -8,11 +8,11 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 1. The `crypto` module represents cryptographic primitives: 1) asymmetric encryption, decryption; 2) asymmetric signing and signature verification; 3) symmetric encryption and decryption; 4) hashing; 5) entropy enhancement; 6) computational problems (puzzles); 7) cryptographically stable pseudorandom number generator.
 2. The `client` module for encrypting and decrypting information with the attached data integrity (hash), authentication (signature) and confirmation (work). It is a basic part of the `anonymity` module.
-3. The `queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client` module.
+3. The `client/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client` module.
 4. The `network` module is a decentralized communication between network nodes. It does not represent any protection of information and anonymity of participants.
 5. The `network/anonymity` module to ensure anonymity based on the fifth stage. Presents the main functions for working with the network on top of the `network` and `queue` modules.
 6. The `storage` module includes two types of storage: `in-memory` and"`crypto`. The second type of storage can be used for secure storage of passwords and private keys.
-7. The `storage/database` module is a key-value database with the functions of value encryption and key hashing.
+7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
 > Examples of works in the directory [https://github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 

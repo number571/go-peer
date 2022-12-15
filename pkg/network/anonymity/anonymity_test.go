@@ -9,12 +9,12 @@ import (
 
 	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/queue"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
