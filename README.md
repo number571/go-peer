@@ -142,7 +142,7 @@ Decode response
 
 > [github.com/number571/go-peer/tree/master/cmd/hlm](https://github.com/number571/go-peer/tree/master/cmd/hlm "HLM");
 
-<img src="examples/images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="examples/images/hlm_logo2.png" alt="hlm_logo2.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 
