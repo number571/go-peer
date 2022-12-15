@@ -17,28 +17,28 @@ The `Hidden Lake Service` is the core of an anonymous network with theoretically
 
 A feature of HLS (compared to many other anonymous networks) is its easy adaptation to a hostile centralized environment. Anonymity can be restored literally from one node in the network, even if it is the only point of failure.
 
-> More information about HLS in the `https://habr.com/ru/post/696504/`
+> More information about HLS in the [habr.com/ru/post/696504](https://habr.com/ru/post/696504/ "Habr HLS")
 
 #### How it works
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
 
 <img src="examples/images/hls_queue.png" alt="hls_queue.png"/>
-Figure 1. Queue and message generation in HLS.
+<p align="center">Figure 1. Queue and message generation in HLS.<p>
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
 <img src="examples/images/hls_view.png" alt="hls_view.png"/>
-Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.
+<p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.<p>
 
 Data exchange between network participants is carried out using application services. HLS has a dual role: 1) packages traffic from pure to anonymizing and vice versa; 2) converts external traffic to internal and vice versa. The second property is the redirection of traffic from the network to the local service and back.
 
 <img src="examples/images/hls_service.png" alt="hls_service.png"/>
-Figure 3. Interaction of third-party services with the traffic anonymization service.
+<p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.<p>
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
 
-> More details in the work `Theory of the structure of hidden systems`
+> More details in the work [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/hidden_systems.pdf "TSHS")
 
 #### Examples
 
@@ -99,7 +99,7 @@ $ make
 Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
 
 <img src="examples/images/hls_logger.png" alt="hls_logger.png"/>
-Figure 4. Output of all actions and all received traffic from the middle_hls node.
+<p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.<p>
 
 Send request
 ```bash
@@ -133,7 +133,7 @@ The `Hidden Lake Messenger` is a messenger based on the core of an anonymous net
 
 HLM is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com /. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
-> More information about HLM in the `https://habr.com/ru/post/701488/`
+> More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
 #### How it works
 
@@ -144,7 +144,7 @@ Firstly, there is registration and authorization, which does not exist in the HL
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
 <img src="examples/images/hlm_auth.png" alt="hlm_auth.png"/>
-Figure 5. Data encryption with different types of input parameters.
+<p align="center">Figure 5. Data encryption with different types of input parameters.<p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
 
@@ -164,7 +164,7 @@ The output of the `middle_hls` node is similar to `Figure 4`.
 
 Than open browser on `localhost:8080`
 <img src="examples/images/hlm_about.png" alt="hlm_about.png"/>
-Figure 6. Home page of the HLM application.
+<p align="center">Figure 6. Home page of the HLM application.<p>
 
 Next, you need to register by going to the Sign up page. Enter your `login/password` and insert the private key `priv.key`. That key is located in `examples/cmd/anon_messenger/node2_hlm`.
 
