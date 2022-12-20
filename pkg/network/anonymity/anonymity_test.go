@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/closer"
@@ -17,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
+	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/network/conn"
 )
@@ -83,7 +83,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 		return
 	}
 
-	t.Errorf("get response without list of friends")
+	t.Error("get response without list of friends")
 }
 
 // nodes[0], nodes[1] = clients

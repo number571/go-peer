@@ -3,3 +3,4 @@ hls
 hlm 
 web/
 !*.cfg
+!*.stg 

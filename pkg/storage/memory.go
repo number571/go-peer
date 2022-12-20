@@ -12,15 +12,17 @@ var (
 )
 
 type sMemoryStorage struct {
-	fMutex   sync.Mutex
-	fMaximum uint64
-	fMapping map[string][]byte
+	fMutex    sync.Mutex
+	fMaximum  uint64
+	fKeyQueue []string
+	fMapping  map[string][]byte
 }
 
 func NewMemoryStorage(max uint64) IKeyValueStorage {
 	return &sMemoryStorage{
-		fMaximum: max,
-		fMapping: make(map[string][]byte),
+		fMaximum:  max,
+		fKeyQueue: make([]string, 0, max),
+		fMapping:  make(map[string][]byte, max),
 	}
 }
 
@@ -28,14 +30,15 @@ func (store *sMemoryStorage) Set(key, value []byte) error {
 	store.fMutex.Lock()
 	defer store.fMutex.Unlock()
 
-	if uint64(len(store.fMapping)) > store.fMaximum {
-		for k := range store.fMapping {
-			delete(store.fMapping, k)
-			break
-		}
+	if uint64(len(store.fMapping)) >= store.fMaximum {
+		delete(store.fMapping, store.fKeyQueue[0])
+		store.fKeyQueue = store.fKeyQueue[1:]
 	}
 
-	store.fMapping[encoding.HexEncode(key)] = value
+	newKey := encoding.HexEncode(key)
+
+	store.fKeyQueue = append(store.fKeyQueue, newKey)
+	store.fMapping[newKey] = value
 	return nil
 }
 

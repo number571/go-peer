@@ -7,10 +7,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	"github.com/number571/go-peer/cmd/hls/pkg/client"
-	"github.com/number571/go-peer/internal/testutils"
+	testutils "github.com/number571/go-peer/test/_data"
 
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
-	anon_testutils "github.com/number571/go-peer/internal/testutils/anonymity"
+	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (

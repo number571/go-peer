@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/network"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestConnKeeper(t *testing.T) {

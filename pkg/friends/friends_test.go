@@ -3,8 +3,8 @@ package friends
 import (
 	"testing"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 var (

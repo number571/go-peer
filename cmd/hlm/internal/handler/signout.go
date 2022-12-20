@@ -4,25 +4,23 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
-	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 )
 
-func SignOutPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
+func SignOutPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/sign/out" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 
-		if db == nil {
+		if !s.IsActive() {
 			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
 
-		if err := wDB.Close(); err != nil {
-			fmt.Fprint(w, "error: close database")
+		if err := s.ClearActiveState(); err != nil {
+			fmt.Fprint(w, "error: clean hls_client data")
 			return
 		}
 

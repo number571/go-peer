@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestTransaction(t *testing.T) {
@@ -28,23 +28,23 @@ func TestTransaction(t *testing.T) {
 
 	newBlock := NewBlock(sett, priv, hash, txs)
 	if newBlock == nil {
-		t.Errorf("new block is nil")
+		t.Error("new block is nil")
 		return
 	}
 
 	if !newBlock.IsValid() {
-		t.Errorf("new block is not valid")
+		t.Error("new block is not valid")
 		return
 	}
 
 	loadBlock := LoadBlock(sett, testutils.TcLargeBody)
 	if loadBlock == nil {
-		t.Errorf("load block is nil")
+		t.Error("load block is nil")
 		return
 	}
 
 	if !loadBlock.IsValid() {
-		t.Errorf("load block is not valid")
+		t.Error("load block is not valid")
 		return
 	}
 }

@@ -3,14 +3,13 @@ package handler
 import (
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 )
 
-func FaviconPage(wDB database.IWrapperDB) http.HandlerFunc {
+func FaviconPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/favicon.ico" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 		http.Redirect(w, r, "/static/img/favicon.ico", http.StatusFound)

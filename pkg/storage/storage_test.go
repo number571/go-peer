@@ -2,22 +2,24 @@ package storage
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
-	storageName = "storage.stg"
+	testStorageSize = 32
+	testStorageName = "storage.stg"
 )
 
 func TestCryptoStorage(t *testing.T) {
-	os.Remove(storageName)
-	defer os.Remove(storageName)
+	os.Remove(testStorageName)
+	defer os.Remove(testStorageName)
 
-	store, err := NewCryptoStorage(storageName, []byte(testutils.TcKey1), 10)
+	store, err := NewCryptoStorage(testStorageName, []byte(testutils.TcKey1), 10)
 	if err != nil {
 		t.Error(err)
 		return
@@ -43,7 +45,47 @@ func TestCryptoStorage(t *testing.T) {
 	}
 
 	if _, err := store.Get([]byte(testutils.TcKey2)); err == nil {
-		t.Errorf("value in storage not deleted")
+		t.Error("value in storage not deleted")
+		return
+	}
+}
+
+func TestMemoryStorage(t *testing.T) {
+	store := NewMemoryStorage(testStorageSize)
+
+	for i := 0; i < testStorageSize; i++ {
+		store.Set([]byte(fmt.Sprintf("%d", i)), []byte{byte(i)})
+	}
+
+	for i := 0; i < testStorageSize; i++ {
+		res, err := store.Get([]byte(fmt.Sprintf("%d", i)))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if !bytes.Equal([]byte{byte(i)}, res) {
+			t.Error("values not equals (1)")
+			return
+		}
+	}
+
+	key := []byte("AAA-key")
+	val := []byte{12, 23, 34, 45, 56}
+	store.Set(key, val)
+
+	if _, err := store.Get([]byte("0")); err == nil {
+		t.Error("queue does not work")
+		return
+	}
+
+	res, err := store.Get(key)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !bytes.Equal(val, res) {
+		t.Error("values not equals (2)")
 		return
 	}
 }

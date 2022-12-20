@@ -96,19 +96,19 @@ func TestConfig(t *testing.T) {
 	}
 
 	if cfg.Logging() != tcLogging {
-		t.Errorf("logging is invalid")
+		t.Error("logging is invalid")
 	}
 
 	if cfg.Network() != tcNetwork {
-		t.Errorf("network is invalid")
+		t.Error("network is invalid")
 	}
 
 	if cfg.Address().TCP() != tcAddressTCP {
-		t.Errorf("address_tcp is invalid")
+		t.Error("address_tcp is invalid")
 	}
 
 	if cfg.Address().HTTP() != tcAddressHTTP {
-		t.Errorf("address_http is invalid")
+		t.Error("address_http is invalid")
 	}
 
 	for i, v := range cfg.Connections() {
@@ -146,7 +146,7 @@ func TestWrapper(t *testing.T) {
 	}
 
 	if len(cfg.Friends()) == 0 {
-		t.Errorf("list of friends should be is not nil for tests")
+		t.Error("list of friends should be is not nil for tests")
 		return
 	}
 
@@ -154,7 +154,7 @@ func TestWrapper(t *testing.T) {
 	wrapper.Editor().UpdateFriends(nil)
 
 	if len(cfg.Friends()) != 0 {
-		t.Errorf("friends is not nil for current config")
+		t.Error("friends is not nil for current config")
 		return
 	}
 
@@ -164,7 +164,7 @@ func TestWrapper(t *testing.T) {
 	}
 
 	if len(cfg.Friends()) != 0 {
-		t.Errorf("friends is not nil for loaded config")
+		t.Error("friends is not nil for loaded config")
 		return
 	}
 }

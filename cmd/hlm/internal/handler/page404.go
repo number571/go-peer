@@ -4,11 +4,11 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/cmd/hlm/web"
 )
 
-func NotFoundPage(db database.IKeyValueDB) http.HandlerFunc {
+func NotFoundPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		t, err := template.ParseFS(
@@ -19,6 +19,6 @@ func NotFoundPage(db database.IKeyValueDB) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, newTemplateData(db))
+		t.Execute(w, s.GetTemplate())
 	}
 }

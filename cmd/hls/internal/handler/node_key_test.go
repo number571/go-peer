@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/hls/pkg/client"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestHandlePubKeyAPI(t *testing.T) {
@@ -24,13 +24,13 @@ func TestHandlePubKeyAPI(t *testing.T) {
 	}
 
 	if pubKey.String() != node.Queue().Client().PubKey().String() {
-		t.Errorf("public keys not equals")
+		t.Error("public keys not equals")
 		return
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2)
 	if err := client.PrivKey(privKey); err != nil {
-		t.Errorf("failed update private key")
+		t.Error("failed update private key")
 		return
 	}
 
@@ -41,7 +41,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 	}
 
 	if pubKey.Address().String() == newPubKey.Address().String() {
-		t.Errorf("public keys are equals")
+		t.Error("public keys are equals")
 		return
 	}
 }

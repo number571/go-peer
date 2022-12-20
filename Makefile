@@ -9,15 +9,15 @@ clean:
 	make -C ./cmd/hms clean
 	make -C ./cmd/hmc clean
 	make -C ./cmd/ubc clean
-	make -C ./examples/cmd/anon_messenger clean 
-	make -C ./examples/cmd/echo_service clean 
+	make -C ./examples/_cmd/anon_messenger clean 
+	make -C ./examples/_cmd/echo_service clean 
 
 test:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		go clean -testcache; \
 		echo $$i; \
-		go test `go list ./... | grep -v examples`; \
+		go test `go list ./...`; \
 		if [ $$? != 0 ]; then \
 			exit; \
 		fi; \

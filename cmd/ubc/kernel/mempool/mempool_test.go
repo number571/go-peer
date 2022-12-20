@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
@@ -30,7 +30,7 @@ func TestMempool(t *testing.T) {
 	defer mempool.Close()
 
 	if mempool.Height() != 0 {
-		t.Errorf("init mempool with height != 0")
+		t.Error("init mempool with height != 0")
 		return
 	}
 
@@ -41,13 +41,13 @@ func TestMempool(t *testing.T) {
 
 	mempool.Push(tx)
 	if mempool.Height() != 1 {
-		t.Errorf("mempool with 1 push has height != 1")
+		t.Error("mempool with 1 push has height != 1")
 		return
 	}
 
 	loadTX := mempool.Transaction(encoding.HexDecode(tcHashTX))
 	if loadTX == nil {
-		t.Errorf("load tx from mempool = nil")
+		t.Error("load tx from mempool = nil")
 		return
 	}
 
@@ -63,14 +63,14 @@ func TestMempool(t *testing.T) {
 	}
 
 	if mempool.Height() != blockCountTXs {
-		t.Errorf("mempool height != blockCountTXs")
+		t.Error("mempool height != blockCountTXs")
 		return
 	}
 
 	txs := mempool.Pop()
 	if len(txs) != int(blockCountTXs) {
 		fmt.Println(len(txs), blockCountTXs)
-		t.Errorf("len of pop txs != blockCountTXs")
+		t.Error("len of pop txs != blockCountTXs")
 		return
 	}
 }

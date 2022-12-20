@@ -7,24 +7,22 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/storage"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	"github.com/number571/go-peer/cmd/hlm/web"
 	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
-func SignUpPage(wDB database.IWrapperDB, stg storage.IKeyValueStorage) http.HandlerFunc {
+func SignUpPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/sign/up" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 
-		if db != nil {
+		if s.IsActive() {
 			http.Redirect(w, r, "/about", http.StatusFound)
 			return
 		}
@@ -64,11 +62,6 @@ func SignUpPage(wDB database.IWrapperDB, stg storage.IKeyValueStorage) http.Hand
 				[]byte{},
 			)).Bytes()
 
-			if _, err := stg.Get(hashLP); err == nil {
-				fmt.Fprint(w, "error: account already exist")
-				return
-			}
-
 			var privKey asymmetric.IPrivKey
 			privateKey := strings.TrimSpace(r.FormValue("private_key"))
 
@@ -84,8 +77,8 @@ func SignUpPage(wDB database.IWrapperDB, stg storage.IKeyValueStorage) http.Hand
 				return
 			}
 
-			if err := stg.Set(hashLP, privKey.Bytes()); err != nil {
-				fmt.Fprint(w, "error: create storage account")
+			if err := s.CreateState(hashLP, privKey); err != nil {
+				fmt.Fprint(w, "error: create account")
 				return
 			}
 
@@ -101,6 +94,6 @@ func SignUpPage(wDB database.IWrapperDB, stg storage.IKeyValueStorage) http.Hand
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, newTemplateData(db))
+		t.Execute(w, s.GetTemplate())
 	}
 }

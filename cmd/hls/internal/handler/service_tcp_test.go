@@ -9,14 +9,13 @@ import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	"github.com/number571/go-peer/cmd/hls/pkg/request"
+	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
-
-	"github.com/number571/go-peer/internal/testutils"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestHandleFriendsAPI(t *testing.T) {
@@ -32,7 +32,7 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 	}
 
 	if len(friends) != 3 {
-		t.Errorf("length of friends != 3")
+		t.Error("length of friends != 3")
 		return
 	}
 

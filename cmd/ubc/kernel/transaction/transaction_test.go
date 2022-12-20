@@ -3,8 +3,8 @@ package transaction
 import (
 	"testing"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
@@ -17,23 +17,23 @@ func TestTransaction(t *testing.T) {
 
 	newTX := NewTransaction(sett, priv, []byte("hello, world!"))
 	if newTX == nil {
-		t.Errorf("new tx is nil")
+		t.Error("new tx is nil")
 		return
 	}
 
 	if !newTX.IsValid() {
-		t.Errorf("new tx is not valid")
+		t.Error("new tx is not valid")
 		return
 	}
 
 	loadTX := LoadTransaction(sett, tcTX)
 	if loadTX == nil {
-		t.Errorf("load tx is nil")
+		t.Error("load tx is nil")
 		return
 	}
 
 	if !loadTX.IsValid() {
-		t.Errorf("load tx is not valid")
+		t.Error("load tx is not valid")
 		return
 	}
 }

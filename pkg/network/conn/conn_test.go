@@ -5,8 +5,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/payload"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (

@@ -8,10 +8,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/ubc/kernel/block"
 	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestChain(t *testing.T) {

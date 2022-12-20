@@ -11,10 +11,18 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 3. The `client/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client` module.
 4. The `network` module is a decentralized communication between network nodes. It does not represent any protection of information and anonymity of participants.
 5. The `network/anonymity` module to ensure anonymity based on the fifth stage. Presents the main functions for working with the network on top of the `network` and `queue` modules.
-6. The `storage` module includes two types of storage: `in-memory` and `crypto`. The second type of storage can be used for secure storage of passwords and private keys.
+6. The `storage` module includes two types of storage: `memory` and `crypto`. The second type of storage can be used for secure storage of passwords and private keys.
 7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
 > Examples of works in the directory [https://github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
+
+## TODO 
+
+1. Write or close commented tests as 'TODO'
+2. Update HMS's, HMC's package structure
+3. Try merge HLS with HMS and HLC with HMC
+4. Create UBC application
+5. Update HLM (save list of friends, connections)
 
 ## Library based applications
 
@@ -43,7 +51,7 @@ Each network participant sets a message generation period for himself (the perio
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
-> Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/modules/client](https://github.com/number571/go-peer/tree/master/examples/modules/client "Module client");
+> Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/_modules/client](https://github.com/number571/go-peer/tree/master/examples/_modules/client "Module client");
 
 <p align="center"><img src="examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
@@ -98,16 +106,16 @@ JSON_DATA='{
 ```
 
 Request format
-```
-PUSH_FORMAT="{
-        \"receiver\":\"Pub(go-peer/rsa){3082020A0282020100B752D35E81F4AEEC1A9C42EDED16E8924DD4D359663611DE2DCCE1A9611704A697B26254DD2AFA974A61A2CF94FAD016450FEF22F218CA970BFE41E6340CE3ABCBEE123E35A9DCDA6D23738DAC46AF8AC57902DDE7F41A03EB00A4818137E1BF4DFAE1EEDF8BB9E4363C15FD1C2278D86F2535BC3F395BE9A6CD690A5C852E6C35D6184BE7B9062AEE2AFC1A5AC81E7D21B7252A56C62BB5AC0BBAD36C7A4907C868704985E1754BAA3E8315E775A51B7BDC7ACB0D0675D29513D78CB05AB6119D3CA0A810A41F78150E3C5D9ACAFBE1533FC3533DECEC14387BF7478F6E229EB4CC312DC22436F4DB0D4CC308FB6EEA612F2F9E00239DE7902DE15889EE71370147C9696A5E7B022947ABB8AFBBC64F7840BED4CE69592CAF4085A1074475E365ED015048C89AE717BC259C42510F15F31DA3F9302EAD8F263B43D14886B2335A245C00871C041CBB683F1F047573F789673F9B11B6E6714C2A3360244757BB220C7952C6D3D9D65AA47511A63E2A59706B7A70846C930DCFB3D8CAFB3BD6F687CACF5A708692C26B363C80C460F54E59912D41D9BB359698051ABC049A0D0CFD7F23DC97DA940B1EDEAC6B84B194C8F8A56A46CE69EE7A0AEAA11C99508A368E64D27756AD0BA7146A6ADA3D5FA237B3B4EDDC84B71C27DE3A9F26A42197791C7DC09E2D7C4A7D8FCDC8F9A5D4983BB278FCE9513B1486D18F8560C3F31CC70203010001}\",
-        \"hex_data\":\"$(str2hex "$JSON_DATA")\"
-}";
+```bash
+PUSH_FORMAT='{
+        "receiver":"Pub(go-peer/rsa){3082020A0282020100B752D35E81F4AEEC1A9C42EDED16E8924DD4D359663611DE2DCCE1A9611704A697B26254DD2AFA974A61A2CF94FAD016450FEF22F218CA970BFE41E6340CE3ABCBEE123E35A9DCDA6D23738DAC46AF8AC57902DDE7F41A03EB00A4818137E1BF4DFAE1EEDF8BB9E4363C15FD1C2278D86F2535BC3F395BE9A6CD690A5C852E6C35D6184BE7B9062AEE2AFC1A5AC81E7D21B7252A56C62BB5AC0BBAD36C7A4907C868704985E1754BAA3E8315E775A51B7BDC7ACB0D0675D29513D78CB05AB6119D3CA0A810A41F78150E3C5D9ACAFBE1533FC3533DECEC14387BF7478F6E229EB4CC312DC22436F4DB0D4CC308FB6EEA612F2F9E00239DE7902DE15889EE71370147C9696A5E7B022947ABB8AFBBC64F7840BED4CE69592CAF4085A1074475E365ED015048C89AE717BC259C42510F15F31DA3F9302EAD8F263B43D14886B2335A245C00871C041CBB683F1F047573F789673F9B11B6E6714C2A3360244757BB220C7952C6D3D9D65AA47511A63E2A59706B7A70846C930DCFB3D8CAFB3BD6F687CACF5A708692C26B363C80C460F54E59912D41D9BB359698051ABC049A0D0CFD7F23DC97DA940B1EDEAC6B84B194C8F8A56A46CE69EE7A0AEAA11C99508A368E64D27756AD0BA7146A6ADA3D5FA237B3B4EDDC84B71C27DE3A9F26A42197791C7DC09E2D7C4A7D8FCDC8F9A5D4983BB278FCE9513B1486D18F8560C3F31CC70203010001}",
+        "hex_data":"'$(str2hex "$JSON_DATA")'"
+}';
 ```
 
 Build and run nodes
 ```bash
-$ cd examples/cmd/echo_service
+$ cd examples/_cmd/echo_service
 $ make
 ```
 
@@ -136,7 +144,7 @@ Decode response
 {"echo":"hello, world!","return":1}
 ```
 
-> Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/modules/network/anonymity "Module anonymity");
+> Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
 
 ## 2. Hidden Lake Messenger
 
@@ -171,21 +179,19 @@ The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm 
 
 Build and run nodes
 ```bash
-$ cd examples/cmd/anon_messenger
+$ cd examples/_cmd/anon_messenger
 $ make
 ```
 
 The output of the `middle_hls` node is similar to `Figure 4`.
+Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-Than open browser on `localhost:8080`
 <p align="center"><img src="examples/images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 6. Home page of the HLM application.</p>
 
-Next, you need to register by going to the Sign up page. Enter your `login/password` and insert the private key `priv.key`. That key is located in `examples/cmd/anon_messenger/node2_hlm`.
+Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 
-After the registration procedure, re-enter your `login/password`. After that, you will have the functions of adding connections and friends, as well as the communication with friends itself. In the example, friend `Alice` will be added by default. 
-
-To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` and `node2_hlm`. This node will be Alice.
+To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hlm/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 

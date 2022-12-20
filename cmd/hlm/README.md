@@ -31,21 +31,19 @@ The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm 
 
 Build and run nodes
 ```bash
-$ cd examples/cmd/anon_messenger
+$ cd examples/_cmd/anon_messenger
 $ make
 ```
 
 The output of the `middle_hls` node is similar to `Figure 4`.
+Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-Than open browser on `localhost:8080`
 <p align="center"><img src="../../examples/images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 6. Home page of the HLM application.</p>
 
-Next, you need to register by going to the Sign up page. Enter your `login/password` and insert the private key `priv.key`. That key is located in `examples/cmd/anon_messenger/node2_hlm`.
+Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 
-After the registration procedure, re-enter your `login/password`. After that, you will have the functions of adding connections and friends, as well as the communication with friends itself. In the example, friend `Alice` will be added by default. 
-
-To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` and `node2_hlm`. This node will be Alice.
+To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hlm/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 

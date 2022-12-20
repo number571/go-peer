@@ -6,24 +6,23 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/cmd/hlm/internal/chat_queue"
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	"github.com/number571/go-peer/cmd/hlm/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
-	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
 
-func HandleIncomigHTTP(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
+func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			response(w, hls_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		db := wDB.Get()
-		if db == nil {
+		if !s.IsActive() {
 			response(w, hls_settings.CErrorUnauth, "failed: client unauthorized")
 			return
 		}
@@ -45,7 +44,7 @@ func HandleIncomigHTTP(wDB database.IWrapperDB, client hls_client.IClient) http.
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := client.PubKey()
+		myPubKey, err := s.GetClient().PubKey()
 		if err != nil {
 			response(w, hls_settings.CErrorPubKey, "failed: message is null")
 			return
@@ -54,6 +53,7 @@ func HandleIncomigHTTP(wDB database.IWrapperDB, client hls_client.IClient) http.
 		rel := database.NewRelation(myPubKey, friendPubKey)
 		dbMsg := database.NewMessage(true, msg)
 
+		db := s.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
 			response(w, hls_settings.CErrorWrite, "failed: push message to database")
 			return

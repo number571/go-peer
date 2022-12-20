@@ -7,26 +7,24 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/cmd/hlm/web"
-	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 )
 
 type sSettings struct {
-	*sTemplateData
+	*state.STemplateState
 	FPublicKey   string
 	FConnections []string
 }
 
-func SettingsPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
+func SettingsPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/settings" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 
-		if db == nil {
+		if !s.IsActive() {
 			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
@@ -45,7 +43,7 @@ func SettingsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handl
 				fmt.Fprint(w, "error: port is not a number")
 				return
 			}
-			err := client.AddConnection(fmt.Sprintf("%s:%s", host, port))
+			err := s.AddConnection(fmt.Sprintf("%s:%s", host, port))
 			if err != nil {
 				fmt.Fprint(w, "error: add connection")
 				return
@@ -56,15 +54,17 @@ func SettingsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handl
 				fmt.Fprint(w, "error: address is null")
 				return
 			}
-			err := client.DelConnection(address)
+			err := s.DelConnection(address)
 			if err != nil {
 				fmt.Fprint(w, "error: del connection")
 				return
 			}
 		}
 
+		client := s.GetClient()
+
 		result := new(sSettings)
-		result.sTemplateData = newTemplateData(db)
+		result.STemplateState = s.GetTemplate()
 
 		pubKey, err := client.PubKey()
 		if err != nil {

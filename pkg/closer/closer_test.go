@@ -23,7 +23,7 @@ func TestCloser(t *testing.T) {
 	}
 
 	if err := CloseAll([]types.ICloser{testNewCloser(true)}); err == nil {
-		t.Errorf("nothing error?")
+		t.Error("nothing error?")
 		return
 	}
 }

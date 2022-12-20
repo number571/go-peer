@@ -9,11 +9,11 @@ import (
 	"github.com/number571/go-peer/cmd/hls/internal/config"
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/types"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestHandleOnlineAPI(t *testing.T) {
@@ -42,13 +42,13 @@ func testGetOnlines(t *testing.T, client hls_client.IClient, node anonymity.INod
 	}
 
 	if len(onlines) != 1 {
-		t.Errorf("length of onlines != 1")
+		t.Error("length of onlines != 1")
 		return
 	}
 
 	if _, ok := node.Network().Connections()[onlines[0]]; !ok {
 		fmt.Println(node.Network().Connections(), onlines[0])
-		t.Errorf("online address is invalid")
+		t.Error("online address is invalid")
 		return
 	}
 }
@@ -67,7 +67,7 @@ func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
 	}
 
 	if len(onlines) != 0 {
-		t.Errorf("length of onlines != 0")
+		t.Error("length of onlines != 0")
 		return
 	}
 }

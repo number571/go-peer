@@ -7,26 +7,24 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hlm/internal/database"
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/cmd/hlm/web"
-	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 type sFriends struct {
-	*sTemplateData
+	*state.STemplateState
 	FFriends []string
 }
 
-func FriendsPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
+func FriendsPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/friends" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 
-		if db == nil {
+		if !s.IsActive() {
 			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
@@ -46,9 +44,8 @@ func FriendsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handle
 				fmt.Fprint(w, "error: public key is nil")
 				return
 			}
-			err := client.AddFriend(aliasName, pubKey)
-			if err != nil {
-				fmt.Fprint(w, "error: add connection")
+			if err := s.AddFriend(aliasName, pubKey); err != nil {
+				fmt.Fprint(w, "error: add friend")
 				return
 			}
 		case http.MethodDelete:
@@ -57,22 +54,21 @@ func FriendsPage(wDB database.IWrapperDB, client hls_client.IClient) http.Handle
 				fmt.Fprint(w, "error: alias_name is null")
 				return
 			}
-			err := client.DelFriend(aliasName)
-			if err != nil {
-				fmt.Fprint(w, "error: del connection")
+			if err := s.DelFriend(aliasName); err != nil {
+				fmt.Fprint(w, "error: del friend")
 				return
 			}
 		}
-
-		res, err := client.GetFriends()
+		res, err := s.GetClient().GetFriends()
 		if err != nil {
 			fmt.Fprint(w, "error: read friends")
 			return
 		}
 
 		result := new(sFriends)
-		result.sTemplateData = newTemplateData(db)
+		result.STemplateState = s.GetTemplate()
 		result.FFriends = make([]string, 0, len(res))
+
 		for aliasName := range res {
 			result.FFriends = append(result.FFriends, aliasName)
 		}

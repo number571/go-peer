@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hlm/internal/app/state"
 	"github.com/number571/go-peer/cmd/hlm/internal/database"
 	hlm_settings "github.com/number571/go-peer/cmd/hlm/internal/settings"
 	"github.com/number571/go-peer/cmd/hlm/web"
-	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/cmd/hls/pkg/request"
 	hls_settings "github.com/number571/go-peer/cmd/hls/pkg/settings"
 )
@@ -29,20 +29,19 @@ type sChatAddress struct {
 	FFriend string
 }
 type sChatMessages struct {
-	*sTemplateData
+	*state.STemplateState
 	FAddress  sChatAddress
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(wDB database.IWrapperDB, client hls_client.IClient) http.HandlerFunc {
+func FriendsChatPage(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		db := wDB.Get()
 		if r.URL.Path != "/friends/chat" {
-			NotFoundPage(db)(w, r)
+			NotFoundPage(s)(w, r)
 			return
 		}
 
-		if db == nil {
+		if !s.IsActive() {
 			http.Redirect(w, r, "/sign/in", http.StatusFound)
 			return
 		}
@@ -52,6 +51,11 @@ func FriendsChatPage(wDB database.IWrapperDB, client hls_client.IClient) http.Ha
 			fmt.Fprint(w, "alias name is null")
 			return
 		}
+
+		var (
+			client = s.GetClient()
+			db     = s.GetWrapperDB().Get()
+		)
 
 		myPubKey, err := client.PubKey()
 		if err != nil {
@@ -136,7 +140,7 @@ func FriendsChatPage(wDB database.IWrapperDB, client hls_client.IClient) http.Ha
 		}
 
 		res := &sChatMessages{
-			sTemplateData: newTemplateData(db),
+			STemplateState: s.GetTemplate(),
 			FAddress: sChatAddress{
 				FClient: clientPubKey.Address().String(),
 				FFriend: friendPubKey.Address().String(),

@@ -11,11 +11,11 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hls/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hls/pkg/client"
 	"github.com/number571/go-peer/cmd/hls/pkg/request"
-	"github.com/number571/go-peer/internal/testutils"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/types"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestHandlePushAPI(t *testing.T) {
