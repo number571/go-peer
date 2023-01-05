@@ -14,7 +14,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 6. The `storage` module includes two types of storage: `memory` and `crypto`. The second type of storage can be used for secure storage of passwords and private keys.
 7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
-> Examples of works in the directory [https://github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
+> Examples of works in the directory [github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 
 ## TODO 
 
@@ -22,7 +22,15 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 2. Update HMS's, HMC's package structure
 3. Try merge HLS with HMS and HLC with HMC
 4. Create UBC application
-5. Update HLM (save list of friends, connections)
+
+## Dependencies
+
+1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "yndtr/goleveldb");
+2. Go library (used by `cmd/hlm`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
+3. Go library (used by `cmd/hlm`) [golang.org/x/net](https://golang.org/x/net "x/net");
+4. Go library (used by `cmd/hmc`) [golang.org/x/term](https://golang.org/x/term "x/term");
+5. Go library (used by `cmd/hms`) [github.com/robfig/cron/v3](https://github.com/robfig/cron/v3, "robfig/cron")
+6. CSS/JS library (used by `cmd/hlm`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -63,7 +71,10 @@ Data exchange between network participants is carried out using application serv
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
 
-> More details in the work [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/hidden_systems.pdf "TSHS")
+> More details in the works 
+> [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
+> [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
+> [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
 ### Example
 
