@@ -11,13 +11,15 @@ import (
 type iLogType string
 
 const (
+	// Base
+	cLogBaseBroadcast   iLogType = "BRDCS"
+	cLogBaseEnqueueResp iLogType = "ENRSP"
+
 	// INFO
 	cLogInfoExist         iLogType = "EXIST"
 	cLogInfoUnencryptable iLogType = "UNENC"
 	cLogInfoAction        iLogType = "ACTON"
 	cLogInfoWithoutResp   iLogType = "WHRSP"
-	cLogInfoEnqueueResp   iLogType = "ENRSP"
-	cLogInfoBroadcast     iLogType = "BRDCS"
 
 	// WARN
 	cLogWarnMessageNull  iLogType = "MNULL"

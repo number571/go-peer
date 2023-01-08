@@ -19,7 +19,7 @@ const (
 
 var (
 	_ IKeyValueDB = &sLevelDB{}
-	_ iIterator   = &sLevelDBIterator{}
+	_ IIterator   = &sLevelDBIterator{}
 )
 
 type sLevelDB struct {
@@ -112,7 +112,7 @@ func (db *sLevelDB) Close() error {
 }
 
 // Storage in hashing mode can't iterates
-func (db *sLevelDB) Iter(prefix []byte) iIterator {
+func (db *sLevelDB) Iter(prefix []byte) IIterator {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 

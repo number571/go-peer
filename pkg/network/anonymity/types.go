@@ -13,7 +13,9 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
-type IHandlerF func(INode, asymmetric.IPubKey, []byte) []byte
+type (
+	IHandlerF func(INode, asymmetric.IPubKey, []byte) []byte
+)
 
 type INode interface {
 	types.IApp

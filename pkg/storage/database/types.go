@@ -10,7 +10,7 @@ type IKeyValueDB interface {
 	types.ICloser
 
 	Settings() ISettings
-	Iter([]byte) iIterator
+	Iter([]byte) IIterator
 }
 
 type ISettings interface {
@@ -18,7 +18,7 @@ type ISettings interface {
 	GetCipherKey() []byte
 }
 
-type iIterator interface {
+type IIterator interface {
 	Key() []byte
 	Value() []byte
 

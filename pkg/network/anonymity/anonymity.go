@@ -179,11 +179,15 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			hash := msg.Body().Hash()
 			proof := msg.Body().Proof()
 
-			// redirect message to another nodes
-			_ = node.networkBroadcast(msg)
-
 			pubKey := node.fQueue.Client().PubKey()
-			node.fLogger.Info(fmtLog(cLogInfoBroadcast, hash, proof, pubKey, nil))
+
+			// redirect message to another nodes
+			if err := node.networkBroadcast(msg); err != nil {
+				node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, pubKey, nil))
+				continue
+			}
+
+			node.fLogger.Info(fmtLog(cLogBaseBroadcast, hash, proof, pubKey, nil))
 		}
 	}()
 
@@ -197,19 +201,23 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		hash := msg.Body().Hash()
 		proof := msg.Body().Proof()
 
-		// redirect message to another nodes
-		_ = node.networkBroadcast(msg)
-
 		// check already received data by hash
-		if _, err := node.KeyValueDB().Get(hash); err == nil {
+		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
+		if _, err := node.KeyValueDB().Get(hashDB); err == nil {
 			node.fLogger.Info(fmtLog(cLogInfoExist, hash, proof, nil, conn))
 			return
 		}
 
 		// set hash to database
-		if err := node.KeyValueDB().Set(hash, []byte{}); err != nil {
+		if err := node.KeyValueDB().Set(hashDB, []byte{}); err != nil {
 			node.fLogger.Erro(fmtLog(cLogErroDatabaseSet, hash, proof, nil, conn))
 			return
+		}
+
+		// redirect message to another nodes
+		if err := node.networkBroadcast(msg); err != nil {
+			node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, nil, conn))
+			// need continue
 		}
 
 		// try decrypt message
@@ -252,8 +260,12 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		// create the message and put this to the queue
-		_ = node.Broadcast(sender, payload.NewPayload(pld.Head(), resp))
-		node.fLogger.Info(fmtLog(cLogInfoEnqueueResp, hash, proof, sender, conn))
+		if err := node.Broadcast(sender, payload.NewPayload(pld.Head(), resp)); err != nil {
+			node.fLogger.Erro(fmtLog(cLogBaseEnqueueResp, hash, proof, sender, conn))
+			return
+		}
+
+		node.fLogger.Info(fmtLog(cLogBaseEnqueueResp, hash, proof, sender, conn))
 	}
 }
 

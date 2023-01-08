@@ -1,6 +1,8 @@
 package anonymity
 
-import "time"
+import (
+	"time"
+)
 
 var (
 	_ ISettings = &sSettings{}
