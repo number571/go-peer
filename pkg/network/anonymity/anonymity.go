@@ -11,8 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
@@ -61,10 +59,28 @@ func NewNode(
 }
 
 func (node *sNode) Run() error {
-	if err := node.Queue().Run(); err != nil {
+	if err := node.runQueue(); err != nil {
 		return err
 	}
-	node.Network().Handle(node.Settings().GetNetworkMask(), node.handleWrapper())
+
+	handleWrapper := node.handleWrapper()
+
+	middleware := node.Settings().GetTraffic().Download()
+	if middleware != nil {
+		chMsg := middleware()
+		for {
+			msg, ok := <-chMsg
+			if !ok {
+				break
+			}
+			handleWrapper(nil, nil, msg.Bytes())
+		}
+	}
+
+	node.Network().Handle(
+		node.Settings().GetNetworkMask(),
+		handleWrapper,
+	)
 	return nil
 }
 
@@ -168,7 +184,11 @@ func (node *sNode) recv(actionKey string) ([]byte, error) {
 	}
 }
 
-func (node *sNode) handleWrapper() network.IHandlerF {
+func (node *sNode) runQueue() error {
+	if err := node.Queue().Run(); err != nil {
+		return err
+	}
+
 	go func() {
 		for {
 			msg, ok := <-node.Queue().Dequeue()
@@ -176,14 +196,14 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 				break
 			}
 
-			hash := msg.Body().Hash()
-			proof := msg.Body().Proof()
+			var (
+				hash   = msg.Body().Hash()
+				proof  = msg.Body().Proof()
+				pubKey = node.Queue().Client().PubKey()
+			)
 
-			pubKey := node.fQueue.Client().PubKey()
-
-			// redirect message to another nodes
 			if err := node.networkBroadcast(msg); err != nil {
-				node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, pubKey, nil))
+				node.fLogger.Erro(fmtLog(cLogErroMiddleware, hash, proof, pubKey, nil))
 				continue
 			}
 
@@ -191,8 +211,12 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 	}()
 
-	return func(nnode network.INode, conn conn.IConn, reqBytes []byte) {
-		msg := node.initialCheck(message.LoadMessage(reqBytes))
+	return nil
+}
+
+func (node *sNode) handleWrapper() network.IHandlerF {
+	return func(_ network.INode, conn conn.IConn, reqBytes []byte) {
+		msg := message.LoadMessage(reqBytes, node.Queue().Client().Settings().GetWorkSize())
 		if msg == nil {
 			node.fLogger.Warn(fmtLog(cLogWarnMessageNull, nil, 0, nil, conn))
 			return
@@ -214,10 +238,10 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		// redirect message to another nodes
+		// broadcast message to network
 		if err := node.networkBroadcast(msg); err != nil {
-			node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, nil, conn))
-			// need continue
+			node.fLogger.Erro(fmtLog(cLogErroMiddleware, hash, proof, nil, conn))
+			return
 		}
 
 		// try decrypt message
@@ -226,6 +250,8 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			node.fLogger.Info(fmtLog(cLogInfoUnencryptable, hash, proof, nil, conn))
 			return
 		}
+
+		fmt.Println("AAA")
 
 		// check sender in f2f list
 		if !node.F2F().InList(sender) {
@@ -269,29 +295,29 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 	}
 }
 
-func (node *sNode) initialCheck(msg message.IMessage) message.IMessage {
-	if msg == nil {
-		return nil
-	}
-
-	if len(msg.Body().Hash()) != hashing.CSHA256Size {
-		return nil
-	}
-
-	diff := node.Queue().Client().Settings().GetWorkSize()
-	puzzle := puzzle.NewPoWPuzzle(diff)
-	if !puzzle.Verify(msg.Body().Hash(), msg.Body().Proof()) {
-		return nil
-	}
-
-	return msg
-}
-
 func (node *sNode) networkBroadcast(msg message.IMessage) error {
-	return node.Network().Broadcast(payload.NewPayload(
+	hash := msg.Body().Hash()
+	proof := msg.Body().Proof()
+
+	// redirect message to another nodes
+	err := node.Network().Broadcast(payload.NewPayload(
 		node.Settings().GetNetworkMask(),
 		msg.Bytes(),
 	))
+	if err != nil {
+		node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, nil, nil))
+		// need continue (some of connections may be closed)
+	}
+
+	// use middleware func for upload raw messages
+	middleware := node.Settings().GetTraffic().Upload()
+	if middleware != nil {
+		if err := middleware(msg); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (node *sNode) setRoute(head uint32, handle IHandlerF) {

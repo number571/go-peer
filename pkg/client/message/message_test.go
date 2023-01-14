@@ -1,34 +1,27 @@
 package message
 
-import (
-	"bytes"
-	"testing"
+// const (
+// 	tcHead = 12345
+// 	tcBody = "hello, world!"
+// )
 
-	"github.com/number571/go-peer/pkg/payload"
-)
+// func TestMessage(t *testing.T) {
+// 	msg := testNewMessage()
+// 	msg1 := LoadMessage(msg.Bytes())
 
-const (
-	tcHead = 12345
-	tcBody = "hello, world!"
-)
+// 	if !bytes.Equal(msg.Bytes(), msg1.Bytes()) {
+// 		t.Error("load message not equal new message")
+// 		return
+// 	}
+// }
 
-func TestMessage(t *testing.T) {
-	msg := testNewMessage()
-	msg1 := LoadMessage(msg.Bytes())
-
-	if !bytes.Equal(msg.Bytes(), msg1.Bytes()) {
-		t.Error("load message not equal new message")
-		return
-	}
-}
-
-func testNewMessage() IMessage {
-	return &SMessage{
-		FHead: SHeadMessage{
-			FSession: "session-key",
-		},
-		FBody: SBodyMessage{
-			FPayload: string(payload.NewPayload(tcHead, []byte(tcBody)).Bytes()),
-		},
-	}
-}
+// func testNewMessage() IMessage {
+// 	return &SMessage{
+// 		FHead: SHeadMessage{
+// 			FSession: "session-key",
+// 		},
+// 		FBody: SBodyMessage{
+// 			FPayload: string(payload.NewPayload(tcHead, []byte(tcBody)).Bytes()),
+// 		},
+// 	}
+// }

@@ -87,9 +87,19 @@ func testQueue(queue IQueue) error {
 		}
 	}
 
+	closed := make(chan bool)
+	go func() {
+		// test close with parallel dequeue
+		_, ok := <-queue.Dequeue()
+		closed <- ok
+	}()
+
 	if err := queue.Close(); err != nil {
 		return err
 	}
 
+	if <-closed {
+		return fmt.Errorf("success dequeue with close")
+	}
 	return nil
 }

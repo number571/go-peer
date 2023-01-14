@@ -3,6 +3,8 @@ package message
 import (
 	"encoding/json"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -34,10 +36,13 @@ type SBodyMessage struct {
 
 // IMessage
 
-func LoadMessage(bmsg []byte) IMessage {
+func LoadMessage(bmsg []byte, workSize uint64) IMessage {
 	var msg = new(SMessage)
 	err := json.Unmarshal(bmsg, msg)
 	if err != nil {
+		return nil
+	}
+	if !msg.isValid(workSize) {
 		return nil
 	}
 	return msg
@@ -57,6 +62,14 @@ func (msg *SMessage) Bytes() []byte {
 		return nil
 	}
 	return jsonData
+}
+
+func (msg *SMessage) isValid(workSize uint64) bool {
+	if len(msg.Body().Hash()) != hashing.CSHA256Size {
+		return false
+	}
+	puzzle := puzzle.NewPoWPuzzle(workSize)
+	return puzzle.Verify(msg.Body().Hash(), msg.Body().Proof())
 }
 
 // IHead

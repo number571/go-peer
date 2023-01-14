@@ -49,7 +49,6 @@ func (q *sQueue) UpdateClient(c client.IClient) {
 
 	q.fClient = c
 	q.fQueue = make(chan message.IMessage, q.Settings().GetCapacity())
-	q.fMsgPull.fQueue = make(chan message.IMessage, q.Settings().GetPullCapacity())
 }
 
 func (q *sQueue) Client() client.IClient {
@@ -73,7 +72,7 @@ func (q *sQueue) Run() error {
 				return
 			case <-time.After(q.Settings().GetDuration() / 2):
 				currLen := len(q.fMsgPull.fQueue)
-				if !q.fIsRun || uint64(currLen) >= q.Settings().GetPullCapacity() {
+				if uint64(currLen) >= q.Settings().GetPullCapacity() {
 					continue
 				}
 				q.fMsgPull.fQueue <- q.newPseudoMessage()
@@ -105,31 +104,34 @@ func (q *sQueue) Enqueue(msg message.IMessage) error {
 		return errors.New("queue already full, need wait and retry")
 	}
 
-	go func() {
-		q.fMutex.Lock()
-		defer q.fMutex.Unlock()
-
-		q.fQueue <- msg
-	}()
-
+	q.fQueue <- msg
 	return nil
 }
 
 func (q *sQueue) Dequeue() <-chan message.IMessage {
-	time.Sleep(q.Settings().GetDuration())
+	closed := make(chan bool)
 
 	go func() {
-		q.fMutex.Lock()
-		defer q.fMutex.Unlock()
-
-		if !q.fIsRun {
+		select {
+		case <-q.fMsgPull.fSignal:
+			closed <- true
 			return
-		}
+		case <-time.After(q.Settings().GetDuration()):
+			q.fMutex.Lock()
+			defer q.fMutex.Unlock()
 
-		if len(q.fQueue) == 0 {
-			q.fQueue <- (<-q.fMsgPull.fQueue)
+			if len(q.fQueue) == 0 {
+				q.fQueue <- (<-q.fMsgPull.fQueue)
+			}
+			closed <- false
 		}
 	}()
+
+	if <-closed {
+		queue := make(chan message.IMessage)
+		close(queue)
+		return queue
+	}
 
 	return q.fQueue
 }

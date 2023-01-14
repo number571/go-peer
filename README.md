@@ -19,9 +19,9 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 ## TODO 
 
 1. Write or close commented tests as 'TODO'
-2. Update HMS's, HMC's package structure
-3. Try merge HLS with HMS and HLC with HMC
-4. Create UBC application
+2. Create UBC application
+3. Databases to ISettings
+4. Write tests for HLT
 
 ## Dependencies
 
@@ -36,11 +36,11 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 1. [Hidden Lake Service](#1-hidden-lake-service) 
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
-3. [Another applications](#3-another-applications) 
+3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
 
 ## 1. Hidden Lake Service
 
-> [github.com/number571/go-peer/tree/master/cmd/hls](https://github.com/number571/go-peer/tree/master/cmd/hls "HLS")
+> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service "HLS")
 
 <img src="examples/images/hls_logo.png" alt="hls_logo.png"/>
 
@@ -159,7 +159,7 @@ Decode response
 
 ## 2. Hidden Lake Messenger
 
-> [github.com/number571/go-peer/tree/master/cmd/hlm](https://github.com/number571/go-peer/tree/master/cmd/hlm "HLM");
+> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger "HLM");
 
 <img src="examples/images/hlm_logo.png" alt="hlm_logo.png"/>
 
@@ -204,15 +204,11 @@ Next, you need to login by going to the Sign in page. Enter your `login=user` an
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hlm/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 
-## 3. Another applications
+## 3. Hidden Lake Traffic
 
-* Hidden Message Service: [github.com/number571/go-peer/tree/master/cmd/hms](https://github.com/number571/go-peer/tree/master/cmd/hms "HMS");
-* Hidden Message Client: [github.com/number571/go-peer/tree/master/cmd/hmc](https://github.com/number571/go-peer/tree/master/cmd/hmc "HMC");
-* Asymmetric Keys Generator: [github.com/number571/go-peer/tree/master/cmd/akg](https://github.com/number571/go-peer/tree/master/cmd/akg "AKG");
-* Cryptographic Data Storage: [github.com/number571/go-peer/tree/master/cmd/cds](https://github.com/number571/go-peer/tree/master/cmd/cds "CDS");
-* In developing... Union Block Chain: [github.com/number571/go-peer/tree/master/cmd/ubc](https://github.com/number571/go-peer/tree/master/cmd/ubc "UBC");
+TODO
 
 ### Deprecated applications
 

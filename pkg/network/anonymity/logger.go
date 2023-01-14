@@ -27,6 +27,7 @@ const (
 	cLogWarnUnknownRoute iLogType = "UNKRT"
 
 	// ERRO
+	cLogErroMiddleware  iLogType = "MDLWR"
 	cLogErroDatabaseSet iLogType = "DBSET"
 )
 

@@ -4,11 +4,9 @@ N=1
 default: clean test
 
 clean:
-	make -C ./cmd/hls clean
-	make -C ./cmd/hlm clean
-	make -C ./cmd/hms clean
-	make -C ./cmd/hmc clean
-	make -C ./cmd/ubc clean
+	make -C ./cmd/hidden_lake/service clean
+	make -C ./cmd/hidden_lake/messenger clean
+	make -C ./cmd/hidden_lake/traffic clean
 	make -C ./examples/_cmd/anon_messenger clean 
 	make -C ./examples/_cmd/echo_service clean 
 

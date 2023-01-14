@@ -1,3 +1,0 @@
-# HMC
-
-> Hidden Message Client

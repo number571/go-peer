@@ -1,3 +1,0 @@
-# HMS
-
-> Hidden Message Service

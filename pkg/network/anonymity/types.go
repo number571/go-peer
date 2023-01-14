@@ -3,6 +3,7 @@ package anonymity
 import (
 	"time"
 
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
@@ -14,7 +15,9 @@ import (
 )
 
 type (
-	IHandlerF func(INode, asymmetric.IPubKey, []byte) []byte
+	IHandlerF  func(INode, asymmetric.IPubKey, []byte) []byte
+	IDownloadF func() <-chan message.IMessage
+	IUploadF   func(message.IMessage) error
 )
 
 type INode interface {
@@ -35,6 +38,12 @@ type ISettings interface {
 	GetTimeWait() time.Duration
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
+	GetTraffic() ITraffic
+}
+
+type ITraffic interface {
+	Download() IDownloadF
+	Upload() IUploadF
 }
 
 type iHead interface {

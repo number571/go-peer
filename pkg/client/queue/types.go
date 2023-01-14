@@ -9,6 +9,8 @@ import (
 )
 
 type IQueue interface {
+	types.IApp
+
 	Settings() ISettings
 
 	UpdateClient(client.IClient)
@@ -16,8 +18,6 @@ type IQueue interface {
 
 	Enqueue(message.IMessage) error
 	Dequeue() <-chan message.IMessage
-
-	types.IApp
 }
 
 type ISettings interface {
