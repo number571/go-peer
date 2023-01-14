@@ -26,7 +26,7 @@ func HandlePushAPI(db database.IKeyValueDB) http.HandlerFunc {
 			return
 		}
 
-		if uint64(len(vRequest.FMessage)) > hlt_settings.CMessageSize {
+		if uint64(len(vRequest.FMessage)/2) > hlt_settings.CMessageSize {
 			response(w, pkg_settings.CErrorPackSize, "failed: incorrect package size")
 			return
 		}

@@ -2,7 +2,7 @@
 
 > Hidden Lake Service
 
-<img src="../../examples/images/hls_logo.png" alt="hls_logo.png"/>
+<img src="../../../examples/images/hls_logo.png" alt="hls_logo.png"/>
 
 The `Hidden Lake Service` is the core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
 
@@ -14,19 +14,19 @@ A feature of HLS (compared to many other anonymous networks) is its easy adaptat
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
 
-<p align="center"><img src="../../examples/images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
+<p align="center"><img src="../../../examples/images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
 <p align="center">Figure 1. Queue and message generation in HLS.</p>
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
 > Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/_modules/client](https://github.com/number571/go-peer/tree/master/examples/_modules/client "Module client");
 
-<p align="center"><img src="../../examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
+<p align="center"><img src="../../../examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
 
 Data exchange between network participants is carried out using application services. HLS has a dual role: 1) packages traffic from pure to anonymizing and vice versa; 2) converts external traffic to internal and vice versa. The second property is the redirection of traffic from the network to the local service and back.
 
-<p align="center"><img src="../../examples/images/hls_service.jpg" alt="hls_service.jpg"/></p>
+<p align="center"><img src="../../../examples/images/hls_service.jpg" alt="hls_service.jpg"/></p>
 <p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.</p>
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
@@ -92,7 +92,7 @@ $ make
 
 Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
 
-<p align="center"><img src="../../examples/images/hls_logger.png" alt="hls_logger.png"/></p>
+<p align="center"><img src="../../../examples/images/hls_logger.png" alt="hls_logger.png"/></p>
 <p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
 
 Send request

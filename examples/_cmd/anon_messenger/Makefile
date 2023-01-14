@@ -8,15 +8,18 @@ init:
 	pkill --version
 build: 
 	# MAKEFILE BUILD
-	make build -C ../../../cmd/hidden_lake/service
 	make build -C ../../../cmd/hidden_lake/messenger
+	make build -C ../../../cmd/hidden_lake/service
+	make build -C ../../../cmd/hidden_lake/traffic
+	# COPY HLM PROGRAM
+	cp ../../../cmd/hidden_lake/messenger/hlm ./node1_hlm/prog_hlm1
+	cp ../../../cmd/hidden_lake/messenger/hlm ./node2_hlm/prog_hlm2
 	# COPY HLS PROGRAM
 	cp ../../../cmd/hidden_lake/service/hls ./middle_hls/prog_hls
 	cp ../../../cmd/hidden_lake/service/hls ./node1_hlm/prog_hls1
 	cp ../../../cmd/hidden_lake/service/hls ./node2_hlm/prog_hls2
-	# COPY HLM PROGRAM
-	cp ../../../cmd/hidden_lake/messenger/hlm ./node1_hlm/prog_hlm1
-	cp ../../../cmd/hidden_lake/messenger/hlm ./node2_hlm/prog_hlm2
+	# COPY HLT PROGRAM
+	cp ../../../cmd/hidden_lake/traffic/hlt ./middle_hls/prog_hlt
 	# COPY HLM WEB
 	cp -r ../../../cmd/hidden_lake/messenger/web ./node1_hlm
 	cp -r ../../../cmd/hidden_lake/messenger/web ./node2_hlm

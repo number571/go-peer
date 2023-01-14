@@ -2,7 +2,7 @@
 
 > Hidden Lake Messenger
 
-<img src="../../examples/images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="../../../examples/images/hlm_logo.png" alt="hlm_logo.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 
@@ -18,7 +18,7 @@ Firstly, there is registration and authorization, which does not exist in the HL
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
-<p align="center"><img src="../../examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
+<p align="center"><img src="../../../examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
 <p align="center">Figure 5. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
@@ -38,7 +38,7 @@ $ make
 The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-<p align="center"><img src="../../examples/images/hlm_about.png" alt="hlm_about.png"/></p>
+<p align="center"><img src="../../../examples/images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 6. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.

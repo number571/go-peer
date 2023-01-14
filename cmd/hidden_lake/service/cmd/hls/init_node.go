@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -99,7 +100,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 func initTrafficClient(addr string) hlt_client.IClient {
 	return hlt_client.NewClient(
 		hlt_client.NewBuilder(),
-		hlt_client.NewRequester(addr),
+		hlt_client.NewRequester(fmt.Sprintf("http://%s", addr)),
 	)
 }
 
