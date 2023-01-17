@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
@@ -32,6 +33,8 @@ func testAllRun(addr string) (*http.Server, database.IKeyValueDB, hlt_client.ICl
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(fmt.Sprintf("http://%s", addr)),
 	)
+
+	time.Sleep(200 * time.Millisecond)
 	return srv, db, hltClient
 }
 
