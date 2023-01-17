@@ -20,18 +20,22 @@ func NewClient(builder IBuilder, requester IRequester) IClient {
 	}
 }
 
-func (client *sClient) Hashes() ([]string, error) {
-	return client.fRequester.Hashes()
+func (client *sClient) GetIndex() (string, error) {
+	return client.fRequester.GetIndex()
 }
 
-func (client *sClient) Load(hash string) (message.IMessage, error) {
-	msg, err := client.fRequester.Load(client.fBuilder.Load(hash))
+func (client *sClient) GetHashes() ([]string, error) {
+	return client.fRequester.GetHashes()
+}
+
+func (client *sClient) GetMessage(hash string) (message.IMessage, error) {
+	msg, err := client.fRequester.GetMessage(client.fBuilder.GetMessage(hash))
 	if err != nil {
 		return nil, err
 	}
 	return msg, nil
 }
 
-func (client *sClient) Push(msg message.IMessage) error {
-	return client.fRequester.Push(client.fBuilder.Push(msg))
+func (client *sClient) AddMessage(msg message.IMessage) error {
+	return client.fRequester.AddMessage(client.fBuilder.AddMessage(msg))
 }

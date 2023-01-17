@@ -22,6 +22,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 2. Create UBC application
 3. Databases to ISettings
 4. Write tests for HLT
+5. Logging in HLS for handlers
 
 ## Dependencies
 

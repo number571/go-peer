@@ -6,15 +6,15 @@ const (
 )
 
 const (
-	CHashesPath = "/hashes"
-	CLoadPath   = "/load"
-	CPushPath   = "/push"
+	CHandleIndexPath   = "/api/index"
+	CHandleHashesPath  = "/api/hashes"
+	CHandleMessagePath = "/api/message"
 )
 
 const (
-	CHashesTemplate = "%s" + CHashesPath
-	CLoadTemplate   = "%s" + CLoadPath
-	CPushTemplate   = "%s" + CPushPath
+	CHandleIndexTemplate   = "%s" + CHandleIndexPath
+	CHandleHashesTemplate  = "%s" + CHandleHashesPath
+	CHandleMessageTemplate = "%s" + CHandleMessagePath
 )
 
 const (

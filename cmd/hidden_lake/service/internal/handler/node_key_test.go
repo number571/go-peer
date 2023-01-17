@@ -17,7 +17,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[8])),
 	)
 
-	pubKey, err := client.PubKey()
+	pubKey, err := client.GetPubKey()
 	if err != nil {
 		t.Error(err)
 		return
@@ -29,12 +29,12 @@ func TestHandlePubKeyAPI(t *testing.T) {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2)
-	if err := client.PrivKey(privKey); err != nil {
+	if err := client.SetPrivKey(privKey); err != nil {
 		t.Error("failed update private key")
 		return
 	}
 
-	newPubKey, err := client.PubKey()
+	newPubKey, err := client.GetPubKey()
 	if err != nil {
 		t.Error(err)
 		return

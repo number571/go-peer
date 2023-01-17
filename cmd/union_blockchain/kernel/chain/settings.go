@@ -3,7 +3,7 @@ package chain
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/mempool"
+	"github.com/number571/go-peer/cmd/union_blockchain/kernel/mempool"
 )
 
 var (

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
@@ -34,7 +33,8 @@ func NewApp(
 		hlt_settings.CPathDB,
 		database.NewSettings(&database.SSettings{
 			FLimitMessages: hlt_settings.CLimitMessages,
-			FWorkSize:      hls_settings.CWorkSize,
+			FMessageSize:   hlt_settings.CMessageSize,
+			FWorkSize:      hlt_settings.CWorkSize,
 		}),
 	)
 	return &sApp{

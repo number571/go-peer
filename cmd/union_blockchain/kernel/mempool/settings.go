@@ -1,6 +1,6 @@
 package mempool
 
-import "github.com/number571/go-peer/cmd/ubc/kernel/block"
+import "github.com/number571/go-peer/cmd/union_blockchain/kernel/block"
 
 var (
 	_ ISettings = &sSettings{}

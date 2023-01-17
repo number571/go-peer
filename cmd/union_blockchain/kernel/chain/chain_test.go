@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/ubc/kernel/block"
-	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+	"github.com/number571/go-peer/cmd/union_blockchain/kernel/block"
+	"github.com/number571/go-peer/cmd/union_blockchain/kernel/transaction"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"

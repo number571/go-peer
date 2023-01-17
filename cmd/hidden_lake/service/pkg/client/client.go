@@ -21,12 +21,16 @@ func NewClient(requester IRequester) IClient {
 	}
 }
 
-func (client *sClient) Broadcast(recv asymmetric.IPubKey, data request.IRequest) error {
-	return client.fRequester.Broadcast(client.fBuilder.Push(recv, data))
+func (client *sClient) GetIndex() (string, error) {
+	return client.fRequester.GetIndex()
 }
 
-func (client *sClient) Request(recv asymmetric.IPubKey, data request.IRequest) ([]byte, error) {
-	return client.fRequester.Request(client.fBuilder.Push(recv, data))
+func (client *sClient) DoBroadcast(recv asymmetric.IPubKey, data request.IRequest) error {
+	return client.fRequester.DoBroadcast(client.fBuilder.DoPush(recv, data))
+}
+
+func (client *sClient) DoRequest(recv asymmetric.IPubKey, data request.IRequest) ([]byte, error) {
+	return client.fRequester.DoRequest(client.fBuilder.DoPush(recv, data))
 }
 
 func (client *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {
@@ -61,10 +65,10 @@ func (client *sClient) DelConnection(connect string) error {
 	return client.fRequester.DelConnection(client.fBuilder.Connect(connect))
 }
 
-func (client *sClient) PrivKey(privKey asymmetric.IPrivKey) error {
-	return client.fRequester.PrivKey(client.fBuilder.PrivKey(privKey))
+func (client *sClient) SetPrivKey(privKey asymmetric.IPrivKey) error {
+	return client.fRequester.SetPrivKey(client.fBuilder.SetPrivKey(privKey))
 }
 
-func (client *sClient) PubKey() (asymmetric.IPubKey, error) {
-	return client.fRequester.PubKey()
+func (client *sClient) GetPubKey() (asymmetric.IPubKey, error) {
+	return client.fRequester.GetPubKey()
 }

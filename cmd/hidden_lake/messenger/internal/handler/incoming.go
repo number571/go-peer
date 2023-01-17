@@ -17,7 +17,7 @@ import (
 
 func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			response(w, hls_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
@@ -44,7 +44,7 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := s.GetClient().PubKey()
+		myPubKey, err := s.GetClient().GetPubKey()
 		if err != nil {
 			response(w, hls_settings.CErrorPubKey, "failed: message is null")
 			return

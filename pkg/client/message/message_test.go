@@ -1,27 +1,21 @@
 package message
 
-// const (
-// 	tcHead = 12345
-// 	tcBody = "hello, world!"
-// )
+import (
+	"bytes"
+	"os"
+	"testing"
+)
 
-// func TestMessage(t *testing.T) {
-// 	msg := testNewMessage()
-// 	msg1 := LoadMessage(msg.Bytes())
+func TestMessage(t *testing.T) {
+	msgBytes, err := os.ReadFile("message.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-// 	if !bytes.Equal(msg.Bytes(), msg1.Bytes()) {
-// 		t.Error("load message not equal new message")
-// 		return
-// 	}
-// }
-
-// func testNewMessage() IMessage {
-// 	return &SMessage{
-// 		FHead: SHeadMessage{
-// 			FSession: "session-key",
-// 		},
-// 		FBody: SBodyMessage{
-// 			FPayload: string(payload.NewPayload(tcHead, []byte(tcBody)).Bytes()),
-// 		},
-// 	}
-// }
+	msg := LoadMessage(msgBytes, 10)
+	if !bytes.Equal(msg.Bytes(), msg.Bytes()) {
+		t.Error("load message not equal new message")
+		return
+	}
+}

@@ -22,7 +22,7 @@ func initApp() (types.IApp, error) {
 		hls_client.NewRequester(fmt.Sprintf("http://%s", cfg.Connection())),
 	)
 
-	if _, err := hlsClient.PubKey(); err != nil {
+	if _, err := hlsClient.GetPubKey(); err != nil {
 		return nil, err
 	}
 

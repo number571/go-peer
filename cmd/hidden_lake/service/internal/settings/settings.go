@@ -5,8 +5,7 @@ import (
 )
 
 const (
-	CTitlePattern = "go-peer/hidden-lake-service"
-	CHeaderHLS    = uint32(0x1750571)
+	CHeaderHLS = uint32(0x1750571)
 )
 
 const (

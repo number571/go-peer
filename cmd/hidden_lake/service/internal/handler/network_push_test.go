@@ -37,9 +37,9 @@ func TestHandlePushAPI(t *testing.T) {
 }
 
 func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
-	err := client.Broadcast(
+	err := client.DoBroadcast(
 		pubKey,
-		request.NewRequest("GET", tcServiceAddressInHLS, "/echo").
+		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
@@ -52,9 +52,9 @@ func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IP
 }
 
 func testRequest(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
-	res, err := client.Request(
+	res, err := client.DoRequest(
 		pubKey,
-		request.NewRequest("GET", tcServiceAddressInHLS, "/echo").
+		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).

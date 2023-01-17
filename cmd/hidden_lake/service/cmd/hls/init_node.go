@@ -31,13 +31,13 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 						defer close(ch)
 						for _, addr := range cfg.Traffic().Download() {
 							client := initTrafficClient(addr)
-							hashes, err := client.Hashes()
+							hashes, err := client.GetHashes()
 							if err != nil {
 								// TODO: log
 								continue
 							}
 							for _, hash := range hashes {
-								msg, err := client.Load(hash)
+								msg, err := client.GetMessage(hash)
 								if err != nil {
 									continue
 								}
@@ -50,7 +50,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 				func(msg message.IMessage) error {
 					for _, addr := range cfg.Traffic().Upload() {
 						client := initTrafficClient(addr)
-						if err := client.Push(msg); err != nil {
+						if err := client.AddMessage(msg); err != nil {
 							// TODO: log
 							continue
 						}

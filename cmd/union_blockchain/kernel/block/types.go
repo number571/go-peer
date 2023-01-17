@@ -1,8 +1,8 @@
 package block
 
 import (
-	"github.com/number571/go-peer/cmd/ubc/kernel"
-	"github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+	"github.com/number571/go-peer/cmd/union_blockchain/kernel"
+	"github.com/number571/go-peer/cmd/union_blockchain/kernel/transaction"
 )
 
 type ISettings interface {

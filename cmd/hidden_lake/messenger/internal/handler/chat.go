@@ -57,7 +57,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 			db     = s.GetWrapperDB().Get()
 		)
 
-		myPubKey, err := client.PubKey()
+		myPubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(w, "error: read public key")
 			return
@@ -86,9 +86,9 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				return
 			}
 
-			res, err := client.Request(
+			res, err := client.DoRequest(
 				friendPubKey,
-				request.NewRequest("POST", hlm_settings.CTitlePattern, "/push").
+				request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, "/push").
 					WithHead(map[string]string{
 						"Content-Type": "application/json",
 					}).
@@ -133,7 +133,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 			return
 		}
 
-		clientPubKey, err := client.PubKey()
+		clientPubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(w, "error: read public key")
 			return

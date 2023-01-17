@@ -27,10 +27,32 @@ func NewRequester(host string) IRequester {
 	}
 }
 
-func (requester *sRequester) Request(push *pkg_settings.SPush) ([]byte, error) {
+func (requester *sRequester) GetIndex() (string, error) {
+	resp, err := http.Get(
+		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, requester.fHost),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	var response pkg_settings.SResponse
+	json.NewDecoder(resp.Body).Decode(&response)
+
+	if response.FReturn != pkg_settings.CErrorNone {
+		return "", fmt.Errorf("%s", string(response.FResult))
+	}
+
+	if response.FResult != pkg_settings.CTitlePattern {
+		return "", fmt.Errorf("incorrect title pattern")
+	}
+
+	return response.FResult, nil
+}
+
+func (requester *sRequester) DoRequest(push *pkg_settings.SPush) ([]byte, error) {
 	res, err := doRequest(
 		http.MethodPost,
-		requester.fHost+pkg_settings.CHandleNetworkPush,
+		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
 		push,
 	)
 	if err != nil {
@@ -40,10 +62,10 @@ func (requester *sRequester) Request(push *pkg_settings.SPush) ([]byte, error) {
 	return encoding.HexDecode(res), nil
 }
 
-func (requester *sRequester) Broadcast(push *pkg_settings.SPush) error {
+func (requester *sRequester) DoBroadcast(push *pkg_settings.SPush) error {
 	_, err := doRequest(
 		http.MethodPut,
-		requester.fHost+pkg_settings.CHandleNetworkPush,
+		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
 		push,
 	)
 	return err
@@ -52,7 +74,7 @@ func (requester *sRequester) Broadcast(push *pkg_settings.SPush) error {
 func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+pkg_settings.CHandleConfigFriends,
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		nil,
 	)
 	if err != nil {
@@ -76,7 +98,7 @@ func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error)
 func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
 	_, err := doRequest(
 		http.MethodPost,
-		requester.fHost+pkg_settings.CHandleConfigFriends,
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
 	)
 	return err
@@ -85,7 +107,7 @@ func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
 func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+pkg_settings.CHandleConfigFriends,
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
 	)
 	return err
@@ -94,7 +116,7 @@ func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
 func (requester *sRequester) GetOnlines() ([]string, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+pkg_settings.CHandleNetworkOnline,
+		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		nil,
 	)
 	if err != nil {
@@ -106,7 +128,7 @@ func (requester *sRequester) GetOnlines() ([]string, error) {
 func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+pkg_settings.CHandleNetworkOnline,
+		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		connect,
 	)
 	return err
@@ -115,7 +137,7 @@ func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
 func (requester *sRequester) GetConnections() ([]string, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+pkg_settings.CHandleConfigConnects,
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		nil,
 	)
 	if err != nil {
@@ -127,7 +149,7 @@ func (requester *sRequester) GetConnections() ([]string, error) {
 func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodPost,
-		requester.fHost+pkg_settings.CHandleConfigConnects,
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
 	)
 	return err
@@ -136,25 +158,25 @@ func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error
 func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error {
 	_, err := doRequest(
 		http.MethodDelete,
-		requester.fHost+pkg_settings.CHandleConfigConnects,
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
 	)
 	return err
 }
 
-func (requester *sRequester) PrivKey(privKey *pkg_settings.SPrivKey) error {
+func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
 	_, err := doRequest(
 		http.MethodPost,
-		requester.fHost+pkg_settings.CHandleNodeKey,
+		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		privKey,
 	)
 	return err
 }
 
-func (requester *sRequester) PubKey() (asymmetric.IPubKey, error) {
+func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := doRequest(
 		http.MethodGet,
-		requester.fHost+pkg_settings.CHandleNodeKey,
+		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		nil,
 	)
 	if err != nil {

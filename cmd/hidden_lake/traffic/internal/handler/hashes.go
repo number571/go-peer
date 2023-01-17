@@ -8,9 +8,9 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
-func HashesPage(db database.IKeyValueDB) http.HandlerFunc {
+func HandleHashesAPI(db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
+		if r.Method != http.MethodGet {
 			response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}

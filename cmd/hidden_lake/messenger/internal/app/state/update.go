@@ -30,7 +30,7 @@ func (s *sState) updateClientPrivKey(stateValue *SStorageState) error {
 		return fmt.Errorf("private key is null")
 	}
 
-	return client.PrivKey(privKey)
+	return client.SetPrivKey(privKey)
 }
 
 func (s *sState) updateClientFriends(stateValue *SStorageState) error {

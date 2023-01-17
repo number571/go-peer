@@ -251,8 +251,6 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 			return
 		}
 
-		fmt.Println("AAA")
-
 		// check sender in f2f list
 		if !node.F2F().InList(sender) {
 			node.fLogger.Warn(fmtLog(cLogWarnNotFriend, hash, proof, sender, conn))

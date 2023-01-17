@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -114,7 +115,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 
 	msg := payload.NewPayload(
 		uint64(hls_settings.CHeaderHLS),
-		request.NewRequest("GET", tcServiceAddressInHLS, "/echo").
+		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).

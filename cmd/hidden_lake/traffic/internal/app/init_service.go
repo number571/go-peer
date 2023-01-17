@@ -12,9 +12,9 @@ import (
 func initServiceHTTP(cfg config.IConfig, db database.IKeyValueDB) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(pkg_settings.CHashesPath, handler.HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CLoadPath, handler.HandleLoadAPI(db))
-	mux.HandleFunc(pkg_settings.CPushPath, handler.HandlePushAPI(db))
+	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI())
+	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(db))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(db))
 
 	return &http.Server{
 		Addr:    cfg.Address(),

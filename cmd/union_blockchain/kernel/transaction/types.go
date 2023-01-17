@@ -1,6 +1,6 @@
 package transaction
 
-import "github.com/number571/go-peer/cmd/ubc/kernel"
+import "github.com/number571/go-peer/cmd/union_blockchain/kernel"
 
 type ISettings interface {
 	GetMaxSize() uint64

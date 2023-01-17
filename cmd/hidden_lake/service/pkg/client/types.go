@@ -8,8 +8,10 @@ import (
 )
 
 type IClient interface {
-	PubKey() (asymmetric.IPubKey, error)
-	PrivKey(asymmetric.IPrivKey) error
+	GetIndex() (string, error)
+
+	GetPubKey() (asymmetric.IPubKey, error)
+	SetPrivKey(asymmetric.IPrivKey) error
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error
@@ -22,13 +24,15 @@ type IClient interface {
 	AddConnection(string) error
 	DelConnection(string) error
 
-	Broadcast(asymmetric.IPubKey, request.IRequest) error
-	Request(asymmetric.IPubKey, request.IRequest) ([]byte, error)
+	DoBroadcast(asymmetric.IPubKey, request.IRequest) error
+	DoRequest(asymmetric.IPubKey, request.IRequest) ([]byte, error)
 }
 
 type IRequester interface {
-	PubKey() (asymmetric.IPubKey, error)
-	PrivKey(*pkg_settings.SPrivKey) error
+	GetIndex() (string, error)
+
+	GetPubKey() (asymmetric.IPubKey, error)
+	SetPrivKey(*pkg_settings.SPrivKey) error
 
 	GetOnlines() ([]string, error)
 	DelOnline(*pkg_settings.SConnect) error
@@ -41,13 +45,13 @@ type IRequester interface {
 	AddConnection(*pkg_settings.SConnect) error
 	DelConnection(*pkg_settings.SConnect) error
 
-	Broadcast(*pkg_settings.SPush) error
-	Request(*pkg_settings.SPush) ([]byte, error)
+	DoBroadcast(*pkg_settings.SPush) error
+	DoRequest(*pkg_settings.SPush) ([]byte, error)
 }
 
 type IBuilder interface {
-	PrivKey(asymmetric.IPrivKey) *pkg_settings.SPrivKey
+	SetPrivKey(asymmetric.IPrivKey) *pkg_settings.SPrivKey
 	Connect(string) *pkg_settings.SConnect
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
-	Push(asymmetric.IPubKey, request.IRequest) *pkg_settings.SPush
+	DoPush(asymmetric.IPubKey, request.IRequest) *pkg_settings.SPush
 }

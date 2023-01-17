@@ -66,7 +66,7 @@ func SettingsPage(s state.IState) http.HandlerFunc {
 		result := new(sSettings)
 		result.STemplateState = s.GetTemplate()
 
-		pubKey, err := client.PubKey()
+		pubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(w, "error: read public key")
 			return

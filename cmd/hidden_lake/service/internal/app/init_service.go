@@ -12,12 +12,12 @@ import (
 func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(pkg_settings.CHandleIndex, handler.HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleConfigConnects, handler.HandleConfigConnectsAPI(wrapper, node))
-	mux.HandleFunc(pkg_settings.CHandleConfigFriends, handler.HandleConfigFriendsAPI(wrapper, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkOnline, handler.HandleNetworkOnlineAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkPush, handler.HandleNetworkPushAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNodeKey, handler.HandleNodeKeyAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI())
+	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, handler.HandleConfigConnectsAPI(wrapper, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, handler.HandleConfigFriendsAPI(wrapper, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, handler.HandleNetworkOnlineAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkPushPath, handler.HandleNetworkPushAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(node))
 
 	return &http.Server{
 		Addr:    wrapper.Config().Address().HTTP(),

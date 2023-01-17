@@ -21,7 +21,7 @@ func (s *sState) clearClientPrivKey() error {
 	client := s.GetClient()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
-	return client.PrivKey(pseudoPrivKey)
+	return client.SetPrivKey(pseudoPrivKey)
 }
 
 func (s *sState) clearClientFriends() error {

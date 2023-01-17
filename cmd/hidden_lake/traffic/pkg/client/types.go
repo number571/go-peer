@@ -6,18 +6,20 @@ import (
 )
 
 type IClient interface {
-	Hashes() ([]string, error)
-	Load(string) (message.IMessage, error)
-	Push(message.IMessage) error
+	GetIndex() (string, error)
+	GetHashes() ([]string, error)
+	GetMessage(string) (message.IMessage, error)
+	AddMessage(message.IMessage) error
 }
 
 type IBuilder interface {
-	Load(string) *pkg_settings.SLoadRequest
-	Push(message.IMessage) *pkg_settings.SPushRequest
+	GetMessage(string) *pkg_settings.SLoadRequest
+	AddMessage(message.IMessage) *pkg_settings.SPushRequest
 }
 
 type IRequester interface {
-	Hashes() ([]string, error)
-	Load(*pkg_settings.SLoadRequest) (message.IMessage, error)
-	Push(*pkg_settings.SPushRequest) error
+	GetIndex() (string, error)
+	GetHashes() ([]string, error)
+	GetMessage(*pkg_settings.SLoadRequest) (message.IMessage, error)
+	AddMessage(*pkg_settings.SPushRequest) error
 }

@@ -17,7 +17,7 @@ func main() {
 }
 
 func echoPage(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		response(w, 2, "failed: incorrect method")
 		return
 	}

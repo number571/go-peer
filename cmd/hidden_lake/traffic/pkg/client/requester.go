@@ -27,9 +27,31 @@ func NewRequester(host string) IRequester {
 	}
 }
 
-func (r *sRequester) Hashes() ([]string, error) {
+func (r *sRequester) GetIndex() (string, error) {
 	resp, err := http.Get(
-		fmt.Sprintf(pkg_settings.CHashesTemplate, r.fHost),
+		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, r.fHost),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	var response pkg_settings.SResponse
+	json.NewDecoder(resp.Body).Decode(&response)
+
+	if response.FReturn != pkg_settings.CErrorNone {
+		return "", fmt.Errorf("%s", string(response.FResult))
+	}
+
+	if response.FResult != pkg_settings.CTitlePattern {
+		return "", fmt.Errorf("incorrect title pattern")
+	}
+
+	return response.FResult, nil
+}
+
+func (r *sRequester) GetHashes() ([]string, error) {
+	resp, err := http.Get(
+		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, r.fHost),
 	)
 	if err != nil {
 		return nil, err
@@ -45,11 +67,9 @@ func (r *sRequester) Hashes() ([]string, error) {
 	return strings.Split(response.FResult, ","), nil
 }
 
-func (r *sRequester) Load(request *pkg_settings.SLoadRequest) (message.IMessage, error) {
-	resp, err := http.Post(
-		fmt.Sprintf(pkg_settings.CLoadTemplate, r.fHost),
-		pkg_settings.CContentType,
-		bytes.NewReader(encoding.Serialize(request)),
+func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMessage, error) {
+	resp, err := http.Get(
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", r.fHost, request.FHash),
 	)
 	if err != nil {
 		return nil, err
@@ -73,9 +93,9 @@ func (r *sRequester) Load(request *pkg_settings.SLoadRequest) (message.IMessage,
 	return msg, nil
 }
 
-func (r *sRequester) Push(request *pkg_settings.SPushRequest) error {
+func (r *sRequester) AddMessage(request *pkg_settings.SPushRequest) error {
 	resp, err := http.Post(
-		fmt.Sprintf(pkg_settings.CPushTemplate, r.fHost),
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, r.fHost),
 		pkg_settings.CContentType,
 		bytes.NewReader(encoding.Serialize(request)),
 	)

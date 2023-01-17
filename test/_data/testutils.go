@@ -29,7 +29,27 @@ func TestEchoPage(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	TgAddrs = [20]string{
+	TgAddrs = [40]string{
+		"localhost:8060",
+		"localhost:8061",
+		"localhost:8062",
+		"localhost:8063",
+		"localhost:8064",
+		"localhost:8065",
+		"localhost:8066",
+		"localhost:8067",
+		"localhost:8068",
+		"localhost:8069",
+		"localhost:8070",
+		"localhost:8071",
+		"localhost:8072",
+		"localhost:8073",
+		"localhost:8074",
+		"localhost:8075",
+		"localhost:8076",
+		"localhost:8077",
+		"localhost:8078",
+		"localhost:8079",
 		"localhost:8080",
 		"localhost:8081",
 		"localhost:8082",

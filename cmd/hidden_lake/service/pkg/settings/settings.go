@@ -1,6 +1,7 @@
 package settings
 
 const (
+	CTitlePattern = "go-peer/hidden-lake-service"
 	CContentType  = "application/json"
 	CHeaderPubKey = "Sender-Public-Key"
 )
@@ -12,12 +13,21 @@ const (
 )
 
 const (
-	CHandleIndex          = "/api/index"
-	CHandleConfigConnects = "/api/config/connects"
-	CHandleConfigFriends  = "/api/config/friends"
-	CHandleNetworkOnline  = "/api/network/online"
-	CHandleNetworkPush    = "/api/network/push"
-	CHandleNodeKey        = "/api/node/key"
+	CHandleIndexPath          = "/api/index"
+	CHandleConfigConnectsPath = "/api/config/connects"
+	CHandleConfigFriendsPath  = "/api/config/friends"
+	CHandleNetworkOnlinePath  = "/api/network/online"
+	CHandleNetworkPushPath    = "/api/network/push"
+	CHandleNodeKeyPath        = "/api/node/key"
+)
+
+const (
+	CHandleIndexTemplate          = "%s" + CHandleIndexPath
+	CHandleConfigConnectsTemplate = "%s" + CHandleConfigConnectsPath
+	CHandleConfigFriendsTemplate  = "%s" + CHandleConfigFriendsPath
+	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath
+	CHandleNetworkPushTemplate    = "%s" + CHandleNetworkPushPath
+	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
 )
 
 const (

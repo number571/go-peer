@@ -1,6 +1,6 @@
 package block
 
-import "github.com/number571/go-peer/cmd/ubc/kernel/transaction"
+import "github.com/number571/go-peer/cmd/union_blockchain/kernel/transaction"
 
 var (
 	_ ISettings = &sSettings{}
