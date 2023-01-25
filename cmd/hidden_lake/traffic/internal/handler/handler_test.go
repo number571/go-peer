@@ -11,6 +11,8 @@ import (
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -48,9 +50,16 @@ func testAllFree(addr string, srv *http.Server, db database.IKeyValueDB) {
 func testRunService(db database.IKeyValueDB, addr string) *http.Server {
 	mux := http.NewServeMux()
 
+	// TODO: make node with connection
+	connKeeper := conn_keeper.NewConnKeeper(
+		conn_keeper.NewSettings(&conn_keeper.SSettings{}),
+		network.NewNode(network.NewSettings(&network.SSettings{})),
+	)
+
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(db))
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(db))
+	mux.HandleFunc(pkg_settings.CHandleBroadcastPath, HandleBroadcastAPI(db, connKeeper))
 
 	srv := &http.Server{
 		Addr:    addr,

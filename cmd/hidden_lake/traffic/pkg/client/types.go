@@ -10,6 +10,7 @@ type IClient interface {
 	GetHashes() ([]string, error)
 	GetMessage(string) (message.IMessage, error)
 	AddMessage(message.IMessage) error
+	DoBroadcast() error
 }
 
 type IBuilder interface {
@@ -22,4 +23,5 @@ type IRequester interface {
 	GetHashes() ([]string, error)
 	GetMessage(*pkg_settings.SLoadRequest) (message.IMessage, error)
 	AddMessage(*pkg_settings.SPushRequest) error
+	DoBroadcast() error
 }

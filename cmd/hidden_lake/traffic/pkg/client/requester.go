@@ -113,3 +113,24 @@ func (r *sRequester) AddMessage(request *pkg_settings.SPushRequest) error {
 
 	return nil
 }
+
+func (r *sRequester) DoBroadcast() error {
+	resp, err := http.Post(
+		fmt.Sprintf(pkg_settings.CHandleBroadcastTemplate, r.fHost),
+		pkg_settings.CContentType,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	var response pkg_settings.SResponse
+	json.NewDecoder(resp.Body).Decode(&response)
+
+	if response.FReturn != pkg_settings.CErrorNone {
+		fmt.Println(response)
+		return fmt.Errorf("%s", string(response.FResult))
+	}
+
+	return nil
+}
