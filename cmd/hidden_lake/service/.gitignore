@@ -6,4 +6,6 @@ pub.key
 priv.key 
 *.db_push1
 *.db_push2
+*.cfg_push1
+*.cfg_push2
 !cmd/hls

@@ -36,8 +36,8 @@ type sLevelDBIterator struct {
 	fCipher symmetric.ICipher
 }
 
-func NewLevelDB(sett ISettings, path string) IKeyValueDB {
-	db, err := leveldb.OpenFile(path, nil)
+func NewLevelDB(sett ISettings) IKeyValueDB {
+	db, err := leveldb.OpenFile(sett.GetPath(), nil)
 	if err != nil {
 		fmt.Println(err)
 		return nil

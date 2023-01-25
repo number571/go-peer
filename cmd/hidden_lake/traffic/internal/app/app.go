@@ -7,8 +7,8 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
 	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -23,29 +23,32 @@ var (
 type sApp struct {
 	fConfig      config.IConfig
 	fDatabase    database.IKeyValueDB
+	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
 }
 
 func NewApp(
 	cfg config.IConfig,
+	db database.IKeyValueDB,
+	connKeeper conn_keeper.IConnKeeper,
 ) types.IApp {
-	db := database.NewKeyValueDB(
-		hlt_settings.CPathDB,
-		database.NewSettings(&database.SSettings{
-			FLimitMessages: hlt_settings.CLimitMessages,
-			FMessageSize:   hlt_settings.CMessageSize,
-			FWorkSize:      hlt_settings.CWorkSize,
-		}),
-	)
 	return &sApp{
 		fConfig:      cfg,
 		fDatabase:    db,
+		fConnKeeper:  connKeeper,
 		fServiceHTTP: initServiceHTTP(cfg, db),
 	}
 }
 
 func (app *sApp) Run() error {
 	res := make(chan error)
+
+	go func() {
+		if err := app.fConnKeeper.Run(); err != nil {
+			res <- err
+			return
+		}
+	}()
 
 	go func() {
 		err := app.fServiceHTTP.ListenAndServe()
@@ -66,6 +69,8 @@ func (app *sApp) Run() error {
 
 func (app *sApp) Close() error {
 	return closer.CloseAll([]types.ICloser{
+		app.fConnKeeper.Network(),
+		app.fConnKeeper,
 		app.fServiceHTTP,
 		app.fDatabase,
 	})

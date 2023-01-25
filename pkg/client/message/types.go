@@ -5,6 +5,8 @@ import "github.com/number571/go-peer/pkg/payload"
 type IMessage interface {
 	Head() iHead
 	Body() iBody
+
+	IsValid(uint64, uint64) bool
 	Bytes() []byte
 }
 

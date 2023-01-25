@@ -12,7 +12,9 @@ var (
 )
 
 type SConfig struct {
-	FAddress string `json:"address"`
+	FNetwork    string `json:"network"`
+	FAddress    string `json:"address"`
+	FConnection string `json:"connection"`
 }
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
@@ -49,6 +51,14 @@ func LoadConfig(filepath string) (IConfig, error) {
 	return cfg, nil
 }
 
+func (cfg *SConfig) Network() string {
+	return cfg.FNetwork
+}
+
 func (cfg *SConfig) Address() string {
 	return cfg.FAddress
+}
+
+func (cfg *SConfig) Connection() string {
+	return cfg.FConnection
 }

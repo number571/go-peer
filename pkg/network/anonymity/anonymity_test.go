@@ -148,10 +148,10 @@ func testNewNode(i int, timeWait time.Duration) INode {
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
+				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
 				FHashing:   true,
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
-			fmt.Sprintf(tcPathDBTemplate, i),
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

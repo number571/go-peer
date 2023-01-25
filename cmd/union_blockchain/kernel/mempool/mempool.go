@@ -23,8 +23,9 @@ func NewMempool(sett ISettings, path string) IMempool {
 	mempool := &sMempool{
 		fSettings: sett,
 		fDB: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			path,
+			database.NewSettings(&database.SSettings{
+				FPath: path,
+			}),
 		),
 	}
 	_, err := mempool.fDB.Get(getKeyHeight())

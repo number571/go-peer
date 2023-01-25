@@ -8,11 +8,13 @@ import (
 const (
 	tcConfigFile = "config_test.txt"
 	tcAddress    = "test_address"
+	tcConnection = "test_connection"
 )
 
 func testConfigDefaultInit(configPath string) {
 	_, _ = NewConfig(configPath, &SConfig{
-		FAddress: tcAddress,
+		FAddress:    tcAddress,
+		FConnection: tcConnection,
 	})
 }
 
@@ -27,5 +29,9 @@ func TestConfig(t *testing.T) {
 
 	if cfg.Address() != tcAddress {
 		t.Error("address is invalid")
+	}
+
+	if cfg.Connection() != tcConnection {
+		t.Error("connection is invalid")
 	}
 }

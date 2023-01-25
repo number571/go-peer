@@ -9,7 +9,7 @@ var (
 )
 
 const (
-	cMaskNetwork = 0x676F2D7065657201
+	cMaskNetwork = 0x1111111111111111
 	cTimeWait    = time.Minute
 )
 
@@ -18,7 +18,6 @@ type sSettings struct {
 	FRetryEnqueue uint64
 	FNetworkMask  uint64
 	FTimeWait     time.Duration
-	FTraffic      ITraffic
 }
 
 func NewSettings(sett *SSettings) ISettings {
@@ -26,7 +25,6 @@ func NewSettings(sett *SSettings) ISettings {
 		FRetryEnqueue: sett.FRetryEnqueue,
 		FNetworkMask:  sett.FNetworkMask,
 		FTimeWait:     sett.FTimeWait,
-		FTraffic:      sett.FTraffic,
 	}).useDefaultValue()
 }
 
@@ -36,9 +34,6 @@ func (s *sSettings) useDefaultValue() ISettings {
 	}
 	if s.FTimeWait == 0 {
 		s.FTimeWait = cTimeWait
-	}
-	if s.FTraffic == nil {
-		s.FTraffic = NewTraffic(nil, nil)
 	}
 	return s
 }
@@ -53,8 +48,4 @@ func (s *sSettings) GetNetworkMask() uint64 {
 
 func (s *sSettings) GetRetryEnqueue() uint64 {
 	return s.FRetryEnqueue
-}
-
-func (s *sSettings) GetTraffic() ITraffic {
-	return s.FTraffic
 }

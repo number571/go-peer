@@ -18,15 +18,9 @@ type IConfig interface {
 	Network() string
 	Logging() ILogging
 	Address() IAddress
-	Traffic() ITraffic
 	Connections() []string
 	Friends() map[string]asymmetric.IPubKey
 	Service(string) (string, bool)
-}
-
-type ITraffic interface {
-	Download() []string
-	Upload() []string
 }
 
 type ILogging interface {

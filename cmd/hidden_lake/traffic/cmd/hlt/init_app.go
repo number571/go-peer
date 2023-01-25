@@ -11,5 +11,8 @@ func initApp() (types.IApp, error) {
 		return nil, err
 	}
 
-	return app.NewApp(cfg), nil
+	db := initDatabase()
+	connKeeper := initConnKeeper(cfg, db)
+
+	return app.NewApp(cfg, db, connKeeper), nil
 }

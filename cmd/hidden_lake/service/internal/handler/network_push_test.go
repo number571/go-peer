@@ -72,10 +72,14 @@ func testRequest(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPub
 }
 
 func testAllPushCreate() (anonymity.INode, *http.Server) {
+	os.RemoveAll(tcPathConfig + "_push1")
+	os.RemoveAll(tcPathDB + "_push1")
+
 	pushNode := testNewPushNode(tcPathConfig+"_push1", tcPathDB+"_push1")
 	if pushNode == nil {
 		return nil, nil
 	}
+
 	pushSrv := testStartServerHTTP(testutils.TgAddrs[10])
 	time.Sleep(200 * time.Millisecond)
 	return pushNode, pushSrv
@@ -85,13 +89,13 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 	defer func() {
 		os.RemoveAll(tcPathConfig + "_push1")
 		os.RemoveAll(tcPathDB + "_push1")
-		closer.CloseAll([]types.ICloser{
-			node,
-			srv,
-			node.KeyValueDB(),
-			node.Network(),
-		})
 	}()
+	closer.CloseAll([]types.ICloser{
+		srv,
+		node,
+		node.KeyValueDB(),
+		node.Network(),
+	})
 }
 
 func testNewPushNode(cfgPath, dbPath string) anonymity.INode {

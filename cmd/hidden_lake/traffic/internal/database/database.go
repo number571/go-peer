@@ -19,10 +19,11 @@ type sKeyValueDB struct {
 	fDB       gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(path string, sett ISettings) IKeyValueDB {
+func NewKeyValueDB(sett ISettings, path string) IKeyValueDB {
 	levelDB := gp_database.NewLevelDB(
-		gp_database.NewSettings(&gp_database.SSettings{}),
-		path,
+		gp_database.NewSettings(&gp_database.SSettings{
+			FPath: path,
+		}),
 	)
 	if levelDB == nil {
 		panic("storage (hashes) is nil")
@@ -63,6 +64,10 @@ func (db *sKeyValueDB) Hashes() ([]string, error) {
 func (db *sKeyValueDB) Push(msg message.IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
+
+	if !msg.IsValid(db.Settings().GetMessageSize(), db.Settings().GetWorkSize()) {
+		return fmt.Errorf("invalid push message")
+	}
 
 	// delete old message
 	keyHash := getKeyHash(db.getPointer())
@@ -106,7 +111,11 @@ func (db *sKeyValueDB) Load(strHash string) (message.IMessage, error) {
 		return nil, fmt.Errorf("message undefined")
 	}
 
-	msg := message.LoadMessage(data, db.fSettings.GetWorkSize())
+	msg := message.LoadMessage(
+		data,
+		db.Settings().GetMessageSize(),
+		db.Settings().GetWorkSize(),
+	)
 	if msg == nil {
 		panic("message is nil")
 	}

@@ -21,7 +21,6 @@ const (
 const (
 	CNetworkCapacity = (1 << 10) // hashes
 	CNetworkMaxConns = 10
-	CNetworkWaitTime = 10 * time.Second
 )
 
 const (

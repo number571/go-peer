@@ -49,16 +49,6 @@ const (
 		"tcp": "%s",
 		"http": "%s"
 	},
-	"traffic": {
-		"download": [
-			"%s", 
-			"%s"
-		],
-		"upload": [
-			"%s", 
-			"%s"
-		]
-	},
 	"connections": [
 		"%s",
 		"%s"
@@ -80,10 +70,6 @@ func testNewConfigString() string {
 		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
-		tgConnects[0],
-		tgConnects[1],
-		tgConnects[0],
-		tgConnects[1],
 		tgConnects[0],
 		tgConnects[1],
 		tcPubKeyAlias1,
@@ -139,28 +125,6 @@ func TestConfig(t *testing.T) {
 	if cfg.Address().HTTP() != tcAddressHTTP {
 		t.Error("address_http is invalid")
 		return
-	}
-
-	if len(cfg.Traffic().Download()) != 2 {
-		t.Error("len traffic download != 2")
-		return
-	}
-	for i, v := range cfg.Traffic().Download() {
-		if v != tgConnects[i] {
-			t.Errorf("traffic download '%d' is invalid", i)
-			return
-		}
-	}
-
-	if len(cfg.Traffic().Upload()) != 2 {
-		t.Error("len traffic upload != 2")
-		return
-	}
-	for i, v := range cfg.Traffic().Upload() {
-		if v != tgConnects[i] {
-			t.Errorf("traffic upload '%d' is invalid", i)
-			return
-		}
 	}
 
 	if len(cfg.Connections()) != 2 {

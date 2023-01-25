@@ -12,7 +12,6 @@ import (
 
 func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
 			response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
@@ -43,7 +42,11 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 				return
 			}
 
-			msg := message.LoadMessage(encoding.HexDecode(vRequest.FMessage), db.Settings().GetWorkSize())
+			msg := message.LoadMessage(
+				encoding.HexDecode(vRequest.FMessage),
+				db.Settings().GetMessageSize(),
+				db.Settings().GetWorkSize(),
+			)
 			if msg == nil {
 				response(w, pkg_settings.CErrorMessage, "failed: decode message")
 				return

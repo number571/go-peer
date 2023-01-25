@@ -24,10 +24,10 @@ func TestNewNode(pathDB string) anonymity.INode {
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
+				FPath:      pathDB,
 				FHashing:   true,
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
-			pathDB,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

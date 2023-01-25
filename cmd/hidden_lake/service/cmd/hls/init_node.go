@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
@@ -22,51 +19,18 @@ import (
 func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
+			FNetworkMask:  pkg_settings.CNetworkMask,
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
 			FTimeWait:     hls_settings.CWaitTime,
-			FTraffic: anonymity.NewTraffic(
-				func() <-chan message.IMessage {
-					ch := make(chan message.IMessage, 300)
-					go func() {
-						defer close(ch)
-						for _, addr := range cfg.Traffic().Download() {
-							client := initTrafficClient(addr)
-							hashes, err := client.GetHashes()
-							if err != nil {
-								// TODO: log
-								continue
-							}
-							for _, hash := range hashes {
-								msg, err := client.GetMessage(hash)
-								if err != nil {
-									continue
-								}
-								ch <- msg
-							}
-						}
-					}()
-					return ch
-				},
-				func(msg message.IMessage) error {
-					for _, addr := range cfg.Traffic().Upload() {
-						client := initTrafficClient(addr)
-						if err := client.AddMessage(msg); err != nil {
-							// TODO: log
-							continue
-						}
-					}
-					return nil
-				},
-			),
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
 		logger.NewLogger(loggerSettings(cfg.Logging())),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
+				FPath:    hls_settings.CPathDB,
 				FHashing: true,
 			}),
-			hls_settings.CPathDB,
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
@@ -75,7 +39,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  cfg.Network(),
 					FMessageSize: pkg_settings.CMessageSize,
-					FTimeWait:    hls_settings.CNetworkWaitTime,
+					FTimeWait:    pkg_settings.CNetworkWaitTime,
 				}),
 			}),
 		),
@@ -94,13 +58,6 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			}
 			return f2f
 		}(),
-	)
-}
-
-func initTrafficClient(addr string) hlt_client.IClient {
-	return hlt_client.NewClient(
-		hlt_client.NewBuilder(),
-		hlt_client.NewRequester(fmt.Sprintf("http://%s", addr)),
 	)
 }
 

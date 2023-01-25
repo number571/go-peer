@@ -36,12 +36,9 @@ type sApp struct {
 func NewApp(
 	cfg config.IConfig,
 	client hls_client.IClient,
+	stg storage.IKeyValueStorage,
+	wDB database.IWrapperDB,
 ) types.IApp {
-	wDB := database.NewWrapperDB()
-	stg, err := initCryptoStorage(cfg)
-	if err != nil {
-		panic(err)
-	}
 	state := state.NewState(client, stg, wDB)
 	return &sApp{
 		fState:          state,

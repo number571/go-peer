@@ -84,6 +84,7 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 
 	msg := message.LoadMessage(
 		encoding.HexDecode(response.FResult),
+		hlt_settings.CMessageSize,
 		hlt_settings.CWorkSize,
 	)
 	if msg == nil {

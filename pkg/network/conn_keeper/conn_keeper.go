@@ -27,6 +27,10 @@ func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
 	}
 }
 
+func (connKeeper *sConnKeeper) Network() network.INode {
+	return connKeeper.fNode
+}
+
 func (connKeeper *sConnKeeper) Settings() ISettings {
 	return connKeeper.fSettings
 }

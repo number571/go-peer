@@ -20,11 +20,11 @@ const (
 
 func testAllRun(addr string) (*http.Server, database.IKeyValueDB, hlt_client.IClient) {
 	db := database.NewKeyValueDB(
-		fmt.Sprintf(databaseTemplate, addr),
 		database.NewSettings(&database.SSettings{
 			FMessageSize: hlt_settings.CMessageSize,
 			FWorkSize:    hlt_settings.CWorkSize,
 		}),
+		fmt.Sprintf(databaseTemplate, addr),
 	)
 
 	srv := testRunService(db, addr)

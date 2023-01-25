@@ -36,13 +36,12 @@ type SBodyMessage struct {
 
 // IMessage
 
-func LoadMessage(bmsg []byte, workSize uint64) IMessage {
-	var msg = new(SMessage)
-	err := json.Unmarshal(bmsg, msg)
-	if err != nil {
+func LoadMessage(bmsg []byte, msgSize, workSize uint64) IMessage {
+	msg := new(SMessage)
+	if err := json.Unmarshal(bmsg, msg); err != nil {
 		return nil
 	}
-	if !msg.isValid(workSize) {
+	if !msg.IsValid(msgSize, workSize) {
 		return nil
 	}
 	return msg
@@ -64,7 +63,10 @@ func (msg *SMessage) Bytes() []byte {
 	return jsonData
 }
 
-func (msg *SMessage) isValid(workSize uint64) bool {
+func (msg *SMessage) IsValid(msgSize, workSize uint64) bool {
+	if uint64(len(msg.Bytes())) > msgSize {
+		return false
+	}
 	if len(msg.Body().Hash()) != hashing.CSHA256Size {
 		return false
 	}

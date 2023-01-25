@@ -1,15 +1,19 @@
 package settings
 
+import "time"
+
 const (
 	CTitlePattern = "go-peer/hidden-lake-service"
 	CContentType  = "application/json"
 	CHeaderPubKey = "Sender-Public-Key"
+	CNetworkMask  = 0x676F2D7065657201
 )
 
 const (
-	CAKeySize    = 4096
-	CWorkSize    = 20        // bits
-	CMessageSize = (2 << 20) // 2MiB
+	CAKeySize        = 4096
+	CWorkSize        = 20        // bits
+	CMessageSize     = (1 << 20) // 1MiB
+	CNetworkWaitTime = 10 * time.Second
 )
 
 const (

@@ -19,7 +19,6 @@ const (
 var (
 	_ IConfig  = &SConfig{}
 	_ IAddress = &SAddress{}
-	_ ITraffic = &STraffic{}
 	_ ILogging = &sLogging{}
 )
 
@@ -170,10 +169,6 @@ func (cfg *SConfig) Logging() ILogging {
 
 func (cfg *SConfig) Address() IAddress {
 	return cfg.FAddress
-}
-
-func (cfg *SConfig) Traffic() ITraffic {
-	return cfg.FTraffic
 }
 
 func (cfg *SConfig) Connections() []string {

@@ -4,7 +4,7 @@ default: clean run
 run:
 	./prog_hls &
 	./prog_hlt &
-	sleep 10
+	sleep 5
 clean:
 	pkill prog_hls || true
 	pkill prog_hlt || true

@@ -4,10 +4,8 @@ go 1.17
 
 require (
 	github.com/boombuler/barcode v1.0.1
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/net v0.0.0-20180906233101-161cd47e91fd
-	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
 )
 
 require (

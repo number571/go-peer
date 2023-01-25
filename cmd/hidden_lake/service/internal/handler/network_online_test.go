@@ -47,7 +47,6 @@ func testGetOnlines(t *testing.T, client hls_client.IClient, node anonymity.INod
 	}
 
 	if _, ok := node.Network().Connections()[onlines[0]]; !ok {
-		fmt.Println(node.Network().Connections(), onlines[0])
 		t.Error("online address is invalid")
 		return
 	}
@@ -73,10 +72,14 @@ func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
 }
 
 func testAllOnlineCreate() anonymity.INode {
+	os.RemoveAll(tcPathConfig + "_push2")
+	os.RemoveAll(tcPathDB + "_push2")
+
 	pushNode := testOnlinePushNode(tcPathConfig+"_push2", tcPathDB+"_push2")
 	if pushNode == nil {
 		return nil
 	}
+
 	time.Sleep(200 * time.Millisecond)
 	return pushNode
 }
@@ -85,12 +88,12 @@ func testAllOnlineFree(node anonymity.INode) {
 	defer func() {
 		os.RemoveAll(tcPathConfig + "_push2")
 		os.RemoveAll(tcPathDB + "_push2")
-		closer.CloseAll([]types.ICloser{
-			node,
-			node.KeyValueDB(),
-			node.Network(),
-		})
 	}()
+	closer.CloseAll([]types.ICloser{
+		node,
+		node.KeyValueDB(),
+		node.Network(),
+	})
 }
 
 func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {

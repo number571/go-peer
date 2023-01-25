@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
@@ -63,24 +64,11 @@ func (node *sNode) Run() error {
 		return err
 	}
 
-	handleWrapper := node.handleWrapper()
-
-	middleware := node.Settings().GetTraffic().Download()
-	if middleware != nil {
-		chMsg := middleware()
-		for {
-			msg, ok := <-chMsg
-			if !ok {
-				break
-			}
-			handleWrapper(nil, nil, msg.Bytes())
-		}
-	}
-
 	node.Network().Handle(
 		node.Settings().GetNetworkMask(),
-		handleWrapper,
+		node.handleWrapper(),
 	)
+
 	return nil
 }
 
@@ -216,32 +204,46 @@ func (node *sNode) runQueue() error {
 
 func (node *sNode) handleWrapper() network.IHandlerF {
 	return func(_ network.INode, conn conn.IConn, reqBytes []byte) {
-		msg := message.LoadMessage(reqBytes, node.Queue().Client().Settings().GetWorkSize())
+		msg := message.LoadMessage(
+			reqBytes,
+			node.Queue().Client().Settings().GetMessageSize(),
+			node.Queue().Client().Settings().GetWorkSize(),
+		)
 		if msg == nil {
 			node.fLogger.Warn(fmtLog(cLogWarnMessageNull, nil, 0, nil, conn))
 			return
 		}
 
-		hash := msg.Body().Hash()
-		proof := msg.Body().Proof()
+		var (
+			addr  = node.Queue().Client().PubKey().Address().String()
+			hash  = msg.Body().Hash()
+			proof = msg.Body().Proof()
+		)
+
+		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
+		gotAddrs, err := node.KeyValueDB().Get(hashDB)
 
 		// check already received data by hash
-		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
-		if _, err := node.KeyValueDB().Get(hashDB); err == nil {
+		hashIsExist := (err == nil)
+		if hashIsExist && strings.Contains(string(gotAddrs), addr) {
 			node.fLogger.Info(fmtLog(cLogInfoExist, hash, proof, nil, conn))
 			return
 		}
 
 		// set hash to database
-		if err := node.KeyValueDB().Set(hashDB, []byte{}); err != nil {
+		updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), addr)
+		if err := node.KeyValueDB().Set(hashDB, []byte(updateAddrs)); err != nil {
 			node.fLogger.Erro(fmtLog(cLogErroDatabaseSet, hash, proof, nil, conn))
 			return
 		}
 
-		// broadcast message to network
-		if err := node.networkBroadcast(msg); err != nil {
-			node.fLogger.Erro(fmtLog(cLogErroMiddleware, hash, proof, nil, conn))
-			return
+		// do not send data if than already received
+		if !hashIsExist {
+			// broadcast message to network
+			if err := node.networkBroadcast(msg); err != nil {
+				node.fLogger.Erro(fmtLog(cLogErroMiddleware, hash, proof, nil, conn))
+				return
+			}
 		}
 
 		// try decrypt message
@@ -305,14 +307,6 @@ func (node *sNode) networkBroadcast(msg message.IMessage) error {
 	if err != nil {
 		node.fLogger.Warn(fmtLog(cLogBaseBroadcast, hash, proof, nil, nil))
 		// need continue (some of connections may be closed)
-	}
-
-	// use middleware func for upload raw messages
-	middleware := node.Settings().GetTraffic().Upload()
-	if middleware != nil {
-		if err := middleware(msg); err != nil {
-			return err
-		}
 	}
 
 	return nil

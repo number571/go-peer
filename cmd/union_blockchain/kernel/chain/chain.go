@@ -44,12 +44,14 @@ func NewChain(sett ISettings, priv asymmetric.IPrivKey, genesis block.IBlock) (I
 		fSettings: sett,
 		fPrivKey:  priv,
 		fBlocks: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			sett.GetBlocksPath(),
+			database.NewSettings(&database.SSettings{
+				FPath: sett.GetBlocksPath(),
+			}),
 		),
 		fTransactions: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			sett.GetTransactionsPath(),
+			database.NewSettings(&database.SSettings{
+				FPath: sett.GetTransactionsPath(),
+			}),
 		),
 		fMempool: mempool.NewMempool(
 			sett.GetMempoolSettings(),
@@ -84,12 +86,14 @@ func LoadChain(sett ISettings, priv asymmetric.IPrivKey) (IChain, error) {
 		fSettings: sett,
 		fPrivKey:  priv,
 		fBlocks: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			sett.GetBlocksPath(),
+			database.NewSettings(&database.SSettings{
+				FPath: sett.GetBlocksPath(),
+			}),
 		),
 		fTransactions: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			sett.GetTransactionsPath(),
+			database.NewSettings(&database.SSettings{
+				FPath: sett.GetTransactionsPath(),
+			}),
 		),
 		fMempool: mempool.NewMempool(
 			sett.GetMempoolSettings(),
