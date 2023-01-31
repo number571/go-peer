@@ -29,16 +29,7 @@ func TestNewNode(pathDB string) anonymity.INode {
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
 		),
-		network.NewNode(
-			network.NewSettings(&network.SSettings{
-				FCapacity:    (1 << 10),
-				FMaxConnects: 10,
-				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FMessageSize: msgSize,
-					FTimeWait:    5 * time.Second,
-				}),
-			}),
-		),
+		TestNewNetworkNode(),
 		queue.NewQueue(
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     10,
@@ -56,4 +47,18 @@ func TestNewNode(pathDB string) anonymity.INode {
 		friends.NewF2F(),
 	)
 	return node
+}
+
+func TestNewNetworkNode() network.INode {
+	msgSize := uint64(100 << 10)
+	return network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FCapacity:    (1 << 10),
+			FMaxConnects: 10,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSize: msgSize,
+				FTimeWait:    5 * time.Second,
+			}),
+		}),
+	)
 }

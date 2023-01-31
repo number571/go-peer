@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
@@ -13,9 +15,10 @@ import (
 
 func TestHandleHashesAPI(t *testing.T) {
 	addr := testutils.TgAddrs[19]
+	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, db, hltClient := testAllRun(addr)
-	defer testAllFree(addr, srv, db)
+	srv, connKeeper, db, hltClient := testAllRun(addr, "")
+	defer testAllFree(addr, srv, connKeeper, db)
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])

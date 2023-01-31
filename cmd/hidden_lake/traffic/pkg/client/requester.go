@@ -128,7 +128,6 @@ func (r *sRequester) DoBroadcast() error {
 	json.NewDecoder(resp.Body).Decode(&response)
 
 	if response.FReturn != pkg_settings.CErrorNone {
-		fmt.Println(response)
 		return fmt.Errorf("%s", string(response.FResult))
 	}
 

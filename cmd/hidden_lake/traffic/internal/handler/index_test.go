@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -9,9 +11,10 @@ import (
 
 func TestHandleIndexAPI(t *testing.T) {
 	addr := testutils.TgAddrs[21]
+	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, db, hltClient := testAllRun(addr)
-	defer testAllFree(addr, srv, db)
+	srv, connKeeper, db, hltClient := testAllRun(addr, "")
+	defer testAllFree(addr, srv, connKeeper, db)
 
 	title, err := hltClient.GetIndex()
 	if err != nil {

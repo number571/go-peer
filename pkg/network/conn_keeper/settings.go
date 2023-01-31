@@ -7,7 +7,11 @@ var (
 )
 
 const (
-	cTimeWait = time.Minute
+	cDuration = time.Minute
+)
+
+var (
+	gConnections = func() []string { return nil }
 )
 
 type SSettings sSettings
@@ -25,7 +29,10 @@ func NewSettings(sett *SSettings) ISettings {
 
 func (s *sSettings) useDefaultValue() ISettings {
 	if s.FDuration == 0 {
-		s.FDuration = cTimeWait
+		s.FDuration = cDuration
+	}
+	if s.FConnections == nil {
+		s.FConnections = gConnections
 	}
 	return s
 }

@@ -60,15 +60,15 @@ func (node *sNode) Settings() ISettings {
 // Turn on listener by address.
 // Client handle function need be not null.
 func (node *sNode) Listen(address string) error {
-	listen, err := net.Listen("tcp", address)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
 	}
-	defer listen.Close()
+	defer listener.Close()
 
-	node.fListener = listen
+	node.setListener(listener)
 	for {
-		tconn, err := listen.Accept()
+		tconn, err := node.getListener().Accept()
 		if err != nil {
 			break
 		}
@@ -228,4 +228,18 @@ func (node *sNode) getFunction(head uint64) (IHandlerF, bool) {
 
 	f, ok := node.fHandleRoutes[head]
 	return f, ok
+}
+
+func (node *sNode) setListener(listener net.Listener) {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	node.fListener = listener
+}
+
+func (node *sNode) getListener() net.Listener {
+	node.fMutex.Lock()
+	defer node.fMutex.Unlock()
+
+	return node.fListener
 }

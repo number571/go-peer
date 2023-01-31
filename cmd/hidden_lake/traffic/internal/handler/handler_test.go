@@ -10,17 +10,23 @@ import (
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/closer"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
+	testutils "github.com/number571/go-peer/test/_data"
+	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
 	databaseTemplate = "database_test_%s.db"
 )
 
-func testAllRun(addr string) (*http.Server, database.IKeyValueDB, hlt_client.IClient) {
+func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IKeyValueDB, hlt_client.IClient) {
 	db := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FMessageSize: hlt_settings.CMessageSize,
@@ -29,7 +35,7 @@ func testAllRun(addr string) (*http.Server, database.IKeyValueDB, hlt_client.ICl
 		fmt.Sprintf(databaseTemplate, addr),
 	)
 
-	srv := testRunService(db, addr)
+	srv, connKeeper := testRunService(db, addr, addrNode)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -37,24 +43,39 @@ func testAllRun(addr string) (*http.Server, database.IKeyValueDB, hlt_client.ICl
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, db, hltClient
+	return srv, connKeeper, db, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, db database.IKeyValueDB) {
+func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, db database.IKeyValueDB) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	closer.CloseAll([]types.ICloser{srv, db})
+	closer.CloseAll([]types.ICloser{srv, connKeeper, db})
 }
 
-func testRunService(db database.IKeyValueDB, addr string) *http.Server {
+func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
 	mux := http.NewServeMux()
 
-	// TODO: make node with connection
+	connKeeperSettings := &conn_keeper.SSettings{}
+	if addrNode != "" {
+		connKeeperSettings.FConnections = func() []string {
+			return []string{addrNode}
+		}
+	}
+
+	sett := anonymity.NewSettings(&anonymity.SSettings{})
 	connKeeper := conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(&conn_keeper.SSettings{}),
-		network.NewNode(network.NewSettings(&network.SSettings{})),
+		conn_keeper.NewSettings(connKeeperSettings),
+		anon_testutils.TestNewNetworkNode().Handle(
+			sett.GetNetworkMask(), // default value
+			func(_ network.INode, _ conn.IConn, _ []byte) {
+				// pass response actions
+			},
+		),
 	)
+	if err := connKeeper.Run(); err != nil {
+		return nil, nil
+	}
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(db))
@@ -70,5 +91,16 @@ func testRunService(db database.IKeyValueDB, addr string) *http.Server {
 		srv.ListenAndServe()
 	}()
 
-	return srv
+	return srv, connKeeper
+}
+
+func testNewClient() client.IClient {
+	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	return client.NewClient(client.NewSettings(
+		&client.SSettings{
+			FMessageSize: hlt_settings.CMessageSize,
+			FWorkSize:    hlt_settings.CWorkSize,
+		}),
+		privKey,
+	)
 }

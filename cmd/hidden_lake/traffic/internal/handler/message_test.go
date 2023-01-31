@@ -1,11 +1,10 @@
 package handler
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
-	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -13,23 +12,14 @@ import (
 
 func TestHandleMessageAPI(t *testing.T) {
 	addr := testutils.TgAddrs[20]
+	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, db, hltClient := testAllRun(addr)
-	defer testAllFree(addr, srv, db)
+	srv, connKeeper, db, hltClient := testAllRun(addr, "")
+	defer testAllFree(addr, srv, connKeeper, db)
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	pubKey := privKey.PubKey()
-
-	client := client.NewClient(client.NewSettings(
-		&client.SSettings{
-			FMessageSize: hlt_settings.CMessageSize,
-			FWorkSize:    hlt_settings.CWorkSize,
-		}),
-		privKey,
-	)
-
+	client := testNewClient()
 	msg, err := client.Encrypt(
-		pubKey,
+		client.PubKey(),
 		payload.NewPayload(0, []byte(testutils.TcLargeBody)),
 	)
 	if err != nil {
@@ -55,7 +45,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	if gotPubKey.Address().String() != pubKey.Address().String() {
+	if gotPubKey.Address().String() != client.PubKey().Address().String() {
 		t.Error(err)
 		return
 	}
