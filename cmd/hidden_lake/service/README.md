@@ -140,7 +140,7 @@ Decode response
 
 ```json
 {
-	"logging": true,
+	"logging": ["info", "warn", "erro"],
 	"network": "hls-network-key",
 	"address": {
 		"tcp": "localhost:9571",
