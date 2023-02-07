@@ -29,9 +29,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "yndtr/goleveldb");
 2. Go library (used by `cmd/hlm`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hlm`) [golang.org/x/net](https://golang.org/x/net "x/net");
-4. Go library (used by `cmd/hmc`) [golang.org/x/term](https://golang.org/x/term "x/term");
-5. Go library (used by `cmd/hms`) [github.com/robfig/cron/v3](https://github.com/robfig/cron/v3, "robfig/cron")
-6. CSS/JS library (used by `cmd/hlm`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+4. CSS/JS library (used by `cmd/hlm`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
