@@ -1,6 +1,7 @@
 prog_*
 hls
 hlm 
+hlt
 web/
 !*.cfg
 !*.stg 

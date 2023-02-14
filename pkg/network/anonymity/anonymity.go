@@ -206,8 +206,10 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 	return func(_ network.INode, conn conn.IConn, reqBytes []byte) {
 		msg := message.LoadMessage(
 			reqBytes,
-			node.Queue().Client().Settings().GetMessageSize(),
-			node.Queue().Client().Settings().GetWorkSize(),
+			message.NewParams(
+				node.Queue().Client().Settings().GetMessageSize(),
+				node.Queue().Client().Settings().GetWorkSize(),
+			),
 		)
 		if msg == nil {
 			node.fLogger.Warn(fmtLog(cLogWarnMessageNull, nil, 0, nil, conn))

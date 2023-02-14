@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -18,12 +17,14 @@ var (
 )
 
 type sRequester struct {
-	fHost string
+	fHost   string
+	fParams message.IParams
 }
 
-func NewRequester(host string) IRequester {
+func NewRequester(host string, params message.IParams) IRequester {
 	return &sRequester{
-		fHost: host,
+		fHost:   host,
+		fParams: params,
 	}
 }
 
@@ -84,8 +85,10 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 
 	msg := message.LoadMessage(
 		encoding.HexDecode(response.FResult),
-		hlt_settings.CMessageSize,
-		hlt_settings.CWorkSize,
+		message.NewParams(
+			r.fParams.GetMessageSize(),
+			r.fParams.GetWorkSize(),
+		),
 	)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")

@@ -65,7 +65,11 @@ func (db *sKeyValueDB) Push(msg message.IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
-	if !msg.IsValid(db.Settings().GetMessageSize(), db.Settings().GetWorkSize()) {
+	params := message.NewParams(
+		db.Settings().GetMessageSize(),
+		db.Settings().GetWorkSize(),
+	)
+	if !msg.IsValid(params) {
 		return fmt.Errorf("invalid push message")
 	}
 
@@ -113,8 +117,10 @@ func (db *sKeyValueDB) Load(strHash string) (message.IMessage, error) {
 
 	msg := message.LoadMessage(
 		data,
-		db.Settings().GetMessageSize(),
-		db.Settings().GetWorkSize(),
+		message.NewParams(
+			db.Settings().GetMessageSize(),
+			db.Settings().GetWorkSize(),
+		),
 	)
 	if msg == nil {
 		panic("message is nil")

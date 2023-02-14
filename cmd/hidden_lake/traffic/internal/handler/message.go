@@ -44,8 +44,10 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 
 			msg := message.LoadMessage(
 				encoding.HexDecode(vRequest.FMessage),
-				db.Settings().GetMessageSize(),
-				db.Settings().GetWorkSize(),
+				message.NewParams(
+					db.Settings().GetMessageSize(),
+					db.Settings().GetWorkSize(),
+				),
 			)
 			if msg == nil {
 				response(w, pkg_settings.CErrorMessage, "failed: decode message")

@@ -1,17 +1,17 @@
 package config
 
 type IConfig interface {
-	Address() iAddress
-	Connection() iConnection
+	Address() IAddress
+	Connection() IConnection
 	StorageKey() string
 }
 
-type iConnection interface {
-	Service() string
-	Traffic() string
-}
-
-type iAddress interface {
+type IAddress interface {
 	Interface() string
 	Incoming() string
+}
+
+type IConnection interface {
+	Service() string
+	Traffic() string
 }

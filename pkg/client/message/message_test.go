@@ -13,7 +13,8 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg := LoadMessage(msgBytes, 100<<10, 10)
+	params := NewParams(100<<10, 10)
+	msg := LoadMessage(msgBytes, params)
 	if msg == nil {
 		t.Error("failed load message")
 		return

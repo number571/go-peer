@@ -9,8 +9,8 @@ import (
 
 var (
 	_ IConfig     = &SConfig{}
-	_ iAddress    = &SAddress{}
-	_ iConnection = &SConnection{}
+	_ IAddress    = &SAddress{}
+	_ IConnection = &SConnection{}
 )
 
 type SConfig struct {
@@ -63,11 +63,11 @@ func LoadConfig(filepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *SConfig) Address() iAddress {
+func (cfg *SConfig) Address() IAddress {
 	return cfg.FAddress
 }
 
-func (cfg *SConfig) Connection() iConnection {
+func (cfg *SConfig) Connection() IConnection {
 	return cfg.FConnection
 }
 

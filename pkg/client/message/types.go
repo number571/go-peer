@@ -3,20 +3,25 @@ package message
 import "github.com/number571/go-peer/pkg/payload"
 
 type IMessage interface {
-	Head() iHead
-	Body() iBody
+	Head() IHead
+	Body() IBody
 
-	IsValid(uint64, uint64) bool
+	IsValid(IParams) bool
 	Bytes() []byte
 }
 
-type iHead interface {
+type IParams interface {
+	GetMessageSize() uint64
+	GetWorkSize() uint64
+}
+
+type IHead interface {
 	Sender() []byte
 	Session() []byte
 	Salt() []byte
 }
 
-type iBody interface {
+type IBody interface {
 	Payload() payload.IPayload
 	Hash() []byte
 	Sign() []byte

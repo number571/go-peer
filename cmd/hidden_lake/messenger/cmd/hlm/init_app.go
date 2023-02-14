@@ -5,9 +5,11 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/types"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
@@ -29,7 +31,10 @@ func initApp() (types.IApp, error) {
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
-		hlt_client.NewRequester(fmt.Sprintf("http://%s", cfg.Connection().Traffic())),
+		hlt_client.NewRequester(
+			fmt.Sprintf("http://%s", cfg.Connection().Traffic()),
+			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
+		),
 	)
 
 	wDB := database.NewWrapperDB()

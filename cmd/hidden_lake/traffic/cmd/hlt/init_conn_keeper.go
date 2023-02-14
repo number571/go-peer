@@ -31,8 +31,10 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB) conn_keeper.ICo
 			func(_ network.INode, _ conn.IConn, reqBytes []byte) {
 				msg := message.LoadMessage(
 					reqBytes,
-					db.Settings().GetMessageSize(),
-					db.Settings().GetWorkSize(),
+					message.NewParams(
+						db.Settings().GetMessageSize(),
+						db.Settings().GetWorkSize(),
+					),
 				)
 				if msg == nil {
 					// TODO: log

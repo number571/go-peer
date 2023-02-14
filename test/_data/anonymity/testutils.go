@@ -15,8 +15,12 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+const (
+	TCMessageSize = uint64(100 << 10)
+	TCWorkSize    = 10
+)
+
 func TestNewNode(pathDB string) anonymity.INode {
-	msgSize := uint64(100 << 10)
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
@@ -38,8 +42,8 @@ func TestNewNode(pathDB string) anonymity.INode {
 			}),
 			client.NewClient(
 				client.NewSettings(&client.SSettings{
-					FWorkSize:    10,
-					FMessageSize: msgSize,
+					FWorkSize:    TCWorkSize,
+					FMessageSize: TCMessageSize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),
@@ -50,13 +54,12 @@ func TestNewNode(pathDB string) anonymity.INode {
 }
 
 func TestNewNetworkNode() network.INode {
-	msgSize := uint64(100 << 10)
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FCapacity:    (1 << 10),
 			FMaxConnects: 10,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize: msgSize,
+				FMessageSize: TCMessageSize,
 				FTimeWait:    5 * time.Second,
 			}),
 		}),

@@ -5,12 +5,12 @@ import (
 	"os"
 	"testing"
 
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
+	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 func TestHandleHashesAPI(t *testing.T) {
@@ -25,8 +25,8 @@ func TestHandleHashesAPI(t *testing.T) {
 
 	client := client.NewClient(client.NewSettings(
 		&client.SSettings{
-			FMessageSize: hlt_settings.CMessageSize,
-			FWorkSize:    hlt_settings.CWorkSize,
+			FMessageSize: anon_testutils.TCMessageSize,
+			FWorkSize:    anon_testutils.TCWorkSize,
 		}),
 		privKey,
 	)
