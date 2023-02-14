@@ -1,6 +1,6 @@
 N=1
 
-.PHONY: default clean test  
+.PHONY: default status push clean test  
 default: clean test
 
 clean:
@@ -21,3 +21,11 @@ test:
 		fi; \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
+
+status:
+	git add .
+	git status 
+
+push:
+	git commit -m "update"
+	git push 
