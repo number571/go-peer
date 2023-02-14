@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -39,19 +40,24 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 			return
 		}
 
-		friendPubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
-		if friendPubKey == nil {
+		fPubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
+		if fPubKey == nil {
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := s.GetClient().GetPubKey()
+		msgHash := r.Header.Get(hls_settings.CHeaderMsgHash)
+		if msgHash == "" {
+			panic("message hash is null (invalid data from HLS)!")
+		}
+
+		myPubKey, err := s.GetClient().Service().GetPubKey()
 		if err != nil {
 			response(w, hls_settings.CErrorPubKey, "failed: message is null")
 			return
 		}
 
-		rel := database.NewRelation(myPubKey, friendPubKey)
-		dbMsg := database.NewMessage(true, msg)
+		rel := database.NewRelation(myPubKey, fPubKey)
+		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
 
 		db := s.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
@@ -60,7 +66,7 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:   friendPubKey.Address().String(),
+			FAddress:   fPubKey.Address().String(),
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})

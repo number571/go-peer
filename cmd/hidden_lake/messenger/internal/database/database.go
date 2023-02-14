@@ -48,7 +48,7 @@ func (db *sKeyValueDB) Load(r IRelation, start, end uint64) ([]IMessage, error) 
 
 	res := make([]IMessage, 0, end-start)
 	for i := start; i < end; i++ {
-		data, err := (*db.fDB).Get(getKeyMessage(r, i))
+		data, err := (*db.fDB).Get(getKeyMessageByEnum(r, i))
 		if err != nil {
 			return nil, fmt.Errorf("message undefined")
 		}
@@ -66,8 +66,18 @@ func (db *sKeyValueDB) Push(r IRelation, msg IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
+	_, err := (*db.fDB).Get(getKeyMessageByHash(r, msg.GetSHA256UID()))
+	if err == nil {
+		return fmt.Errorf("message is already exist")
+	}
+
+	err = (*db.fDB).Set(getKeyMessageByHash(r, msg.GetSHA256UID()), []byte{1})
+	if err != nil {
+		return err
+	}
+
 	size := db.getSize(r)
-	err := (*db.fDB).Set(getKeyMessage(r, size), msg.Bytes())
+	err = (*db.fDB).Set(getKeyMessageByEnum(r, size), msg.Bytes())
 	if err != nil {
 		return err
 	}

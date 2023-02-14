@@ -53,6 +53,7 @@ func TestApp(t *testing.T) {
 	}()
 
 	client := client.NewClient(
+		client.NewBuilder(),
 		client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[15])),
 	)
 

@@ -27,10 +27,10 @@ func NewRequest(method, host, path string) IRequest {
 	}
 }
 
-func LoadRequest(data []byte) IRequest {
-	var request = new(sRequest)
-	encoding.Deserialize(data, request)
-	return request
+func LoadRequest(data []byte) (IRequest, error) {
+	request := new(sRequest)
+	err := encoding.Deserialize(data, request)
+	return request, err
 }
 
 func (r *sRequest) Bytes() []byte {

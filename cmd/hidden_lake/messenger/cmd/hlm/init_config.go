@@ -15,7 +15,9 @@ func initConfig() (config.IConfig, error) {
 			FInterface: "localhost:8080",
 			FIncoming:  "localhost:8081",
 		},
-		FConnection: "localhost:9572",
+		FConnection: &config.SConnection{
+			FService: "localhost:9572",
+		},
 	}
 	return config.NewConfig(hlm_settings.CPathCFG, initCfg)
 }

@@ -36,10 +36,6 @@ func (client *sClient) GetMessage(hash string) (message.IMessage, error) {
 	return msg, nil
 }
 
-func (client *sClient) AddMessage(msg message.IMessage) error {
-	return client.fRequester.AddMessage(client.fBuilder.AddMessage(msg))
-}
-
-func (client *sClient) DoBroadcast() error {
-	return client.fRequester.DoBroadcast()
+func (client *sClient) PutMessage(msg message.IMessage) error {
+	return client.fRequester.PutMessage(client.fBuilder.PutMessage(msg))
 }

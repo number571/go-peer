@@ -16,7 +16,6 @@ func initServiceHTTP(cfg config.IConfig, db database.IKeyValueDB, connKeeper con
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI())
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(db))
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(db))
-	mux.HandleFunc(pkg_settings.CHandleBroadcastPath, handler.HandleBroadcastAPI(db, connKeeper))
 
 	return &http.Server{
 		Addr:    cfg.Address(),

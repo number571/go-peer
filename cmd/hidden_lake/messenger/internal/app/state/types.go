@@ -3,6 +3,7 @@ package state
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/storage"
 )
@@ -18,7 +19,7 @@ type SStorageState struct {
 }
 
 type IState interface {
-	GetClient() hls_client.IClient
+	GetClient() iClient
 	GetStorage() storage.IKeyValueStorage
 	GetWrapperDB() database.IWrapperDB
 
@@ -34,4 +35,9 @@ type IState interface {
 	CreateState([]byte, asymmetric.IPrivKey) error
 	UpdateState([]byte) error
 	ClearActiveState() error
+}
+
+type iClient interface {
+	Service() hls_client.IClient
+	Traffic() hlt_client.IClient
 }

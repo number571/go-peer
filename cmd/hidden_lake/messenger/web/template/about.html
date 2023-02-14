@@ -20,25 +20,38 @@ About
           <div class="tab-content" id="pills-tabContent">
             <div class="p-3 tab-pane fade show active" id="pills-project" role="tabpanel" aria-labelledby="pills-project-tab">
                 <p class="text-left">
-                    The HLM is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
+                    The HLM is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving). The HLM can use HLT to download messages when the user was offline. 
                 </p>
                 <p class="text-left">
                     The HLS is the core of an anonymous network with theoretically provable anonymity, built on the basis of friend-to-friend (F2F) connections. It is based on the "queues" model. In certain implementations, it may exhibit the property of "abstractness".
+                </p>
+                <p class="text-left">
+                    The HLT is an application that emulates itself as a HLS for receiving messages from the network. It stores downloaded messages in its database for subsequent issuance. The database works as a ring structure in which old messages are overwritten with new ones.
                 </p>
             </div>
             <div class="p-3 tab-pane fade" id="pills-theory" role="tabpanel" aria-labelledby="pills-theory-tab">
                 <p class="text-left">
                     The theory of the structure of hidden systems is a scientific and theoretical article describing the development of anonymous communications and secure applications. The analysis is based on a dialectical approach that allows us to consider the patterns of development through the sum of accumulated contradictions.
                 </p>
+                <p class="text-left">
+                    Theory of the structure of hidden systems: <a href="https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf" class="text-info">theory_of_the_structure_of_hidden_systems.pdf</a>;
+                </p>
+                <p class="text-left">
+                    Monolithic cryptographic protocol: <a href="https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf" class="text-info">monolithic_cryptographic_protocol.pdf</a>;
+                </p>
+                <p class="text-left">
+                    Abstract anonymous networks: <a href="https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf" class="text-info">abstract_anonymous_networks.pdf</a>;
+                </p>
             </div>
             <div class="p-3 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">
                 <p class="text-left">
-                    Projects 
-                    <a href="https://github.com/number571/go-peer/tree/master/cmd/hlm" class="text-info">HLM</a>,
-                    <a href="https://github.com/number571/go-peer/tree/master/cmd/hls" class="text-info">HLS</a>;
+                    Hidden Lake Service: <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service" class="text-info">source</a>;
                 </p>
                 <p class="text-left">
-                    Theory <a href="https://github.com/number571/go-peer/blob/master/hidden_systems.pdf" class="text-info">Hidden Systems</a>;
+                    Hidden Lake Messenger: <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger" class="text-info">source</a>;
+                </p>
+                <p class="text-left">
+                    Hidden Lake Traffic: <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic" class="text-info">source</a>;
                 </p>
             </div>
           </div>

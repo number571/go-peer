@@ -27,7 +27,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	if err := hltClient.AddMessage(msg); err != nil {
+	if err := hltClient.PutMessage(msg); err != nil {
 		t.Error(err)
 		return
 	}

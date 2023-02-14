@@ -12,29 +12,52 @@ import (
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+)
+
+var (
+	_ IState  = &sState{}
+	_ iClient = &sClient{}
 )
 
 type sState struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
-	fClient   hls_client.IClient
 	fStorage  storage.IKeyValueStorage
 	fDatabase database.IWrapperDB
+	fClient   *sClient
+}
+
+type sClient struct {
+	fService hls_client.IClient
+	fTraffic hlt_client.IClient
 }
 
 func NewState(
-	client hls_client.IClient,
 	storage storage.IKeyValueStorage,
 	database database.IWrapperDB,
+	hlsClient hls_client.IClient,
+	hltClient hlt_client.IClient,
 ) IState {
 	return &sState{
-		fClient:   client,
 		fStorage:  storage,
 		fDatabase: database,
+		fClient: &sClient{
+			fService: hlsClient,
+			fTraffic: hltClient,
+		},
 	}
 }
 
-func (s *sState) GetClient() hls_client.IClient {
+func (c *sClient) Service() hls_client.IClient {
+	return c.fService
+}
+
+func (c *sClient) Traffic() hlt_client.IClient {
+	return c.fTraffic
+}
+
+func (s *sState) GetClient() iClient {
 	return s.fClient
 }
 
@@ -68,10 +91,6 @@ func (s *sState) UpdateState(hashLP []byte) error {
 		return err
 	}
 
-	if err := s.updateClientState(stateValue); err != nil {
-		return err
-	}
-
 	db := database.NewKeyValueDB(
 		hlm_settings.CPathDB,
 		entropy.NewEntropy(hlm_settings.CWorkForKeys).
@@ -79,6 +98,10 @@ func (s *sState) UpdateState(hashLP []byte) error {
 	)
 
 	if err := s.GetWrapperDB().Update(db); err != nil {
+		return err
+	}
+
+	if err := s.updateClientState(stateValue); err != nil {
 		return err
 	}
 

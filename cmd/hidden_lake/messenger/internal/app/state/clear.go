@@ -18,14 +18,14 @@ func (s *sState) clearClientState() error {
 }
 
 func (s *sState) clearClientPrivKey() error {
-	client := s.GetClient()
+	client := s.GetClient().Service()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
 	return client.SetPrivKey(pseudoPrivKey)
 }
 
 func (s *sState) clearClientFriends() error {
-	client := s.GetClient()
+	client := s.GetClient().Service()
 
 	friends, err := client.GetFriends()
 	if err != nil {
@@ -42,7 +42,7 @@ func (s *sState) clearClientFriends() error {
 }
 
 func (s *sState) clearClientConnections() error {
-	client := s.GetClient()
+	client := s.GetClient().Service()
 
 	connects, err := client.GetConnections()
 	if err != nil {

@@ -24,6 +24,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 	defer testAllOnlineFree(pushNode)
 
 	client := hls_client.NewClient(
+		hls_client.NewBuilder(),
 		hls_client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[12])),
 	)
 

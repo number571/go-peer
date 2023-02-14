@@ -27,6 +27,7 @@ type IRelation interface {
 
 type IMessage interface {
 	IsIncoming() bool
+	GetSHA256UID() string
 	GetMessage() string
 	GetTimestamp() string
 	Bytes() []byte

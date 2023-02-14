@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -32,7 +31,7 @@ func HandleNodeKeyAPI(node anonymity.INode) http.HandlerFunc {
 				return
 			}
 
-			node.Queue().UpdateClient(hls_settings.InitClient(privKey))
+			node.Queue().UpdateClient(pkg_settings.InitClient(privKey))
 		}
 
 		// Response for GET and POST

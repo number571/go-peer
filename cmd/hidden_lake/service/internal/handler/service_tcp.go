@@ -10,14 +10,15 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
-	return func(node anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) []byte {
+	return func(_ anonymity.INode, sender asymmetric.IPubKey, msgHash, reqBytes []byte) []byte {
 		// load request from message's body
-		loadReq := request.LoadRequest(reqBytes)
-		if loadReq == nil {
+		loadReq, err := request.LoadRequest(reqBytes)
+		if err != nil {
 			return nil
 		}
 
@@ -37,13 +38,18 @@ func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
 			return nil
 		}
 
-		// set headers
+		// set service headers
 		pushReq.Header.Add(pkg_settings.CHeaderPubKey, sender.String())
+		pushReq.Header.Add(pkg_settings.CHeaderMsgHash, encoding.HexEncode(msgHash))
+
+		// append headers from request
 		for key, val := range loadReq.Head() {
-			if key == pkg_settings.CHeaderPubKey {
+			switch key {
+			case pkg_settings.CHeaderPubKey, pkg_settings.CHeaderMsgHash:
 				continue
+			default:
+				pushReq.Header.Add(key, val)
 			}
-			pushReq.Header.Add(key, val)
 		}
 
 		// send request to service

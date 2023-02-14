@@ -94,31 +94,11 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 	return msg, nil
 }
 
-func (r *sRequester) AddMessage(request *pkg_settings.SPushRequest) error {
+func (r *sRequester) PutMessage(request *pkg_settings.SPushRequest) error {
 	resp, err := http.Post(
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, r.fHost),
 		pkg_settings.CContentType,
 		bytes.NewReader(encoding.Serialize(request)),
-	)
-	if err != nil {
-		return err
-	}
-
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return fmt.Errorf("%s", string(response.FResult))
-	}
-
-	return nil
-}
-
-func (r *sRequester) DoBroadcast() error {
-	resp, err := http.Post(
-		fmt.Sprintf(pkg_settings.CHandleBroadcastTemplate, r.fHost),
-		pkg_settings.CContentType,
-		nil,
 	)
 	if err != nil {
 		return err

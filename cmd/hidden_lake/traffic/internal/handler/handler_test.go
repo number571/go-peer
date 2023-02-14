@@ -80,7 +80,6 @@ func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*htt
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(db))
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(db))
-	mux.HandleFunc(pkg_settings.CHandleBroadcastPath, HandleBroadcastAPI(db, connKeeper))
 
 	srv := &http.Server{
 		Addr:    addr,

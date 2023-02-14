@@ -7,21 +7,23 @@ import (
 
 type IClient interface {
 	GetIndex() (string, error)
+
 	GetHashes() ([]string, error)
+
 	GetMessage(string) (message.IMessage, error)
-	AddMessage(message.IMessage) error
-	DoBroadcast() error
+	PutMessage(message.IMessage) error
 }
 
 type IBuilder interface {
 	GetMessage(string) *pkg_settings.SLoadRequest
-	AddMessage(message.IMessage) *pkg_settings.SPushRequest
+	PutMessage(message.IMessage) *pkg_settings.SPushRequest
 }
 
 type IRequester interface {
 	GetIndex() (string, error)
+
 	GetHashes() ([]string, error)
+
 	GetMessage(*pkg_settings.SLoadRequest) (message.IMessage, error)
-	AddMessage(*pkg_settings.SPushRequest) error
-	DoBroadcast() error
+	PutMessage(*pkg_settings.SPushRequest) error
 }

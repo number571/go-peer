@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"time"
+
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 )
 
 var (
@@ -12,24 +14,27 @@ var (
 
 type sMessage struct {
 	fIsIncoming bool
-	fMessage    string
+	fSHA256UID  []byte
 	fTimestamp  string
+	fMessage    string
 }
 
-func NewMessage(isIncoming bool, message string) IMessage {
+func NewMessage(isIncoming bool, message string, hashUID []byte) IMessage {
 	t := time.Now()
 	return &sMessage{
 		fIsIncoming: isIncoming,
-		fMessage:    message,
+		fSHA256UID:  hashUID,
 		// 2022-12-08T02:43:24
 		fTimestamp: fmt.Sprintf("%04d-%02d-%02dT%02d:%02d:%02d",
 			t.Year(), t.Month(), t.Day(),
 			t.Hour(), t.Minute(), t.Second()),
+		fMessage: message,
 	}
 }
 
 func LoadMessage(msgBytes []byte) IMessage {
-	if len(msgBytes) < 20 { // 1(isIncoming)+19(time)
+	// 1(isIncoming) + 32(sha256) + 19(time)
+	if len(msgBytes) < 1+hashing.CSHA256Size+19 {
 		return nil
 	}
 	isIncoming := false
@@ -37,14 +42,19 @@ func LoadMessage(msgBytes []byte) IMessage {
 		isIncoming = true
 	}
 	return &sMessage{
-		fIsIncoming: isIncoming,
-		fTimestamp:  string(msgBytes[1:20]),
-		fMessage:    string(msgBytes[20:]),
+		fIsIncoming: isIncoming,                                                         // 1 byte
+		fSHA256UID:  msgBytes[1 : hashing.CSHA256Size+1],                                // 32 bytes
+		fTimestamp:  string(msgBytes[hashing.CSHA256Size+1 : hashing.CSHA256Size+1+19]), // 19 bytes
+		fMessage:    string(msgBytes[hashing.CSHA256Size+1+19:]),                        // n bytes
 	}
 }
 
 func (msg *sMessage) IsIncoming() bool {
 	return msg.fIsIncoming
+}
+
+func (msg *sMessage) GetSHA256UID() string {
+	return string(msg.fSHA256UID)
 }
 
 func (msg *sMessage) GetMessage() string {
@@ -63,6 +73,7 @@ func (msg *sMessage) Bytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			{firstByte},
+			[]byte(msg.fSHA256UID),
 			[]byte(msg.fTimestamp),
 			[]byte(msg.fMessage),
 		},

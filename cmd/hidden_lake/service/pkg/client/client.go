@@ -14,9 +14,9 @@ type sClient struct {
 	fRequester IRequester
 }
 
-func NewClient(requester IRequester) IClient {
+func NewClient(builder IBuilder, requester IRequester) IClient {
 	return &sClient{
-		fBuilder:   NewBuilder(),
+		fBuilder:   builder,
 		fRequester: requester,
 	}
 }

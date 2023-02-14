@@ -6,17 +6,15 @@ const (
 )
 
 const (
-	CHandleIndexPath     = "/api/index"
-	CHandleHashesPath    = "/api/hashes"
-	CHandleMessagePath   = "/api/message"
-	CHandleBroadcastPath = "/api/broadcast"
+	CHandleIndexPath   = "/api/index"
+	CHandleHashesPath  = "/api/hashes"
+	CHandleMessagePath = "/api/message"
 )
 
 const (
-	CHandleIndexTemplate     = "%s" + CHandleIndexPath
-	CHandleHashesTemplate    = "%s" + CHandleHashesPath
-	CHandleMessageTemplate   = "%s" + CHandleMessagePath
-	CHandleBroadcastTemplate = "%s" + CHandleBroadcastPath
+	CHandleIndexTemplate   = "%s" + CHandleIndexPath
+	CHandleHashesTemplate  = "%s" + CHandleHashesPath
+	CHandleMessageTemplate = "%s" + CHandleMessagePath
 )
 
 const (

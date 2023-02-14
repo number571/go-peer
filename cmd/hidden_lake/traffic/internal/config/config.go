@@ -12,7 +12,7 @@ var (
 )
 
 type SConfig struct {
-	FNetwork    string `json:"network"`
+	FNetwork    string `json:"network,omitempty"`
 	FAddress    string `json:"address"`
 	FConnection string `json:"connection"`
 }

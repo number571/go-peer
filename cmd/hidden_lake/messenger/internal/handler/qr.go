@@ -22,7 +22,7 @@ func QRPublicKeyPage(s state.IState) http.HandlerFunc {
 			return
 		}
 
-		pubKey, err := s.GetClient().GetPubKey()
+		pubKey, err := s.GetClient().Service().GetPubKey()
 		if err != nil {
 			fmt.Fprint(w, "error: read public key")
 			return

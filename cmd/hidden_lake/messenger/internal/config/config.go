@@ -8,19 +8,25 @@ import (
 )
 
 var (
-	_ IConfig  = &SConfig{}
-	_ iAddress = &SAddress{}
+	_ IConfig     = &SConfig{}
+	_ iAddress    = &SAddress{}
+	_ iConnection = &SConnection{}
 )
 
 type SConfig struct {
-	FAddress    *SAddress `json:"address"`
-	FConnection string    `json:"connection"`
-	FStorageKey string    `json:"storage_key,omitempty"`
+	FAddress    *SAddress    `json:"address"`
+	FConnection *SConnection `json:"connection"`
+	FStorageKey string       `json:"storage_key,omitempty"`
 }
 
 type SAddress struct {
 	FInterface string `json:"interface"`
 	FIncoming  string `json:"incoming"`
+}
+
+type SConnection struct {
+	FService string `json:"service"`
+	FTraffic string `json:"traffic,omitempty"`
 }
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
@@ -61,12 +67,20 @@ func (cfg *SConfig) Address() iAddress {
 	return cfg.FAddress
 }
 
+func (cfg *SConfig) Connection() iConnection {
+	return cfg.FConnection
+}
+
 func (cfg *SConfig) StorageKey() string {
 	return cfg.FStorageKey
 }
 
-func (cfg *SConfig) Connection() string {
-	return cfg.FConnection
+func (conn *SConnection) Service() string {
+	return conn.FService
+}
+
+func (conn *SConnection) Traffic() string {
+	return conn.FTraffic
 }
 
 func (addr *SAddress) Interface() string {

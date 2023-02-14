@@ -59,7 +59,7 @@ func FriendsPage(s state.IState) http.HandlerFunc {
 				return
 			}
 		}
-		res, err := s.GetClient().GetFriends()
+		res, err := s.GetClient().Service().GetFriends()
 		if err != nil {
 			fmt.Fprint(w, "error: read friends")
 			return

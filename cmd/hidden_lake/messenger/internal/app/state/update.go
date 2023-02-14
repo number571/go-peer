@@ -2,7 +2,11 @@ package state
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -15,11 +19,16 @@ func (s *sState) updateClientState(stateValue *SStorageState) error {
 		return err
 	}
 
-	return s.updateClientConnections(stateValue)
+	if err := s.updateClientConnections(stateValue); err != nil {
+		return err
+	}
+
+	_ = s.updateClientTraffic(stateValue)
+	return nil
 }
 
 func (s *sState) updateClientPrivKey(stateValue *SStorageState) error {
-	client := s.GetClient()
+	hlsClient := s.GetClient().Service()
 
 	if err := s.clearClientPrivKey(); err != nil {
 		return err
@@ -30,11 +39,71 @@ func (s *sState) updateClientPrivKey(stateValue *SStorageState) error {
 		return fmt.Errorf("private key is null")
 	}
 
-	return client.SetPrivKey(privKey)
+	return hlsClient.SetPrivKey(privKey)
+}
+
+func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
+	hltClient := s.GetClient().Traffic()
+
+	privKey := asymmetric.LoadRSAPrivKey(stateValue.FPrivKey)
+	if privKey == nil {
+		return fmt.Errorf("private key is null")
+	}
+
+	hashes, err := hltClient.GetHashes()
+	if err != nil {
+		return err
+	}
+
+	for _, hash := range hashes {
+		msg, err := hltClient.GetMessage(hash)
+		if err != nil {
+			continue
+		}
+
+		c := hls_settings.InitClient(privKey)
+		pubKey, pld, err := c.Decrypt(msg)
+		if err != nil {
+			continue
+		}
+
+		inFriends := false
+		for _, pubKeyString := range stateValue.FFriends {
+			fPubKey := asymmetric.LoadRSAPubKey(pubKeyString)
+			if pubKey.Address().String() == fPubKey.Address().String() {
+				inFriends = true
+				break
+			}
+		}
+
+		if !inFriends {
+			continue
+		}
+
+		loadReq, err := request.LoadRequest(pld.Body())
+		if err != nil {
+			continue
+		}
+
+		strMsg := strings.TrimSpace(string(loadReq.Body()))
+		if len(strMsg) == 0 {
+			continue
+		}
+
+		rel := database.NewRelation(privKey.PubKey(), pubKey)
+		dbMsg := database.NewMessage(true, strMsg, msg.Body().Hash())
+
+		db := s.GetWrapperDB().Get()
+		if err := db.Push(rel, dbMsg); err != nil {
+			continue
+		}
+	}
+
+	return nil
 }
 
 func (s *sState) updateClientFriends(stateValue *SStorageState) error {
-	client := s.GetClient()
+	client := s.GetClient().Service()
 
 	if err := s.clearClientFriends(); err != nil {
 		return err
@@ -51,7 +120,7 @@ func (s *sState) updateClientFriends(stateValue *SStorageState) error {
 }
 
 func (s *sState) updateClientConnections(stateValue *SStorageState) error {
-	client := s.GetClient()
+	client := s.GetClient().Service()
 
 	if err := s.clearClientConnections(); err != nil {
 		return err

@@ -10,13 +10,14 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler"
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/types"
 	"golang.org/x/net/websocket"
+
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 const (
@@ -35,15 +36,16 @@ type sApp struct {
 
 func NewApp(
 	cfg config.IConfig,
-	client hls_client.IClient,
 	stg storage.IKeyValueStorage,
 	wDB database.IWrapperDB,
+	hlsClient hls_client.IClient,
+	hltClient hlt_client.IClient,
 ) types.IApp {
-	state := state.NewState(client, stg, wDB)
+	state := state.NewState(stg, wDB, hlsClient, hltClient)
 	return &sApp{
 		fState:          state,
-		fIntServiceHTTP: initIntServiceHTTP(cfg, state),
-		fIncServiceHTTP: initIncServiceHTTP(cfg, state),
+		fIntServiceHTTP: initInterfaceServiceHTTP(cfg, state),
+		fIncServiceHTTP: initIncomingServiceHTTP(cfg, state),
 	}
 }
 
@@ -91,15 +93,7 @@ func (app *sApp) Close() error {
 	return lastErr
 }
 
-func initCryptoStorage(cfg config.IConfig) (storage.IKeyValueStorage, error) {
-	return storage.NewCryptoStorage(
-		hlm_settings.CPathSTG,
-		[]byte(cfg.StorageKey()),
-		hlm_settings.CWorkForKeys,
-	)
-}
-
-func initIncServiceHTTP(
+func initIncomingServiceHTTP(
 	cfg config.IConfig,
 	state state.IState,
 ) *http.Server {
@@ -112,7 +106,7 @@ func initIncServiceHTTP(
 	}
 }
 
-func initIntServiceHTTP(
+func initInterfaceServiceHTTP(
 	cfg config.IConfig,
 	state state.IState,
 ) *http.Server {

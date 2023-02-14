@@ -61,7 +61,7 @@ func SettingsPage(s state.IState) http.HandlerFunc {
 			}
 		}
 
-		client := s.GetClient()
+		client := s.GetClient().Service()
 
 		result := new(sSettings)
 		result.STemplateState = s.GetTemplate()

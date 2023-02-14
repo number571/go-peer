@@ -279,7 +279,7 @@ func (node *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		// response can be nil
-		resp := f(node, sender, pld.Body())
+		resp := f(node, sender, hash, pld.Body())
 		if resp == nil {
 			node.fLogger.Info(fmtLog(cLogInfoWithoutResp, hash, proof, sender, conn))
 			return

@@ -49,7 +49,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 				FPullCapacity: hls_settings.CQueuePullCapacity,
 				FDuration:     hls_settings.CQueueDuration,
 			}),
-			hls_settings.InitClient(privKey),
+			pkg_settings.InitClient(privKey),
 		),
 		func() friends.IF2F {
 			f2f := friends.NewF2F()

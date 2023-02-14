@@ -13,6 +13,8 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
 const (
@@ -53,7 +55,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 		}
 
 		var (
-			client = s.GetClient()
+			client = s.GetClient().Service()
 			db     = s.GetWrapperDB().Get()
 		)
 
@@ -110,7 +112,8 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				return
 			}
 
-			err = db.Push(rel, database.NewMessage(false, msg))
+			uid := random.NewStdPRNG().Bytes(hashing.CSHA256Size)
+			err = db.Push(rel, database.NewMessage(false, msg, uid))
 			if err != nil {
 				fmt.Fprint(w, "error: add message to database")
 				return
