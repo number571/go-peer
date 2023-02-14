@@ -209,7 +209,7 @@ To see the success of sending and receiving messages, you need to do all the sam
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
 
-<img src="../../../examples/images/hlt_logo.png" alt="hlt_logo.png"/>
+<img src="examples/images/hlt_logo.png" alt="hlt_logo.png"/>
 
 The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
 
