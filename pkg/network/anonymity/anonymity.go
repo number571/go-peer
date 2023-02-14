@@ -16,11 +16,10 @@ import (
 	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
-
-	"github.com/number571/go-peer/pkg/network/conn"
 )
 
 var (

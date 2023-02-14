@@ -5,6 +5,7 @@ var (
 )
 
 const (
+	cPath          = "database.db"
 	cWorkSize      = 10
 	cMessageSize   = (1 << 20)
 	cLimitMessages = (1 << 10)
@@ -12,6 +13,7 @@ const (
 
 type SSettings sSettings
 type sSettings struct {
+	FPath          string
 	FLimitMessages uint64
 	FMessageSize   uint64
 	FWorkSize      uint64
@@ -19,6 +21,7 @@ type sSettings struct {
 
 func NewSettings(sett *SSettings) ISettings {
 	return (&sSettings{
+		FPath:          sett.FPath,
 		FWorkSize:      sett.FWorkSize,
 		FMessageSize:   sett.FMessageSize,
 		FLimitMessages: sett.FLimitMessages,
@@ -26,6 +29,9 @@ func NewSettings(sett *SSettings) ISettings {
 }
 
 func (s *sSettings) useDefaultValues() ISettings {
+	if s.FPath == "" {
+		s.FPath = cPath
+	}
 	if s.FWorkSize == 0 {
 		s.FWorkSize = cWorkSize
 	}
@@ -36,6 +42,10 @@ func (s *sSettings) useDefaultValues() ISettings {
 		s.FLimitMessages = cLimitMessages
 	}
 	return s
+}
+
+func (s *sSettings) GetPath() string {
+	return s.FPath
 }
 
 func (s *sSettings) GetLimitMessages() uint64 {

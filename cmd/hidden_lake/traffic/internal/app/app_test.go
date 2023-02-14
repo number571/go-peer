@@ -46,8 +46,7 @@ func TestApp(t *testing.T) {
 	}
 
 	db := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{}),
-		tcPathDB,
+		database.NewSettings(&database.SSettings{FPath: tcPathDB}),
 	)
 
 	sett := anonymity.NewSettings(&anonymity.SSettings{})

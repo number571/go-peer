@@ -9,6 +9,7 @@ clean:
 	make -C ./cmd/hidden_lake/traffic clean
 	make -C ./examples/_cmd/anon_messenger clean 
 	make -C ./examples/_cmd/echo_service clean 
+	make -C ./examples/_cmd/traffic_keeper clean 
 
 test:
 	d=$$(date +%s); \

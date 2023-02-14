@@ -40,7 +40,7 @@ func main() {
 		client  = newNode(dbPath2)
 	)
 
-	service.Handle(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) []byte {
+	service.Handle(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) []byte {
 		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes)))
 	})
 
@@ -77,8 +77,7 @@ func newNode(dbPath string) anonymity.INode {
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			dbPath,
+			database.NewSettings(&database.SSettings{FPath: dbPath}),
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

@@ -29,10 +29,10 @@ const (
 func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IKeyValueDB, hlt_client.IClient) {
 	db := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
+			FPath:        fmt.Sprintf(databaseTemplate, addr),
 			FMessageSize: anon_testutils.TCMessageSize,
 			FWorkSize:    anon_testutils.TCWorkSize,
 		}),
-		fmt.Sprintf(databaseTemplate, addr),
 	)
 
 	srv, connKeeper := testRunService(db, addr, addrNode)

@@ -22,7 +22,7 @@ var (
 
 func testHmsDefaultInit(dbPath string) {
 	os.RemoveAll(dbPath)
-	tgDB = NewKeyValueDB(NewSettings(&SSettings{}), dbPath)
+	tgDB = NewKeyValueDB(NewSettings(&SSettings{FPath: dbPath}))
 }
 
 func TestDB(t *testing.T) {

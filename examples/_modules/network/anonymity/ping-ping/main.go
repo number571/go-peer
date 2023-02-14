@@ -77,7 +77,7 @@ func main() {
 }
 
 func handler(serviceName string) anonymity.IHandlerF {
-	return func(node anonymity.INode, pubKey asymmetric.IPubKey, reqBytes []byte) []byte {
+	return func(node anonymity.INode, pubKey asymmetric.IPubKey, _, reqBytes []byte) []byte {
 		num, err := strconv.Atoi(string(reqBytes))
 		if err != nil {
 			panic(err)
@@ -109,8 +109,7 @@ func newNode(dbPath string) anonymity.INode {
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{}),
-			dbPath,
+			database.NewSettings(&database.SSettings{FPath: dbPath}),
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

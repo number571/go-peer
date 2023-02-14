@@ -18,18 +18,17 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 ## TODO 
 
-1. Write or close commented tests as 'TODO'
+1. Write tests for HLM
 2. Create UBC application
-3. Databases to ISettings
-4. Write tests for HLT
-5. Logging in HLS for handlers
+3. Logging in HLS and HLT for handlers
+4. Write HLE (Hidden Lake Encryptor)
 
 ## Dependencies
 
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "yndtr/goleveldb");
-2. Go library (used by `cmd/hlm`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
-3. Go library (used by `cmd/hlm`) [golang.org/x/net](https://golang.org/x/net "x/net");
-4. CSS/JS library (used by `cmd/hlm`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
+3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
+4. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -203,7 +202,7 @@ Next, you need to login by going to the Sign in page. Enter your `login=user` an
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/examples/images "Path to HLM images")
 
 ## 3. Hidden Lake Traffic
 

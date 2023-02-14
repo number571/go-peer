@@ -14,22 +14,20 @@ type sKeyValueDB struct {
 	fMutex   sync.Mutex
 	fPointer uint64
 
-	fPath     string
 	fSettings ISettings
 	fDB       gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(sett ISettings, path string) IKeyValueDB {
+func NewKeyValueDB(sett ISettings) IKeyValueDB {
 	levelDB := gp_database.NewLevelDB(
 		gp_database.NewSettings(&gp_database.SSettings{
-			FPath: path,
+			FPath: sett.GetPath(),
 		}),
 	)
 	if levelDB == nil {
 		panic("storage (hashes) is nil")
 	}
 	db := &sKeyValueDB{
-		fPath:     path,
 		fSettings: sett,
 		fDB:       levelDB,
 	}

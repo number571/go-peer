@@ -8,10 +8,10 @@ import (
 func initDatabase() database.IKeyValueDB {
 	return database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
+			FPath:          hlt_settings.CPathDB,
 			FLimitMessages: hlt_settings.CLimitMessages,
 			FMessageSize:   hlt_settings.CMessageSize,
 			FWorkSize:      hlt_settings.CWorkSize,
 		}),
-		hlt_settings.CPathDB,
 	)
 }

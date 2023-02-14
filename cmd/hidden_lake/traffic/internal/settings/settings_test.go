@@ -2,7 +2,4 @@ package settings
 
 import "testing"
 
-// TODO
-func TestDefault(t *testing.T) {
-
-}
+func TestNothing(t *testing.T) {}
