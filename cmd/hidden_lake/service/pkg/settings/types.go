@@ -1,10 +1,5 @@
 package settings
 
-type SResponse struct {
-	FResult string `json:"result"`
-	FReturn int    `json:"return"`
-}
-
 type SPrivKey struct {
 	FPrivKey string `json:"priv_key"`
 }

@@ -12,7 +12,7 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
@@ -101,7 +101,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				return
 			}
 
-			resp := &hls_settings.SResponse{}
+			resp := &api.SResponse{}
 			if err := json.Unmarshal(res, resp); err != nil {
 				fmt.Fprint(w, "error: receive response")
 				return

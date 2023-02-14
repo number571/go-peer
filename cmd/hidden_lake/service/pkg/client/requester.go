@@ -1,14 +1,12 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -28,29 +26,23 @@ func NewRequester(host string) IRequester {
 }
 
 func (requester *sRequester) GetIndex() (string, error) {
-	resp, err := http.Get(
+	res, err := api.Request(
+		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, requester.fHost),
+		nil,
 	)
 	if err != nil {
 		return "", err
 	}
 
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return "", fmt.Errorf("%s", string(response.FResult))
-	}
-
-	if response.FResult != pkg_settings.CTitlePattern {
+	if res != pkg_settings.CTitlePattern {
 		return "", fmt.Errorf("incorrect title pattern")
 	}
-
-	return response.FResult, nil
+	return res, nil
 }
 
 func (requester *sRequester) DoRequest(push *pkg_settings.SPush) ([]byte, error) {
-	res, err := doRequest(
+	res, err := api.Request(
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
 		push,
@@ -63,7 +55,7 @@ func (requester *sRequester) DoRequest(push *pkg_settings.SPush) ([]byte, error)
 }
 
 func (requester *sRequester) DoBroadcast(push *pkg_settings.SPush) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodPut,
 		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
 		push,
@@ -72,7 +64,7 @@ func (requester *sRequester) DoBroadcast(push *pkg_settings.SPush) error {
 }
 
 func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
-	res, err := doRequest(
+	res, err := api.Request(
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		nil,
@@ -96,7 +88,7 @@ func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error)
 }
 
 func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
@@ -105,7 +97,7 @@ func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
 }
 
 func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
@@ -114,7 +106,7 @@ func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
 }
 
 func (requester *sRequester) GetOnlines() ([]string, error) {
-	res, err := doRequest(
+	res, err := api.Request(
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		nil,
@@ -126,7 +118,7 @@ func (requester *sRequester) GetOnlines() ([]string, error) {
 }
 
 func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		connect,
@@ -135,7 +127,7 @@ func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
 }
 
 func (requester *sRequester) GetConnections() ([]string, error) {
-	res, err := doRequest(
+	res, err := api.Request(
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		nil,
@@ -147,7 +139,7 @@ func (requester *sRequester) GetConnections() ([]string, error) {
 }
 
 func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
@@ -156,7 +148,7 @@ func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error
 }
 
 func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
@@ -165,7 +157,7 @@ func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error
 }
 
 func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
-	_, err := doRequest(
+	_, err := api.Request(
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		privKey,
@@ -174,7 +166,7 @@ func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
 }
 
 func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
-	res, err := doRequest(
+	res, err := api.Request(
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		nil,
@@ -183,54 +175,6 @@ func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 		return nil, err
 	}
 	return asymmetric.LoadRSAPubKey(res), nil
-}
-
-func doRequest(method, url string, data interface{}) (string, error) {
-	jsonValue, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-
-	req, err := http.NewRequest(
-		method,
-		url,
-		bytes.NewBuffer(jsonValue),
-	)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", pkg_settings.CContentType)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	res, err := loadResponse(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return res.FResult, nil
-}
-
-func loadResponse(reader io.ReadCloser) (*pkg_settings.SResponse, error) {
-	body, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := &pkg_settings.SResponse{}
-	if err := json.Unmarshal(body, resp); err != nil {
-		return nil, err
-	}
-
-	if resp.FReturn != pkg_settings.CErrorNone {
-		return nil, fmt.Errorf("error code = %d", resp.FReturn)
-	}
-
-	return resp, nil
 }
 
 func deleteVoidStrings(s []string) []string {

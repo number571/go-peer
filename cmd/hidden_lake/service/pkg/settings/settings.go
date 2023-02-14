@@ -4,7 +4,6 @@ import "time"
 
 const (
 	CTitlePattern  = "go-peer/hidden-lake-service"
-	CContentType   = "application/json"
 	CHeaderPubKey  = "Service-Public-Key"
 	CHeaderMsgHash = "Service-Message-Hash"
 	CNetworkMask   = 0x676F2D7065657201

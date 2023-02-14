@@ -6,6 +6,7 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -16,24 +17,24 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 		var vPush pkg_settings.SPush
 
 		if r.Method != http.MethodPost && r.Method != http.MethodPut {
-			response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&vPush); err != nil {
-			response(w, pkg_settings.CErrorDecode, "failed: decode request")
+			api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
 			return
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(vPush.FReceiver)
 		if pubKey == nil {
-			response(w, pkg_settings.CErrorPubKey, "failed: load public key")
+			api.Response(w, pkg_settings.CErrorPubKey, "failed: load public key")
 			return
 		}
 
 		data := encoding.HexDecode(vPush.FHexData)
 		if data == nil {
-			response(w, pkg_settings.CErrorPubKey, "failed: decode hex format data")
+			api.Response(w, pkg_settings.CErrorPubKey, "failed: decode hex format data")
 			return
 		}
 
@@ -44,10 +45,10 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
 			)
 			if err != nil {
-				response(w, pkg_settings.CErrorMessage, "failed: broadcast message")
+				api.Response(w, pkg_settings.CErrorMessage, "failed: broadcast message")
 				return
 			}
-			response(w, pkg_settings.CErrorNone, "success: broadcast")
+			api.Response(w, pkg_settings.CErrorNone, "success: broadcast")
 			return
 		case http.MethodPost:
 			resp, err := node.Request(
@@ -55,10 +56,10 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
 			)
 			if err != nil {
-				response(w, pkg_settings.CErrorResponse, "failed: response message")
+				api.Response(w, pkg_settings.CErrorResponse, "failed: response message")
 				return
 			}
-			response(w, pkg_settings.CErrorNone, encoding.HexEncode(resp))
+			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(resp))
 			return
 		}
 	}

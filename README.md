@@ -207,10 +207,18 @@ To see the success of sending and receiving messages, you need to do all the sam
 
 ## 3. Hidden Lake Traffic
 
-TODO
+> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
 
-### Deprecated applications
+<img src="../../../examples/images/hlt_logo.png" alt="hlt_logo.png"/>
 
-* Hidden Lake (new release = cmd/hls+cmd/hlm+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
-* Hidden Email Service (new release = cmd/hms+cmd/hmc): [github.com/number571/hes](https://github.com/number571/hes "HES");
-* Hidden Lake Service (new release = cmd/hls): [github.com/number571/hls](https://github.com/number571/hls "HLS");
+The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
+
+### How it works
+
+HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
+
+## Deprecated applications
+
+* Hidden Lake (HLS+HLM+HLT+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
+* Hidden Email Service (HLT can be used as HES): [github.com/number571/hes](https://github.com/number571/hes "HES");
+* Hidden Lake Service (new release = HLS): [github.com/number571/hls](https://github.com/number571/hls "HLS");

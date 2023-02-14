@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
@@ -15,7 +16,7 @@ func HandleNetworkOnlineAPI(node anonymity.INode) http.HandlerFunc {
 		var vConnect pkg_settings.SConnect
 
 		if r.Method != http.MethodGet && r.Method != http.MethodDelete {
-			response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
@@ -28,19 +29,19 @@ func HandleNetworkOnlineAPI(node anonymity.INode) http.HandlerFunc {
 			sort.SliceStable(inOnline, func(i, j int) bool {
 				return inOnline[i] < inOnline[j]
 			})
-			response(w, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
+			api.Response(w, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
 			return
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
-			response(w, pkg_settings.CErrorDecode, "failed: decode request")
+			api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
 			return
 		}
 
 		if err := node.Network().Disconnect(vConnect.FConnect); err != nil {
-			response(w, pkg_settings.CErrorNone, "failed: delete online connection")
+			api.Response(w, pkg_settings.CErrorNone, "failed: delete online connection")
 			return
 		}
-		response(w, pkg_settings.CErrorNone, "success: delete online connection")
+		api.Response(w, pkg_settings.CErrorNone, "success: delete online connection")
 	}
 }

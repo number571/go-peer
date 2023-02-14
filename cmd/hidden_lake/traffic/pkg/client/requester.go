@@ -1,13 +1,12 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -29,62 +28,45 @@ func NewRequester(host string, params message.IParams) IRequester {
 }
 
 func (r *sRequester) GetIndex() (string, error) {
-	resp, err := http.Get(
+	resp, err := api.Request(
+		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, r.fHost),
+		nil,
 	)
 	if err != nil {
 		return "", err
 	}
 
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return "", fmt.Errorf("%s", string(response.FResult))
-	}
-
-	if response.FResult != pkg_settings.CTitlePattern {
+	if resp != pkg_settings.CTitlePattern {
 		return "", fmt.Errorf("incorrect title pattern")
 	}
-
-	return response.FResult, nil
+	return resp, nil
 }
 
 func (r *sRequester) GetHashes() ([]string, error) {
-	resp, err := http.Get(
+	resp, err := api.Request(
+		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, r.fHost),
+		nil,
 	)
 	if err != nil {
 		return nil, err
 	}
-
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return nil, fmt.Errorf("%s", string(response.FResult))
-	}
-
-	return strings.Split(response.FResult, ","), nil
+	return strings.Split(resp, ";"), nil
 }
 
 func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMessage, error) {
-	resp, err := http.Get(
+	resp, err := api.Request(
+		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", r.fHost, request.FHash),
+		nil,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return nil, fmt.Errorf("%s", string(response.FResult))
-	}
-
 	msg := message.LoadMessage(
-		encoding.HexDecode(response.FResult),
+		encoding.HexDecode(resp),
 		message.NewParams(
 			r.fParams.GetMessageSize(),
 			r.fParams.GetWorkSize(),
@@ -98,21 +80,10 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 }
 
 func (r *sRequester) PutMessage(request *pkg_settings.SPushRequest) error {
-	resp, err := http.Post(
+	_, err := api.Request(
+		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, r.fHost),
-		pkg_settings.CContentType,
-		bytes.NewReader(encoding.Serialize(request)),
+		request,
 	)
-	if err != nil {
-		return err
-	}
-
-	var response pkg_settings.SResponse
-	json.NewDecoder(resp.Body).Decode(&response)
-
-	if response.FReturn != pkg_settings.CErrorNone {
-		return fmt.Errorf("%s", string(response.FResult))
-	}
-
-	return nil
+	return err
 }

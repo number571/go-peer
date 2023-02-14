@@ -13,8 +13,8 @@ var (
 
 type SConfig struct {
 	FNetwork    string `json:"network,omitempty"`
-	FAddress    string `json:"address"`
-	FConnection string `json:"connection"`
+	FAddress    string `json:"address,omitempty"`
+	FConnection string `json:"connection,omitempty"`
 }
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {

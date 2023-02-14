@@ -2,7 +2,6 @@ package settings
 
 const (
 	CTitlePattern = "go-peer/hidden-lake-traffic"
-	CContentType  = "application/json"
 )
 
 const (

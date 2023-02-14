@@ -51,6 +51,10 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
+		if app.fConfig.Address() == "" {
+			return
+		}
+
 		err := app.fServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err

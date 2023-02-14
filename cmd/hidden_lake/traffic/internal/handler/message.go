@@ -6,6 +6,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -13,7 +14,7 @@ import (
 func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
-			response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
@@ -22,23 +23,23 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 			query := r.URL.Query()
 			msg, err := db.Load(query.Get("hash"))
 			if err != nil {
-				response(w, pkg_settings.CErrorLoad, "failed: load message")
+				api.Response(w, pkg_settings.CErrorLoad, "failed: load message")
 				return
 			}
 
-			response(w, pkg_settings.CErrorNone, encoding.HexEncode(msg.Bytes()))
+			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(msg.Bytes()))
 			return
 		case http.MethodPost:
 			var vRequest pkg_settings.SPushRequest
 
 			err := json.NewDecoder(r.Body).Decode(&vRequest)
 			if err != nil {
-				response(w, pkg_settings.CErrorDecode, "failed: decode request")
+				api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
 				return
 			}
 
 			if uint64(len(vRequest.FMessage)/2) > db.Settings().GetMessageSize() {
-				response(w, pkg_settings.CErrorPackSize, "failed: incorrect package size")
+				api.Response(w, pkg_settings.CErrorPackSize, "failed: incorrect package size")
 				return
 			}
 
@@ -50,17 +51,17 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 				),
 			)
 			if msg == nil {
-				response(w, pkg_settings.CErrorMessage, "failed: decode message")
+				api.Response(w, pkg_settings.CErrorMessage, "failed: decode message")
 				return
 			}
 
 			err = db.Push(msg)
 			if err != nil {
-				response(w, pkg_settings.CErrorPush, "failed: push message")
+				api.Response(w, pkg_settings.CErrorPush, "failed: push message")
 				return
 			}
 
-			response(w, pkg_settings.CErrorNone, "success")
+			api.Response(w, pkg_settings.CErrorNone, "success")
 			return
 		}
 	}
