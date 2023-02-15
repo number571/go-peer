@@ -23,10 +23,10 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FMaxConnects: hlt_settings.CNetworkMaxConns,
+				FMaxConnects: 1, // one HLS from cfg.Connection()
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  cfg.Network(),
-					FMessageSize: hlt_settings.CMessageSize,
+					FMessageSize: db.Settings().GetMessageSize(),
 					FTimeWait:    hlt_settings.CNetworkWaitTime,
 				}),
 			}),
@@ -50,7 +50,7 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					proof = msg.Body().Proof()
 				)
 
-				strHash := encoding.HexEncode(msg.Body().Hash())
+				strHash := encoding.HexEncode(hash)
 				if _, err := db.Load(strHash); err == nil {
 					logger.Info(anonLogger.FmtLog(anon_logger.CLogInfoExist, hash, proof, nil, conn))
 					return

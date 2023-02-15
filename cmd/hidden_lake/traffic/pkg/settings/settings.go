@@ -18,7 +18,6 @@ const (
 	CLimitMessages   = (1 << 10)
 	CWorkSize        = hls_settings.CWorkSize
 	CMessageSize     = hls_settings.CMessageSize
-	CNetworkMaxConns = hls_settings.CNetworkMaxConns
 	CNetworkWaitTime = hls_settings.CNetworkWaitTime
 	CNetworkMask     = hls_settings.CNetworkMask
 )

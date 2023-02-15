@@ -15,7 +15,6 @@ import (
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
@@ -89,7 +88,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	if title != pkg_settings.CTitlePattern {
+	if title != hlt_settings.CTitlePattern {
 		t.Error("title is incorrect")
 		return
 	}
