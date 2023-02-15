@@ -7,15 +7,26 @@ import (
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
+const (
+	CLogInfo = "info"
+	CLogWarn = "warn"
+	CLogErro = "erro"
+)
+
 var (
 	_ IConfig = &SConfig{}
 )
 
 type SConfig struct {
-	FNetwork    string `json:"network,omitempty"`
-	FAddress    string `json:"address,omitempty"`
-	FConnection string `json:"connection,omitempty"`
+	FLogging    []string `json:"logging,omitempty"`
+	FNetwork    string   `json:"network,omitempty"`
+	FAddress    string   `json:"address,omitempty"`
+	FConnection string   `json:"connection,omitempty"`
+
+	fLogging *sLogging
 }
+
+type sLogging []bool
 
 func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(filepath)
@@ -28,6 +39,9 @@ func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
 		return nil, err
 	}
 
+	if err := cfg.loadLogging(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
@@ -48,7 +62,32 @@ func LoadConfig(filepath string) (IConfig, error) {
 		return nil, err
 	}
 
+	if err := cfg.loadLogging(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
+}
+
+func (cfg *SConfig) loadLogging() error {
+	// [info, warn, erro]
+	logging := sLogging(make([]bool, 3))
+
+	mapping := map[string]int{
+		"info": 0,
+		"warn": 1,
+		"erro": 2,
+	}
+
+	for _, v := range cfg.FLogging {
+		logType, ok := mapping[v]
+		if !ok {
+			return fmt.Errorf("undefined log type '%s'", v)
+		}
+		logging[logType] = true
+	}
+
+	cfg.fLogging = &logging
+	return nil
 }
 
 func (cfg *SConfig) Network() string {
@@ -61,4 +100,20 @@ func (cfg *SConfig) Address() string {
 
 func (cfg *SConfig) Connection() string {
 	return cfg.FConnection
+}
+
+func (cfg *SConfig) Logging() ILogging {
+	return cfg.fLogging
+}
+
+func (logging *sLogging) Info() bool {
+	return (*logging)[0]
+}
+
+func (logging *sLogging) Warn() bool {
+	return (*logging)[1]
+}
+
+func (logging *sLogging) Erro() bool {
+	return (*logging)[2]
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -116,7 +115,7 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 }
 
 func testRunNewNode(dbPath string) anonymity.INode {
-	node := anon_testutils.TestNewNode(dbPath).Handle(hls_settings.CHeaderHLS, nil)
+	node := anon_testutils.TestNewNode(dbPath).Handle(pkg_settings.CHeaderHLS, nil)
 	if err := node.Run(); err != nil {
 		return nil
 	}

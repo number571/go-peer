@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -105,7 +105,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 		return nil
 	}
 
-	node.Handle(hls_settings.CHeaderHLS, HandleServiceTCP(cfg))
+	node.Handle(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {

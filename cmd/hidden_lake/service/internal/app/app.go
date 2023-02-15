@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 const (
@@ -70,7 +70,7 @@ func (app *sApp) Run() error {
 		cfg := app.fWrapper.Config()
 
 		app.fNode.Handle(
-			hls_settings.CHeaderHLS,
+			pkg_settings.CHeaderHLS,
 			handler.HandleServiceTCP(cfg),
 		)
 		if err := app.fNode.Run(); err != nil {
@@ -103,7 +103,7 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Close() error {
-	app.fNode.Handle(hls_settings.CHeaderHLS, nil)
+	app.fNode.Handle(pkg_settings.CHeaderHLS, nil)
 	return closer.CloseAll([]types.ICloser{
 		app.fNode,
 		app.fConnKeeper,

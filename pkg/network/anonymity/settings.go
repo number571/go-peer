@@ -9,12 +9,14 @@ var (
 )
 
 const (
+	cServiceName = "DFT"
 	cMaskNetwork = 0x1111111111111111
 	cTimeWait    = time.Minute
 )
 
 type SSettings sSettings
 type sSettings struct {
+	FServiceName  string
 	FRetryEnqueue uint64
 	FNetworkMask  uint64
 	FTimeWait     time.Duration
@@ -22,6 +24,7 @@ type sSettings struct {
 
 func NewSettings(sett *SSettings) ISettings {
 	return (&sSettings{
+		FServiceName:  sett.FServiceName,
 		FRetryEnqueue: sett.FRetryEnqueue,
 		FNetworkMask:  sett.FNetworkMask,
 		FTimeWait:     sett.FTimeWait,
@@ -29,6 +32,9 @@ func NewSettings(sett *SSettings) ISettings {
 }
 
 func (s *sSettings) useDefaultValue() ISettings {
+	if s.FServiceName == "" {
+		s.FServiceName = cServiceName
+	}
 	if s.FNetworkMask == 0 {
 		s.FNetworkMask = cMaskNetwork
 	}
@@ -36,6 +42,10 @@ func (s *sSettings) useDefaultValue() ISettings {
 		s.FTimeWait = cTimeWait
 	}
 	return s
+}
+
+func (s *sSettings) GetServiceName() string {
+	return s.FServiceName
 }
 
 func (s *sSettings) GetTimeWait() time.Duration {

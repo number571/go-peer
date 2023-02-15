@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -42,7 +41,7 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 		case http.MethodPut:
 			err := node.Broadcast(
 				pubKey,
-				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
+				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)
 			if err != nil {
 				api.Response(w, pkg_settings.CErrorMessage, "failed: broadcast message")
@@ -53,7 +52,7 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 		case http.MethodPost:
 			resp, err := node.Request(
 				pubKey,
-				anonymity.NewPayload(hls_settings.CHeaderHLS, data),
+				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)
 			if err != nil {
 				api.Response(w, pkg_settings.CErrorResponse, "failed: response message")

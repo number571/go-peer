@@ -6,6 +6,7 @@ import (
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/friends"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
@@ -25,6 +26,7 @@ type INode interface {
 	Network() network.INode
 	Queue() queue.IQueue
 	F2F() friends.IF2F
+	Logger() logger.ILogger
 
 	Handle(uint32, IHandlerF) INode
 	Broadcast(recv asymmetric.IPubKey, pl payload.IPayload) error
@@ -32,6 +34,7 @@ type INode interface {
 }
 
 type ISettings interface {
+	GetServiceName() string
 	GetTimeWait() time.Duration
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64

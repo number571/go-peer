@@ -13,8 +13,8 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"

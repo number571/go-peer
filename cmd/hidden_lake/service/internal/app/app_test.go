@@ -9,13 +9,13 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	testutils "github.com/number571/go-peer/test/_data"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
-	tcPathDB     = hls_settings.CPathDB
-	tcPathConfig = hls_settings.CPathCFG
+	tcPathDB     = pkg_settings.CPathDB
+	tcPathConfig = pkg_settings.CPathCFG
 )
 
 func testDeleteFiles() {

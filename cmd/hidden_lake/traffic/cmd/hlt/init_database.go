@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/settings"
+	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
 func initDatabase() database.IKeyValueDB {

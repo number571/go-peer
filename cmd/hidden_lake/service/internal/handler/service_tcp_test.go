@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/internal/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/closer"
@@ -84,7 +84,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		return nil, fmt.Errorf("node is not running")
 	}
 
-	node.Handle(hls_settings.CHeaderHLS, HandleServiceTCP(cfg))
+	node.Handle(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
 	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
@@ -114,7 +114,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 	}
 
 	msg := payload.NewPayload(
-		uint64(hls_settings.CHeaderHLS),
+		uint64(pkg_settings.CHeaderHLS),
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
