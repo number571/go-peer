@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 	"golang.org/x/net/websocket"
 
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
@@ -98,7 +99,7 @@ func initIncomingServiceHTTP(
 	state state.IState,
 ) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/push", handler.HandleIncomigHTTP(state)) // POST
+	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(state)) // POST
 
 	return &http.Server{
 		Addr:    cfg.Address().Incoming(),

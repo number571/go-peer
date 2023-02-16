@@ -90,7 +90,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 
 			res, err := client.DoRequest(
 				friendPubKey,
-				request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, "/push").
+				request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 					WithHead(map[string]string{
 						"Content-Type": "application/json",
 					}).
@@ -118,6 +118,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				fmt.Fprint(w, "error: add message to database")
 				return
 			}
+
 			http.Redirect(w, r,
 				fmt.Sprintf("/friends/chat?alias_name=%s", aliasName),
 				http.StatusSeeOther)

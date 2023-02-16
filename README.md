@@ -211,9 +211,27 @@ To see the success of sending and receiving messages, you need to do all the sam
 
 The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
 
+> More information about HLT in the [habr.com/ru/post/717184](https://habr.com/ru/post/717184/ "Habr HLT")
+
 ### How it works
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
+
+### Example 
+
+Build and run service
+```bash
+$ cd examples/_cmd/traffic_keeper
+$ make
+```
+
+Run client
+```bash
+$ cd client
+$ go run ./main.go w 'hello, world!'
+$ go run ./main.go h
+$ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
+```
 
 ## Deprecated applications
 

@@ -2,6 +2,7 @@ package settings
 
 const (
 	CTitlePattern = "go-peer/hidden-lake-messenger"
+	CPushPath     = "/push"
 	CWorkForKeys  = 20
 )
 
