@@ -107,7 +107,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 		},
 	}
 
-	cfg, err := config.NewConfig(cfgPath, rawCFG)
+	cfg, err := config.BuildConfig(cfgPath, rawCFG)
 	if err != nil {
 		return nil
 	}

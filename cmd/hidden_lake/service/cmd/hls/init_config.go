@@ -17,5 +17,5 @@ func initConfig() (config.IConfig, error) {
 			FHTTP: "localhost:9572",
 		},
 	}
-	return config.NewConfig(pkg_settings.CPathCFG, initCfg)
+	return config.BuildConfig(pkg_settings.CPathCFG, initCfg)
 }

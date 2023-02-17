@@ -10,7 +10,7 @@ var (
 )
 
 const (
-	CSHA256Size            = 32
+	CSHA256Size            = sha256.Size
 	CSHA256KeyType         = "go-peer/sha256"
 	CHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
 )

@@ -10,6 +10,11 @@ const (
 	cUsedEmbedFS = true
 )
 
+const (
+	staticPath   = "static"
+	templatePath = "template"
+)
+
 var (
 	//go:embed static
 	gEmbededStatic embed.FS
@@ -19,7 +24,6 @@ var (
 )
 
 func GetStaticPath() fs.FS {
-	const staticPath = "static"
 	if !cUsedEmbedFS {
 		return os.DirFS("./web/" + staticPath)
 	}
@@ -31,7 +35,6 @@ func GetStaticPath() fs.FS {
 }
 
 func GetTemplatePath() fs.FS {
-	const templatePath = "template"
 	if !cUsedEmbedFS {
 		return os.DirFS("./web/" + templatePath)
 	}

@@ -28,7 +28,7 @@ func TestApp(t *testing.T) {
 	defer testDeleteFiles()
 
 	// Run application
-	cfg, err := config.NewConfig(tcPathConfig, &config.SConfig{
+	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
 		FAddress: &config.SAddress{
 			FTCP:  testutils.TgAddrs[14],
 			FHTTP: testutils.TgAddrs[15],

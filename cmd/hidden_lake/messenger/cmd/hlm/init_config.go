@@ -19,5 +19,5 @@ func initConfig() (config.IConfig, error) {
 			FService: "localhost:9572",
 		},
 	}
-	return config.NewConfig(hlm_settings.CPathCFG, initCfg)
+	return config.BuildConfig(hlm_settings.CPathCFG, initCfg)
 }

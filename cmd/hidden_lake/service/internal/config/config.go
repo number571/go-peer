@@ -51,7 +51,7 @@ type SAddress struct {
 	FHTTP string `json:"http,omitempty"`
 }
 
-func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
+func BuildConfig(filepath string, cfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(filepath)
 
 	if configFile.IsExist() {

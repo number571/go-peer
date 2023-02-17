@@ -100,7 +100,7 @@ func testAllOnlineFree(node anonymity.INode) {
 func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 	node := testRunNewNode(dbPath)
 
-	cfg, err := config.NewConfig(cfgPath, &config.SConfig{})
+	cfg, err := config.BuildConfig(cfgPath, &config.SConfig{})
 	if err != nil {
 		return nil
 	}

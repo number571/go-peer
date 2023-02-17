@@ -74,7 +74,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		},
 	}
 
-	cfg, err := config.NewConfig(tcPathConfig+"_tcp", rawCFG)
+	cfg, err := config.BuildConfig(tcPathConfig+"_tcp", rawCFG)
 	if err != nil {
 		return nil, err
 	}

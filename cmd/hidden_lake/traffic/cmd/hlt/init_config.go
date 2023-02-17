@@ -15,5 +15,5 @@ func initConfig() (config.IConfig, error) {
 		FAddress:    "localhost:9573",
 		FConnection: "localhost:9571",
 	}
-	return config.NewConfig(hlt_settings.CPathCFG, initCfg)
+	return config.BuildConfig(hlt_settings.CPathCFG, initCfg)
 }

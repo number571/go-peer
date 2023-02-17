@@ -33,7 +33,7 @@ func TestApp(t *testing.T) {
 	testDeleteFiles()
 	defer testDeleteFiles()
 
-	cfg, err := config.NewConfig(
+	cfg, err := config.BuildConfig(
 		tcPathConfig,
 		&config.SConfig{
 			FAddress: testutils.TgAddrs[23],

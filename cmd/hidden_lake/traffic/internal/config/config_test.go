@@ -14,7 +14,7 @@ const (
 )
 
 func testConfigDefaultInit(configPath string) {
-	_, _ = NewConfig(configPath, &SConfig{
+	_, _ = BuildConfig(configPath, &SConfig{
 		FLogging:    []string{"info", "erro"},
 		FNetwork:    tcNetwork,
 		FAddress:    tcAddress,

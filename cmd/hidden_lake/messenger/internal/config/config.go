@@ -29,7 +29,7 @@ type SConnection struct {
 	FTraffic string `json:"traffic,omitempty"`
 }
 
-func NewConfig(filepath string, cfg *SConfig) (IConfig, error) {
+func BuildConfig(filepath string, cfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(filepath)
 
 	if configFile.IsExist() {
