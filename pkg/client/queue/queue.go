@@ -52,6 +52,9 @@ func (q *sQueue) UpdateClient(c client.IClient) {
 }
 
 func (q *sQueue) Client() client.IClient {
+	q.fMutex.Lock()
+	defer q.fMutex.Unlock()
+
 	return q.fClient
 }
 

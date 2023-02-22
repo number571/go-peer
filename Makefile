@@ -1,32 +1,42 @@
 N=1
+CHECK_RETURN_CODE=if [ $$? != 0 ]; then exit; fi
 
-.PHONY: default status push clean test  
-default: clean test
+.PHONY: default clean \
+	test-run test-coverage test-benchmark \
+	git-status git-push 
+
+default: clean test-run
 
 clean:
-	make -C ./cmd/hidden_lake/service clean
-	make -C ./cmd/hidden_lake/messenger clean
-	make -C ./cmd/hidden_lake/traffic clean
-	make -C ./examples/_cmd/anon_messenger clean 
-	make -C ./examples/_cmd/echo_service clean 
-	make -C ./examples/_cmd/traffic_keeper clean 
+	make -C ./cmd/hidden_lake clean 
+	make -C ./examples/_cmd clean
 
-test:
+test-run:
+	go vet ./...;
+	$(CHECK_RETURN_CODE);
+
+	go test -race ./...;
+	$(CHECK_RETURN_CODE);
+
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
-		go clean -testcache; \
 		echo $$i; \
-		go test `go list ./...`; \
-		if [ $$? != 0 ]; then \
-			exit; \
-		fi; \
+		go test -count=1 -coverprofile=test/coverage.out `go list ./...`; \
+		$(CHECK_RETURN_CODE); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
-status:
+test-coverage:
+	go test -coverprofile=test/coverage.out `go list ./...`
+	go tool cover -html=test/coverage.out
+
+test-benchmark:
+	# TODO 
+
+git-status:
 	git add .
 	git status 
 
-push:
+git-push:
 	git commit -m "update"
 	git push 

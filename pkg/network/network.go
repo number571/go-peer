@@ -17,7 +17,6 @@ var (
 	_ INode = &sNode{}
 )
 
-// Basic structure for network use.
 type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
@@ -27,7 +26,9 @@ type sNode struct {
 	fHandleRoutes map[uint64]IHandlerF
 }
 
-// Create client by private key as identification.
+// Creating a node object managed by connections with multiple nodes.
+// Saves hashes of received messages to a buffer to prevent network cycling.
+// Redirects messages to handle routers by keys.
 func NewNode(sett ISettings) INode {
 	return &sNode{
 		fSettings:     sett,
@@ -37,8 +38,13 @@ func NewNode(sett ISettings) INode {
 	}
 }
 
+// Return settings interface.
+func (node *sNode) Settings() ISettings {
+	return node.fSettings
+}
+
+// Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (node *sNode) Broadcast(pld payload.IPayload) error {
-	// set this message to mapping
 	hash := hashing.NewSHA256Hasher(pld.Bytes()).Bytes()
 	node.inMappingWithSet(hash)
 
@@ -53,12 +59,9 @@ func (node *sNode) Broadcast(pld payload.IPayload) error {
 	return err
 }
 
-func (node *sNode) Settings() ISettings {
-	return node.fSettings
-}
-
-// Turn on listener by address.
-// Client handle function need be not null.
+// Opens a tcp connection to receive data from outside.
+// Checks the number of valid connections.
+// Redirects connections to the handle router.
 func (node *sNode) Listen(address string) error {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -89,6 +92,7 @@ func (node *sNode) Listen(address string) error {
 	return nil
 }
 
+// Closes the listener and all connections.
 func (node *sNode) Close() error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -106,7 +110,7 @@ func (node *sNode) Close() error {
 	return closer.CloseAll(toClose)
 }
 
-// Add function to mapping for route use.
+// Saves the function to the map by key for subsequent redirection.
 func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -115,17 +119,7 @@ func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 	return node
 }
 
-func (node *sNode) handleConn(address string, conn conn.IConn) {
-	defer node.Disconnect(address)
-	for {
-		ok := node.handleMessage(conn, conn.Read())
-		if !ok {
-			break
-		}
-	}
-}
-
-// Get list of connection addresses.
+// Retrieves the entire list of connections with addresses.
 func (node *sNode) Connections() map[string]conn.IConn {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -138,8 +132,8 @@ func (node *sNode) Connections() map[string]conn.IConn {
 	return mapping
 }
 
-// Connect to node by address.
-// Client handle function need be not null.
+// Connects to the node at the specified address and automatically starts reading all incoming messages.
+// Checks the number of connections.
 func (node *sNode) Connect(address string) (conn.IConn, error) {
 	if node.hasMaxConnSize() {
 		return nil, fmt.Errorf("has max connections size")
@@ -157,6 +151,7 @@ func (node *sNode) Connect(address string) (conn.IConn, error) {
 	return conn, nil
 }
 
+// Disables the connection at the address and removes the connection from the connection list.
 func (node *sNode) Disconnect(address string) error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -170,6 +165,20 @@ func (node *sNode) Disconnect(address string) error {
 	return conn.Close()
 }
 
+// Processes the received data from the connection.
+func (node *sNode) handleConn(address string, conn conn.IConn) {
+	defer node.Disconnect(address)
+	for {
+		ok := node.handleMessage(conn, conn.Read())
+		if !ok {
+			break
+		}
+	}
+}
+
+// Processes the message for correctness and redirects it to the handler function.
+// Returns true if the message was successfully redirected to the handler function
+// > or if the message already existed in the hash value store.
 func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 	// null message from connection is error
 	if pld == nil {
@@ -192,6 +201,7 @@ func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 	return true
 }
 
+// Checks the current number of connections with the limit.
 func (node *sNode) hasMaxConnSize() bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -200,6 +210,8 @@ func (node *sNode) hasMaxConnSize() bool {
 	return uint64(len(node.fConnections)) > maxConns
 }
 
+// Checks the hash of the message for existence in the hash store.
+// Returns true if the hash already existed, otherwise false.
 func (node *sNode) inMappingWithSet(hash []byte) bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -215,6 +227,7 @@ func (node *sNode) inMappingWithSet(hash []byte) bool {
 	return false
 }
 
+// Saves the connection to the map.
 func (node *sNode) setConnection(address string, conn conn.IConn) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -222,6 +235,7 @@ func (node *sNode) setConnection(address string, conn conn.IConn) {
 	node.fConnections[address] = conn
 }
 
+// Gets the handler function by key.
 func (node *sNode) getFunction(head uint64) (IHandlerF, bool) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -230,6 +244,7 @@ func (node *sNode) getFunction(head uint64) (IHandlerF, bool) {
 	return f, ok
 }
 
+// Sets the listener.
 func (node *sNode) setListener(listener net.Listener) {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
@@ -237,6 +252,7 @@ func (node *sNode) setListener(listener net.Listener) {
 	node.fListener = listener
 }
 
+// Gets the listener.
 func (node *sNode) getListener() net.Listener {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()

@@ -88,4 +88,19 @@ func TestMemoryStorage(t *testing.T) {
 		t.Error("values not equals (2)")
 		return
 	}
+
+	if err := store.Del(key); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := store.Get(key); err == nil {
+		t.Error("delete does not work")
+		return
+	}
+
+	if err := store.Del([]byte("undefined key")); err == nil {
+		t.Error("success delete value by undefined key")
+		return
+	}
 }

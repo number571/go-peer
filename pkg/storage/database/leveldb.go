@@ -13,10 +13,6 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
-const (
-	cSaltKey = "go-peer/salt"
-)
-
 var (
 	_ IKeyValueDB = &sLevelDB{}
 	_ IIterator   = &sLevelDBIterator{}
@@ -39,18 +35,12 @@ type sLevelDBIterator struct {
 func NewLevelDB(sett ISettings) IKeyValueDB {
 	db, err := leveldb.OpenFile(sett.GetPath(), nil)
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
-	salt, err := db.Get([]byte(cSaltKey), nil)
+	salt, err := db.Get(sett.GetSaltKey(), nil)
 	if err != nil {
 		salt = random.NewStdPRNG().Bytes(symmetric.CAESKeySize)
-		err := db.Put(
-			[]byte(cSaltKey),
-			salt,
-			nil,
-		)
-		if err != nil {
+		if err := db.Put(sett.GetSaltKey(), salt, nil); err != nil {
 			return nil
 		}
 	}
@@ -63,9 +53,6 @@ func NewLevelDB(sett ISettings) IKeyValueDB {
 }
 
 func (db *sLevelDB) Settings() ISettings {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
-
 	return db.fSettings
 }
 
@@ -75,7 +62,7 @@ func (db *sLevelDB) Set(key []byte, value []byte) error {
 
 	return db.fDB.Put(
 		db.tryHash(key),
-		db.fCipher.Encrypt(value),
+		doEncrypt(db.fCipher, value),
 		nil,
 	)
 }
@@ -89,12 +76,10 @@ func (db *sLevelDB) Get(key []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	decBytes := db.fCipher.Decrypt(encBytes)
-	if decBytes == nil {
-		return nil, fmt.Errorf("failed decrypt message")
-	}
-
-	return decBytes, nil
+	return tryDecrypt(
+		db.fCipher,
+		encBytes,
+	)
 }
 
 func (db *sLevelDB) Del(key []byte) error {
@@ -144,11 +129,14 @@ func (iter *sLevelDBIterator) Value() []byte {
 	iter.fMutex.Lock()
 	defer iter.fMutex.Unlock()
 
-	if iter.fCipher == nil {
-		return iter.fIter.Value()
+	decBytes, err := tryDecrypt(
+		iter.fCipher,
+		iter.fIter.Value(),
+	)
+	if err != nil {
+		return nil
 	}
-
-	return iter.fCipher.Decrypt(iter.fIter.Value())
+	return decBytes
 }
 
 func (iter *sLevelDBIterator) Close() {
@@ -156,6 +144,42 @@ func (iter *sLevelDBIterator) Close() {
 	defer iter.fMutex.Unlock()
 
 	iter.fIter.Release()
+}
+
+func doEncrypt(cipher symmetric.ICipher, dataBytes []byte) []byte {
+	return bytes.Join(
+		[][]byte{
+			hashing.NewHMACSHA256Hasher(
+				cipher.Bytes(),
+				dataBytes,
+			).Bytes(),
+			cipher.Encrypt(dataBytes),
+		},
+		[]byte{},
+	)
+}
+
+func tryDecrypt(cipher symmetric.ICipher, encBytes []byte) ([]byte, error) {
+	if len(encBytes) < hashing.CSHA256Size+symmetric.CAESBlockSize {
+		return nil, fmt.Errorf("incorrect size of encrypted data")
+	}
+
+	decBytes := cipher.Decrypt(encBytes[hashing.CSHA256Size:])
+	if decBytes == nil {
+		return nil, fmt.Errorf("failed decrypt message")
+	}
+
+	gotHashed := encBytes[:hashing.CSHA256Size]
+	newHashed := hashing.NewHMACSHA256Hasher(
+		cipher.Bytes(),
+		decBytes,
+	).Bytes()
+
+	if !bytes.Equal(gotHashed, newHashed) {
+		return nil, fmt.Errorf("incorrect hash of decrypted data")
+	}
+
+	return decBytes, nil
 }
 
 func (db *sLevelDB) tryHash(key []byte) []byte {

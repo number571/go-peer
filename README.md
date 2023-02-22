@@ -18,9 +18,9 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 ## TODO 
 
-1. Write tests for HLM
-2. Create UBC application
-3. Write HLE (Hidden Lake Encryptor)
+1. Append comments for functions/variables/constants/etc (doc)
+2. Append benchmarks
+3. Write tests for coverage -> 100%
 
 ## Dependencies
 

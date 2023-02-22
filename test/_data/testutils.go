@@ -90,8 +90,10 @@ const (
 const (
 	TcKey1 = "key1"
 	TcKey2 = "key2"
+	TcKey3 = "key3"
 	TcVal1 = "val1"
 	TcVal2 = "val2"
+	TcVal3 = "val3"
 )
 
 const (
