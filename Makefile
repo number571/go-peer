@@ -21,7 +21,7 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -count=1 -coverprofile=test/coverage.out `go list ./...`; \
+		go test -count=1 `go list ./...`; \
 		$(CHECK_RETURN_CODE); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";

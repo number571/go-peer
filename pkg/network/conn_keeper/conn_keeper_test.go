@@ -22,14 +22,34 @@ func TestConnKeeper(t *testing.T) {
 		node,
 	)
 
+	if node := connKeeper.Network(); node == nil {
+		t.Error("network node is nil")
+		return
+	}
+
 	if err := connKeeper.Run(); err != nil {
 		t.Error(err)
+		return
+	}
+
+	if err := connKeeper.Run(); err == nil {
+		t.Error("error is nil with already running connKeeper")
 		return
 	}
 
 	time.Sleep(time.Second)
 	if len(node.Connections()) != 1 {
 		t.Error("lenght of connections != 1")
+		return
+	}
+
+	if err := connKeeper.Close(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := connKeeper.Close(); err == nil {
+		t.Error("error is nil with already closed connKeeper")
 		return
 	}
 }
