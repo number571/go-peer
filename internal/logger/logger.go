@@ -16,10 +16,10 @@ func defaultSettings(logging ILogging) logger.ISettings {
 		sett.FInfo = os.Stdout
 	}
 	if logging.Warn() {
-		sett.FInfo = os.Stderr
+		sett.FWarn = os.Stderr
 	}
 	if logging.Erro() {
-		sett.FInfo = os.Stderr
+		sett.FErro = os.Stderr
 	}
 	return logger.NewSettings(sett)
 }

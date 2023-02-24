@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 func main() {
-	if len(os.Args) != 3 {
+	if len(os.Args) != 2 {
 		panic(fmt.Sprintf(
 			"usage: \n\t%s",
-			"./main [key-size] [inline|pretty]",
+			"./main [key-size]",
 		))
 	}
 
@@ -27,22 +26,11 @@ func main() {
 		panic("key size is negative")
 	}
 
-	mode := strings.ToLower(os.Args[2])
-	if mode != "inline" && mode != "pretty" {
-		panic("undefined mode [inline|pretty]")
-	}
-
 	priv := asymmetric.NewRSAPrivKey(uint64(keySize))
 	if priv == nil {
 		panic("generate key error")
 	}
 
-	switch mode {
-	case "inline":
-		filesystem.OpenFile("priv.key").Write([]byte(priv.String()))
-		filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().String()))
-	case "pretty":
-		filesystem.OpenFile("priv.key").Write([]byte(priv.Format()))
-		filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().Format()))
-	}
+	filesystem.OpenFile("priv.key").Write([]byte(priv.String()))
+	filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().String()))
 }

@@ -10,9 +10,10 @@ var (
 )
 
 type sLogger struct {
-	fInfoOut *log.Logger
-	fWarnOut *log.Logger
-	fErroOut *log.Logger
+	fSettings ISettings
+	fInfoOut  *log.Logger
+	fWarnOut  *log.Logger
+	fErroOut  *log.Logger
 }
 
 const (
@@ -23,7 +24,9 @@ const (
 )
 
 func NewLogger(sett ISettings) ILogger {
-	logger := &sLogger{}
+	logger := &sLogger{
+		fSettings: sett,
+	}
 
 	infoStream := sett.GetStreamInfo()
 	if infoStream != nil {
@@ -41,6 +44,10 @@ func NewLogger(sett ISettings) ILogger {
 	}
 
 	return logger
+}
+
+func (l *sLogger) Settings() ISettings {
+	return l.fSettings
 }
 
 func (l *sLogger) Info(info string) {

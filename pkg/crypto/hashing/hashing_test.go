@@ -8,10 +8,29 @@ func TestSHA256(t *testing.T) {
 	hash := NewSHA256Hasher(msg).String()
 	if hash != NewSHA256Hasher(msg).String() {
 		t.Error("hash is not determined")
+		return
 	}
 
 	msg[3] = msg[3] ^ 8
 	if hash == NewSHA256Hasher(msg).String() {
 		t.Error("bit didn't change the result ")
+		return
+	}
+}
+
+func TestHMACSHA256(t *testing.T) {
+	key := []byte("secret key")
+	msg := []byte("hello, world!")
+
+	hash := NewHMACSHA256Hasher(key, msg).String()
+	if hash != NewHMACSHA256Hasher(key, msg).String() {
+		t.Error("hash is not determined")
+		return
+	}
+
+	msg[3] = msg[3] ^ 8
+	if hash == NewHMACSHA256Hasher(key, msg).String() {
+		t.Error("bit didn't change the result ")
+		return
 	}
 }

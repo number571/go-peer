@@ -3,6 +3,7 @@ package logger
 import "os"
 
 type ILogger interface {
+	Settings() ISettings
 	Info(string)
 	Warn(string)
 	Erro(string)

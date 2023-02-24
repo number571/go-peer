@@ -17,6 +17,9 @@ type sLogger struct {
 }
 
 func NewLogger(service string) ILogger {
+	if len(service) != 3 {
+		return nil
+	}
 	return &sLogger{
 		fService: service,
 	}

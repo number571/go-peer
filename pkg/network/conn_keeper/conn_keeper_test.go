@@ -9,6 +9,18 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+func TestConnKeeperSettings(t *testing.T) {
+	sett := NewSettings(&SSettings{})
+	if sett.GetDuration() != cDuration {
+		t.Error("default duration != default settings")
+		return
+	}
+	if sett.GetConnections() != nil {
+		t.Error("default connections != default settings")
+		return
+	}
+}
+
 func TestConnKeeper(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)

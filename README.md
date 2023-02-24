@@ -20,7 +20,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 1. Append comments for functions/variables/constants/etc (doc)
 2. Append benchmarks
-3. Write tests for coverage -> 100%
+3. Write tests for coverage > 70%
 
 ## Dependencies
 

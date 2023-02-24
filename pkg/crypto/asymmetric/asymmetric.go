@@ -104,20 +104,6 @@ func (key *sRSAPrivKey) String() string {
 	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
 }
 
-func (key *sRSAPrivKey) Format() string {
-	s := fmt.Sprintf("Priv(%s){\n", key.Type())
-	b := key.Bytes()
-	for i := 0; i < len(b); i += cFormatBlock {
-		end := i + cFormatBlock
-		if end > len(b) {
-			end = len(b)
-		}
-		s += fmt.Sprintf("\t%X\n", b[i:end])
-	}
-	s += "}"
-	return s
-}
-
 func (key *sRSAPrivKey) Type() string {
 	return CRSAKeyType
 }
@@ -226,20 +212,6 @@ func (key *sRSAPubKey) Bytes() []byte {
 
 func (key *sRSAPubKey) String() string {
 	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
-}
-
-func (key *sRSAPubKey) Format() string {
-	s := fmt.Sprintf("Pub(%s){\n", key.Type())
-	b := key.Bytes()
-	for i := 0; i < len(b); i += cFormatBlock {
-		end := i + cFormatBlock
-		if end > len(b) {
-			end = len(b)
-		}
-		s += fmt.Sprintf("\t%X\n", b[i:end])
-	}
-	s += "}"
-	return s
 }
 
 func (key *sRSAPubKey) Type() string {

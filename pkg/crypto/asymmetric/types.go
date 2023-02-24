@@ -2,17 +2,11 @@ package asymmetric
 
 import "github.com/number571/go-peer/pkg/crypto"
 
-type iFormatter interface {
-	Format() string
-}
-
 type iAddress interface {
 	crypto.IConverter
 }
 
 type IPubKey interface {
-	iFormatter
-
 	crypto.IEncrypter
 	crypto.IConverter
 
@@ -21,8 +15,6 @@ type IPubKey interface {
 }
 
 type IPrivKey interface {
-	iFormatter
-
 	crypto.IDecrypter
 	crypto.IConverter
 
