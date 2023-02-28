@@ -20,7 +20,7 @@ func NewBuilder() IBuilder {
 
 func (builder *sBuilder) SetPrivKey(privKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
 	return &pkg_settings.SPrivKey{
-		FPrivKey: privKey.String(),
+		FPrivKey: privKey.ToString(),
 	}
 }
 
@@ -38,13 +38,13 @@ func (builder *sBuilder) Friend(aliasName string, pubKey asymmetric.IPubKey) *pk
 	}
 	return &pkg_settings.SFriend{
 		FAliasName: aliasName,
-		FPublicKey: pubKey.String(),
+		FPublicKey: pubKey.ToString(),
 	}
 }
 
-func (builder *sBuilder) DoPush(recv asymmetric.IPubKey, req request.IRequest) *pkg_settings.SPush {
-	return &pkg_settings.SPush{
-		FReceiver: recv.String(),
+func (builder *sBuilder) Request(recv asymmetric.IPubKey, req request.IRequest) *pkg_settings.SRequest {
+	return &pkg_settings.SRequest{
+		FReceiver: recv.ToString(),
 		FHexData:  encoding.HexEncode(req.Bytes()),
 	}
 }

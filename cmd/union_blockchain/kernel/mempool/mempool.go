@@ -75,12 +75,12 @@ func (mempool *sMempool) Clear() {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
-	iter := mempool.fDB.Iter([]byte(cPrefix))
+	iter := mempool.fDB.GetIterator([]byte(cPrefix))
 	defer iter.Close()
 
 	// TODO: iter.Key without load transaction
 	for iter.Next() {
-		txBytes := iter.Value()
+		txBytes := iter.GetValue()
 
 		tx := transaction.LoadTransaction(
 			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
@@ -137,11 +137,11 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 		count uint64
 	)
 
-	iter := mempool.fDB.Iter([]byte(cPrefix))
+	iter := mempool.fDB.GetIterator([]byte(cPrefix))
 	defer iter.Close()
 
 	for count = 0; iter.Next() && count < blockCountTXs; count++ {
-		txBytes := iter.Value()
+		txBytes := iter.GetValue()
 
 		tx := transaction.LoadTransaction(
 			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),

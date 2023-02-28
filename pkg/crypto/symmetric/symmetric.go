@@ -25,18 +25,18 @@ type sAESCipher struct {
 
 func NewAESCipher(key []byte) ICipher {
 	return &sAESCipher{
-		fKey: hashing.NewSHA256Hasher(key).Bytes(),
+		fKey: hashing.NewSHA256Hasher(key).ToBytes(),
 	}
 }
 
-func (cph *sAESCipher) Encrypt(msg []byte) []byte {
+func (cph *sAESCipher) EncryptBytes(msg []byte) []byte {
 	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
 	}
 
 	blockSize := block.BlockSize()
-	iv := random.NewStdPRNG().Bytes(uint64(blockSize))
+	iv := random.NewStdPRNG().GetBytes(uint64(blockSize))
 
 	stream := cipher.NewCTR(block, iv)
 	result := make([]byte, len(msg)+len(iv))
@@ -46,7 +46,7 @@ func (cph *sAESCipher) Encrypt(msg []byte) []byte {
 	return result
 }
 
-func (cph *sAESCipher) Decrypt(msg []byte) []byte {
+func (cph *sAESCipher) DecryptBytes(msg []byte) []byte {
 	block, err := aes.NewCipher(cph.fKey)
 	if err != nil {
 		return nil
@@ -64,18 +64,18 @@ func (cph *sAESCipher) Decrypt(msg []byte) []byte {
 	return result
 }
 
-func (cph *sAESCipher) String() string {
-	return fmt.Sprintf("Key(%s){%X}", cph.Type(), cph.Bytes())
+func (cph *sAESCipher) ToString() string {
+	return fmt.Sprintf("Key(%s){%X}", cph.GetType(), cph.ToBytes())
 }
 
-func (cph *sAESCipher) Bytes() []byte {
+func (cph *sAESCipher) ToBytes() []byte {
 	return cph.fKey
 }
 
-func (cph *sAESCipher) Type() string {
+func (cph *sAESCipher) GetType() string {
 	return CAESKeyType
 }
 
-func (cph *sAESCipher) Size() uint64 {
+func (cph *sAESCipher) GetSize() uint64 {
 	return CAESKeySize
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/types"
 	"golang.org/x/net/websocket"
@@ -26,7 +25,7 @@ const (
 )
 
 var (
-	_ types.IApp = &sApp{}
+	_ types.ICommand = &sApp{}
 )
 
 type sApp struct {
@@ -41,7 +40,7 @@ func NewApp(
 	wDB database.IWrapperDB,
 	hlsClient hls_client.IClient,
 	hltClient hlt_client.IClient,
-) types.IApp {
+) types.ICommand {
 	state := state.NewState(stg, wDB, hlsClient, hltClient)
 	return &sApp{
 		fState:          state,
@@ -71,15 +70,15 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Close()
+		app.Stop()
 		return err
 	case <-time.After(initStart):
 		return nil
 	}
 }
 
-func (app *sApp) Close() error {
-	lastErr := closer.CloseAll([]types.ICloser{
+func (app *sApp) Stop() error {
+	lastErr := types.CloseAll([]types.ICloser{
 		app.fIntServiceHTTP,
 		app.fIncServiceHTTP,
 	})

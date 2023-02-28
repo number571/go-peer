@@ -43,8 +43,8 @@ func TestDB(t *testing.T) {
 	putHashes := make([]string, 0, 3)
 
 	for i := 0; i < 3; i++ {
-		msg, err := cl.Encrypt(
-			cl.PubKey(),
+		msg, err := cl.EncryptPayload(
+			cl.GetPubKey(),
 			payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
 		)
 		if err != nil {
@@ -56,7 +56,7 @@ func TestDB(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		putHashes = append(putHashes, encoding.HexEncode(msg.Body().Hash()))
+		putHashes = append(putHashes, encoding.HexEncode(msg.GetBody().GetHash()))
 	}
 
 	getHashes, err := tgDB.Hashes()
@@ -84,29 +84,29 @@ func TestDB(t *testing.T) {
 			return
 		}
 
-		msgHash := encoding.HexEncode(loadMsg.Body().Hash())
+		msgHash := encoding.HexEncode(loadMsg.GetBody().GetHash())
 		if getHash != msgHash {
 			t.Errorf("getHash[%s] != msgHash[%s]", getHash, msgHash)
 			return
 		}
 
-		pubKey, pl, err := cl.Decrypt(loadMsg)
+		pubKey, pl, err := cl.DecryptMessage(loadMsg)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		if pubKey.Address().String() != cl.PubKey().Address().String() {
+		if pubKey.Address().ToString() != cl.GetPubKey().Address().ToString() {
 			t.Error("load public key != init public key")
 			return
 		}
 
-		if pl.Head() != uint64(testutils.TcHead) {
+		if pl.GetHead() != uint64(testutils.TcHead) {
 			t.Error("load msg head != init head")
 			return
 		}
 
-		if !bytes.Equal(pl.Body(), []byte(testutils.TcBody)) {
+		if !bytes.Equal(pl.GetBody(), []byte(testutils.TcBody)) {
 			t.Error("load msg body != init body")
 			return
 		}

@@ -12,17 +12,17 @@ func TestAESEncrypt(t *testing.T) {
 	)
 
 	cipher := NewAESCipher(key)
-	emsg := cipher.Encrypt(msg)
+	emsg := cipher.EncryptBytes(msg)
 
 	if bytes.Equal(msg, emsg) {
 		t.Error("encrypted message = open message")
 	}
 
-	if !bytes.Equal(msg, cipher.Decrypt(emsg)) {
+	if !bytes.Equal(msg, cipher.DecryptBytes(emsg)) {
 		t.Error("decrypted message is invalid")
 	}
 
-	if !bytes.Equal(cipher.Decrypt(emsg), cipher.Decrypt(emsg)) {
+	if !bytes.Equal(cipher.DecryptBytes(emsg), cipher.DecryptBytes(emsg)) {
 		t.Error("decrypted message is not determinated")
 	}
 }

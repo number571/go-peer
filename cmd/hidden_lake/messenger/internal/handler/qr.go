@@ -28,7 +28,7 @@ func QRPublicKeyPage(s state.IState) http.HandlerFunc {
 			return
 		}
 
-		qrCode, err := qr.Encode(pubKey.String(), qr.L, qr.Auto)
+		qrCode, err := qr.Encode(pubKey.ToString(), qr.L, qr.Auto)
 		if err != nil {
 			fmt.Fprint(w, "error: qrcode generate")
 			return

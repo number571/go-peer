@@ -42,12 +42,11 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorag
 		}
 		store.fSalt = encdata[:symmetric.CAESKeySize]
 	} else {
-		store.fSalt = random.NewStdPRNG().Bytes(symmetric.CAESKeySize)
+		store.fSalt = random.NewStdPRNG().GetBytes(symmetric.CAESKeySize)
 	}
 
-	entropy := entropy.NewEntropy(store.fWorkSize)
-	ekey := entropy.Raise(key, store.fSalt)
-	store.fCipher = symmetric.NewAESCipher(ekey)
+	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
+	store.fCipher = symmetric.NewAESCipher(entropy.BoostEntropy(key))
 
 	if !store.exists() {
 		store.Set(nil, nil)
@@ -81,12 +80,12 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	entropy := entropy.NewEntropy(store.fWorkSize)
-	ekey := entropy.Raise(key, store.fSalt)
-	hash := hashing.NewSHA256Hasher(ekey).String()
+	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
+	ekey := entropy.BoostEntropy(key)
+	hash := hashing.NewSHA256Hasher(ekey).ToString()
 
 	cipher := symmetric.NewAESCipher(ekey)
-	mapping.FSecrets[hash] = cipher.Encrypt(value)
+	mapping.FSecrets[hash] = cipher.EncryptBytes(value)
 
 	return store.encrypt(&mapping)
 }
@@ -107,9 +106,9 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropy(store.fWorkSize)
-	ekey := entropy.Raise(key, store.fSalt)
-	hash := hashing.NewSHA256Hasher(ekey).String()
+	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
+	ekey := entropy.BoostEntropy(key)
+	hash := hashing.NewSHA256Hasher(ekey).ToString()
 
 	encsecret, ok := mapping.FSecrets[hash]
 	if !ok {
@@ -117,7 +116,7 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	}
 
 	cipher := symmetric.NewAESCipher(ekey)
-	secret := cipher.Decrypt(encsecret)
+	secret := cipher.DecryptBytes(encsecret)
 
 	return secret, nil
 }
@@ -138,9 +137,8 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropy(store.fWorkSize)
-	ekey := entropy.Raise(key, store.fSalt)
-	hash := hashing.NewSHA256Hasher(ekey).String()
+	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
+	hash := hashing.NewSHA256Hasher(entropy.BoostEntropy(key)).ToString()
 
 	_, ok := mapping.FSecrets[hash]
 	if !ok {
@@ -164,7 +162,7 @@ func (store *sCryptoStorage) encrypt(mapping *storageData) error {
 
 	err = filesystem.OpenFile(store.fPath).Write(
 		bytes.Join(
-			[][]byte{store.fSalt, store.fCipher.Encrypt(data)},
+			[][]byte{store.fSalt, store.fCipher.EncryptBytes(data)},
 			[]byte{},
 		),
 	)
@@ -183,7 +181,7 @@ func (store *sCryptoStorage) decrypt() (storageData, error) {
 		return storageData{}, err
 	}
 
-	data := store.fCipher.Decrypt(encdata[symmetric.CAESKeySize:])
+	data := store.fCipher.DecryptBytes(encdata[symmetric.CAESKeySize:])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
 		return storageData{}, err

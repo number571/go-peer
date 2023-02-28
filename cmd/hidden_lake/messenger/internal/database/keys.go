@@ -13,16 +13,16 @@ const (
 func getKeySize(r IRelation) []byte {
 	return []byte(fmt.Sprintf(
 		cKeySizeTemplate,
-		r.IAm().Address().String(),
-		r.Friend().Address().String(),
+		r.IAm().Address().ToString(),
+		r.Friend().Address().ToString(),
 	))
 }
 
 func getKeyMessageByEnum(r IRelation, i uint64) []byte {
 	return []byte(fmt.Sprintf(
 		cKeyMessageByEnumTemplate,
-		r.IAm().Address().String(),
-		r.Friend().Address().String(),
+		r.IAm().Address().ToString(),
+		r.Friend().Address().ToString(),
 		i,
 	))
 }
@@ -30,8 +30,8 @@ func getKeyMessageByEnum(r IRelation, i uint64) []byte {
 func getKeyMessageByHash(r IRelation, hash string) []byte {
 	return []byte(fmt.Sprintf(
 		cKeyMessageByHashTemplate,
-		r.IAm().Address().String(),
-		r.Friend().Address().String(),
+		r.IAm().Address().ToString(),
+		r.Friend().Address().ToString(),
 		hash,
 	))
 }

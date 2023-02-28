@@ -25,7 +25,7 @@ func TestCryptoStorage(t *testing.T) {
 		return
 	}
 
-	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
+	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
 	store.Set([]byte(testutils.TcKey2), secret1)
 
 	secret2, err := store.Get([]byte(testutils.TcKey2))

@@ -36,7 +36,7 @@ func NewBlock(sett ISettings, priv asymmetric.IPrivKey, prevHash []byte, txs []t
 		fTXs:       txs,
 		fValidator: priv.PubKey(),
 		FPrevHash:  prevHash,
-		FValidator: priv.PubKey().Bytes(),
+		FValidator: priv.PubKey().ToBytes(),
 	}
 
 	if len(prevHash) != hashing.CSHA256Size {
@@ -204,7 +204,7 @@ func (block *sBlock) newHash() []byte {
 				tx.Hash(),
 			},
 			[]byte{},
-		)).Bytes()
+		)).ToBytes()
 	}
 
 	return hash

@@ -11,29 +11,29 @@ var (
 
 type tsLogger struct{}
 
-func (l *tsLogger) Info() bool {
+func (l *tsLogger) HasInfo() bool {
 	return true
 }
 
-func (l *tsLogger) Warn() bool {
+func (l *tsLogger) HasWarn() bool {
 	return true
 }
 
-func (l *tsLogger) Erro() bool {
+func (l *tsLogger) HasErro() bool {
 	return false
 }
 
 func TestLogger(t *testing.T) {
 	logger := DefaultLogger(&tsLogger{})
-	if logger.Settings().GetStreamInfo().Name() != os.Stdout.Name() {
+	if logger.GetSettings().GetStreamInfo().Name() != os.Stdout.Name() {
 		t.Error("info stream != stdout")
 		return
 	}
-	if logger.Settings().GetStreamWarn().Name() != os.Stderr.Name() {
+	if logger.GetSettings().GetStreamWarn().Name() != os.Stderr.Name() {
 		t.Error("warn stream != stderr")
 		return
 	}
-	if logger.Settings().GetStreamErro() != nil {
+	if logger.GetSettings().GetStreamErro() != nil {
 		t.Error("erro stream != nil")
 		return
 	}

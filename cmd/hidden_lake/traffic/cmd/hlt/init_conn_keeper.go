@@ -30,7 +30,7 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					FTimeWait:    hlt_settings.CNetworkWaitTime,
 				}),
 			}),
-		).Handle(
+		).HandleFunc(
 			hlt_settings.CNetworkMask,
 			func(_ network.INode, conn conn.IConn, reqBytes []byte) {
 				msg := message.LoadMessage(
@@ -41,27 +41,27 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					),
 				)
 				if msg == nil {
-					logger.Warn(anonLogger.FmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, conn))
+					logger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, conn))
 					return
 				}
 
 				var (
-					hash  = msg.Body().Hash()
-					proof = msg.Body().Proof()
+					hash  = msg.GetBody().GetHash()
+					proof = msg.GetBody().GetProof()
 				)
 
 				strHash := encoding.HexEncode(hash)
 				if _, err := db.Load(strHash); err == nil {
-					logger.Info(anonLogger.FmtLog(anon_logger.CLogInfoExist, hash, proof, nil, conn))
+					logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, conn))
 					return
 				}
 
 				if err := db.Push(msg); err != nil {
-					logger.Erro(anonLogger.FmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, conn))
+					logger.PushErro(anonLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, conn))
 					return
 				}
 
-				logger.Info(anonLogger.FmtLog(anon_logger.CLogInfoUnencryptable, hash, proof, nil, conn))
+				logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUnencryptable, hash, proof, nil, conn))
 			},
 		),
 	)

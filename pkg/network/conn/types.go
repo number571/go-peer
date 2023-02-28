@@ -15,12 +15,12 @@ type ISettings interface {
 }
 
 type IConn interface {
-	Settings() ISettings
 	types.ICloser
 
-	Socket() net.Conn
-	Request(pld payload.IPayload) (payload.IPayload, error)
+	GetSettings() ISettings
+	GetSocket() net.Conn
 
-	Write(payload.IPayload) error
-	Read() payload.IPayload
+	FetchPayload(pld payload.IPayload) (payload.IPayload, error)
+	WritePayload(payload.IPayload) error
+	ReadPayload() payload.IPayload
 }

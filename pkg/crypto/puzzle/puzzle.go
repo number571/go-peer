@@ -39,7 +39,7 @@ func (puzzle *sPoWPuzzle) Proof(packHash []byte) uint64 {
 				bNonce[:],
 			},
 			[]byte{},
-		)).Bytes()
+		)).ToBytes()
 		intHash.SetBytes(hash)
 		if intHash.Cmp(target) == -1 {
 			return nonce
@@ -60,7 +60,7 @@ func (puzzle *sPoWPuzzle) Verify(packHash []byte, nonce uint64) bool {
 			bNonce[:],
 		},
 		[]byte{},
-	)).Bytes()
+	)).ToBytes()
 	intHash.SetBytes(hash)
 	target.Lsh(target, hashSizeInBits()-uint(puzzle.fDiff))
 	return intHash.Cmp(target) == -1

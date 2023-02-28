@@ -27,7 +27,7 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 				return
 			}
 
-			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(msg.Bytes()))
+			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(msg.ToBytes()))
 			return
 		case http.MethodPost:
 			var vRequest pkg_settings.SPushRequest

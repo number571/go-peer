@@ -7,23 +7,16 @@ import (
 )
 
 type IClient interface {
-	Settings() ISettings
+	GetSettings() ISettings
 
-	iKeeper
-	iCipher
+	GetPubKey() asymmetric.IPubKey
+	GetPrivKey() asymmetric.IPrivKey
+
+	EncryptPayload(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
+	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }
 
 type ISettings interface {
 	GetMessageSize() uint64
 	GetWorkSize() uint64
-}
-
-type iKeeper interface {
-	PubKey() asymmetric.IPubKey
-	PrivKey() asymmetric.IPrivKey
-}
-
-type iCipher interface {
-	Encrypt(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
-	Decrypt(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }

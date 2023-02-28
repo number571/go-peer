@@ -34,7 +34,7 @@ func TestConnKeeper(t *testing.T) {
 		node,
 	)
 
-	if node := connKeeper.Network(); node == nil {
+	if node := connKeeper.GetNetworkNode(); node == nil {
 		t.Error("network node is nil")
 		return
 	}
@@ -50,17 +50,17 @@ func TestConnKeeper(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
-	if len(node.Connections()) != 1 {
+	if len(node.GetConnections()) != 1 {
 		t.Error("lenght of connections != 1")
 		return
 	}
 
-	if err := connKeeper.Close(); err != nil {
+	if err := connKeeper.Stop(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := connKeeper.Close(); err == nil {
+	if err := connKeeper.Stop(); err == nil {
 		t.Error("error is nil with already closed connKeeper")
 		return
 	}

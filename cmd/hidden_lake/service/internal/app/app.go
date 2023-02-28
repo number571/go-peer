@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
@@ -21,7 +20,7 @@ const (
 )
 
 var (
-	_ types.IApp = &sApp{}
+	_ types.ICommand = &sApp{}
 )
 
 type sApp struct {
@@ -34,7 +33,7 @@ type sApp struct {
 func NewApp(
 	cfg config.IConfig,
 	node anonymity.INode,
-) types.IApp {
+) types.ICommand {
 	wrapper := config.NewWrapper(cfg)
 	return &sApp{
 		fWrapper:     wrapper,
@@ -69,7 +68,7 @@ func (app *sApp) Run() error {
 	go func() {
 		cfg := app.fWrapper.Config()
 
-		app.fNode.Handle(
+		app.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
 			handler.HandleServiceTCP(cfg),
 		)
@@ -86,7 +85,7 @@ func (app *sApp) Run() error {
 		}
 
 		// run node in server mode
-		err := app.fNode.Network().Listen(tcpAddress)
+		err := app.fNode.GetNetworkNode().Run()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			res <- err
 			return
@@ -95,20 +94,29 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Close()
+		app.Stop()
 		return err
 	case <-time.After(initStart):
 		return nil
 	}
 }
 
-func (app *sApp) Close() error {
-	app.fNode.Handle(pkg_settings.CHeaderHLS, nil)
-	return closer.CloseAll([]types.ICloser{
+func (app *sApp) Stop() error {
+	app.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
+
+	lastErr := types.StopAllCommands([]types.ICommand{
 		app.fNode,
 		app.fConnKeeper,
-		app.fServiceHTTP,
-		app.fNode.Network(),
-		app.fNode.KeyValueDB(),
+		app.fNode.GetNetworkNode(),
 	})
+
+	err := types.CloseAll([]types.ICloser{
+		app.fServiceHTTP,
+		app.fNode.GetKeyValueDB(),
+	})
+	if err != nil {
+		lastErr = err
+	}
+
+	return lastErr
 }

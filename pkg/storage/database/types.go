@@ -5,14 +5,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IKeyValueDB interface {
-	storage.IKeyValueStorage
-	types.ICloser
-
-	Settings() ISettings
-	Iter([]byte) IIterator
-}
-
 type ISettings interface {
 	GetPath() string
 	GetHashing() bool
@@ -20,10 +12,18 @@ type ISettings interface {
 	GetCipherKey() []byte
 }
 
-type IIterator interface {
-	Key() []byte
-	Value() []byte
+type IKeyValueDB interface {
+	storage.IKeyValueStorage
+	types.ICloser
 
+	GetSettings() ISettings
+	GetIterator([]byte) IIterator
+}
+
+type IIterator interface {
+	types.ICloser
 	Next() bool
-	Close()
+
+	GetKey() []byte
+	GetValue() []byte
 }

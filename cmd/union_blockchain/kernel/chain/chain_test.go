@@ -26,7 +26,7 @@ func TestChain(t *testing.T) {
 	sett := NewSettings(&SSettings{FRootPath: chainName})
 
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
-	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
+	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).ToBytes()
 
 	// generate genesis block
 	chain, err := NewChain(
@@ -152,7 +152,7 @@ func testGetNewTransactions(sett block.ISettings, priv asymmetric.IPrivKey) []tr
 			transaction.NewTransaction(
 				sett.GetTransactionSettings(),
 				priv,
-				[]byte(fmt.Sprintf("transaction-%d-%X", i, random.NewStdPRNG().Bytes(20))),
+				[]byte(fmt.Sprintf("transaction-%d-%X", i, random.NewStdPRNG().GetBytes(20))),
 			),
 		)
 	}

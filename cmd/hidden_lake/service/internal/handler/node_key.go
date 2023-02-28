@@ -32,10 +32,10 @@ func HandleNodeKeyAPI(node anonymity.INode) http.HandlerFunc {
 				return
 			}
 
-			node.Queue().UpdateClient(pkg_settings.InitClient(privKey))
+			node.GetMessageQueue().UpdateClient(pkg_settings.InitClient(privKey))
 		}
 
 		// Response for GET and POST
-		api.Response(w, pkg_settings.CErrorNone, node.Queue().Client().PubKey().String())
+		api.Response(w, pkg_settings.CErrorNone, node.GetMessageQueue().GetClient().GetPubKey().ToString())
 	}
 }

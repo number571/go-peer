@@ -41,10 +41,10 @@ func (requester *sRequester) GetIndex() (string, error) {
 	return res, nil
 }
 
-func (requester *sRequester) DoRequest(push *pkg_settings.SPush) ([]byte, error) {
+func (requester *sRequester) FetchRequest(push *pkg_settings.SRequest) ([]byte, error) {
 	res, err := api.Request(
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
 		push,
 	)
 	if err != nil {
@@ -54,10 +54,10 @@ func (requester *sRequester) DoRequest(push *pkg_settings.SPush) ([]byte, error)
 	return encoding.HexDecode(res), nil
 }
 
-func (requester *sRequester) DoBroadcast(push *pkg_settings.SPush) error {
+func (requester *sRequester) BroadcastRequest(push *pkg_settings.SRequest) error {
 	_, err := api.Request(
 		http.MethodPut,
-		fmt.Sprintf(pkg_settings.CHandleNetworkPushTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
 		push,
 	)
 	return err

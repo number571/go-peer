@@ -3,11 +3,11 @@ package message
 import "github.com/number571/go-peer/pkg/payload"
 
 type IMessage interface {
-	Head() IHead
-	Body() IBody
+	GetHead() IHead
+	GetBody() IBody
 
 	IsValid(IParams) bool
-	Bytes() []byte
+	ToBytes() []byte
 }
 
 type IParams interface {
@@ -16,14 +16,14 @@ type IParams interface {
 }
 
 type IHead interface {
-	Sender() []byte
-	Session() []byte
-	Salt() []byte
+	GetSender() []byte
+	GetSession() []byte
+	GetSalt() []byte
 }
 
 type IBody interface {
-	Payload() payload.IPayload
-	Hash() []byte
-	Sign() []byte
-	Proof() uint64
+	GetPayload() payload.IPayload
+	GetHash() []byte
+	GetSign() []byte
+	GetProof() uint64
 }

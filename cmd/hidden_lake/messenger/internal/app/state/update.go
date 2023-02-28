@@ -62,7 +62,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		}
 
 		c := hls_settings.InitClient(privKey)
-		pubKey, pld, err := c.Decrypt(msg)
+		pubKey, pld, err := c.DecryptMessage(msg)
 		if err != nil {
 			continue
 		}
@@ -70,7 +70,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		inFriends := false
 		for _, pubKeyString := range stateValue.FFriends {
 			fPubKey := asymmetric.LoadRSAPubKey(pubKeyString)
-			if pubKey.Address().String() == fPubKey.Address().String() {
+			if pubKey.Address().ToString() == fPubKey.Address().ToString() {
 				inFriends = true
 				break
 			}
@@ -80,7 +80,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 			continue
 		}
 
-		loadReq, err := request.LoadRequest(pld.Body())
+		loadReq, err := request.LoadRequest(pld.GetBody())
 		if err != nil {
 			continue
 		}
@@ -91,7 +91,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		}
 
 		rel := database.NewRelation(privKey.PubKey(), pubKey)
-		dbMsg := database.NewMessage(true, strMsg, msg.Body().Hash())
+		dbMsg := database.NewMessage(true, strMsg, msg.GetBody().GetHash())
 
 		db := s.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {

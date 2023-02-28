@@ -24,13 +24,13 @@ func TestConn(t *testing.T) {
 		return
 	}
 
-	pld, err := conn.Request(payload.NewPayload(tcHead, []byte(tcBody)))
+	pld, err := conn.FetchPayload(payload.NewPayload(tcHead, []byte(tcBody)))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !bytes.Equal(pld.Body(), []byte(tcBody)) {
+	if !bytes.Equal(pld.GetBody(), []byte(tcBody)) {
 		t.Error("load payload not equal new payload")
 		return
 	}
@@ -51,11 +51,11 @@ func testNewService(t *testing.T) net.Listener {
 			}
 
 			conn := LoadConn(NewSettings(&SSettings{}), aconn)
-			pld := conn.Read()
+			pld := conn.ReadPayload()
 
 			ok := func() bool {
 				defer conn.Close()
-				return conn.Write(pld) == nil
+				return conn.WritePayload(pld) == nil
 			}()
 
 			if !ok {

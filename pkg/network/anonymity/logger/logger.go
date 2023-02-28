@@ -25,14 +25,14 @@ func NewLogger(service string) ILogger {
 	}
 }
 
-func (l *sLogger) FmtLog(lType ILogType, msgHash []byte, proof uint64, pubKey asymmetric.IPubKey, netConn conn.IConn) string {
+func (l *sLogger) GetFmtLog(lType ILogType, msgHash []byte, proof uint64, pubKey asymmetric.IPubKey, netConn conn.IConn) string {
 	conn := "127.0.0.1:"
 	if netConn != nil {
-		conn = netConn.Socket().RemoteAddr().String()
+		conn = netConn.GetSocket().RemoteAddr().String()
 	}
 	addr := make([]byte, hashing.CSHA256Size)
 	if pubKey != nil {
-		addr = pubKey.Address().Bytes()
+		addr = pubKey.Address().ToBytes()
 	}
 	hash := make([]byte, hashing.CSHA256Size)
 	if msgHash != nil {

@@ -8,22 +8,22 @@ import (
 
 type IHandlerF func(INode, conn.IConn, []byte)
 
-type INode interface {
-	Settings() ISettings
-	Connections() map[string]conn.IConn
-
-	Handle(uint64, IHandlerF) INode
-	Broadcast(payload.IPayload) error
-
-	Listen(string) error
-	types.ICloser
-
-	Connect(string) (conn.IConn, error)
-	Disconnect(string) error
-}
-
 type ISettings interface {
+	GetAddress() string
 	GetCapacity() uint64
 	GetMaxConnects() uint64
 	GetConnSettings() conn.ISettings
+}
+
+type INode interface {
+	types.ICommand
+
+	GetSettings() ISettings
+	GetConnections() map[string]conn.IConn
+
+	AddConnect(string) error
+	DelConnect(string) error
+
+	HandleFunc(uint64, IHandlerF) INode
+	BroadcastPayload(payload.IPayload) error
 }

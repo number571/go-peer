@@ -51,9 +51,9 @@ func TestLogger(t *testing.T) {
 		FErro: fileErro,
 	}))
 
-	logger.Info(tcTestInfo)
-	logger.Warn(tcTestWarning)
-	logger.Erro(tcTestError)
+	logger.PushInfo(tcTestInfo)
+	logger.PushWarn(tcTestWarning)
+	logger.PushErro(tcTestError)
 
 	res, err := filesystem.OpenFile(tcPathInfo).Read()
 	if err != nil {

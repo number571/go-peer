@@ -13,7 +13,7 @@ type SFriend struct {
 	FPublicKey string `json:"public_key"`
 }
 
-type SPush struct {
+type SRequest struct {
 	FReceiver string `json:"receiver"` // public key
 	FHexData  string `json:"hex_data"` // data in hex encode
 }

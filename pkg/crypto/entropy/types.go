@@ -1,5 +1,5 @@
 package entropy
 
-type IEntropy interface {
-	Raise([]byte, []byte) []byte
+type IEntropyBooster interface {
+	BoostEntropy([]byte) []byte
 }

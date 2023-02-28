@@ -61,7 +61,7 @@ func (edit *sEditor) UpdateFriends(friends map[string]asymmetric.IPubKey) error 
 	defer edit.fMutex.Unlock()
 
 	for name, pubKey := range friends {
-		if pubKey.Size() == pkg_settings.CAKeySize {
+		if pubKey.GetSize() == pkg_settings.CAKeySize {
 			continue
 		}
 		return fmt.Errorf("not supported key size for '%s'", name)
@@ -92,7 +92,7 @@ func (edit *sEditor) UpdateFriends(friends map[string]asymmetric.IPubKey) error 
 func pubKeysToStrings(pubKeys map[string]asymmetric.IPubKey) map[string]string {
 	result := make(map[string]string, len(pubKeys))
 	for name, pubKey := range pubKeys {
-		result[name] = pubKey.String()
+		result[name] = pubKey.ToString()
 	}
 	return result
 }
@@ -101,7 +101,7 @@ func deleteDuplicatePubKeys(pubKeys map[string]asymmetric.IPubKey) map[string]as
 	result := make(map[string]asymmetric.IPubKey, len(pubKeys))
 	mapping := make(map[string]struct{})
 	for name, pubKey := range pubKeys {
-		pubStr := pubKey.Address().String()
+		pubStr := pubKey.Address().ToString()
 		if _, ok := mapping[pubStr]; ok {
 			continue
 		}

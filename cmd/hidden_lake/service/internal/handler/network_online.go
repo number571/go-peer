@@ -20,28 +20,32 @@ func HandleNetworkOnlineAPI(node anonymity.INode) http.HandlerFunc {
 			return
 		}
 
-		if r.Method == http.MethodGet {
-			conns := node.Network().Connections()
+		switch r.Method {
+		case http.MethodGet:
+			conns := node.GetNetworkNode().GetConnections()
+
 			inOnline := make([]string, 0, len(conns))
 			for addr := range conns {
 				inOnline = append(inOnline, addr)
 			}
+
 			sort.SliceStable(inOnline, func(i, j int) bool {
 				return inOnline[i] < inOnline[j]
 			})
+
 			api.Response(w, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
-			return
-		}
+		case http.MethodDelete:
+			if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
+				api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+				return
+			}
 
-		if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
-			api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
-			return
-		}
+			if err := node.GetNetworkNode().DelConnect(vConnect.FConnect); err != nil {
+				api.Response(w, pkg_settings.CErrorNone, "failed: delete online connection")
+				return
+			}
 
-		if err := node.Network().Disconnect(vConnect.FConnect); err != nil {
-			api.Response(w, pkg_settings.CErrorNone, "failed: delete online connection")
-			return
+			api.Response(w, pkg_settings.CErrorNone, "success: delete online connection")
 		}
-		api.Response(w, pkg_settings.CErrorNone, "success: delete online connection")
 	}
 }

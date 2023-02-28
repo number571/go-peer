@@ -91,10 +91,10 @@ func (s *sState) UpdateState(hashLP []byte) error {
 		return err
 	}
 
+	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
 	db := database.NewKeyValueDB(
 		hlm_settings.CPathDB,
-		entropy.NewEntropy(hlm_settings.CWorkForKeys).
-			Raise(hashLP, []byte{5, 7, 1}),
+		entropyBooster.BoostEntropy(hashLP),
 	)
 
 	if err := s.GetWrapperDB().Update(db); err != nil {
@@ -133,7 +133,7 @@ func (s *sState) AddFriend(aliasName string, pubKey asymmetric.IPubKey) error {
 	return s.stateUpdater(
 		s.updateClientFriends,
 		func(storageValue *SStorageState) {
-			storageValue.FFriends[aliasName] = pubKey.String()
+			storageValue.FFriends[aliasName] = pubKey.ToString()
 		},
 	)
 }
@@ -177,7 +177,7 @@ func (s *sState) IsActive() bool {
 
 func (s *sState) newStorageState(hashLP []byte, privKey asymmetric.IPrivKey) error {
 	stateValueBytes := encoding.Serialize(&SStorageState{
-		FPrivKey: privKey.String(),
+		FPrivKey: privKey.ToString(),
 	})
 	return s.GetStorage().Set(hashLP, stateValueBytes)
 }

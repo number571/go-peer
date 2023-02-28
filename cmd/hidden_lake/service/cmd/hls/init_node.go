@@ -6,7 +6,6 @@ import (
 	internal_logger "github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -32,6 +31,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
+				FAddress:     cfg.Address().TCP(),
 				FCapacity:    pkg_settings.CNetworkCapacity,
 				FMaxConnects: pkg_settings.CNetworkMaxConns,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -41,7 +41,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 				}),
 			}),
 		),
-		queue.NewQueue(
+		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     pkg_settings.CQueueCapacity,
 				FPullCapacity: pkg_settings.CQueuePullCapacity,
@@ -49,10 +49,10 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 			}),
 			pkg_settings.InitClient(privKey),
 		),
-		func() friends.IF2F {
-			f2f := friends.NewF2F()
+		func() asymmetric.IListPubKeys {
+			f2f := asymmetric.NewListPubKeys()
 			for _, pubKey := range cfg.Friends() {
-				f2f.Append(pubKey)
+				f2f.AddPubKey(pubKey)
 			}
 			return f2f
 		}(),

@@ -39,7 +39,7 @@ func NewLevelDB(sett ISettings) IKeyValueDB {
 	}
 	salt, err := db.Get(sett.GetSaltKey(), nil)
 	if err != nil {
-		salt = random.NewStdPRNG().Bytes(symmetric.CAESKeySize)
+		salt = random.NewStdPRNG().GetBytes(symmetric.CAESKeySize)
 		if err := db.Put(sett.GetSaltKey(), salt, nil); err != nil {
 			return nil
 		}
@@ -52,7 +52,7 @@ func NewLevelDB(sett ISettings) IKeyValueDB {
 	}
 }
 
-func (db *sLevelDB) Settings() ISettings {
+func (db *sLevelDB) GetSettings() ISettings {
 	return db.fSettings
 }
 
@@ -97,7 +97,7 @@ func (db *sLevelDB) Close() error {
 }
 
 // Storage in hashing mode can't iterates
-func (db *sLevelDB) Iter(prefix []byte) IIterator {
+func (db *sLevelDB) GetIterator(prefix []byte) IIterator {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
@@ -118,14 +118,14 @@ func (iter *sLevelDBIterator) Next() bool {
 	return iter.fIter.Next()
 }
 
-func (iter *sLevelDBIterator) Key() []byte {
+func (iter *sLevelDBIterator) GetKey() []byte {
 	iter.fMutex.Lock()
 	defer iter.fMutex.Unlock()
 
 	return iter.fIter.Key()
 }
 
-func (iter *sLevelDBIterator) Value() []byte {
+func (iter *sLevelDBIterator) GetValue() []byte {
 	iter.fMutex.Lock()
 	defer iter.fMutex.Unlock()
 
@@ -139,21 +139,22 @@ func (iter *sLevelDBIterator) Value() []byte {
 	return decBytes
 }
 
-func (iter *sLevelDBIterator) Close() {
+func (iter *sLevelDBIterator) Close() error {
 	iter.fMutex.Lock()
 	defer iter.fMutex.Unlock()
 
 	iter.fIter.Release()
+	return nil
 }
 
 func doEncrypt(cipher symmetric.ICipher, dataBytes []byte) []byte {
 	return bytes.Join(
 		[][]byte{
 			hashing.NewHMACSHA256Hasher(
-				cipher.Bytes(),
+				cipher.ToBytes(),
 				dataBytes,
-			).Bytes(),
-			cipher.Encrypt(dataBytes),
+			).ToBytes(),
+			cipher.EncryptBytes(dataBytes),
 		},
 		[]byte{},
 	)
@@ -164,16 +165,16 @@ func tryDecrypt(cipher symmetric.ICipher, encBytes []byte) ([]byte, error) {
 		return nil, fmt.Errorf("incorrect size of encrypted data")
 	}
 
-	decBytes := cipher.Decrypt(encBytes[hashing.CSHA256Size:])
+	decBytes := cipher.DecryptBytes(encBytes[hashing.CSHA256Size:])
 	if decBytes == nil {
 		return nil, fmt.Errorf("failed decrypt message")
 	}
 
 	gotHashed := encBytes[:hashing.CSHA256Size]
 	newHashed := hashing.NewHMACSHA256Hasher(
-		cipher.Bytes(),
+		cipher.ToBytes(),
 		decBytes,
-	).Bytes()
+	).ToBytes()
 
 	if !bytes.Equal(gotHashed, newHashed) {
 		return nil, fmt.Errorf("incorrect hash of decrypted data")
@@ -193,5 +194,5 @@ func (db *sLevelDB) tryHash(key []byte) []byte {
 		},
 		[]byte{},
 	)
-	return hashing.NewSHA256Hasher(saltWithKey).Bytes()
+	return hashing.NewSHA256Hasher(saltWithKey).ToBytes()
 }

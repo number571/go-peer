@@ -51,7 +51,7 @@ func TestApp(t *testing.T) {
 	sett := anonymity.NewSettings(&anonymity.SSettings{})
 	connKeeper := conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{}),
-		anon_testutils.TestNewNetworkNode().Handle(
+		anon_testutils.TestNewNetworkNode("").HandleFunc(
 			sett.GetNetworkMask(), // default value
 			func(_ network.INode, _ conn.IConn, _ []byte) {
 				// pass response actions
@@ -65,7 +65,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 	defer func() {
-		if err := app.Close(); err != nil {
+		if err := app.Stop(); err != nil {
 			t.Error(err)
 			return
 		}

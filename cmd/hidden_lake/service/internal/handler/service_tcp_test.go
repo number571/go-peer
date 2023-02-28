@@ -12,7 +12,6 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
@@ -46,11 +45,15 @@ func TestHLS(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer closer.CloseAll([]types.ICloser{
-		nodeService.KeyValueDB(),
-		nodeService.Network(),
-		nodeService,
-	})
+	defer func() {
+		types.StopAllCommands([]types.ICommand{
+			nodeService,
+			nodeService.GetNetworkNode(),
+		})
+		types.CloseAll([]types.ICloser{
+			nodeService.GetKeyValueDB(),
+		})
+	}()
 
 	// client
 	nodeClient, err := testStartClientHLS()
@@ -58,11 +61,15 @@ func TestHLS(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer closer.CloseAll([]types.ICloser{
-		nodeClient.KeyValueDB(),
-		nodeClient.Network(),
-		nodeClient,
-	})
+	defer func() {
+		types.StopAllCommands([]types.ICommand{
+			nodeClient,
+			nodeClient.GetNetworkNode(),
+		})
+		types.CloseAll([]types.ICloser{
+			nodeClient.GetKeyValueDB(),
+		})
+	}()
 }
 
 // HLS
@@ -79,17 +86,16 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		return nil, err
 	}
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 0))
+	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 0), testutils.TgAddrs[4])
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}
 
-	node.Handle(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
-	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
-		err := node.Network().Listen(testutils.TgAddrs[4])
-		if err != nil {
+		if err := node.GetNetworkNode().Run(); err != nil {
 			t.Error(err)
 		}
 	}()
@@ -102,18 +108,17 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 func testStartClientHLS() (anonymity.INode, error) {
 	time.Sleep(time.Second)
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 1))
+	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 1), "")
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}
-	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
-	_, err := node.Network().Connect(testutils.TgAddrs[4])
-	if err != nil {
+	if err := node.GetNetworkNode().AddConnect(testutils.TgAddrs[4]); err != nil {
 		return nil, err
 	}
 
-	msg := payload.NewPayload(
+	pld := payload.NewPayload(
 		uint64(pkg_settings.CHeaderHLS),
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
@@ -124,7 +129,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 	)
 
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey()
-	res, err := node.Request(pubKey, msg)
+	res, err := node.FetchPayload(pubKey, pld)
 	if err != nil {
 		return node, err
 	}

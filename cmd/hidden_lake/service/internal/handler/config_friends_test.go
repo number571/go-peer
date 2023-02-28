@@ -43,7 +43,7 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 			t.Errorf("undefined friend '%s'", k)
 			return
 		}
-		if v.String() != v1.String() {
+		if v.ToString() != v1.ToString() {
 			t.Errorf("public keys not equals for '%s'", k)
 			return
 		}

@@ -6,7 +6,7 @@ import (
 )
 
 type ILogger interface {
-	FmtLog(ILogType, []byte, uint64, asymmetric.IPubKey, conn.IConn) string
+	GetFmtLog(ILogType, []byte, uint64, asymmetric.IPubKey, conn.IConn) string
 }
 
 type ILogType string

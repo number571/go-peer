@@ -71,7 +71,7 @@ func SettingsPage(s state.IState) http.HandlerFunc {
 			fmt.Fprint(w, "error: read public key")
 			return
 		}
-		result.FPublicKey = pubKey.String()
+		result.FPublicKey = pubKey.ToString()
 
 		res, err := client.GetConnections()
 		if err != nil {

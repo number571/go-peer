@@ -5,7 +5,6 @@ import (
 
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -18,26 +17,26 @@ type (
 	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) []byte
 )
 
-type INode interface {
-	types.IApp
-
-	Settings() ISettings
-	KeyValueDB() database.IKeyValueDB
-	Network() network.INode
-	Queue() queue.IQueue
-	F2F() friends.IF2F
-	Logger() logger.ILogger
-
-	Handle(uint32, IHandlerF) INode
-	Broadcast(recv asymmetric.IPubKey, pl payload.IPayload) error
-	Request(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
-}
-
 type ISettings interface {
 	GetServiceName() string
 	GetTimeWait() time.Duration
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
+}
+
+type INode interface {
+	types.ICommand
+
+	GetSettings() ISettings
+	GetKeyValueDB() database.IKeyValueDB
+	GetNetworkNode() network.INode
+	GetMessageQueue() queue.IMessageQueue
+	GetListPubKeys() asymmetric.IListPubKeys
+	GetLogger() logger.ILogger
+
+	HandleFunc(uint32, IHandlerF) INode
+	BroadcastPayload(recv asymmetric.IPubKey, pl payload.IPayload) error
+	FetchPayload(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
 }
 
 type iHead interface {

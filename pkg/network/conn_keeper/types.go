@@ -8,9 +8,10 @@ import (
 )
 
 type IConnKeeper interface {
-	Settings() ISettings
-	Network() network.INode
-	types.IApp
+	types.ICommand
+
+	GetSettings() ISettings
+	GetNetworkNode() network.INode
 }
 
 type ISettings interface {

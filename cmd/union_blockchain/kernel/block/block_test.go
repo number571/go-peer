@@ -14,7 +14,7 @@ func TestTransaction(t *testing.T) {
 	sett := NewSettings(&SSettings{})
 
 	priv := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
-	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).Bytes()
+	hash := hashing.NewSHA256Hasher([]byte("prev-hash")).ToBytes()
 
 	txs := []transaction.ITransaction{}
 	for i := uint64(0); i < sett.GetCountTXs(); i++ {

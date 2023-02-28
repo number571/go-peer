@@ -1,7 +1,7 @@
 package logger
 
 type ILogging interface {
-	Info() bool
-	Warn() bool
-	Erro() bool
+	HasInfo() bool
+	HasWarn() bool
+	HasErro() bool
 }

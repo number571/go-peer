@@ -6,7 +6,6 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -20,7 +19,7 @@ const (
 	TCWorkSize    = 10
 )
 
-func TestNewNode(pathDB string) anonymity.INode {
+func TestNewNode(pathDB, addr string) anonymity.INode {
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
@@ -33,8 +32,8 @@ func TestNewNode(pathDB string) anonymity.INode {
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
 		),
-		TestNewNetworkNode(),
-		queue.NewQueue(
+		TestNewNetworkNode(addr),
+		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     10,
 				FPullCapacity: 5,
@@ -48,14 +47,15 @@ func TestNewNode(pathDB string) anonymity.INode {
 				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),
 		),
-		friends.NewF2F(),
+		asymmetric.NewListPubKeys(),
 	)
 	return node
 }
 
-func TestNewNetworkNode() network.INode {
+func TestNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
+			FAddress:     addr,
 			FCapacity:    (1 << 10),
 			FMaxConnects: 10,
 			FConnSettings: conn.NewSettings(&conn.SSettings{

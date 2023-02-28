@@ -1,7 +1,8 @@
 package hashing
 
-import "github.com/number571/go-peer/pkg/crypto"
+import "github.com/number571/go-peer/pkg/types"
 
 type IHasher interface {
-	crypto.IConverter
+	types.IConverter
+	types.IParameter
 }

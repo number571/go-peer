@@ -66,7 +66,7 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:   fPubKey.Address().String(),
+			FAddress:   fPubKey.Address().ToString(),
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})

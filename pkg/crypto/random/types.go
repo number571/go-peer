@@ -1,8 +1,8 @@
 package random
 
 type IPRNG interface {
-	String(uint64) string
-	Bytes(uint64) []byte
-	Uint64() uint64
-	Bool() bool
+	GetString(uint64) string
+	GetBytes(uint64) []byte
+	GetUint64() uint64
+	GetBool() bool
 }

@@ -58,9 +58,9 @@ func SignUpPage(s state.IState) http.HandlerFunc {
 			hashPassword := hashing.NewSHA256Hasher([]byte(password))
 
 			hashLP := hashing.NewSHA256Hasher(bytes.Join(
-				[][]byte{hashLogin.Bytes(), hashPassword.Bytes()},
+				[][]byte{hashLogin.ToBytes(), hashPassword.ToBytes()},
 				[]byte{},
-			)).Bytes()
+			)).ToBytes()
 
 			var privKey asymmetric.IPrivKey
 			privateKey := strings.TrimSpace(r.FormValue("private_key"))

@@ -1,7 +1,7 @@
 package payload
 
 type IPayload interface {
-	Head() uint64
-	Body() []byte
-	Bytes() []byte
+	GetHead() uint64
+	GetBody() []byte
+	ToBytes() []byte
 }

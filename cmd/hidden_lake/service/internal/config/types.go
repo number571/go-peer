@@ -24,9 +24,9 @@ type IConfig interface {
 }
 
 type ILogging interface {
-	Info() bool
-	Warn() bool
-	Erro() bool
+	HasInfo() bool
+	HasWarn() bool
+	HasErro() bool
 }
 
 type IAddress interface {

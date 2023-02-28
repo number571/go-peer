@@ -31,17 +31,17 @@ func TestConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	if cfg.Logging().Info() != tcLogging {
+	if cfg.Logging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
 	}
 
-	if cfg.Logging().Erro() != tcLogging {
+	if cfg.Logging().HasErro() != tcLogging {
 		t.Error("logging.erro is invalid")
 		return
 	}
 
-	if cfg.Logging().Warn() == tcLogging {
+	if cfg.Logging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
 		return
 	}

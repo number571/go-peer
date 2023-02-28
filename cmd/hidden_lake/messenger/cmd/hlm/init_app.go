@@ -13,7 +13,7 @@ import (
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
-func initApp() (types.IApp, error) {
+func initApp() (types.ICommand, error) {
 	cfg, err := initConfig()
 	if err != nil {
 		return nil, err

@@ -2,22 +2,23 @@ N=1
 CHECK_RETURN_CODE=if [ $$? != 0 ]; then exit; fi
 
 .PHONY: default clean \
-	test-run test-coverage test-benchmark \
+	test-prerun test-run test-coverage test-benchmark \
 	git-status git-push 
 
-default: clean test-run
+default: clean test-prerun test-run
 
 clean:
 	make -C ./cmd/hidden_lake clean 
 	make -C ./examples/_cmd clean
 
-test-run:
+test-prerun:
 	go vet ./...;
 	$(CHECK_RETURN_CODE);
 
 	go test -race ./...;
 	$(CHECK_RETURN_CODE);
 
+test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \

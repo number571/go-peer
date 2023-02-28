@@ -5,7 +5,6 @@ import (
 	"net"
 	"sync"
 
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
@@ -39,18 +38,18 @@ func NewNode(sett ISettings) INode {
 }
 
 // Return settings interface.
-func (node *sNode) Settings() ISettings {
+func (node *sNode) GetSettings() ISettings {
 	return node.fSettings
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
-func (node *sNode) Broadcast(pld payload.IPayload) error {
-	hash := hashing.NewSHA256Hasher(pld.Bytes()).Bytes()
+func (node *sNode) BroadcastPayload(pld payload.IPayload) error {
+	hash := hashing.NewSHA256Hasher(pld.ToBytes()).ToBytes()
 	node.inMappingWithSet(hash)
 
 	var err error
-	for _, conn := range node.Connections() {
-		e := conn.Write(pld)
+	for _, conn := range node.GetConnections() {
+		e := conn.WritePayload(pld)
 		if e != nil {
 			err = e
 		}
@@ -62,8 +61,8 @@ func (node *sNode) Broadcast(pld payload.IPayload) error {
 // Opens a tcp connection to receive data from outside.
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
-func (node *sNode) Listen(address string) error {
-	listener, err := net.Listen("tcp", address)
+func (node *sNode) Run() error {
+	listener, err := net.Listen("tcp", node.GetSettings().GetAddress())
 	if err != nil {
 		return err
 	}
@@ -81,7 +80,7 @@ func (node *sNode) Listen(address string) error {
 			continue
 		}
 
-		sett := node.Settings().GetConnSettings()
+		sett := node.GetSettings().GetConnSettings()
 		conn := conn.LoadConn(sett, tconn)
 		address := tconn.RemoteAddr().String()
 
@@ -93,7 +92,7 @@ func (node *sNode) Listen(address string) error {
 }
 
 // Closes the listener and all connections.
-func (node *sNode) Close() error {
+func (node *sNode) Stop() error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -107,11 +106,11 @@ func (node *sNode) Close() error {
 		delete(node.fConnections, id)
 	}
 
-	return closer.CloseAll(toClose)
+	return types.CloseAll(toClose)
 }
 
 // Saves the function to the map by key for subsequent redirection.
-func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
+func (node *sNode) HandleFunc(head uint64, handle IHandlerF) INode {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -120,7 +119,7 @@ func (node *sNode) Handle(head uint64, handle IHandlerF) INode {
 }
 
 // Retrieves the entire list of connections with addresses.
-func (node *sNode) Connections() map[string]conn.IConn {
+func (node *sNode) GetConnections() map[string]conn.IConn {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -134,25 +133,25 @@ func (node *sNode) Connections() map[string]conn.IConn {
 
 // Connects to the node at the specified address and automatically starts reading all incoming messages.
 // Checks the number of connections.
-func (node *sNode) Connect(address string) (conn.IConn, error) {
+func (node *sNode) AddConnect(address string) error {
 	if node.hasMaxConnSize() {
-		return nil, fmt.Errorf("has max connections size")
+		return fmt.Errorf("has max connections size")
 	}
 
-	sett := node.Settings().GetConnSettings()
+	sett := node.GetSettings().GetConnSettings()
 	conn, err := conn.NewConn(sett, address)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	node.setConnection(address, conn)
 	go node.handleConn(address, conn)
 
-	return conn, nil
+	return nil
 }
 
 // Disables the connection at the address and removes the connection from the connection list.
-func (node *sNode) Disconnect(address string) error {
+func (node *sNode) DelConnect(address string) error {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
@@ -167,9 +166,9 @@ func (node *sNode) Disconnect(address string) error {
 
 // Processes the received data from the connection.
 func (node *sNode) handleConn(address string, conn conn.IConn) {
-	defer node.Disconnect(address)
+	defer node.DelConnect(address)
 	for {
-		ok := node.handleMessage(conn, conn.Read())
+		ok := node.handleMessage(conn, conn.ReadPayload())
 		if !ok {
 			break
 		}
@@ -186,18 +185,18 @@ func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
 	}
 
 	// check message in mapping by hash
-	hash := hashing.NewSHA256Hasher(pld.Bytes()).Bytes()
+	hash := hashing.NewSHA256Hasher(pld.ToBytes()).ToBytes()
 	if node.inMappingWithSet(hash) {
 		return true
 	}
 
 	// get function by head
-	f, ok := node.getFunction(pld.Head())
+	f, ok := node.getFunction(pld.GetHead())
 	if !ok || f == nil {
 		return false
 	}
 
-	f(node, conn, pld.Body())
+	f(node, conn, pld.GetBody())
 	return true
 }
 
@@ -206,7 +205,7 @@ func (node *sNode) hasMaxConnSize() bool {
 	node.fMutex.Lock()
 	defer node.fMutex.Unlock()
 
-	maxConns := node.Settings().GetMaxConnects()
+	maxConns := node.GetSettings().GetMaxConnects()
 	return uint64(len(node.fConnections)) > maxConns
 }
 

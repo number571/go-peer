@@ -8,16 +8,16 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IQueue interface {
-	types.IApp
+type IMessageQueue interface {
+	types.ICommand
 
-	Settings() ISettings
+	GetSettings() ISettings
+	GetClient() client.IClient
 
 	UpdateClient(client.IClient)
-	Client() client.IClient
 
-	Enqueue(message.IMessage) error
-	Dequeue() <-chan message.IMessage
+	EnqueueMessage(message.IMessage) error
+	DequeueMessage() <-chan message.IMessage
 }
 
 type ISettings interface {

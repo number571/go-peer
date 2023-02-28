@@ -11,14 +11,13 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
-func TestHandlePushAPI(t *testing.T) {
+func TestHandleRequestAPI(t *testing.T) {
 	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[9])
 	defer testAllFree(node, srv)
 
@@ -30,15 +29,15 @@ func TestHandlePushAPI(t *testing.T) {
 		hls_client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[9])),
 	)
 
-	node.Network().Connect(testutils.TgAddrs[11])
-	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetNetworkNode().AddConnect(testutils.TgAddrs[11])
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
-	testBroadcast(t, client, pushNode.Queue().Client().PubKey())
-	testRequest(t, client, pushNode.Queue().Client().PubKey())
+	testBroadcast(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
+	testFetch(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
 }
 
 func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
-	err := client.DoBroadcast(
+	err := client.BroadcastRequest(
 		pubKey,
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
@@ -52,8 +51,8 @@ func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IP
 	}
 }
 
-func testRequest(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
-	res, err := client.DoRequest(
+func testFetch(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
+	res, err := client.FetchRequest(
 		pubKey,
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
@@ -91,16 +90,18 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 		os.RemoveAll(tcPathConfig + "_push1")
 		os.RemoveAll(tcPathDB + "_push1")
 	}()
-	closer.CloseAll([]types.ICloser{
-		srv,
+	types.StopAllCommands([]types.ICommand{
 		node,
-		node.KeyValueDB(),
-		node.Network(),
+		node.GetNetworkNode(),
+	})
+	types.CloseAll([]types.ICloser{
+		srv,
+		node.GetKeyValueDB(),
 	})
 }
 
 func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
-	node := testRunNewNode(dbPath)
+	node := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
 		FServices: map[string]string{
 			tcServiceAddressInHLS: testutils.TgAddrs[10],
@@ -112,12 +113,11 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 		return nil
 	}
 
-	node.Handle(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
-	node.F2F().Append(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
 	go func() {
-		err := node.Network().Listen(testutils.TgAddrs[11])
-		if err != nil {
+		if err := node.GetNetworkNode().Run(); err != nil {
 			return
 		}
 	}()

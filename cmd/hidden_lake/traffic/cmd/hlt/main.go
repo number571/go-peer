@@ -19,7 +19,7 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
-	defer app.Close()
+	defer app.Stop()
 
 	fmt.Println("Service is running...")
 

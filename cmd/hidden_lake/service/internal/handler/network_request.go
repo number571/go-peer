@@ -11,9 +11,9 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(node anonymity.INode) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var vPush pkg_settings.SPush
+		var vPush pkg_settings.SRequest
 
 		if r.Method != http.MethodPost && r.Method != http.MethodPut {
 			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
@@ -39,7 +39,7 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 
 		switch r.Method {
 		case http.MethodPut:
-			err := node.Broadcast(
+			err := node.BroadcastPayload(
 				pubKey,
 				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)
@@ -50,7 +50,7 @@ func HandleNetworkPushAPI(node anonymity.INode) http.HandlerFunc {
 			api.Response(w, pkg_settings.CErrorNone, "success: broadcast")
 			return
 		case http.MethodPost:
-			resp, err := node.Request(
+			resp, err := node.FetchPayload(
 				pubKey,
 				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)

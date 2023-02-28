@@ -26,7 +26,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 			friends := wrapper.Config().Friends()
 			listFriends := make([]string, 0, len(friends))
 			for name, pubKey := range friends {
-				listFriends = append(listFriends, fmt.Sprintf("%s:%s", name, pubKey.String()))
+				listFriends = append(listFriends, fmt.Sprintf("%s:%s", name, pubKey.ToString()))
 			}
 			api.Response(w, pkg_settings.CErrorNone, strings.Join(listFriends, ","))
 			return
@@ -63,7 +63,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 				return
 			}
 
-			node.F2F().Append(pubKey)
+			node.GetListPubKeys().AddPubKey(pubKey)
 			api.Response(w, pkg_settings.CErrorNone, "success: update friends")
 		case http.MethodDelete:
 			friends := wrapper.Config().Friends()
@@ -79,7 +79,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 				return
 			}
 
-			node.F2F().Remove(pubKey)
+			node.GetListPubKeys().DelPubKey(pubKey)
 			api.Response(w, pkg_settings.CErrorNone, "success: delete friend")
 		}
 	}

@@ -19,18 +19,18 @@ func TestMessage(t *testing.T) {
 		[]byte(tcKey),
 	)
 
-	if !bytes.Equal(msg.Payload().Body(), []byte(tcBody)) {
+	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
 		return
 	}
 
-	if msg.Payload().Head() != tcHead {
+	if msg.GetPayload().GetHead() != tcHead {
 		t.Error("payload head not equal head in message")
 		return
 	}
 
-	msg1 := LoadMessage(msg.Bytes(), []byte(tcKey))
-	if !bytes.Equal(msg.Bytes(), msg1.Bytes()) {
+	msg1 := LoadMessage(msg.GetBytes(), []byte(tcKey))
+	if !bytes.Equal(msg.GetBytes(), msg1.GetBytes()) {
 		t.Error("load message not equal new message")
 		return
 	}

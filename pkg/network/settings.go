@@ -7,12 +7,14 @@ var (
 )
 
 const (
+	cAddress     = ""
 	cCapacity    = (1 << 10)
 	cMaxConnects = (1 << 6)
 )
 
 type SSettings sSettings
 type sSettings struct {
+	FAddress      string
 	FCapacity     uint64
 	FMaxConnects  uint64
 	FConnSettings conn.ISettings
@@ -20,6 +22,7 @@ type sSettings struct {
 
 func NewSettings(sett *SSettings) ISettings {
 	return (&sSettings{
+		FAddress:      sett.FAddress,
 		FCapacity:     sett.FCapacity,
 		FMaxConnects:  sett.FMaxConnects,
 		FConnSettings: sett.FConnSettings,
@@ -27,6 +30,9 @@ func NewSettings(sett *SSettings) ISettings {
 }
 
 func (s *sSettings) useDefaultValues() ISettings {
+	if s.FAddress == "" {
+		s.FAddress = cAddress
+	}
 	if s.FCapacity == 0 {
 		s.FCapacity = cCapacity
 	}
@@ -37,6 +43,10 @@ func (s *sSettings) useDefaultValues() ISettings {
 		s.FConnSettings = conn.NewSettings(&conn.SSettings{})
 	}
 	return s
+}
+
+func (s *sSettings) GetAddress() string {
+	return s.FAddress
 }
 
 func (s *sSettings) GetCapacity() uint64 {

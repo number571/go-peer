@@ -31,7 +31,7 @@ func TestHandleHashesAPI(t *testing.T) {
 		privKey,
 	)
 
-	msg, err := client.Encrypt(
+	msg, err := client.EncryptPayload(
 		pubKey,
 		payload.NewPayload(0, []byte("hello")),
 	)
@@ -56,7 +56,7 @@ func TestHandleHashesAPI(t *testing.T) {
 		return
 	}
 
-	if hashes[0] != encoding.HexEncode(msg.Body().Hash()) {
+	if hashes[0] != encoding.HexEncode(msg.GetBody().GetHash()) {
 		t.Error("hashes not equals")
 		return
 	}

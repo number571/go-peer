@@ -19,7 +19,7 @@ const (
 func TestFailCreateLevelDB(t *testing.T) {
 	dbPath := fmt.Sprintf(
 		"/fail_test_random/%s/111/222/333",
-		random.NewStdPRNG().String(16),
+		random.NewStdPRNG().GetString(16),
 	)
 	defer os.RemoveAll(dbPath)
 
@@ -38,17 +38,17 @@ func TestCreateLevelDB(t *testing.T) {
 	store := NewLevelDB(NewSettings(&SSettings{}))
 	defer store.Close()
 
-	if !bytes.Equal(store.Settings().GetCipherKey(), []byte(cCipherKey)) {
+	if !bytes.Equal(store.GetSettings().GetCipherKey(), []byte(cCipherKey)) {
 		t.Error("incorrect default value = cipherKey")
 		return
 	}
 
-	if store.Settings().GetHashing() != false {
+	if store.GetSettings().GetHashing() != false {
 		t.Error("incorrect default value = hashing")
 		return
 	}
 
-	if store.Settings().GetPath() != cPath {
+	if store.GetSettings().GetPath() != cPath {
 		t.Error("incorrect default value = path")
 		return
 	}
@@ -92,7 +92,7 @@ func TestLevelDB(t *testing.T) {
 	}))
 	defer store.Close()
 
-	secret1 := asymmetric.NewRSAPrivKey(512).Bytes()
+	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
 	store.Set([]byte(testutils.TcKey2), secret1)
 
 	secret2, err := store.Get([]byte(testutils.TcKey2))
@@ -112,7 +112,7 @@ func TestLevelDB(t *testing.T) {
 		return
 	}
 
-	iter := store.Iter([]byte("_value"))
+	iter := store.GetIterator([]byte("_value"))
 	if iter != nil {
 		t.Error("iter is not null with hashing=true")
 		return
@@ -147,15 +147,15 @@ func TestLevelDBIter(t *testing.T) {
 	}
 
 	count := 0
-	iter := store.Iter([]byte(testutils.TcKey2))
+	iter := store.GetIterator([]byte(testutils.TcKey2))
 	defer iter.Close()
 
 	for iter.Next() {
-		if !bytes.Equal([]byte(fmt.Sprintf("%s%d", testutils.TcKey2, count)), iter.Key()) {
+		if !bytes.Equal([]byte(fmt.Sprintf("%s%d", testutils.TcKey2, count)), iter.GetKey()) {
 			t.Error("key not equal saved key")
 			return
 		}
-		val := string(iter.Value())
+		val := string(iter.GetValue())
 		if val != fmt.Sprintf("%s%d", testutils.TcVal1, count) {
 			fmt.Println(val)
 			t.Error("value not equal saved value")

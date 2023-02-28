@@ -16,7 +16,7 @@ func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server
 	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, handler.HandleConfigConnectsAPI(wrapper, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, handler.HandleConfigFriendsAPI(wrapper, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, handler.HandleNetworkOnlineAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkPushPath, handler.HandleNetworkPushAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(node))
 	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(node))
 
 	return &http.Server{

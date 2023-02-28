@@ -18,8 +18,8 @@ func TestHandleMessageAPI(t *testing.T) {
 	defer testAllFree(addr, srv, connKeeper, db)
 
 	client := testNewClient()
-	msg, err := client.Encrypt(
-		client.PubKey(),
+	msg, err := client.EncryptPayload(
+		client.GetPubKey(),
 		payload.NewPayload(0, []byte(testutils.TcLargeBody)),
 	)
 	if err != nil {
@@ -32,25 +32,25 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	strHash := encoding.HexEncode(msg.Body().Hash())
+	strHash := encoding.HexEncode(msg.GetBody().GetHash())
 	gotEncMsg, err := hltClient.GetMessage(strHash)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	gotPubKey, gotPld, err := client.Decrypt(gotEncMsg)
+	gotPubKey, gotPld, err := client.DecryptMessage(gotEncMsg)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if gotPubKey.Address().String() != client.PubKey().Address().String() {
+	if gotPubKey.Address().ToString() != client.GetPubKey().Address().ToString() {
 		t.Error(err)
 		return
 	}
 
-	if string(gotPld.Body()) != testutils.TcLargeBody {
+	if string(gotPld.GetBody()) != testutils.TcLargeBody {
 		t.Error(err)
 		return
 	}

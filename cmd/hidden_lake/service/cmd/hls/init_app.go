@@ -12,7 +12,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func initApp() (types.IApp, error) {
+func initApp() (types.ICommand, error) {
 	var (
 		inputKey string
 	)

@@ -44,7 +44,7 @@ const (
 	CHandleConfigConnectsPath = "/api/config/connects"
 	CHandleConfigFriendsPath  = "/api/config/friends"
 	CHandleNetworkOnlinePath  = "/api/network/online"
-	CHandleNetworkPushPath    = "/api/network/push"
+	CHandleNetworkRequestPath = "/api/network/request"
 	CHandleNodeKeyPath        = "/api/node/key"
 )
 
@@ -53,7 +53,7 @@ const (
 	CHandleConfigConnectsTemplate = "%s" + CHandleConfigConnectsPath
 	CHandleConfigFriendsTemplate  = "%s" + CHandleConfigFriendsPath
 	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath
-	CHandleNetworkPushTemplate    = "%s" + CHandleNetworkPushPath
+	CHandleNetworkRequestTemplate = "%s" + CHandleNetworkRequestPath
 	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
 )
 

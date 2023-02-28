@@ -39,14 +39,14 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	node := anon_testutils.TestNewNode(tcPathDB)
+	node := anon_testutils.TestNewNode(tcPathDB, "")
 	app := NewApp(cfg, node)
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return
 	}
 	defer func() {
-		if err := app.Close(); err != nil {
+		if err := app.Stop(); err != nil {
 			t.Error(err)
 			return
 		}
@@ -64,7 +64,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	if pubKey.String() != node.Queue().Client().PubKey().String() {
+	if pubKey.ToString() != node.GetMessageQueue().GetClient().GetPubKey().ToString() {
 		t.Errorf("public keys are not equals")
 		return
 	}

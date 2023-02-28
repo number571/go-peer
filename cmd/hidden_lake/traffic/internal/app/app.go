@@ -7,7 +7,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -17,7 +16,7 @@ const (
 )
 
 var (
-	_ types.IApp = &sApp{}
+	_ types.ICommand = &sApp{}
 )
 
 type sApp struct {
@@ -31,7 +30,7 @@ func NewApp(
 	cfg config.IConfig,
 	db database.IKeyValueDB,
 	connKeeper conn_keeper.IConnKeeper,
-) types.IApp {
+) types.ICommand {
 	return &sApp{
 		fConfig:      cfg,
 		fDatabase:    db,
@@ -64,18 +63,26 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Close()
+		app.Stop()
 		return err
 	case <-time.After(initStart):
 		return nil
 	}
 }
 
-func (app *sApp) Close() error {
-	return closer.CloseAll([]types.ICloser{
-		app.fConnKeeper.Network(),
+func (app *sApp) Stop() error {
+	lastErr := types.StopAllCommands([]types.ICommand{
 		app.fConnKeeper,
+		app.fConnKeeper.GetNetworkNode(),
+	})
+
+	err := types.CloseAll([]types.ICloser{
 		app.fServiceHTTP,
 		app.fDatabase,
 	})
+	if err != nil {
+		lastErr = err
+	}
+
+	return lastErr
 }

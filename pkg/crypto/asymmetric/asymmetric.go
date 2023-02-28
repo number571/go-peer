@@ -16,7 +16,13 @@ import (
 var (
 	_ IPrivKey = &sRSAPrivKey{}
 	_ IPubKey  = &sRSAPubKey{}
-	_ iAddress = &sAddress{}
+	_ IAddress = &sAddress{}
+)
+
+const (
+	cPrivKeyPrefixTemplate = "PrivKey(%s){"
+	cPubKeyPrefixTemplate  = "PubKey(%s){"
+	cKeySuffix             = "}"
 )
 
 const (
@@ -60,8 +66,8 @@ func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
 	case string:
 		x = skipSpaceChars(x)
 		var (
-			prefix = fmt.Sprintf("Priv(%s){", CRSAKeyType)
-			suffix = "}"
+			prefix = fmt.Sprintf(cPrivKeyPrefixTemplate, CRSAKeyType)
+			suffix = cKeySuffix
 		)
 
 		if !strings.HasPrefix(x, prefix) {
@@ -84,32 +90,32 @@ func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
 	}
 }
 
-func (key *sRSAPrivKey) Decrypt(msg []byte) []byte {
+func (key *sRSAPrivKey) DecryptBytes(msg []byte) []byte {
 	return decryptRSA(key.fPrivKey, msg)
 }
 
 func (key *sRSAPrivKey) Sign(msg []byte) []byte {
-	return sign(key.fPrivKey, hashing.NewSHA256Hasher(msg).Bytes())
+	return sign(key.fPrivKey, hashing.NewSHA256Hasher(msg).ToBytes())
 }
 
 func (key *sRSAPrivKey) PubKey() IPubKey {
 	return key.fPubKey
 }
 
-func (key *sRSAPrivKey) Bytes() []byte {
+func (key *sRSAPrivKey) ToBytes() []byte {
 	return privateKeyToBytes(key.fPrivKey)
 }
 
-func (key *sRSAPrivKey) String() string {
-	return fmt.Sprintf("Priv(%s){%X}", key.Type(), key.Bytes())
+func (key *sRSAPrivKey) ToString() string {
+	return fmt.Sprintf(cPrivKeyPrefixTemplate+"%X"+cKeySuffix, key.GetType(), key.ToBytes())
 }
 
-func (key *sRSAPrivKey) Type() string {
+func (key *sRSAPrivKey) GetType() string {
 	return CRSAKeyType
 }
 
-func (key *sRSAPrivKey) Size() uint64 {
-	return key.PubKey().Size()
+func (key *sRSAPrivKey) GetSize() uint64 {
+	return key.PubKey().GetSize()
 }
 
 // Used PKCS1.
@@ -148,7 +154,7 @@ func sign(priv *rsa.PrivateKey, hash []byte) []byte {
  */
 
 type sRSAPubKey struct {
-	fAddr   iAddress
+	fAddr   IAddress
 	fPubKey *rsa.PublicKey
 }
 
@@ -170,8 +176,8 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 	case string:
 		x = skipSpaceChars(x)
 		var (
-			prefix = fmt.Sprintf("Pub(%s){", CRSAKeyType)
-			suffix = "}"
+			prefix = fmt.Sprintf(cPubKeyPrefixTemplate, CRSAKeyType)
+			suffix = cKeySuffix
 		)
 
 		if !strings.HasPrefix(x, prefix) {
@@ -194,31 +200,31 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 	}
 }
 
-func (key *sRSAPubKey) Encrypt(msg []byte) []byte {
+func (key *sRSAPubKey) EncryptBytes(msg []byte) []byte {
 	return encryptRSA(key.fPubKey, msg)
 }
 
-func (key *sRSAPubKey) Address() iAddress {
+func (key *sRSAPubKey) Address() IAddress {
 	return key.fAddr
 }
 
 func (key *sRSAPubKey) Verify(msg []byte, sig []byte) bool {
-	return verify(key.fPubKey, hashing.NewSHA256Hasher(msg).Bytes(), sig) == nil
+	return verify(key.fPubKey, hashing.NewSHA256Hasher(msg).ToBytes(), sig) == nil
 }
 
-func (key *sRSAPubKey) Bytes() []byte {
+func (key *sRSAPubKey) ToBytes() []byte {
 	return publicKeyToBytes(key.fPubKey)
 }
 
-func (key *sRSAPubKey) String() string {
-	return fmt.Sprintf("Pub(%s){%X}", key.Type(), key.Bytes())
+func (key *sRSAPubKey) ToString() string {
+	return fmt.Sprintf(cPubKeyPrefixTemplate+"%X"+cKeySuffix, key.GetType(), key.ToBytes())
 }
 
-func (key *sRSAPubKey) Type() string {
+func (key *sRSAPubKey) GetType() string {
 	return CRSAKeyType
 }
 
-func (key *sRSAPubKey) Size() uint64 {
+func (key *sRSAPubKey) GetSize() uint64 {
 	return uint64(key.fPubKey.N.BitLen())
 }
 
@@ -230,27 +236,27 @@ type sAddress struct {
 	fBytes []byte
 }
 
-func newAddress(pubKey *rsa.PublicKey) iAddress {
+func newAddress(pubKey *rsa.PublicKey) IAddress {
 	return &sAddress{
 		fBytes: hashing.NewSHA256Hasher(
 			publicKeyToBytes(pubKey),
-		).Bytes(),
+		).ToBytes(),
 	}
 }
 
-func (addr *sAddress) Bytes() []byte {
+func (addr *sAddress) ToBytes() []byte {
 	return addr.fBytes
 }
 
-func (addr *sAddress) String() string {
-	return fmt.Sprintf("Address(%s){%X}", addr.Type(), addr.Bytes())
+func (addr *sAddress) ToString() string {
+	return fmt.Sprintf("Address(%s){%X}", addr.GetType(), addr.ToBytes())
 }
 
-func (addr *sAddress) Type() string {
+func (addr *sAddress) GetType() string {
 	return CRSAKeyType
 }
 
-func (addr *sAddress) Size() uint64 {
+func (addr *sAddress) GetSize() uint64 {
 	return hashing.CSHA256Size
 }
 

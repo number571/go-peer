@@ -27,11 +27,11 @@ func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
 	}
 }
 
-func (connKeeper *sConnKeeper) Network() network.INode {
+func (connKeeper *sConnKeeper) GetNetworkNode() network.INode {
 	return connKeeper.fNode
 }
 
-func (connKeeper *sConnKeeper) Settings() ISettings {
+func (connKeeper *sConnKeeper) GetSettings() ISettings {
 	return connKeeper.fSettings
 }
 
@@ -52,7 +52,7 @@ func (connKeeper *sConnKeeper) Run() error {
 			select {
 			case <-connKeeper.fSignal:
 				return
-			case <-time.After(connKeeper.Settings().GetDuration()):
+			case <-time.After(connKeeper.GetSettings().GetDuration()):
 				connKeeper.tryConnectToAll()
 			}
 		}
@@ -61,7 +61,7 @@ func (connKeeper *sConnKeeper) Run() error {
 	return nil
 }
 
-func (connKeeper *sConnKeeper) Close() error {
+func (connKeeper *sConnKeeper) Stop() error {
 	connKeeper.fMutex.Lock()
 	defer connKeeper.fMutex.Unlock()
 
@@ -76,12 +76,12 @@ func (connKeeper *sConnKeeper) Close() error {
 
 func (connKeeper *sConnKeeper) tryConnectToAll() {
 NEXT:
-	for _, address := range connKeeper.Settings().GetConnections() {
-		for addr := range connKeeper.fNode.Connections() {
+	for _, address := range connKeeper.GetSettings().GetConnections() {
+		for addr := range connKeeper.fNode.GetConnections() {
 			if addr == address {
 				continue NEXT
 			}
 		}
-		connKeeper.fNode.Connect(address)
+		connKeeper.fNode.AddConnect(address)
 	}
 }

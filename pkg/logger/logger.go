@@ -46,25 +46,25 @@ func NewLogger(sett ISettings) ILogger {
 	return logger
 }
 
-func (l *sLogger) Settings() ISettings {
+func (l *sLogger) GetSettings() ISettings {
 	return l.fSettings
 }
 
-func (l *sLogger) Info(info string) {
+func (l *sLogger) PushInfo(info string) {
 	if l.fInfoOut == nil {
 		return
 	}
 	l.fInfoOut.Println(info)
 }
 
-func (l *sLogger) Warn(warn string) {
+func (l *sLogger) PushWarn(warn string) {
 	if l.fWarnOut == nil {
 		return
 	}
 	l.fWarnOut.Println(warn)
 }
 
-func (l *sLogger) Erro(erro string) {
+func (l *sLogger) PushErro(erro string) {
 	if l.fErroOut == nil {
 		return
 	}

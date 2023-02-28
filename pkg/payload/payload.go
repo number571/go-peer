@@ -27,16 +27,16 @@ func LoadPayload(payloadBytes []byte) IPayload {
 	return sPayload(payloadBytes)
 }
 
-func (payload sPayload) Head() uint64 {
+func (payload sPayload) GetHead() uint64 {
 	bHead := [encoding.CSizeUint64]byte{}
 	copy(bHead[:], payload[:encoding.CSizeUint64])
 	return encoding.BytesToUint64(bHead)
 }
 
-func (payload sPayload) Body() []byte {
+func (payload sPayload) GetBody() []byte {
 	return payload[encoding.CSizeUint64:]
 }
 
-func (payload sPayload) Bytes() []byte {
+func (payload sPayload) ToBytes() []byte {
 	return payload[:]
 }

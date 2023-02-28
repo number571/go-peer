@@ -32,32 +32,32 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(msg.Head().Salt(), encoding.HexDecode(tcSalt)) {
+	if !bytes.Equal(msg.GetHead().GetSalt(), encoding.HexDecode(tcSalt)) {
 		t.Error("incorrect salt value")
 		return
 	}
 
-	if !bytes.Equal(msg.Head().Session(), encoding.HexDecode(tcSession)) {
+	if !bytes.Equal(msg.GetHead().GetSession(), encoding.HexDecode(tcSession)) {
 		t.Error("incorrect session value")
 		return
 	}
 
-	if !bytes.Equal(msg.Head().Sender(), encoding.HexDecode(tcSender)) {
+	if !bytes.Equal(msg.GetHead().GetSender(), encoding.HexDecode(tcSender)) {
 		t.Error("incorrect sender value")
 		return
 	}
 
-	if !bytes.Equal(msg.Body().Hash(), encoding.HexDecode(tcHash)) {
+	if !bytes.Equal(msg.GetBody().GetHash(), encoding.HexDecode(tcHash)) {
 		t.Error("incorrect hash value")
 		return
 	}
 
-	if !bytes.Equal(msg.Body().Sign(), encoding.HexDecode(tcSign)) {
+	if !bytes.Equal(msg.GetBody().GetSign(), encoding.HexDecode(tcSign)) {
 		t.Error("incorrect sign value")
 		return
 	}
 
-	if msg.Body().Proof() != tcProof {
+	if msg.GetBody().GetProof() != tcProof {
 		t.Error("incorrect proof value")
 		return
 	}

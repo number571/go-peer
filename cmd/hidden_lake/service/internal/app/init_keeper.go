@@ -10,8 +10,8 @@ func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnK
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
 			FConnections: func() []string { return cfg.Connections() },
-			FDuration:    node.Settings().GetTimeWait(),
+			FDuration:    node.GetSettings().GetTimeWait(),
 		}),
-		node.Network(),
+		node.GetNetworkNode(),
 	)
 }

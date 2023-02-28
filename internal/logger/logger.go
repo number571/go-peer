@@ -12,13 +12,13 @@ func DefaultLogger(logging ILogging) logger.ILogger {
 
 func defaultSettings(logging ILogging) logger.ISettings {
 	sett := &logger.SSettings{}
-	if logging.Info() {
+	if logging.HasInfo() {
 		sett.FInfo = os.Stdout
 	}
-	if logging.Warn() {
+	if logging.HasWarn() {
 		sett.FWarn = os.Stderr
 	}
-	if logging.Erro() {
+	if logging.HasErro() {
 		sett.FErro = os.Stderr
 	}
 	return logger.NewSettings(sett)

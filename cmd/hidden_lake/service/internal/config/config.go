@@ -140,7 +140,7 @@ func (cfg *SConfig) loadPubKeys() error {
 			return fmt.Errorf("public key is nil for '%s'", name)
 		}
 		cfg.fFriends[name] = pubKey
-		if pubKey.Size() != pkg_settings.CAKeySize {
+		if pubKey.GetSize() != pkg_settings.CAKeySize {
 			return fmt.Errorf("not supported key size for '%s'", name)
 		}
 	}
@@ -197,15 +197,15 @@ func (traffic *STraffic) Upload() []string {
 	return traffic.FUpload
 }
 
-func (logging *sLogging) Info() bool {
+func (logging *sLogging) HasInfo() bool {
 	return (*logging)[0]
 }
 
-func (logging *sLogging) Warn() bool {
+func (logging *sLogging) HasWarn() bool {
 	return (*logging)[1]
 }
 
-func (logging *sLogging) Erro() bool {
+func (logging *sLogging) HasErro() bool {
 	return (*logging)[2]
 }
 

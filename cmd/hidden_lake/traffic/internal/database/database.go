@@ -80,14 +80,14 @@ func (db *sKeyValueDB) Push(msg message.IMessage) error {
 	}
 
 	// rewrite hash's field
-	hash := msg.Body().Hash()
+	hash := msg.GetBody().GetHash()
 	if err := db.fDB.Set(keyHash, hash); err != nil {
 		return err
 	}
 
 	// write message
 	keyMsg := getKeyMessage(hash)
-	if err := db.fDB.Set(keyMsg, msg.Bytes()); err != nil {
+	if err := db.fDB.Set(keyMsg, msg.ToBytes()); err != nil {
 		return err
 	}
 

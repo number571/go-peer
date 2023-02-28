@@ -26,6 +26,6 @@ func (builder *sBuilder) GetMessage(hash string) *pkg_settings.SLoadRequest {
 
 func (builder *sBuilder) PutMessage(msg message.IMessage) *pkg_settings.SPushRequest {
 	return &pkg_settings.SPushRequest{
-		FMessage: encoding.HexEncode(msg.Bytes()),
+		FMessage: encoding.HexEncode(msg.ToBytes()),
 	}
 }

@@ -39,7 +39,7 @@ func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
 		}
 
 		// set service headers
-		pushReq.Header.Add(pkg_settings.CHeaderPubKey, sender.String())
+		pushReq.Header.Add(pkg_settings.CHeaderPubKey, sender.ToString())
 		pushReq.Header.Add(pkg_settings.CHeaderMsgHash, encoding.HexEncode(msgHash))
 
 		// append headers from request

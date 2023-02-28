@@ -37,21 +37,21 @@ func LoadConn(sett ISettings, conn net.Conn) IConn {
 	}
 }
 
-func (conn *sConn) Settings() ISettings {
+func (conn *sConn) GetSettings() ISettings {
 	return conn.fSettings
 }
 
-func (conn *sConn) Socket() net.Conn {
+func (conn *sConn) GetSocket() net.Conn {
 	return conn.fSocket
 }
 
-func (conn *sConn) Request(pld payload.IPayload) (payload.IPayload, error) {
+func (conn *sConn) FetchPayload(pld payload.IPayload) (payload.IPayload, error) {
 	var (
 		chPld    = make(chan payload.IPayload)
 		timeWait = conn.fSettings.GetTimeWait()
 	)
 
-	if err := conn.Write(pld); err != nil {
+	if err := conn.WritePayload(pld); err != nil {
 		return nil, err
 	}
 	go readPayload(conn, chPld)
@@ -68,21 +68,21 @@ func (conn *sConn) Request(pld payload.IPayload) (payload.IPayload, error) {
 }
 
 func (conn *sConn) Close() error {
-	return conn.Socket().Close()
+	return conn.GetSocket().Close()
 }
 
-func (conn *sConn) Write(pld payload.IPayload) error {
+func (conn *sConn) WritePayload(pld payload.IPayload) error {
 	conn.fMutex.Lock()
 	defer conn.fMutex.Unlock()
 
 	var (
-		msgBytes  = message.NewMessage(pld, []byte(conn.fSettings.GetNetworkKey())).Bytes()
-		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).Bytes()
+		msgBytes  = message.NewMessage(pld, []byte(conn.fSettings.GetNetworkKey())).GetBytes()
+		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).ToBytes()
 		packPtr   = len(packBytes)
 	)
 
 	for {
-		n, err := conn.Socket().Write(packBytes[:packPtr])
+		n, err := conn.GetSocket().Write(packBytes[:packPtr])
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (conn *sConn) Write(pld payload.IPayload) error {
 	return nil
 }
 
-func (conn *sConn) Read() payload.IPayload {
+func (conn *sConn) ReadPayload() payload.IPayload {
 	chPld := make(chan payload.IPayload)
 	go readPayload(conn, chPld)
 	return <-chPld
@@ -112,7 +112,7 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 
 	// bufLen = Size[u64] in bytes
 	bufLen := make([]byte, encoding.CSizeUint64)
-	length, err := conn.Socket().Read(bufLen)
+	length, err := conn.GetSocket().Read(bufLen)
 	if err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 	msgRaw := make([]byte, 0, mustLen)
 	for {
 		buffer := make([]byte, mustLen)
-		n, err := conn.Socket().Read(buffer)
+		n, err := conn.GetSocket().Read(buffer)
 		if err != nil {
 			return
 		}
@@ -160,5 +160,5 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 		return
 	}
 
-	pld = msg.Payload()
+	pld = msg.GetPayload()
 }

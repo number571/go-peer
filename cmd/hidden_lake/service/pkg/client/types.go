@@ -24,8 +24,8 @@ type IClient interface {
 	AddConnection(string) error
 	DelConnection(string) error
 
-	DoBroadcast(asymmetric.IPubKey, request.IRequest) error
-	DoRequest(asymmetric.IPubKey, request.IRequest) ([]byte, error)
+	BroadcastRequest(asymmetric.IPubKey, request.IRequest) error
+	FetchRequest(asymmetric.IPubKey, request.IRequest) ([]byte, error)
 }
 
 type IRequester interface {
@@ -45,13 +45,13 @@ type IRequester interface {
 	AddConnection(*pkg_settings.SConnect) error
 	DelConnection(*pkg_settings.SConnect) error
 
-	DoBroadcast(*pkg_settings.SPush) error
-	DoRequest(*pkg_settings.SPush) ([]byte, error)
+	BroadcastRequest(*pkg_settings.SRequest) error
+	FetchRequest(*pkg_settings.SRequest) ([]byte, error)
 }
 
 type IBuilder interface {
 	SetPrivKey(asymmetric.IPrivKey) *pkg_settings.SPrivKey
 	Connect(string) *pkg_settings.SConnect
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
-	DoPush(asymmetric.IPubKey, request.IRequest) *pkg_settings.SPush
+	Request(asymmetric.IPubKey, request.IRequest) *pkg_settings.SRequest
 }

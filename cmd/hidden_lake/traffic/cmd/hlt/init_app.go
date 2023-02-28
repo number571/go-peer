@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-func initApp() (types.IApp, error) {
+func initApp() (types.ICommand, error) {
 	cfg, err := initConfig()
 	if err != nil {
 		return nil, err

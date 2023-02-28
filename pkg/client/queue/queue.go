@@ -11,16 +11,16 @@ import (
 )
 
 var (
-	_ IQueue = &sQueue{}
+	_ IMessageQueue = &sMessageQueue{}
 )
 
-type sQueue struct {
+type sMessageQueue struct {
 	fIsRun    bool
 	fMutex    sync.Mutex
 	fSettings ISettings
 	fClient   client.IClient
 	fQueue    chan message.IMessage
-	fMsgPull  *sPull
+	fMsgPull  sPull
 }
 
 type sPull struct {
@@ -28,37 +28,37 @@ type sPull struct {
 	fQueue  chan message.IMessage
 }
 
-func NewQueue(sett ISettings, client client.IClient) IQueue {
-	return &sQueue{
+func NewMessageQueue(sett ISettings, client client.IClient) IMessageQueue {
+	return &sMessageQueue{
 		fSettings: sett,
 		fClient:   client,
 		fQueue:    make(chan message.IMessage, sett.GetCapacity()),
-		fMsgPull: &sPull{
+		fMsgPull: sPull{
 			fQueue: make(chan message.IMessage, sett.GetPullCapacity()),
 		},
 	}
 }
 
-func (q *sQueue) Settings() ISettings {
+func (q *sMessageQueue) GetSettings() ISettings {
 	return q.fSettings
 }
 
-func (q *sQueue) UpdateClient(c client.IClient) {
+func (q *sMessageQueue) UpdateClient(c client.IClient) {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
 	q.fClient = c
-	q.fQueue = make(chan message.IMessage, q.Settings().GetCapacity())
+	q.fQueue = make(chan message.IMessage, q.GetSettings().GetCapacity())
 }
 
-func (q *sQueue) Client() client.IClient {
+func (q *sMessageQueue) GetClient() client.IClient {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
 	return q.fClient
 }
 
-func (q *sQueue) Run() error {
+func (q *sMessageQueue) Run() error {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
@@ -73,9 +73,9 @@ func (q *sQueue) Run() error {
 			select {
 			case <-q.fMsgPull.fSignal:
 				return
-			case <-time.After(q.Settings().GetDuration() / 2):
+			case <-time.After(q.GetSettings().GetDuration() / 2):
 				currLen := len(q.fMsgPull.fQueue)
-				if uint64(currLen) >= q.Settings().GetPullCapacity() {
+				if uint64(currLen) >= q.GetSettings().GetPullCapacity() {
 					continue
 				}
 				q.fMsgPull.fQueue <- q.newPseudoMessage()
@@ -86,7 +86,7 @@ func (q *sQueue) Run() error {
 	return nil
 }
 
-func (q *sQueue) Close() error {
+func (q *sMessageQueue) Stop() error {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
@@ -99,11 +99,11 @@ func (q *sQueue) Close() error {
 	return nil
 }
 
-func (q *sQueue) Enqueue(msg message.IMessage) error {
+func (q *sMessageQueue) EnqueueMessage(msg message.IMessage) error {
 	q.fMutex.Lock()
 	defer q.fMutex.Unlock()
 
-	if uint64(len(q.fQueue)) >= q.Settings().GetCapacity() {
+	if uint64(len(q.fQueue)) >= q.GetSettings().GetCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
 
@@ -111,7 +111,7 @@ func (q *sQueue) Enqueue(msg message.IMessage) error {
 	return nil
 }
 
-func (q *sQueue) Dequeue() <-chan message.IMessage {
+func (q *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 	closed := make(chan bool)
 
 	go func() {
@@ -119,7 +119,7 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 		case <-q.fMsgPull.fSignal:
 			closed <- true
 			return
-		case <-time.After(q.Settings().GetDuration()):
+		case <-time.After(q.GetSettings().GetDuration()):
 			q.fMutex.Lock()
 			defer q.fMutex.Unlock()
 
@@ -139,9 +139,9 @@ func (q *sQueue) Dequeue() <-chan message.IMessage {
 	return q.fQueue
 }
 
-func (q *sQueue) newPseudoMessage() message.IMessage {
-	msg, err := q.Client().Encrypt(
-		q.Client().PubKey(),
+func (q *sMessageQueue) newPseudoMessage() message.IMessage {
+	msg, err := q.GetClient().EncryptPayload(
+		q.GetClient().GetPubKey(),
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {

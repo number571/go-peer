@@ -27,7 +27,7 @@ func TestBroadcast(t *testing.T) {
 	headHandle := uint64(testutils.TcHead)
 	handleF := func(node INode, conn conn.IConn, reqBytes []byte) {
 		defer wg.Done()
-		defer node.Broadcast(payload.NewPayload(headHandle, reqBytes))
+		defer node.BroadcastPayload(payload.NewPayload(headHandle, reqBytes))
 
 		tcMutex.Lock()
 		defer tcMutex.Unlock()
@@ -45,7 +45,7 @@ func TestBroadcast(t *testing.T) {
 	}
 
 	for _, node := range nodes {
-		node.Handle(headHandle, handleF)
+		node.HandleFunc(headHandle, handleF)
 	}
 
 	// nodes[0] -> nodes[1:]
@@ -55,7 +55,7 @@ func TestBroadcast(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcLargeBodyTemplate, i)),
 			)
-			nodes[0].Broadcast(pld)
+			nodes[0].BroadcastPayload(pld)
 		}(i)
 	}
 
@@ -94,9 +94,11 @@ func TestBroadcast(t *testing.T) {
 
 func testNodes() ([5]INode, map[INode]map[string]bool) {
 	nodes := [5]INode{}
+	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
+			FAddress:     addrs[i],
 			FCapacity:    (1 << 10),
 			FMaxConnects: 10,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -108,25 +110,23 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 	}
 
 	go func() {
-		err := nodes[2].Listen(testutils.TgAddrs[0])
-		if err != nil {
+		if err := nodes[2].Run(); err != nil {
 			panic(err)
 		}
 	}()
 	go func() {
-		err := nodes[4].Listen(testutils.TgAddrs[1])
-		if err != nil {
+		if err := nodes[4].Run(); err != nil {
 			panic(err)
 		}
 	}()
 
 	time.Sleep(200 * time.Millisecond)
 
-	nodes[0].Connect(testutils.TgAddrs[0])
-	nodes[1].Connect(testutils.TgAddrs[1])
+	nodes[0].AddConnect(testutils.TgAddrs[0])
+	nodes[1].AddConnect(testutils.TgAddrs[1])
 
-	nodes[3].Connect(testutils.TgAddrs[0])
-	nodes[3].Connect(testutils.TgAddrs[1])
+	nodes[3].AddConnect(testutils.TgAddrs[0])
+	nodes[3].AddConnect(testutils.TgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {
@@ -145,6 +145,6 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
-		node.Close()
+		node.Stop()
 	}
 }

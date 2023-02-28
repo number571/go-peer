@@ -25,12 +25,12 @@ func (client *sClient) GetIndex() (string, error) {
 	return client.fRequester.GetIndex()
 }
 
-func (client *sClient) DoBroadcast(recv asymmetric.IPubKey, data request.IRequest) error {
-	return client.fRequester.DoBroadcast(client.fBuilder.DoPush(recv, data))
+func (client *sClient) BroadcastRequest(recv asymmetric.IPubKey, data request.IRequest) error {
+	return client.fRequester.BroadcastRequest(client.fBuilder.Request(recv, data))
 }
 
-func (client *sClient) DoRequest(recv asymmetric.IPubKey, data request.IRequest) ([]byte, error) {
-	return client.fRequester.DoRequest(client.fBuilder.DoPush(recv, data))
+func (client *sClient) FetchRequest(recv asymmetric.IPubKey, data request.IRequest) ([]byte, error) {
+	return client.fRequester.FetchRequest(client.fBuilder.Request(recv, data))
 }
 
 func (client *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {

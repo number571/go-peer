@@ -1,9 +1,13 @@
 package symmetric
 
-import "github.com/number571/go-peer/pkg/crypto"
+import (
+	"github.com/number571/go-peer/pkg/crypto"
+	"github.com/number571/go-peer/pkg/types"
+)
 
 type ICipher interface {
 	crypto.IEncrypter
 	crypto.IDecrypter
-	crypto.IConverter
+	types.IConverter
+	types.IParameter
 }

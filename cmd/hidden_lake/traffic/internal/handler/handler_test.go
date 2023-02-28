@@ -11,7 +11,6 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -56,7 +55,8 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	closer.CloseAll([]types.ICloser{srv, connKeeper, db})
+	types.StopAllCommands([]types.ICommand{connKeeper})
+	types.CloseAll([]types.ICloser{srv, db})
 }
 
 func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
@@ -72,7 +72,7 @@ func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*htt
 	sett := anonymity.NewSettings(&anonymity.SSettings{})
 	connKeeper := conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(connKeeperSettings),
-		anon_testutils.TestNewNetworkNode().Handle(
+		anon_testutils.TestNewNetworkNode("").HandleFunc(
 			sett.GetNetworkMask(), // default value
 			func(_ network.INode, _ conn.IConn, _ []byte) {
 				// pass response actions

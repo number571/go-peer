@@ -88,7 +88,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				return
 			}
 
-			res, err := client.DoRequest(
+			res, err := client.FetchRequest(
 				friendPubKey,
 				request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 					WithHead(map[string]string{
@@ -112,7 +112,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 				return
 			}
 
-			uid := random.NewStdPRNG().Bytes(hashing.CSHA256Size)
+			uid := random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
 			err = db.Push(rel, database.NewMessage(false, msg, uid))
 			if err != nil {
 				fmt.Fprint(w, "error: add message to database")
@@ -146,8 +146,8 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 		res := &sChatMessages{
 			STemplateState: s.GetTemplate(),
 			FAddress: sChatAddress{
-				FClient: clientPubKey.Address().String(),
-				FFriend: friendPubKey.Address().String(),
+				FClient: clientPubKey.Address().ToString(),
+				FFriend: friendPubKey.Address().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),
 		}

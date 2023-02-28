@@ -21,7 +21,7 @@ func TestQueue(t *testing.T) {
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)
-	queue := NewQueue(
+	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FCapacity:     10,
 			FPullCapacity: 5,
@@ -50,39 +50,40 @@ func TestQueue(t *testing.T) {
 	}
 }
 
-func testQueue(queue IQueue) error {
+func testQueue(queue IMessageQueue) error {
 	if err := queue.Run(); err != nil {
 		return err
 	}
 
 	msgs := make([]message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
-		msgs = append(msgs, <-queue.Dequeue())
+		msgs = append(msgs, <-queue.DequeueMessage())
 	}
 
 	for i := 0; i < len(msgs)-1; i++ {
 		for j := i + 1; j < len(msgs); j++ {
-			if bytes.Equal(msgs[i].Body().Hash(), msgs[j].Body().Hash()) {
+			if bytes.Equal(msgs[i].GetBody().GetHash(), msgs[j].GetBody().GetHash()) {
 				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
 			}
 		}
 	}
 
-	msg, err := queue.Client().Encrypt(
-		queue.Client().PubKey(),
+	client := queue.GetClient()
+	msg, err := client.EncryptPayload(
+		client.GetPubKey(),
 		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		return err
 	}
 
-	hash := msg.Body().Hash()
+	hash := msg.GetBody().GetHash()
 	for i := 0; i < 3; i++ {
-		queue.Enqueue(msg)
+		queue.EnqueueMessage(msg)
 	}
 	for i := 0; i < 3; i++ {
-		msg := <-queue.Dequeue()
-		if !bytes.Equal(msg.Body().Hash(), hash) {
+		msg := <-queue.DequeueMessage()
+		if !bytes.Equal(msg.GetBody().GetHash(), hash) {
 			return fmt.Errorf("hash of messages not equals (%d)", i)
 		}
 	}
@@ -90,11 +91,11 @@ func testQueue(queue IQueue) error {
 	closed := make(chan bool)
 	go func() {
 		// test close with parallel dequeue
-		_, ok := <-queue.Dequeue()
+		_, ok := <-queue.DequeueMessage()
 		closed <- ok
 	}()
 
-	if err := queue.Close(); err != nil {
+	if err := queue.Stop(); err != nil {
 		return err
 	}
 

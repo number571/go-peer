@@ -37,7 +37,7 @@ func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http
 				api.Response(w, pkg_settings.CErrorAction, "failed: update connections")
 				return
 			}
-			node.Network().Connect(vConnect.FConnect)
+			node.GetNetworkNode().AddConnect(vConnect.FConnect)
 			api.Response(w, pkg_settings.CErrorNone, "success: update connections")
 		case http.MethodDelete:
 			connects := deleteConnect(wrapper.Config(), vConnect.FConnect)
@@ -45,7 +45,7 @@ func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http
 				api.Response(w, pkg_settings.CErrorAction, "failed: delete connection")
 				return
 			}
-			node.Network().Disconnect(vConnect.FConnect)
+			node.GetNetworkNode().DelConnect(vConnect.FConnect)
 			api.Response(w, pkg_settings.CErrorNone, "success: delete connection")
 		}
 	}

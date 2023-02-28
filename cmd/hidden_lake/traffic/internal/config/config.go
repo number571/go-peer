@@ -106,14 +106,14 @@ func (cfg *SConfig) Logging() ILogging {
 	return cfg.fLogging
 }
 
-func (logging *sLogging) Info() bool {
+func (logging *sLogging) HasInfo() bool {
 	return (*logging)[0]
 }
 
-func (logging *sLogging) Warn() bool {
+func (logging *sLogging) HasWarn() bool {
 	return (*logging)[1]
 }
 
-func (logging *sLogging) Erro() bool {
+func (logging *sLogging) HasErro() bool {
 	return (*logging)[2]
 }

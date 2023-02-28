@@ -30,7 +30,7 @@ func NewTransaction(sett ISettings, priv asymmetric.IPrivKey, payLoad []byte) IT
 		fSettings:  sett,
 		fValidator: priv.PubKey(),
 		FPayload:   payLoad,
-		FValidator: priv.PubKey().Bytes(),
+		FValidator: priv.PubKey().ToBytes(),
 	}
 
 	tx.FHash = tx.newHash()
@@ -138,9 +138,9 @@ func (tx *sTransaction) IsValid() bool {
 func (tx *sTransaction) newHash() []byte {
 	return hashing.NewSHA256Hasher(bytes.Join(
 		[][]byte{
-			tx.Validator().Bytes(),
+			tx.Validator().ToBytes(),
 			tx.Payload(),
 		},
 		[]byte{},
-	)).Bytes()
+	)).ToBytes()
 }

@@ -22,7 +22,7 @@ func TestLogger(t *testing.T) {
 	}
 
 	logger := NewLogger(tcService)
-	fmtLog := logger.FmtLog(
+	fmtLog := logger.GetFmtLog(
 		CLogBaseEnqueueResp,
 		encoding.HexDecode(tcHash),
 		12345,

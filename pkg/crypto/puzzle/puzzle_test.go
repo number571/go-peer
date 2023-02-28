@@ -12,7 +12,7 @@ func TestPuzzle(t *testing.T) {
 		msg    = []byte("hello, world!")
 	)
 
-	hash := hashing.NewSHA256Hasher(msg).Bytes()
+	hash := hashing.NewSHA256Hasher(msg).ToBytes()
 	proof := puzzle.Proof(hash)
 
 	if !puzzle.Verify(hash, proof) {

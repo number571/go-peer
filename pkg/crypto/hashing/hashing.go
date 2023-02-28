@@ -10,9 +10,8 @@ var (
 )
 
 const (
-	CSHA256Size            = sha256.Size
-	CSHA256KeyType         = "go-peer/sha256"
-	CHMACSHA256HmacKeyType = "go-peer/hmac-sha256"
+	CSHA256Size    = sha256.Size
+	CSHA256KeyType = "go-peer/sha256"
 )
 
 type sSHA256Hasher struct {
@@ -27,18 +26,18 @@ func NewSHA256Hasher(data []byte) IHasher {
 	}
 }
 
-func (h *sSHA256Hasher) String() string {
-	return fmt.Sprintf("Hash(%s){%X}", h.Type(), h.Bytes())
+func (h *sSHA256Hasher) ToString() string {
+	return fmt.Sprintf("Hash(%s){%X}", h.GetType(), h.ToBytes())
 }
 
-func (h *sSHA256Hasher) Bytes() []byte {
+func (h *sSHA256Hasher) ToBytes() []byte {
 	return h.fHash
 }
 
-func (h *sSHA256Hasher) Type() string {
+func (h *sSHA256Hasher) GetType() string {
 	return CSHA256KeyType
 }
 
-func (h *sSHA256Hasher) Size() uint64 {
+func (h *sSHA256Hasher) GetSize() uint64 {
 	return CSHA256Size
 }
