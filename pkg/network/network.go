@@ -44,8 +44,8 @@ func (node *sNode) GetSettings() ISettings {
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (node *sNode) BroadcastPayload(pld payload.IPayload) error {
-	hash := hashing.NewSHA256Hasher(pld.ToBytes()).ToBytes()
-	node.inMappingWithSet(hash)
+	hasher := hashing.NewSHA256Hasher(pld.ToBytes())
+	node.inMappingWithSet(hasher.ToBytes())
 
 	var err error
 	for _, conn := range node.GetConnections() {

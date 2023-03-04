@@ -20,7 +20,7 @@ func TestHandleFriendsAPI(t *testing.T) {
 	)
 
 	aliasName := "test_name4"
-	testGetFriends(t, client, wcfg.Config())
+	testGetFriends(t, client, wcfg.GetConfig())
 	testAddFriend(t, client, aliasName)
 	testDelFriend(t, client, aliasName)
 }
@@ -38,7 +38,7 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 	}
 
 	for k, v := range friends {
-		v1, ok := cfg.Friends()[k]
+		v1, ok := cfg.GetFriends()[k]
 		if !ok {
 			t.Errorf("undefined friend '%s'", k)
 			return

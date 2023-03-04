@@ -5,9 +5,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"github.com/number571/go-peer/internal/pprof"
 )
 
 func main() {
+	pprof.RunPprofService(3, time.Second)
+
 	app, err := initApp()
 	if err != nil {
 		panic(err)

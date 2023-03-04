@@ -9,7 +9,7 @@ import (
 func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnKeeper {
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: func() []string { return cfg.Connections() },
+			FConnections: func() []string { return cfg.GetConnections() },
 			FDuration:    node.GetSettings().GetTimeWait(),
 		}),
 		node.GetNetworkNode(),

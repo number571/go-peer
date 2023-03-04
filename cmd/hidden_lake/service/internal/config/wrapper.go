@@ -16,10 +16,10 @@ func NewWrapper(cfg IConfig) IWrapper {
 	}
 }
 
-func (w *sWrapper) Config() IConfig {
+func (w *sWrapper) GetConfig() IConfig {
 	return w.fConfig
 }
 
-func (w *sWrapper) Editor() IEditor {
+func (w *sWrapper) GetEditor() IEditor {
 	return w.fEditor
 }

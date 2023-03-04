@@ -23,7 +23,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 		}
 
 		if r.Method == http.MethodGet {
-			friends := wrapper.Config().Friends()
+			friends := wrapper.GetConfig().GetFriends()
 			listFriends := make([]string, 0, len(friends))
 			for name, pubKey := range friends {
 				listFriends = append(listFriends, fmt.Sprintf("%s:%s", name, pubKey.ToString()))
@@ -51,14 +51,14 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 				return
 			}
 
-			friends := wrapper.Config().Friends()
+			friends := wrapper.GetConfig().GetFriends()
 			if _, ok := friends[aliasName]; ok {
 				api.Response(w, pkg_settings.CErrorExist, "failed: friend already exist")
 				return
 			}
 
 			friends[aliasName] = pubKey
-			if err := wrapper.Editor().UpdateFriends(friends); err != nil {
+			if err := wrapper.GetEditor().UpdateFriends(friends); err != nil {
 				api.Response(w, pkg_settings.CErrorAction, "failed: update friends")
 				return
 			}
@@ -66,7 +66,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 			node.GetListPubKeys().AddPubKey(pubKey)
 			api.Response(w, pkg_settings.CErrorNone, "success: update friends")
 		case http.MethodDelete:
-			friends := wrapper.Config().Friends()
+			friends := wrapper.GetConfig().GetFriends()
 			pubKey, ok := friends[aliasName]
 			if !ok {
 				api.Response(w, pkg_settings.CErrorNotExist, "failed: friend does not exist")
@@ -74,7 +74,7 @@ func HandleConfigFriendsAPI(wrapper config.IWrapper, node anonymity.INode) http.
 			}
 
 			delete(friends, aliasName)
-			if err := wrapper.Editor().UpdateFriends(friends); err != nil {
+			if err := wrapper.GetEditor().UpdateFriends(friends); err != nil {
 				api.Response(w, pkg_settings.CErrorAction, "failed: delete friend"+err.Error())
 				return
 			}

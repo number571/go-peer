@@ -18,7 +18,7 @@ const (
 
 	// INFO
 	CLogInfoExist         ILogType = "EXIST"
-	CLogInfoUnencryptable ILogType = "UNENC"
+	CLogInfoUndecryptable ILogType = "UNDEC"
 	CLogInfoAction        ILogType = "ACTON"
 	CLogInfoWithoutResp   ILogType = "WHRSP"
 

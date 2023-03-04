@@ -23,7 +23,7 @@ func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
 		}
 
 		// get service's address by hostname
-		address, ok := cfg.Service(loadReq.Host())
+		address, ok := cfg.GetService(loadReq.Host())
 		if !ok {
 			return nil
 		}

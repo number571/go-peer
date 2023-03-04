@@ -19,7 +19,7 @@ func TestHandleConnectsAPI(t *testing.T) {
 	)
 
 	connect := "test_connect4"
-	testGetConnects(t, client, wcfg.Config())
+	testGetConnects(t, client, wcfg.GetConfig())
 	testAddConnect(t, client, connect)
 	testDelConnect(t, client, connect)
 }
@@ -37,7 +37,7 @@ func testGetConnects(t *testing.T, client hls_client.IClient, cfg config.IConfig
 	}
 
 	for i := range connects {
-		if connects[i] != cfg.Connections()[i] {
+		if connects[i] != cfg.GetConnections()[i] {
 			t.Error("connections from config not equals with get")
 			return
 		}

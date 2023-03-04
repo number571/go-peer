@@ -35,7 +35,7 @@ func NewApp(
 		fConfig:      cfg,
 		fDatabase:    db,
 		fConnKeeper:  connKeeper,
-		fServiceHTTP: initServiceHTTP(cfg, db),
+		fServiceHTTP: initServiceHTTP(cfg, connKeeper, db),
 	}
 }
 

@@ -22,6 +22,7 @@ type SConfig struct {
 	FNetwork    string   `json:"network,omitempty"`
 	FAddress    string   `json:"address,omitempty"`
 	FConnection string   `json:"connection,omitempty"`
+	FConsumers  []string `json:"consumers,omitempty"`
 
 	fLogging *sLogging
 }
@@ -100,6 +101,10 @@ func (cfg *SConfig) Address() string {
 
 func (cfg *SConfig) Connection() string {
 	return cfg.FConnection
+}
+
+func (cfg *SConfig) Consumers() []string {
+	return cfg.FConsumers
 }
 
 func (cfg *SConfig) Logging() ILogging {

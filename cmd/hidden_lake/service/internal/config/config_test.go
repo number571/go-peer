@@ -97,41 +97,41 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.Logging().HasInfo() != tcLogging {
+	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
 	}
 
-	if cfg.Logging().HasErro() != tcLogging {
+	if cfg.GetLogging().HasErro() != tcLogging {
 		t.Error("logging.erro is invalid")
 		return
 	}
 
-	if cfg.Logging().HasWarn() == tcLogging {
+	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
 		return
 	}
 
-	if cfg.Network() != tcNetwork {
+	if cfg.GetNetwork() != tcNetwork {
 		t.Error("network is invalid")
 		return
 	}
 
-	if cfg.Address().TCP() != tcAddressTCP {
+	if cfg.GetAddress().GetTCP() != tcAddressTCP {
 		t.Error("address_tcp is invalid")
 		return
 	}
 
-	if cfg.Address().HTTP() != tcAddressHTTP {
+	if cfg.GetAddress().GetHTTP() != tcAddressHTTP {
 		t.Error("address_http is invalid")
 		return
 	}
 
-	if len(cfg.Connections()) != 2 {
+	if len(cfg.GetConnections()) != 2 {
 		t.Error("len connections != 2")
 		return
 	}
-	for i, v := range cfg.Connections() {
+	for i, v := range cfg.GetConnections() {
 		if v != tgConnects[i] {
 			t.Errorf("connection '%d' is invalid", i)
 			return
@@ -139,7 +139,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	for k, v := range tgServices {
-		v1, ok := cfg.Service(k)
+		v1, ok := cfg.GetService(k)
 		if !ok {
 			t.Errorf("service undefined '%s'", k)
 			return
@@ -151,7 +151,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	for name, pubStr := range tgPubKeys {
-		v1 := cfg.Friends()[name]
+		v1 := cfg.GetFriends()[name]
 		pubKey := asymmetric.LoadRSAPubKey(pubStr)
 		if pubKey.Address().ToString() != v1.Address().ToString() {
 			t.Errorf("public key is invalid '%s'", v1)
@@ -170,15 +170,15 @@ func TestWrapper(t *testing.T) {
 		return
 	}
 
-	if len(cfg.Friends()) == 0 {
+	if len(cfg.GetFriends()) == 0 {
 		t.Error("list of friends should be is not nil for tests")
 		return
 	}
 
 	wrapper := NewWrapper(cfg)
-	wrapper.Editor().UpdateFriends(nil)
+	wrapper.GetEditor().UpdateFriends(nil)
 
-	if len(cfg.Friends()) != 0 {
+	if len(cfg.GetFriends()) != 0 {
 		t.Error("friends is not nil for current config")
 		return
 	}
@@ -189,7 +189,7 @@ func TestWrapper(t *testing.T) {
 		return
 	}
 
-	if len(cfg.Friends()) != 0 {
+	if len(cfg.GetFriends()) != 0 {
 		t.Error("friends is not nil for loaded config")
 		return
 	}

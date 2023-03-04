@@ -252,7 +252,7 @@ func (node *sNode) handleWrapper(logger anon_logger.ILogger) network.IHandlerF {
 		// try decrypt message
 		sender, pld, err := node.GetMessageQueue().GetClient().DecryptMessage(msg)
 		if err != nil {
-			node.GetLogger().PushInfo(logger.GetFmtLog(anon_logger.CLogInfoUnencryptable, hash, proof, nil, conn))
+			node.GetLogger().PushInfo(logger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, conn))
 			return
 		}
 

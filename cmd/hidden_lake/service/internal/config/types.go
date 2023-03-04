@@ -5,8 +5,8 @@ import (
 )
 
 type IWrapper interface {
-	Config() IConfig
-	Editor() IEditor
+	GetConfig() IConfig
+	GetEditor() IEditor
 }
 
 type IEditor interface {
@@ -15,12 +15,12 @@ type IEditor interface {
 }
 
 type IConfig interface {
-	Network() string
-	Logging() ILogging
-	Address() IAddress
-	Connections() []string
-	Friends() map[string]asymmetric.IPubKey
-	Service(string) (string, bool)
+	GetNetwork() string
+	GetLogging() ILogging
+	GetAddress() IAddress
+	GetConnections() []string
+	GetFriends() map[string]asymmetric.IPubKey
+	GetService(string) (string, bool)
 }
 
 type ILogging interface {
@@ -30,6 +30,6 @@ type ILogging interface {
 }
 
 type IAddress interface {
-	TCP() string
-	HTTP() string
+	GetTCP() string
+	GetHTTP() string
 }

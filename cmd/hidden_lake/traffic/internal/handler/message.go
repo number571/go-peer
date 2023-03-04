@@ -5,13 +5,16 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/payload"
+
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
-func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
+func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
 			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
@@ -55,11 +58,17 @@ func HandleMessageAPI(db database.IKeyValueDB) http.HandlerFunc {
 				return
 			}
 
-			err = db.Push(msg)
-			if err != nil {
+			if err := db.Push(msg); err != nil {
 				api.Response(w, pkg_settings.CErrorPush, "failed: push message")
 				return
 			}
+
+			connKeeper.GetNetworkNode().BroadcastPayload(
+				payload.NewPayload(
+					pkg_settings.CNetworkMask,
+					msg.ToBytes(),
+				),
+			)
 
 			api.Response(w, pkg_settings.CErrorNone, "success")
 			return

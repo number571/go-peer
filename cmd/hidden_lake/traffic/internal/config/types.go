@@ -5,6 +5,7 @@ type IConfig interface {
 	Network() string
 	Address() string
 	Connection() string
+	Consumers() []string
 }
 
 type ILogging interface {

@@ -20,7 +20,7 @@ func initServiceHTTP(wrapper config.IWrapper, node anonymity.INode) *http.Server
 	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(node))
 
 	return &http.Server{
-		Addr:    wrapper.Config().Address().HTTP(),
+		Addr:    wrapper.GetConfig().GetAddress().GetHTTP(),
 		Handler: mux,
 	}
 }

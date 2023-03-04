@@ -47,7 +47,7 @@ func (app *sApp) Run() error {
 	res := make(chan error)
 
 	go func() {
-		if app.fWrapper.Config().Address().HTTP() == "" {
+		if app.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
 			return
 		}
 
@@ -66,7 +66,7 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
-		cfg := app.fWrapper.Config()
+		cfg := app.fWrapper.GetConfig()
 
 		app.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
@@ -79,7 +79,7 @@ func (app *sApp) Run() error {
 
 		// if node in client mode
 		// then run endless loop
-		tcpAddress := cfg.Address().TCP()
+		tcpAddress := cfg.GetAddress().GetTCP()
 		if tcpAddress == "" {
 			select {}
 		}

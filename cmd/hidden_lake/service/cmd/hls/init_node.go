@@ -22,7 +22,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
-		internal_logger.DefaultLogger(cfg.Logging()),
+		internal_logger.DefaultLogger(cfg.GetLogging()),
 		database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FPath:    pkg_settings.CPathDB,
@@ -31,11 +31,11 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:     cfg.Address().TCP(),
+				FAddress:     cfg.GetAddress().GetTCP(),
 				FCapacity:    pkg_settings.CNetworkCapacity,
 				FMaxConnects: pkg_settings.CNetworkMaxConns,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:  cfg.Network(),
+					FNetworkKey:  cfg.GetNetwork(),
 					FMessageSize: pkg_settings.CMessageSize,
 					FTimeWait:    pkg_settings.CNetworkWaitTime,
 				}),
@@ -51,7 +51,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
-			for _, pubKey := range cfg.Friends() {
+			for _, pubKey := range cfg.GetFriends() {
 				f2f.AddPubKey(pubKey)
 			}
 			return f2f

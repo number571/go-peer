@@ -9,15 +9,23 @@ import (
 )
 
 func Request(method, url string, data interface{}) (string, error) {
-	jsonValue, err := json.Marshal(data)
-	if err != nil {
-		return "", err
+	var requestBytes []byte
+
+	switch x := data.(type) {
+	case []byte:
+		requestBytes = x
+	default:
+		jsonValue, err := json.Marshal(data)
+		if err != nil {
+			return "", err
+		}
+		requestBytes = jsonValue
 	}
 
 	req, err := http.NewRequest(
 		method,
 		url,
-		bytes.NewBuffer(jsonValue),
+		bytes.NewBuffer(requestBytes),
 	)
 	if err != nil {
 		return "", err

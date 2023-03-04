@@ -148,11 +148,11 @@ func (cfg *SConfig) loadPubKeys() error {
 	return nil
 }
 
-func (cfg *SConfig) Network() string {
+func (cfg *SConfig) GetNetwork() string {
 	return cfg.FNetwork
 }
 
-func (cfg *SConfig) Friends() map[string]asymmetric.IPubKey {
+func (cfg *SConfig) GetFriends() map[string]asymmetric.IPubKey {
 	cfg.fMutex.Lock()
 	defer cfg.fMutex.Unlock()
 
@@ -163,19 +163,19 @@ func (cfg *SConfig) Friends() map[string]asymmetric.IPubKey {
 	return result
 }
 
-func (cfg *SConfig) Logging() ILogging {
+func (cfg *SConfig) GetLogging() ILogging {
 	return cfg.fLogging
 }
 
-func (cfg *SConfig) Address() IAddress {
+func (cfg *SConfig) GetAddress() IAddress {
 	return cfg.FAddress
 }
 
-func (cfg *SConfig) Connections() []string {
+func (cfg *SConfig) GetConnections() []string {
 	return cfg.FConnections
 }
 
-func (cfg *SConfig) Service(name string) (string, bool) {
+func (cfg *SConfig) GetService(name string) (string, bool) {
 	cfg.fMutex.Lock()
 	defer cfg.fMutex.Unlock()
 
@@ -183,14 +183,14 @@ func (cfg *SConfig) Service(name string) (string, bool) {
 	return addr, ok
 }
 
-func (traffic *STraffic) Download() []string {
+func (traffic *STraffic) GetDownload() []string {
 	if traffic == nil {
 		return nil
 	}
 	return traffic.FDownload
 }
 
-func (traffic *STraffic) Upload() []string {
+func (traffic *STraffic) GetUpload() []string {
 	if traffic == nil {
 		return nil
 	}
@@ -209,14 +209,14 @@ func (logging *sLogging) HasErro() bool {
 	return (*logging)[2]
 }
 
-func (address *SAddress) TCP() string {
+func (address *SAddress) GetTCP() string {
 	if address == nil {
 		return ""
 	}
 	return address.FTCP
 }
 
-func (address *SAddress) HTTP() string {
+func (address *SAddress) GetHTTP() string {
 	if address == nil {
 		return ""
 	}

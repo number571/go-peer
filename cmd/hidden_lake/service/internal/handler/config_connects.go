@@ -21,7 +21,7 @@ func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http
 		}
 
 		if r.Method == http.MethodGet {
-			api.Response(w, pkg_settings.CErrorNone, strings.Join(wrapper.Config().Connections(), ","))
+			api.Response(w, pkg_settings.CErrorNone, strings.Join(wrapper.GetConfig().GetConnections(), ","))
 			return
 		}
 
@@ -32,16 +32,16 @@ func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http
 
 		switch r.Method {
 		case http.MethodPost:
-			connects := append(wrapper.Config().Connections(), vConnect.FConnect)
-			if err := wrapper.Editor().UpdateConnections(connects); err != nil {
+			connects := append(wrapper.GetConfig().GetConnections(), vConnect.FConnect)
+			if err := wrapper.GetEditor().UpdateConnections(connects); err != nil {
 				api.Response(w, pkg_settings.CErrorAction, "failed: update connections")
 				return
 			}
 			node.GetNetworkNode().AddConnect(vConnect.FConnect)
 			api.Response(w, pkg_settings.CErrorNone, "success: update connections")
 		case http.MethodDelete:
-			connects := deleteConnect(wrapper.Config(), vConnect.FConnect)
-			if err := wrapper.Editor().UpdateConnections(connects); err != nil {
+			connects := deleteConnect(wrapper.GetConfig(), vConnect.FConnect)
+			if err := wrapper.GetEditor().UpdateConnections(connects); err != nil {
 				api.Response(w, pkg_settings.CErrorAction, "failed: delete connection")
 				return
 			}
@@ -51,7 +51,7 @@ func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http
 	}
 }
 func deleteConnect(cfg config.IConfig, connect string) []string {
-	connects := cfg.Connections()
+	connects := cfg.GetConnections()
 	result := make([]string, 0, len(connects))
 	for _, conn := range connects {
 		if conn == connect {

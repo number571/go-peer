@@ -1,8 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
@@ -32,9 +35,9 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 			}),
 		).HandleFunc(
 			hlt_settings.CNetworkMask,
-			func(_ network.INode, conn conn.IConn, reqBytes []byte) {
+			func(_ network.INode, conn conn.IConn, msgBytes []byte) {
 				msg := message.LoadMessage(
-					reqBytes,
+					msgBytes,
 					message.NewParams(
 						db.Settings().GetMessageSize(),
 						db.Settings().GetWorkSize(),
@@ -61,7 +64,13 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					return
 				}
 
-				logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUnencryptable, hash, proof, nil, conn))
+				for _, cURL := range cfg.Consumers() {
+					if _, err := api.Request(http.MethodPost, cURL, msgBytes); err != nil {
+						logger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, nil, conn))
+					}
+				}
+
+				logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, conn))
 			},
 		),
 	)
