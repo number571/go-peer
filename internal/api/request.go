@@ -58,7 +58,7 @@ func loadResponse(reader io.ReadCloser) (*SResponse, error) {
 	}
 
 	if resp.FReturn != CErrorNone {
-		return nil, fmt.Errorf("error code = %d", resp.FReturn)
+		return nil, fmt.Errorf("error code = %d (%s)", resp.FReturn, resp.FResult)
 	}
 
 	return resp, nil

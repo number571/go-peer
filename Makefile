@@ -1,7 +1,9 @@
 N=1
+TEST_PATH=./test/result
+PPROF_PATH=./test/pprof
 
-PPROF_PATH=
-PPROF_PORT=
+PPROF_NAME=_
+PPROF_PORT=_
 
 CHECK_RETURN_CODE=if [ $$? != 0 ]; then exit; fi
 
@@ -27,30 +29,33 @@ test-prerun:
 	go test -race ./...;
 	$(CHECK_RETURN_CODE);
 
+	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
+	$(CHECK_RETURN_CODE);
+
 test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -count=1 `go list ./...`; \
+		go test -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out; \
 		$(CHECK_RETURN_CODE); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage:
-	go test -coverprofile=test/result/coverage.out `go list ./...`
-	go tool cover -html=test/result/coverage.out
+	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
+	go tool cover -html=$(TEST_PATH)/coverage.out
 
 test-benchmark:
 	# TODO 
 
 
 ### PPROF
-# example run: make pprof-run PPROF_PATH=hls PPROF_PORT=62109
+# example run: make pprof-run PPROF_NAME=hls PPROF_PORT=62109
 
 pprof-run:
-	go tool pprof -png -output test/pprof/$(PPROF_PATH)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile
-	go tool pprof -png -output test/pprof/$(PPROF_PATH)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
-	go tool pprof -png -output test/pprof/$(PPROF_PATH)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
 
 
 ### GIT

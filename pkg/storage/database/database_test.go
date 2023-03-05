@@ -157,7 +157,6 @@ func TestLevelDBIter(t *testing.T) {
 		}
 		val := string(iter.GetValue())
 		if val != fmt.Sprintf("%s%d", testutils.TcVal1, count) {
-			fmt.Println(val)
 			t.Error("value not equal saved value")
 			return
 		}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
@@ -64,9 +65,15 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					return
 				}
 
-				for _, cURL := range cfg.Consumers() {
-					if _, err := api.Request(http.MethodPost, cURL, msgBytes); err != nil {
+				for _, cHost := range cfg.Consumers() {
+					_, err := api.Request(
+						http.MethodPost,
+						fmt.Sprintf("http://%s", cHost),
+						msgBytes,
+					)
+					if err != nil {
 						logger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, nil, conn))
+						continue
 					}
 				}
 

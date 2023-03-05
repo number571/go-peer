@@ -9,4 +9,4 @@ clean:
 	pkill prog_hls2 || true
 	pkill prog_hlm2 || true
 	rm -rf prog_hls2 hls.db 
-	rm -rf prog_hlm2 hlm.db web/
+	rm -rf prog_hlm2 hlm.db

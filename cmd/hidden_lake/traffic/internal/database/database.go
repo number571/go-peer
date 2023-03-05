@@ -63,6 +63,11 @@ func (db *sKeyValueDB) Push(msg message.IMessage) error {
 	db.fMutex.Lock()
 	defer db.fMutex.Unlock()
 
+	hash := msg.GetBody().GetHash()
+	if _, err := db.fDB.Get(getKeyMessage(hash)); err == nil {
+		return nil
+	}
+
 	params := message.NewParams(
 		db.Settings().GetMessageSize(),
 		db.Settings().GetWorkSize(),
@@ -80,13 +85,13 @@ func (db *sKeyValueDB) Push(msg message.IMessage) error {
 	}
 
 	// rewrite hash's field
-	hash := msg.GetBody().GetHash()
-	if err := db.fDB.Set(keyHash, hash); err != nil {
+	newHash := msg.GetBody().GetHash()
+	if err := db.fDB.Set(keyHash, newHash); err != nil {
 		return err
 	}
 
 	// write message
-	keyMsg := getKeyMessage(hash)
+	keyMsg := getKeyMessage(newHash)
 	if err := db.fDB.Set(keyMsg, msg.ToBytes()); err != nil {
 		return err
 	}
