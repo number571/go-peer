@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/common"
-	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/storage/database"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -57,6 +56,10 @@ func main() {
 		panic(err)
 	}
 
+	transferTraffic(portService, portHLT)
+}
+
+func transferTraffic(portService, portHLT int) {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -68,57 +71,117 @@ func main() {
 	for {
 		time.Sleep(time.Second)
 
-		strCount, err := api.Request(
-			http.MethodGet,
-			fmt.Sprintf("%s:%d/size", common.HostService, portService),
-			nil,
-		)
+		countService, err := loadCountFromService(portService)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		countService, err := strconv.ParseUint(strCount, 10, 64)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		countDB, err := countOfDataInDB()
+		countDB, err := loadCountFromDB()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
 		for i := countDB; i < countService; i++ {
-			data, err := api.Request(
-				http.MethodGet,
-				fmt.Sprintf("%s:%d/load?data_id=%d", common.HostService, portService, i),
-				nil,
-			)
+			incrementCountInDB()
+
+			msg, err := loadMessageFromService(portService, i)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
 
-			msg := message.LoadMessage(
-				encoding.HexDecode(data),
-				message.NewParams(
-					hls_settings.CMessageSize,
-					hls_settings.CWorkSize,
-				),
-			)
 			if err := hltClient.PutMessage(msg); err != nil {
 				fmt.Println(err)
 				continue
 			}
-
-			incrementCountInDB()
 		}
 	}
 }
 
-func countOfDataInDB() (uint64, error) {
+func loadMessageFromService(portService int, id uint64) (message.IMessage, error) {
+	// build request to service
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s:%d/load?data_id=%d", common.HostService, portService, id),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed: build request")
+	}
+
+	// send request to service
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed: bad request")
+	}
+	defer resp.Body.Close()
+
+	// read response from service
+	bytesMsg, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed: read body from service")
+	}
+
+	// read body of response
+	if len(bytesMsg) <= 1 || bytesMsg[0] == '!' {
+		return nil, fmt.Errorf("failed: incorrect response from service")
+	}
+
+	msg := message.LoadMessage(
+		bytesMsg[1:],
+		message.NewParams(
+			hls_settings.CMessageSize,
+			hls_settings.CWorkSize,
+		),
+	)
+	if msg == nil {
+		return nil, fmt.Errorf("message is nil")
+	}
+
+	return msg, nil
+}
+
+func loadCountFromService(portService int) (uint64, error) {
+	// build request to service
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s:%d/size", common.HostService, portService),
+		nil,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed: build request")
+	}
+
+	// send request to service
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 0, fmt.Errorf("failed: bad request")
+	}
+	defer resp.Body.Close()
+
+	// read response from service
+	bytesCount, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("failed: read body from service")
+	}
+
+	// read body of response
+	if len(bytesCount) <= 1 || bytesCount[0] == '!' {
+		return 0, fmt.Errorf("failed: incorrect response from service")
+	}
+
+	strCount := string(bytesCount[1:])
+	countService, err := strconv.ParseUint(strCount, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return countService, nil
+}
+
+func loadCountFromDB() (uint64, error) {
 	res, err := db.Get([]byte(dataCountKey))
 	if err != nil {
 		return 0, err
@@ -133,7 +196,7 @@ func countOfDataInDB() (uint64, error) {
 }
 
 func incrementCountInDB() error {
-	count, err := countOfDataInDB()
+	count, err := loadCountFromDB()
 	if err != nil {
 		return err
 	}

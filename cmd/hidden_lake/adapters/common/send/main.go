@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,23 +38,46 @@ func trafficPage(portService int) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		res, err := io.ReadAll(r.Body)
+		// get message from HLT
+		msgBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			api.Response(w, 3, "failed: read body")
 			return
 		}
 
-		// convert message to service pattern
-		_, err = api.Request(
-			http.MethodPost,
-			fmt.Sprintf("%s:%d/push", common.HostService, portService),
-			res,
-		)
-		if err != nil {
-			api.Response(w, 4, "failed: bad response")
-			return
-		}
-
-		api.Response(w, 1, "success: push to service")
+		ret, res := pushMessageToService(portService, msgBytes)
+		api.Response(w, ret, res)
 	}
+}
+
+func pushMessageToService(portService int, msgBytes []byte) (int, string) {
+	// build request to service
+	req, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("%s:%d/push", common.HostService, portService),
+		bytes.NewBuffer(msgBytes),
+	)
+	if err != nil {
+		return 4, "failed: build request"
+	}
+
+	// send request to service
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return 5, "failed: bad request"
+	}
+	defer resp.Body.Close()
+
+	// read response from service
+	res, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 6, "failed: read body from service"
+	}
+
+	// read body of response
+	if len(res) == 0 || res[0] == '!' {
+		return 7, "failed: incorrect response from service"
+	}
+
+	return 1, "success: push to service"
 }

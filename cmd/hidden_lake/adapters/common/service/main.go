@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -8,8 +9,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -32,7 +31,7 @@ func init() {
 	if _, err := db.Get([]byte(dataCountKey)); err == nil {
 		return
 	}
-	if err := db.Set([]byte(dataCountKey), []byte(fmt.Sprintf("%d", 0))); err != nil {
+	if err := db.Set([]byte(dataCountKey), []byte("0")); err != nil {
 		panic(err)
 	}
 }
@@ -58,42 +57,42 @@ func main() {
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		api.Response(w, 2, "failed: incorrect method")
+		fmt.Fprint(w, "!incorrect method")
 		return
 	}
 
 	res, err := io.ReadAll(r.Body)
 	if err != nil {
-		api.Response(w, 3, "failed: read body")
+		fmt.Fprint(w, "!read body")
 		return
 	}
 
 	if err := pushDataToDB(res); err != nil {
-		api.Response(w, 4, "failed: push to database")
+		fmt.Fprint(w, "!push to database")
 		return
 	}
 
-	api.Response(w, 1, "success: push to database")
+	fmt.Fprint(w, ".")
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		api.Response(w, 2, "failed: incorrect method")
+		fmt.Fprint(w, "!incorrect method")
 		return
 	}
 
 	count, err := countOfDataInDB()
 	if err != nil {
-		api.Response(w, 3, "failed: read count of data")
+		fmt.Fprint(w, "!read count of data")
 		return
 	}
 
-	api.Response(w, 1, fmt.Sprintf("%d", count))
+	fmt.Fprintf(w, ".%d", count)
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		api.Response(w, 2, "failed: incorrect method")
+		fmt.Fprint(w, "!incorrect method")
 		return
 	}
 
@@ -102,17 +101,17 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 
 	dataID, err := strconv.ParseUint(strDataID, 10, 64)
 	if err != nil {
-		api.Response(w, 3, "failed: decode data_id")
+		fmt.Fprint(w, "!decode data_id")
 		return
 	}
 
 	data, err := loadDataFromDB(dataID)
 	if err != nil {
-		api.Response(w, 3, "failed: load data by data_id")
+		fmt.Fprint(w, "!load data by data_id")
 		return
 	}
 
-	api.Response(w, 1, encoding.HexEncode(data))
+	w.Write(bytes.Join([][]byte{[]byte("."), data}, []byte{}))
 }
 
 func countOfDataInDB() (uint64, error) {
