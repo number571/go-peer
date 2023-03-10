@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/payload"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
@@ -65,7 +66,7 @@ func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueD
 
 			connKeeper.GetNetworkNode().BroadcastPayload(
 				payload.NewPayload(
-					pkg_settings.CNetworkMask,
+					hls_settings.CNetworkMask,
 					msg.ToBytes(),
 				),
 			)

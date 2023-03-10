@@ -2,8 +2,8 @@ GC=go build
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o send .
+	$(GC) -o ../../../../../bin/common_send .
 run:
-	./send
+	./../../../../../bin/common_send
 clean:
-	rm -f send
+	rm -f ../../../../../bin/common_send

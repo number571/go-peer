@@ -12,14 +12,14 @@ build:
 	make build -C ../../../../cmd/hidden_lake/service
 	make build -C ../../../../cmd/hidden_lake/traffic
 	# COPY HLM PROGRAM
-	cp ../../../../cmd/hidden_lake/messenger/hlm ./node1_hlm/prog_hlm1
-	cp ../../../../cmd/hidden_lake/messenger/hlm ./node2_hlm/prog_hlm2
+	cp ../../../../bin/hlm ./node1_hlm/prog_hlm1
+	cp ../../../../bin/hlm ./node2_hlm/prog_hlm2
 	# COPY HLS PROGRAM
-	cp ../../../../cmd/hidden_lake/service/hls ./middle_hls/prog_hls
-	cp ../../../../cmd/hidden_lake/service/hls ./node1_hlm/prog_hls1
-	cp ../../../../cmd/hidden_lake/service/hls ./node2_hlm/prog_hls2
+	cp ../../../../bin/hls ./middle_hls/prog_hls
+	cp ../../../../bin/hls ./node1_hlm/prog_hls1
+	cp ../../../../bin/hls ./node2_hlm/prog_hls2
 	# COPY HLT PROGRAM
-	cp ../../../../cmd/hidden_lake/traffic/hlt ./middle_hls/prog_hlt
+	cp ../../../../bin/hlt ./middle_hls/prog_hlt
 run: 
 	# MAKEFILE RUN
 	make run -C middle_hls

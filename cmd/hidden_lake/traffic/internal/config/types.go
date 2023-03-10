@@ -1,11 +1,11 @@
 package config
 
 type IConfig interface {
-	Logging() ILogging
-	Network() string
-	Address() string
-	Connection() string
-	Consumers() []string
+	GetLogging() ILogging
+	GetNetwork() string
+	GetAddress() string
+	GetConnection() string
+	GetConsumers() []string
 }
 
 type ILogging interface {

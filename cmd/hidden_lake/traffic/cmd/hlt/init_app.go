@@ -13,7 +13,7 @@ func initApp() (types.ICommand, error) {
 	}
 
 	db := initDatabase()
-	logger := internal_logger.DefaultLogger(cfg.Logging())
+	logger := internal_logger.DefaultLogger(cfg.GetLogging())
 	connKeeper := initConnKeeper(cfg, db, logger)
 
 	return app.NewApp(cfg, db, connKeeper), nil

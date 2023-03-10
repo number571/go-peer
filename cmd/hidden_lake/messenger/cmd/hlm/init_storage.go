@@ -9,7 +9,7 @@ import (
 func initCryptoStorage(cfg config.IConfig) (storage.IKeyValueStorage, error) {
 	return storage.NewCryptoStorage(
 		hlm_settings.CPathSTG,
-		[]byte(cfg.StorageKey()),
+		[]byte(cfg.GetStorageKey()),
 		hlm_settings.CWorkForKeys,
 	)
 }

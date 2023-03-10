@@ -3,12 +3,12 @@ GC=go build
 .PHONY: default build test clean
 default: build
 build:
-	make -C recv 
-	make -C send 
-	make -C service 
+	make -C ./recv build
+	make -C ./send build
+	make -C ./service build
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -rf send/send 
-	rm -rf recv/recv recv/recv.db 
-	rm -rf service/service service/service.db 
+	make -C ./recv clean 
+	make -C ./send clean 
+	make -C ./service clean 

@@ -101,7 +101,7 @@ func initIncomingServiceHTTP(
 	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(state)) // POST
 
 	return &http.Server{
-		Addr:    cfg.Address().Incoming(),
+		Addr:    cfg.GetAddress().GetIncoming(),
 		Handler: mux,
 	}
 }
@@ -130,7 +130,7 @@ func initInterfaceServiceHTTP(
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
 	return &http.Server{
-		Addr:    cfg.Address().Interface(),
+		Addr:    cfg.GetAddress().GetInterface(),
 		Handler: mux,
 	}
 }

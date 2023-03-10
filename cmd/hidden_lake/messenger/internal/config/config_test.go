@@ -59,23 +59,23 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.Address().Interface() != tcAddressInterface {
+	if cfg.GetAddress().GetInterface() != tcAddressInterface {
 		t.Error("address.interface is invalid")
 	}
 
-	if cfg.Address().Incoming() != tcAddressIncoming {
+	if cfg.GetAddress().GetIncoming() != tcAddressIncoming {
 		t.Error("address.incoming is invalid")
 	}
 
-	if cfg.Connection().Service() != tcConnectionService {
+	if cfg.GetConnection().GetService() != tcConnectionService {
 		t.Error("connection.service is invalid")
 	}
 
-	if cfg.Connection().Traffic() != tcConnectionTraffic {
+	if cfg.GetConnection().GetTraffic() != tcConnectionTraffic {
 		t.Error("connection.traffic is invalid")
 	}
 
-	if cfg.StorageKey() != tcStorageKey {
+	if cfg.GetStorageKey() != tcStorageKey {
 		t.Error("storage_key is invalid")
 	}
 }

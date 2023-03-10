@@ -50,7 +50,7 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
-		if app.fConfig.Address() == "" {
+		if app.fConfig.GetAddress() == "" {
 			return
 		}
 

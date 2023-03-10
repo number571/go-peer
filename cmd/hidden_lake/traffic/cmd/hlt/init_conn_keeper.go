@@ -14,6 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
@@ -22,20 +23,20 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 	anonLogger := anon_logger.NewLogger(hlt_settings.CServiceName)
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: func() []string { return []string{cfg.Connection()} },
-			FDuration:    hlt_settings.CNetworkWaitTime,
+			FConnections: func() []string { return []string{cfg.GetConnection()} },
+			FDuration:    hls_settings.CNetworkWaitTime,
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FMaxConnects: 1, // one HLS from cfg.Connection()
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:  cfg.Network(),
+					FNetworkKey:  cfg.GetNetwork(),
 					FMessageSize: db.Settings().GetMessageSize(),
-					FTimeWait:    hlt_settings.CNetworkWaitTime,
+					FTimeWait:    hls_settings.CNetworkWaitTime,
 				}),
 			}),
 		).HandleFunc(
-			hlt_settings.CNetworkMask,
+			hls_settings.CNetworkMask,
 			func(_ network.INode, conn conn.IConn, msgBytes []byte) {
 				msg := message.LoadMessage(
 					msgBytes,
@@ -65,7 +66,7 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					return
 				}
 
-				for _, cHost := range cfg.Consumers() {
+				for _, cHost := range cfg.GetConsumers() {
 					_, err := api.Request(
 						http.MethodPost,
 						fmt.Sprintf("http://%s", cHost),

@@ -7,7 +7,7 @@ build:
 	# MAKEFILE BUILD
 	make build -C ../../../cmd/hidden_lake/traffic
 	# COPY HLS
-	cp -r ../../../cmd/hidden_lake/traffic/hlt ./service_hlt/prog_hlt
+	cp -r ../../../../bin/hlt ./service_hlt/prog_hlt
 run: 
 	# MAKEFILE RUN
 	make run -C ./service_hlt

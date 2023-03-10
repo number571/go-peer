@@ -16,20 +16,20 @@ build:
 	make build -C ../../../../cmd/hidden_lake/adapters/common/send 
 	make build -C ../../../../cmd/hidden_lake/adapters/common/recv 
 	# COPY HLM PROGRAM
-	cp ../../../../cmd/hidden_lake/messenger/hlm ./node1_hlm/prog_hlm1
-	cp ../../../../cmd/hidden_lake/messenger/hlm ./node2_hlm/prog_hlm2
+	cp ../../../../bin/hlm ./node1_hlm/prog_hlm1
+	cp ../../../../bin/hlm ./node2_hlm/prog_hlm2
 	# COPY HLS PROGRAM
-	cp ../../../../cmd/hidden_lake/service/hls ./node1_hlm/prog_hls1
-	cp ../../../../cmd/hidden_lake/service/hls ./node2_hlm/prog_hls2
+	cp ../../../../bin/hls ./node1_hlm/prog_hls1
+	cp ../../../../bin/hls ./node2_hlm/prog_hls2
 	# COPY HLT PROGRAM
-	cp ../../../../cmd/hidden_lake/traffic/hlt ./node1_hlm/prog_hlt1
-	cp ../../../../cmd/hidden_lake/traffic/hlt ./node2_hlm/prog_hlt2
+	cp ../../../../bin/hlt ./node1_hlm/prog_hlt1
+	cp ../../../../bin/hlt ./node2_hlm/prog_hlt2
 	# COPY ADAPTERS 
-	cp ../../../../cmd/hidden_lake/adapters/common/service/service ./service/prog_service
-	cp ../../../../cmd/hidden_lake/adapters/common/send/send ./node1_hlm/prog_send1
-	cp ../../../../cmd/hidden_lake/adapters/common/send/send ./node2_hlm/prog_send2
-	cp ../../../../cmd/hidden_lake/adapters/common/recv/recv ./node1_hlm/prog_recv1
-	cp ../../../../cmd/hidden_lake/adapters/common/recv/recv ./node2_hlm/prog_recv2
+	cp ../../../../bin/common_service ./service/prog_service
+	cp ../../../../bin/common_send ./node1_hlm/prog_send1
+	cp ../../../../bin/common_send ./node2_hlm/prog_send2
+	cp ../../../../bin/common_recv ./node1_hlm/prog_recv1
+	cp ../../../../bin/common_recv ./node2_hlm/prog_recv2
 run: 
 	# MAKEFILE RUN
 	make run -C service

@@ -1,10 +1,11 @@
 GC=go build
+BINPATH=../../../../../bin
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o recv .
+	$(GC) -o $(BINPATH)/common_recv .
 run:
-	./recv
+	./$(BINPATH)/common_recv
 clean:
-	rm -f recv
-	rm -rf recv.db
+	rm -f $(BINPATH)/common_recv
+	rm -rf $(BINPATH)/common_recv.db

@@ -1,13 +1,14 @@
 N=1
 GC=go build
+BINPATH=../../../bin
 .PHONY: default build run test clean
 default: build run
 build:
-	$(GC) -o hls ./cmd/hls
+	$(GC) -o $(BINPATH)/hls ./cmd/hls
 run:
-	./hls
+	./$(BINPATH)/hls
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -f hls hls.cfg hls.stg
-	rm -rf hls.db
+	rm -f $(BINPATH)/hls $(BINPATH)/hls.cfg $(BINPATH)/hls.stg
+	rm -rf $(BINPATH)/hls.db

@@ -31,30 +31,30 @@ func TestConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	if cfg.Logging().HasInfo() != tcLogging {
+	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
 	}
 
-	if cfg.Logging().HasErro() != tcLogging {
+	if cfg.GetLogging().HasErro() != tcLogging {
 		t.Error("logging.erro is invalid")
 		return
 	}
 
-	if cfg.Logging().HasWarn() == tcLogging {
+	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
 		return
 	}
 
-	if cfg.Network() != tcNetwork {
+	if cfg.GetNetwork() != tcNetwork {
 		t.Error("network is invalid")
 	}
 
-	if cfg.Address() != tcAddress {
+	if cfg.GetAddress() != tcAddress {
 		t.Error("address is invalid")
 	}
 
-	if cfg.Connection() != tcConnection {
+	if cfg.GetConnection() != tcConnection {
 		t.Error("connection is invalid")
 	}
 }

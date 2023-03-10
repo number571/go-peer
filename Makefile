@@ -26,9 +26,6 @@ test-prerun:
 	go vet ./...;
 	$(CHECK_RETURN_CODE);
 
-	go test -race ./...;
-	$(CHECK_RETURN_CODE);
-
 	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
 	$(CHECK_RETURN_CODE);
 
@@ -36,7 +33,7 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out; \
+		go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out; \
 		$(CHECK_RETURN_CODE); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";

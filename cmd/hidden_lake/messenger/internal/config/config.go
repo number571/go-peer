@@ -63,30 +63,30 @@ func LoadConfig(filepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *SConfig) Address() IAddress {
+func (cfg *SConfig) GetAddress() IAddress {
 	return cfg.FAddress
 }
 
-func (cfg *SConfig) Connection() IConnection {
+func (cfg *SConfig) GetConnection() IConnection {
 	return cfg.FConnection
 }
 
-func (cfg *SConfig) StorageKey() string {
+func (cfg *SConfig) GetStorageKey() string {
 	return cfg.FStorageKey
 }
 
-func (conn *SConnection) Service() string {
+func (conn *SConnection) GetService() string {
 	return conn.FService
 }
 
-func (conn *SConnection) Traffic() string {
+func (conn *SConnection) GetTraffic() string {
 	return conn.FTraffic
 }
 
-func (addr *SAddress) Interface() string {
+func (addr *SAddress) GetInterface() string {
 	return addr.FInterface
 }
 
-func (addr *SAddress) Incoming() string {
+func (addr *SAddress) GetIncoming() string {
 	return addr.FIncoming
 }

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	databasePath = "recv.db"
+	databasePath = "common_recv.db"
 	dataCountKey = "count_recv"
 )
 

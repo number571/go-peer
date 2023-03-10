@@ -18,7 +18,7 @@ func initServiceHTTP(cfg config.IConfig, connKeeper conn_keeper.IConnKeeper, db 
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(connKeeper, db))
 
 	return &http.Server{
-		Addr:    cfg.Address(),
+		Addr:    cfg.GetAddress(),
 		Handler: mux,
 	}
 }

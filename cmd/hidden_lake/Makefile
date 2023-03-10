@@ -1,5 +1,10 @@
-.PHONY: default clean 
-default: clean 
+.PHONY: default build clean 
+default: build 
+build:
+	make -C ./service build
+	make -C ./messenger build
+	make -C ./traffic build
+	make -C ./adapters build
 clean:
 	make -C ./service clean
 	make -C ./messenger clean

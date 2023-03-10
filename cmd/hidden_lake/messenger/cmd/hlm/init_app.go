@@ -26,13 +26,13 @@ func initApp() (types.ICommand, error) {
 
 	hlsClient := hls_client.NewClient(
 		hls_client.NewBuilder(),
-		hls_client.NewRequester(fmt.Sprintf("http://%s", cfg.Connection().Service())),
+		hls_client.NewRequester(fmt.Sprintf("http://%s", cfg.GetConnection().GetService())),
 	)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			fmt.Sprintf("http://%s", cfg.Connection().Traffic()),
+			fmt.Sprintf("http://%s", cfg.GetConnection().GetTraffic()),
 			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
 		),
 	)

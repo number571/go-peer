@@ -71,7 +71,7 @@ func (q *sMessageQueue) Run() error {
 	go func() {
 		for {
 			select {
-			case <-q.fMsgPull.fSignal:
+			case <-q.readSignal():
 				return
 			case <-time.After(q.GetSettings().GetDuration() / 2):
 				currLen := len(q.fMsgPull.fQueue)
@@ -116,7 +116,7 @@ func (q *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 
 	go func() {
 		select {
-		case <-q.fMsgPull.fSignal:
+		case <-q.readSignal():
 			closed <- true
 			return
 		case <-time.After(q.GetSettings().GetDuration()):
@@ -148,4 +148,11 @@ func (q *sMessageQueue) newPseudoMessage() message.IMessage {
 		panic(err)
 	}
 	return msg
+}
+
+func (q *sMessageQueue) readSignal() <-chan struct{} {
+	q.fMutex.Lock()
+	defer q.fMutex.Unlock()
+
+	return q.fMsgPull.fSignal
 }

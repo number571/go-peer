@@ -1,9 +1,5 @@
 package settings
 
-import (
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-)
-
 const (
 	CServiceName  = "HLT"
 	CTitlePattern = "go-peer/hidden-lake-traffic"
@@ -15,11 +11,7 @@ const (
 )
 
 const (
-	CLimitMessages   = (1 << 10)
-	CWorkSize        = hls_settings.CWorkSize
-	CMessageSize     = hls_settings.CMessageSize
-	CNetworkWaitTime = hls_settings.CNetworkWaitTime
-	CNetworkMask     = hls_settings.CNetworkMask
+	CLimitMessages = (1 << 10)
 )
 
 const (

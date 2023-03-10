@@ -8,9 +8,9 @@ build:
 	make build -C ../../../../cmd/hidden_lake/service
 	make build -C ./recv_hls
 	# COPY HLS
-	cp -r ../../../../cmd/hidden_lake/service/hls ./middle_hls/prog_hls
-	cp -r ../../../../cmd/hidden_lake/service/hls ./recv_hls/prog_hls1
-	cp -r ../../../../cmd/hidden_lake/service/hls ./send_hls/prog_hls2
+	cp -r ../../../../bin/hls ./middle_hls/prog_hls
+	cp -r ../../../../bin/hls ./recv_hls/prog_hls1
+	cp -r ../../../../bin/hls ./send_hls/prog_hls2
 run: 
 	# MAKEFILE RUN
 	make run -C ./middle_hls

@@ -91,23 +91,23 @@ func (cfg *SConfig) loadLogging() error {
 	return nil
 }
 
-func (cfg *SConfig) Network() string {
+func (cfg *SConfig) GetNetwork() string {
 	return cfg.FNetwork
 }
 
-func (cfg *SConfig) Address() string {
+func (cfg *SConfig) GetAddress() string {
 	return cfg.FAddress
 }
 
-func (cfg *SConfig) Connection() string {
+func (cfg *SConfig) GetConnection() string {
 	return cfg.FConnection
 }
 
-func (cfg *SConfig) Consumers() []string {
+func (cfg *SConfig) GetConsumers() []string {
 	return cfg.FConsumers
 }
 
-func (cfg *SConfig) Logging() ILogging {
+func (cfg *SConfig) GetLogging() ILogging {
 	return cfg.fLogging
 }
 

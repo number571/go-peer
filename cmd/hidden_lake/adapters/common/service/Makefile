@@ -2,9 +2,9 @@ GC=go build
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o service .
+	$(GC) -o ../../../../../bin/common_service .
 run:
-	./service
+	./../../../../../bin/service
 clean:
-	rm -f service
-	rm -rf service.db
+	rm -f ../../../../../bin/common_service
+	rm -rf ../../../../../bin/common_service.db
