@@ -3,6 +3,11 @@ package settings
 import "time"
 
 const (
+	CServiceName  = "HLS"
+	CTitlePattern = "go-peer/hidden-lake-service"
+)
+
+const (
 	CHeaderHLS = uint32(0x1750571)
 )
 
@@ -12,8 +17,6 @@ const (
 )
 
 const (
-	CServiceName   = "HLS"
-	CTitlePattern  = "go-peer/hidden-lake-service"
 	CHeaderPubKey  = "Service-Public-Key"
 	CHeaderMsgHash = "Service-Message-Hash"
 	CNetworkMask   = 0x676F2D7065657201

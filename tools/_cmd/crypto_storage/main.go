@@ -62,7 +62,7 @@ func main() {
 			panic("data-key already exist")
 		}
 		// 1char = 4bit entropy => 128bit
-		randStr := random.NewStdPRNG().String(32)
+		randStr := random.NewStdPRNG().GetString(32)
 		err := stg.Set([]byte(dateKey), []byte(randStr))
 		if err != nil {
 			panic(err)

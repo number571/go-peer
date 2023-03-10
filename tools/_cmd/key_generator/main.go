@@ -31,6 +31,6 @@ func main() {
 		panic("generate key error")
 	}
 
-	filesystem.OpenFile("priv.key").Write([]byte(priv.String()))
-	filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().String()))
+	filesystem.OpenFile("priv.key").Write([]byte(priv.ToString()))
+	filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().ToString()))
 }
