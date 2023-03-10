@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	q := queue.NewQueue(
+	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{
 			FDuration:     time.Second,
 			FCapacity:     1 << 5,
@@ -34,30 +34,30 @@ func main() {
 	}
 
 	for i := 0; i < 3; i++ {
-		msg, err := q.Client().Encrypt(
-			q.Client().PubKey(),
+		msg, err := q.GetClient().EncryptPayload(
+			q.GetClient().GetPubKey(),
 			payload.NewPayload(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))),
 		)
 		if err != nil {
 			panic(err)
 		}
-		if err := q.Enqueue(msg); err != nil {
+		if err := q.EnqueueMessage(msg); err != nil {
 			panic(err)
 		}
 	}
 
 	for i := 0; i < 3; i++ {
-		msg := <-q.Dequeue()
-		pubKey, pld, err := q.Client().Decrypt(msg)
+		msg := <-q.DequeueMessage()
+		pubKey, pld, err := q.GetClient().DecryptMessage(msg)
 		if err != nil {
 			panic(err)
 		}
-		if pld.Head() != payloadHead {
+		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if pubKey.Address().String() != q.Client().PubKey().Address().String() {
+		if pubKey.Address().ToString() != q.GetClient().GetPubKey().Address().ToString() {
 			panic("public key is invalid")
 		}
-		fmt.Println(string(pld.Body()))
+		fmt.Println(string(pld.GetBody()))
 	}
 }

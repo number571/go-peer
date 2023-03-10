@@ -109,11 +109,8 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
-	go func() {
-		if err := node.GetNetworkNode().Run(); err != nil {
-			return
-		}
-	}()
-
+	if err := node.GetNetworkNode().Run(); err != nil {
+		return nil
+	}
 	return node
 }

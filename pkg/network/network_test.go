@@ -109,16 +109,12 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		nodes[i] = NewNode(sett)
 	}
 
-	go func() {
-		if err := nodes[2].Run(); err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		if err := nodes[4].Run(); err != nil {
-			panic(err)
-		}
-	}()
+	if err := nodes[2].Run(); err != nil {
+		panic(err)
+	}
+	if err := nodes[4].Run(); err != nil {
+		panic(err)
+	}
 
 	time.Sleep(200 * time.Millisecond)
 

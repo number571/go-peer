@@ -46,7 +46,7 @@ func main() {
 			panic("len os.Args != 3")
 		}
 
-		msg, err := client.Encrypt(
+		msg, err := client.EncryptPayload(
 			privKey.PubKey(),
 			payload.NewPayload(pldHead, []byte(os.Args[2])),
 		)
@@ -67,20 +67,20 @@ func main() {
 			panic(err)
 		}
 
-		pubKey, pld, err := client.Decrypt(msg)
+		pubKey, pld, err := client.DecryptMessage(msg)
 		if err != nil {
 			panic(err)
 		}
 
-		if pld.Head() != pldHead {
+		if pld.GetHead() != pldHead {
 			panic("payload head != constant head")
 		}
 
-		if pubKey.Address().String() != client.PubKey().Address().String() {
+		if pubKey.Address().ToString() != client.GetPubKey().Address().ToString() {
 			panic("public key is incorrect")
 		}
 
-		fmt.Println(string(pld.Body()))
+		fmt.Println(string(pld.GetBody()))
 	case "h", "hashes":
 		hashes, err := hltClient.GetHashes()
 		if err != nil {

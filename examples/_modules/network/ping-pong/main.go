@@ -17,22 +17,25 @@ const (
 
 func main() {
 	var (
-		service1 = network.NewNode(network.NewSettings(&network.SSettings{}))
+		service1 = network.NewNode(network.NewSettings(&network.SSettings{FAddress: serviceAddress}))
 		service2 = network.NewNode(network.NewSettings(&network.SSettings{}))
 	)
 
-	service1.Handle(serviceHeader, handler("#1"))
-	service2.Handle(serviceHeader, handler("#2"))
+	service1.HandleFunc(serviceHeader, handler("#1"))
+	service2.HandleFunc(serviceHeader, handler("#2"))
 
-	go service1.Listen(serviceAddress)
+	if err := service1.Run(); err != nil {
+		panic(err)
+	}
+	defer service1.Stop()
+
 	time.Sleep(time.Second) // wait
 
-	_, err := service2.Connect(serviceAddress)
-	if err != nil {
+	if err := service2.AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}
 
-	service2.Broadcast(payload.NewPayload(
+	service2.BroadcastPayload(payload.NewPayload(
 		serviceHeader,
 		[]byte("0"),
 	))
@@ -55,7 +58,7 @@ func handler(serviceName string) network.IHandlerF {
 		}
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
-		n.Broadcast(payload.NewPayload(
+		n.BroadcastPayload(payload.NewPayload(
 			serviceHeader,
 			[]byte(fmt.Sprintf("%d", num+1)),
 		))

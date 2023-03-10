@@ -66,27 +66,29 @@ func (node *sNode) Run() error {
 	if err != nil {
 		return err
 	}
-	defer listener.Close()
 
-	node.setListener(listener)
-	for {
-		tconn, err := node.getListener().Accept()
-		if err != nil {
-			break
+	go func(l net.Listener) {
+		defer l.Close()
+		node.setListener(l)
+		for {
+			tconn, err := node.getListener().Accept()
+			if err != nil {
+				break
+			}
+
+			if node.hasMaxConnSize() {
+				tconn.Close()
+				continue
+			}
+
+			sett := node.GetSettings().GetConnSettings()
+			conn := conn.LoadConn(sett, tconn)
+			address := tconn.RemoteAddr().String()
+
+			node.setConnection(address, conn)
+			go node.handleConn(address, conn)
 		}
-
-		if node.hasMaxConnSize() {
-			tconn.Close()
-			continue
-		}
-
-		sett := node.GetSettings().GetConnSettings()
-		conn := conn.LoadConn(sett, tconn)
-		address := tconn.RemoteAddr().String()
-
-		node.setConnection(address, conn)
-		go node.handleConn(address, conn)
-	}
+	}(listener)
 
 	return nil
 }

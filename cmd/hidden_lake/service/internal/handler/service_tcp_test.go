@@ -94,12 +94,10 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
 
-	go func() {
-		if err := node.GetNetworkNode().Run(); err != nil {
-			t.Error(err)
-		}
-	}()
-
+	if err := node.GetNetworkNode().Run(); err != nil {
+		t.Error(err)
+		return nil, nil
+	}
 	return node, nil
 }
 

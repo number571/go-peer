@@ -14,21 +14,21 @@ func main() {
 		client2 = newClient()
 	)
 
-	msg, err := client1.Encrypt(
-		client2.PubKey(),
+	msg, err := client1.EncryptPayload(
+		client2.GetPubKey(),
 		payload.NewPayload(0x0, []byte("hello, world!")),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	pubKey, pld, err := client2.Decrypt(msg)
+	pubKey, pld, err := client2.DecryptMessage(msg)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("Message: '%s';\nSender's public key: '%s';\n", string(pld.Body()), pubKey.String())
-	fmt.Printf("Encrypted message: '%s'\n", string(msg.Bytes()))
+	fmt.Printf("Message: '%s';\nSender's public key: '%s';\n", string(pld.GetBody()), pubKey.ToString())
+	fmt.Printf("Encrypted message: '%s'\n", string(msg.ToBytes()))
 }
 
 func newClient() client.IClient {

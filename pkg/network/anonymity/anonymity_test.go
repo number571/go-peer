@@ -112,16 +112,12 @@ func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
 		)
 	}
 
-	go func() {
-		if err := nodes[2].GetNetworkNode().Run(); err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		if err := nodes[4].GetNetworkNode().Run(); err != nil {
-			panic(err)
-		}
-	}()
+	if err := nodes[2].GetNetworkNode().Run(); err != nil {
+		panic(err)
+	}
+	if err := nodes[4].GetNetworkNode().Run(); err != nil {
+		panic(err)
+	}
 
 	time.Sleep(200 * time.Millisecond)
 
