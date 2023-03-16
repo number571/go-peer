@@ -64,6 +64,7 @@ func transferTraffic(portService, portHLT int) {
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s:%d", "localhost", portHLT),
+			&http.Client{Timeout: time.Minute},
 			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
 		),
 	)

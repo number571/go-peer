@@ -40,6 +40,7 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", addr),
+			&http.Client{Timeout: time.Minute},
 			message.NewParams(
 				anon_testutils.TCMessageSize,
 				anon_testutils.TCWorkSize,

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
@@ -20,6 +21,7 @@ import (
 )
 
 func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.ILogger) conn_keeper.IConnKeeper {
+	httpClient := &http.Client{Timeout: time.Minute}
 	anonLogger := anon_logger.NewLogger(hlt_settings.CServiceName)
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
@@ -68,6 +70,7 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 
 				for _, cHost := range cfg.GetConsumers() {
 					_, err := api.Request(
+						httpClient,
 						http.MethodPost,
 						fmt.Sprintf("http://%s", cHost),
 						msgBytes,

@@ -16,17 +16,20 @@ var (
 )
 
 type sRequester struct {
-	fHost string
+	fHost   string
+	fClient *http.Client
 }
 
-func NewRequester(host string) IRequester {
+func NewRequester(host string, client *http.Client) IRequester {
 	return &sRequester{
-		fHost: host,
+		fHost:   host,
+		fClient: client,
 	}
 }
 
 func (requester *sRequester) GetIndex() (string, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, requester.fHost),
 		nil,
@@ -43,6 +46,7 @@ func (requester *sRequester) GetIndex() (string, error) {
 
 func (requester *sRequester) FetchRequest(push *pkg_settings.SRequest) ([]byte, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
 		push,
@@ -56,6 +60,7 @@ func (requester *sRequester) FetchRequest(push *pkg_settings.SRequest) ([]byte, 
 
 func (requester *sRequester) BroadcastRequest(push *pkg_settings.SRequest) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodPut,
 		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
 		push,
@@ -65,6 +70,7 @@ func (requester *sRequester) BroadcastRequest(push *pkg_settings.SRequest) error
 
 func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		nil,
@@ -89,6 +95,7 @@ func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error)
 
 func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
@@ -98,6 +105,7 @@ func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
 
 func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
 		friend,
@@ -107,6 +115,7 @@ func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
 
 func (requester *sRequester) GetOnlines() ([]string, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		nil,
@@ -119,6 +128,7 @@ func (requester *sRequester) GetOnlines() ([]string, error) {
 
 func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
 		connect,
@@ -128,6 +138,7 @@ func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
 
 func (requester *sRequester) GetConnections() ([]string, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		nil,
@@ -140,6 +151,7 @@ func (requester *sRequester) GetConnections() ([]string, error) {
 
 func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
@@ -149,6 +161,7 @@ func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error
 
 func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
 		connect,
@@ -158,6 +171,7 @@ func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error
 
 func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
 	_, err := api.Request(
+		requester.fClient,
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		privKey,
@@ -167,6 +181,7 @@ func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
 
 func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
+		requester.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
 		nil,

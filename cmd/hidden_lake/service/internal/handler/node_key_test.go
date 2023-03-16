@@ -2,7 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
+	"time"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -15,7 +17,10 @@ func TestHandlePubKeyAPI(t *testing.T) {
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
-		hls_client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[8])),
+		hls_client.NewRequester(
+			fmt.Sprintf("http://%s", testutils.TgAddrs[8]),
+			&http.Client{Timeout: time.Minute},
+		),
 	)
 
 	pubKey, err := client.GetPubKey()

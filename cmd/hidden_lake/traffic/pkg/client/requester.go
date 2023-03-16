@@ -17,18 +17,21 @@ var (
 
 type sRequester struct {
 	fHost   string
+	fClient *http.Client
 	fParams message.IParams
 }
 
-func NewRequester(host string, params message.IParams) IRequester {
+func NewRequester(host string, client *http.Client, params message.IParams) IRequester {
 	return &sRequester{
 		fHost:   host,
+		fClient: client,
 		fParams: params,
 	}
 }
 
 func (r *sRequester) GetIndex() (string, error) {
 	resp, err := api.Request(
+		r.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, r.fHost),
 		nil,
@@ -45,6 +48,7 @@ func (r *sRequester) GetIndex() (string, error) {
 
 func (r *sRequester) GetHashes() ([]string, error) {
 	resp, err := api.Request(
+		r.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, r.fHost),
 		nil,
@@ -57,6 +61,7 @@ func (r *sRequester) GetHashes() ([]string, error) {
 
 func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMessage, error) {
 	resp, err := api.Request(
+		r.fClient,
 		http.MethodGet,
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", r.fHost, request.FHash),
 		nil,
@@ -81,6 +86,7 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 
 func (r *sRequester) PutMessage(request *pkg_settings.SPushRequest) error {
 	_, err := api.Request(
+		r.fClient,
 		http.MethodPost,
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, r.fHost),
 		request,

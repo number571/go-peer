@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Request(method, url string, data interface{}) (string, error) {
+func Request(client *http.Client, method, url string, data interface{}) (string, error) {
 	var requestBytes []byte
 
 	switch x := data.(type) {
@@ -32,7 +32,7 @@ func Request(method, url string, data interface{}) (string, error) {
 	}
 
 	req.Header.Set("Content-Type", CContentType)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}

@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
@@ -75,6 +77,7 @@ func TestApp(t *testing.T) {
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
+			&http.Client{Timeout: time.Minute},
 			message.NewParams(
 				anon_testutils.TCMessageSize,
 				anon_testutils.TCWorkSize,

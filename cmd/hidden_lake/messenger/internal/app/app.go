@@ -78,6 +78,8 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Stop() error {
+	_ = app.fState.ClearActiveState()
+
 	lastErr := types.CloseAll([]types.ICloser{
 		app.fIntServiceHTTP,
 		app.fIncServiceHTTP,

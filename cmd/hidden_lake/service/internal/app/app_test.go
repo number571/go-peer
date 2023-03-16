@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -54,7 +56,10 @@ func TestApp(t *testing.T) {
 
 	client := client.NewClient(
 		client.NewBuilder(),
-		client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[15])),
+		client.NewRequester(
+			fmt.Sprintf("http://%s", testutils.TgAddrs[15]),
+			&http.Client{Timeout: time.Minute},
+		),
 	)
 
 	// Check public key of node

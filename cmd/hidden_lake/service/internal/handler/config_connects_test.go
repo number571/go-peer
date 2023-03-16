@@ -2,7 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -15,7 +17,10 @@ func TestHandleConnectsAPI(t *testing.T) {
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
-		hls_client.NewRequester(fmt.Sprintf("http://%s", testutils.TgAddrs[6])),
+		hls_client.NewRequester(
+			fmt.Sprintf("http://%s", testutils.TgAddrs[6]),
+			&http.Client{Timeout: time.Minute},
+		),
 	)
 
 	connect := "test_connect4"

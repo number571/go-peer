@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
@@ -26,13 +28,17 @@ func initApp() (types.ICommand, error) {
 
 	hlsClient := hls_client.NewClient(
 		hls_client.NewBuilder(),
-		hls_client.NewRequester(fmt.Sprintf("http://%s", cfg.GetConnection().GetService())),
+		hls_client.NewRequester(
+			fmt.Sprintf("http://%s", cfg.GetConnection().GetService()),
+			&http.Client{Timeout: time.Minute},
+		),
 	)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", cfg.GetConnection().GetTraffic()),
+			&http.Client{Timeout: time.Minute},
 			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
 		),
 	)
