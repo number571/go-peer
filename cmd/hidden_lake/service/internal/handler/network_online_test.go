@@ -98,7 +98,7 @@ func testAllOnlineFree(node anonymity.INode) {
 		node.GetNetworkNode(),
 	})
 	types.CloseAll([]types.ICloser{
-		node.GetKeyValueDB(),
+		node.GetWrapperDB(),
 	})
 }
 

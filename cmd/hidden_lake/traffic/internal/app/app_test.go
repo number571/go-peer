@@ -8,12 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -46,22 +41,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	db := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{FPath: tcPathDB}),
-	)
-
-	sett := anonymity.NewSettings(&anonymity.SSettings{})
-	connKeeper := conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(&conn_keeper.SSettings{}),
-		anon_testutils.TestNewNetworkNode("").HandleFunc(
-			sett.GetNetworkMask(), // default value
-			func(_ network.INode, _ conn.IConn, _ []byte) {
-				// pass response actions
-			},
-		),
-	)
-
-	app := NewApp(cfg, db, connKeeper)
+	app := NewApp(cfg)
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return
@@ -93,6 +73,16 @@ func TestApp(t *testing.T) {
 
 	if title != hlt_settings.CTitlePattern {
 		t.Error("title is incorrect")
+		return
+	}
+
+	// try run after stop
+	if err := app.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := app.Run(); err != nil {
+		t.Error(err)
 		return
 	}
 }

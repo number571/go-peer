@@ -139,13 +139,13 @@ func testNewNode(i int, timeWait time.Duration, addr string) INode {
 			FTimeWait:     timeWait,
 		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		database.NewLevelDB(
+		NewWrapperDB().Set(database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
 				FHashing:   true,
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
-		),
+		)),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:     addr,
@@ -181,7 +181,7 @@ func testNewNode(i int, timeWait time.Duration, addr string) INode {
 
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
-		node.GetKeyValueDB().Close()
+		node.GetWrapperDB().Close()
 		types.StopAll([]types.ICommand{node, node.GetNetworkNode()})
 	}
 	for i := 0; i < 5; i++ {

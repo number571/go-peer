@@ -28,7 +28,7 @@ type INode interface {
 	types.ICommand
 
 	GetSettings() ISettings
-	GetKeyValueDB() database.IKeyValueDB
+	GetWrapperDB() IWrapperDB
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
@@ -43,4 +43,11 @@ type iHead interface {
 	Uint64() uint64
 	GetRoute() uint32
 	GetAction() uint32
+}
+
+type IWrapperDB interface {
+	types.ICloser
+
+	Get() database.IKeyValueDB
+	Set(database.IKeyValueDB) IWrapperDB
 }

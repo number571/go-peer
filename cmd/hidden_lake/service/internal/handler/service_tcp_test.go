@@ -51,7 +51,7 @@ func TestHLS(t *testing.T) {
 			nodeService.GetNetworkNode(),
 		})
 		types.CloseAll([]types.ICloser{
-			nodeService.GetKeyValueDB(),
+			nodeService.GetWrapperDB(),
 		})
 	}()
 
@@ -67,7 +67,7 @@ func TestHLS(t *testing.T) {
 			nodeClient.GetNetworkNode(),
 		})
 		types.CloseAll([]types.ICloser{
-			nodeClient.GetKeyValueDB(),
+			nodeClient.GetWrapperDB(),
 		})
 	}()
 }

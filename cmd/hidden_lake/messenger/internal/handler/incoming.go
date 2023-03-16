@@ -59,7 +59,7 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
 
-		db := s.GetWrapperDB().Get()
+		db := s.GetWrapperDB().Get().(database.IKeyValueDB)
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(w, hls_settings.CErrorWrite, "failed: push message to database")
 			return

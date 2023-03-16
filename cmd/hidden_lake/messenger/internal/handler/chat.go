@@ -56,7 +56,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 
 		var (
 			client = s.GetClient().Service()
-			db     = s.GetWrapperDB().Get()
+			db     = s.GetWrapperDB().Get().(database.IKeyValueDB)
 		)
 
 		myPubKey, err := client.GetPubKey()

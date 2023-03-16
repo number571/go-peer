@@ -141,7 +141,7 @@ func (app *sApp) Stop() error {
 
 	err := types.CloseAll([]types.ICloser{
 		app.fServiceHTTP,
-		app.fNode.GetKeyValueDB(),
+		app.fNode.GetWrapperDB(),
 	})
 	if err != nil {
 		lastErr = err

@@ -77,7 +77,7 @@ func (s *sState) GetTemplate() *STemplateState {
 
 func (s *sState) CreateState(hashLP []byte, privKey asymmetric.IPrivKey) error {
 	if _, err := s.GetStorage().Get(hashLP); err == nil {
-		return err
+		return fmt.Errorf("state already exists")
 	}
 	return s.newStorageState(hashLP, privKey)
 }
@@ -86,20 +86,20 @@ func (s *sState) UpdateState(hashLP []byte) error {
 	s.fMutex.Lock()
 	defer s.fMutex.Unlock()
 
+	if s.IsActive() {
+		return fmt.Errorf("state already exists")
+	}
+
 	stateValue, err := s.getStorageState(hashLP)
 	if err != nil {
 		return err
 	}
 
 	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
-	db := database.NewKeyValueDB(
+	s.GetWrapperDB().Set(database.NewKeyValueDB(
 		hlm_settings.CPathDB,
 		entropyBooster.BoostEntropy(hashLP),
-	)
-
-	if err := s.GetWrapperDB().Update(db); err != nil {
-		return err
-	}
+	))
 
 	if err := s.updateClientState(stateValue); err != nil {
 		return err

@@ -16,7 +16,6 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -30,7 +29,7 @@ type sNode struct {
 	fMutex         sync.Mutex
 	fSettings      ISettings
 	fLogger        logger.ILogger
-	fKeyValueDB    database.IKeyValueDB
+	fWrapperDB     IWrapperDB
 	fNetwork       network.INode
 	fQueue         queue.IMessageQueue
 	fFriends       asymmetric.IListPubKeys
@@ -41,7 +40,7 @@ type sNode struct {
 func NewNode(
 	sett ISettings,
 	log logger.ILogger,
-	kvDB database.IKeyValueDB,
+	wDB IWrapperDB,
 	nnode network.INode,
 	queue queue.IMessageQueue,
 	friends asymmetric.IListPubKeys,
@@ -49,7 +48,7 @@ func NewNode(
 	return &sNode{
 		fSettings:      sett,
 		fLogger:        log,
-		fKeyValueDB:    kvDB,
+		fWrapperDB:     wDB,
 		fNetwork:       nnode,
 		fQueue:         queue,
 		fFriends:       friends,
@@ -88,8 +87,8 @@ func (node *sNode) GetSettings() ISettings {
 	return node.fSettings
 }
 
-func (node *sNode) GetKeyValueDB() database.IKeyValueDB {
-	return node.fKeyValueDB
+func (node *sNode) GetWrapperDB() IWrapperDB {
+	return node.fWrapperDB
 }
 
 func (node *sNode) GetNetworkNode() network.INode {
@@ -218,13 +217,14 @@ func (node *sNode) handleWrapper(logger anon_logger.ILogger) network.IHandlerF {
 		}
 
 		var (
-			addr  = node.GetMessageQueue().GetClient().GetPubKey().Address().ToString()
-			hash  = msg.GetBody().GetHash()
-			proof = msg.GetBody().GetProof()
+			addr     = node.GetMessageQueue().GetClient().GetPubKey().Address().ToString()
+			hash     = msg.GetBody().GetHash()
+			proof    = msg.GetBody().GetProof()
+			database = node.GetWrapperDB().Get()
 		)
 
 		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
-		gotAddrs, err := node.GetKeyValueDB().Get(hashDB)
+		gotAddrs, err := database.Get(hashDB)
 
 		// check already received data by hash
 		hashIsExist := (err == nil)
@@ -235,7 +235,7 @@ func (node *sNode) handleWrapper(logger anon_logger.ILogger) network.IHandlerF {
 
 		// set hash to database
 		updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), addr)
-		if err := node.GetKeyValueDB().Set(hashDB, []byte(updateAddrs)); err != nil {
+		if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
 			node.GetLogger().PushErro(logger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, conn))
 			return
 		}

@@ -25,13 +25,13 @@ func TestNewNode(pathDB, addr string) anonymity.INode {
 			FTimeWait: 30 * time.Second,
 		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		database.NewLevelDB(
+		anonymity.NewWrapperDB().Set(database.NewLevelDB(
 			database.NewSettings(&database.SSettings{
 				FPath:      pathDB,
 				FHashing:   true,
 				FCipherKey: []byte(testutils.TcKey1),
 			}),
-		),
+		)),
 		TestNewNetworkNode(addr),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{

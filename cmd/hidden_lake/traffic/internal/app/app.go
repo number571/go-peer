@@ -3,12 +3,15 @@ package app
 import (
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
+
+	internal_logger "github.com/number571/go-peer/internal/logger"
 )
 
 const (
@@ -20,7 +23,11 @@ var (
 )
 
 type sApp struct {
-	fConfig      config.IConfig
+	fIsRun bool
+	fMutex sync.Mutex
+
+	fConfig config.IConfig
+
 	fDatabase    database.IKeyValueDB
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
@@ -28,18 +35,27 @@ type sApp struct {
 
 func NewApp(
 	cfg config.IConfig,
-	db database.IKeyValueDB,
-	connKeeper conn_keeper.IConnKeeper,
 ) types.ICommand {
 	return &sApp{
-		fConfig:      cfg,
-		fDatabase:    db,
-		fConnKeeper:  connKeeper,
-		fServiceHTTP: initServiceHTTP(cfg, connKeeper, db),
+		fConfig: cfg,
 	}
 }
 
 func (app *sApp) Run() error {
+	app.fMutex.Lock()
+	defer app.fMutex.Unlock()
+
+	if app.fIsRun {
+		return errors.New("application already running")
+	}
+	app.fIsRun = true
+
+	logger := internal_logger.StdLogger(app.fConfig.GetLogging())
+
+	app.fDatabase = initDatabase()
+	app.fConnKeeper = initConnKeeper(app.fConfig, app.fDatabase, logger)
+	app.fServiceHTTP = initServiceHTTP(app.fConfig, app.fConnKeeper, app.fDatabase)
+
 	res := make(chan error)
 
 	go func() {
@@ -71,6 +87,14 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Stop() error {
+	app.fMutex.Lock()
+	defer app.fMutex.Unlock()
+
+	if !app.fIsRun {
+		return errors.New("application already stopped or not started")
+	}
+	app.fIsRun = false
+
 	lastErr := types.StopAll([]types.ICommand{
 		app.fConnKeeper,
 		app.fConnKeeper.GetNetworkNode(),

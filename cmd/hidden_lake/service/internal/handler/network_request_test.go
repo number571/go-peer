@@ -99,7 +99,7 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 	})
 	types.CloseAll([]types.ICloser{
 		srv,
-		node.GetKeyValueDB(),
+		node.GetWrapperDB(),
 	})
 }
 

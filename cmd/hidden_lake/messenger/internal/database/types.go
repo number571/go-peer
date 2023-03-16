@@ -6,18 +6,18 @@ import (
 )
 
 type IWrapperDB interface {
-	Get() IKeyValueDB
-	Update(IKeyValueDB) error
-
 	types.ICloser
+
+	Get() IKeyValueDB
+	Set(IKeyValueDB) IWrapperDB
 }
 
 type IKeyValueDB interface {
+	types.ICloser
+
 	Size(IRelation) uint64
 	Push(IRelation, IMessage) error
 	Load(IRelation, uint64, uint64) ([]IMessage, error)
-
-	types.ICloser
 }
 
 type IRelation interface {
