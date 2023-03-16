@@ -89,7 +89,7 @@ func testAllOnlineFree(node anonymity.INode) {
 		os.RemoveAll(tcPathConfig + "_push2")
 		os.RemoveAll(tcPathDB + "_push2")
 	}()
-	types.StopAllCommands([]types.ICommand{
+	types.StopAll([]types.ICommand{
 		node,
 		node.GetNetworkNode(),
 	})

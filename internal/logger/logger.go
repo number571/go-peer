@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func DefaultLogger(logging ILogging) logger.ILogger {
+func StdLogger(logging ILogging) logger.ILogger {
 	return logger.NewLogger(defaultSettings(logging))
 }
 
@@ -16,7 +16,7 @@ func defaultSettings(logging ILogging) logger.ISettings {
 		sett.FInfo = os.Stdout
 	}
 	if logging.HasWarn() {
-		sett.FWarn = os.Stderr
+		sett.FWarn = os.Stdout
 	}
 	if logging.HasErro() {
 		sett.FErro = os.Stderr

@@ -12,6 +12,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
+// initApp work with the raw data = read files, read args
 func initApp() (types.ICommand, error) {
 	var (
 		inputKey string
@@ -41,5 +42,5 @@ func initApp() (types.ICommand, error) {
 		return nil, err
 	}
 
-	return app.NewApp(cfg, initNode(cfg, privKey)), nil
+	return app.NewApp(cfg, privKey), nil
 }

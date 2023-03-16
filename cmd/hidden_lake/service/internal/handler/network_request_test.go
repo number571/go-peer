@@ -90,7 +90,7 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 		os.RemoveAll(tcPathConfig + "_push1")
 		os.RemoveAll(tcPathDB + "_push1")
 	}()
-	types.StopAllCommands([]types.ICommand{
+	types.StopAll([]types.ICommand{
 		node,
 		node.GetNetworkNode(),
 	})

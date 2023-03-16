@@ -71,7 +71,7 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Stop() error {
-	lastErr := types.StopAllCommands([]types.ICommand{
+	lastErr := types.StopAll([]types.ICommand{
 		app.fConnKeeper,
 		app.fConnKeeper.GetNetworkNode(),
 	})

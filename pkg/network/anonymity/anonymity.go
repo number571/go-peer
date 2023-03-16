@@ -75,7 +75,7 @@ func (node *sNode) Run() error {
 
 func (node *sNode) Stop() error {
 	node.GetNetworkNode().HandleFunc(node.GetSettings().GetNetworkMask(), nil)
-	return types.StopAllCommands([]types.ICommand{
+	return types.StopAll([]types.ICommand{
 		node.GetMessageQueue(),
 	})
 }

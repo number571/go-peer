@@ -46,7 +46,7 @@ func TestHLS(t *testing.T) {
 		return
 	}
 	defer func() {
-		types.StopAllCommands([]types.ICommand{
+		types.StopAll([]types.ICommand{
 			nodeService,
 			nodeService.GetNetworkNode(),
 		})
@@ -62,7 +62,7 @@ func TestHLS(t *testing.T) {
 		return
 	}
 	defer func() {
-		types.StopAllCommands([]types.ICommand{
+		types.StopAll([]types.ICommand{
 			nodeClient,
 			nodeClient.GetNetworkNode(),
 		})

@@ -182,7 +182,7 @@ func testNewNode(i int, timeWait time.Duration, addr string) INode {
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
 		node.GetKeyValueDB().Close()
-		types.StopAllCommands([]types.ICommand{node, node.GetNetworkNode()})
+		types.StopAll([]types.ICommand{node, node.GetNetworkNode()})
 	}
 	for i := 0; i < 5; i++ {
 		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))

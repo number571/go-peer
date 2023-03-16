@@ -21,8 +21,11 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 1. Append comments for functions/variables/constants/etc (doc)
 2. Append benchmarks
 3. Write tests for coverage > 70%
-4. IApp -> ICommand (Close => Stop)
-5. Arguments with prefix 'a'
+4. Arguments with prefix 'a'
+5. Use loggers into hls, hlm, hlt
+6. Develop union_blockchain
+7. Command's stop with create and close objects (as into HLS)
+8. Rename functions in crypto package (Get,Set,...)
 
 ## Dependencies
 
@@ -36,6 +39,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 1. [Hidden Lake Service](#1-hidden-lake-service) 
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
 3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
+4. [Hidden Lake Adapters](#4-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
@@ -125,7 +129,7 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/echo_service
+$ cd examples/_cmd/echo_service/default
 $ make
 ```
 
@@ -136,6 +140,7 @@ Logs from `middle_hls` node. When sending requests and receiving responses, `mid
 
 Send request
 ```bash
+$ cd examples/_cmd/echo_service
 $ ./request.sh
 ```
 
@@ -189,7 +194,7 @@ The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm 
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/anon_messenger
+$ cd examples/_cmd/anon_messenger/default
 $ make
 ```
 
@@ -234,6 +239,10 @@ $ go run ./main.go w 'hello, world!'
 $ go run ./main.go h
 $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
 ```
+
+## 4. Hidden Lake Adapters
+
+> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 
 ## Deprecated applications
 

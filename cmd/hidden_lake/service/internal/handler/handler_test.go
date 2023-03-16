@@ -74,7 +74,7 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 		os.RemoveAll(tcPathDB)
 		os.RemoveAll(tcPathConfig)
 	}()
-	types.StopAllCommands([]types.ICommand{
+	types.StopAll([]types.ICommand{
 		node,
 		node.GetNetworkNode(),
 	})

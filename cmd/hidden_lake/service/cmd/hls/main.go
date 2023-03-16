@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/number571/go-peer/internal/pprof"
 )
 
 func main() {
-	pprof.RunPprofService(3, time.Second)
+	pprof.RunPprofService()
 
 	app, err := initApp()
 	if err != nil {
@@ -30,8 +28,5 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Service is running...")
-
 	<-shutdown
-	fmt.Println("\nShutting down...")
 }

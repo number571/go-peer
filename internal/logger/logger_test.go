@@ -24,13 +24,13 @@ func (l *tsLogger) HasErro() bool {
 }
 
 func TestLogger(t *testing.T) {
-	logger := DefaultLogger(&tsLogger{})
+	logger := StdLogger(&tsLogger{})
 	if logger.GetSettings().GetStreamInfo().Name() != os.Stdout.Name() {
 		t.Error("info stream != stdout")
 		return
 	}
-	if logger.GetSettings().GetStreamWarn().Name() != os.Stderr.Name() {
-		t.Error("warn stream != stderr")
+	if logger.GetSettings().GetStreamWarn().Name() != os.Stdout.Name() {
+		t.Error("warn stream != stdout")
 		return
 	}
 	if logger.GetSettings().GetStreamErro() != nil {

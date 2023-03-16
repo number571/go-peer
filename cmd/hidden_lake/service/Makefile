@@ -10,5 +10,5 @@ run:
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -f $(BINPATH)/hls $(BINPATH)/hls.cfg $(BINPATH)/hls.stg
-	rm -rf $(BINPATH)/hls.db
+	rm -f $(BINPATH)/hls hls.cfg
+	rm -rf hls.db

@@ -7,10 +7,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
@@ -39,8 +39,8 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	node := anon_testutils.TestNewNode(tcPathDB, "")
-	app := NewApp(cfg, node)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	app := NewApp(cfg, privKey)
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return
@@ -63,9 +63,18 @@ func TestApp(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	if pubKey.ToString() != node.GetMessageQueue().GetClient().GetPubKey().ToString() {
+	if pubKey.ToString() != privKey.PubKey().ToString() {
 		t.Errorf("public keys are not equals")
+		return
+	}
+
+	// try run after stop
+	if err := app.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := app.Run(); err != nil {
+		t.Error(err)
 		return
 	}
 }

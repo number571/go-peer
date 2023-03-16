@@ -12,7 +12,7 @@ CHECK_RETURN_CODE=if [ $$? != 0 ]; then exit; fi
 	pprof-run \
 	git-status git-push 
 
-default: clean test-prerun test-run
+default: clean test-run
 
 clean:
 	make -C ./cmd/hidden_lake clean 
@@ -29,7 +29,7 @@ test-prerun:
 	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
 	$(CHECK_RETURN_CODE);
 
-test-run:
+test-run: test-prerun 
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
@@ -38,8 +38,7 @@ test-run:
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
-test-coverage:
-	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
+test-coverage: test-prerun
 	go tool cover -html=$(TEST_PATH)/coverage.out
 
 test-benchmark:

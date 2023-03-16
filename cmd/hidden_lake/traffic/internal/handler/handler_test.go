@@ -55,7 +55,7 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	types.StopAllCommands([]types.ICommand{connKeeper})
+	types.StopAll([]types.ICommand{connKeeper})
 	types.CloseAll([]types.ICloser{srv, db})
 }
 

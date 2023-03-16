@@ -13,19 +13,18 @@ import (
 	_ "net/http/pprof"
 )
 
-func RunPprofService(retries int, waitTime time.Duration) {
-	go runPprofService(retries)
-	time.Sleep(waitTime)
-}
-
-func runPprofService(retries int) {
+func RunPprofService() {
 	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{
 		FInfo: os.Stdout,
 		FWarn: os.Stdout,
 		FErro: os.Stderr,
 	}))
+	go runPprofService(logger)
+	time.Sleep(cWaitTime)
+}
 
-	for i := 0; i < retries; i++ {
+func runPprofService(logger logger.ILogger) {
+	for i := 0; i < cRetriesNum; i++ {
 		port := random.NewStdPRNG().GetUint64()%(4<<10) + 60000 // [60000;64096]
 		logger.PushInfo(fmt.Sprintf("pprof running on %d port", port))
 
