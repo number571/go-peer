@@ -16,5 +16,5 @@ clean:
 	pkill prog_send2 || true
 	rm -rf prog_hls2 hls.db
 	rm -rf prog_hlt2 hlt.db
-	rm -rf prog_recv2 recv.db
+	rm -rf prog_recv2 common_recv.db
 	rm -rf prog_send2

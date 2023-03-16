@@ -244,6 +244,8 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 
+> More information about HLT in the [habr.com/ru/post/720544](https://habr.com/ru/post/720544/ "Habr HLA")
+
 ## Deprecated applications
 
 * Hidden Lake (HLS+HLM+HLT+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");

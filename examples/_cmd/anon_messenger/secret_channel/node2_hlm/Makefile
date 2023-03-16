@@ -21,4 +21,4 @@ clean:
 	rm -rf prog_hlt2 hlt.db
 	rm -rf prog_hlm2 hlm.db
 	rm -rf prog_send2 
-	rm -rf prog_recv2 recv.db 
+	rm -rf prog_recv2 common_recv.db 
