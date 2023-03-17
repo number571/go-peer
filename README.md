@@ -22,10 +22,8 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 2. Append benchmarks
 3. Write tests for coverage > 70%
 4. Arguments with prefix 'a'
-5. Use loggers into hls, hlm, hlt
-6. Develop union_blockchain
-7. Command's stop with create and close objects (as into HLS)
-8. Rename functions in crypto package (Get,Set,...)
+5. Develop union_blockchain
+6. Rename functions in crypto package (Get,Set,...)
 
 ## Dependencies
 

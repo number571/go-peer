@@ -47,7 +47,7 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 
 // Get public key from client object.
 func (client *sClient) GetPubKey() asymmetric.IPubKey {
-	return client.GetPrivKey().PubKey()
+	return client.GetPrivKey().GetPubKey()
 }
 
 // Get private key from client object.
@@ -109,15 +109,15 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			client.GetPubKey().Address().ToBytes(),
-			receiver.Address().ToBytes(),
+			client.GetPubKey().GetAddress().ToBytes(),
+			receiver.GetAddress().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},
 	)).ToBytes()
 
 	cipher := symmetric.NewAESCipher(session)
-	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(workSize).Proof(hash))
+	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(workSize).ProofBytes(hash))
 	return &message.SMessage{
 		FHead: message.SHeadMessage{
 			FSender:  encoding.HexEncode(cipher.EncryptBytes(client.GetPubKey().ToBytes())),
@@ -127,7 +127,7 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 		FBody: message.SBodyMessage{
 			FPayload: encoding.HexEncode(cipher.EncryptBytes(doublePayload.ToBytes())),
 			FHash:    encoding.HexEncode(hash),
-			FSign:    encoding.HexEncode(cipher.EncryptBytes(client.GetPrivKey().Sign(hash))),
+			FSign:    encoding.HexEncode(cipher.EncryptBytes(client.GetPrivKey().SignBytes(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
 		},
 	}
@@ -148,7 +148,7 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	// Proof of work. Prevent spam.
 	diff := client.GetSettings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
-	if !puzzle.Verify(msg.GetBody().GetHash(), msg.GetBody().GetProof()) {
+	if !puzzle.VerifyBytes(msg.GetBody().GetHash(), msg.GetBody().GetProof()) {
 		return nil, nil, fmt.Errorf("invalid proof of msg")
 	}
 
@@ -193,8 +193,8 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	// Check received hash and generated hash.
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			pubKey.Address().ToBytes(),
-			client.GetPubKey().Address().ToBytes(),
+			pubKey.GetAddress().ToBytes(),
+			client.GetPubKey().GetAddress().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},
@@ -209,7 +209,7 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	if sign == nil {
 		return nil, nil, fmt.Errorf("failed decrypt sign")
 	}
-	if !pubKey.Verify(msg.GetBody().GetHash(), sign) {
+	if !pubKey.VerifyBytes(msg.GetBody().GetHash(), sign) {
 		return nil, nil, fmt.Errorf("invalid msg sign")
 	}
 

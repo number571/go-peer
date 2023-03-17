@@ -32,7 +32,7 @@ func (l *sLogger) GetFmtLog(lType ILogType, msgHash []byte, proof uint64, pubKey
 	}
 	addr := make([]byte, hashing.CSHA256Size)
 	if pubKey != nil {
-		addr = pubKey.Address().ToBytes()
+		addr = pubKey.GetAddress().ToBytes()
 	}
 	hash := make([]byte, hashing.CSHA256Size)
 	if msgHash != nil {

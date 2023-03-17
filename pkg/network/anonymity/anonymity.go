@@ -217,7 +217,7 @@ func (node *sNode) handleWrapper(logger anon_logger.ILogger) network.IHandlerF {
 		}
 
 		var (
-			addr     = node.GetMessageQueue().GetClient().GetPubKey().Address().ToString()
+			addr     = node.GetMessageQueue().GetClient().GetPubKey().GetAddress().ToString()
 			hash     = msg.GetBody().GetHash()
 			proof    = msg.GetBody().GetProof()
 			database = node.GetWrapperDB().Get()
@@ -360,7 +360,7 @@ func (node *sNode) delAction(actionKey string) {
 }
 
 func newActionKey(pubKey asymmetric.IPubKey, head uint32) string {
-	pubKeyAddr := pubKey.Address().ToString()
+	pubKeyAddr := pubKey.GetAddress().ToString()
 	headString := fmt.Sprintf("%d", head)
 	return fmt.Sprintf("%s-%s", pubKeyAddr, headString)
 }

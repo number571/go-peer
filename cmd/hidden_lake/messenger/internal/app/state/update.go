@@ -70,7 +70,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		inFriends := false
 		for _, pubKeyString := range stateValue.FFriends {
 			fPubKey := asymmetric.LoadRSAPubKey(pubKeyString)
-			if pubKey.Address().ToString() == fPubKey.Address().ToString() {
+			if pubKey.GetAddress().ToString() == fPubKey.GetAddress().ToString() {
 				inFriends = true
 				break
 			}
@@ -90,7 +90,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 			continue
 		}
 
-		rel := database.NewRelation(privKey.PubKey(), pubKey)
+		rel := database.NewRelation(privKey.GetPubKey(), pubKey)
 		dbMsg := database.NewMessage(true, strMsg, msg.GetBody().GetHash())
 
 		db := s.GetWrapperDB().Get()

@@ -34,9 +34,9 @@ func NewBlock(sett ISettings, priv asymmetric.IPrivKey, prevHash []byte, txs []t
 	block := &sBlock{
 		fSettings:  sett,
 		fTXs:       txs,
-		fValidator: priv.PubKey(),
+		fValidator: priv.GetPubKey(),
 		FPrevHash:  prevHash,
-		FValidator: priv.PubKey().ToBytes(),
+		FValidator: priv.GetPubKey().ToBytes(),
 	}
 
 	if len(prevHash) != hashing.CSHA256Size {
@@ -55,7 +55,7 @@ func NewBlock(sett ISettings, priv asymmetric.IPrivKey, prevHash []byte, txs []t
 	}
 
 	block.FCurrHash = block.newHash()
-	block.FSign = priv.Sign(block.FCurrHash)
+	block.FSign = priv.SignBytes(block.FCurrHash)
 
 	return block
 }
@@ -163,7 +163,7 @@ func (block *sBlock) IsValid() bool {
 		return false
 	}
 
-	return block.Validator().Verify(block.Hash(), block.Sign())
+	return block.Validator().VerifyBytes(block.Hash(), block.Sign())
 }
 
 func (block *sBlock) txsAreValid() bool {

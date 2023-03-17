@@ -59,14 +59,14 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
 
-		db := s.GetWrapperDB().Get().(database.IKeyValueDB)
+		db := s.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(w, hls_settings.CErrorWrite, "failed: push message to database")
 			return
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:   fPubKey.Address().ToString(),
+			FAddress:   fPubKey.GetAddress().ToString(),
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})

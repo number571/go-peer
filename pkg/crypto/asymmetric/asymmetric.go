@@ -94,11 +94,11 @@ func (key *sRSAPrivKey) DecryptBytes(msg []byte) []byte {
 	return decryptRSA(key.fPrivKey, msg)
 }
 
-func (key *sRSAPrivKey) Sign(msg []byte) []byte {
+func (key *sRSAPrivKey) SignBytes(msg []byte) []byte {
 	return sign(key.fPrivKey, hashing.NewSHA256Hasher(msg).ToBytes())
 }
 
-func (key *sRSAPrivKey) PubKey() IPubKey {
+func (key *sRSAPrivKey) GetPubKey() IPubKey {
 	return key.fPubKey
 }
 
@@ -115,7 +115,7 @@ func (key *sRSAPrivKey) GetType() string {
 }
 
 func (key *sRSAPrivKey) GetSize() uint64 {
-	return key.PubKey().GetSize()
+	return key.GetPubKey().GetSize()
 }
 
 // Used PKCS1.
@@ -204,11 +204,11 @@ func (key *sRSAPubKey) EncryptBytes(msg []byte) []byte {
 	return encryptRSA(key.fPubKey, msg)
 }
 
-func (key *sRSAPubKey) Address() IAddress {
+func (key *sRSAPubKey) GetAddress() IAddress {
 	return key.fAddr
 }
 
-func (key *sRSAPubKey) Verify(msg []byte, sig []byte) bool {
+func (key *sRSAPubKey) VerifyBytes(msg []byte, sig []byte) bool {
 	return verify(key.fPubKey, hashing.NewSHA256Hasher(msg).ToBytes(), sig) == nil
 }
 

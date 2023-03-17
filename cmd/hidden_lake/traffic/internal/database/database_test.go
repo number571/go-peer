@@ -96,7 +96,7 @@ func TestDB(t *testing.T) {
 			return
 		}
 
-		if pubKey.Address().ToString() != cl.GetPubKey().Address().ToString() {
+		if pubKey.GetAddress().ToString() != cl.GetPubKey().GetAddress().ToString() {
 			t.Error("load public key != init public key")
 			return
 		}

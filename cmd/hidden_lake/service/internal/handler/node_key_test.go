@@ -46,7 +46,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		return
 	}
 
-	if pubKey.Address().ToString() == newPubKey.Address().ToString() {
+	if pubKey.GetAddress().ToString() == newPubKey.GetAddress().ToString() {
 		t.Error("public keys are equals")
 		return
 	}

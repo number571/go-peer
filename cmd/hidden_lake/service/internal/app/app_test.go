@@ -68,7 +68,7 @@ func TestApp(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if pubKey.ToString() != privKey.PubKey().ToString() {
+	if pubKey.ToString() != privKey.GetPubKey().ToString() {
 		t.Errorf("public keys are not equals")
 		return
 	}

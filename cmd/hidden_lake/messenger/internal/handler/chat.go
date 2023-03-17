@@ -56,7 +56,7 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 
 		var (
 			client = s.GetClient().Service()
-			db     = s.GetWrapperDB().Get().(database.IKeyValueDB)
+			db     = s.GetWrapperDB().Get()
 		)
 
 		myPubKey, err := client.GetPubKey()
@@ -146,8 +146,8 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 		res := &sChatMessages{
 			STemplateState: s.GetTemplate(),
 			FAddress: sChatAddress{
-				FClient: clientPubKey.Address().ToString(),
-				FFriend: friendPubKey.Address().ToString(),
+				FClient: clientPubKey.GetAddress().ToString(),
+				FFriend: friendPubKey.GetAddress().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),
 		}

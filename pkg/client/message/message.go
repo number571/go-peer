@@ -70,7 +70,7 @@ func (msg *SMessage) IsValid(params IParams) bool {
 		return false
 	}
 	puzzle := puzzle.NewPoWPuzzle(params.GetWorkSize())
-	return puzzle.Verify(msg.GetBody().GetHash(), msg.GetBody().GetProof())
+	return puzzle.VerifyBytes(msg.GetBody().GetHash(), msg.GetBody().GetProof())
 }
 
 // IHead

@@ -28,13 +28,13 @@ type sTransaction struct {
 func NewTransaction(sett ISettings, priv asymmetric.IPrivKey, payLoad []byte) ITransaction {
 	tx := &sTransaction{
 		fSettings:  sett,
-		fValidator: priv.PubKey(),
+		fValidator: priv.GetPubKey(),
 		FPayload:   payLoad,
-		FValidator: priv.PubKey().ToBytes(),
+		FValidator: priv.GetPubKey().ToBytes(),
 	}
 
 	tx.FHash = tx.newHash()
-	tx.FSign = priv.Sign(tx.FHash)
+	tx.FSign = priv.SignBytes(tx.FHash)
 
 	if !tx.IsValid() {
 		return nil
@@ -132,7 +132,7 @@ func (tx *sTransaction) IsValid() bool {
 		return false
 	}
 
-	return tx.Validator().Verify(tx.Hash(), tx.Sign())
+	return tx.Validator().VerifyBytes(tx.Hash(), tx.Sign())
 }
 
 func (tx *sTransaction) newHash() []byte {

@@ -33,7 +33,7 @@ func TestHandleRequestAPI(t *testing.T) {
 	)
 
 	node.GetNetworkNode().AddConnect(testutils.TgAddrs[11])
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	testBroadcast(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
 	testFetch(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
@@ -117,7 +117,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 	}
 
 	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	if err := node.GetNetworkNode().Run(); err != nil {
 		return nil

@@ -28,7 +28,7 @@ func TestLoadRSAKey(t *testing.T) {
 		return
 	}
 
-	if priv.PubKey().Address().ToString() != pub.Address().ToString() {
+	if priv.GetPubKey().GetAddress().ToString() != pub.GetAddress().ToString() {
 		t.Error("load public key have not relation with private key")
 		return
 	}
@@ -56,7 +56,7 @@ func testRSAConverter(priv IPrivKey, pub IPubKey) error {
 		return fmt.Errorf("public key string != tcPrivKey")
 	}
 
-	addr := pub.Address()
+	addr := pub.GetAddress()
 
 	if addr.GetSize() != hashing.CSHA256Size {
 		return fmt.Errorf("address size != sha256 size")
@@ -75,10 +75,10 @@ func TestRSASign(t *testing.T) {
 		msg  = []byte("hello, world!")
 	)
 
-	pub := priv.PubKey()
-	sign := priv.Sign(msg)
+	pub := priv.GetPubKey()
+	sign := priv.SignBytes(msg)
 
-	if !pub.Verify(msg, sign) {
+	if !pub.VerifyBytes(msg, sign) {
 		t.Error("signature is invalid")
 		return
 	}
@@ -90,7 +90,7 @@ func TestRSAEncrypt(t *testing.T) {
 		msg  = []byte("hello, world!")
 	)
 
-	pub := priv.PubKey()
+	pub := priv.GetPubKey()
 	emsg := pub.EncryptBytes(msg)
 
 	if !bytes.Equal(msg, priv.DecryptBytes(emsg)) {

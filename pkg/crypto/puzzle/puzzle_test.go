@@ -13,18 +13,18 @@ func TestPuzzle(t *testing.T) {
 	)
 
 	hash := hashing.NewSHA256Hasher(msg).ToBytes()
-	proof := puzzle.Proof(hash)
+	proof := puzzle.ProofBytes(hash)
 
-	if !puzzle.Verify(hash, proof) {
+	if !puzzle.VerifyBytes(hash, proof) {
 		t.Error("proof is invalid")
 	}
 
-	if NewPoWPuzzle(25).Verify(hash, proof) {
+	if NewPoWPuzzle(25).VerifyBytes(hash, proof) {
 		t.Error("proof 10 with 25 bits is valid?")
 	}
 
 	hash[3] = hash[3] ^ 8
-	if puzzle.Verify(hash, proof) {
+	if puzzle.VerifyBytes(hash, proof) {
 		t.Error("proof is correct?")
 	}
 }

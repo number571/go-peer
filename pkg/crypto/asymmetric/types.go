@@ -22,8 +22,8 @@ type IPubKey interface {
 	types.IConverter
 	types.IParameter
 
-	Address() IAddress
-	Verify([]byte, []byte) bool
+	GetAddress() IAddress
+	VerifyBytes([]byte, []byte) bool
 }
 
 type IPrivKey interface {
@@ -31,6 +31,6 @@ type IPrivKey interface {
 	types.IConverter
 	types.IParameter
 
-	Sign([]byte) []byte
-	PubKey() IPubKey
+	SignBytes([]byte) []byte
+	GetPubKey() IPubKey
 }

@@ -101,7 +101,7 @@ func deleteDuplicatePubKeys(pubKeys map[string]asymmetric.IPubKey) map[string]as
 	result := make(map[string]asymmetric.IPubKey, len(pubKeys))
 	mapping := make(map[string]struct{})
 	for name, pubKey := range pubKeys {
-		pubStr := pubKey.Address().ToString()
+		pubStr := pubKey.GetAddress().ToString()
 		if _, ok := mapping[pubStr]; ok {
 			continue
 		}

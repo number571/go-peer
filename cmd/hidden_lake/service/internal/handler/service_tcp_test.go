@@ -92,7 +92,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	}
 
 	node.HandleFunc(pkg_settings.CHeaderHLS, HandleServiceTCP(cfg))
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	if err := node.GetNetworkNode().Run(); err != nil {
 		t.Error(err)
@@ -110,7 +110,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	if err := node.GetNetworkNode().AddConnect(testutils.TgAddrs[4]); err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 			Bytes(),
 	)
 
-	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).PubKey()
+	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey()
 	res, err := node.FetchPayload(pubKey, pld)
 	if err != nil {
 		return node, err

@@ -23,7 +23,7 @@ func NewPoWPuzzle(diff uint64) IPuzzle {
 
 // Proof of work by the method of finding the desired hash.
 // Hash must start with 'diff' number of zero bits.
-func (puzzle *sPoWPuzzle) Proof(packHash []byte) uint64 {
+func (puzzle *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 	var (
 		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
@@ -50,7 +50,7 @@ func (puzzle *sPoWPuzzle) Proof(packHash []byte) uint64 {
 }
 
 // Verifies the work of the proof of work function.
-func (puzzle *sPoWPuzzle) Verify(packHash []byte, nonce uint64) bool {
+func (puzzle *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
 	intHash := big.NewInt(1)
 	target := big.NewInt(1)
 	bNonce := encoding.Uint64ToBytes(nonce)

@@ -1,10 +1,11 @@
 GC=go build
+BINPATH=../../../../../bin
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o ../../../../../bin/common_service .
+	$(GC) -o $(BINPATH)/common_service .
 run:
-	./../../../../../bin/service
+	./$(BINPATH)/service
 clean:
-	rm -f ../../../../../bin/common_service
-	rm -rf ../../../../../bin/common_service.db
+	rm -f $(BINPATH)/common_service
+	rm -rf $(BINPATH)/common_service.db
