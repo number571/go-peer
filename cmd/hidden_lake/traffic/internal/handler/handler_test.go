@@ -25,16 +25,16 @@ const (
 	databaseTemplate = "database_test_%s.db"
 )
 
-func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IKeyValueDB, hlt_client.IClient) {
-	db := database.NewKeyValueDB(
+func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IWrapperDB, hlt_client.IClient) {
+	wDB := database.NewWrapperDB().Set(database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:        fmt.Sprintf(databaseTemplate, addr),
 			FMessageSize: anon_testutils.TCMessageSize,
 			FWorkSize:    anon_testutils.TCWorkSize,
 		}),
-	)
+	))
 
-	srv, connKeeper := testRunService(db, addr, addrNode)
+	srv, connKeeper := testRunService(wDB, addr, addrNode)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -49,18 +49,18 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, connKeeper, db, hltClient
+	return srv, connKeeper, wDB, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, db database.IKeyValueDB) {
+func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperDB) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
 	types.StopAll([]types.ICommand{connKeeper})
-	types.CloseAll([]types.ICloser{srv, db})
+	types.CloseAll([]types.ICloser{srv, wDB})
 }
 
-func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
+func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
 	mux := http.NewServeMux()
 
 	connKeeperSettings := &conn_keeper.SSettings{}
@@ -85,8 +85,8 @@ func testRunService(db database.IKeyValueDB, addr string, addrNode string) (*htt
 	}
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(db))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(connKeeper, db))
+	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(connKeeper, wDB))
 
 	srv := &http.Server{
 		Addr:    addr,

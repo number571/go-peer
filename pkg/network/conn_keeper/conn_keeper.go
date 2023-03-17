@@ -50,7 +50,7 @@ func (connKeeper *sConnKeeper) Run() error {
 	go func() {
 		for {
 			select {
-			case <-connKeeper.fSignal:
+			case <-connKeeper.readSignal():
 				return
 			case <-time.After(connKeeper.GetSettings().GetDuration()):
 				connKeeper.tryConnectToAll()
@@ -84,4 +84,11 @@ NEXT:
 		}
 		connKeeper.fNode.AddConnect(address)
 	}
+}
+
+func (connKeeper *sConnKeeper) readSignal() <-chan struct{} {
+	connKeeper.fMutex.Lock()
+	defer connKeeper.fMutex.Unlock()
+
+	return connKeeper.fSignal
 }

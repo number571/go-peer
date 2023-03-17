@@ -223,6 +223,11 @@ func (node *sNode) handleWrapper(logger anon_logger.ILogger) network.IHandlerF {
 			database = node.GetWrapperDB().Get()
 		)
 
+		if database == nil {
+			node.GetLogger().PushErro(logger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, conn))
+			return
+		}
+
 		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
 		gotAddrs, err := database.Get(hashDB)
 

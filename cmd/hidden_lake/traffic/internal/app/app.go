@@ -26,9 +26,8 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fConfig config.IConfig
-
-	fDatabase    database.IKeyValueDB
+	fConfig      config.IConfig
+	fWrapperDB   database.IWrapperDB
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
 }
@@ -36,8 +35,13 @@ type sApp struct {
 func NewApp(
 	cfg config.IConfig,
 ) types.ICommand {
+	wDB := database.NewWrapperDB()
+	connKeeper := initConnKeeper(cfg, wDB, internal_logger.StdLogger(cfg.GetLogging()))
 	return &sApp{
-		fConfig: cfg,
+		fConfig:      cfg,
+		fWrapperDB:   wDB,
+		fConnKeeper:  connKeeper,
+		fServiceHTTP: initServiceHTTP(cfg, connKeeper, wDB),
 	}
 }
 
@@ -50,12 +54,7 @@ func (app *sApp) Run() error {
 	}
 	app.fIsRun = true
 
-	logger := internal_logger.StdLogger(app.fConfig.GetLogging())
-
-	app.fDatabase = initDatabase()
-	app.fConnKeeper = initConnKeeper(app.fConfig, app.fDatabase, logger)
-	app.fServiceHTTP = initServiceHTTP(app.fConfig, app.fConnKeeper, app.fDatabase)
-
+	app.fWrapperDB.Set(initDatabase())
 	res := make(chan error)
 
 	go func() {
@@ -102,7 +101,7 @@ func (app *sApp) Stop() error {
 
 	err := types.CloseAll([]types.ICloser{
 		app.fServiceHTTP,
-		app.fDatabase,
+		app.fWrapperDB,
 	})
 	if err != nil {
 		lastErr = err

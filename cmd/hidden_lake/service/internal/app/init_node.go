@@ -7,7 +7,6 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/storage/database"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	internal_logger "github.com/number571/go-peer/internal/logger"
@@ -24,12 +23,7 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey) anonymity.INode {
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
 		internal_logger.StdLogger(cfg.GetLogging()),
-		anonymity.NewWrapperDB().Set(database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath:    pkg_settings.CPathDB,
-				FHashing: true,
-			}),
-		)),
+		anonymity.NewWrapperDB(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:     cfg.GetAddress().GetTCP(),

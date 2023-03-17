@@ -15,17 +15,20 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
-func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueDB) http.HandlerFunc {
+func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
 			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
+		database := wDB.Get()
+
 		switch r.Method {
 		case http.MethodGet:
 			query := r.URL.Query()
-			msg, err := db.Load(query.Get("hash"))
+
+			msg, err := database.Load(query.Get("hash"))
 			if err != nil {
 				api.Response(w, pkg_settings.CErrorLoad, "failed: load message")
 				return
@@ -42,7 +45,7 @@ func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueD
 				return
 			}
 
-			if uint64(len(vRequest.FMessage)/2) > db.Settings().GetMessageSize() {
+			if uint64(len(vRequest.FMessage)/2) > database.Settings().GetMessageSize() {
 				api.Response(w, pkg_settings.CErrorPackSize, "failed: incorrect package size")
 				return
 			}
@@ -50,8 +53,8 @@ func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueD
 			msg := message.LoadMessage(
 				encoding.HexDecode(vRequest.FMessage),
 				message.NewParams(
-					db.Settings().GetMessageSize(),
-					db.Settings().GetWorkSize(),
+					database.Settings().GetMessageSize(),
+					database.Settings().GetWorkSize(),
 				),
 			)
 			if msg == nil {
@@ -59,7 +62,7 @@ func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, db database.IKeyValueD
 				return
 			}
 
-			if err := db.Push(msg); err != nil {
+			if err := database.Push(msg); err != nil {
 				api.Response(w, pkg_settings.CErrorPush, "failed: push message")
 				return
 			}

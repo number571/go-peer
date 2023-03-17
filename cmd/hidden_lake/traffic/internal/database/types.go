@@ -20,3 +20,10 @@ type ISettings interface {
 	GetMessageSize() uint64
 	GetWorkSize() uint64
 }
+
+type IWrapperDB interface {
+	types.ICloser
+
+	Get() IKeyValueDB
+	Set(IKeyValueDB) IWrapperDB
+}

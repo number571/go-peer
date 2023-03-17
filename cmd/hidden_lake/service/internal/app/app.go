@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
@@ -29,10 +30,7 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fConfig  config.IConfig
-	fPrivKey asymmetric.IPrivKey
-	fWrapper config.IWrapper
-
+	fConfig      config.IConfig
 	fNode        anonymity.INode
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
@@ -42,10 +40,12 @@ func NewApp(
 	cfg config.IConfig,
 	privKey asymmetric.IPrivKey,
 ) types.ICommand {
+	node := initNode(cfg, privKey)
 	return &sApp{
-		fConfig:  cfg,
-		fPrivKey: privKey,
-		fWrapper: config.NewWrapper(cfg),
+		fConfig:      cfg,
+		fNode:        node,
+		fConnKeeper:  initConnKeeper(cfg, node),
+		fServiceHTTP: initServiceHTTP(config.NewWrapper(cfg), node),
 	}
 }
 
@@ -58,15 +58,16 @@ func (app *sApp) Run() error {
 	}
 	app.fIsRun = true
 
-	// need reload node for close database in the stop method
-	app.fNode = initNode(app.fConfig, app.fPrivKey)
-	app.fConnKeeper = initConnKeeper(app.fConfig, app.fNode)
-	app.fServiceHTTP = initServiceHTTP(app.fWrapper, app.fNode)
-
 	res := make(chan error)
+	app.fNode.GetWrapperDB().Set(database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath:    pkg_settings.CPathDB,
+			FHashing: true,
+		}),
+	))
 
 	go func() {
-		if app.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
+		if app.fConfig.GetAddress().GetHTTP() == "" {
 			return
 		}
 
@@ -85,11 +86,9 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
-		cfg := app.fWrapper.GetConfig()
-
 		app.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
-			handler.HandleServiceTCP(cfg),
+			handler.HandleServiceTCP(app.fConfig),
 		)
 		if err := app.fNode.Run(); err != nil {
 			res <- err
@@ -98,7 +97,7 @@ func (app *sApp) Run() error {
 
 		// if node in client mode
 		// then run endless loop
-		tcpAddress := cfg.GetAddress().GetTCP()
+		tcpAddress := app.fConfig.GetAddress().GetTCP()
 		if tcpAddress == "" {
 			select {}
 		}

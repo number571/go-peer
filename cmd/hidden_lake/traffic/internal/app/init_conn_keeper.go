@@ -20,7 +20,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.ILogger) conn_keeper.IConnKeeper {
+func initConnKeeper(cfg config.IConfig, wDB database.IWrapperDB, logger logger.ILogger) conn_keeper.IConnKeeper {
 	httpClient := &http.Client{Timeout: time.Minute}
 	anonLogger := anon_logger.NewLogger(hlt_settings.CServiceName)
 	return conn_keeper.NewConnKeeper(
@@ -33,7 +33,7 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 				FMaxConnects: 1, // one HLS from cfg.Connection()
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  cfg.GetNetwork(),
-					FMessageSize: db.Settings().GetMessageSize(),
+					FMessageSize: hls_settings.CMessageSize,
 					FTimeWait:    hls_settings.CNetworkWaitTime,
 				}),
 			}),
@@ -43,8 +43,8 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 				msg := message.LoadMessage(
 					msgBytes,
 					message.NewParams(
-						db.Settings().GetMessageSize(),
-						db.Settings().GetWorkSize(),
+						hls_settings.CMessageSize,
+						hls_settings.CWorkSize,
 					),
 				)
 				if msg == nil {
@@ -57,13 +57,15 @@ func initConnKeeper(cfg config.IConfig, db database.IKeyValueDB, logger logger.I
 					proof = msg.GetBody().GetProof()
 				)
 
+				database := wDB.Get()
+
 				strHash := encoding.HexEncode(hash)
-				if _, err := db.Load(strHash); err == nil {
+				if _, err := database.Load(strHash); err == nil {
 					logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, conn))
 					return
 				}
 
-				if err := db.Push(msg); err != nil {
+				if err := database.Push(msg); err != nil {
 					logger.PushErro(anonLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, conn))
 					return
 				}

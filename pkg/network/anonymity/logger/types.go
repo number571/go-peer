@@ -29,5 +29,6 @@ const (
 
 	// ERRO
 	CLogErroMiddleware  ILogType = "MDLWR"
+	CLogErroDatabaseGet ILogType = "DBGET"
 	CLogErroDatabaseSet ILogType = "DBSET"
 )

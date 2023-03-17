@@ -9,14 +9,15 @@ import (
 	"github.com/number571/go-peer/internal/api"
 )
 
-func HandleHashesAPI(db database.IKeyValueDB) http.HandlerFunc {
+func HandleHashesAPI(wDB database.IWrapperDB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		hashes, err := db.Hashes()
+		database := wDB.Get()
+		hashes, err := database.Hashes()
 		if err != nil {
 			api.Response(w, pkg_settings.CErrorLoad, "failed: load size")
 			return
