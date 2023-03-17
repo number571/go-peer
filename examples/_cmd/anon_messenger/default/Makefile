@@ -5,7 +5,7 @@
 default: init clean build run
 init: 
 	# CHECK PROGRAMS
-	pkill --version
+	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
 	make build -C ../../../../cmd/hidden_lake/messenger
@@ -15,11 +15,11 @@ build:
 	cp ../../../../bin/hlm ./node1_hlm/prog_hlm1
 	cp ../../../../bin/hlm ./node2_hlm/prog_hlm2
 	# COPY HLS PROGRAM
-	cp ../../../../bin/hls ./middle_hls/prog_hls
+	cp ../../../../bin/hls ./middle_hls/prog_hls0
 	cp ../../../../bin/hls ./node1_hlm/prog_hls1
 	cp ../../../../bin/hls ./node2_hlm/prog_hls2
 	# COPY HLT PROGRAM
-	cp ../../../../bin/hlt ./middle_hls/prog_hlt
+	cp ../../../../bin/hlt ./middle_hls/prog_hlt0
 run: 
 	# MAKEFILE RUN
 	make run -C middle_hls

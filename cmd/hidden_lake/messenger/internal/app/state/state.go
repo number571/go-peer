@@ -117,6 +117,8 @@ func (s *sState) ClearActiveState() error {
 		return fmt.Errorf("state does not exist")
 	}
 
+	s.fHashLP = nil
+
 	if err := s.GetWrapperDB().Close(); err != nil {
 		return err
 	}
@@ -125,7 +127,6 @@ func (s *sState) ClearActiveState() error {
 		return err
 	}
 
-	s.fHashLP = nil
 	return nil
 }
 

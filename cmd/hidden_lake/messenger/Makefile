@@ -13,7 +13,7 @@ run:
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	pkill hls || true
+	pkill -15 hls || true
 	rm -f $(BINPATH)/hls $(BINPATH)/hls.cfg 
 	rm -f $(BINPATH)/hlm $(BINPATH)/hlm.cfg $(BINPATH)/hlm.stg
 	rm -rf $(BINPATH)/hls.db $(BINPATH)/hlm.db

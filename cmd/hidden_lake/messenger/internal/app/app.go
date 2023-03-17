@@ -95,19 +95,12 @@ func (app *sApp) Run() error {
 }
 
 func (app *sApp) Stop() error {
+	// state may be already closed
 	_ = app.fState.ClearActiveState()
 
-	lastErr := types.CloseAll([]types.ICloser{
+	return types.CloseAll([]types.ICloser{
 		app.fIntServiceHTTP,
 		app.fIncServiceHTTP,
+		app.fState.GetWrapperDB(),
 	})
-
-	db := app.fState.GetWrapperDB().Get()
-	if db != nil {
-		if err := db.Close(); err != nil {
-			lastErr = err
-		}
-	}
-
-	return lastErr
 }

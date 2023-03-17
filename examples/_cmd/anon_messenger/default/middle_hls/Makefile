@@ -2,10 +2,9 @@ GC=go build
 .PHONY: default run clean 
 default: clean run 
 run:
-	./prog_hls &
-	sleep 5
-	./prog_hlt &
+	./prog_hls0 &
+	./prog_hlt0 &
 clean:
-	pkill prog_hls || true
-	pkill prog_hlt || true
-	rm -rf prog_hls prog_hlt hls.db hlt.db 
+	pkill -15 prog_hls0 || true
+	pkill -15 prog_hlt0 || true
+	rm -rf prog_hls0 prog_hlt0 hls.db hlt.db 

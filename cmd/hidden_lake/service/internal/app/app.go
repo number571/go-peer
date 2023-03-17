@@ -116,7 +116,7 @@ func (app *sApp) Run() error {
 		app.Stop()
 		return err
 	case <-time.After(initStart):
-		app.fNode.GetLogger().PushInfo("service is running...")
+		app.fNode.GetLogger().PushInfo("HLS is running...")
 		return nil
 	}
 }
@@ -130,7 +130,7 @@ func (app *sApp) Stop() error {
 	}
 	app.fIsRun = false
 
-	app.fNode.GetLogger().PushInfo("service is shutting down...")
+	app.fNode.GetLogger().PushInfo("HLS is shutting down...")
 	app.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
 
 	lastErr := types.StopAll([]types.ICommand{

@@ -2,7 +2,7 @@
 default: init clean build run
 init: 
 	# CHECK PROGRAMS
-	pkill --version
+	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
 	make build -C ../../../cmd/hidden_lake/traffic
