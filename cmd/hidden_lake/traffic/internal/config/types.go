@@ -1,15 +1,11 @@
 package config
 
+import "github.com/number571/go-peer/pkg/logger"
+
 type IConfig interface {
-	GetLogging() ILogging
+	GetLogging() logger.ILogging
 	GetNetwork() string
 	GetAddress() string
 	GetConnection() string
 	GetConsumers() []string
-}
-
-type ILogging interface {
-	HasInfo() bool
-	HasWarn() bool
-	HasErro() bool
 }

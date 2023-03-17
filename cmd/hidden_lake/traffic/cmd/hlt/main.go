@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,8 +24,5 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Service is running...")
-
 	<-shutdown
-	fmt.Println("\nShutting down...")
 }

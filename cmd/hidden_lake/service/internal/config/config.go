@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 const (
@@ -17,9 +18,9 @@ const (
 )
 
 var (
-	_ IConfig  = &SConfig{}
-	_ IAddress = &SAddress{}
-	_ ILogging = &sLogging{}
+	_ IConfig         = &SConfig{}
+	_ IAddress        = &SAddress{}
+	_ logger.ILogging = &sLogging{}
 )
 
 type SConfig struct {
@@ -163,7 +164,7 @@ func (cfg *SConfig) GetFriends() map[string]asymmetric.IPubKey {
 	return result
 }
 
-func (cfg *SConfig) GetLogging() ILogging {
+func (cfg *SConfig) GetLogging() logger.ILogging {
 	return cfg.fLogging
 }
 

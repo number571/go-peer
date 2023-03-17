@@ -4,17 +4,21 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	internal_logger "github.com/number571/go-peer/internal/logger"
 )
 
 const (
@@ -26,7 +30,11 @@ var (
 )
 
 type sApp struct {
+	fIsRun bool
+	fMutex sync.Mutex
+
 	fState          state.IState
+	fLogger         logger.ILogger
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
 }
@@ -61,12 +69,21 @@ func NewApp(
 
 	return &sApp{
 		fState:          state,
+		fLogger:         internal_logger.StdLogger(cfg.GetLogging()),
 		fIntServiceHTTP: initInterfaceServiceHTTP(cfg, state),
 		fIncServiceHTTP: initIncomingServiceHTTP(cfg, state),
 	}
 }
 
 func (app *sApp) Run() error {
+	app.fMutex.Lock()
+	defer app.fMutex.Unlock()
+
+	if app.fIsRun {
+		return errors.New("application already running")
+	}
+	app.fIsRun = true
+
 	res := make(chan error)
 
 	go func() {
@@ -90,11 +107,21 @@ func (app *sApp) Run() error {
 		app.Stop()
 		return err
 	case <-time.After(initStart):
+		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
 		return nil
 	}
 }
 
 func (app *sApp) Stop() error {
+	app.fMutex.Lock()
+	defer app.fMutex.Unlock()
+
+	if !app.fIsRun {
+		return errors.New("application already stopped or not started")
+	}
+	app.fIsRun = false
+	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
+
 	// state may be already closed
 	_ = app.fState.ClearActiveState()
 

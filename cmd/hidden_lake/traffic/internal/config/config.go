@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 const (
@@ -14,7 +15,8 @@ const (
 )
 
 var (
-	_ IConfig = &SConfig{}
+	_ IConfig         = &SConfig{}
+	_ logger.ILogging = &sLogging{}
 )
 
 type SConfig struct {
@@ -107,7 +109,7 @@ func (cfg *SConfig) GetConsumers() []string {
 	return cfg.FConsumers
 }
 
-func (cfg *SConfig) GetLogging() ILogging {
+func (cfg *SConfig) GetLogging() logger.ILogging {
 	return cfg.fLogging
 }
 

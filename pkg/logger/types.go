@@ -14,3 +14,9 @@ type ILogger interface {
 	PushWarn(string)
 	PushErro(string)
 }
+
+type ILogging interface {
+	HasInfo() bool
+	HasWarn() bool
+	HasErro() bool
+}

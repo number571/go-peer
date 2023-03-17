@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 type IWrapper interface {
@@ -16,17 +17,11 @@ type IEditor interface {
 
 type IConfig interface {
 	GetNetwork() string
-	GetLogging() ILogging
+	GetLogging() logger.ILogging
 	GetAddress() IAddress
 	GetConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
 	GetService(string) (string, bool)
-}
-
-type ILogging interface {
-	HasInfo() bool
-	HasWarn() bool
-	HasErro() bool
 }
 
 type IAddress interface {

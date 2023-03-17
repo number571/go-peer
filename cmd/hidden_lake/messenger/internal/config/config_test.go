@@ -9,11 +9,13 @@ import (
 )
 
 const (
+	tcLogging    = true
 	tcConfigFile = "config_test.txt"
 )
 
 const (
 	tcConfigTemplate = `{
+	"logging": ["info", "erro"],
 	"address": {
 		"interface": "%s",
 		"incoming": "%s"
@@ -56,6 +58,21 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if cfg.GetLogging().HasInfo() != tcLogging {
+		t.Error("logging.info is invalid")
+		return
+	}
+
+	if cfg.GetLogging().HasErro() != tcLogging {
+		t.Error("logging.erro is invalid")
+		return
+	}
+
+	if cfg.GetLogging().HasWarn() == tcLogging {
+		t.Error("logging.warn is invalid")
 		return
 	}
 

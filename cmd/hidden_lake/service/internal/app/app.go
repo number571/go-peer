@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"sync"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	internal_logger "github.com/number571/go-peer/internal/logger"
 )
 
 const (
@@ -32,6 +35,7 @@ type sApp struct {
 
 	fConfig      config.IConfig
 	fNode        anonymity.INode
+	fLogger      logger.ILogger
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
 }
@@ -40,10 +44,12 @@ func NewApp(
 	cfg config.IConfig,
 	privKey asymmetric.IPrivKey,
 ) types.ICommand {
-	node := initNode(cfg, privKey)
+	logger := internal_logger.StdLogger(cfg.GetLogging())
+	node := initNode(cfg, privKey, logger)
 	return &sApp{
 		fConfig:      cfg,
 		fNode:        node,
+		fLogger:      logger,
 		fConnKeeper:  initConnKeeper(cfg, node),
 		fServiceHTTP: initServiceHTTP(config.NewWrapper(cfg), node),
 	}
@@ -115,7 +121,7 @@ func (app *sApp) Run() error {
 		app.Stop()
 		return err
 	case <-time.After(initStart):
-		app.fNode.GetLogger().PushInfo("HLS is running...")
+		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
@@ -128,10 +134,9 @@ func (app *sApp) Stop() error {
 		return errors.New("application already stopped or not started")
 	}
 	app.fIsRun = false
+	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	app.fNode.GetLogger().PushInfo("HLS is shutting down...")
 	app.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
-
 	lastErr := types.StopAll([]types.ICommand{
 		app.fNode,
 		app.fConnKeeper,

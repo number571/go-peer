@@ -2,15 +2,18 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	internal_logger "github.com/number571/go-peer/internal/logger"
 )
 
@@ -28,6 +31,7 @@ type sApp struct {
 
 	fConfig      config.IConfig
 	fWrapperDB   database.IWrapperDB
+	fLogger      logger.ILogger
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
 }
@@ -36,10 +40,12 @@ func NewApp(
 	cfg config.IConfig,
 ) types.ICommand {
 	wDB := database.NewWrapperDB()
-	connKeeper := initConnKeeper(cfg, wDB, internal_logger.StdLogger(cfg.GetLogging()))
+	logger := internal_logger.StdLogger(cfg.GetLogging())
+	connKeeper := initConnKeeper(cfg, wDB, logger)
 	return &sApp{
 		fConfig:      cfg,
 		fWrapperDB:   wDB,
+		fLogger:      logger,
 		fConnKeeper:  connKeeper,
 		fServiceHTTP: initServiceHTTP(cfg, connKeeper, wDB),
 	}
@@ -81,6 +87,7 @@ func (app *sApp) Run() error {
 		app.Stop()
 		return err
 	case <-time.After(initStart):
+		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
@@ -93,6 +100,7 @@ func (app *sApp) Stop() error {
 		return errors.New("application already stopped or not started")
 	}
 	app.fIsRun = false
+	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	lastErr := types.StopAll([]types.ICommand{
 		app.fConnKeeper,

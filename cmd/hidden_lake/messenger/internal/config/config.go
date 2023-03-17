@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 var (
@@ -14,10 +15,15 @@ var (
 )
 
 type SConfig struct {
+	FLogging    []string     `json:"logging,omitempty"`
 	FAddress    *SAddress    `json:"address"`
 	FConnection *SConnection `json:"connection"`
 	FStorageKey string       `json:"storage_key,omitempty"`
+
+	fLogging *sLogging
 }
+
+type sLogging []bool
 
 type SAddress struct {
 	FInterface string `json:"interface"`
@@ -40,6 +46,9 @@ func BuildConfig(filepath string, cfg *SConfig) (IConfig, error) {
 		return nil, err
 	}
 
+	if err := cfg.loadLogging(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
@@ -60,7 +69,32 @@ func LoadConfig(filepath string) (IConfig, error) {
 		return nil, err
 	}
 
+	if err := cfg.loadLogging(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
+}
+
+func (cfg *SConfig) loadLogging() error {
+	// [info, warn, erro]
+	logging := sLogging(make([]bool, 3))
+
+	mapping := map[string]int{
+		"info": 0,
+		"warn": 1,
+		"erro": 2,
+	}
+
+	for _, v := range cfg.FLogging {
+		logType, ok := mapping[v]
+		if !ok {
+			return fmt.Errorf("undefined log type '%s'", v)
+		}
+		logging[logType] = true
+	}
+
+	cfg.fLogging = &logging
+	return nil
 }
 
 func (cfg *SConfig) GetAddress() IAddress {
@@ -89,4 +123,20 @@ func (addr *SAddress) GetInterface() string {
 
 func (addr *SAddress) GetIncoming() string {
 	return addr.FIncoming
+}
+
+func (cfg *SConfig) GetLogging() logger.ILogging {
+	return cfg.fLogging
+}
+
+func (logging *sLogging) HasInfo() bool {
+	return (*logging)[0]
+}
+
+func (logging *sLogging) HasWarn() bool {
+	return (*logging)[1]
+}
+
+func (logging *sLogging) HasErro() bool {
+	return (*logging)[2]
 }

@@ -6,10 +6,12 @@ import (
 	"syscall"
 
 	"github.com/number571/go-peer/internal/pprof"
+
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func main() {
-	pprof.RunPprofService()
+	pprof.RunPprofService(pkg_settings.CServiceName)
 
 	app, err := initApp()
 	if err != nil {
