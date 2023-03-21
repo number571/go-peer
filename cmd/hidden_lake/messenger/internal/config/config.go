@@ -35,28 +35,28 @@ type SConnection struct {
 	FTraffic string `json:"traffic,omitempty"`
 }
 
-func BuildConfig(filepath string, cfg *SConfig) (IConfig, error) {
-	configFile := filesystem.OpenFile(filepath)
+func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
+	configFile := filesystem.OpenFile(pFilepath)
 
 	if configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' already exist", filepath)
+		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
 	}
 
-	if err := configFile.Write(encoding.Serialize(cfg)); err != nil {
+	if err := configFile.Write(encoding.Serialize(pCfg)); err != nil {
 		return nil, err
 	}
 
-	if err := cfg.loadLogging(); err != nil {
+	if err := pCfg.loadLogging(); err != nil {
 		return nil, err
 	}
-	return cfg, nil
+	return pCfg, nil
 }
 
-func LoadConfig(filepath string) (IConfig, error) {
-	configFile := filesystem.OpenFile(filepath)
+func LoadConfig(pFilepath string) (IConfig, error) {
+	configFile := filesystem.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' does not exist", filepath)
+		return nil, fmt.Errorf("config file '%s' does not exist", pFilepath)
 	}
 
 	bytes, err := configFile.Read()
@@ -75,7 +75,7 @@ func LoadConfig(filepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *SConfig) loadLogging() error {
+func (p *SConfig) loadLogging() error {
 	// [info, warn, erro]
 	logging := sLogging(make([]bool, 3))
 
@@ -85,7 +85,7 @@ func (cfg *SConfig) loadLogging() error {
 		"erro": 2,
 	}
 
-	for _, v := range cfg.FLogging {
+	for _, v := range p.FLogging {
 		logType, ok := mapping[v]
 		if !ok {
 			return fmt.Errorf("undefined log type '%s'", v)
@@ -93,50 +93,50 @@ func (cfg *SConfig) loadLogging() error {
 		logging[logType] = true
 	}
 
-	cfg.fLogging = &logging
+	p.fLogging = &logging
 	return nil
 }
 
-func (cfg *SConfig) GetAddress() IAddress {
-	return cfg.FAddress
+func (p *SConfig) GetAddress() IAddress {
+	return p.FAddress
 }
 
-func (cfg *SConfig) GetConnection() IConnection {
-	return cfg.FConnection
+func (p *SConfig) GetConnection() IConnection {
+	return p.FConnection
 }
 
-func (cfg *SConfig) GetStorageKey() string {
-	return cfg.FStorageKey
+func (p *SConfig) GetStorageKey() string {
+	return p.FStorageKey
 }
 
-func (conn *SConnection) GetService() string {
-	return conn.FService
+func (p *SConnection) GetService() string {
+	return p.FService
 }
 
-func (conn *SConnection) GetTraffic() string {
-	return conn.FTraffic
+func (p *SConnection) GetTraffic() string {
+	return p.FTraffic
 }
 
-func (addr *SAddress) GetInterface() string {
-	return addr.FInterface
+func (p *SAddress) GetInterface() string {
+	return p.FInterface
 }
 
-func (addr *SAddress) GetIncoming() string {
-	return addr.FIncoming
+func (p *SAddress) GetIncoming() string {
+	return p.FIncoming
 }
 
-func (cfg *SConfig) GetLogging() logger.ILogging {
-	return cfg.fLogging
+func (p *SConfig) GetLogging() logger.ILogging {
+	return p.fLogging
 }
 
-func (logging *sLogging) HasInfo() bool {
-	return (*logging)[0]
+func (p *sLogging) HasInfo() bool {
+	return (*p)[0]
 }
 
-func (logging *sLogging) HasWarn() bool {
-	return (*logging)[1]
+func (p *sLogging) HasWarn() bool {
+	return (*p)[1]
 }
 
-func (logging *sLogging) HasErro() bool {
-	return (*logging)[2]
+func (p *sLogging) HasErro() bool {
+	return (*p)[2]
 }

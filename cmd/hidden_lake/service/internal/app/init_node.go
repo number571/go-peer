@@ -12,7 +12,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey, logger logger.ILogger) anonymity.INode {
+func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  pkg_settings.CServiceName,
@@ -22,15 +22,15 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey, logger logger.ILo
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
-		logger,
+		pLogger,
 		anonymity.NewWrapperDB(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:     cfg.GetAddress().GetTCP(),
+				FAddress:     pCfg.GetAddress().GetTCP(),
 				FCapacity:    pkg_settings.CNetworkCapacity,
 				FMaxConnects: pkg_settings.CNetworkMaxConns,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:  cfg.GetNetwork(),
+					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: pkg_settings.CMessageSize,
 					FTimeWait:    pkg_settings.CNetworkWaitTime,
 				}),
@@ -42,11 +42,11 @@ func initNode(cfg config.IConfig, privKey asymmetric.IPrivKey, logger logger.ILo
 				FPullCapacity: pkg_settings.CQueuePullCapacity,
 				FDuration:     pkg_settings.CQueueDuration,
 			}),
-			pkg_settings.InitClient(privKey),
+			pkg_settings.InitClient(pPrivKey),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
-			for _, pubKey := range cfg.GetFriends() {
+			for _, pubKey := range pCfg.GetFriends() {
 				f2f.AddPubKey(pubKey)
 			}
 			return f2f

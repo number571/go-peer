@@ -11,17 +11,17 @@ type sRelation struct {
 	fFriend asymmetric.IPubKey
 }
 
-func NewRelation(iam, friend asymmetric.IPubKey) IRelation {
+func NewRelation(pIAm, pFriend asymmetric.IPubKey) IRelation {
 	return &sRelation{
-		fIAm:    iam,
-		fFriend: friend,
+		fIAm:    pIAm,
+		fFriend: pFriend,
 	}
 }
 
-func (r *sRelation) IAm() asymmetric.IPubKey {
-	return r.fIAm
+func (p *sRelation) IAm() asymmetric.IPubKey {
+	return p.fIAm
 }
 
-func (r *sRelation) Friend() asymmetric.IPubKey {
-	return r.fFriend
+func (p *sRelation) Friend() asymmetric.IPubKey {
+	return p.fFriend
 }

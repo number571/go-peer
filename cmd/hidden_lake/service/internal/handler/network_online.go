@@ -11,18 +11,18 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleNetworkOnlineAPI(node anonymity.INode) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vConnect pkg_settings.SConnect
 
-		if r.Method != http.MethodGet && r.Method != http.MethodDelete {
-			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+		if pR.Method != http.MethodGet && pR.Method != http.MethodDelete {
+			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		switch r.Method {
+		switch pR.Method {
 		case http.MethodGet:
-			conns := node.GetNetworkNode().GetConnections()
+			conns := pNode.GetNetworkNode().GetConnections()
 
 			inOnline := make([]string, 0, len(conns))
 			for addr := range conns {
@@ -33,19 +33,19 @@ func HandleNetworkOnlineAPI(node anonymity.INode) http.HandlerFunc {
 				return inOnline[i] < inOnline[j]
 			})
 
-			api.Response(w, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
+			api.Response(pW, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
 		case http.MethodDelete:
-			if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
-				api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+			if err := json.NewDecoder(pR.Body).Decode(&vConnect); err != nil {
+				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 				return
 			}
 
-			if err := node.GetNetworkNode().DelConnect(vConnect.FConnect); err != nil {
-				api.Response(w, pkg_settings.CErrorNone, "failed: delete online connection")
+			if err := pNode.GetNetworkNode().DelConnect(vConnect.FConnect); err != nil {
+				api.Response(pW, pkg_settings.CErrorNone, "failed: delete online connection")
 				return
 			}
 
-			api.Response(w, pkg_settings.CErrorNone, "success: delete online connection")
+			api.Response(pW, pkg_settings.CErrorNone, "success: delete online connection")
 		}
 	}
 }

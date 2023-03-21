@@ -7,23 +7,23 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 )
 
-func SignOutPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/sign/out" {
-			NotFoundPage(s)(w, r)
+func SignOutPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/sign/out" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if !s.IsActive() {
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+		if !pState.IsActive() {
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		if err := s.ClearActiveState(); err != nil {
-			fmt.Fprint(w, "error: clean hls_client data")
+		if err := pState.ClearActiveState(); err != nil {
+			fmt.Fprint(pW, "error: clean hls_client data")
 			return
 		}
 
-		http.Redirect(w, r, "/about", http.StatusFound)
+		http.Redirect(pW, pR, "/about", http.StatusFound)
 	}
 }

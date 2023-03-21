@@ -17,56 +17,56 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/friends" {
-			NotFoundPage(s)(w, r)
+func FriendsPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/friends" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if !s.IsActive() {
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+		if !pState.IsActive() {
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		r.ParseForm()
+		pR.ParseForm()
 
-		switch r.FormValue("method") {
+		switch pR.FormValue("method") {
 		case http.MethodPost:
-			aliasName := strings.TrimSpace(r.FormValue("alias_name"))
-			pubStrKey := strings.TrimSpace(r.FormValue("public_key"))
+			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
+			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
 			if aliasName == "" || pubStrKey == "" {
-				fmt.Fprint(w, "error: host or port is null")
+				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
 			pubKey := asymmetric.LoadRSAPubKey(pubStrKey)
 			if pubKey == nil {
-				fmt.Fprint(w, "error: public key is nil")
+				fmt.Fprint(pW, "error: public key is nil")
 				return
 			}
-			if err := s.AddFriend(aliasName, pubKey); err != nil {
-				fmt.Fprint(w, "error: add friend")
+			if err := pState.AddFriend(aliasName, pubKey); err != nil {
+				fmt.Fprint(pW, "error: add friend")
 				return
 			}
 		case http.MethodDelete:
-			aliasName := strings.TrimSpace(r.FormValue("alias_name"))
+			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			if aliasName == "" {
-				fmt.Fprint(w, "error: alias_name is null")
+				fmt.Fprint(pW, "error: alias_name is null")
 				return
 			}
-			if err := s.DelFriend(aliasName); err != nil {
-				fmt.Fprint(w, "error: del friend")
+			if err := pState.DelFriend(aliasName); err != nil {
+				fmt.Fprint(pW, "error: del friend")
 				return
 			}
 		}
-		res, err := s.GetClient().Service().GetFriends()
+		res, err := pState.GetClient().Service().GetFriends()
 		if err != nil {
-			fmt.Fprint(w, "error: read friends")
+			fmt.Fprint(pW, "error: read friends")
 			return
 		}
 
 		result := new(sFriends)
-		result.STemplateState = s.GetTemplate()
+		result.STemplateState = pState.GetTemplate()
 		result.FFriends = make([]string, 0, len(res))
 
 		for aliasName := range res {
@@ -82,6 +82,6 @@ func FriendsPage(s state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, result)
+		t.Execute(pW, result)
 	}
 }

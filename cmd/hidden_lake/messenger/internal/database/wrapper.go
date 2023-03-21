@@ -19,11 +19,11 @@ func NewWrapperDB() IWrapperDB {
 	return &sWrapperDB{fWrapper: wrapper.NewWrapper()}
 }
 
-func (w *sWrapperDB) Get() IKeyValueDB {
-	w.fMutex.Lock()
-	defer w.fMutex.Unlock()
+func (p *sWrapperDB) Get() IKeyValueDB {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	db, ok := w.fWrapper.Get().(IKeyValueDB)
+	db, ok := p.fWrapper.Get().(IKeyValueDB)
 	if !ok {
 		return nil
 	}
@@ -31,23 +31,23 @@ func (w *sWrapperDB) Get() IKeyValueDB {
 	return db
 }
 
-func (w *sWrapperDB) Set(db IKeyValueDB) IWrapperDB {
-	w.fMutex.Lock()
-	defer w.fMutex.Unlock()
+func (p *sWrapperDB) Set(pDB IKeyValueDB) IWrapperDB {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	w.fWrapper.Set(db)
-	return w
+	p.fWrapper.Set(pDB)
+	return p
 }
 
-func (w *sWrapperDB) Close() error {
-	w.fMutex.Lock()
-	defer w.fMutex.Unlock()
+func (p *sWrapperDB) Close() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	db, ok := w.fWrapper.Get().(IKeyValueDB)
+	db, ok := p.fWrapper.Get().(IKeyValueDB)
 	if !ok {
 		return nil
 	}
 
-	w.fWrapper.Set(nil)
+	p.fWrapper.Set(nil)
 	return db.Close()
 }

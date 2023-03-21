@@ -19,43 +19,43 @@ type sSettings struct {
 	FWorkSize      uint64
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FPath:          sett.FPath,
-		FWorkSize:      sett.FWorkSize,
-		FMessageSize:   sett.FMessageSize,
-		FLimitMessages: sett.FLimitMessages,
+		FPath:          pSett.FPath,
+		FWorkSize:      pSett.FWorkSize,
+		FMessageSize:   pSett.FMessageSize,
+		FLimitMessages: pSett.FLimitMessages,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FPath == "" {
-		s.FPath = cPath
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FPath == "" {
+		p.FPath = cPath
 	}
-	if s.FWorkSize == 0 {
-		s.FWorkSize = cWorkSize
+	if p.FWorkSize == 0 {
+		p.FWorkSize = cWorkSize
 	}
-	if s.FMessageSize == 0 {
-		s.FMessageSize = cMessageSize
+	if p.FMessageSize == 0 {
+		p.FMessageSize = cMessageSize
 	}
-	if s.FLimitMessages == 0 {
-		s.FLimitMessages = cLimitMessages
+	if p.FLimitMessages == 0 {
+		p.FLimitMessages = cLimitMessages
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetPath() string {
-	return s.FPath
+func (p *sSettings) GetPath() string {
+	return p.FPath
 }
 
 func (s *sSettings) GetLimitMessages() uint64 {
 	return s.FLimitMessages
 }
 
-func (s *sSettings) GetMessageSize() uint64 {
-	return s.FMessageSize
+func (p *sSettings) GetMessageSize() uint64 {
+	return p.FMessageSize
 }
 
-func (s *sSettings) GetWorkSize() uint64 {
-	return s.FWorkSize
+func (p *sSettings) GetWorkSize() uint64 {
+	return p.FWorkSize
 }

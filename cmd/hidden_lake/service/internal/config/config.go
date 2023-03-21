@@ -52,28 +52,28 @@ type SAddress struct {
 	FHTTP string `json:"http,omitempty"`
 }
 
-func BuildConfig(filepath string, cfg *SConfig) (IConfig, error) {
-	configFile := filesystem.OpenFile(filepath)
+func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
+	configFile := filesystem.OpenFile(pFilepath)
 
 	if configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' already exist", filepath)
+		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
 	}
 
-	if err := configFile.Write(encoding.Serialize(cfg)); err != nil {
+	if err := configFile.Write(encoding.Serialize(pCfg)); err != nil {
 		return nil, err
 	}
 
-	if err := cfg.initConfig(filepath); err != nil {
+	if err := pCfg.initConfig(pFilepath); err != nil {
 		return nil, err
 	}
-	return cfg, nil
+	return pCfg, nil
 }
 
-func LoadConfig(filepath string) (IConfig, error) {
-	configFile := filesystem.OpenFile(filepath)
+func LoadConfig(pFilepath string) (IConfig, error) {
+	configFile := filesystem.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' does not exist", filepath)
+		return nil, fmt.Errorf("config file '%s' does not exist", pFilepath)
 	}
 
 	bytes, err := configFile.Read()
@@ -86,27 +86,27 @@ func LoadConfig(filepath string) (IConfig, error) {
 		return nil, err
 	}
 
-	if err := cfg.initConfig(filepath); err != nil {
+	if err := cfg.initConfig(pFilepath); err != nil {
 		return nil, err
 	}
 	return cfg, nil
 }
 
-func (cfg *SConfig) initConfig(filepath string) error {
-	cfg.fFilepath = filepath
+func (p *SConfig) initConfig(filepath string) error {
+	p.fFilepath = filepath
 
-	if err := cfg.loadPubKeys(); err != nil {
+	if err := p.loadPubKeys(); err != nil {
 		return err
 	}
 
-	if err := cfg.loadLogging(); err != nil {
+	if err := p.loadLogging(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (cfg *SConfig) loadLogging() error {
+func (p *SConfig) loadLogging() error {
 	// [info, warn, erro]
 	logging := sLogging(make([]bool, 3))
 
@@ -116,7 +116,7 @@ func (cfg *SConfig) loadLogging() error {
 		"erro": 2,
 	}
 
-	for _, v := range cfg.FLogging {
+	for _, v := range p.FLogging {
 		logType, ok := mapping[v]
 		if !ok {
 			return fmt.Errorf("undefined log type '%s'", v)
@@ -124,15 +124,15 @@ func (cfg *SConfig) loadLogging() error {
 		logging[logType] = true
 	}
 
-	cfg.fLogging = &logging
+	p.fLogging = &logging
 	return nil
 }
 
-func (cfg *SConfig) loadPubKeys() error {
-	cfg.fFriends = make(map[string]asymmetric.IPubKey)
+func (p *SConfig) loadPubKeys() error {
+	p.fFriends = make(map[string]asymmetric.IPubKey)
 
 	mapping := make(map[string]interface{})
-	for name, val := range cfg.FFriends {
+	for name, val := range p.FFriends {
 		if _, ok := mapping[val]; ok {
 			return fmt.Errorf("found public key duplicate '%s'", val)
 		}
@@ -140,7 +140,7 @@ func (cfg *SConfig) loadPubKeys() error {
 		if pubKey == nil {
 			return fmt.Errorf("public key is nil for '%s'", name)
 		}
-		cfg.fFriends[name] = pubKey
+		p.fFriends[name] = pubKey
 		if pubKey.GetSize() != pkg_settings.CAKeySize {
 			return fmt.Errorf("not supported key size for '%s'", name)
 		}
@@ -149,77 +149,77 @@ func (cfg *SConfig) loadPubKeys() error {
 	return nil
 }
 
-func (cfg *SConfig) GetNetwork() string {
-	return cfg.FNetwork
+func (p *SConfig) GetNetwork() string {
+	return p.FNetwork
 }
 
-func (cfg *SConfig) GetFriends() map[string]asymmetric.IPubKey {
-	cfg.fMutex.Lock()
-	defer cfg.fMutex.Unlock()
+func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	result := make(map[string]asymmetric.IPubKey)
-	for k, v := range cfg.fFriends {
+	for k, v := range p.fFriends {
 		result[k] = v
 	}
 	return result
 }
 
-func (cfg *SConfig) GetLogging() logger.ILogging {
-	return cfg.fLogging
+func (p *SConfig) GetLogging() logger.ILogging {
+	return p.fLogging
 }
 
-func (cfg *SConfig) GetAddress() IAddress {
-	return cfg.FAddress
+func (p *SConfig) GetAddress() IAddress {
+	return p.FAddress
 }
 
-func (cfg *SConfig) GetConnections() []string {
-	return cfg.FConnections
+func (p *SConfig) GetConnections() []string {
+	return p.FConnections
 }
 
-func (cfg *SConfig) GetService(name string) (string, bool) {
-	cfg.fMutex.Lock()
-	defer cfg.fMutex.Unlock()
+func (p *SConfig) GetService(name string) (string, bool) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	addr, ok := cfg.FServices[name]
+	addr, ok := p.FServices[name]
 	return addr, ok
 }
 
-func (traffic *STraffic) GetDownload() []string {
-	if traffic == nil {
+func (p *STraffic) GetDownload() []string {
+	if p == nil {
 		return nil
 	}
-	return traffic.FDownload
+	return p.FDownload
 }
 
-func (traffic *STraffic) GetUpload() []string {
-	if traffic == nil {
+func (p *STraffic) GetUpload() []string {
+	if p == nil {
 		return nil
 	}
-	return traffic.FUpload
+	return p.FUpload
 }
 
-func (logging *sLogging) HasInfo() bool {
-	return (*logging)[0]
+func (p *sLogging) HasInfo() bool {
+	return (*p)[0]
 }
 
-func (logging *sLogging) HasWarn() bool {
-	return (*logging)[1]
+func (p *sLogging) HasWarn() bool {
+	return (*p)[1]
 }
 
-func (logging *sLogging) HasErro() bool {
-	return (*logging)[2]
+func (p *sLogging) HasErro() bool {
+	return (*p)[2]
 }
 
-func (address *SAddress) GetTCP() string {
-	if address == nil {
+func (p *SAddress) GetTCP() string {
+	if p == nil {
 		return ""
 	}
-	return address.FTCP
+	return p.FTCP
 }
 
-func (address *SAddress) GetHTTP() string {
-	if address == nil {
+func (p *SAddress) GetHTTP() string {
+	if p == nil {
 		return ""
 	}
-	return address.FHTTP
+	return p.FHTTP
 }

@@ -36,55 +36,55 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/friends/chat" {
-			NotFoundPage(s)(w, r)
+func FriendsChatPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/friends/chat" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if !s.IsActive() {
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+		if !pState.IsActive() {
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		aliasName := r.URL.Query().Get("alias_name")
+		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
-			fmt.Fprint(w, "alias name is null")
+			fmt.Fprint(pW, "alias name is null")
 			return
 		}
 
 		var (
-			client = s.GetClient().Service()
-			db     = s.GetWrapperDB().Get()
+			client = pState.GetClient().Service()
+			db     = pState.GetWrapperDB().Get()
 		)
 
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
-			fmt.Fprint(w, "error: read public key")
+			fmt.Fprint(pW, "error: read public key")
 			return
 		}
 
 		friends, err := client.GetFriends()
 		if err != nil {
-			fmt.Fprint(w, "error: read friends")
+			fmt.Fprint(pW, "error: read friends")
 			return
 		}
 
 		friendPubKey, ok := friends[aliasName]
 		if !ok {
-			fmt.Fprint(w, "undefined public key by alias name")
+			fmt.Fprint(pW, "undefined public key by alias name")
 			return
 		}
 
 		rel := database.NewRelation(myPubKey, friendPubKey)
-		r.ParseForm()
+		pR.ParseForm()
 
-		switch r.FormValue("method") {
+		switch pR.FormValue("method") {
 		case http.MethodPost:
-			msg := strings.TrimSpace(r.FormValue("input_message"))
+			msg := strings.TrimSpace(pR.FormValue("input_message"))
 			if msg == "" {
-				fmt.Fprint(w, "error: message is null")
+				fmt.Fprint(pW, "error: message is null")
 				return
 			}
 
@@ -97,29 +97,29 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 					WithBody([]byte(msg)),
 			)
 			if err != nil {
-				fmt.Fprint(w, "error: push message to network")
+				fmt.Fprint(pW, "error: push message to network")
 				return
 			}
 
 			resp := &api.SResponse{}
 			if err := json.Unmarshal(res, resp); err != nil {
-				fmt.Fprint(w, "error: receive response")
+				fmt.Fprint(pW, "error: receive response")
 				return
 			}
 
 			if resp.FResult != hlm_settings.CTitlePattern {
-				fmt.Fprint(w, "error: invalid response")
+				fmt.Fprint(pW, "error: invalid response")
 				return
 			}
 
 			uid := random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
 			err = db.Push(rel, database.NewMessage(false, msg, uid))
 			if err != nil {
-				fmt.Fprint(w, "error: add message to database")
+				fmt.Fprint(pW, "error: add message to database")
 				return
 			}
 
-			http.Redirect(w, r,
+			http.Redirect(pW, pR,
 				fmt.Sprintf("/friends/chat?alias_name=%s", aliasName),
 				http.StatusSeeOther)
 			return
@@ -133,18 +133,18 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 
 		msgs, err := db.Load(rel, start, size)
 		if err != nil {
-			fmt.Fprint(w, "error: read database")
+			fmt.Fprint(pW, "error: read database")
 			return
 		}
 
 		clientPubKey, err := client.GetPubKey()
 		if err != nil {
-			fmt.Fprint(w, "error: read public key")
+			fmt.Fprint(pW, "error: read public key")
 			return
 		}
 
 		res := &sChatMessages{
-			STemplateState: s.GetTemplate(),
+			STemplateState: pState.GetTemplate(),
 			FAddress: sChatAddress{
 				FClient: clientPubKey.GetAddress().ToString(),
 				FFriend: friendPubKey.GetAddress().ToString(),
@@ -168,6 +168,6 @@ func FriendsChatPage(s state.IState) http.HandlerFunc {
 			panic("can't load hmtl files")
 		}
 
-		t.Execute(w, res)
+		t.Execute(pW, res)
 	}
 }

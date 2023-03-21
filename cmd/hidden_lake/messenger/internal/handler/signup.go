@@ -15,42 +15,42 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func SignUpPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/sign/up" {
-			NotFoundPage(s)(w, r)
+func SignUpPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/sign/up" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if s.IsActive() {
-			http.Redirect(w, r, "/about", http.StatusFound)
+		if pState.IsActive() {
+			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
 
-		r.ParseForm()
+		pR.ParseForm()
 
-		switch r.FormValue("method") {
+		switch pR.FormValue("method") {
 		case http.MethodPost:
-			login := strings.TrimSpace(r.FormValue("login"))
+			login := strings.TrimSpace(pR.FormValue("login"))
 			if login == "" {
-				fmt.Fprint(w, "error: login is null")
+				fmt.Fprint(pW, "error: login is null")
 				return
 			}
 
-			password := strings.TrimSpace(r.FormValue("password"))
+			password := strings.TrimSpace(pR.FormValue("password"))
 			if password == "" {
-				fmt.Fprint(w, "error: password is null")
+				fmt.Fprint(pW, "error: password is null")
 				return
 			}
 
-			passwordRepeat := strings.TrimSpace(r.FormValue("password_repeat"))
+			passwordRepeat := strings.TrimSpace(pR.FormValue("password_repeat"))
 			if passwordRepeat == "" {
-				fmt.Fprint(w, "error: password_repeat is null")
+				fmt.Fprint(pW, "error: password_repeat is null")
 				return
 			}
 
 			if password != passwordRepeat {
-				fmt.Fprint(w, "error: passwords not equals")
+				fmt.Fprint(pW, "error: passwords not equals")
 				return
 			}
 
@@ -63,7 +63,7 @@ func SignUpPage(s state.IState) http.HandlerFunc {
 			)).ToBytes()
 
 			var privKey asymmetric.IPrivKey
-			privateKey := strings.TrimSpace(r.FormValue("private_key"))
+			privateKey := strings.TrimSpace(pR.FormValue("private_key"))
 
 			switch privateKey {
 			case "":
@@ -73,16 +73,16 @@ func SignUpPage(s state.IState) http.HandlerFunc {
 			}
 
 			if privKey == nil {
-				fmt.Fprint(w, "error: incorrect private key")
+				fmt.Fprint(pW, "error: incorrect private key")
 				return
 			}
 
-			if err := s.CreateState(hashLP, privKey); err != nil {
-				fmt.Fprint(w, "error: create account")
+			if err := pState.CreateState(hashLP, privKey); err != nil {
+				fmt.Fprint(pW, "error: create account")
 				return
 			}
 
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
@@ -94,6 +94,6 @@ func SignUpPage(s state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, s.GetTemplate())
+		t.Execute(pW, pState.GetTemplate())
 	}
 }

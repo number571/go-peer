@@ -21,19 +21,19 @@ type sRequester struct {
 	fParams message.IParams
 }
 
-func NewRequester(host string, client *http.Client, params message.IParams) IRequester {
+func NewRequester(pHost string, pClient *http.Client, pParams message.IParams) IRequester {
 	return &sRequester{
-		fHost:   host,
-		fClient: client,
-		fParams: params,
+		fHost:   pHost,
+		fClient: pClient,
+		fParams: pParams,
 	}
 }
 
-func (r *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex() (string, error) {
 	resp, err := api.Request(
-		r.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, r.fHost),
+		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -46,11 +46,11 @@ func (r *sRequester) GetIndex() (string, error) {
 	return resp, nil
 }
 
-func (r *sRequester) GetHashes() ([]string, error) {
+func (p *sRequester) GetHashes() ([]string, error) {
 	resp, err := api.Request(
-		r.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, r.fHost),
+		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -59,11 +59,11 @@ func (r *sRequester) GetHashes() ([]string, error) {
 	return strings.Split(resp, ";"), nil
 }
 
-func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMessage, error) {
+func (p *sRequester) GetMessage(pRequest *pkg_settings.SLoadRequest) (message.IMessage, error) {
 	resp, err := api.Request(
-		r.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", r.fHost, request.FHash),
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pRequest.FHash),
 		nil,
 	)
 	if err != nil {
@@ -73,8 +73,8 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 	msg := message.LoadMessage(
 		encoding.HexDecode(resp),
 		message.NewParams(
-			r.fParams.GetMessageSize(),
-			r.fParams.GetWorkSize(),
+			p.fParams.GetMessageSize(),
+			p.fParams.GetWorkSize(),
 		),
 	)
 	if msg == nil {
@@ -84,12 +84,12 @@ func (r *sRequester) GetMessage(request *pkg_settings.SLoadRequest) (message.IMe
 	return msg, nil
 }
 
-func (r *sRequester) PutMessage(request *pkg_settings.SPushRequest) error {
+func (p *sRequester) PutMessage(pRequest *pkg_settings.SPushRequest) error {
 	_, err := api.Request(
-		r.fClient,
+		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, r.fHost),
-		request,
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, p.fHost),
+		pRequest,
 	)
 	return err
 }

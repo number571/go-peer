@@ -10,36 +10,36 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 )
 
-func QRPublicKeyPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/qr/public_key" {
-			NotFoundPage(s)(w, r)
+func QRPublicKeyPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/qr/public_key" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if !s.IsActive() {
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+		if !pState.IsActive() {
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		pubKey, err := s.GetClient().Service().GetPubKey()
+		pubKey, err := pState.GetClient().Service().GetPubKey()
 		if err != nil {
-			fmt.Fprint(w, "error: read public key")
+			fmt.Fprint(pW, "error: read public key")
 			return
 		}
 
 		qrCode, err := qr.Encode(pubKey.ToString(), qr.L, qr.Auto)
 		if err != nil {
-			fmt.Fprint(w, "error: qrcode generate")
+			fmt.Fprint(pW, "error: qrcode generate")
 			return
 		}
 
 		qrCode, err = barcode.Scale(qrCode, 1024, 1024)
 		if err != nil {
-			fmt.Fprint(w, "error: qrcode scale")
+			fmt.Fprint(pW, "error: qrcode scale")
 			return
 		}
 
-		png.Encode(w, qrCode)
+		png.Encode(pW, qrCode)
 	}
 }

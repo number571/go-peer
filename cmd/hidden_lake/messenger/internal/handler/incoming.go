@@ -16,52 +16,52 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			api.Response(w, hls_settings.CErrorMethod, "failed: incorrect method")
+func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.Method != http.MethodPost {
+			api.Response(pW, hls_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		if !s.IsActive() {
-			api.Response(w, hls_settings.CErrorUnauth, "failed: client unauthorized")
+		if !pState.IsActive() {
+			api.Response(pW, hls_settings.CErrorUnauth, "failed: client unauthorized")
 			return
 		}
 
-		msgBytes, err := io.ReadAll(r.Body)
+		msgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			api.Response(w, hls_settings.CErrorResponse, "failed: response message")
+			api.Response(pW, hls_settings.CErrorResponse, "failed: response message")
 			return
 		}
 
 		msg := strings.TrimSpace(string(msgBytes))
 		if len(msg) == 0 {
-			api.Response(w, hls_settings.CErrorMessage, "failed: message is null")
+			api.Response(pW, hls_settings.CErrorMessage, "failed: message is null")
 			return
 		}
 
-		fPubKey := asymmetric.LoadRSAPubKey(r.Header.Get(hls_settings.CHeaderPubKey))
+		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPubKey))
 		if fPubKey == nil {
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		msgHash := r.Header.Get(hls_settings.CHeaderMsgHash)
+		msgHash := pR.Header.Get(hls_settings.CHeaderMsgHash)
 		if msgHash == "" {
 			panic("message hash is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := s.GetClient().Service().GetPubKey()
+		myPubKey, err := pState.GetClient().Service().GetPubKey()
 		if err != nil {
-			api.Response(w, hls_settings.CErrorPubKey, "failed: message is null")
+			api.Response(pW, hls_settings.CErrorPubKey, "failed: message is null")
 			return
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
 
-		db := s.GetWrapperDB().Get()
+		db := pState.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
-			api.Response(w, hls_settings.CErrorWrite, "failed: push message to database")
+			api.Response(pW, hls_settings.CErrorWrite, "failed: push message to database")
 			return
 		}
 
@@ -70,6 +70,6 @@ func HandleIncomigHTTP(s state.IState) http.HandlerFunc {
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})
-		api.Response(w, hls_settings.CErrorNone, settings.CTitlePattern)
+		api.Response(pW, hls_settings.CErrorNone, settings.CTitlePattern)
 	}
 }

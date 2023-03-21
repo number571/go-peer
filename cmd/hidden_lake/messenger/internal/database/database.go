@@ -13,12 +13,12 @@ type sKeyValueDB struct {
 	fDB    *gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(path string, key []byte) IKeyValueDB {
+func NewKeyValueDB(pPath string, pKey []byte) IKeyValueDB {
 	db := gp_database.NewLevelDB(
 		gp_database.NewSettings(&gp_database.SSettings{
-			FPath:      path,
+			FPath:      pPath,
 			FHashing:   true,
-			FCipherKey: key,
+			FCipherKey: pKey,
 		}),
 	)
 	return &sKeyValueDB{
@@ -26,29 +26,29 @@ func NewKeyValueDB(path string, key []byte) IKeyValueDB {
 	}
 }
 
-func (db *sKeyValueDB) Size(r IRelation) uint64 {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sKeyValueDB) Size(pR IRelation) uint64 {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return db.getSize(r)
+	return p.getSize(pR)
 }
 
-func (db *sKeyValueDB) Load(r IRelation, start, end uint64) ([]IMessage, error) {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if start > end {
+	if pStart > pEnd {
 		return nil, fmt.Errorf("start > end")
 	}
 
-	size := db.getSize(r)
-	if end > size {
+	size := p.getSize(pR)
+	if pEnd > size {
 		return nil, fmt.Errorf("end > size")
 	}
 
-	res := make([]IMessage, 0, end-start)
-	for i := start; i < end; i++ {
-		data, err := (*db.fDB).Get(getKeyMessageByEnum(r, i))
+	res := make([]IMessage, 0, pEnd-pStart)
+	for i := pStart; i < pEnd; i++ {
+		data, err := (*p.fDB).Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
 			return nil, fmt.Errorf("message undefined")
 		}
@@ -62,39 +62,39 @@ func (db *sKeyValueDB) Load(r IRelation, start, end uint64) ([]IMessage, error) 
 	return res, nil
 }
 
-func (db *sKeyValueDB) Push(r IRelation, msg IMessage) error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	_, err := (*db.fDB).Get(getKeyMessageByHash(r, msg.GetSHA256UID()))
+	_, err := (*p.fDB).Get(getKeyMessageByHash(pR, pMsg.GetSHA256UID()))
 	if err == nil {
 		return fmt.Errorf("message is already exist")
 	}
 
-	err = (*db.fDB).Set(getKeyMessageByHash(r, msg.GetSHA256UID()), []byte{1})
+	err = (*p.fDB).Set(getKeyMessageByHash(pR, pMsg.GetSHA256UID()), []byte{1})
 	if err != nil {
 		return err
 	}
 
-	size := db.getSize(r)
-	err = (*db.fDB).Set(getKeyMessageByEnum(r, size), msg.Bytes())
+	size := p.getSize(pR)
+	err = (*p.fDB).Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes())
 	if err != nil {
 		return err
 	}
 
 	numBytes := encoding.Uint64ToBytes(size + 1)
-	return (*db.fDB).Set(getKeySize(r), numBytes[:])
+	return (*p.fDB).Set(getKeySize(pR), numBytes[:])
 }
 
-func (db *sKeyValueDB) Close() error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sKeyValueDB) Close() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return (*db.fDB).Close()
+	return (*p.fDB).Close()
 }
 
-func (db *sKeyValueDB) getSize(r IRelation) uint64 {
-	data, err := (*db.fDB).Get(getKeySize(r))
+func (p *sKeyValueDB) getSize(pR IRelation) uint64 {
+	data, err := (*p.fDB).Get(getKeySize(pR))
 	if err != nil {
 		return 0
 	}

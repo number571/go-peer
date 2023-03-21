@@ -11,50 +11,50 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleConfigConnectsAPI(wrapper config.IWrapper, node anonymity.INode) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vConnect pkg_settings.SConnect
 
-		if r.Method != http.MethodGet && r.Method != http.MethodPost && r.Method != http.MethodDelete {
-			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
+			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		if r.Method == http.MethodGet {
-			api.Response(w, pkg_settings.CErrorNone, strings.Join(wrapper.GetConfig().GetConnections(), ","))
+		if pR.Method == http.MethodGet {
+			api.Response(pW, pkg_settings.CErrorNone, strings.Join(pWrapper.GetConfig().GetConnections(), ","))
 			return
 		}
 
-		if err := json.NewDecoder(r.Body).Decode(&vConnect); err != nil {
-			api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+		if err := json.NewDecoder(pR.Body).Decode(&vConnect); err != nil {
+			api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 			return
 		}
 
-		switch r.Method {
+		switch pR.Method {
 		case http.MethodPost:
-			connects := append(wrapper.GetConfig().GetConnections(), vConnect.FConnect)
-			if err := wrapper.GetEditor().UpdateConnections(connects); err != nil {
-				api.Response(w, pkg_settings.CErrorAction, "failed: update connections")
+			connects := append(pWrapper.GetConfig().GetConnections(), vConnect.FConnect)
+			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
+				api.Response(pW, pkg_settings.CErrorAction, "failed: update connections")
 				return
 			}
-			node.GetNetworkNode().AddConnect(vConnect.FConnect)
-			api.Response(w, pkg_settings.CErrorNone, "success: update connections")
+			pNode.GetNetworkNode().AddConnect(vConnect.FConnect)
+			api.Response(pW, pkg_settings.CErrorNone, "success: update connections")
 		case http.MethodDelete:
-			connects := deleteConnect(wrapper.GetConfig(), vConnect.FConnect)
-			if err := wrapper.GetEditor().UpdateConnections(connects); err != nil {
-				api.Response(w, pkg_settings.CErrorAction, "failed: delete connection")
+			connects := deleteConnect(pWrapper.GetConfig(), vConnect.FConnect)
+			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
+				api.Response(pW, pkg_settings.CErrorAction, "failed: delete connection")
 				return
 			}
-			node.GetNetworkNode().DelConnect(vConnect.FConnect)
-			api.Response(w, pkg_settings.CErrorNone, "success: delete connection")
+			pNode.GetNetworkNode().DelConnect(vConnect.FConnect)
+			api.Response(pW, pkg_settings.CErrorNone, "success: delete connection")
 		}
 	}
 }
-func deleteConnect(cfg config.IConfig, connect string) []string {
-	connects := cfg.GetConnections()
+func deleteConnect(pCfg config.IConfig, pConnect string) []string {
+	connects := pCfg.GetConnections()
 	result := make([]string, 0, len(connects))
 	for _, conn := range connects {
-		if conn == connect {
+		if conn == pConnect {
 			continue
 		}
 		result = append(result, conn)

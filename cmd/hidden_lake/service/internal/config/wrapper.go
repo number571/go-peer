@@ -9,17 +9,17 @@ type sWrapper struct {
 	fEditor IEditor
 }
 
-func NewWrapper(cfg IConfig) IWrapper {
+func NewWrapper(pCfg IConfig) IWrapper {
 	return &sWrapper{
-		fConfig: cfg,
-		fEditor: newEditor(cfg),
+		fConfig: pCfg,
+		fEditor: newEditor(pCfg),
 	}
 }
 
-func (w *sWrapper) GetConfig() IConfig {
-	return w.fConfig
+func (p *sWrapper) GetConfig() IConfig {
+	return p.fConfig
 }
 
-func (w *sWrapper) GetEditor() IEditor {
-	return w.fEditor
+func (p *sWrapper) GetEditor() IEditor {
+	return p.fEditor
 }

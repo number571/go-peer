@@ -19,82 +19,82 @@ type sRequest struct {
 	FBody   []byte            `json:"body"`
 }
 
-func NewRequest(method, host, path string) IRequest {
+func NewRequest(pMethod, pHost, pPath string) IRequest {
 	return &sRequest{
-		FMethod: method,
-		FHost:   host,
-		FPath:   path,
+		FMethod: pMethod,
+		FHost:   pHost,
+		FPath:   pPath,
 	}
 }
 
-func LoadRequest(data []byte) (IRequest, error) {
+func LoadRequest(pData []byte) (IRequest, error) {
 	request := new(sRequest)
-	err := encoding.Deserialize(data, request)
+	err := encoding.Deserialize(pData, request)
 	return request, err
 }
 
-func (r *sRequest) Bytes() []byte {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Bytes() []byte {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return encoding.Serialize(r)
+	return encoding.Serialize(p)
 }
 
-func (r *sRequest) WithHead(head map[string]string) IRequest {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) WithHead(pHead map[string]string) IRequest {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	r.FHead = make(map[string]string)
-	for k, v := range head {
-		r.FHead[k] = v
+	p.FHead = make(map[string]string)
+	for k, v := range pHead {
+		p.FHead[k] = v
 	}
-	return r
+	return p
 }
 
-func (r *sRequest) WithBody(body []byte) IRequest {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) WithBody(pBody []byte) IRequest {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	r.FBody = body
-	return r
+	p.FBody = pBody
+	return p
 }
 
-func (r *sRequest) Host() string {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Host() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return r.FHost
+	return p.FHost
 }
 
-func (r *sRequest) Path() string {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Path() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return r.FPath
+	return p.FPath
 }
 
-func (r *sRequest) Method() string {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Method() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return r.FMethod
+	return p.FMethod
 }
 
-func (r *sRequest) Head() map[string]string {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Head() map[string]string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	headers := make(map[string]string)
-	for k, v := range r.FHead {
+	for k, v := range p.FHead {
 		headers[k] = v
 	}
 
 	return headers
 }
 
-func (r *sRequest) Body() []byte {
-	r.fMutex.Lock()
-	defer r.fMutex.Unlock()
+func (p *sRequest) Body() []byte {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return r.FBody
+	return p.FBody
 }

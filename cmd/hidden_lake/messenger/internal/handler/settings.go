@@ -17,65 +17,65 @@ type sSettings struct {
 	FConnections []string
 }
 
-func SettingsPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/settings" {
-			NotFoundPage(s)(w, r)
+func SettingsPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/settings" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if !s.IsActive() {
-			http.Redirect(w, r, "/sign/in", http.StatusFound)
+		if !pState.IsActive() {
+			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		r.ParseForm()
+		pR.ParseForm()
 
-		switch r.FormValue("method") {
+		switch pR.FormValue("method") {
 		case http.MethodPost:
-			host := strings.TrimSpace(r.FormValue("host"))
-			port := strings.TrimSpace(r.FormValue("port"))
+			host := strings.TrimSpace(pR.FormValue("host"))
+			port := strings.TrimSpace(pR.FormValue("port"))
 			if host == "" || port == "" {
-				fmt.Fprint(w, "error: host or port is null")
+				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
 			if _, err := strconv.Atoi(port); err != nil {
-				fmt.Fprint(w, "error: port is not a number")
+				fmt.Fprint(pW, "error: port is not a number")
 				return
 			}
-			err := s.AddConnection(fmt.Sprintf("%s:%s", host, port))
+			err := pState.AddConnection(fmt.Sprintf("%s:%s", host, port))
 			if err != nil {
-				fmt.Fprint(w, "error: add connection")
+				fmt.Fprint(pW, "error: add connection")
 				return
 			}
 		case http.MethodDelete:
-			address := strings.TrimSpace(r.FormValue("address"))
+			address := strings.TrimSpace(pR.FormValue("address"))
 			if address == "" {
-				fmt.Fprint(w, "error: address is null")
+				fmt.Fprint(pW, "error: address is null")
 				return
 			}
-			err := s.DelConnection(address)
+			err := pState.DelConnection(address)
 			if err != nil {
-				fmt.Fprint(w, "error: del connection")
+				fmt.Fprint(pW, "error: del connection")
 				return
 			}
 		}
 
-		client := s.GetClient().Service()
+		client := pState.GetClient().Service()
 
 		result := new(sSettings)
-		result.STemplateState = s.GetTemplate()
+		result.STemplateState = pState.GetTemplate()
 
 		pubKey, err := client.GetPubKey()
 		if err != nil {
-			fmt.Fprint(w, "error: read public key")
+			fmt.Fprint(pW, "error: read public key")
 			return
 		}
 		result.FPublicKey = pubKey.ToString()
 
 		res, err := client.GetConnections()
 		if err != nil {
-			fmt.Fprint(w, "error: read connections")
+			fmt.Fprint(pW, "error: read connections")
 			return
 		}
 		result.FConnections = res
@@ -88,6 +88,6 @@ func SettingsPage(s state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, result)
+		t.Execute(pW, result)
 	}
 }

@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	initStart = 3 * time.Second
+	cInitStart = 3 * time.Second
 )
 
 var (
@@ -37,45 +37,45 @@ type sApp struct {
 }
 
 func NewApp(
-	cfg config.IConfig,
+	pCfg config.IConfig,
 ) types.ICommand {
 	wDB := database.NewWrapperDB()
-	logger := internal_logger.StdLogger(cfg.GetLogging())
-	connKeeper := initConnKeeper(cfg, wDB, logger)
+	logger := internal_logger.StdLogger(pCfg.GetLogging())
+	connKeeper := initConnKeeper(pCfg, wDB, logger)
 	return &sApp{
-		fConfig:      cfg,
+		fConfig:      pCfg,
 		fWrapperDB:   wDB,
 		fLogger:      logger,
 		fConnKeeper:  connKeeper,
-		fServiceHTTP: initServiceHTTP(cfg, connKeeper, wDB),
+		fServiceHTTP: initServiceHTTP(pCfg, connKeeper, wDB),
 	}
 }
 
-func (app *sApp) Run() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Run() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if app.fIsRun {
+	if p.fIsRun {
 		return errors.New("application already running")
 	}
-	app.fIsRun = true
+	p.fIsRun = true
 
-	app.fWrapperDB.Set(initDatabase())
+	p.fWrapperDB.Set(initDatabase())
 	res := make(chan error)
 
 	go func() {
-		if err := app.fConnKeeper.Run(); err != nil {
+		if err := p.fConnKeeper.Run(); err != nil {
 			res <- err
 			return
 		}
 	}()
 
 	go func() {
-		if app.fConfig.GetAddress() == "" {
+		if p.fConfig.GetAddress() == "" {
 			return
 		}
 
-		err := app.fServiceHTTP.ListenAndServe()
+		err := p.fServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err
 			return
@@ -84,32 +84,32 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Stop()
+		p.Stop()
 		return err
-	case <-time.After(initStart):
-		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
+	case <-time.After(cInitStart):
+		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
 
-func (app *sApp) Stop() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !app.fIsRun {
+	if !p.fIsRun {
 		return errors.New("application already stopped or not started")
 	}
-	app.fIsRun = false
-	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+	p.fIsRun = false
+	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	lastErr := types.StopAll([]types.ICommand{
-		app.fConnKeeper,
-		app.fConnKeeper.GetNetworkNode(),
+		p.fConnKeeper,
+		p.fConnKeeper.GetNetworkNode(),
 	})
 
 	err := types.CloseAll([]types.ICloser{
-		app.fServiceHTTP,
-		app.fWrapperDB,
+		p.fServiceHTTP,
+		p.fWrapperDB,
 	})
 	if err != nil {
 		lastErr = err

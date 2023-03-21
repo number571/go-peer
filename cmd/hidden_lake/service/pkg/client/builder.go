@@ -18,33 +18,33 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (builder *sBuilder) SetPrivKey(privKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
+func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
 	return &pkg_settings.SPrivKey{
-		FPrivKey: privKey.ToString(),
+		FPrivKey: pPrivKey.ToString(),
 	}
 }
 
-func (builder *sBuilder) Connect(connect string) *pkg_settings.SConnect {
+func (p *sBuilder) Connect(pConnect string) *pkg_settings.SConnect {
 	return &pkg_settings.SConnect{
-		FConnect: connect,
+		FConnect: pConnect,
 	}
 }
 
-func (builder *sBuilder) Friend(aliasName string, pubKey asymmetric.IPubKey) *pkg_settings.SFriend {
-	if pubKey == nil {
+func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {
+	if pPubKey == nil {
 		return &pkg_settings.SFriend{
-			FAliasName: aliasName,
+			FAliasName: pAliasName,
 		}
 	}
 	return &pkg_settings.SFriend{
-		FAliasName: aliasName,
-		FPublicKey: pubKey.ToString(),
+		FAliasName: pAliasName,
+		FPublicKey: pPubKey.ToString(),
 	}
 }
 
-func (builder *sBuilder) Request(recv asymmetric.IPubKey, req request.IRequest) *pkg_settings.SRequest {
+func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg_settings.SRequest {
 	return &pkg_settings.SRequest{
-		FReceiver: recv.ToString(),
-		FHexData:  encoding.HexEncode(req.Bytes()),
+		FReceiver: pRecv.ToString(),
+		FHexData:  encoding.HexEncode(pReq.Bytes()),
 	}
 }

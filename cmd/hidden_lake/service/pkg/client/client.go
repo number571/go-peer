@@ -14,61 +14,61 @@ type sClient struct {
 	fRequester IRequester
 }
 
-func NewClient(builder IBuilder, requester IRequester) IClient {
+func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 	return &sClient{
-		fBuilder:   builder,
-		fRequester: requester,
+		fBuilder:   pBuilder,
+		fRequester: pRequester,
 	}
 }
 
-func (client *sClient) GetIndex() (string, error) {
-	return client.fRequester.GetIndex()
+func (p *sClient) GetIndex() (string, error) {
+	return p.fRequester.GetIndex()
 }
 
-func (client *sClient) BroadcastRequest(recv asymmetric.IPubKey, data request.IRequest) error {
-	return client.fRequester.BroadcastRequest(client.fBuilder.Request(recv, data))
+func (p *sClient) BroadcastRequest(pRecv asymmetric.IPubKey, pData request.IRequest) error {
+	return p.fRequester.BroadcastRequest(p.fBuilder.Request(pRecv, pData))
 }
 
-func (client *sClient) FetchRequest(recv asymmetric.IPubKey, data request.IRequest) ([]byte, error) {
-	return client.fRequester.FetchRequest(client.fBuilder.Request(recv, data))
+func (p *sClient) FetchRequest(pRecv asymmetric.IPubKey, pData request.IRequest) ([]byte, error) {
+	return p.fRequester.FetchRequest(p.fBuilder.Request(pRecv, pData))
 }
 
-func (client *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {
-	return client.fRequester.GetFriends()
+func (p *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {
+	return p.fRequester.GetFriends()
 }
 
-func (client *sClient) AddFriend(aliasName string, pubKey asymmetric.IPubKey) error {
-	return client.fRequester.AddFriend(client.fBuilder.Friend(aliasName, pubKey))
+func (p *sClient) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
+	return p.fRequester.AddFriend(p.fBuilder.Friend(pAliasName, pPubKey))
 }
 
-func (client *sClient) DelFriend(aliasName string) error {
-	return client.fRequester.DelFriend(client.fBuilder.Friend(aliasName, nil))
+func (p *sClient) DelFriend(pAliasName string) error {
+	return p.fRequester.DelFriend(p.fBuilder.Friend(pAliasName, nil))
 }
 
-func (client *sClient) GetOnlines() ([]string, error) {
-	return client.fRequester.GetOnlines()
+func (p *sClient) GetOnlines() ([]string, error) {
+	return p.fRequester.GetOnlines()
 }
 
-func (client *sClient) DelOnline(connect string) error {
-	return client.fRequester.DelOnline(client.fBuilder.Connect(connect))
+func (p *sClient) DelOnline(pConnect string) error {
+	return p.fRequester.DelOnline(p.fBuilder.Connect(pConnect))
 }
 
-func (client *sClient) GetConnections() ([]string, error) {
-	return client.fRequester.GetConnections()
+func (p *sClient) GetConnections() ([]string, error) {
+	return p.fRequester.GetConnections()
 }
 
-func (client *sClient) AddConnection(connect string) error {
-	return client.fRequester.AddConnection(client.fBuilder.Connect(connect))
+func (p *sClient) AddConnection(pConnect string) error {
+	return p.fRequester.AddConnection(p.fBuilder.Connect(pConnect))
 }
 
-func (client *sClient) DelConnection(connect string) error {
-	return client.fRequester.DelConnection(client.fBuilder.Connect(connect))
+func (p *sClient) DelConnection(pConnect string) error {
+	return p.fRequester.DelConnection(p.fBuilder.Connect(pConnect))
 }
 
-func (client *sClient) SetPrivKey(privKey asymmetric.IPrivKey) error {
-	return client.fRequester.SetPrivKey(client.fBuilder.SetPrivKey(privKey))
+func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey) error {
+	return p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey))
 }
 
-func (client *sClient) GetPubKey() (asymmetric.IPubKey, error) {
-	return client.fRequester.GetPubKey()
+func (p *sClient) GetPubKey() (asymmetric.IPubKey, error) {
+	return p.fRequester.GetPubKey()
 }

@@ -6,12 +6,12 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 )
 
-func initConnKeeper(cfg config.IConfig, node anonymity.INode) conn_keeper.IConnKeeper {
+func initConnKeeper(pCfg config.IConfig, pNode anonymity.INode) conn_keeper.IConnKeeper {
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: func() []string { return cfg.GetConnections() },
-			FDuration:    node.GetSettings().GetTimeWait(),
+			FConnections: func() []string { return pCfg.GetConnections() },
+			FDuration:    pNode.GetSettings().GetTimeWait(),
 		}),
-		node.GetNetworkNode(),
+		pNode.GetNetworkNode(),
 	)
 }

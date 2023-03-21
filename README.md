@@ -16,15 +16,6 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 > Examples of works in the directory [github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 
-## TODO 
-
-1. Append comments for functions/variables/constants/etc (doc)
-2. Append benchmarks
-3. Write tests for coverage > 70%
-4. Arguments with prefix 'p'
-5. Develop union_blockchain
-6. Rename functions in crypto package (Get,Set,...)
-
 ## Dependencies
 
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "yndtr/goleveldb");

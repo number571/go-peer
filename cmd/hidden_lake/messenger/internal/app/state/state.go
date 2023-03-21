@@ -34,162 +34,162 @@ type sClient struct {
 }
 
 func NewState(
-	storage storage.IKeyValueStorage,
-	database database.IWrapperDB,
-	hlsClient hls_client.IClient,
-	hltClient hlt_client.IClient,
+	pStorage storage.IKeyValueStorage,
+	pDatabase database.IWrapperDB,
+	pHlsClient hls_client.IClient,
+	pHltClient hlt_client.IClient,
 ) IState {
 	return &sState{
-		fStorage:  storage,
-		fDatabase: database,
+		fStorage:  pStorage,
+		fDatabase: pDatabase,
 		fClient: &sClient{
-			fService: hlsClient,
-			fTraffic: hltClient,
+			fService: pHlsClient,
+			fTraffic: pHltClient,
 		},
 	}
 }
 
-func (c *sClient) Service() hls_client.IClient {
-	return c.fService
+func (p *sClient) Service() hls_client.IClient {
+	return p.fService
 }
 
-func (c *sClient) Traffic() hlt_client.IClient {
-	return c.fTraffic
+func (p *sClient) Traffic() hlt_client.IClient {
+	return p.fTraffic
 }
 
-func (s *sState) GetClient() iClient {
-	return s.fClient
+func (p *sState) GetClient() iClient {
+	return p.fClient
 }
 
-func (s *sState) GetStorage() storage.IKeyValueStorage {
-	return s.fStorage
+func (p *sState) GetStorage() storage.IKeyValueStorage {
+	return p.fStorage
 }
 
-func (s *sState) GetWrapperDB() database.IWrapperDB {
-	return s.fDatabase
+func (p *sState) GetWrapperDB() database.IWrapperDB {
+	return p.fDatabase
 }
 
-func (s *sState) GetTemplate() *STemplateState {
+func (p *sState) GetTemplate() *STemplateState {
 	return &STemplateState{
-		FAuthorized: s.IsActive(),
+		FAuthorized: p.IsActive(),
 	}
 }
 
-func (s *sState) CreateState(hashLP []byte, privKey asymmetric.IPrivKey) error {
-	if _, err := s.GetStorage().Get(hashLP); err == nil {
+func (p *sState) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
+	if _, err := p.GetStorage().Get(pHashLP); err == nil {
 		return fmt.Errorf("state already exists")
 	}
-	return s.newStorageState(hashLP, privKey)
+	return p.newStorageState(pHashLP, pPrivKey)
 }
 
-func (s *sState) UpdateState(hashLP []byte) error {
-	s.fMutex.Lock()
-	defer s.fMutex.Unlock()
+func (p *sState) UpdateState(pHashLP []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if s.IsActive() {
+	if p.IsActive() {
 		return fmt.Errorf("state already exists")
 	}
 
-	stateValue, err := s.getStorageState(hashLP)
+	stateValue, err := p.getStorageState(pHashLP)
 	if err != nil {
 		return err
 	}
 
 	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
-	s.GetWrapperDB().Set(database.NewKeyValueDB(
+	p.GetWrapperDB().Set(database.NewKeyValueDB(
 		hlm_settings.CPathDB,
-		entropyBooster.BoostEntropy(hashLP),
+		entropyBooster.BoostEntropy(pHashLP),
 	))
 
-	if err := s.updateClientState(stateValue); err != nil {
+	if err := p.updateClientState(stateValue); err != nil {
 		return err
 	}
 
-	s.fHashLP = hashLP
+	p.fHashLP = pHashLP
 	return nil
 }
 
-func (s *sState) ClearActiveState() error {
-	s.fMutex.Lock()
-	defer s.fMutex.Unlock()
+func (p *sState) ClearActiveState() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !s.IsActive() {
+	if !p.IsActive() {
 		return fmt.Errorf("state does not exist")
 	}
 
-	s.fHashLP = nil
+	p.fHashLP = nil
 
-	if err := s.GetWrapperDB().Close(); err != nil {
+	if err := p.GetWrapperDB().Close(); err != nil {
 		return err
 	}
 
-	if err := s.clearClientState(); err != nil {
+	if err := p.clearClientState(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *sState) AddFriend(aliasName string, pubKey asymmetric.IPubKey) error {
-	return s.stateUpdater(
-		s.updateClientFriends,
+func (p *sState) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
+	return p.stateUpdater(
+		p.updateClientFriends,
 		func(storageValue *SStorageState) {
-			storageValue.FFriends[aliasName] = pubKey.ToString()
+			storageValue.FFriends[pAliasName] = pPubKey.ToString()
 		},
 	)
 }
 
-func (s *sState) DelFriend(aliasName string) error {
-	return s.stateUpdater(
-		s.updateClientFriends,
+func (p *sState) DelFriend(pAliasName string) error {
+	return p.stateUpdater(
+		p.updateClientFriends,
 		func(storageValue *SStorageState) {
-			delete(storageValue.FFriends, aliasName)
+			delete(storageValue.FFriends, pAliasName)
 		},
 	)
 }
 
-func (s *sState) AddConnection(connect string) error {
-	return s.stateUpdater(
-		s.updateClientConnections,
+func (p *sState) AddConnection(pConnect string) error {
+	return p.stateUpdater(
+		p.updateClientConnections,
 		func(storageValue *SStorageState) {
 			storageValue.FConnections = append(
 				storageValue.FConnections,
-				connect,
+				pConnect,
 			)
 		},
 	)
 }
 
-func (s *sState) DelConnection(connect string) error {
-	return s.stateUpdater(
-		s.updateClientConnections,
+func (p *sState) DelConnection(pConnect string) error {
+	return p.stateUpdater(
+		p.updateClientConnections,
 		func(storageValue *SStorageState) {
 			storageValue.FConnections = remove(
 				storageValue.FConnections,
-				connect,
+				pConnect,
 			)
 		},
 	)
 }
 
-func (s *sState) IsActive() bool {
-	return s.fHashLP != nil
+func (p *sState) IsActive() bool {
+	return p.fHashLP != nil
 }
 
-func (s *sState) newStorageState(hashLP []byte, privKey asymmetric.IPrivKey) error {
+func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
 	stateValueBytes := encoding.Serialize(&SStorageState{
-		FPrivKey: privKey.ToString(),
+		FPrivKey: pPrivKey.ToString(),
 	})
-	return s.GetStorage().Set(hashLP, stateValueBytes)
+	return p.GetStorage().Set(pHashLP, stateValueBytes)
 }
 
-func (s *sState) setStorageState(stateValue *SStorageState) error {
-	stateValueBytes := encoding.Serialize(stateValue)
-	return s.GetStorage().Set(s.fHashLP, stateValueBytes)
+func (p *sState) setStorageState(pStateValue *SStorageState) error {
+	stateValueBytes := encoding.Serialize(pStateValue)
+	return p.GetStorage().Set(p.fHashLP, stateValueBytes)
 }
 
-func (s *sState) getStorageState(hashLP []byte) (*SStorageState, error) {
-	stateValueBytes, err := s.GetStorage().Get(hashLP)
+func (p *sState) getStorageState(pHashLP []byte) (*SStorageState, error) {
+	stateValueBytes, err := p.GetStorage().Get(pHashLP)
 	if err != nil {
 		return nil, err
 	}
@@ -202,11 +202,11 @@ func (s *sState) getStorageState(hashLP []byte) (*SStorageState, error) {
 	return stateValue, err
 }
 
-func remove(slice []string, elem string) []string {
-	for i, sElem := range slice {
-		if elem == sElem {
-			return append(slice[:i], slice[i+1:]...)
+func remove(pSlice []string, pElem string) []string {
+	for i, sElem := range pSlice {
+		if pElem == sElem {
+			return append(pSlice[:i], pSlice[i+1:]...)
 		}
 	}
-	return slice
+	return pSlice
 }

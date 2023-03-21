@@ -13,31 +13,31 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 )
 
-func SignInPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/sign/in" {
-			NotFoundPage(s)(w, r)
+func SignInPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/sign/in" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
-		if s.IsActive() {
-			http.Redirect(w, r, "/about", http.StatusFound)
+		if pState.IsActive() {
+			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
 
-		r.ParseForm()
+		pR.ParseForm()
 
-		switch r.FormValue("method") {
+		switch pR.FormValue("method") {
 		case http.MethodPost:
-			login := strings.TrimSpace(r.FormValue("login"))
+			login := strings.TrimSpace(pR.FormValue("login"))
 			if login == "" {
-				fmt.Fprint(w, "error: login is null")
+				fmt.Fprint(pW, "error: login is null")
 				return
 			}
 
-			password := strings.TrimSpace(r.FormValue("password"))
+			password := strings.TrimSpace(pR.FormValue("password"))
 			if password == "" {
-				fmt.Fprint(w, "error: password is null")
+				fmt.Fprint(pW, "error: password is null")
 				return
 			}
 
@@ -49,12 +49,12 @@ func SignInPage(s state.IState) http.HandlerFunc {
 				[]byte{},
 			)).ToBytes()
 
-			if err := s.UpdateState(hashLP); err != nil {
-				fmt.Fprintf(w, "error: %s", err.Error())
+			if err := pState.UpdateState(hashLP); err != nil {
+				fmt.Fprintf(pW, "error: %s", err.Error())
 				return
 			}
 
-			http.Redirect(w, r, "/about", http.StatusFound)
+			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
 
@@ -66,6 +66,6 @@ func SignInPage(s state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(w, s.GetTemplate())
+		t.Execute(pW, pState.GetTemplate())
 	}
 }

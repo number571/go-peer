@@ -30,5 +30,5 @@ type IMessage interface {
 	GetSHA256UID() string
 	GetMessage() string
 	GetTimestamp() string
-	Bytes() []byte
+	ToBytes() []byte
 }

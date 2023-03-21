@@ -14,7 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
+func HandleServiceTCP(pCfg config.IConfig) anonymity.IHandlerF {
 	return func(_ anonymity.INode, sender asymmetric.IPubKey, msgHash, reqBytes []byte) []byte {
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
@@ -23,7 +23,7 @@ func HandleServiceTCP(cfg config.IConfig) anonymity.IHandlerF {
 		}
 
 		// get service's address by hostname
-		address, ok := cfg.GetService(loadReq.Host())
+		address, ok := pCfg.GetService(loadReq.Host())
 		if !ok {
 			return nil
 		}

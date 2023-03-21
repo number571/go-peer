@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	initStart = time.Second * 3
+	cInitStart = time.Second * 3
 )
 
 var (
@@ -40,9 +40,9 @@ type sApp struct {
 }
 
 func NewApp(
-	cfg config.IConfig,
+	pCfg config.IConfig,
 ) types.ICommand {
-	stg, err := initCryptoStorage(cfg)
+	stg, err := initCryptoStorage(pCfg)
 	if err != nil {
 		panic(err)
 	}
@@ -53,14 +53,14 @@ func NewApp(
 		hls_client.NewClient(
 			hls_client.NewBuilder(),
 			hls_client.NewRequester(
-				fmt.Sprintf("http://%s", cfg.GetConnection().GetService()),
+				fmt.Sprintf("http://%s", pCfg.GetConnection().GetService()),
 				&http.Client{Timeout: time.Minute},
 			),
 		),
 		hlt_client.NewClient(
 			hlt_client.NewBuilder(),
 			hlt_client.NewRequester(
-				fmt.Sprintf("http://%s", cfg.GetConnection().GetTraffic()),
+				fmt.Sprintf("http://%s", pCfg.GetConnection().GetTraffic()),
 				&http.Client{Timeout: time.Minute},
 				message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
 			),
@@ -69,25 +69,25 @@ func NewApp(
 
 	return &sApp{
 		fState:          state,
-		fLogger:         internal_logger.StdLogger(cfg.GetLogging()),
-		fIntServiceHTTP: initInterfaceServiceHTTP(cfg, state),
-		fIncServiceHTTP: initIncomingServiceHTTP(cfg, state),
+		fLogger:         internal_logger.StdLogger(pCfg.GetLogging()),
+		fIntServiceHTTP: initInterfaceServiceHTTP(pCfg, state),
+		fIncServiceHTTP: initIncomingServiceHTTP(pCfg, state),
 	}
 }
 
-func (app *sApp) Run() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Run() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if app.fIsRun {
+	if p.fIsRun {
 		return errors.New("application already running")
 	}
-	app.fIsRun = true
+	p.fIsRun = true
 
 	res := make(chan error)
 
 	go func() {
-		err := app.fIntServiceHTTP.ListenAndServe()
+		err := p.fIntServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err
 			return
@@ -95,7 +95,7 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
-		err := app.fIncServiceHTTP.ListenAndServe()
+		err := p.fIncServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err
 			return
@@ -104,30 +104,30 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Stop()
+		p.Stop()
 		return err
-	case <-time.After(initStart):
-		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
+	case <-time.After(cInitStart):
+		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
 		return nil
 	}
 }
 
-func (app *sApp) Stop() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !app.fIsRun {
+	if !p.fIsRun {
 		return errors.New("application already stopped or not started")
 	}
-	app.fIsRun = false
-	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
+	p.fIsRun = false
+	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
 
 	// state may be already closed
-	_ = app.fState.ClearActiveState()
+	_ = p.fState.ClearActiveState()
 
 	return types.CloseAll([]types.ICloser{
-		app.fIntServiceHTTP,
-		app.fIncServiceHTTP,
-		app.fState.GetWrapperDB(),
+		p.fIntServiceHTTP,
+		p.fIncServiceHTTP,
+		p.fState.GetWrapperDB(),
 	})
 }

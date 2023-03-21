@@ -8,10 +8,10 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 )
 
-func AboutPage(s state.IState) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/about" {
-			NotFoundPage(s)(w, r)
+func AboutPage(pState state.IState) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.URL.Path != "/about" {
+			NotFoundPage(pState)(pW, pR)
 			return
 		}
 
@@ -24,6 +24,6 @@ func AboutPage(s state.IState) http.HandlerFunc {
 			panic("can't load hmtl files")
 		}
 
-		t.Execute(w, s.GetTemplate())
+		t.Execute(pW, pState.GetTemplate())
 	}
 }

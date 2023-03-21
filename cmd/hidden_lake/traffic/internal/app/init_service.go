@@ -10,15 +10,15 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 )
 
-func initServiceHTTP(cfg config.IConfig, connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperDB) *http.Server {
+func initServiceHTTP(pCfg config.IConfig, pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.IWrapperDB) *http.Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(wDB))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(connKeeper, wDB))
+	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(pWrapperDB))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(pConnKeeper, pWrapperDB))
 
 	return &http.Server{
-		Addr:    cfg.GetAddress(),
+		Addr:    pCfg.GetAddress(),
 		Handler: mux,
 	}
 }

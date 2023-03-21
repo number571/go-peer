@@ -6,10 +6,10 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 )
 
-func initCryptoStorage(cfg config.IConfig) (storage.IKeyValueStorage, error) {
+func initCryptoStorage(pCfg config.IConfig) (storage.IKeyValueStorage, error) {
 	return storage.NewCryptoStorage(
 		hlm_settings.CPathSTG,
-		[]byte(cfg.GetStorageKey()),
+		[]byte(pCfg.GetStorageKey()),
 		hlm_settings.CWorkForKeys,
 	)
 }

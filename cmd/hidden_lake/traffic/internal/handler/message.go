@@ -15,38 +15,38 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
-func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperDB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet && r.Method != http.MethodPost {
-			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.IWrapperDB) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
+		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
+			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		database := wDB.Get()
+		database := pWrapperDB.Get()
 
-		switch r.Method {
+		switch pR.Method {
 		case http.MethodGet:
-			query := r.URL.Query()
+			query := pR.URL.Query()
 
 			msg, err := database.Load(query.Get("hash"))
 			if err != nil {
-				api.Response(w, pkg_settings.CErrorLoad, "failed: load message")
+				api.Response(pW, pkg_settings.CErrorLoad, "failed: load message")
 				return
 			}
 
-			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(msg.ToBytes()))
+			api.Response(pW, pkg_settings.CErrorNone, encoding.HexEncode(msg.ToBytes()))
 			return
 		case http.MethodPost:
 			var vRequest pkg_settings.SPushRequest
 
-			err := json.NewDecoder(r.Body).Decode(&vRequest)
+			err := json.NewDecoder(pR.Body).Decode(&vRequest)
 			if err != nil {
-				api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 				return
 			}
 
 			if uint64(len(vRequest.FMessage)/2) > database.Settings().GetMessageSize() {
-				api.Response(w, pkg_settings.CErrorPackSize, "failed: incorrect package size")
+				api.Response(pW, pkg_settings.CErrorPackSize, "failed: incorrect package size")
 				return
 			}
 
@@ -58,23 +58,23 @@ func HandleMessageAPI(connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperD
 				),
 			)
 			if msg == nil {
-				api.Response(w, pkg_settings.CErrorMessage, "failed: decode message")
+				api.Response(pW, pkg_settings.CErrorMessage, "failed: decode message")
 				return
 			}
 
 			if err := database.Push(msg); err != nil {
-				api.Response(w, pkg_settings.CErrorPush, "failed: push message")
+				api.Response(pW, pkg_settings.CErrorPush, "failed: push message")
 				return
 			}
 
-			connKeeper.GetNetworkNode().BroadcastPayload(
+			pConnKeeper.GetNetworkNode().BroadcastPayload(
 				payload.NewPayload(
 					hls_settings.CNetworkMask,
 					msg.ToBytes(),
 				),
 			)
 
-			api.Response(w, pkg_settings.CErrorNone, "success")
+			api.Response(pW, pkg_settings.CErrorNone, "success")
 			return
 		}
 	}

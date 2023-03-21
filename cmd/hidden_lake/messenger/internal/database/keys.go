@@ -10,28 +10,28 @@ const (
 	cKeyMessageByHashTemplate = "database[%s].friends[%s].messages[hash=%s]"
 )
 
-func getKeySize(r IRelation) []byte {
+func getKeySize(pR IRelation) []byte {
 	return []byte(fmt.Sprintf(
 		cKeySizeTemplate,
-		r.IAm().GetAddress().ToString(),
-		r.Friend().GetAddress().ToString(),
+		pR.IAm().GetAddress().ToString(),
+		pR.Friend().GetAddress().ToString(),
 	))
 }
 
-func getKeyMessageByEnum(r IRelation, i uint64) []byte {
+func getKeyMessageByEnum(pR IRelation, pI uint64) []byte {
 	return []byte(fmt.Sprintf(
 		cKeyMessageByEnumTemplate,
-		r.IAm().GetAddress().ToString(),
-		r.Friend().GetAddress().ToString(),
-		i,
+		pR.IAm().GetAddress().ToString(),
+		pR.Friend().GetAddress().ToString(),
+		pI,
 	))
 }
 
-func getKeyMessageByHash(r IRelation, hash string) []byte {
+func getKeyMessageByHash(pR IRelation, pHash string) []byte {
 	return []byte(fmt.Sprintf(
 		cKeyMessageByHashTemplate,
-		r.IAm().GetAddress().ToString(),
-		r.Friend().GetAddress().ToString(),
-		hash,
+		pR.IAm().GetAddress().ToString(),
+		pR.Friend().GetAddress().ToString(),
+		pHash,
 	))
 }

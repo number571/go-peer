@@ -2,18 +2,18 @@ package state
 
 import "fmt"
 
-func (s *sState) stateUpdater(
+func (p *sState) stateUpdater(
 	clientUpdater func(storageValue *SStorageState) error,
 	middleWare func(storageValue *SStorageState),
 ) error {
-	s.fMutex.Lock()
-	defer s.fMutex.Unlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !s.IsActive() {
+	if !p.IsActive() {
 		return fmt.Errorf("state does not exist")
 	}
 
-	oldStorageValue, err := s.getStorageState(s.fHashLP)
+	oldStorageValue, err := p.getStorageState(p.fHashLP)
 	if err != nil {
 		return err
 	}
@@ -22,26 +22,26 @@ func (s *sState) stateUpdater(
 	middleWare(newStorageValue)
 
 	if err := clientUpdater(newStorageValue); err == nil {
-		return s.setStorageState(newStorageValue)
+		return p.setStorageState(newStorageValue)
 	}
 
-	return s.setStorageState(oldStorageValue)
+	return p.setStorageState(oldStorageValue)
 }
 
-func copyStorageState(storageValue *SStorageState) *SStorageState {
+func copyStorageState(pStorageValue *SStorageState) *SStorageState {
 	copyStorageValue := &SStorageState{
-		FPrivKey:     storageValue.FPrivKey,
-		FFriends:     make(map[string]string, len(storageValue.FFriends)),
-		FConnections: make([]string, 0, len(storageValue.FConnections)),
+		FPrivKey:     pStorageValue.FPrivKey,
+		FFriends:     make(map[string]string, len(pStorageValue.FFriends)),
+		FConnections: make([]string, 0, len(pStorageValue.FConnections)),
 	}
 
-	for aliasName, pubKey := range storageValue.FFriends {
+	for aliasName, pubKey := range pStorageValue.FFriends {
 		copyStorageValue.FFriends[aliasName] = pubKey
 	}
 
 	copyStorageValue.FConnections = append(
 		copyStorageValue.FConnections,
-		storageValue.FConnections...,
+		pStorageValue.FConnections...,
 	)
 
 	return copyStorageValue

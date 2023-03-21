@@ -13,53 +13,53 @@ import (
 )
 
 func initIncomingServiceHTTP(
-	cfg config.IConfig,
-	state state.IState,
+	pCfg config.IConfig,
+	pState state.IState,
 ) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(state)) // POST
+	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(pState)) // POST
 
 	return &http.Server{
-		Addr:    cfg.GetAddress().GetIncoming(),
+		Addr:    pCfg.GetAddress().GetIncoming(),
 		Handler: mux,
 	}
 }
 
 func initInterfaceServiceHTTP(
-	cfg config.IConfig,
-	state state.IState,
+	pCfg config.IConfig,
+	pState state.IState,
 ) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
-		handleFileServer(state, http.FS(web.GetStaticPath()))),
+		handleFileServer(pState, http.FS(web.GetStaticPath()))),
 	)
 
-	mux.HandleFunc("/", handler.IndexPage(state))                    // GET
-	mux.HandleFunc("/sign/out", handler.SignOutPage(state))          // GET
-	mux.HandleFunc("/sign/in", handler.SignInPage(state))            // GET, POST
-	mux.HandleFunc("/sign/up", handler.SignUpPage(state))            // GET, POST
-	mux.HandleFunc("/favicon.ico", handler.FaviconPage(state))       // GET
-	mux.HandleFunc("/about", handler.AboutPage(state))               // GET
-	mux.HandleFunc("/settings", handler.SettingsPage(state))         // GET, POST, DELETE
-	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(state)) // GET
-	mux.HandleFunc("/friends", handler.FriendsPage(state))           // GET, POST, DELETE
-	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(state))  // GET, POST
+	mux.HandleFunc("/", handler.IndexPage(pState))                    // GET
+	mux.HandleFunc("/sign/out", handler.SignOutPage(pState))          // GET
+	mux.HandleFunc("/sign/in", handler.SignInPage(pState))            // GET, POST
+	mux.HandleFunc("/sign/up", handler.SignUpPage(pState))            // GET, POST
+	mux.HandleFunc("/favicon.ico", handler.FaviconPage(pState))       // GET
+	mux.HandleFunc("/about", handler.AboutPage(pState))               // GET
+	mux.HandleFunc("/settings", handler.SettingsPage(pState))         // GET, POST, DELETE
+	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(pState)) // GET
+	mux.HandleFunc("/friends", handler.FriendsPage(pState))           // GET, POST, DELETE
+	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(pState))  // GET, POST
 
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
 	return &http.Server{
-		Addr:    cfg.GetAddress().GetInterface(),
+		Addr:    pCfg.GetAddress().GetInterface(),
 		Handler: mux,
 	}
 }
 
-func handleFileServer(state state.IState, fs http.FileSystem) http.Handler {
+func handleFileServer(pState state.IState, pFS http.FileSystem) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fs.Open(r.URL.Path); os.IsNotExist(err) {
-			handler.NotFoundPage(state)(w, r)
+		if _, err := pFS.Open(r.URL.Path); os.IsNotExist(err) {
+			handler.NotFoundPage(pState)(w, r)
 			return
 		}
-		http.FileServer(fs).ServeHTTP(w, r)
+		http.FileServer(pFS).ServeHTTP(w, r)
 	})
 }

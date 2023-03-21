@@ -20,18 +20,18 @@ type sRequester struct {
 	fClient *http.Client
 }
 
-func NewRequester(host string, client *http.Client) IRequester {
+func NewRequester(pHost string, pClient *http.Client) IRequester {
 	return &sRequester{
-		fHost:   host,
-		fClient: client,
+		fHost:   pHost,
+		fClient: pClient,
 	}
 }
 
-func (requester *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex() (string, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -44,12 +44,12 @@ func (requester *sRequester) GetIndex() (string, error) {
 	return res, nil
 }
 
-func (requester *sRequester) FetchRequest(push *pkg_settings.SRequest) ([]byte, error) {
+func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) ([]byte, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
-		push,
+		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, p.fHost),
+		pRequest,
 	)
 	if err != nil {
 		return nil, err
@@ -58,21 +58,21 @@ func (requester *sRequester) FetchRequest(push *pkg_settings.SRequest) ([]byte, 
 	return encoding.HexDecode(res), nil
 }
 
-func (requester *sRequester) BroadcastRequest(push *pkg_settings.SRequest) error {
+func (p *sRequester) BroadcastRequest(pRequest *pkg_settings.SRequest) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodPut,
-		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, requester.fHost),
-		push,
+		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, p.fHost),
+		pRequest,
 	)
 	return err
 }
 
-func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
+func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -93,31 +93,31 @@ func (requester *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error)
 	return result, nil
 }
 
-func (requester *sRequester) AddFriend(friend *pkg_settings.SFriend) error {
+func (p *sRequester) AddFriend(pFriend *pkg_settings.SFriend) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
-		friend,
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
+		pFriend,
 	)
 	return err
 }
 
-func (requester *sRequester) DelFriend(friend *pkg_settings.SFriend) error {
+func (p *sRequester) DelFriend(pFriend *pkg_settings.SFriend) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, requester.fHost),
-		friend,
+		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
+		pFriend,
 	)
 	return err
 }
 
-func (requester *sRequester) GetOnlines() ([]string, error) {
+func (p *sRequester) GetOnlines() ([]string, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -126,21 +126,21 @@ func (requester *sRequester) GetOnlines() ([]string, error) {
 	return deleteVoidStrings(strings.Split(res, ",")), nil
 }
 
-func (requester *sRequester) DelOnline(connect *pkg_settings.SConnect) error {
+func (p *sRequester) DelOnline(pConnect *pkg_settings.SConnect) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, requester.fHost),
-		connect,
+		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, p.fHost),
+		pConnect,
 	)
 	return err
 }
 
-func (requester *sRequester) GetConnections() ([]string, error) {
+func (p *sRequester) GetConnections() ([]string, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -149,41 +149,41 @@ func (requester *sRequester) GetConnections() ([]string, error) {
 	return deleteVoidStrings(strings.Split(res, ",")), nil
 }
 
-func (requester *sRequester) AddConnection(connect *pkg_settings.SConnect) error {
+func (p *sRequester) AddConnection(pConnect *pkg_settings.SConnect) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
-		connect,
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		pConnect,
 	)
 	return err
 }
 
-func (requester *sRequester) DelConnection(connect *pkg_settings.SConnect) error {
+func (p *sRequester) DelConnection(pConnect *pkg_settings.SConnect) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, requester.fHost),
-		connect,
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		pConnect,
 	)
 	return err
 }
 
-func (requester *sRequester) SetPrivKey(privKey *pkg_settings.SPrivKey) error {
+func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
 	_, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
-		privKey,
+		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
+		pPrivKey,
 	)
 	return err
 }
 
-func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
+func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
-		requester.fClient,
+		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, requester.fHost),
+		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -192,9 +192,9 @@ func (requester *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	return asymmetric.LoadRSAPubKey(res), nil
 }
 
-func deleteVoidStrings(s []string) []string {
-	result := make([]string, 0, len(s))
-	for _, v := range s {
+func deleteVoidStrings(pS []string) []string {
+	result := make([]string, 0, len(pS))
+	for _, v := range pS {
 		r := strings.TrimSpace(v)
 		if r == "" {
 			continue

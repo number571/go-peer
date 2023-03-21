@@ -18,14 +18,14 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (builder *sBuilder) GetMessage(hash string) *pkg_settings.SLoadRequest {
+func (p *sBuilder) GetMessage(pHash string) *pkg_settings.SLoadRequest {
 	return &pkg_settings.SLoadRequest{
-		FHash: hash,
+		FHash: pHash,
 	}
 }
 
-func (builder *sBuilder) PutMessage(msg message.IMessage) *pkg_settings.SPushRequest {
+func (p *sBuilder) PutMessage(pMsg message.IMessage) *pkg_settings.SPushRequest {
 	return &pkg_settings.SPushRequest{
-		FMessage: encoding.HexEncode(msg.ToBytes()),
+		FMessage: encoding.HexEncode(pMsg.ToBytes()),
 	}
 }

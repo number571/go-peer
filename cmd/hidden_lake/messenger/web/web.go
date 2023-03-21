@@ -11,8 +11,8 @@ const (
 )
 
 const (
-	staticPath   = "static"
-	templatePath = "template"
+	cStaticPath   = "static"
+	cTemplatePath = "template"
 )
 
 var (
@@ -25,9 +25,9 @@ var (
 
 func GetStaticPath() fs.FS {
 	if !cUsedEmbedFS {
-		return os.DirFS("./web/" + staticPath)
+		return os.DirFS("./web/" + cStaticPath)
 	}
-	fsys, err := fs.Sub(gEmbededStatic, staticPath)
+	fsys, err := fs.Sub(gEmbededStatic, cStaticPath)
 	if err != nil {
 		panic(err)
 	}
@@ -36,9 +36,9 @@ func GetStaticPath() fs.FS {
 
 func GetTemplatePath() fs.FS {
 	if !cUsedEmbedFS {
-		return os.DirFS("./web/" + templatePath)
+		return os.DirFS("./web/" + cTemplatePath)
 	}
-	fsys, err := fs.Sub(gEmbededTemplate, templatePath)
+	fsys, err := fs.Sub(gEmbededTemplate, cTemplatePath)
 	if err != nil {
 		panic(err)
 	}

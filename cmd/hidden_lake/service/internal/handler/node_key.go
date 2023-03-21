@@ -10,32 +10,32 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleNodeKeyAPI(node anonymity.INode) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleNodeKeyAPI(pNode anonymity.INode) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vPrivKey pkg_settings.SPrivKey
 
-		if r.Method != http.MethodGet && r.Method != http.MethodPost {
-			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
+			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		switch r.Method {
+		switch pR.Method {
 		case http.MethodPost:
-			if err := json.NewDecoder(r.Body).Decode(&vPrivKey); err != nil {
-				api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+			if err := json.NewDecoder(pR.Body).Decode(&vPrivKey); err != nil {
+				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 				return
 			}
 
 			privKey := asymmetric.LoadRSAPrivKey(vPrivKey.FPrivKey)
 			if privKey == nil {
-				api.Response(w, pkg_settings.CErrorPrivKey, "failed: decode private key")
+				api.Response(pW, pkg_settings.CErrorPrivKey, "failed: decode private key")
 				return
 			}
 
-			node.GetMessageQueue().UpdateClient(pkg_settings.InitClient(privKey))
+			pNode.GetMessageQueue().UpdateClient(pkg_settings.InitClient(privKey))
 		}
 
 		// Response for GET and POST
-		api.Response(w, pkg_settings.CErrorNone, node.GetMessageQueue().GetClient().GetPubKey().ToString())
+		api.Response(pW, pkg_settings.CErrorNone, pNode.GetMessageQueue().GetClient().GetPubKey().ToString())
 	}
 }

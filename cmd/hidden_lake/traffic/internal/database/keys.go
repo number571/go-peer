@@ -12,10 +12,10 @@ func getKeyPointer() []byte {
 	return []byte(cKeyPointer)
 }
 
-func getKeyHash(i uint64) []byte {
-	return []byte(fmt.Sprintf(cKeyHashTemplate, i))
+func getKeyHash(pI uint64) []byte {
+	return []byte(fmt.Sprintf(cKeyHashTemplate, pI))
 }
 
-func getKeyMessage(hash []byte) []byte {
-	return []byte(fmt.Sprintf(cKeyMessageTemplate, hash))
+func getKeyMessage(pHash []byte) []byte {
+	return []byte(fmt.Sprintf(cKeyMessageTemplate, pHash))
 }

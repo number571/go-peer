@@ -10,31 +10,31 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
-func (s *sState) updateClientState(stateValue *SStorageState) error {
-	if err := s.updateClientPrivKey(stateValue); err != nil {
+func (p *sState) updateClientState(pStateValue *SStorageState) error {
+	if err := p.updateClientPrivKey(pStateValue); err != nil {
 		return err
 	}
 
-	if err := s.updateClientFriends(stateValue); err != nil {
+	if err := p.updateClientFriends(pStateValue); err != nil {
 		return err
 	}
 
-	if err := s.updateClientConnections(stateValue); err != nil {
+	if err := p.updateClientConnections(pStateValue); err != nil {
 		return err
 	}
 
-	_ = s.updateClientTraffic(stateValue)
+	_ = p.updateClientTraffic(pStateValue)
 	return nil
 }
 
-func (s *sState) updateClientPrivKey(stateValue *SStorageState) error {
-	hlsClient := s.GetClient().Service()
+func (p *sState) updateClientPrivKey(pStateValue *SStorageState) error {
+	hlsClient := p.GetClient().Service()
 
-	if err := s.clearClientPrivKey(); err != nil {
+	if err := p.clearClientPrivKey(); err != nil {
 		return err
 	}
 
-	privKey := asymmetric.LoadRSAPrivKey(stateValue.FPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(pStateValue.FPrivKey)
 	if privKey == nil {
 		return fmt.Errorf("private key is null")
 	}
@@ -42,10 +42,10 @@ func (s *sState) updateClientPrivKey(stateValue *SStorageState) error {
 	return hlsClient.SetPrivKey(privKey)
 }
 
-func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
-	hltClient := s.GetClient().Traffic()
+func (p *sState) updateClientTraffic(pStateValue *SStorageState) error {
+	hltClient := p.GetClient().Traffic()
 
-	privKey := asymmetric.LoadRSAPrivKey(stateValue.FPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(pStateValue.FPrivKey)
 	if privKey == nil {
 		return fmt.Errorf("private key is null")
 	}
@@ -68,7 +68,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		}
 
 		inFriends := false
-		for _, pubKeyString := range stateValue.FFriends {
+		for _, pubKeyString := range pStateValue.FFriends {
 			fPubKey := asymmetric.LoadRSAPubKey(pubKeyString)
 			if pubKey.GetAddress().ToString() == fPubKey.GetAddress().ToString() {
 				inFriends = true
@@ -93,7 +93,7 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 		rel := database.NewRelation(privKey.GetPubKey(), pubKey)
 		dbMsg := database.NewMessage(true, strMsg, msg.GetBody().GetHash())
 
-		db := s.GetWrapperDB().Get()
+		db := p.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
 			continue
 		}
@@ -102,14 +102,14 @@ func (s *sState) updateClientTraffic(stateValue *SStorageState) error {
 	return nil
 }
 
-func (s *sState) updateClientFriends(stateValue *SStorageState) error {
-	client := s.GetClient().Service()
+func (p *sState) updateClientFriends(pStateValue *SStorageState) error {
+	client := p.GetClient().Service()
 
-	if err := s.clearClientFriends(); err != nil {
+	if err := p.clearClientFriends(); err != nil {
 		return err
 	}
 
-	for aliasName, pubKeyString := range stateValue.FFriends {
+	for aliasName, pubKeyString := range pStateValue.FFriends {
 		pubKey := asymmetric.LoadRSAPubKey(pubKeyString)
 		if err := client.AddFriend(aliasName, pubKey); err != nil {
 			return err
@@ -119,14 +119,14 @@ func (s *sState) updateClientFriends(stateValue *SStorageState) error {
 	return nil
 }
 
-func (s *sState) updateClientConnections(stateValue *SStorageState) error {
-	client := s.GetClient().Service()
+func (p *sState) updateClientConnections(pStateValue *SStorageState) error {
+	client := p.GetClient().Service()
 
-	if err := s.clearClientConnections(); err != nil {
+	if err := p.clearClientConnections(); err != nil {
 		return err
 	}
 
-	for _, conn := range stateValue.FConnections {
+	for _, conn := range pStateValue.FConnections {
 		if err := client.AddConnection(conn); err != nil {
 			return err
 		}

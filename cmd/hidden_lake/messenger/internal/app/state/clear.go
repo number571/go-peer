@@ -5,27 +5,27 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
-func (s *sState) clearClientState() error {
-	if err := s.clearClientPrivKey(); err != nil {
+func (p *sState) clearClientState() error {
+	if err := p.clearClientPrivKey(); err != nil {
 		return err
 	}
 
-	if err := s.clearClientFriends(); err != nil {
+	if err := p.clearClientFriends(); err != nil {
 		return err
 	}
 
-	return s.clearClientConnections()
+	return p.clearClientConnections()
 }
 
-func (s *sState) clearClientPrivKey() error {
-	client := s.GetClient().Service()
+func (p *sState) clearClientPrivKey() error {
+	client := p.GetClient().Service()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
 	return client.SetPrivKey(pseudoPrivKey)
 }
 
-func (s *sState) clearClientFriends() error {
-	client := s.GetClient().Service()
+func (p *sState) clearClientFriends() error {
+	client := p.GetClient().Service()
 
 	friends, err := client.GetFriends()
 	if err != nil {
@@ -41,8 +41,8 @@ func (s *sState) clearClientFriends() error {
 	return nil
 }
 
-func (s *sState) clearClientConnections() error {
-	client := s.GetClient().Service()
+func (p *sState) clearClientConnections() error {
+	client := p.GetClient().Service()
 
 	connects, err := client.GetConnections()
 	if err != nil {

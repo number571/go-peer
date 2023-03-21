@@ -13,29 +13,29 @@ type sClient struct {
 	fRequester IRequester
 }
 
-func NewClient(builder IBuilder, requester IRequester) IClient {
+func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 	return &sClient{
-		fBuilder:   builder,
-		fRequester: requester,
+		fBuilder:   pBuilder,
+		fRequester: pRequester,
 	}
 }
 
-func (client *sClient) GetIndex() (string, error) {
-	return client.fRequester.GetIndex()
+func (p *sClient) GetIndex() (string, error) {
+	return p.fRequester.GetIndex()
 }
 
-func (client *sClient) GetHashes() ([]string, error) {
-	return client.fRequester.GetHashes()
+func (p *sClient) GetHashes() ([]string, error) {
+	return p.fRequester.GetHashes()
 }
 
-func (client *sClient) GetMessage(hash string) (message.IMessage, error) {
-	msg, err := client.fRequester.GetMessage(client.fBuilder.GetMessage(hash))
+func (p *sClient) GetMessage(pHash string) (message.IMessage, error) {
+	msg, err := p.fRequester.GetMessage(p.fBuilder.GetMessage(pHash))
 	if err != nil {
 		return nil, err
 	}
 	return msg, nil
 }
 
-func (client *sClient) PutMessage(msg message.IMessage) error {
-	return client.fRequester.PutMessage(client.fBuilder.PutMessage(msg))
+func (p *sClient) PutMessage(pMsg message.IMessage) error {
+	return p.fRequester.PutMessage(p.fBuilder.PutMessage(pMsg))
 }

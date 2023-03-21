@@ -20,35 +20,35 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-func initConnKeeper(cfg config.IConfig, wDB database.IWrapperDB, logger logger.ILogger) conn_keeper.IConnKeeper {
+func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) conn_keeper.IConnKeeper {
 	httpClient := &http.Client{Timeout: time.Minute}
 	anonLogger := anon_logger.NewLogger(hlt_settings.CServiceName)
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
-			FConnections: func() []string { return []string{cfg.GetConnection()} },
+			FConnections: func() []string { return []string{pCfg.GetConnection()} },
 			FDuration:    hls_settings.CNetworkWaitTime,
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FMaxConnects: 1, // one HLS from cfg.Connection()
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:  cfg.GetNetwork(),
+					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: hls_settings.CMessageSize,
 					FTimeWait:    hls_settings.CNetworkWaitTime,
 				}),
 			}),
 		).HandleFunc(
 			hls_settings.CNetworkMask,
-			func(_ network.INode, conn conn.IConn, msgBytes []byte) {
+			func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
 				msg := message.LoadMessage(
-					msgBytes,
+					pMsgBytes,
 					message.NewParams(
 						hls_settings.CMessageSize,
 						hls_settings.CWorkSize,
 					),
 				)
 				if msg == nil {
-					logger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, conn))
+					pLogger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
 					return
 				}
 
@@ -57,33 +57,33 @@ func initConnKeeper(cfg config.IConfig, wDB database.IWrapperDB, logger logger.I
 					proof = msg.GetBody().GetProof()
 				)
 
-				database := wDB.Get()
+				database := pWrapperDB.Get()
 
 				strHash := encoding.HexEncode(hash)
 				if _, err := database.Load(strHash); err == nil {
-					logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, conn))
+					pLogger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
 					return
 				}
 
 				if err := database.Push(msg); err != nil {
-					logger.PushErro(anonLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, conn))
+					pLogger.PushErro(anonLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
 					return
 				}
 
-				for _, cHost := range cfg.GetConsumers() {
+				for _, cHost := range pCfg.GetConsumers() {
 					_, err := api.Request(
 						httpClient,
 						http.MethodPost,
 						fmt.Sprintf("http://%s", cHost),
-						msgBytes,
+						pMsgBytes,
 					)
 					if err != nil {
-						logger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, nil, conn))
+						pLogger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, nil, pConn))
 						continue
 					}
 				}
 
-				logger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, conn))
+				pLogger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
 			},
 		),
 	)

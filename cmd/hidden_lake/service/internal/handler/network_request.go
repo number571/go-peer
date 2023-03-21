@@ -11,54 +11,54 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleNetworkRequestAPI(node anonymity.INode) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
+	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vPush pkg_settings.SRequest
 
-		if r.Method != http.MethodPost && r.Method != http.MethodPut {
-			api.Response(w, pkg_settings.CErrorMethod, "failed: incorrect method")
+		if pR.Method != http.MethodPost && pR.Method != http.MethodPut {
+			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		if err := json.NewDecoder(r.Body).Decode(&vPush); err != nil {
-			api.Response(w, pkg_settings.CErrorDecode, "failed: decode request")
+		if err := json.NewDecoder(pR.Body).Decode(&vPush); err != nil {
+			api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 			return
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(vPush.FReceiver)
 		if pubKey == nil {
-			api.Response(w, pkg_settings.CErrorPubKey, "failed: load public key")
+			api.Response(pW, pkg_settings.CErrorPubKey, "failed: load public key")
 			return
 		}
 
 		data := encoding.HexDecode(vPush.FHexData)
 		if data == nil {
-			api.Response(w, pkg_settings.CErrorPubKey, "failed: decode hex format data")
+			api.Response(pW, pkg_settings.CErrorPubKey, "failed: decode hex format data")
 			return
 		}
 
-		switch r.Method {
+		switch pR.Method {
 		case http.MethodPut:
-			err := node.BroadcastPayload(
+			err := pNode.BroadcastPayload(
 				pubKey,
 				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)
 			if err != nil {
-				api.Response(w, pkg_settings.CErrorMessage, "failed: broadcast message")
+				api.Response(pW, pkg_settings.CErrorMessage, "failed: broadcast message")
 				return
 			}
-			api.Response(w, pkg_settings.CErrorNone, "success: broadcast")
+			api.Response(pW, pkg_settings.CErrorNone, "success: broadcast")
 			return
 		case http.MethodPost:
-			resp, err := node.FetchPayload(
+			resp, err := pNode.FetchPayload(
 				pubKey,
 				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)
 			if err != nil {
-				api.Response(w, pkg_settings.CErrorResponse, "failed: response message")
+				api.Response(pW, pkg_settings.CErrorResponse, "failed: response message")
 				return
 			}
-			api.Response(w, pkg_settings.CErrorNone, encoding.HexEncode(resp))
+			api.Response(pW, pkg_settings.CErrorNone, encoding.HexEncode(resp))
 			return
 		}
 	}

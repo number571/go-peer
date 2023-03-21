@@ -9,11 +9,11 @@ var (
 	gChatQueue = chat_queue.NewChatQueue(1)
 )
 
-func FriendsChatWS(ws *websocket.Conn) {
-	defer ws.Close()
+func FriendsChatWS(pWS *websocket.Conn) {
+	defer pWS.Close()
 
 	subscribe := new(chat_queue.SMessage)
-	if err := websocket.JSON.Receive(ws, subscribe); err != nil {
+	if err := websocket.JSON.Receive(pWS, subscribe); err != nil {
 		return
 	}
 
@@ -23,7 +23,7 @@ func FriendsChatWS(ws *websocket.Conn) {
 		if !ok {
 			return
 		}
-		if err := websocket.JSON.Send(ws, msg); err != nil {
+		if err := websocket.JSON.Send(pWS, msg); err != nil {
 			return
 		}
 	}

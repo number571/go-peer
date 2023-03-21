@@ -16,50 +16,50 @@ type sChatQueue struct {
 	fSize   int
 }
 
-func NewChatQueue(size int) IChatQueue {
+func NewChatQueue(pSize int) IChatQueue {
 	return &sChatQueue{
-		fQueue: make(chan *SMessage, size),
-		fSize:  size,
+		fQueue: make(chan *SMessage, pSize),
+		fSize:  pSize,
 	}
 }
 
-func (cq *sChatQueue) Init() {
+func (p *sChatQueue) Init() {
 	defer time.Sleep(200 * time.Millisecond)
 
-	cq.fMutex.Lock()
-	defer cq.fMutex.Unlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	close(cq.fQueue)
-	cq.fQueue = make(chan *SMessage, cq.fSize)
+	close(p.fQueue)
+	p.fQueue = make(chan *SMessage, p.fSize)
 }
 
-func (cq *sChatQueue) Load(addr string) (*SMessage, bool) {
+func (p *sChatQueue) Load(addr string) (*SMessage, bool) {
 	defer func() {
-		cq.fMutex.Lock()
-		cq.fListen = ""
-		cq.fMutex.Unlock()
+		p.fMutex.Lock()
+		p.fListen = ""
+		p.fMutex.Unlock()
 	}()
 
-	cq.fMutex.Lock()
-	cq.fListen = addr
-	cq.fMutex.Unlock()
+	p.fMutex.Lock()
+	p.fListen = addr
+	p.fMutex.Unlock()
 
-	msg, ok := <-cq.fQueue
+	msg, ok := <-p.fQueue
 	return msg, ok
 }
 
-func (cq *sChatQueue) Push(msg *SMessage) {
-	cq.fMutex.Lock()
-	defer cq.fMutex.Unlock()
+func (p *sChatQueue) Push(msg *SMessage) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if cq.fListen != msg.FAddress {
+	if p.fListen != msg.FAddress {
 		return
 	}
 
 	// to prevent blocking response
-	if len(cq.fQueue) == cq.fSize {
+	if len(p.fQueue) == p.fSize {
 		return
 	}
 
-	cq.fQueue <- msg
+	p.fQueue <- msg
 }

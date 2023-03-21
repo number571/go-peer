@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	initStart = 3 * time.Second
+	cInitStart = 3 * time.Second
 )
 
 var (
@@ -41,31 +41,31 @@ type sApp struct {
 }
 
 func NewApp(
-	cfg config.IConfig,
-	privKey asymmetric.IPrivKey,
+	pCfg config.IConfig,
+	pPrivKey asymmetric.IPrivKey,
 ) types.ICommand {
-	logger := internal_logger.StdLogger(cfg.GetLogging())
-	node := initNode(cfg, privKey, logger)
+	logger := internal_logger.StdLogger(pCfg.GetLogging())
+	node := initNode(pCfg, pPrivKey, logger)
 	return &sApp{
-		fConfig:      cfg,
+		fConfig:      pCfg,
 		fNode:        node,
 		fLogger:      logger,
-		fConnKeeper:  initConnKeeper(cfg, node),
-		fServiceHTTP: initServiceHTTP(config.NewWrapper(cfg), node),
+		fConnKeeper:  initConnKeeper(pCfg, node),
+		fServiceHTTP: initServiceHTTP(config.NewWrapper(pCfg), node),
 	}
 }
 
-func (app *sApp) Run() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Run() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if app.fIsRun {
+	if p.fIsRun {
 		return errors.New("application already running")
 	}
-	app.fIsRun = true
+	p.fIsRun = true
 
 	res := make(chan error)
-	app.fNode.GetWrapperDB().Set(database.NewLevelDB(
+	p.fNode.GetWrapperDB().Set(database.NewLevelDB(
 		database.NewSettings(&database.SSettings{
 			FPath:    pkg_settings.CPathDB,
 			FHashing: true,
@@ -73,11 +73,11 @@ func (app *sApp) Run() error {
 	))
 
 	go func() {
-		if app.fConfig.GetAddress().GetHTTP() == "" {
+		if p.fConfig.GetAddress().GetHTTP() == "" {
 			return
 		}
 
-		err := app.fServiceHTTP.ListenAndServe()
+		err := p.fServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			res <- err
 			return
@@ -85,31 +85,31 @@ func (app *sApp) Run() error {
 	}()
 
 	go func() {
-		if err := app.fConnKeeper.Run(); err != nil {
+		if err := p.fConnKeeper.Run(); err != nil {
 			res <- err
 			return
 		}
 	}()
 
 	go func() {
-		app.fNode.HandleFunc(
+		p.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
-			handler.HandleServiceTCP(app.fConfig),
+			handler.HandleServiceTCP(p.fConfig),
 		)
-		if err := app.fNode.Run(); err != nil {
+		if err := p.fNode.Run(); err != nil {
 			res <- err
 			return
 		}
 
 		// if node in client mode
 		// then run endless loop
-		tcpAddress := app.fConfig.GetAddress().GetTCP()
+		tcpAddress := p.fConfig.GetAddress().GetTCP()
 		if tcpAddress == "" {
 			select {}
 		}
 
 		// run node in server mode
-		err := app.fNode.GetNetworkNode().Run()
+		err := p.fNode.GetNetworkNode().Run()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			res <- err
 			return
@@ -118,34 +118,34 @@ func (app *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		app.Stop()
+		p.Stop()
 		return err
-	case <-time.After(initStart):
-		app.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
+	case <-time.After(cInitStart):
+		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
 
-func (app *sApp) Stop() error {
-	app.fMutex.Lock()
-	defer app.fMutex.Unlock()
+func (p *sApp) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !app.fIsRun {
+	if !p.fIsRun {
 		return errors.New("application already stopped or not started")
 	}
-	app.fIsRun = false
-	app.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+	p.fIsRun = false
+	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	app.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
+	p.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
 	lastErr := types.StopAll([]types.ICommand{
-		app.fNode,
-		app.fConnKeeper,
-		app.fNode.GetNetworkNode(),
+		p.fNode,
+		p.fConnKeeper,
+		p.fNode.GetNetworkNode(),
 	})
 
 	err := types.CloseAll([]types.ICloser{
-		app.fServiceHTTP,
-		app.fNode.GetWrapperDB(),
+		p.fServiceHTTP,
+		p.fNode.GetWrapperDB(),
 	})
 	if err != nil {
 		lastErr = err
