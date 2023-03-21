@@ -35,74 +35,74 @@ type SBodyMessage struct {
 }
 
 // Message can be created only with client module.
-func LoadMessage(bmsg []byte, params IParams) IMessage {
+func LoadMessage(pMsg []byte, pParams IParams) IMessage {
 	msg := new(SMessage)
-	if err := json.Unmarshal(bmsg, msg); err != nil {
+	if err := json.Unmarshal(pMsg, msg); err != nil {
 		return nil
 	}
-	if !msg.IsValid(params) {
+	if !msg.IsValid(pParams) {
 		return nil
 	}
 	return msg
 }
 
-func (msg *SMessage) GetHead() IHead {
-	return msg.FHead
+func (p *SMessage) GetHead() IHead {
+	return p.FHead
 }
 
-func (msg *SMessage) GetBody() IBody {
-	return msg.FBody
+func (p *SMessage) GetBody() IBody {
+	return p.FBody
 }
 
-func (msg *SMessage) ToBytes() []byte {
-	jsonData, err := json.Marshal(msg)
+func (p *SMessage) ToBytes() []byte {
+	jsonData, err := json.Marshal(p)
 	if err != nil {
 		return nil
 	}
 	return jsonData
 }
 
-func (msg *SMessage) IsValid(params IParams) bool {
-	if uint64(len(msg.ToBytes())) > params.GetMessageSize() {
+func (p *SMessage) IsValid(pParams IParams) bool {
+	if uint64(len(p.ToBytes())) > pParams.GetMessageSize() {
 		return false
 	}
-	if len(msg.GetBody().GetHash()) != hashing.CSHA256Size {
+	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
 		return false
 	}
-	puzzle := puzzle.NewPoWPuzzle(params.GetWorkSize())
-	return puzzle.VerifyBytes(msg.GetBody().GetHash(), msg.GetBody().GetProof())
+	puzzle := puzzle.NewPoWPuzzle(pParams.GetWorkSize())
+	return puzzle.VerifyBytes(p.GetBody().GetHash(), p.GetBody().GetProof())
 }
 
 // IHead
 
-func (head SHeadMessage) GetSender() []byte {
-	return encoding.HexDecode(head.FSender)
+func (p SHeadMessage) GetSender() []byte {
+	return encoding.HexDecode(p.FSender)
 }
 
-func (head SHeadMessage) GetSession() []byte {
-	return encoding.HexDecode(head.FSession)
+func (p SHeadMessage) GetSession() []byte {
+	return encoding.HexDecode(p.FSession)
 }
 
-func (head SHeadMessage) GetSalt() []byte {
-	return encoding.HexDecode(head.FSalt)
+func (p SHeadMessage) GetSalt() []byte {
+	return encoding.HexDecode(p.FSalt)
 }
 
 // IBody
 
-func (body SBodyMessage) GetPayload() payload.IPayload {
-	return payload.LoadPayload(encoding.HexDecode(body.FPayload))
+func (p SBodyMessage) GetPayload() payload.IPayload {
+	return payload.LoadPayload(encoding.HexDecode(p.FPayload))
 }
 
-func (body SBodyMessage) GetHash() []byte {
-	return encoding.HexDecode(body.FHash)
+func (p SBodyMessage) GetHash() []byte {
+	return encoding.HexDecode(p.FHash)
 }
 
-func (body SBodyMessage) GetSign() []byte {
-	return encoding.HexDecode(body.FSign)
+func (p SBodyMessage) GetSign() []byte {
+	return encoding.HexDecode(p.FSign)
 }
 
-func (body SBodyMessage) GetProof() uint64 {
-	bProof := encoding.HexDecode(body.FProof)
+func (p SBodyMessage) GetProof() uint64 {
+	bProof := encoding.HexDecode(p.FProof)
 	if len(bProof) != encoding.CSizeUint64 {
 		return 0
 	}

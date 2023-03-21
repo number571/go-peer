@@ -1,9 +1,9 @@
 package crypto
 
 type IEncrypter interface {
-	EncryptBytes(msg []byte) []byte
+	EncryptBytes(pMsg []byte) []byte
 }
 
 type IDecrypter interface {
-	DecryptBytes(msg []byte) []byte
+	DecryptBytes(pMsg []byte) []byte
 }

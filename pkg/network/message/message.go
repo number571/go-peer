@@ -16,28 +16,28 @@ type sMessage struct {
 	fPayload payload.IPayload
 }
 
-func NewMessage(pld payload.IPayload, key []byte) IMessage {
+func NewMessage(pPld payload.IPayload, pKey []byte) IMessage {
 	return &sMessage{
 		fHash: hashing.NewHMACSHA256Hasher(
-			key,
-			pld.ToBytes(),
+			pKey,
+			pPld.ToBytes(),
 		).ToBytes(),
-		fPayload: pld,
+		fPayload: pPld,
 	}
 }
 
-func LoadMessage(packData, key []byte) IMessage {
+func LoadMessage(pData, pKey []byte) IMessage {
 	// check Hash[uN]
-	if len(packData) < hashing.CSHA256Size {
+	if len(pData) < hashing.CSHA256Size {
 		return nil
 	}
 
-	hashRecv := packData[:hashing.CSHA256Size]
-	payloadBytes := packData[hashing.CSHA256Size:]
+	hashRecv := pData[:hashing.CSHA256Size]
+	payloadBytes := pData[hashing.CSHA256Size:]
 	if !bytes.Equal(
 		hashRecv,
 		hashing.NewHMACSHA256Hasher(
-			key,
+			pKey,
 			payloadBytes,
 		).ToBytes(),
 	) {
@@ -56,19 +56,19 @@ func LoadMessage(packData, key []byte) IMessage {
 	}
 }
 
-func (msg *sMessage) GetHash() []byte {
-	return msg.fHash
+func (p *sMessage) GetHash() []byte {
+	return p.fHash
 }
 
-func (msg *sMessage) GetPayload() payload.IPayload {
-	return msg.fPayload
+func (p *sMessage) GetPayload() payload.IPayload {
+	return p.fPayload
 }
 
-func (msg *sMessage) GetBytes() []byte {
+func (p *sMessage) GetBytes() []byte {
 	return bytes.Join(
 		[][]byte{
-			msg.fHash,
-			msg.fPayload.ToBytes(),
+			p.fHash,
+			p.fPayload.ToBytes(),
 		},
 		[]byte{},
 	)

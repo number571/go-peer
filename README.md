@@ -21,7 +21,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 1. Append comments for functions/variables/constants/etc (doc)
 2. Append benchmarks
 3. Write tests for coverage > 70%
-4. Arguments with prefix 'a'
+4. Arguments with prefix 'p'
 5. Develop union_blockchain
 6. Rename functions in crypto package (Get,Set,...)
 

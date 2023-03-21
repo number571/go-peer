@@ -32,106 +32,106 @@ type sLevelDBIterator struct {
 	fCipher symmetric.ICipher
 }
 
-func NewLevelDB(sett ISettings) IKeyValueDB {
-	db, err := leveldb.OpenFile(sett.GetPath(), nil)
+func NewLevelDB(pSett ISettings) IKeyValueDB {
+	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
 	if err != nil {
 		return nil
 	}
-	salt, err := db.Get(sett.GetSaltKey(), nil)
+	salt, err := db.Get(pSett.GetSaltKey(), nil)
 	if err != nil {
 		salt = random.NewStdPRNG().GetBytes(symmetric.CAESKeySize)
-		if err := db.Put(sett.GetSaltKey(), salt, nil); err != nil {
+		if err := db.Put(pSett.GetSaltKey(), salt, nil); err != nil {
 			return nil
 		}
 	}
 	return &sLevelDB{
 		fSalt:     salt,
 		fDB:       db,
-		fSettings: sett,
-		fCipher:   symmetric.NewAESCipher(sett.GetCipherKey()),
+		fSettings: pSett,
+		fCipher:   symmetric.NewAESCipher(pSett.GetCipherKey()),
 	}
 }
 
-func (db *sLevelDB) GetSettings() ISettings {
-	return db.fSettings
+func (p *sLevelDB) GetSettings() ISettings {
+	return p.fSettings
 }
 
-func (db *sLevelDB) Set(key []byte, value []byte) error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sLevelDB) Set(pKey []byte, pValue []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return db.fDB.Put(
-		db.tryHash(key),
-		doEncrypt(db.fCipher, value),
+	return p.fDB.Put(
+		p.tryHash(pKey),
+		doEncrypt(p.fCipher, pValue),
 		nil,
 	)
 }
 
-func (db *sLevelDB) Get(key []byte) ([]byte, error) {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sLevelDB) Get(pKey []byte) ([]byte, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	encBytes, err := db.fDB.Get(db.tryHash(key), nil)
+	encBytes, err := p.fDB.Get(p.tryHash(pKey), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	return tryDecrypt(
-		db.fCipher,
+		p.fCipher,
 		encBytes,
 	)
 }
 
-func (db *sLevelDB) Del(key []byte) error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sLevelDB) Del(pKey []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return db.fDB.Delete(db.tryHash(key), nil)
+	return p.fDB.Delete(p.tryHash(pKey), nil)
 }
 
-func (db *sLevelDB) Close() error {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sLevelDB) Close() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return db.fDB.Close()
+	return p.fDB.Close()
 }
 
 // Storage in hashing mode can't iterates
-func (db *sLevelDB) GetIterator(prefix []byte) IIterator {
-	db.fMutex.Lock()
-	defer db.fMutex.Unlock()
+func (p *sLevelDB) GetIterator(pPrefix []byte) IIterator {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if db.fSettings.GetHashing() {
+	if p.fSettings.GetHashing() {
 		return nil
 	}
 
 	return &sLevelDBIterator{
-		fIter:   db.fDB.NewIterator(util.BytesPrefix(prefix), nil),
-		fCipher: db.fCipher,
+		fIter:   p.fDB.NewIterator(util.BytesPrefix(pPrefix), nil),
+		fCipher: p.fCipher,
 	}
 }
 
-func (iter *sLevelDBIterator) Next() bool {
-	iter.fMutex.Lock()
-	defer iter.fMutex.Unlock()
+func (p *sLevelDBIterator) Next() bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return iter.fIter.Next()
+	return p.fIter.Next()
 }
 
-func (iter *sLevelDBIterator) GetKey() []byte {
-	iter.fMutex.Lock()
-	defer iter.fMutex.Unlock()
+func (p *sLevelDBIterator) GetKey() []byte {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return iter.fIter.Key()
+	return p.fIter.Key()
 }
 
-func (iter *sLevelDBIterator) GetValue() []byte {
-	iter.fMutex.Lock()
-	defer iter.fMutex.Unlock()
+func (p *sLevelDBIterator) GetValue() []byte {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	decBytes, err := tryDecrypt(
-		iter.fCipher,
-		iter.fIter.Value(),
+		p.fCipher,
+		p.fIter.Value(),
 	)
 	if err != nil {
 		return nil
@@ -139,40 +139,40 @@ func (iter *sLevelDBIterator) GetValue() []byte {
 	return decBytes
 }
 
-func (iter *sLevelDBIterator) Close() error {
-	iter.fMutex.Lock()
-	defer iter.fMutex.Unlock()
+func (p *sLevelDBIterator) Close() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	iter.fIter.Release()
+	p.fIter.Release()
 	return nil
 }
 
-func doEncrypt(cipher symmetric.ICipher, dataBytes []byte) []byte {
+func doEncrypt(pCipher symmetric.ICipher, pDataBytes []byte) []byte {
 	return bytes.Join(
 		[][]byte{
 			hashing.NewHMACSHA256Hasher(
-				cipher.ToBytes(),
-				dataBytes,
+				pCipher.ToBytes(),
+				pDataBytes,
 			).ToBytes(),
-			cipher.EncryptBytes(dataBytes),
+			pCipher.EncryptBytes(pDataBytes),
 		},
 		[]byte{},
 	)
 }
 
-func tryDecrypt(cipher symmetric.ICipher, encBytes []byte) ([]byte, error) {
-	if len(encBytes) < hashing.CSHA256Size+symmetric.CAESBlockSize {
+func tryDecrypt(pCipher symmetric.ICipher, pEncBytes []byte) ([]byte, error) {
+	if len(pEncBytes) < hashing.CSHA256Size+symmetric.CAESBlockSize {
 		return nil, fmt.Errorf("incorrect size of encrypted data")
 	}
 
-	decBytes := cipher.DecryptBytes(encBytes[hashing.CSHA256Size:])
+	decBytes := pCipher.DecryptBytes(pEncBytes[hashing.CSHA256Size:])
 	if decBytes == nil {
 		return nil, fmt.Errorf("failed decrypt message")
 	}
 
-	gotHashed := encBytes[:hashing.CSHA256Size]
+	gotHashed := pEncBytes[:hashing.CSHA256Size]
 	newHashed := hashing.NewHMACSHA256Hasher(
-		cipher.ToBytes(),
+		pCipher.ToBytes(),
 		decBytes,
 	).ToBytes()
 
@@ -183,14 +183,14 @@ func tryDecrypt(cipher symmetric.ICipher, encBytes []byte) ([]byte, error) {
 	return decBytes, nil
 }
 
-func (db *sLevelDB) tryHash(key []byte) []byte {
-	if !db.fSettings.GetHashing() {
-		return key
+func (p *sLevelDB) tryHash(pKey []byte) []byte {
+	if !p.fSettings.GetHashing() {
+		return pKey
 	}
 	saltWithKey := bytes.Join(
 		[][]byte{
-			db.fSalt,
-			key,
+			p.fSalt,
+			pKey,
 		},
 		[]byte{},
 	)

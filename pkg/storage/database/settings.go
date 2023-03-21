@@ -18,40 +18,40 @@ type sSettings struct {
 	FCipherKey []byte
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FPath:      sett.FPath,
-		FHashing:   sett.FHashing,
-		FSaltKey:   sett.FSaltKey,
-		FCipherKey: sett.FCipherKey,
+		FPath:      pSett.FPath,
+		FHashing:   pSett.FHashing,
+		FSaltKey:   pSett.FSaltKey,
+		FCipherKey: pSett.FCipherKey,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FPath == "" {
-		s.FPath = cPath
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FPath == "" {
+		p.FPath = cPath
 	}
-	if s.FSaltKey == nil {
-		s.FSaltKey = []byte(cSaltKey)
+	if p.FSaltKey == nil {
+		p.FSaltKey = []byte(cSaltKey)
 	}
-	if s.FCipherKey == nil {
-		s.FCipherKey = []byte(cCipherKey)
+	if p.FCipherKey == nil {
+		p.FCipherKey = []byte(cCipherKey)
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetPath() string {
-	return s.FPath
+func (p *sSettings) GetPath() string {
+	return p.FPath
 }
 
-func (s *sSettings) GetSaltKey() []byte {
-	return s.FSaltKey
+func (p *sSettings) GetSaltKey() []byte {
+	return p.FSaltKey
 }
 
-func (s *sSettings) GetHashing() bool {
-	return s.FHashing
+func (p *sSettings) GetHashing() bool {
+	return p.FHashing
 }
 
-func (s *sSettings) GetCipherKey() []byte {
-	return s.FCipherKey
+func (p *sSettings) GetCipherKey() []byte {
+	return p.FCipherKey
 }

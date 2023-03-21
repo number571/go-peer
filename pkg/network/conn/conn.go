@@ -22,39 +22,39 @@ type sConn struct {
 	fSettings ISettings
 }
 
-func NewConn(sett ISettings, address string) (IConn, error) {
-	conn, err := net.Dial("tcp", address)
+func NewConn(pSett ISettings, pAddr string) (IConn, error) {
+	conn, err := net.Dial("tcp", pAddr)
 	if err != nil {
 		return nil, err
 	}
-	return LoadConn(sett, conn), nil
+	return LoadConn(pSett, conn), nil
 }
 
-func LoadConn(sett ISettings, conn net.Conn) IConn {
+func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	return &sConn{
-		fSettings: sett,
-		fSocket:   conn,
+		fSettings: pSett,
+		fSocket:   pConn,
 	}
 }
 
-func (conn *sConn) GetSettings() ISettings {
-	return conn.fSettings
+func (p *sConn) GetSettings() ISettings {
+	return p.fSettings
 }
 
-func (conn *sConn) GetSocket() net.Conn {
-	return conn.fSocket
+func (p *sConn) GetSocket() net.Conn {
+	return p.fSocket
 }
 
-func (conn *sConn) FetchPayload(pld payload.IPayload) (payload.IPayload, error) {
+func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
 	var (
 		chPld    = make(chan payload.IPayload)
-		timeWait = conn.fSettings.GetTimeWait()
+		timeWait = p.fSettings.GetTimeWait()
 	)
 
-	if err := conn.WritePayload(pld); err != nil {
+	if err := p.WritePayload(pPld); err != nil {
 		return nil, err
 	}
-	go readPayload(conn, chPld)
+	go readPayload(p, chPld)
 
 	select {
 	case rpld := <-chPld:
@@ -67,22 +67,22 @@ func (conn *sConn) FetchPayload(pld payload.IPayload) (payload.IPayload, error) 
 	}
 }
 
-func (conn *sConn) Close() error {
-	return conn.GetSocket().Close()
+func (p *sConn) Close() error {
+	return p.GetSocket().Close()
 }
 
-func (conn *sConn) WritePayload(pld payload.IPayload) error {
-	conn.fMutex.Lock()
-	defer conn.fMutex.Unlock()
+func (p *sConn) WritePayload(pPld payload.IPayload) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	var (
-		msgBytes  = message.NewMessage(pld, []byte(conn.fSettings.GetNetworkKey())).GetBytes()
+		msgBytes  = message.NewMessage(pPld, []byte(p.fSettings.GetNetworkKey())).GetBytes()
 		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).ToBytes()
 		packPtr   = len(packBytes)
 	)
 
 	for {
-		n, err := conn.GetSocket().Write(packBytes[:packPtr])
+		n, err := p.GetSocket().Write(packBytes[:packPtr])
 		if err != nil {
 			return err
 		}
@@ -98,21 +98,21 @@ func (conn *sConn) WritePayload(pld payload.IPayload) error {
 	return nil
 }
 
-func (conn *sConn) ReadPayload() payload.IPayload {
+func (p *sConn) ReadPayload() payload.IPayload {
 	chPld := make(chan payload.IPayload)
-	go readPayload(conn, chPld)
+	go readPayload(p, chPld)
 	return <-chPld
 }
 
-func readPayload(conn *sConn, chPld chan payload.IPayload) {
+func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 	var pld payload.IPayload
 	defer func() {
-		chPld <- pld
+		pChPld <- pld
 	}()
 
 	// bufLen = Size[u64] in bytes
 	bufLen := make([]byte, encoding.CSizeUint64)
-	length, err := conn.GetSocket().Read(bufLen)
+	length, err := pConn.GetSocket().Read(bufLen)
 	if err != nil {
 		return
 	}
@@ -125,14 +125,14 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 	copy(arrLen[:], bufLen)
 
 	mustLen := encoding.BytesToUint64(arrLen)
-	if mustLen > conn.fSettings.GetMessageSize() {
+	if mustLen > pConn.fSettings.GetMessageSize() {
 		return
 	}
 
 	msgRaw := make([]byte, 0, mustLen)
 	for {
 		buffer := make([]byte, mustLen)
-		n, err := conn.GetSocket().Read(buffer)
+		n, err := pConn.GetSocket().Read(buffer)
 		if err != nil {
 			return
 		}
@@ -154,7 +154,7 @@ func readPayload(conn *sConn, chPld chan payload.IPayload) {
 	// try unpack message from bytes
 	msg := message.LoadMessage(
 		msgRaw,
-		[]byte(conn.fSettings.GetNetworkKey()),
+		[]byte(pConn.fSettings.GetNetworkKey()),
 	)
 	if msg == nil {
 		return

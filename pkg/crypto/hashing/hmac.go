@@ -14,26 +14,26 @@ type sHMACSHA256Hasher struct {
 	fHash []byte
 }
 
-func NewHMACSHA256Hasher(key []byte, data []byte) IHasher {
-	h := hmac.New(sha256.New, key)
-	h.Write(data)
+func NewHMACSHA256Hasher(pKey []byte, pData []byte) IHasher {
+	h := hmac.New(sha256.New, pKey)
+	h.Write(pData)
 	return &sHMACSHA256Hasher{
 		fHash: h.Sum(nil),
 	}
 }
 
-func (h *sHMACSHA256Hasher) ToString() string {
-	return fmt.Sprintf("HMAC(%s){%X}", h.GetType(), h.ToBytes())
+func (p *sHMACSHA256Hasher) ToString() string {
+	return fmt.Sprintf("HMAC(%s){%X}", p.GetType(), p.ToBytes())
 }
 
-func (h *sHMACSHA256Hasher) ToBytes() []byte {
-	return h.fHash
+func (p *sHMACSHA256Hasher) ToBytes() []byte {
+	return p.fHash
 }
 
-func (h *sHMACSHA256Hasher) GetType() string {
+func (p *sHMACSHA256Hasher) GetType() string {
 	return CSHA256KeyType
 }
 
-func (h *sHMACSHA256Hasher) GetSize() uint64 {
+func (p *sHMACSHA256Hasher) GetSize() uint64 {
 	return CSHA256Size
 }

@@ -21,35 +21,35 @@ type sSettings struct {
 	FDuration     time.Duration
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FCapacity:     sett.FCapacity,
-		FPullCapacity: sett.FPullCapacity,
-		FDuration:     sett.FDuration,
+		FCapacity:     pSett.FCapacity,
+		FPullCapacity: pSett.FPullCapacity,
+		FDuration:     pSett.FDuration,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FCapacity == 0 {
-		s.FCapacity = cCapacity
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FCapacity == 0 {
+		p.FCapacity = cCapacity
 	}
-	if s.FPullCapacity == 0 {
-		s.FPullCapacity = cPullCapacity
+	if p.FPullCapacity == 0 {
+		p.FPullCapacity = cPullCapacity
 	}
-	if s.FDuration == 0 {
-		s.FDuration = cDuration
+	if p.FDuration == 0 {
+		p.FDuration = cDuration
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetCapacity() uint64 {
-	return s.FCapacity
+func (p *sSettings) GetCapacity() uint64 {
+	return p.FCapacity
 }
 
-func (s *sSettings) GetPullCapacity() uint64 {
-	return s.FPullCapacity
+func (p *sSettings) GetPullCapacity() uint64 {
+	return p.FPullCapacity
 }
 
-func (s *sSettings) GetDuration() time.Duration {
-	return s.FDuration
+func (p *sSettings) GetDuration() time.Duration {
+	return p.FDuration
 }

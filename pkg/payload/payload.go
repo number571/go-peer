@@ -12,31 +12,31 @@ var (
 
 type sPayload []byte
 
-func NewPayload(head uint64, data []byte) IPayload {
-	bHead := encoding.Uint64ToBytes(head)
+func NewPayload(pHead uint64, pData []byte) IPayload {
+	bHead := encoding.Uint64ToBytes(pHead)
 	return sPayload(bytes.Join([][]byte{
 		bHead[:],
-		data,
+		pData,
 	}, []byte{}))
 }
 
-func LoadPayload(payloadBytes []byte) IPayload {
-	if len(payloadBytes) < encoding.CSizeUint64 {
+func LoadPayload(pPayloadBytes []byte) IPayload {
+	if len(pPayloadBytes) < encoding.CSizeUint64 {
 		return nil
 	}
-	return sPayload(payloadBytes)
+	return sPayload(pPayloadBytes)
 }
 
-func (payload sPayload) GetHead() uint64 {
+func (p sPayload) GetHead() uint64 {
 	bHead := [encoding.CSizeUint64]byte{}
-	copy(bHead[:], payload[:encoding.CSizeUint64])
+	copy(bHead[:], p[:encoding.CSizeUint64])
 	return encoding.BytesToUint64(bHead)
 }
 
-func (payload sPayload) GetBody() []byte {
-	return payload[encoding.CSizeUint64:]
+func (p sPayload) GetBody() []byte {
+	return p[encoding.CSizeUint64:]
 }
 
-func (payload sPayload) ToBytes() []byte {
-	return payload[:]
+func (p sPayload) ToBytes() []byte {
+	return p[:]
 }

@@ -23,14 +23,14 @@ type sAESCipher struct {
 	fKey []byte
 }
 
-func NewAESCipher(key []byte) ICipher {
+func NewAESCipher(pKey []byte) ICipher {
 	return &sAESCipher{
-		fKey: hashing.NewSHA256Hasher(key).ToBytes(),
+		fKey: hashing.NewSHA256Hasher(pKey).ToBytes(),
 	}
 }
 
-func (cph *sAESCipher) EncryptBytes(msg []byte) []byte {
-	block, err := aes.NewCipher(cph.fKey)
+func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {
+	block, err := aes.NewCipher(p.fKey)
 	if err != nil {
 		return nil
 	}
@@ -39,43 +39,43 @@ func (cph *sAESCipher) EncryptBytes(msg []byte) []byte {
 	iv := random.NewStdPRNG().GetBytes(uint64(blockSize))
 
 	stream := cipher.NewCTR(block, iv)
-	result := make([]byte, len(msg)+len(iv))
+	result := make([]byte, len(pMsg)+len(iv))
 	copy(result[:blockSize], iv)
 
-	stream.XORKeyStream(result[blockSize:], msg)
+	stream.XORKeyStream(result[blockSize:], pMsg)
 	return result
 }
 
-func (cph *sAESCipher) DecryptBytes(msg []byte) []byte {
-	block, err := aes.NewCipher(cph.fKey)
+func (p *sAESCipher) DecryptBytes(pMsg []byte) []byte {
+	block, err := aes.NewCipher(p.fKey)
 	if err != nil {
 		return nil
 	}
 
 	blockSize := block.BlockSize()
-	if len(msg) < blockSize {
+	if len(pMsg) < blockSize {
 		return nil
 	}
 
-	stream := cipher.NewCTR(block, msg[:blockSize])
-	result := make([]byte, len(msg)-blockSize)
+	stream := cipher.NewCTR(block, pMsg[:blockSize])
+	result := make([]byte, len(pMsg)-blockSize)
 
-	stream.XORKeyStream(result, msg[blockSize:])
+	stream.XORKeyStream(result, pMsg[blockSize:])
 	return result
 }
 
-func (cph *sAESCipher) ToString() string {
-	return fmt.Sprintf("Key(%s){%X}", cph.GetType(), cph.ToBytes())
+func (p *sAESCipher) ToString() string {
+	return fmt.Sprintf("Key(%s){%X}", p.GetType(), p.ToBytes())
 }
 
-func (cph *sAESCipher) ToBytes() []byte {
-	return cph.fKey
+func (p *sAESCipher) ToBytes() []byte {
+	return p.fKey
 }
 
-func (cph *sAESCipher) GetType() string {
+func (p *sAESCipher) GetType() string {
 	return CAESKeyType
 }
 
-func (cph *sAESCipher) GetSize() uint64 {
+func (p *sAESCipher) GetSize() uint64 {
 	return CAESKeySize
 }

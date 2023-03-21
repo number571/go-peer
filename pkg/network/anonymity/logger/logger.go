@@ -16,27 +16,27 @@ type sLogger struct {
 	fService string
 }
 
-func NewLogger(service string) ILogger {
-	if len(service) != 3 {
+func NewLogger(pService string) ILogger {
+	if len(pService) != 3 {
 		return nil
 	}
 	return &sLogger{
-		fService: service,
+		fService: pService,
 	}
 }
 
-func (l *sLogger) GetFmtLog(lType ILogType, msgHash []byte, proof uint64, pubKey asymmetric.IPubKey, netConn conn.IConn) string {
+func (p *sLogger) GetFmtLog(pType ILogType, pMsgHash []byte, pProof uint64, pPubKey asymmetric.IPubKey, pNetConn conn.IConn) string {
 	conn := "127.0.0.1:"
-	if netConn != nil {
-		conn = netConn.GetSocket().RemoteAddr().String()
+	if pNetConn != nil {
+		conn = pNetConn.GetSocket().RemoteAddr().String()
 	}
 	addr := make([]byte, hashing.CSHA256Size)
-	if pubKey != nil {
-		addr = pubKey.GetAddress().ToBytes()
+	if pPubKey != nil {
+		addr = pPubKey.GetAddress().ToBytes()
 	}
 	hash := make([]byte, hashing.CSHA256Size)
-	if msgHash != nil {
-		hash = msgHash
+	if pMsgHash != nil {
+		hash = pMsgHash
 	}
-	return fmt.Sprintf(cLogTemplate, l.fService, lType, hash[:4], hash[28:], addr[:4], addr[28:], proof, conn)
+	return fmt.Sprintf(cLogTemplate, p.fService, pType, hash[:4], hash[28:], addr[:4], addr[28:], pProof, conn)
 }

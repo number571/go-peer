@@ -18,26 +18,26 @@ type sSHA256Hasher struct {
 	fHash []byte
 }
 
-func NewSHA256Hasher(data []byte) IHasher {
+func NewSHA256Hasher(pData []byte) IHasher {
 	h := sha256.New()
-	h.Write(data)
+	h.Write(pData)
 	return &sSHA256Hasher{
 		fHash: h.Sum(nil),
 	}
 }
 
-func (h *sSHA256Hasher) ToString() string {
-	return fmt.Sprintf("Hash(%s){%X}", h.GetType(), h.ToBytes())
+func (p *sSHA256Hasher) ToString() string {
+	return fmt.Sprintf("Hash(%s){%X}", p.GetType(), p.ToBytes())
 }
 
-func (h *sSHA256Hasher) ToBytes() []byte {
-	return h.fHash
+func (p *sSHA256Hasher) ToBytes() []byte {
+	return p.fHash
 }
 
-func (h *sSHA256Hasher) GetType() string {
+func (p *sSHA256Hasher) GetType() string {
 	return CSHA256KeyType
 }
 
-func (h *sSHA256Hasher) GetSize() uint64 {
+func (p *sSHA256Hasher) GetSize() uint64 {
 	return CSHA256Size
 }

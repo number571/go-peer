@@ -15,27 +15,27 @@ type sSettings struct {
 	FErro *os.File
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FInfo: sett.FInfo,
-		FWarn: sett.FWarn,
-		FErro: sett.FErro,
+		FInfo: pSett.FInfo,
+		FWarn: pSett.FWarn,
+		FErro: pSett.FErro,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
+func (p *sSettings) useDefaultValues() ISettings {
 	// set nil for void fields
-	return s
+	return p
 }
 
-func (s *sSettings) GetStreamInfo() *os.File {
-	return s.FInfo
+func (p *sSettings) GetStreamInfo() *os.File {
+	return p.FInfo
 }
 
-func (s *sSettings) GetStreamWarn() *os.File {
-	return s.FWarn
+func (p *sSettings) GetStreamWarn() *os.File {
+	return p.FWarn
 }
 
-func (s *sSettings) GetStreamErro() *os.File {
-	return s.FErro
+func (p *sSettings) GetStreamErro() *os.File {
+	return p.FErro
 }

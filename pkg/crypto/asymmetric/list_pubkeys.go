@@ -21,21 +21,21 @@ func NewListPubKeys() IListPubKeys {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (l *sListPubKeys) InPubKeys(pub IPubKey) bool {
-	l.fMutex.Lock()
-	defer l.fMutex.Unlock()
+func (p *sListPubKeys) InPubKeys(pPubKey IPubKey) bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	_, ok := l.fMapping[pub.GetAddress().ToString()]
+	_, ok := p.fMapping[pPubKey.GetAddress().ToString()]
 	return ok
 }
 
 // Get a list of friends public keys.
-func (l *sListPubKeys) GetPubKeys() []IPubKey {
-	l.fMutex.Lock()
-	defer l.fMutex.Unlock()
+func (p *sListPubKeys) GetPubKeys() []IPubKey {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	var list []IPubKey
-	for _, pub := range l.fMapping {
+	for _, pub := range p.fMapping {
 		list = append(list, pub)
 	}
 
@@ -43,17 +43,17 @@ func (l *sListPubKeys) GetPubKeys() []IPubKey {
 }
 
 // Add public key to list of friends.
-func (l *sListPubKeys) AddPubKey(pub IPubKey) {
-	l.fMutex.Lock()
-	defer l.fMutex.Unlock()
+func (p *sListPubKeys) AddPubKey(pPubKey IPubKey) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	l.fMapping[pub.GetAddress().ToString()] = pub
+	p.fMapping[pPubKey.GetAddress().ToString()] = pPubKey
 }
 
 // Delete public key from list of friends.
-func (l *sListPubKeys) DelPubKey(pub IPubKey) {
-	l.fMutex.Lock()
-	defer l.fMutex.Unlock()
+func (p *sListPubKeys) DelPubKey(pub IPubKey) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	delete(l.fMapping, pub.GetAddress().ToString())
+	delete(p.fMapping, pub.GetAddress().ToString())
 }

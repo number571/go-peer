@@ -18,35 +18,35 @@ type sMemoryStorage struct {
 	fMapping  map[string][]byte
 }
 
-func NewMemoryStorage(max uint64) IKeyValueStorage {
+func NewMemoryStorage(pMaximum uint64) IKeyValueStorage {
 	return &sMemoryStorage{
-		fMaximum:  max,
-		fKeyQueue: make([]string, 0, max),
-		fMapping:  make(map[string][]byte, max),
+		fMaximum:  pMaximum,
+		fKeyQueue: make([]string, 0, pMaximum),
+		fMapping:  make(map[string][]byte, pMaximum),
 	}
 }
 
-func (store *sMemoryStorage) Set(key, value []byte) error {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sMemoryStorage) Set(pKey, pValue []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if uint64(len(store.fMapping)) >= store.fMaximum {
-		delete(store.fMapping, store.fKeyQueue[0])
-		store.fKeyQueue = store.fKeyQueue[1:]
+	if uint64(len(p.fMapping)) >= p.fMaximum {
+		delete(p.fMapping, p.fKeyQueue[0])
+		p.fKeyQueue = p.fKeyQueue[1:]
 	}
 
-	newKey := encoding.HexEncode(key)
+	newKey := encoding.HexEncode(pKey)
 
-	store.fKeyQueue = append(store.fKeyQueue, newKey)
-	store.fMapping[newKey] = value
+	p.fKeyQueue = append(p.fKeyQueue, newKey)
+	p.fMapping[newKey] = pValue
 	return nil
 }
 
-func (store *sMemoryStorage) Get(key []byte) ([]byte, error) {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sMemoryStorage) Get(pKey []byte) ([]byte, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	value, ok := store.fMapping[encoding.HexEncode(key)]
+	value, ok := p.fMapping[encoding.HexEncode(pKey)]
 	if !ok {
 		return nil, fmt.Errorf("undefined value by key")
 	}
@@ -54,15 +54,15 @@ func (store *sMemoryStorage) Get(key []byte) ([]byte, error) {
 	return value, nil
 }
 
-func (store *sMemoryStorage) Del(key []byte) error {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sMemoryStorage) Del(pKey []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	_, ok := store.fMapping[encoding.HexEncode(key)]
+	_, ok := p.fMapping[encoding.HexEncode(pKey)]
 	if !ok {
 		return fmt.Errorf("undefined value by key")
 	}
 
-	delete(store.fMapping, encoding.HexEncode(key))
+	delete(p.fMapping, encoding.HexEncode(pKey))
 	return nil
 }

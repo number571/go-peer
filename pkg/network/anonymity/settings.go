@@ -22,40 +22,40 @@ type sSettings struct {
 	FTimeWait     time.Duration
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FServiceName:  sett.FServiceName,
-		FRetryEnqueue: sett.FRetryEnqueue,
-		FNetworkMask:  sett.FNetworkMask,
-		FTimeWait:     sett.FTimeWait,
+		FServiceName:  pSett.FServiceName,
+		FRetryEnqueue: pSett.FRetryEnqueue,
+		FNetworkMask:  pSett.FNetworkMask,
+		FTimeWait:     pSett.FTimeWait,
 	}).useDefaultValue()
 }
 
-func (s *sSettings) useDefaultValue() ISettings {
-	if s.FServiceName == "" {
-		s.FServiceName = cServiceName
+func (p *sSettings) useDefaultValue() ISettings {
+	if p.FServiceName == "" {
+		p.FServiceName = cServiceName
 	}
-	if s.FNetworkMask == 0 {
-		s.FNetworkMask = cMaskNetwork
+	if p.FNetworkMask == 0 {
+		p.FNetworkMask = cMaskNetwork
 	}
-	if s.FTimeWait == 0 {
-		s.FTimeWait = cTimeWait
+	if p.FTimeWait == 0 {
+		p.FTimeWait = cTimeWait
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetServiceName() string {
-	return s.FServiceName
+func (p *sSettings) GetServiceName() string {
+	return p.FServiceName
 }
 
-func (s *sSettings) GetTimeWait() time.Duration {
-	return s.FTimeWait
+func (p *sSettings) GetTimeWait() time.Duration {
+	return p.FTimeWait
 }
 
-func (s *sSettings) GetNetworkMask() uint64 {
-	return s.FNetworkMask
+func (p *sSettings) GetNetworkMask() uint64 {
+	return p.FNetworkMask
 }
 
-func (s *sSettings) GetRetryEnqueue() uint64 {
-	return s.FRetryEnqueue
+func (p *sSettings) GetRetryEnqueue() uint64 {
+	return p.FRetryEnqueue
 }

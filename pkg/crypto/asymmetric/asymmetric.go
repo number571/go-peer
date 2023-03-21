@@ -39,24 +39,24 @@ type sRSAPrivKey struct {
 	fPrivKey *rsa.PrivateKey
 }
 
-func newPrivKey(privKey *rsa.PrivateKey) IPrivKey {
+func newPrivKey(pPrivKey *rsa.PrivateKey) IPrivKey {
 	return &sRSAPrivKey{
-		fPubKey:  newPubKey(&privKey.PublicKey),
-		fPrivKey: privKey,
+		fPubKey:  newPubKey(&pPrivKey.PublicKey),
+		fPrivKey: pPrivKey,
 	}
 }
 
 // Create private key by number of bits.
-func NewRSAPrivKey(bits uint64) IPrivKey {
-	privKey, err := rsa.GenerateKey(rand.Reader, int(bits))
+func NewRSAPrivKey(pBits uint64) IPrivKey {
+	privKey, err := rsa.GenerateKey(rand.Reader, int(pBits))
 	if err != nil {
 		return nil
 	}
 	return newPrivKey(privKey)
 }
 
-func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
-	switch x := typePrivKey.(type) {
+func LoadRSAPrivKey(pPrivKey interface{}) IPrivKey {
+	switch x := pPrivKey.(type) {
 	case []byte:
 		privKey := bytesToPrivateKey(x)
 		if privKey == nil {
@@ -90,37 +90,37 @@ func LoadRSAPrivKey(typePrivKey interface{}) IPrivKey {
 	}
 }
 
-func (key *sRSAPrivKey) DecryptBytes(msg []byte) []byte {
-	return decryptRSA(key.fPrivKey, msg)
+func (p *sRSAPrivKey) DecryptBytes(pMsg []byte) []byte {
+	return decryptRSA(p.fPrivKey, pMsg)
 }
 
-func (key *sRSAPrivKey) SignBytes(msg []byte) []byte {
-	return sign(key.fPrivKey, hashing.NewSHA256Hasher(msg).ToBytes())
+func (p *sRSAPrivKey) SignBytes(pMsg []byte) []byte {
+	return sign(p.fPrivKey, hashing.NewSHA256Hasher(pMsg).ToBytes())
 }
 
-func (key *sRSAPrivKey) GetPubKey() IPubKey {
-	return key.fPubKey
+func (p *sRSAPrivKey) GetPubKey() IPubKey {
+	return p.fPubKey
 }
 
-func (key *sRSAPrivKey) ToBytes() []byte {
-	return privateKeyToBytes(key.fPrivKey)
+func (p *sRSAPrivKey) ToBytes() []byte {
+	return privateKeyToBytes(p.fPrivKey)
 }
 
-func (key *sRSAPrivKey) ToString() string {
-	return fmt.Sprintf(cPrivKeyPrefixTemplate+"%X"+cKeySuffix, key.GetType(), key.ToBytes())
+func (p *sRSAPrivKey) ToString() string {
+	return fmt.Sprintf(cPrivKeyPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
 }
 
-func (key *sRSAPrivKey) GetType() string {
+func (p *sRSAPrivKey) GetType() string {
 	return CRSAKeyType
 }
 
-func (key *sRSAPrivKey) GetSize() uint64 {
-	return key.GetPubKey().GetSize()
+func (p *sRSAPrivKey) GetSize() uint64 {
+	return p.GetPubKey().GetSize()
 }
 
 // Used PKCS1.
-func bytesToPrivateKey(privData []byte) *rsa.PrivateKey {
-	priv, err := x509.ParsePKCS1PrivateKey(privData)
+func bytesToPrivateKey(pPrivData []byte) *rsa.PrivateKey {
+	priv, err := x509.ParsePKCS1PrivateKey(pPrivData)
 	if err != nil {
 		return nil
 	}
@@ -128,8 +128,8 @@ func bytesToPrivateKey(privData []byte) *rsa.PrivateKey {
 }
 
 // Used RSA(OAEP).
-func decryptRSA(priv *rsa.PrivateKey, data []byte) []byte {
-	data, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, priv, data, nil)
+func decryptRSA(pPrivKey *rsa.PrivateKey, pData []byte) []byte {
+	data, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, pPrivKey, pData, nil)
 	if err != nil {
 		return nil
 	}
@@ -137,12 +137,12 @@ func decryptRSA(priv *rsa.PrivateKey, data []byte) []byte {
 }
 
 // Used PKCS1.
-func privateKeyToBytes(priv *rsa.PrivateKey) []byte {
-	return x509.MarshalPKCS1PrivateKey(priv)
+func privateKeyToBytes(pPrivKey *rsa.PrivateKey) []byte {
+	return x509.MarshalPKCS1PrivateKey(pPrivKey)
 }
 
-func sign(priv *rsa.PrivateKey, hash []byte) []byte {
-	signature, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, hash, nil)
+func sign(pPrivKey *rsa.PrivateKey, pHash []byte) []byte {
+	signature, err := rsa.SignPSS(rand.Reader, pPrivKey, crypto.SHA256, pHash, nil)
 	if err != nil {
 		return nil
 	}
@@ -158,15 +158,15 @@ type sRSAPubKey struct {
 	fPubKey *rsa.PublicKey
 }
 
-func newPubKey(pubKey *rsa.PublicKey) IPubKey {
+func newPubKey(pPubKey *rsa.PublicKey) IPubKey {
 	return &sRSAPubKey{
-		fAddr:   newAddress(pubKey),
-		fPubKey: pubKey,
+		fAddr:   newAddress(pPubKey),
+		fPubKey: pPubKey,
 	}
 }
 
-func LoadRSAPubKey(pubkey interface{}) IPubKey {
-	switch x := pubkey.(type) {
+func LoadRSAPubKey(pPubKey interface{}) IPubKey {
+	switch x := pPubKey.(type) {
 	case []byte:
 		pub := bytesToPublicKey(x)
 		if pub == nil {
@@ -200,32 +200,32 @@ func LoadRSAPubKey(pubkey interface{}) IPubKey {
 	}
 }
 
-func (key *sRSAPubKey) EncryptBytes(msg []byte) []byte {
-	return encryptRSA(key.fPubKey, msg)
+func (p *sRSAPubKey) EncryptBytes(pMsg []byte) []byte {
+	return encryptRSA(p.fPubKey, pMsg)
 }
 
-func (key *sRSAPubKey) GetAddress() IAddress {
-	return key.fAddr
+func (p *sRSAPubKey) GetAddress() IAddress {
+	return p.fAddr
 }
 
-func (key *sRSAPubKey) VerifyBytes(msg []byte, sig []byte) bool {
-	return verify(key.fPubKey, hashing.NewSHA256Hasher(msg).ToBytes(), sig) == nil
+func (p *sRSAPubKey) VerifyBytes(pMsg []byte, pSign []byte) bool {
+	return verify(p.fPubKey, hashing.NewSHA256Hasher(pMsg).ToBytes(), pSign) == nil
 }
 
-func (key *sRSAPubKey) ToBytes() []byte {
-	return publicKeyToBytes(key.fPubKey)
+func (p *sRSAPubKey) ToBytes() []byte {
+	return publicKeyToBytes(p.fPubKey)
 }
 
-func (key *sRSAPubKey) ToString() string {
-	return fmt.Sprintf(cPubKeyPrefixTemplate+"%X"+cKeySuffix, key.GetType(), key.ToBytes())
+func (p *sRSAPubKey) ToString() string {
+	return fmt.Sprintf(cPubKeyPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
 }
 
-func (key *sRSAPubKey) GetType() string {
+func (p *sRSAPubKey) GetType() string {
 	return CRSAKeyType
 }
 
-func (key *sRSAPubKey) GetSize() uint64 {
-	return uint64(key.fPubKey.N.BitLen())
+func (p *sRSAPubKey) GetSize() uint64 {
+	return uint64(p.fPubKey.N.BitLen())
 }
 
 /*
@@ -236,33 +236,33 @@ type sAddress struct {
 	fBytes []byte
 }
 
-func newAddress(pubKey *rsa.PublicKey) IAddress {
+func newAddress(pPubKey *rsa.PublicKey) IAddress {
 	return &sAddress{
 		fBytes: hashing.NewSHA256Hasher(
-			publicKeyToBytes(pubKey),
+			publicKeyToBytes(pPubKey),
 		).ToBytes(),
 	}
 }
 
-func (addr *sAddress) ToBytes() []byte {
-	return addr.fBytes
+func (p *sAddress) ToBytes() []byte {
+	return p.fBytes
 }
 
-func (addr *sAddress) ToString() string {
-	return fmt.Sprintf("Address(%s){%X}", addr.GetType(), addr.ToBytes())
+func (p *sAddress) ToString() string {
+	return fmt.Sprintf("Address(%s){%X}", p.GetType(), p.ToBytes())
 }
 
-func (addr *sAddress) GetType() string {
+func (p *sAddress) GetType() string {
 	return CRSAKeyType
 }
 
-func (addr *sAddress) GetSize() uint64 {
+func (p *sAddress) GetSize() uint64 {
 	return hashing.CSHA256Size
 }
 
 // Used RSA(OAEP).
-func encryptRSA(pub *rsa.PublicKey, data []byte) []byte {
-	data, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pub, data, nil)
+func encryptRSA(pPubKey *rsa.PublicKey, pData []byte) []byte {
+	data, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pPubKey, pData, nil)
 	if err != nil {
 		return nil
 	}
@@ -270,8 +270,8 @@ func encryptRSA(pub *rsa.PublicKey, data []byte) []byte {
 }
 
 // Used PKCS1.
-func bytesToPublicKey(pubData []byte) *rsa.PublicKey {
-	pub, err := x509.ParsePKCS1PublicKey(pubData)
+func bytesToPublicKey(pPubData []byte) *rsa.PublicKey {
+	pub, err := x509.ParsePKCS1PublicKey(pPubData)
 	if err != nil {
 		return nil
 	}
@@ -279,16 +279,17 @@ func bytesToPublicKey(pubData []byte) *rsa.PublicKey {
 }
 
 // Used PKCS1.
-func publicKeyToBytes(pub *rsa.PublicKey) []byte {
-	return x509.MarshalPKCS1PublicKey(pub)
+func publicKeyToBytes(pPubKey *rsa.PublicKey) []byte {
+	return x509.MarshalPKCS1PublicKey(pPubKey)
 }
 
 // Used RSA(PSS).
-func verify(pub *rsa.PublicKey, hash, sign []byte) error {
-	return rsa.VerifyPSS(pub, crypto.SHA256, hash, sign, nil)
+func verify(pPubKey *rsa.PublicKey, pHash, pSign []byte) error {
+	return rsa.VerifyPSS(pPubKey, crypto.SHA256, pHash, pSign, nil)
 }
 
-func skipSpaceChars(s string) string {
+func skipSpaceChars(pS string) string {
+	s := pS
 	s = strings.ReplaceAll(s, "\n", "")
 	s = strings.ReplaceAll(s, "\t", "")
 	s = strings.ReplaceAll(s, " ", "")

@@ -28,28 +28,28 @@ type sNode struct {
 // Creating a node object managed by connections with multiple nodes.
 // Saves hashes of received messages to a buffer to prevent network cycling.
 // Redirects messages to handle routers by keys.
-func NewNode(sett ISettings) INode {
+func NewNode(pSett ISettings) INode {
 	return &sNode{
-		fSettings:     sett,
-		fHashMapping:  storage.NewMemoryStorage(sett.GetCapacity()),
+		fSettings:     pSett,
+		fHashMapping:  storage.NewMemoryStorage(pSett.GetCapacity()),
 		fConnections:  make(map[string]conn.IConn),
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
 }
 
 // Return settings interface.
-func (node *sNode) GetSettings() ISettings {
-	return node.fSettings
+func (p *sNode) GetSettings() ISettings {
+	return p.fSettings
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
-func (node *sNode) BroadcastPayload(pld payload.IPayload) error {
-	hasher := hashing.NewSHA256Hasher(pld.ToBytes())
-	node.inMappingWithSet(hasher.ToBytes())
+func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
+	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
+	p.inMappingWithSet(hasher.ToBytes())
 
 	var err error
-	for _, conn := range node.GetConnections() {
-		e := conn.WritePayload(pld)
+	for _, conn := range p.GetConnections() {
+		e := conn.WritePayload(pPld)
 		if e != nil {
 			err = e
 		}
@@ -61,32 +61,32 @@ func (node *sNode) BroadcastPayload(pld payload.IPayload) error {
 // Opens a tcp connection to receive data from outside.
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
-func (node *sNode) Run() error {
-	listener, err := net.Listen("tcp", node.GetSettings().GetAddress())
+func (p *sNode) Run() error {
+	listener, err := net.Listen("tcp", p.GetSettings().GetAddress())
 	if err != nil {
 		return err
 	}
 
-	go func(l net.Listener) {
-		defer l.Close()
-		node.setListener(l)
+	go func(pListener net.Listener) {
+		defer pListener.Close()
+		p.setListener(pListener)
 		for {
-			tconn, err := node.getListener().Accept()
+			tconn, err := p.getListener().Accept()
 			if err != nil {
 				break
 			}
 
-			if node.hasMaxConnSize() {
+			if p.hasMaxConnSize() {
 				tconn.Close()
 				continue
 			}
 
-			sett := node.GetSettings().GetConnSettings()
+			sett := p.GetSettings().GetConnSettings()
 			conn := conn.LoadConn(sett, tconn)
 			address := tconn.RemoteAddr().String()
 
-			node.setConnection(address, conn)
-			go node.handleConn(address, conn)
+			p.setConnection(address, conn)
+			go p.handleConn(address, conn)
 		}
 	}(listener)
 
@@ -94,39 +94,39 @@ func (node *sNode) Run() error {
 }
 
 // Closes the listener and all connections.
-func (node *sNode) Stop() error {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	toClose := make([]types.ICloser, 0, len(node.fConnections)+1)
-	if node.fListener != nil {
-		toClose = append(toClose, node.fListener)
+	toClose := make([]types.ICloser, 0, len(p.fConnections)+1)
+	if p.fListener != nil {
+		toClose = append(toClose, p.fListener)
 	}
 
-	for id, conn := range node.fConnections {
+	for id, conn := range p.fConnections {
 		toClose = append(toClose, conn)
-		delete(node.fConnections, id)
+		delete(p.fConnections, id)
 	}
 
 	return types.CloseAll(toClose)
 }
 
 // Saves the function to the map by key for subsequent redirection.
-func (node *sNode) HandleFunc(head uint64, handle IHandlerF) INode {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) HandleFunc(pHead uint64, pHandle IHandlerF) INode {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	node.fHandleRoutes[head] = handle
-	return node
+	p.fHandleRoutes[pHead] = pHandle
+	return p
 }
 
 // Retrieves the entire list of connections with addresses.
-func (node *sNode) GetConnections() map[string]conn.IConn {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) GetConnections() map[string]conn.IConn {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	var mapping = make(map[string]conn.IConn, len(node.fConnections))
-	for addr, conn := range node.fConnections {
+	var mapping = make(map[string]conn.IConn, len(p.fConnections))
+	for addr, conn := range p.fConnections {
 		mapping[addr] = conn
 	}
 
@@ -135,42 +135,42 @@ func (node *sNode) GetConnections() map[string]conn.IConn {
 
 // Connects to the node at the specified address and automatically starts reading all incoming messages.
 // Checks the number of connections.
-func (node *sNode) AddConnect(address string) error {
-	if node.hasMaxConnSize() {
+func (p *sNode) AddConnect(pAddress string) error {
+	if p.hasMaxConnSize() {
 		return fmt.Errorf("has max connections size")
 	}
 
-	sett := node.GetSettings().GetConnSettings()
-	conn, err := conn.NewConn(sett, address)
+	sett := p.GetSettings().GetConnSettings()
+	conn, err := conn.NewConn(sett, pAddress)
 	if err != nil {
 		return err
 	}
 
-	node.setConnection(address, conn)
-	go node.handleConn(address, conn)
+	p.setConnection(pAddress, conn)
+	go p.handleConn(pAddress, conn)
 
 	return nil
 }
 
 // Disables the connection at the address and removes the connection from the connection list.
-func (node *sNode) DelConnect(address string) error {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) DelConnect(pAddress string) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	conn, ok := node.fConnections[address]
+	conn, ok := p.fConnections[pAddress]
 	if !ok {
 		return nil
 	}
 
-	delete(node.fConnections, address)
+	delete(p.fConnections, pAddress)
 	return conn.Close()
 }
 
 // Processes the received data from the connection.
-func (node *sNode) handleConn(address string, conn conn.IConn) {
-	defer node.DelConnect(address)
+func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
+	defer p.DelConnect(pAddress)
 	for {
-		ok := node.handleMessage(conn, conn.ReadPayload())
+		ok := p.handleMessage(pConn, pConn.ReadPayload())
 		if !ok {
 			break
 		}
@@ -180,83 +180,83 @@ func (node *sNode) handleConn(address string, conn conn.IConn) {
 // Processes the message for correctness and redirects it to the handler function.
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
-func (node *sNode) handleMessage(conn conn.IConn, pld payload.IPayload) bool {
+func (p *sNode) handleMessage(pConn conn.IConn, pPld payload.IPayload) bool {
 	// null message from connection is error
-	if pld == nil {
+	if pPld == nil {
 		return false
 	}
 
 	// check message in mapping by hash
-	hash := hashing.NewSHA256Hasher(pld.ToBytes()).ToBytes()
-	if node.inMappingWithSet(hash) {
+	hash := hashing.NewSHA256Hasher(pPld.ToBytes()).ToBytes()
+	if p.inMappingWithSet(hash) {
 		return true
 	}
 
 	// get function by head
-	f, ok := node.getFunction(pld.GetHead())
+	f, ok := p.getFunction(pPld.GetHead())
 	if !ok || f == nil {
 		return false
 	}
 
-	f(node, conn, pld.GetBody())
+	f(p, pConn, pPld.GetBody())
 	return true
 }
 
 // Checks the current number of connections with the limit.
-func (node *sNode) hasMaxConnSize() bool {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) hasMaxConnSize() bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	maxConns := node.GetSettings().GetMaxConnects()
-	return uint64(len(node.fConnections)) > maxConns
+	maxConns := p.GetSettings().GetMaxConnects()
+	return uint64(len(p.fConnections)) > maxConns
 }
 
 // Checks the hash of the message for existence in the hash store.
 // Returns true if the hash already existed, otherwise false.
-func (node *sNode) inMappingWithSet(hash []byte) bool {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) inMappingWithSet(pHash []byte) bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	// skey already exists
-	_, err := node.fHashMapping.Get(hash)
+	_, err := p.fHashMapping.Get(pHash)
 	if err == nil {
 		return true
 	}
 
 	// push skey to mapping
-	node.fHashMapping.Set(hash, []byte{1})
+	p.fHashMapping.Set(pHash, []byte{1})
 	return false
 }
 
 // Saves the connection to the map.
-func (node *sNode) setConnection(address string, conn conn.IConn) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) setConnection(pAddress string, pConn conn.IConn) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	node.fConnections[address] = conn
+	p.fConnections[pAddress] = pConn
 }
 
 // Gets the handler function by key.
-func (node *sNode) getFunction(head uint64) (IHandlerF, bool) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) getFunction(pHead uint64) (IHandlerF, bool) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	f, ok := node.fHandleRoutes[head]
+	f, ok := p.fHandleRoutes[pHead]
 	return f, ok
 }
 
 // Sets the listener.
-func (node *sNode) setListener(listener net.Listener) {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) setListener(pListener net.Listener) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	node.fListener = listener
+	p.fListener = pListener
 }
 
 // Gets the listener.
-func (node *sNode) getListener() net.Listener {
-	node.fMutex.Lock()
-	defer node.fMutex.Unlock()
+func (p *sNode) getListener() net.Listener {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return node.fListener
+	return p.fListener
 }

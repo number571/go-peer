@@ -20,40 +20,40 @@ type sConnKeeper struct {
 	fSettings ISettings
 }
 
-func NewConnKeeper(sett ISettings, node network.INode) IConnKeeper {
+func NewConnKeeper(pSett ISettings, pNode network.INode) IConnKeeper {
 	return &sConnKeeper{
-		fNode:     node,
-		fSettings: sett,
+		fNode:     pNode,
+		fSettings: pSett,
 	}
 }
 
-func (connKeeper *sConnKeeper) GetNetworkNode() network.INode {
-	return connKeeper.fNode
+func (p *sConnKeeper) GetNetworkNode() network.INode {
+	return p.fNode
 }
 
-func (connKeeper *sConnKeeper) GetSettings() ISettings {
-	return connKeeper.fSettings
+func (p *sConnKeeper) GetSettings() ISettings {
+	return p.fSettings
 }
 
-func (connKeeper *sConnKeeper) Run() error {
-	connKeeper.fMutex.Lock()
-	defer connKeeper.fMutex.Unlock()
+func (p *sConnKeeper) Run() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if connKeeper.fIsRun {
+	if p.fIsRun {
 		return errors.New("conn keeper already started")
 	}
-	connKeeper.fIsRun = true
+	p.fIsRun = true
 
-	connKeeper.fSignal = make(chan struct{})
-	connKeeper.tryConnectToAll()
+	p.fSignal = make(chan struct{})
+	p.tryConnectToAll()
 
 	go func() {
 		for {
 			select {
-			case <-connKeeper.readSignal():
+			case <-p.readSignal():
 				return
-			case <-time.After(connKeeper.GetSettings().GetDuration()):
-				connKeeper.tryConnectToAll()
+			case <-time.After(p.GetSettings().GetDuration()):
+				p.tryConnectToAll()
 			}
 		}
 	}()
@@ -61,34 +61,35 @@ func (connKeeper *sConnKeeper) Run() error {
 	return nil
 }
 
-func (connKeeper *sConnKeeper) Stop() error {
-	connKeeper.fMutex.Lock()
-	defer connKeeper.fMutex.Unlock()
+func (p *sConnKeeper) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	if !connKeeper.fIsRun {
+	if !p.fIsRun {
 		return errors.New("conn keeper already closed or not started")
 	}
-	connKeeper.fIsRun = false
+	p.fIsRun = false
 
-	close(connKeeper.fSignal)
+	close(p.fSignal)
 	return nil
 }
 
-func (connKeeper *sConnKeeper) tryConnectToAll() {
+func (p *sConnKeeper) tryConnectToAll() {
 NEXT:
-	for _, address := range connKeeper.GetSettings().GetConnections() {
-		for addr := range connKeeper.fNode.GetConnections() {
+	for _, address := range p.GetSettings().GetConnections() {
+		for addr := range p.fNode.GetConnections() {
 			if addr == address {
+				// no need add connect
 				continue NEXT
 			}
 		}
-		connKeeper.fNode.AddConnect(address)
+		p.fNode.AddConnect(address)
 	}
 }
 
-func (connKeeper *sConnKeeper) readSignal() <-chan struct{} {
-	connKeeper.fMutex.Lock()
-	defer connKeeper.fMutex.Unlock()
+func (p *sConnKeeper) readSignal() <-chan struct{} {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return connKeeper.fSignal
+	return p.fSignal
 }

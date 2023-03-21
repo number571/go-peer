@@ -29,14 +29,14 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorage, error) {
+func NewCryptoStorage(pPath string, pKey []byte, pWorkSize uint64) (IKeyValueStorage, error) {
 	store := &sCryptoStorage{
-		fPath:     path,
-		fWorkSize: workSize,
+		fPath:     pPath,
+		fWorkSize: pWorkSize,
 	}
 
 	if store.exists() {
-		encdata, err := filesystem.OpenFile(path).Read()
+		encdata, err := filesystem.OpenFile(pPath).Read()
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +46,7 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorag
 	}
 
 	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
-	store.fCipher = symmetric.NewAESCipher(entropy.BoostEntropy(key))
+	store.fCipher = symmetric.NewAESCipher(entropy.BoostEntropy(pKey))
 
 	if !store.exists() {
 		store.Set(nil, nil)
@@ -60,9 +60,9 @@ func NewCryptoStorage(path string, key []byte, workSize uint64) (IKeyValueStorag
 	return store, nil
 }
 
-func (store *sCryptoStorage) Set(key, value []byte) error {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sCryptoStorage) Set(pKey, pValue []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	var (
 		mapping storageData
@@ -70,8 +70,8 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	)
 
 	// Open and decrypt storage
-	if store.exists() {
-		mapping, err = store.decrypt()
+	if p.exists() {
+		mapping, err = p.decrypt()
 		if err != nil {
 			return err
 		}
@@ -80,34 +80,34 @@ func (store *sCryptoStorage) Set(key, value []byte) error {
 	}
 
 	// Encrypt and save private key into storage
-	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
-	ekey := entropy.BoostEntropy(key)
+	entropy := entropy.NewEntropyBooster(p.fWorkSize, p.fSalt)
+	ekey := entropy.BoostEntropy(pKey)
 	hash := hashing.NewSHA256Hasher(ekey).ToString()
 
 	cipher := symmetric.NewAESCipher(ekey)
-	mapping.FSecrets[hash] = cipher.EncryptBytes(value)
+	mapping.FSecrets[hash] = cipher.EncryptBytes(pValue)
 
-	return store.encrypt(&mapping)
+	return p.encrypt(&mapping)
 }
 
-func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sCryptoStorage) Get(pKey []byte) ([]byte, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	// If storage not exists.
-	if !store.exists() {
+	if !p.exists() {
 		return nil, fmt.Errorf("error: storage undefined")
 	}
 
 	// Open and decrypt storage
-	mapping, err := store.decrypt()
+	mapping, err := p.decrypt()
 	if err != nil {
 		return nil, err
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
-	ekey := entropy.BoostEntropy(key)
+	entropy := entropy.NewEntropyBooster(p.fWorkSize, p.fSalt)
+	ekey := entropy.BoostEntropy(pKey)
 	hash := hashing.NewSHA256Hasher(ekey).ToString()
 
 	encsecret, ok := mapping.FSecrets[hash]
@@ -121,24 +121,24 @@ func (store *sCryptoStorage) Get(key []byte) ([]byte, error) {
 	return secret, nil
 }
 
-func (store *sCryptoStorage) Del(key []byte) error {
-	store.fMutex.Lock()
-	defer store.fMutex.Unlock()
+func (p *sCryptoStorage) Del(pKey []byte) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	// If storage not exists.
-	if !store.exists() {
+	if !p.exists() {
 		return fmt.Errorf("error: storage undefined")
 	}
 
 	// Open and decrypt storage
-	mapping, err := store.decrypt()
+	mapping, err := p.decrypt()
 	if err != nil {
 		return err
 	}
 
 	// Open and decrypt private key
-	entropy := entropy.NewEntropyBooster(store.fWorkSize, store.fSalt)
-	hash := hashing.NewSHA256Hasher(entropy.BoostEntropy(key)).ToString()
+	entropy := entropy.NewEntropyBooster(p.fWorkSize, p.fSalt)
+	hash := hashing.NewSHA256Hasher(entropy.BoostEntropy(pKey)).ToString()
 
 	_, ok := mapping.FSecrets[hash]
 	if !ok {
@@ -146,23 +146,23 @@ func (store *sCryptoStorage) Del(key []byte) error {
 	}
 
 	delete(mapping.FSecrets, hash)
-	return store.encrypt(&mapping)
+	return p.encrypt(&mapping)
 }
 
-func (store *sCryptoStorage) exists() bool {
-	return filesystem.OpenFile(store.fPath).IsExist()
+func (p *sCryptoStorage) exists() bool {
+	return filesystem.OpenFile(p.fPath).IsExist()
 }
 
-func (store *sCryptoStorage) encrypt(mapping *storageData) error {
+func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 	// Encrypt and save storage
-	data, err := json.Marshal(mapping)
+	data, err := json.Marshal(pMapping)
 	if err != nil {
 		return err
 	}
 
-	err = filesystem.OpenFile(store.fPath).Write(
+	err = filesystem.OpenFile(p.fPath).Write(
 		bytes.Join(
-			[][]byte{store.fSalt, store.fCipher.EncryptBytes(data)},
+			[][]byte{p.fSalt, p.fCipher.EncryptBytes(data)},
 			[]byte{},
 		),
 	)
@@ -173,15 +173,15 @@ func (store *sCryptoStorage) encrypt(mapping *storageData) error {
 	return nil
 }
 
-func (store *sCryptoStorage) decrypt() (storageData, error) {
+func (p *sCryptoStorage) decrypt() (storageData, error) {
 	var mapping storageData
 
-	encdata, err := filesystem.OpenFile(store.fPath).Read()
+	encdata, err := filesystem.OpenFile(p.fPath).Read()
 	if err != nil {
 		return storageData{}, err
 	}
 
-	data := store.fCipher.DecryptBytes(encdata[symmetric.CAESKeySize:])
+	data := p.fCipher.DecryptBytes(encdata[symmetric.CAESKeySize:])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
 		return storageData{}, err

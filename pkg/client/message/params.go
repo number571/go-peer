@@ -9,10 +9,10 @@ type sParams struct {
 	fWorkSize    uint64
 }
 
-func NewParams(msgSize, workSize uint64) IParams {
+func NewParams(pMsgSize, pWorkSize uint64) IParams {
 	return &sParams{
-		fMessageSize: msgSize,
-		fWorkSize:    workSize,
+		fMessageSize: pMsgSize,
+		fWorkSize:    pWorkSize,
 	}
 }
 

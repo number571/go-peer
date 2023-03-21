@@ -17,17 +17,17 @@ func NewWrapper() IWrapper {
 	return &sWrapper{fValue: new(interface{})}
 }
 
-func (w *sWrapper) Get() interface{} {
-	w.fMutex.Lock()
-	defer w.fMutex.Unlock()
+func (p *sWrapper) Get() interface{} {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	return (*w.fValue)
+	return (*p.fValue)
 }
 
-func (w *sWrapper) Set(v interface{}) IWrapper {
-	w.fMutex.Lock()
-	defer w.fMutex.Unlock()
+func (p *sWrapper) Set(pValue interface{}) IWrapper {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
-	(*w.fValue) = v
-	return w
+	(*p.fValue) = pValue
+	return p
 }

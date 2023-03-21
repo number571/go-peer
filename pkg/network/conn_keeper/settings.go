@@ -20,27 +20,27 @@ type sSettings struct {
 	FDuration    time.Duration
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FConnections: sett.FConnections,
-		FDuration:    sett.FDuration,
+		FConnections: pSett.FConnections,
+		FDuration:    pSett.FDuration,
 	}).useDefaultValue()
 }
 
-func (s *sSettings) useDefaultValue() ISettings {
-	if s.FDuration == 0 {
-		s.FDuration = cDuration
+func (p *sSettings) useDefaultValue() ISettings {
+	if p.FDuration == 0 {
+		p.FDuration = cDuration
 	}
-	if s.FConnections == nil {
-		s.FConnections = gConnections
+	if p.FConnections == nil {
+		p.FConnections = gConnections
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetConnections() []string {
-	return s.FConnections()
+func (p *sSettings) GetConnections() []string {
+	return p.FConnections()
 }
 
-func (s *sSettings) GetDuration() time.Duration {
-	return s.FDuration
+func (p *sSettings) GetDuration() time.Duration {
+	return p.FDuration
 }

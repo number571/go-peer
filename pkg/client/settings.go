@@ -15,27 +15,27 @@ type sSettings struct {
 	FMessageSize uint64
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FWorkSize:    sett.FWorkSize,
-		FMessageSize: sett.FMessageSize,
+		FWorkSize:    pSett.FWorkSize,
+		FMessageSize: pSett.FMessageSize,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FWorkSize == 0 {
-		s.FWorkSize = cWorkSize
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FWorkSize == 0 {
+		p.FWorkSize = cWorkSize
 	}
-	if s.FMessageSize == 0 {
-		s.FMessageSize = cMessageSize
+	if p.FMessageSize == 0 {
+		p.FMessageSize = cMessageSize
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetWorkSize() uint64 {
-	return s.FWorkSize
+func (p *sSettings) GetWorkSize() uint64 {
+	return p.FWorkSize
 }
 
-func (s *sSettings) GetMessageSize() uint64 {
-	return s.FMessageSize
+func (p *sSettings) GetMessageSize() uint64 {
+	return p.FMessageSize
 }

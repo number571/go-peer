@@ -19,35 +19,35 @@ type sSettings struct {
 	FTimeWait    time.Duration
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkKey:  sett.FNetworkKey,
-		FMessageSize: sett.FMessageSize,
-		FTimeWait:    sett.FTimeWait,
+		FNetworkKey:  pSett.FNetworkKey,
+		FMessageSize: pSett.FMessageSize,
+		FTimeWait:    pSett.FTimeWait,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FNetworkKey == "" {
-		s.FNetworkKey = cNetworkKey
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FNetworkKey == "" {
+		p.FNetworkKey = cNetworkKey
 	}
-	if s.FMessageSize == 0 {
-		s.FMessageSize = cMessageSize
+	if p.FMessageSize == 0 {
+		p.FMessageSize = cMessageSize
 	}
-	if s.FTimeWait == 0 {
-		s.FTimeWait = cTimeWait
+	if p.FTimeWait == 0 {
+		p.FTimeWait = cTimeWait
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetNetworkKey() string {
-	return s.FNetworkKey
+func (p *sSettings) GetNetworkKey() string {
+	return p.FNetworkKey
 }
 
-func (s *sSettings) GetMessageSize() uint64 {
-	return s.FMessageSize
+func (p *sSettings) GetMessageSize() uint64 {
+	return p.FMessageSize
 }
 
-func (s *sSettings) GetTimeWait() time.Duration {
-	return s.FTimeWait
+func (p *sSettings) GetTimeWait() time.Duration {
+	return p.FTimeWait
 }

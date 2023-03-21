@@ -27,10 +27,10 @@ type sClient struct {
 
 // Create client by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
+func NewClient(pSett ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 	client := &sClient{
-		fSettings: sett,
-		fPrivKey:  priv,
+		fSettings: pSett,
+		fPrivKey:  pPrivKey,
 	}
 	msg := client.encryptWithParams(
 		client.GetPubKey(),
@@ -46,30 +46,30 @@ func NewClient(sett ISettings, priv asymmetric.IPrivKey) IClient {
 }
 
 // Get public key from client object.
-func (client *sClient) GetPubKey() asymmetric.IPubKey {
-	return client.GetPrivKey().GetPubKey()
+func (p *sClient) GetPubKey() asymmetric.IPubKey {
+	return p.GetPrivKey().GetPubKey()
 }
 
 // Get private key from client object.
-func (client *sClient) GetPrivKey() asymmetric.IPrivKey {
-	return client.fPrivKey
+func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
+	return p.fPrivKey
 }
 
 // Get settings from client object.
-func (client *sClient) GetSettings() ISettings {
-	return client.fSettings
+func (p *sClient) GetSettings() ISettings {
+	return p.fSettings
 }
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (client *sClient) EncryptPayload(receiver asymmetric.IPubKey, pld payload.IPayload) (message.IMessage, error) {
-	if receiver.GetSize() != client.GetPubKey().GetSize() {
+func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) (message.IMessage, error) {
+	if pRecv.GetSize() != p.GetPubKey().GetSize() {
 		return nil, fmt.Errorf("size of public keys sender and receiver not equal")
 	}
 
 	var (
-		maxMsgSize = client.GetSettings().GetMessageSize() >> 1 // limit of bytes without hex
-		resultSize = uint64(client.fVoidMsgSize) + uint64(len(pld.ToBytes()))
+		maxMsgSize = p.GetSettings().GetMessageSize() >> 1 // limit of bytes without hex
+		resultSize = uint64(p.fVoidMsgSize) + uint64(len(pPld.ToBytes()))
 	)
 
 	if resultSize > maxMsgSize {
@@ -80,28 +80,28 @@ func (client *sClient) EncryptPayload(receiver asymmetric.IPubKey, pld payload.I
 		)
 	}
 
-	return client.encryptWithParams(
-		receiver,
-		pld,
-		client.GetSettings().GetWorkSize(),
+	return p.encryptWithParams(
+		pRecv,
+		pPld,
+		p.GetSettings().GetWorkSize(),
 		maxMsgSize-resultSize,
 	), nil
 }
 
-func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payload.IPayload, workSize, addPadd uint64) message.IMessage {
+func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pWorkSize, pPadd uint64) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
-	payloadBytes := pld.ToBytes()
+	payloadBytes := pPld.ToBytes()
 	doublePayload := payload.NewPayload(
 		uint64(len(payloadBytes)),
 		bytes.Join(
 			[][]byte{
 				payloadBytes,
-				rand.GetBytes(addPadd),
+				rand.GetBytes(pPadd),
 			},
 			[]byte{},
 		),
@@ -109,25 +109,25 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			client.GetPubKey().GetAddress().ToBytes(),
-			receiver.GetAddress().ToBytes(),
+			p.GetPubKey().GetAddress().ToBytes(),
+			pRecv.GetAddress().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},
 	)).ToBytes()
 
 	cipher := symmetric.NewAESCipher(session)
-	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(workSize).ProofBytes(hash))
+	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(pWorkSize).ProofBytes(hash))
 	return &message.SMessage{
 		FHead: message.SHeadMessage{
-			FSender:  encoding.HexEncode(cipher.EncryptBytes(client.GetPubKey().ToBytes())),
-			FSession: encoding.HexEncode(receiver.EncryptBytes(session)),
+			FSender:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
+			FSession: encoding.HexEncode(pRecv.EncryptBytes(session)),
 			FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
 		},
 		FBody: message.SBodyMessage{
 			FPayload: encoding.HexEncode(cipher.EncryptBytes(doublePayload.ToBytes())),
 			FHash:    encoding.HexEncode(hash),
-			FSign:    encoding.HexEncode(cipher.EncryptBytes(client.GetPrivKey().SignBytes(hash))),
+			FSign:    encoding.HexEncode(cipher.EncryptBytes(p.GetPrivKey().SignBytes(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
 		},
 	}
@@ -135,32 +135,32 @@ func (client *sClient) encryptWithParams(receiver asymmetric.IPubKey, pld payloa
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
-	if msg == nil {
+func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
+	if pMsg == nil {
 		return nil, nil, fmt.Errorf("msg is nil")
 	}
 
 	// Initial check.
-	if len(msg.GetBody().GetHash()) != hashing.CSHA256Size {
+	if len(pMsg.GetBody().GetHash()) != hashing.CSHA256Size {
 		return nil, nil, fmt.Errorf("msg hash != sha256 size")
 	}
 
 	// Proof of work. Prevent spam.
-	diff := client.GetSettings().GetWorkSize()
+	diff := p.GetSettings().GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
-	if !puzzle.VerifyBytes(msg.GetBody().GetHash(), msg.GetBody().GetProof()) {
+	if !puzzle.VerifyBytes(pMsg.GetBody().GetHash(), pMsg.GetBody().GetProof()) {
 		return nil, nil, fmt.Errorf("invalid proof of msg")
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := client.GetPrivKey().DecryptBytes(msg.GetHead().GetSession())
+	session := p.GetPrivKey().DecryptBytes(pMsg.GetHead().GetSession())
 	if session == nil {
 		return nil, nil, fmt.Errorf("failed decrypt session key")
 	}
 
 	// Decrypt public key of sender by decrypted session key.
 	cipher := symmetric.NewAESCipher(session)
-	publicBytes := cipher.DecryptBytes(msg.GetHead().GetSender())
+	publicBytes := cipher.DecryptBytes(pMsg.GetHead().GetSender())
 	if publicBytes == nil {
 		return nil, nil, fmt.Errorf("failed decrypt public key")
 	}
@@ -170,12 +170,12 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	if pubKey == nil {
 		return nil, nil, fmt.Errorf("failed load public key")
 	}
-	if pubKey.GetSize() != client.GetPubKey().GetSize() {
+	if pubKey.GetSize() != p.GetPubKey().GetSize() {
 		return nil, nil, fmt.Errorf("invalid public key size")
 	}
 
 	// Decrypt main data of message by session key.
-	doublePayloadBytes := cipher.DecryptBytes(msg.GetBody().GetPayload().ToBytes())
+	doublePayloadBytes := cipher.DecryptBytes(pMsg.GetBody().GetPayload().ToBytes())
 	if doublePayloadBytes == nil {
 		return nil, nil, fmt.Errorf("failed decrypt double payload")
 	}
@@ -185,7 +185,7 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	}
 
 	// Decrypt salt.
-	salt := cipher.DecryptBytes(msg.GetHead().GetSalt())
+	salt := cipher.DecryptBytes(pMsg.GetHead().GetSalt())
 	if salt == nil {
 		return nil, nil, fmt.Errorf("failed decrypt salt")
 	}
@@ -194,22 +194,22 @@ func (client *sClient) DecryptMessage(msg message.IMessage) (asymmetric.IPubKey,
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
 			pubKey.GetAddress().ToBytes(),
-			client.GetPubKey().GetAddress().ToBytes(),
+			p.GetPubKey().GetAddress().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},
 	)).ToBytes()
-	if !bytes.Equal(check, msg.GetBody().GetHash()) {
+	if !bytes.Equal(check, pMsg.GetBody().GetHash()) {
 		return nil, nil, fmt.Errorf("invalid msg hash")
 	}
 
 	// Decrypt sign of message and verify this
 	// by public key of sender and hash of message.
-	sign := cipher.DecryptBytes(msg.GetBody().GetSign())
+	sign := cipher.DecryptBytes(pMsg.GetBody().GetSign())
 	if sign == nil {
 		return nil, nil, fmt.Errorf("failed decrypt sign")
 	}
-	if !pubKey.VerifyBytes(msg.GetBody().GetHash(), sign) {
+	if !pubKey.VerifyBytes(pMsg.GetBody().GetHash(), sign) {
 		return nil, nil, fmt.Errorf("invalid msg sign")
 	}
 

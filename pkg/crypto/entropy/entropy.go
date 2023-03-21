@@ -15,22 +15,25 @@ type sEntropyBooster struct {
 	fBits uint64
 }
 
-func NewEntropyBooster(bits uint64, salt []byte) IEntropyBooster {
+func NewEntropyBooster(pBits uint64, pSalt []byte) IEntropyBooster {
 	return &sEntropyBooster{
-		fBits: bits,
-		fSalt: salt,
+		fBits: pBits,
+		fSalt: pSalt,
 	}
 }
 
 // Increase entropy by multiple hashing.
-func (e *sEntropyBooster) BoostEntropy(data []byte) []byte {
-	lim := uint64(1 << e.fBits)
+func (p *sEntropyBooster) BoostEntropy(pData []byte) []byte {
+	var (
+		lim  = uint64(1 << p.fBits)
+		data = pData
+	)
 
 	for i := uint64(0); i < lim; i++ {
 		data = hashing.NewSHA256Hasher(bytes.Join(
 			[][]byte{
-				data,
-				e.fSalt,
+				pData,
+				p.fSalt,
 			},
 			[]byte{},
 		)).ToBytes()

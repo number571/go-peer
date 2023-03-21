@@ -20,43 +20,43 @@ type sSettings struct {
 	FConnSettings conn.ISettings
 }
 
-func NewSettings(sett *SSettings) ISettings {
+func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FAddress:      sett.FAddress,
-		FCapacity:     sett.FCapacity,
-		FMaxConnects:  sett.FMaxConnects,
-		FConnSettings: sett.FConnSettings,
+		FAddress:      pSett.FAddress,
+		FCapacity:     pSett.FCapacity,
+		FMaxConnects:  pSett.FMaxConnects,
+		FConnSettings: pSett.FConnSettings,
 	}).useDefaultValues()
 }
 
-func (s *sSettings) useDefaultValues() ISettings {
-	if s.FAddress == "" {
-		s.FAddress = cAddress
+func (p *sSettings) useDefaultValues() ISettings {
+	if p.FAddress == "" {
+		p.FAddress = cAddress
 	}
-	if s.FCapacity == 0 {
-		s.FCapacity = cCapacity
+	if p.FCapacity == 0 {
+		p.FCapacity = cCapacity
 	}
-	if s.FMaxConnects == 0 {
-		s.FMaxConnects = cMaxConnects
+	if p.FMaxConnects == 0 {
+		p.FMaxConnects = cMaxConnects
 	}
-	if s.FConnSettings == nil {
-		s.FConnSettings = conn.NewSettings(&conn.SSettings{})
+	if p.FConnSettings == nil {
+		p.FConnSettings = conn.NewSettings(&conn.SSettings{})
 	}
-	return s
+	return p
 }
 
-func (s *sSettings) GetAddress() string {
-	return s.FAddress
+func (p *sSettings) GetAddress() string {
+	return p.FAddress
 }
 
-func (s *sSettings) GetCapacity() uint64 {
-	return s.FCapacity
+func (p *sSettings) GetCapacity() uint64 {
+	return p.FCapacity
 }
 
-func (s *sSettings) GetMaxConnects() uint64 {
-	return s.FMaxConnects
+func (p *sSettings) GetMaxConnects() uint64 {
+	return p.FMaxConnects
 }
 
-func (s *sSettings) GetConnSettings() conn.ISettings {
-	return s.FConnSettings
+func (p *sSettings) GetConnSettings() conn.ISettings {
+	return p.FConnSettings
 }

@@ -2,14 +2,14 @@ package encoding
 
 import "encoding/json"
 
-func Serialize(data interface{}) []byte {
-	res, err := json.MarshalIndent(data, "", "\t")
+func Serialize(pData interface{}) []byte {
+	res, err := json.MarshalIndent(pData, "", "\t")
 	if err != nil {
 		return nil
 	}
 	return res
 }
 
-func Deserialize(data []byte, res interface{}) error {
-	return json.Unmarshal(data, res)
+func Deserialize(pData []byte, pRes interface{}) error {
+	return json.Unmarshal(pData, pRes)
 }

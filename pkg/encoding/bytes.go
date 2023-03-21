@@ -14,11 +14,11 @@ const (
 )
 
 // Uint64 to slice of bytes by big endian.
-func Uint64ToBytes(num uint64) [cSizeUint64]byte {
+func Uint64ToBytes(pNum uint64) [cSizeUint64]byte {
 	res := [CSizeUint64]byte{}
 
 	var data = new(bytes.Buffer)
-	err := binary.Write(data, binary.BigEndian, num)
+	err := binary.Write(data, binary.BigEndian, pNum)
 	if err != nil {
 		panic(err)
 	}
@@ -28,6 +28,6 @@ func Uint64ToBytes(num uint64) [cSizeUint64]byte {
 }
 
 // Slice of bytes to uint64 by big endian.
-func BytesToUint64(bytes [cSizeUint64]byte) uint64 {
-	return binary.BigEndian.Uint64(bytes[:])
+func BytesToUint64(pBytes [cSizeUint64]byte) uint64 {
+	return binary.BigEndian.Uint64(pBytes[:])
 }

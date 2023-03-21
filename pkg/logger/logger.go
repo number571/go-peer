@@ -23,22 +23,22 @@ const (
 	colorReset  = "\033[0m"
 )
 
-func NewLogger(sett ISettings) ILogger {
+func NewLogger(pSett ISettings) ILogger {
 	logger := &sLogger{
-		fSettings: sett,
+		fSettings: pSett,
 	}
 
-	infoStream := sett.GetStreamInfo()
+	infoStream := pSett.GetStreamInfo()
 	if infoStream != nil {
 		logger.fInfoOut = log.New(infoStream, fmt.Sprintf("%s[INFO] %s", colorCyan, colorReset), log.LstdFlags)
 	}
 
-	warnStream := sett.GetStreamWarn()
+	warnStream := pSett.GetStreamWarn()
 	if warnStream != nil {
 		logger.fWarnOut = log.New(warnStream, fmt.Sprintf("%s[WARN] %s", colorYellow, colorReset), log.LstdFlags)
 	}
 
-	erroStream := sett.GetStreamErro()
+	erroStream := pSett.GetStreamErro()
 	if erroStream != nil {
 		logger.fErroOut = log.New(erroStream, fmt.Sprintf("%s[ERRO] %s", colorRed, colorReset), log.LstdFlags)
 	}
@@ -46,27 +46,27 @@ func NewLogger(sett ISettings) ILogger {
 	return logger
 }
 
-func (l *sLogger) GetSettings() ISettings {
-	return l.fSettings
+func (p *sLogger) GetSettings() ISettings {
+	return p.fSettings
 }
 
-func (l *sLogger) PushInfo(info string) {
-	if l.fInfoOut == nil {
+func (p *sLogger) PushInfo(info string) {
+	if p.fInfoOut == nil {
 		return
 	}
-	l.fInfoOut.Println(info)
+	p.fInfoOut.Println(info)
 }
 
-func (l *sLogger) PushWarn(warn string) {
-	if l.fWarnOut == nil {
+func (p *sLogger) PushWarn(warn string) {
+	if p.fWarnOut == nil {
 		return
 	}
-	l.fWarnOut.Println(warn)
+	p.fWarnOut.Println(warn)
 }
 
-func (l *sLogger) PushErro(erro string) {
-	if l.fErroOut == nil {
+func (p *sLogger) PushErro(erro string) {
+	if p.fErroOut == nil {
 		return
 	}
-	l.fErroOut.Println(erro)
+	p.fErroOut.Println(erro)
 }
