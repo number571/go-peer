@@ -2,9 +2,18 @@
 
 ## Theoretical works
 
+### 1. Main
+
 1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
+
+### 2. Habr
+
+1. [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
+2. [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
+3. [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
+4. [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
 
 ## Code style go-peer
 
