@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-func Response(w http.ResponseWriter, ret int, res string) {
-	w.Header().Set("Content-Type", CContentType)
-	json.NewEncoder(w).Encode(&SResponse{
-		FResult: res,
-		FReturn: ret,
+func Response(pW http.ResponseWriter, pRet int, pRes string) {
+	pW.Header().Set("Content-Type", CContentType)
+	json.NewEncoder(pW).Encode(&SResponse{
+		FResult: pRes,
+		FReturn: pRet,
 	})
 }

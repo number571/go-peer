@@ -8,14 +8,14 @@ import (
 	"net/http"
 )
 
-func Request(client *http.Client, method, url string, data interface{}) (string, error) {
+func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (string, error) {
 	var requestBytes []byte
 
-	switch x := data.(type) {
+	switch x := pData.(type) {
 	case []byte:
 		requestBytes = x
 	default:
-		jsonValue, err := json.Marshal(data)
+		jsonValue, err := json.Marshal(pData)
 		if err != nil {
 			return "", err
 		}
@@ -23,8 +23,8 @@ func Request(client *http.Client, method, url string, data interface{}) (string,
 	}
 
 	req, err := http.NewRequest(
-		method,
-		url,
+		pMethod,
+		pURL,
 		bytes.NewBuffer(requestBytes),
 	)
 	if err != nil {
@@ -32,7 +32,7 @@ func Request(client *http.Client, method, url string, data interface{}) (string,
 	}
 
 	req.Header.Set("Content-Type", CContentType)
-	resp, err := client.Do(req)
+	resp, err := pClient.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -46,8 +46,8 @@ func Request(client *http.Client, method, url string, data interface{}) (string,
 	return res.FResult, nil
 }
 
-func loadResponse(reader io.ReadCloser) (*SResponse, error) {
-	body, err := io.ReadAll(reader)
+func loadResponse(pReader io.ReadCloser) (*SResponse, error) {
+	body, err := io.ReadAll(pReader)
 	if err != nil {
 		return nil, err
 	}

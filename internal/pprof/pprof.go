@@ -13,27 +13,27 @@ import (
 	_ "net/http/pprof"
 )
 
-func RunPprofService(service string) {
+func RunPprofService(pService string) {
 	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{
 		FInfo: os.Stdout,
 		FWarn: os.Stdout,
 		FErro: os.Stderr,
 	}))
-	go runPprofService(logger, service)
+	go runPprofService(logger, pService)
 	time.Sleep(cWaitTime)
 }
 
-func runPprofService(logger logger.ILogger, service string) {
+func runPprofService(pLogger logger.ILogger, pService string) {
 	for i := 0; i < cRetriesNum; i++ {
 		port := random.NewStdPRNG().GetUint64()%(4<<10) + 60000 // [60000;64096]
-		logger.PushInfo(fmt.Sprintf("%s => pprof running on %d port", service, port))
+		pLogger.PushInfo(fmt.Sprintf("%s => pprof running on %d port", pService, port))
 
 		err := http.ListenAndServe(fmt.Sprintf("localhost:%d", port), nil)
 		if err != nil && errors.Is(err, http.ErrServerClosed) {
-			logger.PushWarn(fmt.Sprintf("%s => pprof service is closed", service))
+			pLogger.PushWarn(fmt.Sprintf("%s => pprof service is closed", pService))
 			return
 		}
 	}
 
-	logger.PushErro(fmt.Sprintf("%s => pprof failed running", service))
+	pLogger.PushErro(fmt.Sprintf("%s => pprof failed running", pService))
 }
