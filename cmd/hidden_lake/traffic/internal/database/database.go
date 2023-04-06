@@ -79,7 +79,8 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	// delete old message
 	keyHash := getKeyHash(p.getPointer())
 	if hash, err := p.fDB.Get(keyHash); err == nil {
-		if err := p.fDB.Del(hash); err != nil {
+		keyMsg := getKeyMessage(hash)
+		if err := p.fDB.Del(keyMsg); err != nil {
 			return err
 		}
 	}

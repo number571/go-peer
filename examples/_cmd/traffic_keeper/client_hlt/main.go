@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
@@ -21,10 +23,8 @@ func main() {
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			"http://localhost:9573",
-			message.NewParams(
-				hls_settings.CMessageSize,
-				hls_settings.CWorkSize,
-			),
+			&http.Client{Timeout: time.Minute},
+			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
 		),
 	)
 
@@ -47,7 +47,7 @@ func main() {
 		}
 
 		msg, err := client.EncryptPayload(
-			privKey.PubKey(),
+			privKey.GetPubKey(),
 			payload.NewPayload(pldHead, []byte(os.Args[2])),
 		)
 		if err != nil {
@@ -76,7 +76,7 @@ func main() {
 			panic("payload head != constant head")
 		}
 
-		if pubKey.Address().ToString() != client.GetPubKey().Address().ToString() {
+		if pubKey.GetAddress().ToString() != client.GetPubKey().GetAddress().ToString() {
 			panic("public key is incorrect")
 		}
 

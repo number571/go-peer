@@ -1,3 +1,5 @@
+CMDPATH=../../../../cmd
+BINPATH=../../../../bin
 .PHONY: default init build run clean
 default: init clean build run
 init: 
@@ -5,12 +7,12 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C ../../../../cmd/hidden_lake/service
+	make build -C $(CMDPATH)/hidden_lake/service
 	make build -C ./recv_hls
 	# COPY HLS
-	cp -r ../../../../bin/hls ./middle_hls/prog_hls
-	cp -r ../../../../bin/hls ./recv_hls/prog_hls1
-	cp -r ../../../../bin/hls ./send_hls/prog_hls2
+	cp -r $(BINPATH)/hls ./middle_hls/prog_hls
+	cp -r $(BINPATH)/hls ./recv_hls/prog_hls1
+	cp -r $(BINPATH)/hls ./send_hls/prog_hls2
 run: 
 	# MAKEFILE RUN
 	make run -C ./middle_hls
