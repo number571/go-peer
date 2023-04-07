@@ -6,7 +6,6 @@ run:
 	./prog_hlm2 &
 clean:
 	pkill -15 prog_hlm2 || true
-	sleep 3
 	pkill -15 prog_hls2 || true
 	rm -rf prog_hls2 hls.db 
 	rm -rf prog_hlm2 hlm.db

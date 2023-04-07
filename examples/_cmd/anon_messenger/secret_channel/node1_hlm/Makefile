@@ -9,7 +9,6 @@ run:
 	./prog_recv1 6060 8573 &
 clean:
 	pkill -15 prog_hlm1 || true
-	sleep 3
 	pkill -15 prog_hls1 || true
 	pkill -15 prog_hlt1 || true
 	pkill -15 prog_send1 || true 
