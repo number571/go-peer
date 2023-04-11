@@ -2,7 +2,6 @@ package message
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -14,18 +13,18 @@ var (
 )
 
 type sMessage struct {
-	fPayload    payload.IPayload
-	fPldHash    []byte
-	fEncPayload []byte
+	fPayload     payload.IPayload
+	fHashPayload []byte
+	fEncrPayload []byte
 }
 
 func NewMessage(pPld payload.IPayload, pKey []byte) IMessage {
 	cipher := symmetric.NewAESCipher(pKey)
 	encPayload := cipher.EncryptBytes(pPld.ToBytes())
 	return &sMessage{
-		fPayload:    pPld,
-		fPldHash:    getHash(cipher, encPayload),
-		fEncPayload: encPayload,
+		fPayload:     pPld,
+		fHashPayload: getHash(cipher, encPayload),
+		fEncrPayload: encPayload,
 	}
 }
 
@@ -54,14 +53,14 @@ func LoadMessage(pData, pKey []byte) IMessage {
 	}
 
 	return &sMessage{
-		fPayload:    pld,
-		fPldHash:    hashRecv,
-		fEncPayload: encPayload,
+		fPayload:     pld,
+		fHashPayload: hashRecv,
+		fEncrPayload: encPayload,
 	}
 }
 
 func (p *sMessage) GetHash() []byte {
-	return p.fPldHash
+	return p.fHashPayload
 }
 
 func (p *sMessage) GetPayload() payload.IPayload {
@@ -71,15 +70,18 @@ func (p *sMessage) GetPayload() payload.IPayload {
 func (p *sMessage) GetBytes() []byte {
 	return bytes.Join(
 		[][]byte{
-			p.fPldHash,
-			p.fEncPayload,
+			p.fHashPayload,
+			p.fEncrPayload,
 		},
 		[]byte{},
 	)
 }
 
 func getHash(cipher symmetric.ICipher, pBytes []byte) []byte {
-	rawKey := []byte(fmt.Sprintf("~_%X_~", cipher.ToBytes()))
+	rawKey := bytes.Join(
+		[][]byte{[]byte("__"), cipher.ToBytes(), []byte("__")},
+		[]byte{},
+	)
 	return hashing.NewHMACSHA256Hasher(
 		hashing.NewSHA256Hasher(rawKey).ToBytes(),
 		pBytes,
