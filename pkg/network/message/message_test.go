@@ -30,7 +30,7 @@ func TestMessage(t *testing.T) {
 	}
 
 	msg1 := LoadMessage(msg.GetBytes(), []byte(tcKey))
-	if !bytes.Equal(msg.GetBytes(), msg1.GetBytes()) {
+	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
 		t.Error("load message not equal new message")
 		return
 	}

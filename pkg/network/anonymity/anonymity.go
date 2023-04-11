@@ -59,7 +59,6 @@ func NewNode(
 
 func (p *sNode) Run() error {
 	logger := anon_logger.NewLogger(p.GetSettings().GetServiceName())
-
 	if err := p.runQueue(logger); err != nil {
 		return err
 	}

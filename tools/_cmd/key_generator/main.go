@@ -32,5 +32,5 @@ func main() {
 	}
 
 	filesystem.OpenFile("priv.key").Write([]byte(priv.ToString()))
-	filesystem.OpenFile("pub.key").Write([]byte(priv.PubKey().ToString()))
+	filesystem.OpenFile("pub.key").Write([]byte(priv.GetPubKey().ToString()))
 }
