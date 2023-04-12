@@ -4,8 +4,6 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -16,30 +14,12 @@ var (
 type sMessage struct {
 	fPayload     payload.IPayload
 	fHashPayload []byte
-	fEncrPayload []byte
 }
 
-func NewMessage(pPld payload.IPayload, pKey []byte, paddSize uint64) IMessage {
-	var (
-		cipher     = symmetric.NewAESCipher(pKey)
-		prng       = random.NewStdPRNG()
-		rawPayload = pPld.ToBytes()
-	)
-
-	encPayload := cipher.EncryptBytes(
-		payload.NewPayload(
-			uint64(len(rawPayload)),
-			bytes.Join([][]byte{
-				rawPayload,
-				prng.GetBytes(prng.GetUint64() % paddSize),
-			}, []byte{}),
-		).ToBytes(),
-	)
-
+func NewMessage(pPld payload.IPayload, pKey []byte) IMessage {
 	return &sMessage{
 		fPayload:     pPld,
-		fHashPayload: getHash(cipher, encPayload),
-		fEncrPayload: encPayload,
+		fHashPayload: getHash(pKey, pPld.ToBytes()),
 	}
 }
 
@@ -50,30 +30,17 @@ func LoadMessage(pData, pKey []byte) IMessage {
 	}
 
 	hashRecv := pData[:hashing.CSHA256Size]
-	encPayload := pData[hashing.CSHA256Size:]
+	pldBytes := pData[hashing.CSHA256Size:]
 
-	cipher := symmetric.NewAESCipher(pKey)
 	if !bytes.Equal(
 		hashRecv,
-		getHash(cipher, encPayload),
+		getHash(pKey, pldBytes),
 	) {
 		return nil
 	}
 
 	// check Head[u64]
-	decPayload := cipher.DecryptBytes(encPayload)
-	layPayload := payload.LoadPayload(decPayload)
-	if layPayload == nil {
-		return nil
-	}
-
-	head := layPayload.GetHead()
-	body := layPayload.GetBody()
-	if head > uint64(len(body)) {
-		return nil
-	}
-
-	pld := payload.LoadPayload(body[:head])
+	pld := payload.LoadPayload(pldBytes)
 	if pld == nil {
 		return nil
 	}
@@ -81,7 +48,6 @@ func LoadMessage(pData, pKey []byte) IMessage {
 	return &sMessage{
 		fPayload:     pld,
 		fHashPayload: hashRecv,
-		fEncrPayload: encPayload,
 	}
 }
 
@@ -97,15 +63,15 @@ func (p *sMessage) GetBytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			p.fHashPayload,
-			p.fEncrPayload,
+			p.fPayload.ToBytes(),
 		},
 		[]byte{},
 	)
 }
 
-func getHash(cipher symmetric.ICipher, pBytes []byte) []byte {
+func getHash(pkey, pBytes []byte) []byte {
 	rawKey := bytes.Join(
-		[][]byte{[]byte("__"), cipher.ToBytes(), []byte("__")},
+		[][]byte{[]byte("__"), pkey, []byte("__")},
 		[]byte{},
 	)
 	return hashing.NewHMACSHA256Hasher(

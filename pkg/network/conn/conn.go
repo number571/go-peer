@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
@@ -20,6 +22,7 @@ type sConn struct {
 	fMutex    sync.Mutex
 	fSocket   net.Conn
 	fSettings ISettings
+	fCipher   symmetric.ICipher
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
@@ -34,6 +37,7 @@ func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	return &sConn{
 		fSettings: pSett,
 		fSocket:   pConn,
+		fCipher:   symmetric.NewAESCipher([]byte(pSett.GetNetworkKey())),
 	}
 }
 
@@ -75,31 +79,81 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	var (
-		msgBytes = message.NewMessage(
+	encMsgBytes := p.fCipher.EncryptBytes(
+		message.NewMessage(
 			pPld,
 			[]byte(p.fSettings.GetNetworkKey()),
-			p.fSettings.GetPaddingSize(),
-		).GetBytes()
-		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).ToBytes()
-		packPtr   = len(packBytes)
+		).GetBytes(),
 	)
 
+	prng := random.NewStdPRNG()
+	voidBytes := prng.GetBytes(prng.GetUint64() % p.fSettings.GetMaxVoidSize())
+
+	// send headers with length of blocks
+	if err := p.sendBlockSize(encMsgBytes); err != nil {
+		return err
+	}
+	if err := p.sendBlockSize(voidBytes); err != nil {
+		return err
+	}
+
+	// send blocks
+	if err := p.sendBytes(encMsgBytes); err != nil {
+		return err
+	}
+	if err := p.sendBytes(voidBytes); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *sConn) sendBytes(pBytes []byte) error {
+	bytesPtr := uint64(len(pBytes))
 	for {
-		n, err := p.GetSocket().Write(packBytes[:packPtr])
+		n, err := p.GetSocket().Write(pBytes[:bytesPtr])
 		if err != nil {
 			return err
 		}
 
-		packPtr = packPtr - n
-		packBytes = packBytes[:packPtr]
+		bytesPtr = bytesPtr - uint64(n)
+		pBytes = pBytes[:bytesPtr]
 
-		if packPtr == 0 {
+		if bytesPtr == 0 {
 			break
 		}
 	}
-
 	return nil
+}
+
+func (p *sConn) sendBlockSize(pBytes []byte) error {
+	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
+	n, err := p.GetSocket().Write(p.fCipher.EncryptBytes(blockSize[:]))
+	if err != nil {
+		return err
+	}
+	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
+		return fmt.Errorf("invalid size of sent package")
+	}
+	return nil
+}
+
+func (p *sConn) recvBlockSize() (uint64, error) {
+	encBufLen := make([]byte, symmetric.CAESBlockSize+encoding.CSizeUint64)
+	n, err := p.GetSocket().Read(encBufLen)
+	if err != nil {
+		return 0, err
+	}
+	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
+		return 0, fmt.Errorf("block size is invalid")
+	}
+
+	// mustLen = Size[u64] in uint64
+	bufLen := p.fCipher.DecryptBytes(encBufLen)
+	arrLen := [encoding.CSizeUint64]byte{}
+	copy(arrLen[:], bufLen)
+
+	return encoding.BytesToUint64(arrLen), nil
 }
 
 func (p *sConn) ReadPayload() payload.IPayload {
@@ -114,26 +168,18 @@ func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 		pChPld <- pld
 	}()
 
-	// bufLen = Size[u64] in bytes
-	bufLen := make([]byte, encoding.CSizeUint64)
-	length, err := pConn.GetSocket().Read(bufLen)
-	if err != nil {
-		return
-	}
-	if length != encoding.CSizeUint64 {
+	msgSize, err := pConn.recvBlockSize()
+	if err != nil || msgSize > pConn.fSettings.GetMessageSize() {
 		return
 	}
 
-	// mustLen = Size[u64] in uint64
-	arrLen := [encoding.CSizeUint64]byte{}
-	copy(arrLen[:], bufLen)
-
-	mustLen := encoding.BytesToUint64(arrLen)
-	if mustLen > (pConn.fSettings.GetMessageSize() + pConn.fSettings.GetPaddingSize()) {
+	voidSize, err := pConn.recvBlockSize()
+	if err != nil || voidSize > pConn.fSettings.GetMaxVoidSize() {
 		return
 	}
 
-	msgRaw := make([]byte, 0, mustLen)
+	mustLen := msgSize + voidSize
+	dataRaw := make([]byte, 0, mustLen)
 	for {
 		buffer := make([]byte, mustLen)
 		n, err := pConn.GetSocket().Read(buffer)
@@ -141,9 +187,9 @@ func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 			return
 		}
 
-		msgRaw = bytes.Join(
+		dataRaw = bytes.Join(
 			[][]byte{
-				msgRaw,
+				dataRaw,
 				buffer[:n],
 			},
 			[]byte{},
@@ -157,7 +203,7 @@ func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 
 	// try unpack message from bytes
 	msg := message.LoadMessage(
-		msgRaw,
+		pConn.fCipher.DecryptBytes(dataRaw[:msgSize]),
 		[]byte(pConn.fSettings.GetNetworkKey()),
 	)
 	if msg == nil {

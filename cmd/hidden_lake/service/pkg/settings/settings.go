@@ -39,7 +39,7 @@ const (
 	CNetworkMaxConns = 10
 	CWorkSize        = 20        // bits
 	CMessageSize     = (1 << 20) // 1MiB
-	CPaddingSize     = (1 << 20) // 1MiB
+	CMaxVoidSize     = (1 << 20) // 1MiB
 	CNetworkWaitTime = 10 * time.Second
 )
 

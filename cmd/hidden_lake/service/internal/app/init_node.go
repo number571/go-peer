@@ -32,7 +32,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: pkg_settings.CMessageSize,
-					FPaddingSize: pkg_settings.CPaddingSize,
+					FMaxVoidSize: pkg_settings.CMaxVoidSize,
 					FTimeWait:    pkg_settings.CNetworkWaitTime,
 				}),
 			}),

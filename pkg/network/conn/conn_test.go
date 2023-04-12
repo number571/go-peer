@@ -52,6 +52,9 @@ func testNewService(t *testing.T) net.Listener {
 
 			conn := LoadConn(NewSettings(&SSettings{}), aconn)
 			pld := conn.ReadPayload()
+			if pld == nil {
+				break
+			}
 
 			ok := func() bool {
 				defer conn.Close()
