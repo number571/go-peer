@@ -76,7 +76,11 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	defer p.fMutex.Unlock()
 
 	var (
-		msgBytes  = message.NewMessage(pPld, []byte(p.fSettings.GetNetworkKey())).GetBytes()
+		msgBytes = message.NewMessage(
+			pPld,
+			[]byte(p.fSettings.GetNetworkKey()),
+			p.fSettings.GetPaddingSize(),
+		).GetBytes()
 		packBytes = payload.NewPayload(uint64(len(msgBytes)), msgBytes).ToBytes()
 		packPtr   = len(packBytes)
 	)
@@ -125,7 +129,7 @@ func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 	copy(arrLen[:], bufLen)
 
 	mustLen := encoding.BytesToUint64(arrLen)
-	if mustLen > pConn.fSettings.GetMessageSize() {
+	if mustLen > (pConn.fSettings.GetMessageSize() + pConn.fSettings.GetPaddingSize()) {
 		return
 	}
 

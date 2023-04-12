@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -18,9 +19,23 @@ type sMessage struct {
 	fEncrPayload []byte
 }
 
-func NewMessage(pPld payload.IPayload, pKey []byte) IMessage {
-	cipher := symmetric.NewAESCipher(pKey)
-	encPayload := cipher.EncryptBytes(pPld.ToBytes())
+func NewMessage(pPld payload.IPayload, pKey []byte, paddSize uint64) IMessage {
+	var (
+		cipher     = symmetric.NewAESCipher(pKey)
+		prng       = random.NewStdPRNG()
+		rawPayload = pPld.ToBytes()
+	)
+
+	encPayload := cipher.EncryptBytes(
+		payload.NewPayload(
+			uint64(len(rawPayload)),
+			bytes.Join([][]byte{
+				rawPayload,
+				prng.GetBytes(prng.GetUint64() % paddSize),
+			}, []byte{}),
+		).ToBytes(),
+	)
+
 	return &sMessage{
 		fPayload:     pPld,
 		fHashPayload: getHash(cipher, encPayload),
@@ -47,7 +62,18 @@ func LoadMessage(pData, pKey []byte) IMessage {
 
 	// check Head[u64]
 	decPayload := cipher.DecryptBytes(encPayload)
-	pld := payload.LoadPayload(decPayload)
+	layPayload := payload.LoadPayload(decPayload)
+	if layPayload == nil {
+		return nil
+	}
+
+	head := layPayload.GetHead()
+	body := layPayload.GetBody()
+	if head > uint64(len(body)) {
+		return nil
+	}
+
+	pld := payload.LoadPayload(body[:head])
 	if pld == nil {
 		return nil
 	}

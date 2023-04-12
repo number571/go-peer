@@ -17,6 +17,7 @@ func TestMessage(t *testing.T) {
 	msg := NewMessage(
 		payload.NewPayload(tcHead, []byte(tcBody)),
 		[]byte(tcKey),
+		(1 << 10),
 	)
 
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {

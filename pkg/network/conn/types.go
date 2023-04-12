@@ -11,6 +11,7 @@ import (
 type ISettings interface {
 	GetNetworkKey() string
 	GetMessageSize() uint64
+	GetPaddingSize() uint64
 	GetTimeWait() time.Duration
 }
 

@@ -34,6 +34,7 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: hls_settings.CMessageSize,
+					FPaddingSize: hls_settings.CPaddingSize,
 					FTimeWait:    hls_settings.CNetworkWaitTime,
 				}),
 			}),
