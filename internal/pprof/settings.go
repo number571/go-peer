@@ -3,6 +3,7 @@ package pprof
 import "time"
 
 const (
-	cRetriesNum = 3
-	cWaitTime   = time.Second
+	cPProfEnabled = false
+	cRetriesNum   = 3
+	cWaitTime     = time.Second
 )

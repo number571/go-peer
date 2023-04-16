@@ -14,6 +14,9 @@ import (
 )
 
 func RunPprofService(pService string) {
+	if !cPProfEnabled {
+		return
+	}
 	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{
 		FInfo: os.Stdout,
 		FWarn: os.Stdout,
