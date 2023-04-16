@@ -204,11 +204,11 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 	return func(_ network.INode, pConn conn.IConn, pReqBytes []byte) {
 		msg := message.LoadMessage(
+			message.NewSettings(&message.SSettings{
+				FWorkSize:    p.GetMessageQueue().GetClient().GetSettings().GetWorkSize(),
+				FMessageSize: p.GetMessageQueue().GetClient().GetSettings().GetMessageSize(),
+			}),
 			pReqBytes,
-			message.NewParams(
-				p.GetMessageQueue().GetClient().GetSettings().GetMessageSize(),
-				p.GetMessageQueue().GetClient().GetSettings().GetWorkSize(),
-			),
 		)
 		if msg == nil {
 			p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))

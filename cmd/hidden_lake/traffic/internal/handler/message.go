@@ -51,11 +51,11 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 			}
 
 			msg := message.LoadMessage(
+				message.NewSettings(&message.SSettings{
+					FMessageSize: database.Settings().GetMessageSize(),
+					FWorkSize:    database.Settings().GetWorkSize(),
+				}),
 				encoding.HexDecode(vRequest.FMessage),
-				message.NewParams(
-					database.Settings().GetMessageSize(),
-					database.Settings().GetWorkSize(),
-				),
 			)
 			if msg == nil {
 				api.Response(pW, pkg_settings.CErrorMessage, "failed: decode message")

@@ -7,16 +7,11 @@ import (
 )
 
 type IClient interface {
-	GetSettings() ISettings
+	GetSettings() message.ISettings
 
 	GetPubKey() asymmetric.IPubKey
 	GetPrivKey() asymmetric.IPrivKey
 
 	EncryptPayload(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
 	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
-}
-
-type ISettings interface {
-	GetMessageSize() uint64
-	GetWorkSize() uint64
 }

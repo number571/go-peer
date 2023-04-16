@@ -42,11 +42,11 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 			hls_settings.CNetworkMask,
 			func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
 				msg := message.LoadMessage(
+					message.NewSettings(&message.SSettings{
+						FMessageSize: hls_settings.CMessageSize,
+						FWorkSize:    hls_settings.CWorkSize,
+					}),
 					pMsgBytes,
-					message.NewParams(
-						hls_settings.CMessageSize,
-						hls_settings.CWorkSize,
-					),
 				)
 				if msg == nil {
 					pLogger.PushWarn(anonLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))

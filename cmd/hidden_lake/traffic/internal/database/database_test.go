@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
@@ -33,7 +34,7 @@ func TestDB(t *testing.T) {
 	}()
 
 	cl := client.NewClient(
-		client.NewSettings(&client.SSettings{
+		message.NewSettings(&message.SSettings{
 			FWorkSize:    10,
 			FMessageSize: (100 << 10),
 		}),

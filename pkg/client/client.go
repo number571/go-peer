@@ -20,14 +20,14 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings    ISettings
+	fSettings    message.ISettings
 	fPrivKey     asymmetric.IPrivKey
 	fVoidMsgSize int
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(pSett ISettings, pPrivKey asymmetric.IPrivKey) IClient {
+func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 	client := &sClient{
 		fSettings: pSett,
 		fPrivKey:  pPrivKey,
@@ -56,7 +56,7 @@ func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
 }
 
 // Get settings from client object.
-func (p *sClient) GetSettings() ISettings {
+func (p *sClient) GetSettings() message.ISettings {
 	return p.fSettings
 }
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -40,7 +41,7 @@ func TestNewNode(pathDB, addr string) anonymity.INode {
 				FDuration:     500 * time.Millisecond,
 			}),
 			client.NewClient(
-				client.NewSettings(&client.SSettings{
+				message.NewSettings(&message.SSettings{
 					FWorkSize:    TCWorkSize,
 					FMessageSize: TCMessageSize,
 				}),

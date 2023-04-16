@@ -65,7 +65,10 @@ func transferTraffic(portService, portHLT int) {
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s:%d", "localhost", portHLT),
 			&http.Client{Timeout: time.Minute},
-			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
+			message.NewSettings(&message.SSettings{
+				FMessageSize: hls_settings.CMessageSize,
+				FWorkSize:    hls_settings.CWorkSize,
+			}),
 		),
 	)
 
@@ -131,11 +134,11 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 	}
 
 	msg := message.LoadMessage(
+		message.NewSettings(&message.SSettings{
+			FMessageSize: hls_settings.CMessageSize,
+			FWorkSize:    hls_settings.CWorkSize,
+		}),
 		bytesMsg[1:],
-		message.NewParams(
-			hls_settings.CMessageSize,
-			hls_settings.CWorkSize,
-		),
 	)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")

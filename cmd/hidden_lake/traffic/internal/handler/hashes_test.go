@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
@@ -23,8 +24,8 @@ func TestHandleHashesAPI(t *testing.T) {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 
-	client := client.NewClient(client.NewSettings(
-		&client.SSettings{
+	client := client.NewClient(
+		message.NewSettings(&message.SSettings{
 			FMessageSize: anon_testutils.TCMessageSize,
 			FWorkSize:    anon_testutils.TCWorkSize,
 		}),

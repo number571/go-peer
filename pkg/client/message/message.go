@@ -35,12 +35,12 @@ type SBodyMessage struct {
 }
 
 // Message can be created only with client module.
-func LoadMessage(pMsg []byte, pParams IParams) IMessage {
+func LoadMessage(psett ISettings, pMsg []byte) IMessage {
 	msg := new(SMessage)
 	if err := json.Unmarshal(pMsg, msg); err != nil {
 		return nil
 	}
-	if !msg.IsValid(pParams) {
+	if !msg.IsValid(psett) {
 		return nil
 	}
 	return msg
@@ -62,14 +62,14 @@ func (p *SMessage) ToBytes() []byte {
 	return jsonData
 }
 
-func (p *SMessage) IsValid(pParams IParams) bool {
-	if uint64(len(p.ToBytes())) > pParams.GetMessageSize() {
+func (p *SMessage) IsValid(psett ISettings) bool {
+	if uint64(len(p.ToBytes())) > psett.GetMessageSize() {
 		return false
 	}
 	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
 		return false
 	}
-	puzzle := puzzle.NewPoWPuzzle(pParams.GetWorkSize())
+	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSize())
 	return puzzle.VerifyBytes(p.GetBody().GetHash(), p.GetBody().GetProof())
 }
 

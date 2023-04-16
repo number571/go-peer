@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/payload"
@@ -107,7 +108,7 @@ func TestMessageSize(t *testing.T) {
 
 func testNewClient() IClient {
 	return NewClient(
-		NewSettings(&SSettings{
+		message.NewSettings(&message.SSettings{
 			FWorkSize:    10,
 			FMessageSize: tcMessageSize,
 		}),

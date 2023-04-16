@@ -18,10 +18,10 @@ var (
 type sRequester struct {
 	fHost   string
 	fClient *http.Client
-	fParams message.IParams
+	fParams message.ISettings
 }
 
-func NewRequester(pHost string, pClient *http.Client, pParams message.IParams) IRequester {
+func NewRequester(pHost string, pClient *http.Client, pParams message.ISettings) IRequester {
 	return &sRequester{
 		fHost:   pHost,
 		fClient: pClient,
@@ -71,11 +71,11 @@ func (p *sRequester) GetMessage(pRequest *pkg_settings.SLoadRequest) (message.IM
 	}
 
 	msg := message.LoadMessage(
+		message.NewSettings(&message.SSettings{
+			FWorkSize:    p.fParams.GetWorkSize(),
+			FMessageSize: p.fParams.GetMessageSize(),
+		}),
 		encoding.HexDecode(resp),
-		message.NewParams(
-			p.fParams.GetMessageSize(),
-			p.fParams.GetWorkSize(),
-		),
 	)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")

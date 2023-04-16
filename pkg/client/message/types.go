@@ -6,11 +6,11 @@ type IMessage interface {
 	GetHead() IHead
 	GetBody() IBody
 
-	IsValid(IParams) bool
+	IsValid(ISettings) bool
 	ToBytes() []byte
 }
 
-type IParams interface {
+type ISettings interface {
 	GetMessageSize() uint64
 	GetWorkSize() uint64
 }

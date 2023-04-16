@@ -15,7 +15,7 @@ import (
 
 func TestQueue(t *testing.T) {
 	oldClient := client.NewClient(
-		client.NewSettings(&client.SSettings{
+		message.NewSettings(&message.SSettings{
 			FWorkSize:    10,
 			FMessageSize: (1 << 20),
 		}),
@@ -36,7 +36,7 @@ func TestQueue(t *testing.T) {
 	}
 
 	newClient := client.NewClient(
-		client.NewSettings(&client.SSettings{
+		message.NewSettings(&message.SSettings{
 			FWorkSize:    10,
 			FMessageSize: (1 << 20),
 		}),

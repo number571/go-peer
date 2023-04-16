@@ -41,10 +41,10 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", addr),
 			&http.Client{Timeout: time.Minute},
-			message.NewParams(
-				anon_testutils.TCMessageSize,
-				anon_testutils.TCWorkSize,
-			),
+			message.NewSettings(&message.SSettings{
+				FMessageSize: anon_testutils.TCMessageSize,
+				FWorkSize:    anon_testutils.TCWorkSize,
+			}),
 		),
 	)
 
@@ -102,8 +102,8 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 
 func testNewClient() client.IClient {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	return client.NewClient(client.NewSettings(
-		&client.SSettings{
+	return client.NewClient(
+		message.NewSettings(&message.SSettings{
 			FMessageSize: anon_testutils.TCMessageSize,
 			FWorkSize:    anon_testutils.TCWorkSize,
 		}),

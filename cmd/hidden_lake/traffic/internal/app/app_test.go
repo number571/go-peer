@@ -58,10 +58,10 @@ func TestApp(t *testing.T) {
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
 			&http.Client{Timeout: time.Minute},
-			message.NewParams(
-				anon_testutils.TCMessageSize,
-				anon_testutils.TCWorkSize,
-			),
+			message.NewSettings(&message.SSettings{
+				FMessageSize: anon_testutils.TCMessageSize,
+				FWorkSize:    anon_testutils.TCWorkSize,
+			}),
 		),
 	)
 

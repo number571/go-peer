@@ -1,4 +1,4 @@
-package client
+package message
 
 var (
 	_ ISettings = &sSettings{}
