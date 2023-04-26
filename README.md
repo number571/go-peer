@@ -254,7 +254,7 @@ Adapters are a way to exchange data between multiple HLS processes via third-par
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
-<p align="center"><img src="examples/images/hla_client.gif" alt="hla_client.gif"/></p>
+<p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 9. Example of running HLA client.</p>
 
 ### Example 
