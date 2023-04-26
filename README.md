@@ -124,7 +124,7 @@ $ make
 
 Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
 
-<p align="center"><img src="examples/images/hls_logger.png" alt="hls_logger.png"/></p>
+<p align="center"><img src="examples/images/hls_logger.gif" alt="hls_logger.gif"/></p>
 <p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
 
 Send request
@@ -149,6 +149,9 @@ Decode response
 {"echo":"hello, world!","return":1}
 ```
 
+<p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
+<p align="center">Figure 5. Example of running HLS with internal service.</p>
+
 > Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
 
 ## 2. Hidden Lake Messenger
@@ -167,12 +170,15 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
+<p align="center"><img src="examples/images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
+<p align="center">Figure 5. Example of chat room in HLM.</p>
+
 Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
 <p align="center"><img src="examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
-<p align="center">Figure 5. Data encryption with different types of input parameters.</p>
+<p align="center">Figure 6. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
 
@@ -192,7 +198,7 @@ The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
 <p align="center"><img src="examples/images/hlm_about.png" alt="hlm_about.png"/></p>
-<p align="center">Figure 6. Home page of the HLM application.</p>
+<p align="center">Figure 7. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 
@@ -213,6 +219,9 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 ### How it works
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
+
+<p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
+<p align="center">Figure 8. Example of running HLT client.</p>
 
 ### Example 
 
@@ -244,6 +253,9 @@ Adapters are a way to exchange data between multiple HLS processes via third-par
 
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
+
+<p align="center"><img src="examples/images/hla_client.gif" alt="hla_client.gif"/></p>
+<p align="center">Figure 9. Example of running HLA client.</p>
 
 ### Example 
 

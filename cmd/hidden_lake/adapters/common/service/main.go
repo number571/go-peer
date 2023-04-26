@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -56,6 +57,8 @@ func main() {
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
+	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+
 	if r.Method != http.MethodPost {
 		fmt.Fprint(w, "!incorrect method")
 		return
@@ -76,6 +79,8 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
+	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+
 	if r.Method != http.MethodGet {
 		fmt.Fprint(w, "!incorrect method")
 		return
@@ -91,6 +96,8 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {
+	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+
 	if r.Method != http.MethodGet {
 		fmt.Fprint(w, "!incorrect method")
 		return

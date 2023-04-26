@@ -24,7 +24,10 @@ func main() {
 		hlt_client.NewRequester(
 			"http://localhost:9573",
 			&http.Client{Timeout: time.Minute},
-			message.NewParams(hls_settings.CMessageSize, hls_settings.CWorkSize),
+			message.NewSettings(&message.SSettings{
+				FWorkSize:    hls_settings.CWorkSize,
+				FMessageSize: hls_settings.CMessageSize,
+			}),
 		),
 	)
 

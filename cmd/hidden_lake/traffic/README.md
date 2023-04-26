@@ -12,6 +12,9 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
+<p align="center"><img src="../../../examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
+<p align="center">Figure 8. Example of running HLT client.</p>
+
 ## Example 
 
 Build and run service

@@ -92,7 +92,7 @@ $ make
 
 Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
 
-<p align="center"><img src="../../../examples/images/hls_logger.png" alt="hls_logger.png"/></p>
+<p align="center"><img src="../../../examples/images/hls_logger.gif" alt="hls_logger.gif"/></p>
 <p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
 
 Send request

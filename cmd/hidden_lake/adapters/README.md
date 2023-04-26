@@ -13,6 +13,9 @@
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
+<p align="center"><img src="../../../examples/images/hla_client.gif" alt="hla_client.gif"/></p>
+<p align="center">Figure 9. Example of running HLA client.</p>
+
 ### Example 
 
 Since the adapters are capable of performing the same functions as the source programs, without secret communication channels, then all the examples become similar. So, let's analyze one of the examples based on the echo service.
