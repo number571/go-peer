@@ -2,7 +2,7 @@
 
 > Hidden Lake Messenger
 
-<img src="../../../examples/images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="../../../images/hlm_logo.png" alt="hlm_logo.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 

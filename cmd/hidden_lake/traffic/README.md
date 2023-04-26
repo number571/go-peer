@@ -2,7 +2,7 @@
 
 > Hidden Lake Traffic
 
-<img src="../../../examples/images/hlt_logo.png" alt="hlt_logo.png"/>
+<img src="../../../images/hlt_logo.png" alt="hlt_logo.png"/>
 
 The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
 
