@@ -60,6 +60,8 @@ func main() {
 		if err := hltClient.PutMessage(msg); err != nil {
 			panic(err)
 		}
+
+		fmt.Printf("%x\n", msg.GetBody().GetHash())
 	case "r", "read":
 		if len(os.Args) != 3 {
 			panic("len os.Args != 3")
