@@ -14,7 +14,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="../../../examples/images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 9. Example of running HLA client.</p>
+<p align="center">Figure 1. Example of running HLA client.</p>
 
 ### Example 
 

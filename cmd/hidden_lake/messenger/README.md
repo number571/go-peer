@@ -15,14 +15,14 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
 <p align="center"><img src="../../../examples/images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
-<p align="center">Figure 5. Example of chat room in HLM.</p>
+<p align="center">Figure 1. Example of chat room in HLM.</p>
 
 Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
 <p align="center"><img src="../../../examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
-<p align="center">Figure 5. Data encryption with different types of input parameters.</p>
+<p align="center">Figure 2. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
 
@@ -30,7 +30,7 @@ Secondly, the received key K is also used to encrypt all incoming and outgoing m
 
 ### Example
 
-The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3`.
+The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3` (HLS).
 
 Build and run nodes
 ```bash
@@ -38,11 +38,11 @@ $ cd examples/_cmd/anon_messenger
 $ make
 ```
 
-The output of the `middle_hls` node is similar to `Figure 4`.
+The output of the `middle_hls` node is similar to `Figure 4` (HLS).
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
 <p align="center"><img src="../../../examples/images/hlm_about.png" alt="hlm_about.png"/></p>
-<p align="center">Figure 6. Home page of the HLM application.</p>
+<p align="center">Figure 3. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 

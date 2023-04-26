@@ -115,6 +115,9 @@ Decode response
 {"echo":"hello, world!","return":1}
 ```
 
+<p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
+<p align="center">Figure 5. Example of running HLS with internal service.</p>
+
 > Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
 
 ## Cryptographic algorithms and functions
