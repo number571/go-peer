@@ -8,12 +8,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-const (
-	CLogInfo = "info"
-	CLogWarn = "warn"
-	CLogErro = "erro"
-)
-
 var (
 	_ IConfig         = &SConfig{}
 	_ logger.ILogging = &sLogging{}

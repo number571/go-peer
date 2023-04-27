@@ -11,12 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-const (
-	CLogInfo = "info"
-	CLogWarn = "warn"
-	CLogErro = "erro"
-)
-
 var (
 	_ IConfig         = &SConfig{}
 	_ IAddress        = &SAddress{}
@@ -27,7 +21,6 @@ type SConfig struct {
 	FNetwork string `json:"network,omitempty"`
 
 	FAddress *SAddress `json:"address,omitempty"`
-	FTraffic *STraffic `json:"traffic,omitempty"`
 	FLogging []string  `json:"logging,omitempty"`
 
 	FConnections []string          `json:"connections,omitempty"`
@@ -54,7 +47,6 @@ type SAddress struct {
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(pFilepath)
-
 	if configFile.IsExist() {
 		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
 	}

@@ -15,6 +15,12 @@
 3. [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
 4. [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
 
+## Default applications ports
+
+1. HLS = 957x
+2. HLT = 958x
+3. HLM = 959x
+
 ## Code style go-peer
 
 In the course of editing the project, some code styles may be added, some edited. Therefore, the current state of the project may not fully adhere to the code style, but you need to strive for it.

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"

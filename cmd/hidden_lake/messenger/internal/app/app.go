@@ -41,8 +41,9 @@ type sApp struct {
 
 func NewApp(
 	pCfg config.IConfig,
+	pPathTo string,
 ) types.ICommand {
-	stg, err := initCryptoStorage(pCfg)
+	stg, err := initCryptoStorage(pCfg, pPathTo)
 	if err != nil {
 		panic(err)
 	}
@@ -68,6 +69,7 @@ func NewApp(
 				}),
 			),
 		),
+		pPathTo,
 	)
 
 	return &sApp{

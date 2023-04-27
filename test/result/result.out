@@ -1,60 +1,62 @@
-ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common	0.031s	coverage: [no statements]
-ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/recv	0.034s	coverage: 3.7% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/send	0.020s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/service	0.027s	coverage: 4.3% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/cmd/hlm	0.020s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app	0.020s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state	0.032s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue	0.031s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config	0.030s	coverage: 67.5% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database	0.033s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler	0.035s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings	0.034s	coverage: [no statements]
-ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/web	0.031s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls	0.050s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/internal/app	6.155s	coverage: 75.4% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/internal/config	0.042s	coverage: 55.6% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler	6.290s	coverage: 65.1% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client	0.036s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request	0.037s	coverage: 100.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings	0.037s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/cmd/hlt	0.030s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/app	6.086s	coverage: 56.7% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config	0.033s	coverage: 75.7% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database	0.489s	coverage: 68.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/handler	1.229s	coverage: 62.8% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client	0.034s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings	0.033s	coverage: [no statements]
-ok  	github.com/number571/go-peer/cmd/union_blockchain	0.035s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel	0.032s	coverage: [no statements]
-ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/block	0.335s	coverage: 71.4% of statements
-ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/chain	7.477s	coverage: 79.7% of statements
-ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/mempool	0.306s	coverage: 73.9% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common	0.045s	coverage: [no statements]
+ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/recv	0.048s	coverage: 3.7% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/send	0.031s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/adapters/common/service	0.041s	coverage: 4.2% of statements
+?   	github.com/number571/go-peer/cmd/hidden_lake/messenger/cmd/m_hlm	[no test files]
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/cmd/hlm	0.038s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app	0.064s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state	0.055s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue	0.052s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config	0.064s	coverage: 60.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database	0.046s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler	0.055s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings	0.046s	coverage: [no statements]
+ok  	github.com/number571/go-peer/cmd/hidden_lake/messenger/web	0.046s	coverage: 0.0% of statements
+?   	github.com/number571/go-peer/cmd/hidden_lake/service/cmd/m_hls	[no test files]
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls	0.060s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler	10.507s	coverage: 65.1% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app	6.530s	coverage: 75.4% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client	0.049s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config	0.063s	coverage: 53.7% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request	0.051s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings	0.044s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/cmd/hlt	0.052s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/app	6.136s	coverage: 56.7% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config	0.046s	coverage: 75.7% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database	0.583s	coverage: 68.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/handler	1.569s	coverage: 62.8% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client	0.030s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings	0.025s	coverage: [no statements]
+ok  	github.com/number571/go-peer/cmd/union_blockchain	0.027s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel	0.027s	coverage: [no statements]
+ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/block	0.436s	coverage: 71.4% of statements
+ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/chain	9.611s	coverage: 79.7% of statements
+ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/mempool	0.403s	coverage: 73.9% of statements
 ok  	github.com/number571/go-peer/cmd/union_blockchain/kernel/transaction	0.051s	coverage: 68.6% of statements
-ok  	github.com/number571/go-peer/internal/api	0.040s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/internal/api	0.029s	coverage: 0.0% of statements
 ok  	github.com/number571/go-peer/internal/logger	0.032s	coverage: 88.9% of statements
-ok  	github.com/number571/go-peer/internal/pprof	0.031s	coverage: 0.0% of statements
-ok  	github.com/number571/go-peer/pkg/client	0.739s	coverage: 73.4% of statements
-ok  	github.com/number571/go-peer/pkg/client/message	0.049s	coverage: 76.3% of statements
-ok  	github.com/number571/go-peer/pkg/client/queue	6.604s	coverage: 90.0% of statements
-ok  	github.com/number571/go-peer/pkg/crypto	0.028s	coverage: [no statements]
-ok  	github.com/number571/go-peer/pkg/crypto/asymmetric	0.256s	coverage: 84.9% of statements
-ok  	github.com/number571/go-peer/pkg/crypto/entropy	0.053s	coverage: 100.0% of statements
-ok  	github.com/number571/go-peer/pkg/crypto/hashing	0.040s	coverage: 85.7% of statements
-ok  	github.com/number571/go-peer/pkg/crypto/puzzle	0.050s	coverage: 94.7% of statements
-ok  	github.com/number571/go-peer/pkg/crypto/random	0.037s	coverage: 81.8% of statements
-ok  	github.com/number571/go-peer/pkg/crypto/symmetric	0.030s	coverage: 72.0% of statements
-ok  	github.com/number571/go-peer/pkg/encoding	0.029s	coverage: 83.3% of statements
-ok  	github.com/number571/go-peer/pkg/filesystem	0.057s	coverage: 100.0% of statements
-ok  	github.com/number571/go-peer/pkg/logger	0.076s	coverage: 84.6% of statements
-ok  	github.com/number571/go-peer/pkg/network	7.983s	coverage: 91.5% of statements
-ok  	github.com/number571/go-peer/pkg/network/anonymity	13.632s	coverage: 80.5% of statements
-ok  	github.com/number571/go-peer/pkg/network/anonymity/logger	0.034s	coverage: 92.3% of statements
-ok  	github.com/number571/go-peer/pkg/network/conn	0.047s	coverage: 81.8% of statements
-ok  	github.com/number571/go-peer/pkg/network/conn_keeper	1.036s	coverage: 100.0% of statements
-ok  	github.com/number571/go-peer/pkg/network/message	0.029s	coverage: 75.0% of statements
-ok  	github.com/number571/go-peer/pkg/payload	0.023s	coverage: 90.0% of statements
-ok  	github.com/number571/go-peer/pkg/storage	0.054s	coverage: 84.8% of statements
-ok  	github.com/number571/go-peer/pkg/storage/database	0.143s	coverage: 94.5% of statements
-ok  	github.com/number571/go-peer/pkg/types	0.037s	coverage: 100.0% of statements
-ok  	github.com/number571/go-peer/pkg/wrapper	0.038s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/internal/pprof	0.033s	coverage: 0.0% of statements
+ok  	github.com/number571/go-peer/pkg/client	1.232s	coverage: 73.4% of statements
+ok  	github.com/number571/go-peer/pkg/client/message	0.077s	coverage: 76.3% of statements
+ok  	github.com/number571/go-peer/pkg/client/queue	6.746s	coverage: 88.6% of statements
+ok  	github.com/number571/go-peer/pkg/crypto	0.047s	coverage: [no statements]
+ok  	github.com/number571/go-peer/pkg/crypto/asymmetric	0.291s	coverage: 84.9% of statements
+ok  	github.com/number571/go-peer/pkg/crypto/entropy	0.058s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/pkg/crypto/hashing	0.057s	coverage: 85.7% of statements
+ok  	github.com/number571/go-peer/pkg/crypto/puzzle	0.094s	coverage: 94.7% of statements
+ok  	github.com/number571/go-peer/pkg/crypto/random	0.042s	coverage: 81.8% of statements
+ok  	github.com/number571/go-peer/pkg/crypto/symmetric	0.042s	coverage: 72.0% of statements
+ok  	github.com/number571/go-peer/pkg/encoding	0.072s	coverage: 83.3% of statements
+ok  	github.com/number571/go-peer/pkg/filesystem	0.062s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/pkg/logger	0.059s	coverage: 84.6% of statements
+ok  	github.com/number571/go-peer/pkg/network	14.321s	coverage: 91.5% of statements
+ok  	github.com/number571/go-peer/pkg/network/anonymity	19.936s	coverage: 80.7% of statements
+ok  	github.com/number571/go-peer/pkg/network/anonymity/logger	0.054s	coverage: 92.3% of statements
+ok  	github.com/number571/go-peer/pkg/network/conn	0.056s	coverage: 81.8% of statements
+ok  	github.com/number571/go-peer/pkg/network/conn_keeper	1.101s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/pkg/network/message	0.038s	coverage: 75.0% of statements
+ok  	github.com/number571/go-peer/pkg/payload	0.049s	coverage: 90.0% of statements
+ok  	github.com/number571/go-peer/pkg/storage	1.130s	coverage: 84.8% of statements
+ok  	github.com/number571/go-peer/pkg/storage/database	1.958s	coverage: 94.5% of statements
+ok  	github.com/number571/go-peer/pkg/types	0.970s	coverage: 100.0% of statements
+ok  	github.com/number571/go-peer/pkg/wrapper	0.916s	coverage: 100.0% of statements

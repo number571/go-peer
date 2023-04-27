@@ -6,6 +6,12 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
+const (
+	CLogInfo = "info"
+	CLogWarn = "warn"
+	CLogErro = "erro"
+)
+
 func StdLogger(pLogging ILogging) logger.ILogger {
 	return logger.NewLogger(defaultSettings(pLogging))
 }

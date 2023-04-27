@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
 
@@ -42,7 +42,7 @@ func TestApp(t *testing.T) {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	app := NewApp(cfg, privKey)
+	app := NewApp(cfg, privKey, "")
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return

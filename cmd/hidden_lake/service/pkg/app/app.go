@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -33,6 +33,7 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
+	fPathTo      string
 	fConfig      config.IConfig
 	fNode        anonymity.INode
 	fLogger      logger.ILogger
@@ -43,6 +44,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPrivKey asymmetric.IPrivKey,
+	pPathTo string,
 ) types.ICommand {
 	logger := internal_logger.StdLogger(pCfg.GetLogging())
 	node := initNode(pCfg, pPrivKey, logger)
@@ -50,6 +52,7 @@ func NewApp(
 		fConfig:      pCfg,
 		fNode:        node,
 		fLogger:      logger,
+		fPathTo:      pPathTo,
 		fConnKeeper:  initConnKeeper(pCfg, node),
 		fServiceHTTP: initServiceHTTP(config.NewWrapper(pCfg), node),
 	}
@@ -67,7 +70,7 @@ func (p *sApp) Run() error {
 	res := make(chan error)
 	p.fNode.GetWrapperDB().Set(database.NewLevelDB(
 		database.NewSettings(&database.SSettings{
-			FPath:    pkg_settings.CPathDB,
+			FPath:    fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
 			FHashing: true,
 		}),
 	))

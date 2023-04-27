@@ -183,18 +183,19 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 				break
 			}
 
-			var (
-				hash   = msg.GetBody().GetHash()
-				proof  = msg.GetBody().GetProof()
-				pubKey = p.GetMessageQueue().GetClient().GetPubKey()
-			)
-
-			if err := p.networkBroadcast(pLogger, msg); err != nil {
-				p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMiddleware, hash, proof, pubKey, nil))
+			// store hash and push message to network
+			if ok := p.storeHashWithBroadcast(pLogger, nil, msg); !ok {
+				// internal logger
 				continue
 			}
 
-			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseBroadcast, hash, proof, pubKey, nil))
+			p.fLogger.PushInfo(pLogger.GetFmtLog(
+				anon_logger.CLogBaseBroadcast,
+				msg.GetBody().GetHash(),
+				msg.GetBody().GetProof(),
+				p.GetMessageQueue().GetClient().GetPubKey(),
+				nil,
+			))
 		}
 	}()
 
@@ -210,48 +211,17 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			}),
 			pReqBytes,
 		)
-		if msg == nil {
-			p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
+
+		// try store hash of message
+		if ok := p.storeHashWithBroadcast(pLogger, pConn, msg); !ok {
+			// internal logger
 			return
 		}
 
 		var (
-			addr     = p.GetMessageQueue().GetClient().GetPubKey().GetAddress().ToString()
-			hash     = msg.GetBody().GetHash()
-			proof    = msg.GetBody().GetProof()
-			database = p.GetWrapperDB().Get()
+			hash  = msg.GetBody().GetHash()
+			proof = msg.GetBody().GetProof()
 		)
-
-		if database == nil {
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, pConn))
-			return
-		}
-
-		hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
-		gotAddrs, err := database.Get(hashDB)
-
-		// check already received data by hash
-		hashIsExist := (err == nil)
-		if hashIsExist && strings.Contains(string(gotAddrs), addr) {
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
-			return
-		}
-
-		// set hash to database
-		updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), addr)
-		if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
-			return
-		}
-
-		// do not send data if than already received
-		if !hashIsExist {
-			// broadcast message to network
-			if err := p.networkBroadcast(pLogger, msg); err != nil {
-				p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMiddleware, hash, proof, nil, pConn))
-				return
-			}
-		}
 
 		// try decrypt message
 		sender, pld, err := p.GetMessageQueue().GetClient().DecryptMessage(msg)
@@ -300,6 +270,53 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 
 		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResp, hash, proof, sender, pConn))
 	}
+}
+
+func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.IConn, pMsg message.IMessage) bool {
+	if pMsg == nil {
+		p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
+		return false
+	}
+
+	var (
+		hash      = pMsg.GetBody().GetHash()
+		proof     = pMsg.GetBody().GetProof()
+		database  = p.GetWrapperDB().Get()
+		myAddress = p.GetMessageQueue().GetClient().GetPubKey().GetAddress().ToString()
+	)
+
+	if database == nil {
+		p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, pConn))
+		return false
+	}
+
+	hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
+	gotAddrs, err := database.Get(hashDB)
+
+	// check already received data by hash
+	hashIsExist := (err == nil)
+	if hashIsExist && strings.Contains(string(gotAddrs), myAddress) {
+		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
+		return false
+	}
+
+	// set hash to database
+	updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), myAddress)
+	if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
+		p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
+		return false
+	}
+
+	// do not send data if than already received
+	if !hashIsExist {
+		// broadcast message to network
+		if err := p.networkBroadcast(pLogger, pMsg); err != nil {
+			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMiddleware, hash, proof, nil, pConn))
+			return false
+		}
+	}
+
+	return true
 }
 
 func (p *sNode) networkBroadcast(pLogger anon_logger.ILogger, pMsg message.IMessage) error {

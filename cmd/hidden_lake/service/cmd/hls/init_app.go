@@ -4,11 +4,12 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/app"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
 
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -37,10 +38,10 @@ func initApp() (types.ICommand, error) {
 		return nil, fmt.Errorf("private key is invalid")
 	}
 
-	cfg, err := initConfig()
+	cfg, err := pkg_config.InitConfig(pkg_settings.CPathCFG, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return app.NewApp(cfg, privKey), nil
+	return app.NewApp(cfg, privKey, "."), nil
 }

@@ -1,7 +1,10 @@
 N=1
 GC=go build
 BINPATH=../../../bin
-.PHONY: default build run test clean
+
+.PHONY: default build run test clean \
+	mobile-default mobile-build mobile-install mobile-clean
+
 default: build run
 build:
 	$(GC) -o $(BINPATH)/hls ./cmd/hls
@@ -12,3 +15,13 @@ test:
 clean:
 	rm -f $(BINPATH)/hls hls.cfg
 	rm -rf hls.db
+
+mobile-default: mobile-build mobile-install
+# fyne not supported "--sourceDir cmd/m_hls"
+mobile-build:
+	cd ./cmd/m_hls && fyne package -os android -appID hidden_lake.service -icon icon.png
+	cp ./cmd/m_hls/m_hls.apk $(BINPATH)/m_hls.apk
+mobile-install:
+	cd ./cmd/m_hls && fyne install -os android -appID hidden_lake.service -icon icon.png
+mobile-clean:
+	rm -f ./cmd/m_hls/m_hls.apk $(BINPATH)/m_hls.apk

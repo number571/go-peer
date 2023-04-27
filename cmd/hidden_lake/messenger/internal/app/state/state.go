@@ -26,6 +26,7 @@ type sState struct {
 	fStorage  storage.IKeyValueStorage
 	fDatabase database.IWrapperDB
 	fClient   *sClient
+	fPathTo   string
 }
 
 type sClient struct {
@@ -38,6 +39,7 @@ func NewState(
 	pDatabase database.IWrapperDB,
 	pHlsClient hls_client.IClient,
 	pHltClient hlt_client.IClient,
+	pPathTo string,
 ) IState {
 	return &sState{
 		fStorage:  pStorage,
@@ -46,6 +48,7 @@ func NewState(
 			fService: pHlsClient,
 			fTraffic: pHltClient,
 		},
+		fPathTo: pPathTo,
 	}
 }
 
@@ -97,7 +100,7 @@ func (p *sState) UpdateState(pHashLP []byte) error {
 
 	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
 	p.GetWrapperDB().Set(database.NewKeyValueDB(
-		hlm_settings.CPathDB,
+		fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
 		entropyBooster.BoostEntropy(pHashLP),
 	))
 
