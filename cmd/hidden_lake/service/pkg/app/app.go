@@ -67,13 +67,18 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	res := make(chan error)
-	p.fNode.GetWrapperDB().Set(database.NewLevelDB(
+	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
 			FPath:    fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
 			FHashing: true,
 		}),
-	))
+	)
+	if err != nil {
+		return err
+	}
+
+	res := make(chan error)
+	p.fNode.GetWrapperDB().Set(db)
 
 	go func() {
 		if p.fConfig.GetAddress().GetHTTP() == "" {

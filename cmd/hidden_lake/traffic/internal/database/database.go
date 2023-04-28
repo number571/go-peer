@@ -19,17 +19,20 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett ISettings) IKeyValueDB {
-	levelDB := gp_database.NewLevelDB(
+	sqlDB, err := gp_database.NewSQLiteDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath: pSett.GetPath(),
 		}),
 	)
-	if levelDB == nil {
+	if err != nil {
+		panic(err)
+	}
+	if sqlDB == nil {
 		panic("storage (hashes) is nil")
 	}
 	db := &sKeyValueDB{
 		fSettings: pSett,
-		fDB:       levelDB,
+		fDB:       sqlDB,
 	}
 	db.fPointer = db.getPointer()
 	return db

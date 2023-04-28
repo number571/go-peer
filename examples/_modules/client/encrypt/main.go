@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+// TODO!!!
 func main() {
 	var (
 		client1 = newClient()

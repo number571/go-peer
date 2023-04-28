@@ -8,4 +8,4 @@ run:
 	./$(BINPATH)/service
 clean:
 	rm -f $(BINPATH)/common_service
-	rm -rf $(BINPATH)/common_service.db
+	rm -rf common_service.db

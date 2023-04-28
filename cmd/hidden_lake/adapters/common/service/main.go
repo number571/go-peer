@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	databasePath = "service.db"
+	databasePath = "common_service.db"
 	dataCountKey = "count_service"
 )
 
@@ -23,21 +23,27 @@ var (
 	db  database.IKeyValueDB
 )
 
-func init() {
-	db = database.NewLevelDB(
+func initDB() database.IKeyValueDB {
+	var err error
+	db, err = database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
 			FPath: databasePath,
 		}),
 	)
+	if err != nil {
+		panic(err)
+	}
 	if _, err := db.Get([]byte(dataCountKey)); err == nil {
-		return
+		return db
 	}
 	if err := db.Set([]byte(dataCountKey), []byte("0")); err != nil {
 		panic(err)
 	}
+	return db
 }
 
 func main() {
+	db := initDB()
 	defer db.Close()
 
 	if len(os.Args) != 2 {

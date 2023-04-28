@@ -21,18 +21,22 @@ const (
 )
 
 func TestNewNode(pathDB, addr string) anonymity.INode {
+	db, err := database.NewSQLiteDB(
+		database.NewSettings(&database.SSettings{
+			FPath:      pathDB,
+			FHashing:   true,
+			FCipherKey: []byte(testutils.TcKey1),
+		}),
+	)
+	if err != nil {
+		return nil
+	}
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FTimeWait: 30 * time.Second,
 		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		anonymity.NewWrapperDB().Set(database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath:      pathDB,
-				FHashing:   true,
-				FCipherKey: []byte(testutils.TcKey1),
-			}),
-		)),
+		anonymity.NewWrapperDB().Set(db),
 		TestNewNetworkNode(addr),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{

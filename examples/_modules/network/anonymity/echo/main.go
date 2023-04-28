@@ -31,6 +31,7 @@ func deleteDBs() {
 	os.RemoveAll(dbPath2)
 }
 
+// TODO!!!
 func main() {
 	deleteDBs()
 	defer deleteDBs()
@@ -73,12 +74,16 @@ func main() {
 }
 
 func newNode(dbPath string) anonymity.INode {
+	db, err := database.NewSQLiteDB(
+		database.NewSettings(&database.SSettings{FPath: dbPath}),
+	)
+	if err != nil {
+		return nil
+	}
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{FPath: dbPath}),
-		),
+		db,
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FConnSettings: conn.NewSettings(&conn.SSettings{}),

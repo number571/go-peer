@@ -20,16 +20,20 @@ type sMempool struct {
 }
 
 func NewMempool(sett ISettings, path string) IMempool {
+	db, err := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath: path,
+		}),
+	)
+	if err != nil {
+		return nil
+	}
+
 	mempool := &sMempool{
 		fSettings: sett,
-		fDB: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: path,
-			}),
-		),
+		fDB:       db,
 	}
-	_, err := mempool.fDB.Get(getKeyHeight())
-	if err != nil {
+	if _, err := mempool.fDB.Get(getKeyHeight()); err != nil {
 		res := encoding.Uint64ToBytes(0)
 		err := mempool.fDB.Set(getKeyHeight(), res[:])
 		if err != nil {
@@ -75,23 +79,24 @@ func (mempool *sMempool) Clear() {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
-	iter := mempool.fDB.GetIterator([]byte(cPrefix))
-	defer iter.Close()
+	// TODO:
+	// iter := mempool.fDB.GetIterator([]byte(cPrefix))
+	// defer iter.Close()
 
-	// TODO: iter.Key without load transaction
-	for iter.Next() {
-		txBytes := iter.GetValue()
+	// // TODO: iter.Key without load transaction
+	// for iter.Next() {
+	// 	txBytes := iter.GetValue()
 
-		tx := transaction.LoadTransaction(
-			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
-			txBytes,
-		)
-		if tx == nil {
-			panic("mempool: tx is nil")
-		}
+	// 	tx := transaction.LoadTransaction(
+	// 		mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
+	// 		txBytes,
+	// 	)
+	// 	if tx == nil {
+	// 		panic("mempool: tx is nil")
+	// 	}
 
-		mempool.deleteTX(tx.Hash())
-	}
+	// 	mempool.deleteTX(tx.Hash())
+	// }
 }
 
 func (mempool *sMempool) Push(tx transaction.ITransaction) {
@@ -126,43 +131,46 @@ func (mempool *sMempool) Pop() []transaction.ITransaction {
 	mempool.fMutex.Lock()
 	defer mempool.fMutex.Unlock()
 
-	// count of tx need be = block size
-	blockCountTXs := mempool.fSettings.GetBlockSettings().GetCountTXs()
-	if mempool.getHeight() < blockCountTXs {
-		return nil
-	}
+	// TODO:
+	// // count of tx need be = block size
+	// blockCountTXs := mempool.fSettings.GetBlockSettings().GetCountTXs()
+	// if mempool.getHeight() < blockCountTXs {
+	// 	return nil
+	// }
 
-	var (
-		txs   []transaction.ITransaction
-		count uint64
-	)
+	// var (
+	// 	txs   []transaction.ITransaction
+	// 	count uint64
+	// )
 
-	iter := mempool.fDB.GetIterator([]byte(cPrefix))
-	defer iter.Close()
+	// iter := mempool.fDB.GetIterator([]byte(cPrefix))
+	// defer iter.Close()
 
-	for count = 0; iter.Next() && count < blockCountTXs; count++ {
-		txBytes := iter.GetValue()
+	// for count = 0; iter.Next() && count < blockCountTXs; count++ {
+	// 	txBytes := iter.GetValue()
 
-		tx := transaction.LoadTransaction(
-			mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
-			txBytes,
-		)
-		if tx == nil {
-			return nil
-		}
+	// 	tx := transaction.LoadTransaction(
+	// 		mempool.fSettings.GetBlockSettings().GetTransactionSettings(),
+	// 		txBytes,
+	// 	)
+	// 	if tx == nil {
+	// 		return nil
+	// 	}
 
-		txs = append(txs, tx)
-	}
+	// 	txs = append(txs, tx)
+	// }
 
-	if count != blockCountTXs {
-		panic("count != settings.CSizeTrns")
-	}
+	// if count != blockCountTXs {
+	// 	panic("count != settings.CSizeTrns")
+	// }
 
-	for _, tx := range txs {
-		mempool.deleteTX(tx.Hash())
-	}
+	// for _, tx := range txs {
+	// 	mempool.deleteTX(tx.Hash())
+	// }
 
-	return txs
+	// return txs
+
+	return nil
 }
 
 func (mempool *sMempool) getHeight() uint64 {

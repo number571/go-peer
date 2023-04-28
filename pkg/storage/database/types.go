@@ -17,13 +17,4 @@ type IKeyValueDB interface {
 	types.ICloser
 
 	GetSettings() ISettings
-	GetIterator([]byte) IIterator
-}
-
-type IIterator interface {
-	types.ICloser
-	Next() bool
-
-	GetKey() []byte
-	GetValue() []byte
 }

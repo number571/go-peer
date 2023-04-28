@@ -14,6 +14,7 @@ const (
 	payloadHead = 0x1
 )
 
+// TODO!!!
 func main() {
 	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{

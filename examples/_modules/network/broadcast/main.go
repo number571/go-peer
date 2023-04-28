@@ -14,6 +14,7 @@ const (
 	serviceAddress = ":8080"
 )
 
+// TODO!!!
 // client <-> service1 <-> service2
 func main() {
 	var (

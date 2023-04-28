@@ -39,19 +39,29 @@ func NewChain(sett ISettings, priv asymmetric.IPrivKey, genesis block.IBlock) (I
 		return nil, fmt.Errorf("chain already exists")
 	}
 
+	blocksDB, err := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath: sett.GetBlocksPath(),
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	transactionsDB, err := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath: sett.GetTransactionsPath(),
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	chain := &sChain{
-		fSettings: sett,
-		fPrivKey:  priv,
-		fBlocks: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: sett.GetBlocksPath(),
-			}),
-		),
-		fTransactions: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: sett.GetTransactionsPath(),
-			}),
-		),
+		fSettings:     sett,
+		fPrivKey:      priv,
+		fBlocks:       blocksDB,
+		fTransactions: transactionsDB,
 		fMempool: mempool.NewMempool(
 			sett.GetMempoolSettings(),
 			sett.GetMempoolPath(),
@@ -81,19 +91,29 @@ func LoadChain(sett ISettings, priv asymmetric.IPrivKey) (IChain, error) {
 		return nil, fmt.Errorf("chain not exists")
 	}
 
+	blocksDB, err := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath: sett.GetBlocksPath(),
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	transactionsDB, err := database.NewLevelDB(
+		database.NewSettings(&database.SSettings{
+			FPath: sett.GetTransactionsPath(),
+		}),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	chain := &sChain{
-		fSettings: sett,
-		fPrivKey:  priv,
-		fBlocks: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: sett.GetBlocksPath(),
-			}),
-		),
-		fTransactions: database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath: sett.GetTransactionsPath(),
-			}),
-		),
+		fSettings:     sett,
+		fPrivKey:      priv,
+		fBlocks:       blocksDB,
+		fTransactions: transactionsDB,
 		fMempool: mempool.NewMempool(
 			sett.GetMempoolSettings(),
 			sett.GetMempoolPath(),

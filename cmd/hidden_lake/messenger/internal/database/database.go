@@ -14,13 +14,16 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pPath string, pKey []byte) IKeyValueDB {
-	db := gp_database.NewLevelDB(
+	db, err := gp_database.NewSQLiteDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pPath,
 			FHashing:   true,
 			FCipherKey: pKey,
 		}),
 	)
+	if err != nil {
+		return nil
+	}
 	return &sKeyValueDB{
 		fDB: &db,
 	}

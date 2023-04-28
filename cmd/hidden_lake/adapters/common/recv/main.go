@@ -26,11 +26,15 @@ var (
 )
 
 func init() {
-	db = database.NewLevelDB(
+	var err error
+	db, err = database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
 			FPath: databasePath,
 		}),
 	)
+	if err != nil {
+		panic(err)
+	}
 	if _, err := db.Get([]byte(dataCountKey)); err == nil {
 		return
 	}

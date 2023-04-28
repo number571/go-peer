@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -32,6 +31,7 @@ func deleteDBs() {
 	os.RemoveAll(dbPath2)
 }
 
+// TODO!!!
 func main() {
 	deleteDBs()
 	defer deleteDBs()
@@ -41,11 +41,11 @@ func main() {
 		service2 = newNode(dbPath2)
 	)
 
-	service1.Handle(serviceHeader, handler("#1"))
-	service2.Handle(serviceHeader, handler("#2"))
+	service1.HandleFunc(serviceHeader, handler("#1"))
+	service2.HandleFunc(serviceHeader, handler("#2"))
 
-	service1.F2F().Append(service2.Queue().Client().PubKey())
-	service2.F2F().Append(service1.Queue().Client().PubKey())
+	service1.GetListPubKeys().AddPubKey(service2.GetMessageQueue().GetClient().GetPubKey())
+	service2.GetListPubKeys().AddPubKey(service1.GetMessageQueue().GetClient().GetPubKey())
 
 	if err := service1.Run(); err != nil {
 		panic(err)
@@ -55,7 +55,7 @@ func main() {
 		panic(err)
 	}
 
-	go service1.Network().Listen(serviceAddress)
+	go service1.GetNetworkNode().Listen(serviceAddress)
 	time.Sleep(time.Second)
 
 	if _, err := service2.Network().Connect(serviceAddress); err != nil {
@@ -105,12 +105,16 @@ func handler(serviceName string) anonymity.IHandlerF {
 }
 
 func newNode(dbPath string) anonymity.INode {
+	db, err := database.NewSQLiteDB(
+		database.NewSettings(&database.SSettings{FPath: dbPath}),
+	)
+	if err != nil {
+		return nil
+	}
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		database.NewLevelDB(
-			database.NewSettings(&database.SSettings{FPath: dbPath}),
-		),
+		db,
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FConnSettings: conn.NewSettings(&conn.SSettings{}),
@@ -123,6 +127,6 @@ func newNode(dbPath string) anonymity.INode {
 				asymmetric.NewRSAPrivKey(1024),
 			),
 		),
-		friends.NewF2F(),
+		asymmetric.NewListPubKeys(),
 	)
 }

@@ -21,7 +21,7 @@ func initApp(path string) (types.ICommand, error) {
 	cfg, err := pkg_config.InitConfig(
 		fmt.Sprintf("%s/%s", path, pkg_settings.CPathCFG),
 		&pkg_config.SConfig{
-			FNetwork: "android_" + pkg_settings.CServiceName,
+			FNetwork: "mobile_" + pkg_settings.CServiceName,
 			FAddress: &pkg_config.SAddress{
 				FTCP:  "localhost:9571",
 				FHTTP: "localhost:9572",

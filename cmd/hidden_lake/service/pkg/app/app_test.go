@@ -42,7 +42,7 @@ func TestApp(t *testing.T) {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
-	app := NewApp(cfg, privKey, "")
+	app := NewApp(cfg, privKey, ".")
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return

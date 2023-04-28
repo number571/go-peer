@@ -134,19 +134,23 @@ func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
 }
 
 func testNewNode(i int, timeWait time.Duration, addr string) INode {
+	db, err := database.NewSQLiteDB(
+		database.NewSettings(&database.SSettings{
+			FPath:      fmt.Sprintf(tcPathDBTemplate, i),
+			FHashing:   true,
+			FCipherKey: []byte(testutils.TcKey1),
+		}),
+	)
+	if err != nil {
+		return nil
+	}
 	node := NewNode(
 		NewSettings(&SSettings{
 			FRetryEnqueue: 0,
 			FTimeWait:     timeWait,
 		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		NewWrapperDB().Set(database.NewLevelDB(
-			database.NewSettings(&database.SSettings{
-				FPath:      fmt.Sprintf(tcPathDBTemplate, i),
-				FHashing:   true,
-				FCipherKey: []byte(testutils.TcKey1),
-			}),
-		)),
+		NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:     addr,

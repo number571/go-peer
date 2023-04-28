@@ -14,6 +14,7 @@ const (
 	serviceAddress = ":8080"
 )
 
+// TODO!!!
 func main() {
 	service := network.NewNode(network.NewSettings(&network.SSettings{}))
 	service.Handle(serviceHeader, func(n network.INode, c conn.IConn, reqBytes []byte) {

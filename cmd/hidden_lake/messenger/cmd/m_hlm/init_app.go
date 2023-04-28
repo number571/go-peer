@@ -23,7 +23,7 @@ func initApp(path string) (types.ICommand, types.ICommand, error) {
 	cfgHLS, err := hls_config.InitConfig(
 		fmt.Sprintf("%s/%s", path, hls_settings.CPathCFG),
 		&hls_config.SConfig{
-			FNetwork: "android_" + hls_settings.CServiceName,
+			FNetwork: "mobile_" + hls_settings.CServiceName,
 			FAddress: &hls_config.SAddress{
 				FTCP:  "localhost:9571",
 				FHTTP: "localhost:9572",
@@ -40,7 +40,7 @@ func initApp(path string) (types.ICommand, types.ICommand, error) {
 	cfgHLM, err := config.InitConfig(
 		fmt.Sprintf("%s/%s", path, settings.CPathCFG),
 		&config.SConfig{
-			FStorageKey: "android_" + settings.CServiceName,
+			FStorageKey: "mobile_" + settings.CServiceName,
 			FAddress: &config.SAddress{
 				FInterface: "localhost:9591",
 				FIncoming:  "localhost:9592",
