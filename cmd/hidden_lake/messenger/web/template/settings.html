@@ -59,7 +59,11 @@ Settings
                 <div class="row">
                     <div class="col-md-8 w-75">
                         <input hidden type="text" name="address" value="{{.}}" class="text-center form-control w-100">
-                        <button disabled type="button" class="btn btn-secondary w-100" style="overflow: hidden;">{{.}}</button>
+                        {{if .FOnline}}
+                            <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">{{.FAddress}}</button>
+                        {{else}}
+                            <button disabled type="button" class="btn btn-secondary w-100" style="overflow: hidden;">{{.FAddress}}</button>
+                        {{end}}
                     </div>
                     <div class="col-md-4 w-25">
                         <input type="submit" name="submit" value="-" class="btn btn-info w-100">

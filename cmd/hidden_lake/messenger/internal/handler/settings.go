@@ -9,12 +9,19 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
+
+type sConnection struct {
+	FAddress string
+	FOnline  bool
+}
 
 type sSettings struct {
 	*state.STemplateState
 	FPublicKey   string
-	FConnections []string
+	FConnections []sConnection
 }
 
 func SettingsPage(pState state.IState) http.HandlerFunc {
@@ -73,12 +80,13 @@ func SettingsPage(pState state.IState) http.HandlerFunc {
 		}
 		result.FPublicKey = pubKey.ToString()
 
-		res, err := client.GetConnections()
+		conns, err := getConnections(client)
 		if err != nil {
-			fmt.Fprint(pW, "error: read connections")
+			fmt.Fprint(pW, err.Error())
 			return
 		}
-		result.FConnections = res
+
+		result.FConnections = conns
 
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),
@@ -90,4 +98,39 @@ func SettingsPage(pState state.IState) http.HandlerFunc {
 		}
 		t.Execute(pW, result)
 	}
+}
+
+func getConnections(client hls_client.IClient) ([]sConnection, error) {
+	var connections []sConnection
+
+	conns, err := client.GetConnections()
+	if err != nil {
+		return nil, fmt.Errorf("error: read connections")
+	}
+
+	onlines, err := client.GetOnlines()
+	if err != nil {
+		return nil, fmt.Errorf("error: read online connections")
+	}
+
+	for _, c := range conns {
+		connections = append(
+			connections,
+			sConnection{
+				FAddress: c,
+				FOnline:  getState(onlines, c),
+			},
+		)
+	}
+
+	return connections, nil
+}
+
+func getState(onlines []string, c string) bool {
+	for _, o := range onlines {
+		if o == c {
+			return true
+		}
+	}
+	return false
 }
