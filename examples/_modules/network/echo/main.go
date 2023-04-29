@@ -14,17 +14,18 @@ const (
 	serviceAddress = ":8080"
 )
 
-// TODO!!!
 func main() {
-	service := network.NewNode(network.NewSettings(&network.SSettings{}))
-	service.Handle(serviceHeader, func(n network.INode, c conn.IConn, reqBytes []byte) {
-		c.Write(payload.NewPayload(
+	service := network.NewNode(network.NewSettings(&network.SSettings{FAddress: serviceAddress}))
+	service.HandleFunc(serviceHeader, func(n network.INode, c conn.IConn, reqBytes []byte) {
+		c.WritePayload(payload.NewPayload(
 			serviceHeader,
 			[]byte(fmt.Sprintf("echo: [%s]", string(reqBytes))),
 		))
 	})
 
-	go service.Listen(serviceAddress)
+	if err := service.Run(); err != nil {
+		panic(err)
+	}
 	time.Sleep(time.Second) // wait
 
 	conn, err := conn.NewConn(
@@ -35,7 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	pld, err := conn.Request(payload.NewPayload(
+	pld, err := conn.FetchPayload(payload.NewPayload(
 		serviceHeader,
 		[]byte("hello, world!")),
 	)
@@ -43,5 +44,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(string(pld.Body()))
+	fmt.Println(string(pld.GetBody()))
 }

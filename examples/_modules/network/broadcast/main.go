@@ -14,22 +14,22 @@ const (
 	serviceAddress = ":8080"
 )
 
-// TODO!!!
 // client <-> service1 <-> service2
 func main() {
 	var (
-		service1 = network.NewNode(network.NewSettings(&network.SSettings{}))
+		service1 = network.NewNode(network.NewSettings(&network.SSettings{FAddress: serviceAddress}))
 		service2 = network.NewNode(network.NewSettings(&network.SSettings{}))
 	)
 
-	service1.Handle(serviceHeader, handlerPingPong("#1"))
-	service2.Handle(serviceHeader, handlerPingPong("#2"))
+	service1.HandleFunc(serviceHeader, handlerPingPong("#1"))
+	service2.HandleFunc(serviceHeader, handlerPingPong("#2"))
 
-	go service1.Listen(serviceAddress)
+	if err := service1.Run(); err != nil {
+		panic(err)
+	}
 	time.Sleep(time.Second) // wait
 
-	_, err := service2.Connect(serviceAddress)
-	if err != nil {
+	if err := service2.AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}
 
@@ -41,7 +41,7 @@ func main() {
 		panic(err)
 	}
 
-	err = conn.Write(payload.NewPayload(
+	err = conn.WritePayload(payload.NewPayload(
 		serviceHeader,
 		[]byte("hello, world!"),
 	))
@@ -54,7 +54,7 @@ func main() {
 
 func handlerPingPong(serviceName string) network.IHandlerF {
 	return func(n network.INode, c conn.IConn, reqBytes []byte) {
-		defer n.Broadcast(payload.NewPayload(serviceHeader, reqBytes))
+		defer n.BroadcastPayload(payload.NewPayload(serviceHeader, reqBytes))
 		fmt.Printf("service '%s' got '%s'\n", serviceName, string(reqBytes))
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
@@ -14,7 +15,6 @@ const (
 	payloadHead = 0x1
 )
 
-// TODO!!!
 func main() {
 	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{
@@ -23,8 +23,9 @@ func main() {
 			FPullCapacity: 1 << 5,
 		}),
 		client.NewClient(
-			client.NewSettings(&client.SSettings{
+			message.NewSettings(&message.SSettings{
 				FMessageSize: 1 << 12,
+				FWorkSize:    10,
 			}),
 			asymmetric.NewRSAPrivKey(1024),
 		),
@@ -56,7 +57,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if pubKey.Address().ToString() != q.GetClient().GetPubKey().Address().ToString() {
+		if pubKey.GetAddress().ToString() != q.GetClient().GetPubKey().GetAddress().ToString() {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

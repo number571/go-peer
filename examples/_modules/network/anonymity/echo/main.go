@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/friends"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -31,40 +31,40 @@ func deleteDBs() {
 	os.RemoveAll(dbPath2)
 }
 
-// TODO!!!
 func main() {
 	deleteDBs()
 	defer deleteDBs()
 
 	var (
-		service = newNode(dbPath1)
-		client  = newNode(dbPath2)
+		service = newNode(serviceAddress, dbPath1)
+		client  = newNode("", dbPath2)
 	)
 
-	service.Handle(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) []byte {
+	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) []byte {
 		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes)))
 	})
 
-	service.F2F().Append(client.Queue().Client().PubKey())
-	client.F2F().Append(service.Queue().Client().PubKey())
+	service.GetListPubKeys().AddPubKey(client.GetMessageQueue().GetClient().GetPubKey())
+	client.GetListPubKeys().AddPubKey(service.GetMessageQueue().GetClient().GetPubKey())
 
 	if err := service.Run(); err != nil {
 		panic(err)
 	}
+	if err := service.GetNetworkNode().Run(); err != nil {
+		panic(err)
+	}
+	time.Sleep(time.Second) // wait
 
 	if err := client.Run(); err != nil {
 		panic(err)
 	}
 
-	go service.Network().Listen(serviceAddress)
-	time.Sleep(time.Second)
-
-	if _, err := client.Network().Connect(serviceAddress); err != nil {
+	if err := client.GetNetworkNode().AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}
 
-	res, err := client.Request(
-		service.Queue().Client().PubKey(),
+	res, err := client.FetchPayload(
+		service.GetMessageQueue().GetClient().GetPubKey(),
 		anonymity.NewPayload(serviceHeader, []byte("hello, world!")),
 	)
 	if err != nil {
@@ -73,7 +73,7 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func newNode(dbPath string) anonymity.INode {
+func newNode(serviceAddress, dbPath string) anonymity.INode {
 	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{FPath: dbPath}),
 	)
@@ -83,19 +83,20 @@ func newNode(dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		db,
+		anonymity.NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
+				FAddress:      serviceAddress,
 				FConnSettings: conn.NewSettings(&conn.SSettings{}),
 			}),
 		),
-		queue.NewQueue(
+		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{}),
 			client.NewClient(
-				client.NewSettings(&client.SSettings{}),
+				message.NewSettings(&message.SSettings{}),
 				asymmetric.NewRSAPrivKey(1024),
 			),
 		),
-		friends.NewF2F(),
+		asymmetric.NewListPubKeys(),
 	)
 }

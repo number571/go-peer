@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
-// TODO!!!
 func main() {
 	var (
 		client1 = newClient()
@@ -34,8 +34,9 @@ func main() {
 
 func newClient() client.IClient {
 	return client.NewClient(
-		client.NewSettings(&client.SSettings{
+		message.NewSettings(&message.SSettings{
 			FMessageSize: (1 << 12),
+			FWorkSize:    10,
 		}),
 		asymmetric.NewRSAPrivKey(1024),
 	)

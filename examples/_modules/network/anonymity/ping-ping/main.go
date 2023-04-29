@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -37,8 +38,8 @@ func main() {
 	defer deleteDBs()
 
 	var (
-		service1 = newNode(dbPath1)
-		service2 = newNode(dbPath2)
+		service1 = newNode(serviceAddress, dbPath1)
+		service2 = newNode("", dbPath2)
 	)
 
 	service1.HandleFunc(serviceHeader, handler("#1"))
@@ -50,20 +51,21 @@ func main() {
 	if err := service1.Run(); err != nil {
 		panic(err)
 	}
+	if err := service1.GetNetworkNode().Run(); err != nil {
+		panic(err)
+	}
+	time.Sleep(time.Second)
 
 	if err := service2.Run(); err != nil {
 		panic(err)
 	}
 
-	go service1.GetNetworkNode().Listen(serviceAddress)
-	time.Sleep(time.Second)
-
-	if _, err := service2.Network().Connect(serviceAddress); err != nil {
+	if err := service2.GetNetworkNode().AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}
 
-	err := service2.Broadcast(
-		service1.Queue().Client().PubKey(),
+	err := service2.BroadcastPayload(
+		service1.GetMessageQueue().GetClient().GetPubKey(),
 		anonymity.NewPayload(
 			serviceHeader,
 			[]byte("0"),
@@ -90,7 +92,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
-		err = node.Broadcast(
+		err = node.BroadcastPayload(
 			pubKey,
 			anonymity.NewPayload(
 				serviceHeader,
@@ -104,7 +106,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 	}
 }
 
-func newNode(dbPath string) anonymity.INode {
+func newNode(serviceAddress, dbPath string) anonymity.INode {
 	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{FPath: dbPath}),
 	)
@@ -114,16 +116,17 @@ func newNode(dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
-		db,
+		anonymity.NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FConnSettings: conn.NewSettings(&conn.SSettings{}),
+				FAddress:      serviceAddress,
 			}),
 		),
-		queue.NewQueue(
+		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{}),
 			client.NewClient(
-				client.NewSettings(&client.SSettings{}),
+				message.NewSettings(&message.SSettings{}),
 				asymmetric.NewRSAPrivKey(1024),
 			),
 		),
