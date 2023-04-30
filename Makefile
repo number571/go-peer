@@ -5,14 +5,12 @@ PPROF_PATH=./test/pprof
 PPROF_NAME=_
 PPROF_PORT=_
 
-CHECK_RETURN_CODE=if [ $$? != 0 ]; then exit; fi
-
 .PHONY: default clean \
-	test-prerun test-run test-coverage test-benchmark \
+	test-run test-coverage test-benchmark \
 	pprof-run \
 	git-status git-push 
 
-default: clean test-prerun test-run
+default: clean test-run
 
 clean:
 	make -C ./cmd/hidden_lake clean 
@@ -21,24 +19,22 @@ clean:
 
 ### TEST
 # example run: make test-run N=10
-
-test-prerun:
-	go vet ./...;
-	$(CHECK_RETURN_CODE);
-
-	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
-	$(CHECK_RETURN_CODE);
-
 test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
 		go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out; \
-		$(CHECK_RETURN_CODE); \
+		if [ $$? != 0 ]; then exit; fi; \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
-test-coverage: test-prerun
+test-coverage:
+	go vet ./...;
+	if [ $$? != 0 ]; then exit; fi;
+
+	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
+	if [ $$? != 0 ]; then exit; fi;
+
 	go tool cover -html=$(TEST_PATH)/coverage.out
 
 test-benchmark:

@@ -136,7 +136,11 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 		return queue
 	}
 
-	return p.fQueue
+	p.fMutex.Lock()
+	queue := p.fQueue
+	p.fMutex.Unlock()
+
+	return queue
 }
 
 func (p *sMessageQueue) newPseudoMessage() message.IMessage {
