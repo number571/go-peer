@@ -45,29 +45,28 @@ func (p *sMobileState) ToString() string {
 	return "Stop " + p.fServiceName
 }
 
-func (p *sMobileState) SwitchOnSuccess(pDo func(bool) error) {
-	newState := !p.fIsRun
-	if err := p.doDefault(newState); err != nil {
+func (p *sMobileState) SwitchOnSuccess(pDo func() error) {
+	if err := p.doDefault(); err != nil {
 		p.sendNotification(err)
 		return
 	}
-	if err := pDo(newState); err != nil {
+	if err := pDo(); err != nil {
 		p.sendNotification(err)
 		return
 	}
-	p.fIsRun = newState
+	p.fIsRun = !p.fIsRun
 }
 
 func (p *sMobileState) sendNotification(pErr error) {
 	if p.fIsRun {
-		p.fApp.SendNotification(fyne.NewNotification("stopApp error", pErr.Error()))
+		p.fApp.SendNotification(fyne.NewNotification("runApp error", pErr.Error()))
 		return
 	}
-	p.fApp.SendNotification(fyne.NewNotification("runApp error", pErr.Error()))
+	p.fApp.SendNotification(fyne.NewNotification("stopApp error", pErr.Error()))
 }
 
-func (p *sMobileState) doDefault(pIsRun bool) error {
-	switch pIsRun {
+func (p *sMobileState) doDefault() error {
+	switch !p.fIsRun {
 	case true:
 		if p.fConstructApp != nil {
 			if err := p.fConstructApp(); err != nil {

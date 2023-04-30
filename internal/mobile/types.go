@@ -3,7 +3,7 @@ package mobile
 type IMobileState interface {
 	IsRun() bool
 	ToString() string
-	SwitchOnSuccess(func(bool) error)
+	SwitchOnSuccess(func() error)
 
 	WithConstructApp(func() error) IMobileState
 	WithDestructApp(func() error) IMobileState

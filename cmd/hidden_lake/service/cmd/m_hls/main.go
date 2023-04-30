@@ -76,8 +76,8 @@ func buttonActions(pApp fyne.App) *widget.Button {
 		state.ToString(),
 		func() {
 			button.SetText("Processing...")
-			state.SwitchOnSuccess(func(pIsRun bool) error {
-				if pIsRun {
+			state.SwitchOnSuccess(func() error {
+				if !state.IsRun() {
 					return mobile.OpenURL(pApp, fmt.Sprintf("http://%s/api/index", hlsURL))
 				}
 				return nil

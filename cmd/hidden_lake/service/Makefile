@@ -3,8 +3,9 @@ GC=go build
 BINPATH=../../../bin
 MOBILEPATH=./cmd/m_hls
 
-.PHONY: default build run test clean \
+.PHONY: default build run test all-clean clean \
 	mobile-default mobile-build mobile-install mobile-clean
+all-clean: clean mobile-clean 
 
 default: build run
 build:
@@ -26,4 +27,4 @@ mobile-install:
 	cd ./cmd/m_hls && fyne install -os android -appID hidden_lake.service -icon icon.png
 mobile-clean:
 	rm -f ./cmd/m_hls/m_hls.apk $(BINPATH)/m_hls.apk
-	rm -f $(MOBILEPATH)/hls.db $(MOBILEPATH)/hls.cfg
+	rm -rf $(MOBILEPATH)/hidden_lake
