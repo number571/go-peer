@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Update system
+      run: sudo apt-get upgrade && apt-get update
     - name: Install dependencies
       run: sudo apt-get install policy libxcursor-dev
     - name: Run test
