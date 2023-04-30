@@ -41,7 +41,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	app := NewApp(cfg)
+	app := NewApp(cfg, ".")
 	if err := app.Run(); err != nil {
 		t.Error(err)
 		return

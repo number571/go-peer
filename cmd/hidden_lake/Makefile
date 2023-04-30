@@ -6,7 +6,7 @@ build:
 	make -C ./traffic build
 	make -C ./adapters build
 clean:
-	make -C ./service clean
-	make -C ./messenger clean
+	make -C ./service clean mobile-clean
+	make -C ./messenger clean mobile-clean
 	make -C ./traffic clean
 	make -C ./adapters clean

@@ -29,6 +29,7 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
+	fPathTo      string
 	fConfig      config.IConfig
 	fWrapperDB   database.IWrapperDB
 	fLogger      logger.ILogger
@@ -38,6 +39,7 @@ type sApp struct {
 
 func NewApp(
 	pCfg config.IConfig,
+	pPathTo string,
 ) types.ICommand {
 	wDB := database.NewWrapperDB()
 	logger := internal_logger.StdLogger(pCfg.GetLogging())
@@ -47,6 +49,7 @@ func NewApp(
 		fWrapperDB:   wDB,
 		fLogger:      logger,
 		fConnKeeper:  connKeeper,
+		fPathTo:      pPathTo,
 		fServiceHTTP: initServiceHTTP(pCfg, connKeeper, wDB),
 	}
 }
@@ -60,7 +63,7 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	p.fWrapperDB.Set(initDatabase())
+	p.fWrapperDB.Set(initDatabase(p.fPathTo))
 	res := make(chan error)
 
 	go func() {
