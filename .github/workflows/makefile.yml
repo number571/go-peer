@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Update system
-      run: sudo apt-get upgrade && sudo apt-get update
     - name: Install dependencies
       run: sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
     - name: Run test
