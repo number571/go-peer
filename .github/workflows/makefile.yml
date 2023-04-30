@@ -8,11 +8,8 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
-    
     - name: Run check
-      run: make test
+      run: make clean test-run
