@@ -12,6 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt-cache policy libx11-dev
+      run: sudo apt-cache policy libxcursor-dev
     - name: Run check
       run: make clean test-run
