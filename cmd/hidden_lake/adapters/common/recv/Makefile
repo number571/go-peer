@@ -8,4 +8,4 @@ run:
 	./$(BINPATH)/common_recv
 clean:
 	rm -f $(BINPATH)/common_recv
-	rm -rf $(BINPATH)/common_recv.db
+	rm -rf common_recv.db

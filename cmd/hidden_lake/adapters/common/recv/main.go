@@ -21,13 +21,9 @@ const (
 	dataCountKey = "count_recv"
 )
 
-var (
-	db database.IKeyValueDB
-)
-
-func init() {
+func initDB() database.IKeyValueDB {
 	var err error
-	db, err = database.NewSQLiteDB(
+	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
 			FPath: databasePath,
 		}),
@@ -36,14 +32,16 @@ func init() {
 		panic(err)
 	}
 	if _, err := db.Get([]byte(dataCountKey)); err == nil {
-		return
+		return db
 	}
 	if err := db.Set([]byte(dataCountKey), []byte(fmt.Sprintf("%d", 0))); err != nil {
 		panic(err)
 	}
+	return db
 }
 
 func main() {
+	db := initDB()
 	defer db.Close()
 
 	if len(os.Args) != 3 {
@@ -60,10 +58,10 @@ func main() {
 		panic(err)
 	}
 
-	transferTraffic(portService, portHLT)
+	transferTraffic(db, portService, portHLT)
 }
 
-func transferTraffic(portService, portHLT int) {
+func transferTraffic(db database.IKeyValueDB, portService, portHLT int) {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -85,14 +83,14 @@ func transferTraffic(portService, portHLT int) {
 			continue
 		}
 
-		countDB, err := loadCountFromDB()
+		countDB, err := loadCountFromDB(db)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
 		for i := countDB; i < countService; i++ {
-			incrementCountInDB()
+			incrementCountInDB(db)
 
 			msg, err := loadMessageFromService(portService, i)
 			if err != nil {
@@ -189,7 +187,7 @@ func loadCountFromService(portService int) (uint64, error) {
 	return countService, nil
 }
 
-func loadCountFromDB() (uint64, error) {
+func loadCountFromDB(db database.IKeyValueDB) (uint64, error) {
 	res, err := db.Get([]byte(dataCountKey))
 	if err != nil {
 		return 0, err
@@ -203,8 +201,8 @@ func loadCountFromDB() (uint64, error) {
 	return count, nil
 }
 
-func incrementCountInDB() error {
-	count, err := loadCountFromDB()
+func incrementCountInDB(db database.IKeyValueDB) error {
+	count, err := loadCountFromDB(db)
 	if err != nil {
 		return err
 	}

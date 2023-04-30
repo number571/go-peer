@@ -1,9 +1,10 @@
 GC=go build
+BINPATH=../../../../../bin
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o ../../../../../bin/common_send .
+	$(GC) -o $(BINPATH)/common_send .
 run:
-	./../../../../../bin/common_send
+	$(BINPATH)/common_send
 clean:
-	rm -f ../../../../../bin/common_send
+	rm -f $(BINPATH)/common_send

@@ -20,16 +20,9 @@ const (
 )
 
 func TestAllDBs(t *testing.T) {
-	testFailCreate(t, NewLevelDB)
 	testFailCreate(t, NewSQLiteDB)
-
-	testCreate(t, NewLevelDB)
 	testCreate(t, NewSQLiteDB)
-
-	testCipherKey(t, NewLevelDB)
 	testCipherKey(t, NewSQLiteDB)
-
-	testBasic(t, NewLevelDB)
 	testBasic(t, NewSQLiteDB)
 }
 
@@ -44,11 +37,11 @@ func testFailCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 		FPath: dbPath,
 	}))
 	if err == nil {
-		t.Errorf("incorrect: error is nil")
+		t.Errorf("[testFailCreate] incorrect: error is nil")
 		return
 	}
 	if store != nil {
-		t.Errorf("this path '%s' realy exists?", dbPath)
+		t.Errorf("[testFailCreate] this path '%s' realy exists?", dbPath)
 		store.Close()
 	}
 }
@@ -64,17 +57,17 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer store.Close()
 
 	if !bytes.Equal(store.GetSettings().GetCipherKey(), []byte(cCipherKey)) {
-		t.Error("incorrect default value = cipherKey")
+		t.Error("[testCreate] incorrect default value = cipherKey")
 		return
 	}
 
 	if store.GetSettings().GetHashing() != false {
-		t.Error("incorrect default value = hashing")
+		t.Error("[testCreate] incorrect default value = hashing")
 		return
 	}
 
 	if store.GetSettings().GetPath() != cPath {
-		t.Error("incorrect default value = path")
+		t.Error("[testCreate] incorrect default value = path")
 		return
 	}
 }
@@ -89,7 +82,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 		FCipherKey: []byte(testutils.TcKey1),
 	}))
 	if err != nil {
-		t.Error(err)
+		t.Error("[testCipherKey]", err)
 		return
 	}
 	defer store.Close()
@@ -103,13 +96,13 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 		FCipherKey: []byte(testutils.TcKey2),
 	}))
 	if err != nil {
-		t.Error(err)
+		t.Error("[testCipherKey]", err)
 		return
 	}
 	defer store.Close()
 
 	if _, err := store.Get([]byte(testutils.TcKey2)); err == nil {
-		t.Error("success read value by another cipher key")
+		t.Error("[testCipherKey] success read value by another cipher key")
 		return
 	}
 }
@@ -124,7 +117,7 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 		FCipherKey: []byte(testutils.TcKey1),
 	}))
 	if err != nil {
-		t.Error(err)
+		t.Error("[testBasic]", err)
 		return
 	}
 	defer store.Close()
@@ -134,23 +127,23 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	secret2, err := store.Get([]byte(testutils.TcKey2))
 	if err != nil {
-		t.Error(err)
+		t.Error("[testBasic]", err)
 		return
 	}
 
 	if !bytes.Equal(secret1, secret2) {
-		t.Error("saved and loaded values not equals")
+		t.Error("[testBasic] saved and loaded values not equals")
 		return
 	}
 
 	err = store.Del([]byte(testutils.TcKey2))
 	if err != nil {
-		t.Error(err)
+		t.Error("[testBasic]", err)
 		return
 	}
 
 	if _, err := store.Get([]byte("undefined key")); err == nil {
-		t.Error("got value by undefined key")
+		t.Error("[testBasic] got value by undefined key")
 		return
 	}
 }

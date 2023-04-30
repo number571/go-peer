@@ -34,7 +34,6 @@ type sSQLiteDB struct {
 	fCipher   symmetric.ICipher
 }
 
-// TODO: return error
 func NewSQLiteDB(pSett ISettings) (IKeyValueDB, error) {
 	db, err := sql.Open("sqlite3", pSett.GetPath())
 	if err != nil {

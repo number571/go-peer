@@ -32,7 +32,6 @@ func deleteDBs() {
 	os.RemoveAll(dbPath2)
 }
 
-// TODO!!!
 func main() {
 	deleteDBs()
 	defer deleteDBs()
