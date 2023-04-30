@@ -14,14 +14,18 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func initApp(path string) (types.ICommand, types.ICommand, error) {
+const (
+	hlmURL = "localhost:9591"
+)
+
+func initApp(pPathTo string) (types.ICommand, types.ICommand, error) {
 	privKey := asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
 	if privKey == nil {
 		return nil, nil, fmt.Errorf("private key is invalid")
 	}
 
 	cfgHLS, err := hls_config.InitConfig(
-		fmt.Sprintf("%s/%s", path, hls_settings.CPathCFG),
+		fmt.Sprintf("%s/%s", pPathTo, hls_settings.CPathCFG),
 		&hls_config.SConfig{
 			FNetwork: "mobile_" + hls_settings.CServiceName,
 			FAddress: &hls_config.SAddress{
@@ -38,11 +42,11 @@ func initApp(path string) (types.ICommand, types.ICommand, error) {
 	}
 
 	cfgHLM, err := config.InitConfig(
-		fmt.Sprintf("%s/%s", path, settings.CPathCFG),
+		fmt.Sprintf("%s/%s", pPathTo, settings.CPathCFG),
 		&config.SConfig{
 			FStorageKey: "mobile_" + settings.CServiceName,
 			FAddress: &config.SAddress{
-				FInterface: "localhost:9591",
+				FInterface: hlmURL,
 				FIncoming:  "localhost:9592",
 			},
 			FConnection: &config.SConnection{
@@ -54,5 +58,5 @@ func initApp(path string) (types.ICommand, types.ICommand, error) {
 		return nil, nil, err
 	}
 
-	return hls_app.NewApp(cfgHLS, privKey, path), app.NewApp(cfgHLM, path), nil
+	return hls_app.NewApp(cfgHLS, privKey, pPathTo), app.NewApp(cfgHLM, pPathTo), nil
 }

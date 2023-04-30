@@ -21,13 +21,23 @@ var (
 	tgDB IKeyValueDB
 )
 
-func testHmsDefaultInit(dbPath string) {
+func testHmsDefaultInit(dbPath string) error {
 	os.RemoveAll(dbPath)
-	tgDB = NewKeyValueDB(NewSettings(&SSettings{FPath: dbPath}))
+	var err error
+	tgDB, err = NewKeyValueDB(NewSettings(&SSettings{FPath: dbPath}))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func TestDB(t *testing.T) {
-	testHmsDefaultInit(tcPathDB)
+	err := testHmsDefaultInit(tcPathDB)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	defer func() {
 		tgDB.Close()
 		os.RemoveAll(tcPathDB)

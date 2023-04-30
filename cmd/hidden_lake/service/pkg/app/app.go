@@ -13,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
-	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
@@ -34,7 +33,7 @@ type sApp struct {
 	fMutex sync.Mutex
 
 	fPathTo      string
-	fConfig      config.IConfig
+	fWrapper     config.IWrapper
 	fNode        anonymity.INode
 	fLogger      logger.ILogger
 	fConnKeeper  conn_keeper.IConnKeeper
@@ -49,12 +48,11 @@ func NewApp(
 	logger := internal_logger.StdLogger(pCfg.GetLogging())
 	node := initNode(pCfg, pPrivKey, logger)
 	return &sApp{
-		fConfig:      pCfg,
-		fNode:        node,
-		fLogger:      logger,
-		fPathTo:      pPathTo,
-		fConnKeeper:  initConnKeeper(pCfg, node),
-		fServiceHTTP: initServiceHTTP(config.NewWrapper(pCfg), node),
+		fPathTo:     pPathTo,
+		fWrapper:    config.NewWrapper(pCfg),
+		fNode:       node,
+		fLogger:     logger,
+		fConnKeeper: initConnKeeper(pCfg, node),
 	}
 }
 
@@ -67,21 +65,15 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	db, err := database.NewSQLiteDB(
-		database.NewSettings(&database.SSettings{
-			FPath:    fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
-			FHashing: true,
-		}),
-	)
-	if err != nil {
+	p.initServiceHTTP()
+	if err := p.initDatabase(); err != nil {
 		return err
 	}
 
 	res := make(chan error)
-	p.fNode.GetWrapperDB().Set(db)
 
 	go func() {
-		if p.fConfig.GetAddress().GetHTTP() == "" {
+		if p.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
 			return
 		}
 
@@ -102,7 +94,7 @@ func (p *sApp) Run() error {
 	go func() {
 		p.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
-			handler.HandleServiceTCP(p.fConfig),
+			handler.HandleServiceTCP(p.fWrapper.GetConfig()),
 		)
 		if err := p.fNode.Run(); err != nil {
 			res <- err
@@ -111,7 +103,7 @@ func (p *sApp) Run() error {
 
 		// if node in client mode
 		// then run endless loop
-		tcpAddress := p.fConfig.GetAddress().GetTCP()
+		tcpAddress := p.fWrapper.GetConfig().GetAddress().GetTCP()
 		if tcpAddress == "" {
 			select {}
 		}

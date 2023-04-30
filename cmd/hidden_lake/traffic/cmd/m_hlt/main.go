@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +15,10 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
+var (
+	gAppHLT types.ICommand
+)
+
 func main() {
 	a := app.New()
 	w := a.NewWindow("app")
@@ -24,52 +29,60 @@ func main() {
 			buttonActions(a),
 		),
 	))
+
+	w.SetOnClosed(func() { destructApp() })
 	w.ShowAndRun()
+}
+
+func constructApp() error {
+	if gAppHLT == nil {
+		var err error
+		gAppHLT, err = initApp(mobile.CAndroidFullPath)
+		if err != nil {
+			return err
+		}
+	}
+	if err := gAppHLT.Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func destructApp() error {
+	if gAppHLT != nil {
+		if err := gAppHLT.Stop(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func buttonActions(a fyne.App) *widget.Button {
 	var (
 		button *widget.Button
-		appHLS types.ICommand
 	)
 
 	if !filesystem.OpenFile(mobile.CAndroidFullPath).IsExist() {
-		if err := os.Mkdir(mobile.CAndroidFullPath, 0644); err != nil {
+		if err := os.Mkdir(mobile.CAndroidFullPath, 0744); err != nil {
 			panic(err)
 		}
 	}
 
-	state := mobile.CStateStop
+	state := mobile.NewState(a, settings.CServiceName).
+		WithConstructApp(constructApp).
+		WithDestructApp(destructApp)
+
 	button = widget.NewButton(
-		mobile.ButtonTextFromState(state, settings.CServiceName),
+		state.ToString(),
 		func() {
-			state = mobile.SwitchState(state)
 			button.SetText("Processing...")
-
-			switch state {
-			case mobile.CStateRun:
-				var err error
-
-				appHLS, err = initApp(mobile.CAndroidFullPath)
-				if err != nil {
-					button.SetText(err.Error())
-					return
+			state.SwitchOnSuccess(func(pIsRun bool) error {
+				if pIsRun {
+					return mobile.OpenURL(a, fmt.Sprintf("http://%s/api/index", hltURL))
 				}
-				if err := appHLS.Run(); err != nil {
-					button.SetText(err.Error())
-					return
-				}
-			case mobile.CStateStop:
-				if appHLS == nil {
-					break
-				}
-				if err := appHLS.Stop(); err != nil {
-					button.SetText(err.Error())
-					return
-				}
-			}
-
-			button.SetText(mobile.ButtonTextFromState(state, settings.CServiceName))
+				return nil
+			})
+			button.SetText(state.ToString())
 		},
 	)
 

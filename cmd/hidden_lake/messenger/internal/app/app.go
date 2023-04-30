@@ -33,6 +33,7 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
+	fConfig         config.IConfig
 	fState          state.IState
 	fLogger         logger.ILogger
 	fIntServiceHTTP *http.Server
@@ -73,10 +74,9 @@ func NewApp(
 	)
 
 	return &sApp{
-		fState:          state,
-		fLogger:         internal_logger.StdLogger(pCfg.GetLogging()),
-		fIntServiceHTTP: initInterfaceServiceHTTP(pCfg, state),
-		fIncServiceHTTP: initIncomingServiceHTTP(pCfg, state),
+		fConfig: pCfg,
+		fState:  state,
+		fLogger: internal_logger.StdLogger(pCfg.GetLogging()),
 	}
 }
 
@@ -88,6 +88,9 @@ func (p *sApp) Run() error {
 		return errors.New("application already running")
 	}
 	p.fIsRun = true
+
+	p.initIncomingServiceHTTP()
+	p.initInterfaceServiceHTTP()
 
 	res := make(chan error)
 

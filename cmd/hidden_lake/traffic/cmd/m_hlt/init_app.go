@@ -10,17 +10,21 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
+const (
+	hltURL = "localhost:9581"
+)
+
 // initApp work with the raw data = read files, read args
-func initApp(path string) (types.ICommand, error) {
+func initApp(pPathTo string) (types.ICommand, error) {
 	cfg, err := pkg_config.InitConfig(
-		fmt.Sprintf("%s/%s", path, pkg_settings.CPathCFG),
+		fmt.Sprintf("%s/%s", pPathTo, pkg_settings.CPathCFG),
 		&pkg_config.SConfig{
-			FAddress:    "localhost:9581",
+			FAddress:    hltURL,
 			FConnection: "localhost:9571",
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
-	return app.NewApp(cfg, path), nil
+	return app.NewApp(cfg, pPathTo), nil
 }

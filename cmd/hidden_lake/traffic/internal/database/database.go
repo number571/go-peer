@@ -18,24 +18,24 @@ type sKeyValueDB struct {
 	fDB       gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(pSett ISettings) IKeyValueDB {
+func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
 	sqlDB, err := gp_database.NewSQLiteDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath: pSett.GetPath(),
 		}),
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if sqlDB == nil {
-		panic("storage (hashes) is nil")
+		return nil, fmt.Errorf("storage (hashes) is nil")
 	}
 	db := &sKeyValueDB{
 		fSettings: pSett,
 		fDB:       sqlDB,
 	}
 	db.fPointer = db.getPointer()
-	return db
+	return db, err
 }
 
 func (p *sKeyValueDB) Settings() ISettings {

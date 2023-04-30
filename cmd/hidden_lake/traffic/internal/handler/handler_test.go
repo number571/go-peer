@@ -26,14 +26,18 @@ const (
 )
 
 func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IWrapperDB, hlt_client.IClient) {
-	wDB := database.NewWrapperDB().Set(database.NewKeyValueDB(
+	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:        fmt.Sprintf(databaseTemplate, addr),
 			FMessageSize: anon_testutils.TCMessageSize,
 			FWorkSize:    anon_testutils.TCWorkSize,
 		}),
-	))
+	)
+	if err != nil {
+		return nil, nil, nil, nil
+	}
 
+	wDB := database.NewWrapperDB().Set(db)
 	srv, connKeeper := testRunService(wDB, addr, addrNode)
 
 	hltClient := hlt_client.NewClient(

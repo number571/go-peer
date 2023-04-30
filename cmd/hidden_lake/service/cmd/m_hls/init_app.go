@@ -11,20 +11,24 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
+const (
+	hlsURL = "localhost:9572"
+)
+
 // initApp work with the raw data = read files, read args
-func initApp(path string) (types.ICommand, error) {
+func initApp(pPathTo string) (types.ICommand, error) {
 	privKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
 	if privKey == nil {
 		return nil, fmt.Errorf("private key is invalid")
 	}
 
 	cfg, err := pkg_config.InitConfig(
-		fmt.Sprintf("%s/%s", path, pkg_settings.CPathCFG),
+		fmt.Sprintf("%s/%s", pPathTo, pkg_settings.CPathCFG),
 		&pkg_config.SConfig{
 			FNetwork: "mobile_" + pkg_settings.CServiceName,
 			FAddress: &pkg_config.SAddress{
 				FTCP:  "localhost:9571",
-				FHTTP: "localhost:9572",
+				FHTTP: hlsURL,
 			},
 		},
 	)
@@ -32,5 +36,5 @@ func initApp(path string) (types.ICommand, error) {
 		return nil, err
 	}
 
-	return app.NewApp(cfg, privKey, path), nil
+	return app.NewApp(cfg, privKey, pPathTo), nil
 }

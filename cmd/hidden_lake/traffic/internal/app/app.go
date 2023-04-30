@@ -45,12 +45,11 @@ func NewApp(
 	logger := internal_logger.StdLogger(pCfg.GetLogging())
 	connKeeper := initConnKeeper(pCfg, wDB, logger)
 	return &sApp{
-		fConfig:      pCfg,
-		fWrapperDB:   wDB,
-		fLogger:      logger,
-		fConnKeeper:  connKeeper,
-		fPathTo:      pPathTo,
-		fServiceHTTP: initServiceHTTP(pCfg, connKeeper, wDB),
+		fConfig:     pCfg,
+		fWrapperDB:  wDB,
+		fLogger:     logger,
+		fConnKeeper: connKeeper,
+		fPathTo:     pPathTo,
 	}
 }
 
@@ -63,7 +62,11 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	p.fWrapperDB.Set(initDatabase(p.fPathTo))
+	p.initServiceHTTP()
+	if err := p.initDatabase(); err != nil {
+		return err
+	}
+
 	res := make(chan error)
 
 	go func() {

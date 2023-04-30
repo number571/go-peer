@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"fyne.io/fyne/v2"
@@ -14,9 +15,15 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
+var (
+	gAppHLS types.ICommand
+	gAppHLM types.ICommand
+)
+
 func main() {
 	a := app.New()
 	w := a.NewWindow("app")
+
 	w.SetContent(container.New(
 		layout.NewCenterLayout(),
 		container.NewVBox(
@@ -24,63 +31,68 @@ func main() {
 			buttonActions(a),
 		),
 	))
+
+	w.SetOnClosed(func() { destructApp() })
 	w.ShowAndRun()
+}
+
+func constructApp() error {
+	if gAppHLS == nil || gAppHLM == nil {
+		var err error
+		gAppHLS, gAppHLM, err = initApp(mobile.CAndroidFullPath)
+		if err != nil {
+			return err
+		}
+	}
+	if err := gAppHLS.Run(); err != nil {
+		return err
+	}
+	if err := gAppHLM.Run(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func destructApp() error {
+	if gAppHLM != nil {
+		if err := gAppHLM.Stop(); err != nil {
+			return err
+		}
+	}
+	if gAppHLS != nil {
+		if err := gAppHLS.Stop(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func buttonActions(a fyne.App) *widget.Button {
 	var (
 		button *widget.Button
-		appHLS types.ICommand
-		appHLM types.ICommand
 	)
 
 	if !filesystem.OpenFile(mobile.CAndroidFullPath).IsExist() {
-		if err := os.Mkdir(mobile.CAndroidFullPath, 0644); err != nil {
+		if err := os.Mkdir(mobile.CAndroidFullPath, 0744); err != nil {
 			panic(err)
 		}
 	}
 
-	state := mobile.CStateStop
+	state := mobile.NewState(a, settings.CServiceName).
+		WithConstructApp(constructApp).
+		WithDestructApp(destructApp)
+
 	button = widget.NewButton(
-		mobile.ButtonTextFromState(state, settings.CServiceName),
+		state.ToString(),
 		func() {
-			state = mobile.SwitchState(state)
 			button.SetText("Processing...")
-
-			switch state {
-			case mobile.CStateRun:
-				var err error
-
-				appHLS, appHLM, err = initApp(mobile.CAndroidFullPath)
-				if err != nil {
-					button.SetText(err.Error())
-					return
+			state.SwitchOnSuccess(func(pIsRun bool) error {
+				if pIsRun {
+					return mobile.OpenURL(a, fmt.Sprintf("http://%s/about", hlmURL))
 				}
-
-				if err := appHLS.Run(); err != nil {
-					button.SetText(err.Error())
-					return
-				}
-				if err := appHLM.Run(); err != nil {
-					button.SetText(err.Error())
-					return
-				}
-			case mobile.CStateStop:
-				if appHLS != nil {
-					if err := appHLS.Stop(); err != nil {
-						button.SetText(err.Error())
-						return
-					}
-				}
-				if appHLM != nil {
-					if err := appHLM.Stop(); err != nil {
-						button.SetText(err.Error())
-						return
-					}
-				}
-			}
-
-			button.SetText(mobile.ButtonTextFromState(state, settings.CServiceName))
+				return nil
+			})
+			button.SetText(state.ToString())
 		},
 	)
 

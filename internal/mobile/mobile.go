@@ -1,25 +1,85 @@
 package mobile
 
-const (
-	CStateStop = 0
-	CStateRun  = 1
+import (
+	"fyne.io/fyne/v2"
 )
 
-const (
-	CAndroidRootPath = "/sdcard/Documents"
-	CAndroidFullPath = CAndroidRootPath + "/hidden_lake"
+var (
+	_ IMobileState = &sMobileState{}
 )
 
-func SwitchState(state int) int {
-	if state == CStateStop {
-		return CStateRun
-	}
-	return CStateStop
+type sMobileState struct {
+	fApp          fyne.App
+	fIsRun        bool
+	fServiceName  string
+	fConstructApp func() error
+	fDestructApp  func() error
 }
 
-func ButtonTextFromState(pState int, pServiceName string) string {
-	if pState == CStateStop {
-		return "Run " + pServiceName
+func NewState(pApp fyne.App, pServiceName string) IMobileState {
+	return &sMobileState{
+		fApp:         pApp,
+		fIsRun:       false,
+		fServiceName: pServiceName,
 	}
-	return "Stop " + pServiceName
+}
+
+func (p *sMobileState) WithConstructApp(pConstructApp func() error) IMobileState {
+	p.fConstructApp = pConstructApp
+	return p
+}
+
+func (p *sMobileState) WithDestructApp(pDestructApp func() error) IMobileState {
+	p.fDestructApp = pDestructApp
+	return p
+}
+
+func (p *sMobileState) IsRun() bool {
+	return p.fIsRun
+}
+
+func (p *sMobileState) ToString() string {
+	if !p.fIsRun {
+		return "Start " + p.fServiceName
+	}
+	return "Stop " + p.fServiceName
+}
+
+func (p *sMobileState) SwitchOnSuccess(pDo func(bool) error) {
+	newState := !p.fIsRun
+	if err := p.doDefault(newState); err != nil {
+		p.sendNotification(err)
+		return
+	}
+	if err := pDo(newState); err != nil {
+		p.sendNotification(err)
+		return
+	}
+	p.fIsRun = newState
+}
+
+func (p *sMobileState) sendNotification(pErr error) {
+	if p.fIsRun {
+		p.fApp.SendNotification(fyne.NewNotification("stopApp error", pErr.Error()))
+		return
+	}
+	p.fApp.SendNotification(fyne.NewNotification("runApp error", pErr.Error()))
+}
+
+func (p *sMobileState) doDefault(pIsRun bool) error {
+	switch pIsRun {
+	case true:
+		if p.fConstructApp != nil {
+			if err := p.fConstructApp(); err != nil {
+				return err
+			}
+		}
+	case false:
+		if p.fDestructApp != nil {
+			if err := p.fDestructApp(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
