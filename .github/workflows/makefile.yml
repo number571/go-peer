@@ -14,6 +14,6 @@ jobs:
     - name: Update system
       run: sudo apt-get upgrade && sudo apt-get update
     - name: Install dependencies
-      run: sudo apt-get install libxcursor-dev
+      run: sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
     - name: Run test
       run: make clean test-run
