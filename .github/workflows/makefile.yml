@@ -14,4 +14,4 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
     - name: Run test
-      run: make clean test-run
+      run: make

@@ -1,6 +1,7 @@
 N=1
 TEST_PATH=./test/result
 PPROF_PATH=./test/pprof
+CHECK_ERROR=if [ $$? != 0 ]; then exit; fi
 
 PPROF_NAME=_
 PPROF_PORT=_
@@ -23,18 +24,21 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out; \
-		if [ $$? != 0 ]; then exit; fi; \
+		go test -race -cover -count=1 `go list ./...`; \
+		$(CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage:
 	go vet ./...;
-	if [ $$? != 0 ]; then exit; fi;
+	$(CHECK_ERROR);
 
 	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
-	if [ $$? != 0 ]; then exit; fi;
+	$(CHECK_ERROR);
 
+	go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out;
+	$(CHECK_ERROR);
+	
 	go tool cover -html=$(TEST_PATH)/coverage.out
 
 test-benchmark:
