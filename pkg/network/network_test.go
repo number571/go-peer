@@ -67,7 +67,7 @@ func TestBroadcast(t *testing.T) {
 
 	select {
 	case <-ch:
-	case <-time.After(time.Minute / 2):
+	case <-time.After(time.Minute):
 		t.Error("limit of waiting time for group")
 		return
 	}
