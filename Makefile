@@ -1,7 +1,7 @@
 N=1
 TEST_PATH=./test/result
 PPROF_PATH=./test/pprof
-CHECK_ERROR=if [ $$? != 0 ]; then exit; fi
+CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
 
 PPROF_NAME=_
 PPROF_PORT=_
