@@ -40,6 +40,7 @@ test-coverage:
 	$(CHECK_ERROR);
 	
 	go tool cover -html=$(TEST_PATH)/coverage.out
+	$(CHECK_ERROR);
 
 test-benchmark:
 	# TODO 

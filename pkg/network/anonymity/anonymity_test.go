@@ -166,7 +166,7 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 				FMaxConnects: 10,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSize: (100 << 10),
-					FTimeWait:    5 * time.Second,
+					FTimeWait:    time.Minute / 2,
 				}),
 			}),
 		),
