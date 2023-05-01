@@ -34,7 +34,6 @@ func TestComplex(t *testing.T) {
 
 	nodes := testNewNodes(t, tcWait, 0)
 	if nodes[0] == nil {
-		t.Error("[complex] can't create node")
 		return
 	}
 	defer testFreeNodes(nodes[:], 0)
@@ -124,13 +123,15 @@ func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 	}
 
 	if err := nodes[2].GetNetworkNode().Run(); err != nil {
-		panic(err)
+		t.Error(err)
+		return [5]INode{}
 	}
 	if err := nodes[4].GetNetworkNode().Run(); err != nil {
-		panic(err)
+		t.Error(err)
+		return [5]INode{}
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(time.Second)
 
 	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
 	nodes[0].GetNetworkNode().AddConnect(testutils.TgAddrs[2])
@@ -176,7 +177,7 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 			queue.NewSettings(&queue.SSettings{
 				FCapacity:     10,
 				FPullCapacity: 5,
-				FDuration:     500 * time.Millisecond,
+				FDuration:     time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
