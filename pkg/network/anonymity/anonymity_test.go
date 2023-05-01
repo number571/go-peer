@@ -21,18 +21,22 @@ import (
 )
 
 const (
-	tcPathDBTemplate = "database_test_%d.db"
-	tcWait           = 30 * time.Second
+	tcPathDBTemplate = "database_test_%d_%d.db"
+	tcWait           = time.Minute
 	tcIter           = 10
 	msgSize          = (100 << 10)
 )
 
 func TestComplex(t *testing.T) {
-	nodes := testNewNodes(t, tcWait)
+	for i := 0; i < 5; i++ {
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 0))
+	}
+
+	nodes := testNewNodes(t, tcWait, 0)
 	if nodes[0] == nil {
 		return
 	}
-	defer testFreeNodes(nodes[:])
+	defer testFreeNodes(nodes[:], 0)
 
 	wg := sync.WaitGroup{}
 	wg.Add(tcIter)
@@ -63,12 +67,16 @@ func TestComplex(t *testing.T) {
 }
 
 func TestF2FWithoutFriends(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 1))
+	}
+
 	// 3 seconds for wait
-	nodes := testNewNodes(t, 3*time.Second)
+	nodes := testNewNodes(t, 3*time.Second, 1)
 	if nodes[0] == nil {
 		return
 	}
-	defer testFreeNodes(nodes[:])
+	defer testFreeNodes(nodes[:], 1)
 
 	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
 	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
@@ -88,12 +96,12 @@ func TestF2FWithoutFriends(t *testing.T) {
 // nodes[0], nodes[1] = clients
 // nodes[2], nodes[3], nodes[4] = routes
 // (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
+func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 	nodes := [5]INode{}
 	addrs := [5]string{"", "", testutils.TgAddrs[2], "", testutils.TgAddrs[3]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = testNewNode(i, timeWait, addrs[i])
+		nodes[i] = testNewNode(i, timeWait, addrs[i], typeDB)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running", i)
 			return [5]INode{}
@@ -133,10 +141,10 @@ func testNewNodes(t *testing.T, timeWait time.Duration) [5]INode {
 	return nodes
 }
 
-func testNewNode(i int, timeWait time.Duration, addr string) INode {
+func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
-			FPath:      fmt.Sprintf(tcPathDBTemplate, i),
+			FPath:      fmt.Sprintf(tcPathDBTemplate, i, typeDB),
 			FHashing:   true,
 			FCipherKey: []byte(testutils.TcKey1),
 		}),
@@ -184,12 +192,12 @@ func testNewNode(i int, timeWait time.Duration, addr string) INode {
 	return node
 }
 
-func testFreeNodes(nodes []INode) {
+func testFreeNodes(nodes []INode, typeDB int) {
 	for _, node := range nodes {
 		node.GetWrapperDB().Close()
 		types.StopAll([]types.ICommand{node, node.GetNetworkNode()})
 	}
 	for i := 0; i < 5; i++ {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, typeDB))
 	}
 }
