@@ -34,6 +34,7 @@ func TestComplex(t *testing.T) {
 
 	nodes := testNewNodes(t, tcWait, 0)
 	if nodes[0] == nil {
+		t.Error("[complex] can't create node")
 		return
 	}
 	defer testFreeNodes(nodes[:], 0)
@@ -74,6 +75,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// 3 seconds for wait
 	nodes := testNewNodes(t, 3*time.Second, 1)
 	if nodes[0] == nil {
+		t.Error("[f2f] can't create node")
 		return
 	}
 	defer testFreeNodes(nodes[:], 1)
