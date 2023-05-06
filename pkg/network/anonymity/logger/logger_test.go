@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -31,7 +30,6 @@ func TestLogger(t *testing.T) {
 	)
 
 	if fmtLog != tcFmtLog {
-		fmt.Println(fmtLog)
 		t.Error("result fmtLog != tcFmtLog")
 		return
 	}
