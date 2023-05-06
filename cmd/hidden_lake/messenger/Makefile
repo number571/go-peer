@@ -25,13 +25,10 @@ clean:
 mobile-default: mobile-build mobile-install
 # fyne not supported "--sourceDir cmd/m_hlm"
 mobile-build:
-	make mobile-build -C ../service
 	cd ./cmd/m_hlm && fyne package -os android -appID hidden_lake.messenger -icon icon.png
 	cp ./cmd/m_hlm/m_hlm.apk $(BINPATH)/m_hlm.apk
 mobile-install:
-	make mobile-install -C ../service
 	cd ./cmd/m_hlm && fyne install -os android -appID hidden_lake.messenger -icon icon.png
 mobile-clean:
-	make mobile-clean -C ../service
 	rm -f $(MOBILEPATH)/m_hlm.apk $(BINPATH)/m_hlm.apk
 	rm -rf $(MOBILEPATH)/hidden_lake
