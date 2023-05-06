@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	CIsRequest  IFormatType = '+'
-	CIsResponse IFormatType = '-'
+	CIsRequest  IFormatType = '>'
+	CIsResponse IFormatType = '<'
 )
 
 type (
