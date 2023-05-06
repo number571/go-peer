@@ -47,7 +47,7 @@ func TestHandleMessageAPI(t *testing.T) {
 
 	_ = hlsClient
 
-	panic(msg.ToBytes())
+	panic(string(msg.ToBytes()))
 	// if err := hlsClient.HandleMessage(msg); err != nil {
 	// 	t.Error(err)
 	// 	return
