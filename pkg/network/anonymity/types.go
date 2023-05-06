@@ -38,7 +38,7 @@ type INode interface {
 	HandleFunc(uint32, IHandlerF) INode
 	HandleMessage(message.IMessage) // in runtime
 
-	BroadcastPayload(asymmetric.IPubKey, payload.IPayload) error
+	BroadcastPayload(IFormatType, asymmetric.IPubKey, payload.IPayload) error
 	FetchPayload(asymmetric.IPubKey, payload.IPayload) ([]byte, error)
 }
 

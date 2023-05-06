@@ -40,6 +40,7 @@ func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.BroadcastPayload(
+				anonymity.CIsRequest,
 				pubKey,
 				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
 			)

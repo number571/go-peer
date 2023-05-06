@@ -64,6 +64,7 @@ func main() {
 	}
 
 	err := service2.BroadcastPayload(
+		anonymity.CIsRequest,
 		service1.GetMessageQueue().GetClient().GetPubKey(),
 		anonymity.NewPayload(
 			serviceHeader,
@@ -92,6 +93,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
 		err = node.BroadcastPayload(
+			anonymity.CIsRequest,
 			pubKey,
 			anonymity.NewPayload(
 				serviceHeader,

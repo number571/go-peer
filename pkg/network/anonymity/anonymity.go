@@ -117,12 +117,23 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 }
 
 // Send message without response waiting.
-func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+func (p *sNode) BroadcastPayload(pType IFormatType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	if len(p.GetNetworkNode().GetConnections()) == 0 {
 		return errors.New("length of connections = 0")
 	}
 
-	msg, err := p.GetMessageQueue().GetClient().EncryptPayload(pRecv, pPld)
+	var newBody []byte
+	switch pType {
+	case CIsRequest:
+		newBody = wrapRequest(pPld.GetBody())
+	case CIsResponse:
+		newBody = wrapResponse(pPld.GetBody())
+	default:
+		return fmt.Errorf("undefined format type")
+	}
+
+	newPld := payload.NewPayload(pPld.GetHead(), newBody)
+	msg, err := p.GetMessageQueue().GetClient().EncryptPayload(pRecv, newPld)
 	if err != nil {
 		return err
 	}
@@ -146,7 +157,7 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) ([
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	if err := p.BroadcastPayload(pRecv, newPld); err != nil {
+	if err := p.BroadcastPayload(CIsRequest, pRecv, newPld); err != nil {
 		return nil, err
 	}
 	return p.recv(actionKey)
@@ -249,13 +260,28 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 
 		// get header of payload
 		head := loadHead(pld.GetHead())
+		body := pld.GetBody()
 
-		// get session by payload head
-		actionKey := newActionKey(sender, head.GetAction())
-		action, ok := p.getAction(actionKey)
-		if ok {
+		switch {
+		// got response message from our side request
+		case isResponse(body):
+			// get session by payload head
+			actionKey := newActionKey(sender, head.GetAction())
+			action, ok := p.getAction(actionKey)
+			if !ok {
+				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
+				return
+			}
 			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
-			action <- pld.GetBody()
+			action <- unwrapBytes(body)
+			return
+		// got request from another side (need generate response)
+		case isRequest(body):
+			// go next
+			body = unwrapBytes(body)
+		// undefined type of message (not request/response)
+		default:
+			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMessageType, hash, proof, sender, pConn))
 			return
 		}
 
@@ -267,19 +293,19 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 		}
 
 		// response can be nil
-		resp := f(p, sender, hash, pld.GetBody())
+		resp := f(p, sender, hash, body)
 		if resp == nil {
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResp, hash, proof, sender, pConn))
+			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
 			return
 		}
 
 		// create the message and put this to the queue
-		if err := p.BroadcastPayload(sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResp, hash, proof, sender, pConn))
+		if err := p.BroadcastPayload(CIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
+			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 			return
 		}
 
-		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResp, hash, proof, sender, pConn))
+		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 	}
 }
 
@@ -322,8 +348,8 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 	if !hashIsExist {
 		// broadcast message to network
 		if err := p.networkBroadcast(pLogger, pMsg); err != nil {
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMiddleware, hash, proof, nil, pConn))
-			return false
+			p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogBaseBroadcast, hash, proof, nil, nil))
+			// need pass error (some of connections may be closed)
 		}
 	}
 
@@ -331,22 +357,13 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 }
 
 func (p *sNode) networkBroadcast(pLogger anon_logger.ILogger, pMsg message.IMessage) error {
-	hash := pMsg.GetBody().GetHash()
-	proof := pMsg.GetBody().GetProof()
-
 	// redirect message to another nodes
-	err := p.GetNetworkNode().BroadcastPayload(
+	return p.GetNetworkNode().BroadcastPayload(
 		payload.NewPayload(
 			p.GetSettings().GetNetworkMask(),
 			pMsg.ToBytes(),
 		),
 	)
-	if err != nil {
-		p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogBaseBroadcast, hash, proof, nil, nil))
-		// need continue (some of connections may be closed)
-	}
-
-	return nil
 }
 
 func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {

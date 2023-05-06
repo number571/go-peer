@@ -44,7 +44,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	return res, nil
 }
 
-func (p *sRequester) HandleMessage(pMsg *pkg_settings.SMessage) error {
+func (p *sRequester) HandleMessage(pMsg pkg_settings.SMessage) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
