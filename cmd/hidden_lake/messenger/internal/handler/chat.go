@@ -108,6 +108,7 @@ func FriendsChatPage(pState state.IState) http.HandlerFunc {
 			}
 
 			if resp.FResult != hlm_settings.CTitlePattern {
+				fmt.Println(resp.FResult, resp.FReturn)
 				fmt.Fprint(pW, "error: invalid response")
 				return
 			}

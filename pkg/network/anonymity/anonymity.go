@@ -103,6 +103,14 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 	return p.fFriends
 }
 
+func (p *sNode) HandleMessage(pMsg message.IMessage) {
+	p.handleWrapper(anon_logger.NewLogger(p.GetSettings().GetServiceName()))(
+		p.GetNetworkNode(),
+		nil,
+		pMsg.ToBytes(),
+	)
+}
+
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 	p.setRoute(pHead, pHandle)
 	return p
@@ -203,13 +211,16 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 }
 
 func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
-	return func(_ network.INode, pConn conn.IConn, pReqBytes []byte) {
+	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
+		client := p.GetMessageQueue().GetClient()
+		settings := client.GetSettings()
+
 		msg := message.LoadMessage(
 			message.NewSettings(&message.SSettings{
-				FWorkSize:    p.GetMessageQueue().GetClient().GetSettings().GetWorkSize(),
-				FMessageSize: p.GetMessageQueue().GetClient().GetSettings().GetMessageSize(),
+				FWorkSize:    settings.GetWorkSize(),
+				FMessageSize: settings.GetMessageSize(),
 			}),
-			pReqBytes,
+			pMsgBytes,
 		)
 
 		// try store hash of message
@@ -224,7 +235,7 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 		)
 
 		// try decrypt message
-		sender, pld, err := p.GetMessageQueue().GetClient().DecryptMessage(msg)
+		sender, pld, err := client.DecryptMessage(msg)
 		if err != nil {
 			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
 			return

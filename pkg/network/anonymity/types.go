@@ -3,6 +3,7 @@ package anonymity
 import (
 	"time"
 
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -35,8 +36,10 @@ type INode interface {
 	GetLogger() logger.ILogger
 
 	HandleFunc(uint32, IHandlerF) INode
-	BroadcastPayload(recv asymmetric.IPubKey, pl payload.IPayload) error
-	FetchPayload(recv asymmetric.IPubKey, pl payload.IPayload) ([]byte, error)
+	HandleMessage(message.IMessage) // in runtime
+
+	BroadcastPayload(asymmetric.IPubKey, payload.IPayload) error
+	FetchPayload(asymmetric.IPubKey, payload.IPayload) ([]byte, error)
 }
 
 type iHead interface {

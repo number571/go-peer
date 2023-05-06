@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -23,6 +24,10 @@ func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 
 func (p *sClient) GetIndex() (string, error) {
 	return p.fRequester.GetIndex()
+}
+
+func (p *sClient) HandleMessage(pMsg message.IMessage) error {
+	return p.fRequester.HandleMessage(p.fBuilder.Message(pMsg))
 }
 
 func (p *sClient) BroadcastRequest(pRecv asymmetric.IPubKey, pData request.IRequest) error {

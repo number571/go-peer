@@ -49,6 +49,7 @@ const (
 	CHandleConfigFriendsPath  = "/api/config/friends"
 	CHandleNetworkOnlinePath  = "/api/network/online"
 	CHandleNetworkRequestPath = "/api/network/request"
+	CHandleNetworkMessagePath = "/api/network/message"
 	CHandleNodeKeyPath        = "/api/node/key"
 )
 
@@ -58,6 +59,7 @@ const (
 	CHandleConfigFriendsTemplate  = "%s" + CHandleConfigFriendsPath
 	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath
 	CHandleNetworkRequestTemplate = "%s" + CHandleNetworkRequestPath
+	CHandleNetworkMessageTemplate = "%s" + CHandleNetworkMessagePath
 	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
 )
 

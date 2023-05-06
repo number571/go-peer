@@ -107,8 +107,9 @@ func (p *sState) UpdateState(pHashLP []byte) error {
 	if err := p.updateClientState(stateValue); err != nil {
 		return err
 	}
-
 	p.fHashLP = pHashLP
+
+	_ = p.updateClientTraffic(stateValue) // connect to HLT
 	return nil
 }
 

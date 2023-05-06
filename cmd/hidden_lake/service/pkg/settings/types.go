@@ -17,3 +17,7 @@ type SRequest struct {
 	FReceiver string `json:"receiver"` // public key
 	FHexData  string `json:"hex_data"` // data in hex encode
 }
+
+type SMessage struct {
+	FHexMessage string `json:"hex_message"` // message in hex encode
+}

@@ -123,7 +123,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 				"Content-Type": "application/json",
 			}).
 			WithBody([]byte(`{"message": "hello, world!"}`)).
-			Bytes(),
+			ToBytes(),
 	)
 
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey()

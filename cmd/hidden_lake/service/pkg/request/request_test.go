@@ -72,7 +72,7 @@ func TestRequest(t *testing.T) {
 func TestLoadRequest(t *testing.T) {
 	brequest := NewRequest(tcMethod, tcHost, tcPath).
 		WithHead(tgHead).
-		WithBody(tgBody).Bytes()
+		WithBody(tgBody).ToBytes()
 
 	request1, err := LoadRequest(brequest)
 	if err != nil {

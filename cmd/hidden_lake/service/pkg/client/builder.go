@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -45,6 +46,12 @@ func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_se
 func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg_settings.SRequest {
 	return &pkg_settings.SRequest{
 		FReceiver: pRecv.ToString(),
-		FHexData:  encoding.HexEncode(pReq.Bytes()),
+		FHexData:  encoding.HexEncode(pReq.ToBytes()),
+	}
+}
+
+func (p *sBuilder) Message(pMsg message.IMessage) *pkg_settings.SMessage {
+	return &pkg_settings.SMessage{
+		FHexMessage: encoding.HexEncode(pMsg.ToBytes()),
 	}
 }

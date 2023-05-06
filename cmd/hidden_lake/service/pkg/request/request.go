@@ -33,7 +33,7 @@ func LoadRequest(pData []byte) (IRequest, error) {
 	return request, err
 }
 
-func (p *sRequest) Bytes() []byte {
+func (p *sRequest) ToBytes() []byte {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
