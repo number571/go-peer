@@ -45,11 +45,8 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	_ = hlsClient
-
-	panic(string(msg.ToBytes()))
-	// if err := hlsClient.HandleMessage(msg); err != nil {
-	// 	t.Error(err)
-	// 	return
-	// }
+	if err := hlsClient.HandleMessage(msg); err != nil {
+		t.Error(err)
+		return
+	}
 }
