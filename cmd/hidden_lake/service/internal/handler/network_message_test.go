@@ -36,14 +36,18 @@ func TestHandleMessageAPI(t *testing.T) {
 		privKey,
 	)
 
-	msg, err := client.EncryptPayload(privKey.GetPubKey(), payload.NewPayload(0, []byte("test")))
+	msg, err := client.EncryptPayload(
+		privKey.GetPubKey(),
+		payload.NewPayload(0, []byte("test")),
+	)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := hlsClient.HandleMessage(msg); err != nil {
-		t.Error(err)
-		return
-	}
+	panic(msg.ToBytes())
+	// if err := hlsClient.HandleMessage(msg); err != nil {
+	// 	t.Error(err)
+	// 	return
+	// }
 }
