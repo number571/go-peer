@@ -1,49 +1,45 @@
 package handler
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleNetworkMessageAPI(pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		var vMessage pkg_settings.SMessage
+
 		if pR.Method != http.MethodPost {
 			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
 		}
 
-		// get message from HLT
-		msgBytes, err := io.ReadAll(pR.Body)
-		if err != nil {
-			api.Response(pW, pkg_settings.CErrorRead, "failed: read message bytes")
+		if err := json.NewDecoder(pR.Body).Decode(&vMessage); err != nil {
+			api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
 			return
 		}
 
-		_ = msgBytes
+		msg := message.LoadMessage(
+			pNode.GetMessageQueue().GetClient().GetSettings(),
+			encoding.HexDecode(vMessage.FHexMessage),
+		)
+		if msg == nil {
+			api.Response(pW, pkg_settings.CErrorMessage, "failed: decode hex format message")
+			return
+		}
 
-		// TEST
-		api.Response(pW, pkg_settings.CErrorNone, "success: handle message")
-		return
-
-		// msg := message.LoadMessage(
-		// 	pNode.GetMessageQueue().GetClient().GetSettings(),
-		// 	msgBytes,
-		// )
-		// if msg == nil {
-		// 	api.Response(pW, pkg_settings.CErrorMessage, "failed: decode hex format message")
-		// 	return
-		// }
-
-		// switch pR.Method {
-		// case http.MethodPost:
-		// 	pNode.HandleMessage(msg)
-		// 	api.Response(pW, pkg_settings.CErrorNone, "success: handle message")
-		// 	return
-		// }
-		// // may be decrypt functions
+		switch pR.Method {
+		case http.MethodPost:
+			pNode.HandleMessage(msg)
+			api.Response(pW, pkg_settings.CErrorNone, "success: handle message")
+			return
+		}
+		// in future: may be decrypt functions
 	}
 }

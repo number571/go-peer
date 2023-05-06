@@ -48,7 +48,7 @@ type IRequester interface {
 	AddConnection(*pkg_settings.SConnect) error
 	DelConnection(*pkg_settings.SConnect) error
 
-	HandleMessage(pkg_settings.SMessage) error
+	HandleMessage(*pkg_settings.SMessage) error
 
 	BroadcastRequest(*pkg_settings.SRequest) error
 	FetchRequest(*pkg_settings.SRequest) ([]byte, error)
@@ -58,6 +58,6 @@ type IBuilder interface {
 	SetPrivKey(asymmetric.IPrivKey) *pkg_settings.SPrivKey
 	Connect(string) *pkg_settings.SConnect
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
-	Message(message.IMessage) pkg_settings.SMessage
+	Message(message.IMessage) *pkg_settings.SMessage
 	Request(asymmetric.IPubKey, request.IRequest) *pkg_settings.SRequest
 }

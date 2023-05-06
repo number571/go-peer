@@ -14,8 +14,6 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 	switch x := pData.(type) {
 	case []byte:
 		requestBytes = x
-	case string:
-		requestBytes = []byte(x)
 	default:
 		jsonValue, err := json.Marshal(pData)
 		if err != nil {

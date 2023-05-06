@@ -1,16 +1,16 @@
 package settings
 
-// TODO: to string as SMessage
 type SPrivKey struct {
 	FPrivKey string `json:"priv_key"`
 }
 
-// TODO: to string as SMessage
 type SConnect struct {
 	FConnect string `json:"connect"`
 }
 
-type SMessage = []byte
+type SMessage struct {
+	FHexMessage string `json:"hex_message"`
+}
 
 type SFriend struct {
 	FAliasName string `json:"alias_name"`

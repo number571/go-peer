@@ -50,6 +50,8 @@ func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg
 	}
 }
 
-func (p *sBuilder) Message(pMsg message.IMessage) pkg_settings.SMessage {
-	return pkg_settings.SMessage(pMsg.ToBytes())
+func (p *sBuilder) Message(pMsg message.IMessage) *pkg_settings.SMessage {
+	return &pkg_settings.SMessage{
+		FHexMessage: encoding.HexEncode(pMsg.ToBytes()),
+	}
 }
