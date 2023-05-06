@@ -14,8 +14,14 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+const (
+	CIsRequest  IFormatType = '+'
+	CIsResponse IFormatType = '-'
+)
+
 type (
-	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) []byte
+	IFormatType byte
+	IHandlerF   func(INode, asymmetric.IPubKey, []byte, []byte) []byte
 )
 
 type ISettings interface {

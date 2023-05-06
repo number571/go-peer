@@ -2,13 +2,6 @@ package anonymity
 
 import "bytes"
 
-type IFormatType byte
-
-const (
-	CIsRequest  IFormatType = '>'
-	CIsResponse IFormatType = '<'
-)
-
 func isRequest(pBytes []byte) bool {
 	if len(pBytes) == 0 {
 		return false

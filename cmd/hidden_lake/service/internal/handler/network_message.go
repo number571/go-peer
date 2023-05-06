@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -25,7 +24,6 @@ func HandleNetworkMessageAPI(pNode anonymity.INode) http.HandlerFunc {
 			return
 		}
 
-		fmt.Println(string(msgBytes))
 		msg := message.LoadMessage(
 			pNode.GetMessageQueue().GetClient().GetSettings(),
 			msgBytes,
