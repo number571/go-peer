@@ -13,9 +13,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Install dependencies
       run: sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
-    - name: disable and stop mono-xsp4.service
-      run: |
-        sudo systemctl stop mono-xsp4.service 
-        sudo systemctl disable mono-xsp4.service
     - name: Run test
       run: make

@@ -56,7 +56,7 @@ var (
 		"localhost:8081",
 		"localhost:8082",
 		"localhost:8083",
-		"localhost:8084",
+		"localhost:8084", // not used: https://github.com/actions/runner-images/issues/2821
 		"localhost:8085",
 		"localhost:8086",
 		"localhost:8087",
