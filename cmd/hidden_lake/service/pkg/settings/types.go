@@ -1,8 +1,10 @@
 package settings
 
-type SPrivKey = string
-type SConnect = string
-type SMessage = []byte
+type (
+	SPrivKey = string
+	SConnect = string
+	SMessage = string
+)
 
 type SFriend struct {
 	FAliasName string `json:"alias_name"`

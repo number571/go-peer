@@ -19,7 +19,6 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 	default:
 		jsonValue, err := json.Marshal(pData)
 		if err != nil {
-			panic(fmt.Sprintf("AAA %s", err.Error()))
 			return "", err
 		}
 		requestBytes = jsonValue
@@ -31,13 +30,14 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 		bytes.NewBuffer(requestBytes),
 	)
 	if err != nil {
-		panic(fmt.Sprintf("BBB %s", err.Error()))
+		panic(fmt.Sprintf("AAA %s", err.Error()))
 		return "", err
 	}
 
 	req.Header.Set("Content-Type", CContentType)
 	resp, err := pClient.Do(req)
 	if err != nil {
+		panic(fmt.Sprintf("BBB %s", err.Error()))
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -53,11 +53,13 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 func loadResponse(pReader io.ReadCloser) (*SResponse, error) {
 	body, err := io.ReadAll(pReader)
 	if err != nil {
+		panic(fmt.Sprintf("CCC %s", err.Error()))
 		return nil, err
 	}
 
 	resp := &SResponse{}
 	if err := json.Unmarshal(body, resp); err != nil {
+		panic(fmt.Sprintf("DDD %s", err.Error()))
 		return nil, err
 	}
 

@@ -47,5 +47,5 @@ func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg
 }
 
 func (p *sBuilder) Message(pMsg message.IMessage) pkg_settings.SMessage {
-	return pMsg.ToBytes()
+	return string(pMsg.ToBytes())
 }
