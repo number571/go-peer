@@ -26,7 +26,7 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
 			FConnections: func() []string { return []string{pCfg.GetConnection()} },
-			FDuration:    hls_settings.CNetworkWaitTime,
+			FDuration:    hlt_settings.CTimeWait,
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
@@ -35,7 +35,7 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: hls_settings.CMessageSize,
 					FMaxVoidSize: hls_settings.CMaxVoidSize,
-					FTimeWait:    hls_settings.CNetworkWaitTime,
+					// FTimeWait (conn.FetchPayload not used in anonymity package)
 				}),
 			}),
 		).HandleFunc(

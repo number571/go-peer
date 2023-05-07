@@ -1,5 +1,7 @@
 package settings
 
+import "time"
+
 const (
 	CServiceName  = "HLT"
 	CTitlePattern = "go-peer/hidden-lake-traffic"
@@ -12,6 +14,7 @@ const (
 
 const (
 	CLimitMessages = (1 << 10)
+	CTimeWait      = 10 * time.Second
 )
 
 const (

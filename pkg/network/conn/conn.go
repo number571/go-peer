@@ -50,14 +50,11 @@ func (p *sConn) GetSocket() net.Conn {
 }
 
 func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
-	var (
-		chPld    = make(chan payload.IPayload)
-		timeWait = p.fSettings.GetTimeWait()
-	)
-
 	if err := p.WritePayload(pPld); err != nil {
 		return nil, err
 	}
+
+	chPld := make(chan payload.IPayload)
 	go readPayload(p, chPld)
 
 	select {
@@ -66,7 +63,7 @@ func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
 			return nil, fmt.Errorf("failed: read payload")
 		}
 		return rpld, nil
-	case <-time.After(timeWait):
+	case <-time.After(p.fSettings.GetTimeWait()):
 		return nil, fmt.Errorf("failed: time out")
 	}
 }

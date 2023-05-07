@@ -28,7 +28,7 @@ const (
 
 const (
 	CRetryEnqueue = 2
-	CWaitTime     = time.Minute
+	CTimeWait     = time.Minute
 )
 
 const (
@@ -38,13 +38,12 @@ const (
 )
 
 const (
-	CAKeySize        = 4096
+	CAKeySize        = 4096      // bits
 	CNetworkCapacity = (1 << 10) // hashes
-	CNetworkMaxConns = 10
+	CNetworkMaxConns = (1 << 6)  // 64
 	CWorkSize        = 20        // bits
 	CMessageSize     = (1 << 20) // 1MiB
 	CMaxVoidSize     = (1 << 20) // 1MiB
-	CNetworkWaitTime = 10 * time.Second
 )
 
 const (

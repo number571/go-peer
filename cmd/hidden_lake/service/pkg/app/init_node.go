@@ -18,7 +18,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			FServiceName:  pkg_settings.CServiceName,
 			FNetworkMask:  pkg_settings.CNetworkMask,
 			FRetryEnqueue: pkg_settings.CRetryEnqueue,
-			FTimeWait:     pkg_settings.CWaitTime,
+			FTimeWait:     pkg_settings.CTimeWait,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -33,7 +33,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 					FNetworkKey:  pCfg.GetNetwork(),
 					FMessageSize: pkg_settings.CMessageSize,
 					FMaxVoidSize: pkg_settings.CMaxVoidSize,
-					FTimeWait:    pkg_settings.CNetworkWaitTime,
+					// FTimeWait (conn.FetchPayload not used in anonymity package)
 				}),
 			}),
 		),
