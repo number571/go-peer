@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -12,8 +12,6 @@ import (
 
 func HandleNodeKeyAPI(pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		var vPrivKey pkg_settings.SPrivKey
-
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
@@ -21,12 +19,13 @@ func HandleNodeKeyAPI(pNode anonymity.INode) http.HandlerFunc {
 
 		switch pR.Method {
 		case http.MethodPost:
-			if err := json.NewDecoder(pR.Body).Decode(&vPrivKey); err != nil {
-				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
+			privKeyBytes, err := io.ReadAll(pR.Body)
+			if err != nil {
+				api.Response(pW, pkg_settings.CErrorRead, "failed: read private key bytes")
 				return
 			}
 
-			privKey := asymmetric.LoadRSAPrivKey(vPrivKey.FPrivKey)
+			privKey := asymmetric.LoadRSAPrivKey(string(privKeyBytes))
 			if privKey == nil {
 				api.Response(pW, pkg_settings.CErrorPrivKey, "failed: decode private key")
 				return

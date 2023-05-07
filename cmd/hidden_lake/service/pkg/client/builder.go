@@ -19,16 +19,12 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
-	return &pkg_settings.SPrivKey{
-		FPrivKey: pPrivKey.ToString(),
-	}
+func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) pkg_settings.SPrivKey {
+	return pPrivKey.ToString()
 }
 
-func (p *sBuilder) Connect(pConnect string) *pkg_settings.SConnect {
-	return &pkg_settings.SConnect{
-		FConnect: pConnect,
-	}
+func (p *sBuilder) Connect(pConnect string) pkg_settings.SConnect {
+	return pConnect
 }
 
 func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {

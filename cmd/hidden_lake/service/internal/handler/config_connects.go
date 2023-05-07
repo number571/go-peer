@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 
@@ -13,8 +13,6 @@ import (
 
 func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		var vConnect pkg_settings.SConnect
-
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
 			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
@@ -25,27 +23,29 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) ht
 			return
 		}
 
-		if err := json.NewDecoder(pR.Body).Decode(&vConnect); err != nil {
-			api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
+		connectBytes, err := io.ReadAll(pR.Body)
+		if err != nil {
+			api.Response(pW, pkg_settings.CErrorRead, "failed: read connect bytes")
 			return
 		}
 
+		connect := string(connectBytes)
 		switch pR.Method {
 		case http.MethodPost:
-			connects := append(pWrapper.GetConfig().GetConnections(), vConnect.FConnect)
+			connects := append(pWrapper.GetConfig().GetConnections(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
 				api.Response(pW, pkg_settings.CErrorAction, "failed: update connections")
 				return
 			}
-			pNode.GetNetworkNode().AddConnect(vConnect.FConnect)
+			pNode.GetNetworkNode().AddConnect(connect)
 			api.Response(pW, pkg_settings.CErrorNone, "success: update connections")
 		case http.MethodDelete:
-			connects := deleteConnect(pWrapper.GetConfig(), vConnect.FConnect)
+			connects := deleteConnect(pWrapper.GetConfig(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
 				api.Response(pW, pkg_settings.CErrorAction, "failed: delete connection")
 				return
 			}
-			pNode.GetNetworkNode().DelConnect(vConnect.FConnect)
+			pNode.GetNetworkNode().DelConnect(connect)
 			api.Response(pW, pkg_settings.CErrorNone, "success: delete connection")
 		}
 	}

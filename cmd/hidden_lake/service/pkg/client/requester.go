@@ -136,7 +136,7 @@ func (p *sRequester) GetOnlines() ([]string, error) {
 	return deleteVoidStrings(strings.Split(res, ",")), nil
 }
 
-func (p *sRequester) DelOnline(pConnect *pkg_settings.SConnect) error {
+func (p *sRequester) DelOnline(pConnect pkg_settings.SConnect) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
@@ -159,7 +159,7 @@ func (p *sRequester) GetConnections() ([]string, error) {
 	return deleteVoidStrings(strings.Split(res, ",")), nil
 }
 
-func (p *sRequester) AddConnection(pConnect *pkg_settings.SConnect) error {
+func (p *sRequester) AddConnection(pConnect pkg_settings.SConnect) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
@@ -169,7 +169,7 @@ func (p *sRequester) AddConnection(pConnect *pkg_settings.SConnect) error {
 	return err
 }
 
-func (p *sRequester) DelConnection(pConnect *pkg_settings.SConnect) error {
+func (p *sRequester) DelConnection(pConnect pkg_settings.SConnect) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
@@ -179,7 +179,7 @@ func (p *sRequester) DelConnection(pConnect *pkg_settings.SConnect) error {
 	return err
 }
 
-func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
+func (p *sRequester) SetPrivKey(pPrivKey pkg_settings.SPrivKey) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,

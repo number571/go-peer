@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 	"sort"
 	"strings"
@@ -13,8 +13,6 @@ import (
 
 func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		var vConnect pkg_settings.SConnect
-
 		if pR.Method != http.MethodGet && pR.Method != http.MethodDelete {
 			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
 			return
@@ -35,12 +33,13 @@ func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
 
 			api.Response(pW, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
 		case http.MethodDelete:
-			if err := json.NewDecoder(pR.Body).Decode(&vConnect); err != nil {
-				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
+			connectBytes, err := io.ReadAll(pR.Body)
+			if err != nil {
+				api.Response(pW, pkg_settings.CErrorRead, "failed: read connect bytes")
 				return
 			}
 
-			if err := pNode.GetNetworkNode().DelConnect(vConnect.FConnect); err != nil {
+			if err := pNode.GetNetworkNode().DelConnect(string(connectBytes)); err != nil {
 				api.Response(pW, pkg_settings.CErrorNone, "failed: delete online connection")
 				return
 			}
