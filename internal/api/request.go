@@ -56,7 +56,6 @@ func loadResponse(pReader io.ReadCloser) (*SResponse, error) {
 
 	resp := &SResponse{}
 	if err := json.Unmarshal(body, resp); err != nil {
-		panic(fmt.Sprintf("DDD %s = %s", string(body), err.Error()))
 		return nil, err
 	}
 
