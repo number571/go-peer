@@ -28,17 +28,18 @@ func TestHandleMessageAPI(t *testing.T) {
 	)
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
+
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    anon_testutils.TCWorkSize,
 			FMessageSize: anon_testutils.TCMessageSize,
+			FWorkSize:    anon_testutils.TCWorkSize,
 		}),
 		privKey,
 	)
-
 	msg, err := client.EncryptPayload(
-		privKey.GetPubKey(),
-		payload.NewPayload(0, []byte("test")),
+		pubKey,
+		payload.NewPayload(0, []byte("hello")),
 	)
 	if err != nil {
 		t.Error(err)
