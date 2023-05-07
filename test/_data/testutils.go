@@ -40,8 +40,8 @@ var (
 		"localhost:8067",
 		"localhost:8068",
 		"localhost:8069",
-		"localhost:8070",
 
+		"localhost:8070",
 		"localhost:8071",
 		"localhost:8072",
 		"localhost:8073",
@@ -51,12 +51,12 @@ var (
 		"localhost:8077",
 		"localhost:8078",
 		"localhost:8079",
-		"localhost:8080",
 
+		"localhost:8080",
 		"localhost:8081",
 		"localhost:8082",
 		"localhost:8083",
-		"localhost:8084", // not used (github)
+		"localhost:8084",
 		"localhost:8085",
 		"localhost:8086",
 		"localhost:8087",
