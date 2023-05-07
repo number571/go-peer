@@ -1,6 +1,10 @@
 package settings
 
-import "time"
+import (
+	"time"
+
+	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+)
 
 const (
 	CServiceName  = "HLS"
@@ -81,4 +85,17 @@ const (
 	CErrorWrite
 	CErrorSize
 	CErrorUnauth
+)
+
+const (
+	// Base
+	CLogWarnResponseFromService anon_logger.ILogType = "RSPSR"
+
+	// WARN
+	CLogWarnRequestToService anon_logger.ILogType = "RQTSR"
+	CLogWarnUndefinedService anon_logger.ILogType = "UNDSR"
+
+	// ERRO
+	CLogErroLoadRequestType  anon_logger.ILogType = "LDRQT"
+	CLogErroProxyRequestType anon_logger.ILogType = "PXRQT"
 )

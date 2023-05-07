@@ -94,7 +94,10 @@ func (p *sApp) Run() error {
 	go func() {
 		p.fNode.HandleFunc(
 			pkg_settings.CHeaderHLS,
-			handler.HandleServiceTCP(p.fWrapper.GetConfig()),
+			handler.HandleServiceTCP(
+				p.fWrapper.GetConfig(),
+				p.fLogger,
+			),
 		)
 		if err := p.fNode.Run(); err != nil {
 			res <- err
