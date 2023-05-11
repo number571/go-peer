@@ -17,6 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -49,7 +50,7 @@ func TestComplex(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-				NewPayload(testutils.TcHead, []byte(reqBody)),
+				adapters.NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -85,7 +86,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err != nil {
 		return

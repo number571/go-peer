@@ -3,7 +3,6 @@ package anonymity
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
 
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
@@ -117,16 +117,20 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 }
 
 // Send message without response waiting.
-func (p *sNode) BroadcastPayload(pType IFormatType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
+	return p.broadcastPayload(cIsRequest, pRecv, pPld.ToOrigin())
+}
+
+func (p *sNode) broadcastPayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	if len(p.GetNetworkNode().GetConnections()) == 0 {
 		return errors.New("length of connections = 0")
 	}
 
 	var newBody []byte
 	switch pType {
-	case CIsRequest:
+	case cIsRequest:
 		newBody = wrapRequest(pPld.GetBody())
-	case CIsResponse:
+	case cIsResponse:
 		newBody = wrapResponse(pPld.GetBody())
 	default:
 		return fmt.Errorf("undefined format type")
@@ -143,12 +147,10 @@ func (p *sNode) BroadcastPayload(pType IFormatType, pRecv asymmetric.IPubKey, pP
 
 // Send message with response waiting.
 // Payload head must be uint32.
-func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) ([]byte, error) {
+func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
 	headAction := uint32(random.NewStdPRNG().GetUint64())
-	headRoute := mustBeUint32(pPld.GetHead())
-
 	newPld := payload.NewPayload(
-		joinHead(headAction, headRoute).Uint64(),
+		joinHead(headAction, pPld.GetHead()).uint64(),
 		pPld.GetBody(),
 	)
 
@@ -157,7 +159,7 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) ([
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	if err := p.BroadcastPayload(CIsRequest, pRecv, newPld); err != nil {
+	if err := p.broadcastPayload(cIsRequest, pRecv, newPld); err != nil {
 		return nil, err
 	}
 	return p.recv(actionKey)
@@ -266,46 +268,45 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 		// got response message from our side request
 		case isResponse(body):
 			// get session by payload head
-			actionKey := newActionKey(sender, head.GetAction())
+			actionKey := newActionKey(sender, head.getAction())
 			action, ok := p.getAction(actionKey)
 			if !ok {
 				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
 				return
 			}
+
 			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
 			action <- unwrapBytes(body)
 			return
 		// got request from another side (need generate response)
 		case isRequest(body):
-			// go next
-			body = unwrapBytes(body)
+			// get function by payload head
+			f, ok := p.getRoute(head.getRoute())
+			if !ok || f == nil {
+				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, sender, pConn))
+				return
+			}
+
+			// response can be nil
+			resp := f(p, sender, hash, unwrapBytes(body))
+			if resp == nil {
+				p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
+				return
+			}
+
+			// create the message and put this to the queue
+			if err := p.broadcastPayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
+				p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+				return
+			}
+
+			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+			return
 		// undefined type of message (not request/response)
 		default:
 			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMessageType, hash, proof, sender, pConn))
 			return
 		}
-
-		// get function by payload head
-		f, ok := p.getRoute(head.GetRoute())
-		if !ok || f == nil {
-			p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, sender, pConn))
-			return
-		}
-
-		// response can be nil
-		resp := f(p, sender, hash, body)
-		if resp == nil {
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
-			return
-		}
-
-		// create the message and put this to the queue
-		if err := p.BroadcastPayload(CIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
-			return
-		}
-
-		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 	}
 }
 
@@ -407,11 +408,4 @@ func newActionKey(pPubKey asymmetric.IPubKey, pHead uint32) string {
 	pubKeyAddr := pPubKey.GetAddress().ToString()
 	headString := fmt.Sprintf("%d", pHead)
 	return fmt.Sprintf("%s-%s", pubKeyAddr, headString)
-}
-
-func mustBeUint32(pValue uint64) uint32 {
-	if pValue > math.MaxUint32 {
-		panic("v > math.MaxUint32")
-	}
-	return uint32(pValue)
 }

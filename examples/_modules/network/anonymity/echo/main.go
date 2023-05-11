@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -65,7 +66,7 @@ func main() {
 
 	res, err := client.FetchPayload(
 		service.GetMessageQueue().GetClient().GetPubKey(),
-		anonymity.NewPayload(serviceHeader, []byte("hello, world!")),
+		adapters.NewPayload(serviceHeader, []byte("hello, world!")),
 	)
 	if err != nil {
 		panic(err)

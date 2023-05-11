@@ -12,7 +12,8 @@ const (
 )
 
 const (
-	CHeaderHLS = uint32(0x1750571)
+	CServiceMask = uint32(0x1750571)
+	CNetworkMask = uint64(0x676F2D7065657201)
 )
 
 const (
@@ -23,7 +24,6 @@ const (
 const (
 	CHeaderPubKey  = "Service-Public-Key"
 	CHeaderMsgHash = "Service-Message-Hash"
-	CNetworkMask   = 0x676F2D7065657201
 )
 
 const (

@@ -1,5 +1,11 @@
 package anonymity
 
+type iHead interface {
+	uint64() uint64
+	getRoute() uint32
+	getAction() uint32
+}
+
 var (
 	_ iHead = sHead(0)
 )
@@ -17,14 +23,14 @@ func joinHead(pAction, pRoute uint32) iHead {
 	return sHead((uint64(pAction) << 32) | uint64(pRoute))
 }
 
-func (p sHead) GetRoute() uint32 {
-	return uint32(p & 0x00000000FFFFFFFF)
+func (p sHead) getRoute() uint32 {
+	return uint32(p & 0xFFFFFFFF)
 }
 
-func (p sHead) GetAction() uint32 {
+func (p sHead) getAction() uint32 {
 	return uint32(p >> 32)
 }
 
-func (p sHead) Uint64() uint64 {
+func (p sHead) uint64() uint64 {
 	return uint64(p)
 }

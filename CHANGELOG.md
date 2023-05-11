@@ -1,8 +1,6 @@
 # Changelog
 
-
-
-
+<!-- ... -->
 
 ## ~v1.5.9
 
@@ -10,22 +8,23 @@
 
 Init.
 
-### BREAKING CHANGES
-
-- Template
-
 ### IMPROVEMENTS
 
-- Makefiles (HLS, HLM, HLT): append cross-compile
-- Release: init applications
+- Makefiles `hidden_lake`: append cross-compile (linux, windows, android)
+- Makefiles `hidden_lake`: append all-build, all-clean options
+- Package `anonymity`: create adapter to interface payload.IPayload
+
+### CHANGES
+
+- Package `anonymity`: deleted limit chars in serviceName logger.ILogger
+- Package `anonymity`: BroadcastPayload corresponds to the FetchPayload interface
+- Service `hidden_lake`: rename CHeaderHLS -> CServiceMask
 
 ### BUG FIXES
 
 - Gitignore (HLT): change m_hls.apk -> m_hlt.apk 
 
-
-
-
+<!-- ... -->
 
 ## v1.5.8
 
@@ -33,23 +32,14 @@ Init.
 
 Init.
 
-### BREAKING CHANGES
-
-- Template
-
 ### IMPROVEMENTS
 
 - Template
 
-### FEATURES
+### CHANGES
 
 - Template
 
 ### BUG FIXES
 
 - Template
-
-
-
-
-

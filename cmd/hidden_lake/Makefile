@@ -1,9 +1,9 @@
 .PHONY: default build clean 
 default: build 
 build:
-	make -C ./service build
-	make -C ./messenger build
-	make -C ./traffic build
+	make -C ./service all-build
+	make -C ./messenger all-build
+	make -C ./traffic all-build
 	make -C ./adapters build
 clean:
 	make -C ./service all-clean

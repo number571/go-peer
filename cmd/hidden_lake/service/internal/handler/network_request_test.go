@@ -118,7 +118,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 	}
 
 	node.HandleFunc(
-		pkg_settings.CHeaderHLS,
+		pkg_settings.CServiceMask,
 		HandleServiceTCP(
 			cfg,
 			logger.NewLogger(logger.NewSettings(&logger.SSettings{})),

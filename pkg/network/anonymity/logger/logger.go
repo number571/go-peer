@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	cLogTemplate = "service=%03s type=%05s hash=%08X...%08X addr=%08X...%08X proof=%016d conn=%s"
+	cLogTemplate = "service=%s type=%s hash=%08X...%08X addr=%08X...%08X proof=%016d conn=%s"
 )
 
 type sLogger struct {
@@ -17,9 +17,6 @@ type sLogger struct {
 }
 
 func NewLogger(pService string) ILogger {
-	if len(pService) != 3 {
-		return nil
-	}
 	return &sLogger{
 		fService: pService,
 	}

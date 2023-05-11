@@ -167,7 +167,7 @@ if err := g(
     a,
     b,
     c,
-); err != nil { /* not allowed multiply args in if block */
+); err != nil { /* not allowed multiply line-args in if block */
     // ...
 }
 ```

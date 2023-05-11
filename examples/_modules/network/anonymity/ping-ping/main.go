@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -64,9 +65,8 @@ func main() {
 	}
 
 	err := service2.BroadcastPayload(
-		anonymity.CIsRequest,
 		service1.GetMessageQueue().GetClient().GetPubKey(),
-		anonymity.NewPayload(
+		adapters.NewPayload(
 			serviceHeader,
 			[]byte("0"),
 		),
@@ -93,9 +93,8 @@ func handler(serviceName string) anonymity.IHandlerF {
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
 		err = node.BroadcastPayload(
-			anonymity.CIsRequest,
 			pubKey,
-			anonymity.NewPayload(
+			adapters.NewPayload(
 				serviceHeader,
 				[]byte(fmt.Sprintf("%d", num+1)),
 			),

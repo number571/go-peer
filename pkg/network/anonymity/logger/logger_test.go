@@ -15,11 +15,6 @@ const (
 )
 
 func TestLogger(t *testing.T) {
-	if NewLogger("QWERTY") != nil {
-		t.Error("result logger is not nil")
-		return
-	}
-
 	logger := NewLogger(tcService)
 	fmtLog := logger.GetFmtLog(
 		CLogBaseEnqueueResponse,

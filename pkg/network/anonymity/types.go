@@ -8,20 +8,13 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
-
-	"github.com/number571/go-peer/pkg/payload"
-)
-
-const (
-	CIsRequest  IFormatType = '>'
-	CIsResponse IFormatType = '<'
 )
 
 type (
-	IFormatType byte
-	IHandlerF   func(INode, asymmetric.IPubKey, []byte, []byte) []byte
+	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) []byte
 )
 
 type ISettings interface {
@@ -44,14 +37,8 @@ type INode interface {
 	HandleFunc(uint32, IHandlerF) INode
 	HandleMessage(message.IMessage) // in runtime
 
-	BroadcastPayload(IFormatType, asymmetric.IPubKey, payload.IPayload) error
-	FetchPayload(asymmetric.IPubKey, payload.IPayload) ([]byte, error)
-}
-
-type iHead interface {
-	Uint64() uint64
-	GetRoute() uint32
-	GetAction() uint32
+	BroadcastPayload(asymmetric.IPubKey, adapters.IPayload) error
+	FetchPayload(asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
 }
 
 type IWrapperDB interface {

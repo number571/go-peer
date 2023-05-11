@@ -93,7 +93,7 @@ func (p *sApp) Run() error {
 
 	go func() {
 		p.fNode.HandleFunc(
-			pkg_settings.CHeaderHLS,
+			pkg_settings.CServiceMask,
 			handler.HandleServiceTCP(
 				p.fWrapper.GetConfig(),
 				p.fLogger,
@@ -105,10 +105,9 @@ func (p *sApp) Run() error {
 		}
 
 		// if node in client mode
-		// then run endless loop
 		tcpAddress := p.fWrapper.GetConfig().GetAddress().GetTCP()
 		if tcpAddress == "" {
-			select {}
+			return
 		}
 
 		// run node in server mode
@@ -139,7 +138,7 @@ func (p *sApp) Stop() error {
 	p.fIsRun = false
 	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	p.fNode.HandleFunc(pkg_settings.CHeaderHLS, nil)
+	p.fNode.HandleFunc(pkg_settings.CServiceMask, nil)
 	lastErr := types.StopAll([]types.ICommand{
 		p.fNode,
 		p.fConnKeeper,

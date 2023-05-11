@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 )
 
 func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
@@ -40,9 +41,8 @@ func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.BroadcastPayload(
-				anonymity.CIsRequest,
 				pubKey,
-				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
+				adapters.NewPayload(pkg_settings.CServiceMask, data),
 			)
 			if err != nil {
 				api.Response(pW, pkg_settings.CErrorMessage, "failed: broadcast message")
@@ -53,7 +53,7 @@ func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
 		case http.MethodPost:
 			resp, err := pNode.FetchPayload(
 				pubKey,
-				anonymity.NewPayload(pkg_settings.CHeaderHLS, data),
+				adapters.NewPayload(pkg_settings.CServiceMask, data),
 			)
 			if err != nil {
 				api.Response(pW, pkg_settings.CErrorResponse, "failed: response message")

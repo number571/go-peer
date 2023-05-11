@@ -117,7 +117,7 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 }
 
 func testRunNewNode(dbPath, addr string) anonymity.INode {
-	node := anon_testutils.TestNewNode(dbPath, addr).HandleFunc(pkg_settings.CHeaderHLS, nil)
+	node := anon_testutils.TestNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
 	if err := node.Run(); err != nil {
 		return nil
 	}

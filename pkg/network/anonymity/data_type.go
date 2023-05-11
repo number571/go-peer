@@ -2,23 +2,30 @@ package anonymity
 
 import "bytes"
 
+type iDataType byte
+
+const (
+	cIsRequest  iDataType = '>'
+	cIsResponse iDataType = '<'
+)
+
 func isRequest(pBytes []byte) bool {
 	if len(pBytes) == 0 {
 		return false
 	}
-	return IFormatType(pBytes[0]) == CIsRequest
+	return iDataType(pBytes[0]) == cIsRequest
 }
 
 func isResponse(pBytes []byte) bool {
 	if len(pBytes) == 0 {
 		return false
 	}
-	return IFormatType(pBytes[0]) == CIsResponse
+	return iDataType(pBytes[0]) == cIsResponse
 }
 
 func wrapRequest(pBytes []byte) []byte {
 	return bytes.Join([][]byte{
-		{byte(CIsRequest)},
+		{byte(cIsRequest)},
 		pBytes,
 	}, []byte{})
 }
@@ -32,7 +39,7 @@ func unwrapBytes(pBytes []byte) []byte {
 
 func wrapResponse(pBytes []byte) []byte {
 	return bytes.Join([][]byte{
-		{byte(CIsResponse)},
+		{byte(cIsResponse)},
 		pBytes,
 	}, []byte{})
 }

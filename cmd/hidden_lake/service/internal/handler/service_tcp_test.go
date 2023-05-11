@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -93,7 +93,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	}
 
 	node.HandleFunc(
-		pkg_settings.CHeaderHLS,
+		pkg_settings.CServiceMask,
 		HandleServiceTCP(
 			cfg,
 			logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
@@ -123,8 +123,8 @@ func testStartClientHLS() (anonymity.INode, error) {
 		return nil, err
 	}
 
-	pld := payload.NewPayload(
-		uint64(pkg_settings.CHeaderHLS),
+	pld := adapters.NewPayload(
+		pkg_settings.CServiceMask,
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
