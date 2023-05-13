@@ -30,16 +30,16 @@ func wrapRequest(pBytes []byte) []byte {
 	}, []byte{})
 }
 
-func unwrapBytes(pBytes []byte) []byte {
-	if len(pBytes) == 0 {
-		panic("length of bytes = 0")
-	}
-	return pBytes[1:]
-}
-
 func wrapResponse(pBytes []byte) []byte {
 	return bytes.Join([][]byte{
 		{byte(cIsResponse)},
 		pBytes,
 	}, []byte{})
+}
+
+func unwrapBytes(pBytes []byte) []byte {
+	if len(pBytes) == 0 {
+		panic("length of bytes = 0")
+	}
+	return pBytes[1:]
 }
