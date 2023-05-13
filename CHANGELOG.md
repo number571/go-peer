@@ -13,6 +13,7 @@ Init.
 - Makefiles `hidden_lake`: append cross-compile (linux, windows, android)
 - Makefiles `hidden_lake`: append all-build, all-clean options
 - Package `anonymity`: create adapter to interface payload.IPayload
+- Article `theory_of_the_structure_of_hidden_systems`: append new section (introduction / economic reasons)
 
 ### CHANGES
 
