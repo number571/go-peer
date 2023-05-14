@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	msgSize        = (100 << 10)
 	serviceHeader  = 0xDEADBEAF
 	serviceAddress = ":8080"
 )
@@ -108,28 +109,56 @@ func handler(serviceName string) anonymity.IHandlerF {
 
 func newNode(serviceAddress, dbPath string) anonymity.INode {
 	db, err := database.NewSQLiteDB(
-		database.NewSettings(&database.SSettings{FPath: dbPath}),
+		database.NewSettings(&database.SSettings{
+			FPath:      dbPath,
+			FHashing:   false,
+			FCipherKey: []byte("CIPHER"),
+		}),
 	)
 	if err != nil {
 		return nil
 	}
 	return anonymity.NewNode(
-		anonymity.NewSettings(&anonymity.SSettings{}),
+		anonymity.NewSettings(&anonymity.SSettings{
+			FServiceName:   "EXAMPLE",
+			FRetryEnqueue:  0,
+			FNetworkMask:   1,
+			FFetchTimeWait: time.Minute,
+		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		anonymity.NewWrapperDB().Set(db),
-		network.NewNode(
-			network.NewSettings(&network.SSettings{
-				FConnSettings: conn.NewSettings(&conn.SSettings{}),
-				FAddress:      serviceAddress,
-			}),
-		),
+		network.NewNode(nodeSettings(serviceAddress)),
 		queue.NewMessageQueue(
-			queue.NewSettings(&queue.SSettings{}),
+			queue.NewSettings(&queue.SSettings{
+				FMainCapacity: (1 << 4),
+				FPoolCapacity: (1 << 4),
+				FDuration:     time.Second,
+			}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{}),
+				message.NewSettings(&message.SSettings{
+					FWorkSize:    10,
+					FMessageSize: msgSize,
+				}),
 				asymmetric.NewRSAPrivKey(1024),
 			),
 		),
 		asymmetric.NewListPubKeys(),
 	)
+}
+
+func nodeSettings(serviceAddress string) network.ISettings {
+	return network.NewSettings(&network.SSettings{
+		FAddress:      serviceAddress,
+		FCapacity:     (1 << 10),
+		FMaxConnects:  1,
+		FConnSettings: connSettings(),
+	})
+}
+
+func connSettings() conn.ISettings {
+	return conn.NewSettings(&conn.SSettings{
+		FMessageSize:   msgSize,
+		FLimitVoidSize: 1, // not used
+		FFetchTimeWait: 1, // not used
+	})
 }

@@ -15,7 +15,7 @@ const (
 )
 
 func main() {
-	service := network.NewNode(network.NewSettings(&network.SSettings{FAddress: serviceAddress}))
+	service := network.NewNode(nodeSettings(serviceAddress))
 	service.HandleFunc(serviceHeader, func(n network.INode, c conn.IConn, reqBytes []byte) {
 		c.WritePayload(payload.NewPayload(
 			serviceHeader,
@@ -29,7 +29,7 @@ func main() {
 	time.Sleep(time.Second) // wait
 
 	conn, err := conn.NewConn(
-		conn.NewSettings(&conn.SSettings{}),
+		connSettings(),
 		serviceAddress,
 	)
 	if err != nil {
@@ -45,4 +45,21 @@ func main() {
 	}
 
 	fmt.Println(string(pld.GetBody()))
+}
+
+func nodeSettings(serviceAddress string) network.ISettings {
+	return network.NewSettings(&network.SSettings{
+		FAddress:      serviceAddress,
+		FCapacity:     (1 << 10),
+		FMaxConnects:  1,
+		FConnSettings: connSettings(),
+	})
+}
+
+func connSettings() conn.ISettings {
+	return conn.NewSettings(&conn.SSettings{
+		FMessageSize:   (1 << 10),
+		FLimitVoidSize: 1, // not used
+		FFetchTimeWait: 5 * time.Second,
+	})
 }

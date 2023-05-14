@@ -19,8 +19,8 @@ func main() {
 	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{
 			FDuration:     time.Second,
-			FCapacity:     1 << 5,
-			FPullCapacity: 1 << 5,
+			FMainCapacity: 1 << 5,
+			FPoolCapacity: 1 << 5,
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{

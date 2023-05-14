@@ -17,8 +17,8 @@ const (
 
 func main() {
 	var (
-		service1 = network.NewNode(network.NewSettings(&network.SSettings{FAddress: serviceAddress}))
-		service2 = network.NewNode(network.NewSettings(&network.SSettings{}))
+		service1 = network.NewNode(nodeSettings(serviceAddress))
+		service2 = network.NewNode(nodeSettings(""))
 	)
 
 	service1.HandleFunc(serviceHeader, handler("#1"))
@@ -63,4 +63,21 @@ func handler(serviceName string) network.IHandlerF {
 			[]byte(fmt.Sprintf("%d", num+1)),
 		))
 	}
+}
+
+func nodeSettings(serviceAddress string) network.ISettings {
+	return network.NewSettings(&network.SSettings{
+		FAddress:      serviceAddress,
+		FCapacity:     (1 << 10),
+		FMaxConnects:  1,
+		FConnSettings: connSettings(),
+	})
+}
+
+func connSettings() conn.ISettings {
+	return conn.NewSettings(&conn.SSettings{
+		FMessageSize:   (1 << 10),
+		FLimitVoidSize: 1, // not used
+		FFetchTimeWait: 1, // not used
+	})
 }
