@@ -12,10 +12,10 @@ import (
 func (p *sApp) initDatabase() error {
 	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
-			FPath:          fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
-			FLimitMessages: hlt_settings.CLimitMessages,
-			FMessageSize:   hls_settings.CMessageSize,
-			FWorkSize:      hls_settings.CWorkSize,
+			FPath:        fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
+			FCapacity:    hlt_settings.CCapacity,
+			FMessageSize: hls_settings.CMessageSize,
+			FWorkSize:    hls_settings.CWorkSize,
 		}),
 	)
 	if err != nil {

@@ -99,11 +99,13 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
 			FAddress:     addrs[i],
-			FCapacity:    (1 << 10),
-			FMaxConnects: 10,
+			FCapacity:    testutils.TCCapacity,
+			FMaxConnects: testutils.TCMaxConnects,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize: (100 << 10),
-				FTimeWait:    5 * time.Second,
+				FNetworkKey:    "_",
+				FMessageSize:   testutils.TCMessageSize,
+				FLimitVoidSize: 1, // not used
+				FFetchTimeWait: 1, // not used
 			}),
 		})
 		nodes[i] = NewNode(sett)

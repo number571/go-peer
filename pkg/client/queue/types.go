@@ -21,7 +21,7 @@ type IMessageQueue interface {
 }
 
 type ISettings interface {
-	GetCapacity() uint64
-	GetPullCapacity() uint64
+	GetMainCapacity() uint64
+	GetPoolCapacity() uint64
 	GetDuration() time.Duration
 }

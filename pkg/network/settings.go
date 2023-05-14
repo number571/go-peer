@@ -1,15 +1,11 @@
 package network
 
-import "github.com/number571/go-peer/pkg/network/conn"
+import (
+	"github.com/number571/go-peer/pkg/network/conn"
+)
 
 var (
 	_ ISettings = &sSettings{}
-)
-
-const (
-	cAddress     = ""
-	cCapacity    = (1 << 10)
-	cMaxConnects = (1 << 6)
 )
 
 type SSettings sSettings
@@ -26,21 +22,18 @@ func NewSettings(pSett *SSettings) ISettings {
 		FCapacity:     pSett.FCapacity,
 		FMaxConnects:  pSett.FMaxConnects,
 		FConnSettings: pSett.FConnSettings,
-	}).useDefaultValues()
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
-	if p.FAddress == "" {
-		p.FAddress = cAddress
-	}
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FCapacity == 0 {
-		p.FCapacity = cCapacity
+		panic(`p.FCapacity == 0`)
 	}
 	if p.FMaxConnects == 0 {
-		p.FMaxConnects = cMaxConnects
+		panic(`p.FMaxConnects == 0`)
 	}
 	if p.FConnSettings == nil {
-		p.FConnSettings = conn.NewSettings(&conn.SSettings{})
+		panic(`p.FConnSettings == nil`)
 	}
 	return p
 }

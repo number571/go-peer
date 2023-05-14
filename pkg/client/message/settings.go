@@ -4,11 +4,6 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cWorkSize    = 10
-	cMessageSize = (1 << 20)
-)
-
 type SSettings sSettings
 type sSettings struct {
 	FWorkSize    uint64
@@ -19,15 +14,15 @@ func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FWorkSize:    pSett.FWorkSize,
 		FMessageSize: pSett.FMessageSize,
-	}).useDefaultValues()
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FWorkSize == 0 {
-		p.FWorkSize = cWorkSize
+		panic(`p.FWorkSize == 0`)
 	}
 	if p.FMessageSize == 0 {
-		p.FMessageSize = cMessageSize
+		panic(`p.FMessageSize == 0`)
 	}
 	return p
 }

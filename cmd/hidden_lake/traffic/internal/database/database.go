@@ -48,7 +48,7 @@ func (p *sKeyValueDB) Hashes() ([]string, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	msgsLimit := p.Settings().GetLimitMessages()
+	msgsLimit := p.Settings().GetCapacity()
 	res := make([]string, 0, msgsLimit)
 	for i := uint64(0); i < msgsLimit; i++ {
 		hash, err := p.fDB.Get(getKeyHash(i))
@@ -157,7 +157,7 @@ func (p *sKeyValueDB) getPointer() uint64 {
 }
 
 func (p *sKeyValueDB) incPointer() error {
-	msgsLimit := p.Settings().GetLimitMessages()
+	msgsLimit := p.Settings().GetCapacity()
 	res := encoding.Uint64ToBytes((p.getPointer() + 1) % msgsLimit)
 	return p.fDB.Set(getKeyPointer(), res[:])
 }

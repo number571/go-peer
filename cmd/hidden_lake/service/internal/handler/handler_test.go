@@ -1,17 +1,25 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/client/queue"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
-	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
@@ -47,7 +55,7 @@ const (
 
 func testStartServerHTTP(addr string) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/echo", testutils.TestEchoPage)
+	mux.HandleFunc("/echo", testEchoPage)
 
 	srv := &http.Server{
 		Addr:    addr,
@@ -59,6 +67,29 @@ func testStartServerHTTP(addr string) *http.Server {
 	}()
 
 	return srv
+}
+
+func testEchoPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var req struct {
+		FMessage string `json:"message"`
+	}
+
+	var resp struct {
+		FEcho  string `json:"echo"`
+		FError int    `json:"error"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		resp.FError = 1
+		json.NewEncoder(w).Encode(resp)
+		return
+	}
+
+	resp.FEcho = req.FMessage
+	json.NewEncoder(w).Encode(resp)
 }
 
 func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, *http.Server) {
@@ -117,9 +148,65 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 }
 
 func testRunNewNode(dbPath, addr string) anonymity.INode {
-	node := anon_testutils.TestNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
+	node := testNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
 	if err := node.Run(); err != nil {
 		return nil
 	}
 	return node
+}
+
+func testNewNode(dbPath, addr string) anonymity.INode {
+	db, err := database.NewSQLiteDB(
+		database.NewSettings(&database.SSettings{
+			FPath:      dbPath,
+			FHashing:   true,
+			FCipherKey: []byte("CIPHER"),
+		}),
+	)
+	if err != nil {
+		return nil
+	}
+	node := anonymity.NewNode(
+		anonymity.NewSettings(&anonymity.SSettings{
+			FServiceName:   "TEST",
+			FRetryEnqueue:  0,
+			FNetworkMask:   1,
+			FFetchTimeWait: time.Minute,
+		}),
+		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
+		anonymity.NewWrapperDB().Set(db),
+		testNewNetworkNode(addr),
+		queue.NewMessageQueue(
+			queue.NewSettings(&queue.SSettings{
+				FMainCapacity: testutils.TCQueueCapacity,
+				FPoolCapacity: testutils.TCQueueCapacity,
+				FDuration:     500 * time.Millisecond,
+			}),
+			client.NewClient(
+				message.NewSettings(&message.SSettings{
+					FWorkSize:    testutils.TCWorkSize,
+					FMessageSize: testutils.TCMessageSize,
+				}),
+				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+			),
+		),
+		asymmetric.NewListPubKeys(),
+	)
+	return node
+}
+
+func testNewNetworkNode(addr string) network.INode {
+	return network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FAddress:     addr,
+			FCapacity:    testutils.TCCapacity,
+			FMaxConnects: testutils.TCMaxConnects,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FNetworkKey:    "_",
+				FMessageSize:   testutils.TCMessageSize,
+				FLimitVoidSize: 1, // not used
+				FFetchTimeWait: 1, // not used
+			}),
+		}),
+	)
 }

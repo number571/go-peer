@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -18,7 +19,15 @@ func TestConn(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)
 
-	conn, err := NewConn(NewSettings(&SSettings{}), testutils.TgAddrs[17])
+	conn, err := NewConn(
+		NewSettings(&SSettings{
+			FNetworkKey:    "_",
+			FMessageSize:   testutils.TCMessageSize,
+			FLimitVoidSize: 1, // not used
+			FFetchTimeWait: 5 * time.Second,
+		}),
+		testutils.TgAddrs[17],
+	)
 	if err != nil {
 		t.Error(err)
 		return
@@ -50,7 +59,15 @@ func testNewService(t *testing.T) net.Listener {
 				break
 			}
 
-			conn := LoadConn(NewSettings(&SSettings{}), aconn)
+			conn := LoadConn(
+				NewSettings(&SSettings{
+					FNetworkKey:    "_",
+					FMessageSize:   testutils.TCMessageSize,
+					FLimitVoidSize: 1,
+					FFetchTimeWait: 5 * time.Second,
+				}),
+				aconn,
+			)
 			pld := conn.ReadPayload()
 			if pld == nil {
 				break

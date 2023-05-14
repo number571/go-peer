@@ -187,7 +187,7 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 			return nil, errors.New("chan is closed")
 		}
 		return result, nil
-	case <-time.After(p.GetSettings().GetTimeWait()):
+	case <-time.After(p.GetSettings().GetFetchTimeWait()):
 		return nil, errors.New("time is over")
 	}
 }

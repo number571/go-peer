@@ -20,10 +20,10 @@ func NewSettings(pSett *SSettings) ISettings {
 		FInfo: pSett.FInfo,
 		FWarn: pSett.FWarn,
 		FErro: pSett.FErro,
-	}).useDefaultValues()
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	// set nil for void fields
 	return p
 }

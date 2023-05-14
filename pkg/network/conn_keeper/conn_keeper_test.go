@@ -6,26 +6,25 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/conn"
 	testutils "github.com/number571/go-peer/test/_data"
 )
-
-func TestConnKeeperSettings(t *testing.T) {
-	sett := NewSettings(&SSettings{})
-	if sett.GetDuration() != cDuration {
-		t.Error("default duration != default settings")
-		return
-	}
-	if sett.GetConnections() != nil {
-		t.Error("default connections != default settings")
-		return
-	}
-}
 
 func TestConnKeeper(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)
 
-	node := network.NewNode(network.NewSettings(&network.SSettings{}))
+	node := network.NewNode(network.NewSettings(&network.SSettings{
+		FAddress:     "",
+		FCapacity:    testutils.TCCapacity,
+		FMaxConnects: testutils.TCMaxConnects,
+		FConnSettings: conn.NewSettings(&conn.SSettings{
+			FNetworkKey:    "_",
+			FMessageSize:   testutils.TCMessageSize,
+			FLimitVoidSize: 1, // not used
+			FFetchTimeWait: 1, // not used
+		}),
+	}))
 	connKeeper := NewConnKeeper(
 		NewSettings(&SSettings{
 			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },

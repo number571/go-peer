@@ -8,46 +8,40 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cCapacity     = (1 << 5)
-	cPullCapacity = (1 << 5)
-	cDuration     = time.Second
-)
-
 type SSettings sSettings
 type sSettings struct {
-	FCapacity     uint64
-	FPullCapacity uint64
+	FMainCapacity uint64
+	FPoolCapacity uint64
 	FDuration     time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FCapacity:     pSett.FCapacity,
-		FPullCapacity: pSett.FPullCapacity,
+		FMainCapacity: pSett.FMainCapacity,
+		FPoolCapacity: pSett.FPoolCapacity,
 		FDuration:     pSett.FDuration,
-	}).useDefaultValues()
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
-	if p.FCapacity == 0 {
-		p.FCapacity = cCapacity
+func (p *sSettings) mustNotNull() ISettings {
+	if p.FMainCapacity == 0 {
+		panic(`p.FMainCapacity == 0`)
 	}
-	if p.FPullCapacity == 0 {
-		p.FPullCapacity = cPullCapacity
+	if p.FPoolCapacity == 0 {
+		panic(`p.FPoolCapacity == 0`)
 	}
 	if p.FDuration == 0 {
-		p.FDuration = cDuration
+		panic(`p.FDuration == 0`)
 	}
 	return p
 }
 
-func (p *sSettings) GetCapacity() uint64 {
-	return p.FCapacity
+func (p *sSettings) GetMainCapacity() uint64 {
+	return p.FMainCapacity
 }
 
-func (p *sSettings) GetPullCapacity() uint64 {
-	return p.FPullCapacity
+func (p *sSettings) GetPoolCapacity() uint64 {
+	return p.FPoolCapacity
 }
 
 func (p *sSettings) GetDuration() time.Duration {

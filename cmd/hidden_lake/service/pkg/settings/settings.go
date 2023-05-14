@@ -27,13 +27,13 @@ const (
 )
 
 const (
-	CRetryEnqueue = 2
-	CTimeWait     = time.Minute
+	CRetryEnqueue  = 2
+	CFetchTimeWait = time.Minute
 )
 
 const (
 	CQueueCapacity     = (1 << 6) // messages in queue
-	CQueuePullCapacity = (1 << 5) // generated fake messages
+	CQueuePoolCapacity = (1 << 5) // generated fake messages
 	CQueueDuration     = 5 * time.Second
 )
 
@@ -43,7 +43,7 @@ const (
 	CNetworkMaxConns = (1 << 6)  // 64
 	CWorkSize        = 20        // bits
 	CMessageSize     = (1 << 20) // 1MiB
-	CMaxVoidSize     = (1 << 20) // 1MiB
+	CLimitVoidSize   = (1 << 20) // 1MiB
 )
 
 const (

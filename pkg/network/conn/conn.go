@@ -63,7 +63,7 @@ func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
 			return nil, fmt.Errorf("failed: read payload")
 		}
 		return rpld, nil
-	case <-time.After(p.fSettings.GetTimeWait()):
+	case <-time.After(p.fSettings.GetFetchTimeWait()):
 		return nil, fmt.Errorf("failed: time out")
 	}
 }
@@ -84,7 +84,7 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	)
 
 	prng := random.NewStdPRNG()
-	voidBytes := prng.GetBytes(prng.GetUint64() % p.fSettings.GetMaxVoidSize())
+	voidBytes := prng.GetBytes(prng.GetUint64() % p.fSettings.GetLimitVoidSize())
 
 	// send headers with length of blocks
 	if err := p.sendBlockSize(encMsgBytes); err != nil {
@@ -103,6 +103,12 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	}
 
 	return nil
+}
+
+func (p *sConn) ReadPayload() payload.IPayload {
+	chPld := make(chan payload.IPayload)
+	go readPayload(p, chPld)
+	return <-chPld
 }
 
 func (p *sConn) sendBytes(pBytes []byte) error {
@@ -153,12 +159,6 @@ func (p *sConn) recvBlockSize() (uint64, error) {
 	return encoding.BytesToUint64(arrLen), nil
 }
 
-func (p *sConn) ReadPayload() payload.IPayload {
-	chPld := make(chan payload.IPayload)
-	go readPayload(p, chPld)
-	return <-chPld
-}
-
 func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 	var pld payload.IPayload
 	defer func() {
@@ -171,7 +171,7 @@ func readPayload(pConn *sConn, pChPld chan payload.IPayload) {
 	}
 
 	voidSize, err := pConn.recvBlockSize()
-	if err != nil || voidSize > pConn.fSettings.GetMaxVoidSize() {
+	if err != nil || voidSize > pConn.fSettings.GetLimitVoidSize() {
 		return
 	}
 

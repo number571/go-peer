@@ -1,32 +1,12 @@
 package testutils
 
-import (
-	"encoding/json"
-	"net/http"
+const (
+	TCMessageSize   = (100 << 10)
+	TCWorkSize      = 10
+	TCCapacity      = (1 << 10)
+	TCMaxConnects   = (1 << 6)
+	TCQueueCapacity = (1 << 4)
 )
-
-func TestEchoPage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var req struct {
-		FMessage string `json:"message"`
-	}
-
-	var resp struct {
-		FEcho  string `json:"echo"`
-		FError int    `json:"error"`
-	}
-
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		resp.FError = 1
-		json.NewEncoder(w).Encode(resp)
-		return
-	}
-
-	resp.FEcho = req.FMessage
-	json.NewEncoder(w).Encode(resp)
-}
 
 var (
 	TgAddrs = [40]string{
@@ -88,15 +68,6 @@ const (
 	TcHead         = uint32(0xDEADBEAF)
 	TcBody         = "hello, world!"
 	TcBodyTemplate = TcBody + " (%d)"
-)
-
-const (
-	TcKey1 = "key1"
-	TcKey2 = "key2"
-	TcKey3 = "key3"
-	TcVal1 = "val1"
-	TcVal2 = "val2"
-	TcVal3 = "val3"
 )
 
 const (

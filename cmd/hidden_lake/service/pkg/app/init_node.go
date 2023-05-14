@@ -15,10 +15,10 @@ import (
 func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:  pkg_settings.CServiceName,
-			FNetworkMask:  pkg_settings.CNetworkMask,
-			FRetryEnqueue: pkg_settings.CRetryEnqueue,
-			FTimeWait:     pkg_settings.CTimeWait,
+			FServiceName:   pkg_settings.CServiceName,
+			FNetworkMask:   pkg_settings.CNetworkMask,
+			FRetryEnqueue:  pkg_settings.CRetryEnqueue,
+			FFetchTimeWait: pkg_settings.CFetchTimeWait,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -30,17 +30,17 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FCapacity:    pkg_settings.CNetworkCapacity,
 				FMaxConnects: pkg_settings.CNetworkMaxConns,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:  pCfg.GetNetwork(),
-					FMessageSize: pkg_settings.CMessageSize,
-					FMaxVoidSize: pkg_settings.CMaxVoidSize,
-					// FTimeWait (conn.FetchPayload not used in anonymity package)
+					FNetworkKey:    pCfg.GetNetwork(),
+					FMessageSize:   pkg_settings.CMessageSize,
+					FLimitVoidSize: pkg_settings.CLimitVoidSize,
+					FFetchTimeWait: 1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FCapacity:     pkg_settings.CQueueCapacity,
-				FPullCapacity: pkg_settings.CQueuePullCapacity,
+				FMainCapacity: pkg_settings.CQueueCapacity,
+				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
 				FDuration:     pkg_settings.CQueueDuration,
 			}),
 			pkg_settings.InitClient(pPrivKey),

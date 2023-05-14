@@ -8,38 +8,32 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cServiceName = "DFT"
-	cMaskNetwork = 0x1111111111111111
-	cTimeWait    = time.Minute
-)
-
 type SSettings sSettings
 type sSettings struct {
-	FServiceName  string
-	FRetryEnqueue uint64
-	FNetworkMask  uint64
-	FTimeWait     time.Duration
+	FServiceName   string
+	FRetryEnqueue  uint64
+	FNetworkMask   uint64
+	FFetchTimeWait time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FServiceName:  pSett.FServiceName,
-		FRetryEnqueue: pSett.FRetryEnqueue,
-		FNetworkMask:  pSett.FNetworkMask,
-		FTimeWait:     pSett.FTimeWait,
-	}).useDefaultValue()
+		FServiceName:   pSett.FServiceName,
+		FRetryEnqueue:  pSett.FRetryEnqueue,
+		FNetworkMask:   pSett.FNetworkMask,
+		FFetchTimeWait: pSett.FFetchTimeWait,
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValue() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FServiceName == "" {
-		p.FServiceName = cServiceName
+		panic(`p.FServiceName == ""`)
 	}
 	if p.FNetworkMask == 0 {
-		p.FNetworkMask = cMaskNetwork
+		panic(`p.FNetworkMask == 0`)
 	}
-	if p.FTimeWait == 0 {
-		p.FTimeWait = cTimeWait
+	if p.FFetchTimeWait == 0 {
+		panic(`p.FTimeWait == 0`)
 	}
 	return p
 }
@@ -48,8 +42,8 @@ func (p *sSettings) GetServiceName() string {
 	return p.FServiceName
 }
 
-func (p *sSettings) GetTimeWait() time.Duration {
-	return p.FTimeWait
+func (p *sSettings) GetFetchTimeWait() time.Duration {
+	return p.FFetchTimeWait
 }
 
 func (p *sSettings) GetNetworkMask() uint64 {

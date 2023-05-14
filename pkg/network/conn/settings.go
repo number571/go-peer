@@ -6,42 +6,35 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cNetworkKey  = "network-key"
-	cMessageSize = (1 << 20)
-	cMaxVoidSize = 1
-	cTimeWait    = time.Minute
-)
-
 type SSettings sSettings
 type sSettings struct {
-	FNetworkKey  string
-	FMessageSize uint64
-	FMaxVoidSize uint64
-	FTimeWait    time.Duration
+	FNetworkKey    string
+	FMessageSize   uint64
+	FLimitVoidSize uint64
+	FFetchTimeWait time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkKey:  pSett.FNetworkKey,
-		FMessageSize: pSett.FMessageSize,
-		FMaxVoidSize: pSett.FMaxVoidSize,
-		FTimeWait:    pSett.FTimeWait,
-	}).useDefaultValues()
+		FNetworkKey:    pSett.FNetworkKey,
+		FMessageSize:   pSett.FMessageSize,
+		FLimitVoidSize: pSett.FLimitVoidSize,
+		FFetchTimeWait: pSett.FFetchTimeWait,
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FNetworkKey == "" {
-		p.FNetworkKey = cNetworkKey
+		panic(`p.FNetworkKey == ""`)
 	}
 	if p.FMessageSize == 0 {
-		p.FMessageSize = cMessageSize
+		panic(`p.FMessageSize == 0`)
 	}
-	if p.FMaxVoidSize == 0 {
-		p.FMaxVoidSize = cMaxVoidSize
+	if p.FLimitVoidSize == 0 {
+		panic(`p.FMaxVoidSize == 0`)
 	}
-	if p.FTimeWait == 0 {
-		p.FTimeWait = cTimeWait
+	if p.FFetchTimeWait == 0 {
+		panic(`p.FFetchTimeWait == 0`)
 	}
 	return p
 }
@@ -54,10 +47,10 @@ func (p *sSettings) GetMessageSize() uint64 {
 	return p.FMessageSize
 }
 
-func (p *sSettings) GetMaxVoidSize() uint64 {
-	return p.FMaxVoidSize
+func (p *sSettings) GetLimitVoidSize() uint64 {
+	return p.FLimitVoidSize
 }
 
-func (p *sSettings) GetTimeWait() time.Duration {
-	return p.FTimeWait
+func (p *sSettings) GetFetchTimeWait() time.Duration {
+	return p.FFetchTimeWait
 }

@@ -31,6 +31,7 @@ func TestApp(t *testing.T) {
 
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
+		FNetwork: "_",
 		FAddress: &config.SAddress{
 			FTCP:  testutils.TgAddrs[14],
 			FHTTP: testutils.TgAddrs[15],

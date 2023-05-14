@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func TestEntropy(t *testing.T) {
@@ -13,13 +14,15 @@ func TestEntropy(t *testing.T) {
 		salt = []byte("it's a salt!")
 	)
 
-	hash := NewEntropyBooster(10, salt).BoostEntropy(msg)
+	hash := NewEntropyBooster(testutils.TCWorkSize, salt).BoostEntropy(msg)
 
 	if bytes.Equal(hash, hashing.NewSHA256Hasher(msg).ToBytes()) {
 		t.Error("hash is correct?")
+		return
 	}
 
-	if !bytes.Equal(hash, NewEntropyBooster(10, salt).BoostEntropy(msg)) {
+	if !bytes.Equal(hash, NewEntropyBooster(testutils.TCWorkSize, salt).BoostEntropy(msg)) {
 		t.Error("hash is not determined")
+		return
 	}
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
-	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
@@ -29,8 +28,9 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:        fmt.Sprintf(databaseTemplate, addr),
-			FMessageSize: anon_testutils.TCMessageSize,
-			FWorkSize:    anon_testutils.TCWorkSize,
+			FMessageSize: testutils.TCMessageSize,
+			FWorkSize:    testutils.TCWorkSize,
+			FCapacity:    testutils.TCCapacity,
 		}),
 	)
 	if err != nil {
@@ -46,8 +46,8 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 			fmt.Sprintf("http://%s", addr),
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FMessageSize: anon_testutils.TCMessageSize,
-				FWorkSize:    anon_testutils.TCWorkSize,
+				FMessageSize: testutils.TCMessageSize,
+				FWorkSize:    testutils.TCWorkSize,
 			}),
 		),
 	)
@@ -67,17 +67,28 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
 	mux := http.NewServeMux()
 
-	connKeeperSettings := &conn_keeper.SSettings{}
+	connKeeperSettings := &conn_keeper.SSettings{
+		FDuration: time.Minute,
+		FConnections: func() []string {
+			return nil
+		},
+	}
+
 	if addrNode != "" {
 		connKeeperSettings.FConnections = func() []string {
 			return []string{addrNode}
 		}
 	}
 
-	sett := anonymity.NewSettings(&anonymity.SSettings{})
+	sett := anonymity.NewSettings(&anonymity.SSettings{
+		FServiceName:   "TEST",
+		FRetryEnqueue:  0,
+		FNetworkMask:   1,
+		FFetchTimeWait: time.Minute,
+	})
 	connKeeper := conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(connKeeperSettings),
-		anon_testutils.TestNewNetworkNode("").HandleFunc(
+		testNewNetworkNode("").HandleFunc(
 			sett.GetNetworkMask(), // default value
 			func(_ network.INode, _ conn.IConn, _ []byte) {
 				// pass response actions
@@ -108,9 +119,25 @@ func testNewClient() client.IClient {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FMessageSize: anon_testutils.TCMessageSize,
-			FWorkSize:    anon_testutils.TCWorkSize,
+			FMessageSize: testutils.TCMessageSize,
+			FWorkSize:    testutils.TCWorkSize,
 		}),
 		privKey,
+	)
+}
+
+func testNewNetworkNode(addr string) network.INode {
+	return network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FAddress:     addr,
+			FCapacity:    testutils.TCCapacity,
+			FMaxConnects: testutils.TCMaxConnects,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FNetworkKey:    "_",
+				FMessageSize:   testutils.TCMessageSize,
+				FLimitVoidSize: 1, // not used
+				FFetchTimeWait: 1, // not used
+			}),
+		}),
 	)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
@@ -18,7 +19,7 @@ func TestCryptoStorage(t *testing.T) {
 
 	sett := NewSettings(&SSettings{
 		FPath:      testStorageName,
-		FWorkSize:  10,
+		FWorkSize:  testutils.TCWorkSize,
 		FCipherKey: []byte("CIPHER"),
 	})
 

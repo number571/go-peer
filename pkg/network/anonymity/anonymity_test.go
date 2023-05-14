@@ -25,7 +25,6 @@ const (
 	tcPathDBTemplate = "database_test_%d_%d.db"
 	tcWait           = time.Minute
 	tcIter           = 10
-	msgSize          = (100 << 10)
 )
 
 func TestComplex(t *testing.T) {
@@ -158,32 +157,36 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 	}
 	node := NewNode(
 		NewSettings(&SSettings{
-			FRetryEnqueue: 0,
-			FTimeWait:     timeWait,
+			FServiceName:   "TEST",
+			FRetryEnqueue:  0,
+			FNetworkMask:   1,
+			FFetchTimeWait: timeWait,
 		}),
 		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:     addr,
-				FCapacity:    (1 << 10),
-				FMaxConnects: 10,
+				FCapacity:    testutils.TCCapacity,
+				FMaxConnects: testutils.TCMaxConnects,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FMessageSize: (100 << 10),
-					FTimeWait:    time.Minute,
+					FNetworkKey:    "_",
+					FMessageSize:   testutils.TCMessageSize,
+					FLimitVoidSize: 1, // not used
+					FFetchTimeWait: 1, // not used
 				}),
 			}),
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FCapacity:     10,
-				FPullCapacity: 5,
+				FMainCapacity: testutils.TCQueueCapacity,
+				FPoolCapacity: testutils.TCQueueCapacity,
 				FDuration:     time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSize:    10,
-					FMessageSize: (100 << 10),
+					FWorkSize:    testutils.TCWorkSize,
+					FMessageSize: testutils.TCMessageSize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),

@@ -4,42 +4,35 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cPath          = "database.db"
-	cWorkSize      = 10
-	cMessageSize   = (1 << 20)
-	cLimitMessages = (1 << 10)
-)
-
 type SSettings sSettings
 type sSettings struct {
-	FPath          string
-	FLimitMessages uint64
-	FMessageSize   uint64
-	FWorkSize      uint64
+	FPath        string
+	FMessageSize uint64
+	FWorkSize    uint64
+	FCapacity    uint64
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FPath:          pSett.FPath,
-		FWorkSize:      pSett.FWorkSize,
-		FMessageSize:   pSett.FMessageSize,
-		FLimitMessages: pSett.FLimitMessages,
-	}).useDefaultValues()
+		FPath:        pSett.FPath,
+		FWorkSize:    pSett.FWorkSize,
+		FMessageSize: pSett.FMessageSize,
+		FCapacity:    pSett.FCapacity,
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValues() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
-		p.FPath = cPath
+		panic(`p.FPath == ""`)
 	}
 	if p.FWorkSize == 0 {
-		p.FWorkSize = cWorkSize
+		panic(`p.FWorkSize == 0`)
 	}
 	if p.FMessageSize == 0 {
-		p.FMessageSize = cMessageSize
+		panic(`p.FMessageSize == 0`)
 	}
-	if p.FLimitMessages == 0 {
-		p.FLimitMessages = cLimitMessages
+	if p.FCapacity == 0 {
+		panic(`p.FLimitMessages == 0`)
 	}
 	return p
 }
@@ -48,8 +41,8 @@ func (p *sSettings) GetPath() string {
 	return p.FPath
 }
 
-func (s *sSettings) GetLimitMessages() uint64 {
-	return s.FLimitMessages
+func (s *sSettings) GetCapacity() uint64 {
+	return s.FCapacity
 }
 
 func (p *sSettings) GetMessageSize() uint64 {

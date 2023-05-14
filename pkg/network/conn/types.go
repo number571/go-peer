@@ -11,8 +11,8 @@ import (
 type ISettings interface {
 	GetNetworkKey() string
 	GetMessageSize() uint64
-	GetMaxVoidSize() uint64
-	GetTimeWait() time.Duration
+	GetLimitVoidSize() uint64
+	GetFetchTimeWait() time.Duration
 }
 
 type IConn interface {

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
@@ -26,8 +27,8 @@ func TestMessage(t *testing.T) {
 	}
 
 	params := NewSettings(&SSettings{
-		FWorkSize:    10,
-		FMessageSize: 100 << 10,
+		FWorkSize:    testutils.TCWorkSize,
+		FMessageSize: testutils.TCMessageSize,
 	})
 	msg := LoadMessage(params, msgBytes)
 	if msg == nil {

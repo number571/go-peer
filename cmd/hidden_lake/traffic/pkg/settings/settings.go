@@ -13,8 +13,8 @@ const (
 )
 
 const (
-	CLimitMessages = (1 << 10)
-	CTimeWait      = 10 * time.Second
+	CCapacity = (1 << 10)
+	CTimeWait = 10 * time.Second
 )
 
 const (

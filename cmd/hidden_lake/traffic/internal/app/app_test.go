@@ -13,7 +13,6 @@ import (
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
-	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 const (
@@ -33,6 +32,7 @@ func TestApp(t *testing.T) {
 	cfg, err := config.BuildConfig(
 		tcPathConfig,
 		&config.SConfig{
+			FNetwork: "_",
 			FAddress: testutils.TgAddrs[23],
 		},
 	)
@@ -59,8 +59,8 @@ func TestApp(t *testing.T) {
 			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FMessageSize: anon_testutils.TCMessageSize,
-				FWorkSize:    anon_testutils.TCWorkSize,
+				FMessageSize: testutils.TCMessageSize,
+				FWorkSize:    testutils.TCWorkSize,
 			}),
 		),
 	)

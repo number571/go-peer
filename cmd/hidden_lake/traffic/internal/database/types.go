@@ -16,7 +16,7 @@ type IKeyValueDB interface {
 
 type ISettings interface {
 	GetPath() string
-	GetLimitMessages() uint64
+	GetCapacity() uint64
 	GetMessageSize() uint64
 	GetWorkSize() uint64
 }

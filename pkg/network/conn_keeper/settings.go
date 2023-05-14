@@ -6,14 +6,6 @@ var (
 	_ ISettings = &sSettings{}
 )
 
-const (
-	cDuration = time.Minute
-)
-
-var (
-	gConnections = func() []string { return nil }
-)
-
 type SSettings sSettings
 type sSettings struct {
 	FConnections func() []string
@@ -24,15 +16,15 @@ func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FConnections: pSett.FConnections,
 		FDuration:    pSett.FDuration,
-	}).useDefaultValue()
+	}).mustNotNull()
 }
 
-func (p *sSettings) useDefaultValue() ISettings {
+func (p *sSettings) mustNotNull() ISettings {
 	if p.FDuration == 0 {
-		p.FDuration = cDuration
+		panic(`p.FDuration = cDuration`)
 	}
 	if p.FConnections == nil {
-		p.FConnections = gConnections
+		panic(`p.FConnections == nil`)
 	}
 	return p
 }

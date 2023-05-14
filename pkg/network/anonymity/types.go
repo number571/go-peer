@@ -19,9 +19,9 @@ type (
 
 type ISettings interface {
 	GetServiceName() string
-	GetTimeWait() time.Duration
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
+	GetFetchTimeWait() time.Duration
 }
 
 type INode interface {

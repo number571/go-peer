@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
-	anon_testutils "github.com/number571/go-peer/test/_data/anonymity"
 )
 
 func TestHandleHashesAPI(t *testing.T) {
@@ -26,8 +25,8 @@ func TestHandleHashesAPI(t *testing.T) {
 
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FMessageSize: anon_testutils.TCMessageSize,
-			FWorkSize:    anon_testutils.TCWorkSize,
+			FMessageSize: testutils.TCMessageSize,
+			FWorkSize:    testutils.TCWorkSize,
 		}),
 		privKey,
 	)

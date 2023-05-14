@@ -20,10 +20,10 @@ type sMessageQueue struct {
 	fSettings ISettings
 	fClient   client.IClient
 	fQueue    chan message.IMessage
-	fMsgPull  sPull
+	fMsgPool  sPool
 }
 
-type sPull struct {
+type sPool struct {
 	fSignal chan struct{}
 	fQueue  chan message.IMessage
 }
@@ -32,9 +32,9 @@ func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
 	return &sMessageQueue{
 		fSettings: pSett,
 		fClient:   pClient,
-		fQueue:    make(chan message.IMessage, pSett.GetCapacity()),
-		fMsgPull: sPull{
-			fQueue: make(chan message.IMessage, pSett.GetPullCapacity()),
+		fQueue:    make(chan message.IMessage, pSett.GetMainCapacity()),
+		fMsgPool: sPool{
+			fQueue: make(chan message.IMessage, pSett.GetPoolCapacity()),
 		},
 	}
 }
@@ -48,7 +48,7 @@ func (p *sMessageQueue) UpdateClient(pClient client.IClient) {
 	defer p.fMutex.Unlock()
 
 	p.fClient = pClient
-	p.fQueue = make(chan message.IMessage, p.GetSettings().GetCapacity())
+	p.fQueue = make(chan message.IMessage, p.GetSettings().GetMainCapacity())
 }
 
 func (p *sMessageQueue) GetClient() client.IClient {
@@ -67,18 +67,18 @@ func (p *sMessageQueue) Run() error {
 	}
 	p.fIsRun = true
 
-	p.fMsgPull.fSignal = make(chan struct{})
+	p.fMsgPool.fSignal = make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-p.readSignal():
 				return
 			case <-time.After(p.GetSettings().GetDuration() / 2):
-				currLen := len(p.fMsgPull.fQueue)
-				if uint64(currLen) >= p.GetSettings().GetPullCapacity() {
+				currLen := len(p.fMsgPool.fQueue)
+				if uint64(currLen) >= p.GetSettings().GetPoolCapacity() {
 					continue
 				}
-				p.fMsgPull.fQueue <- p.newPseudoMessage()
+				p.fMsgPool.fQueue <- p.newPseudoMessage()
 			}
 		}
 	}()
@@ -95,7 +95,7 @@ func (p *sMessageQueue) Stop() error {
 	}
 	p.fIsRun = false
 
-	close(p.fMsgPull.fSignal)
+	close(p.fMsgPool.fSignal)
 	return nil
 }
 
@@ -103,7 +103,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if uint64(len(p.fQueue)) >= p.GetSettings().GetCapacity() {
+	if uint64(len(p.fQueue)) >= p.GetSettings().GetMainCapacity() {
 		return errors.New("queue already full, need wait and retry")
 	}
 
@@ -124,7 +124,7 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 			defer p.fMutex.Unlock()
 
 			if len(p.fQueue) == 0 {
-				p.fQueue <- (<-p.fMsgPull.fQueue)
+				p.fQueue <- (<-p.fMsgPool.fQueue)
 			}
 			closed <- false
 		}
@@ -158,5 +158,5 @@ func (p *sMessageQueue) readSignal() <-chan struct{} {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	return p.fMsgPull.fSignal
+	return p.fMsgPool.fSignal
 }
