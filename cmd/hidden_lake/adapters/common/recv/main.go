@@ -25,7 +25,9 @@ func initDB() database.IKeyValueDB {
 	var err error
 	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
-			FPath: databasePath,
+			FPath:      databasePath,
+			FHashing:   false,
+			FCipherKey: []byte("_"),
 		}),
 	)
 	if err != nil {

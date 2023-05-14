@@ -1,7 +1,6 @@
 package database
 
 import (
-	"bytes"
 	"database/sql"
 	"sync"
 
@@ -14,6 +13,7 @@ import (
 )
 
 const (
+	cSaltKey = "__SALT__"
 	cTabelKV = `
 		CREATE TABLE IF NOT EXISTS kv (
 			key text unique, 
@@ -44,12 +44,11 @@ func NewSQLiteDB(pSett ISettings) (IKeyValueDB, error) {
 		return nil, err
 	}
 
-	saltKey := pSett.GetSaltKey()
 	var saltValue string
-	row := db.QueryRow("SELECT value FROM kv WHERE key = $1", saltKey)
+	row := db.QueryRow("SELECT value FROM kv WHERE key = $1", cSaltKey)
 	if err := row.Scan(&saltValue); err != nil {
 		saltValue = encoding.HexEncode(random.NewStdPRNG().GetBytes(symmetric.CAESKeySize))
-		_, err := db.Exec("REPLACE INTO kv (key, value) VALUES ($1,$2)", pSett.GetSaltKey(), saltValue)
+		_, err := db.Exec("REPLACE INTO kv (key, value) VALUES ($1,$2)", cSaltKey, saltValue)
 		if err != nil {
 			return nil, err
 		}
@@ -117,12 +116,5 @@ func (p *sSQLiteDB) tryHash(pKey []byte) []byte {
 	if !p.fSettings.GetHashing() {
 		return pKey
 	}
-	saltWithKey := bytes.Join(
-		[][]byte{
-			p.fSalt,
-			pKey,
-		},
-		[]byte{},
-	)
-	return hashing.NewSHA256Hasher(saltWithKey).ToBytes()
+	return hashing.NewHMACSHA256Hasher(p.fSalt, pKey).ToBytes()
 }

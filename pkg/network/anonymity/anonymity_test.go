@@ -150,7 +150,7 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 		database.NewSettings(&database.SSettings{
 			FPath:      fmt.Sprintf(tcPathDBTemplate, i, typeDB),
 			FHashing:   true,
-			FCipherKey: []byte(testutils.TcKey1),
+			FCipherKey: []byte("CIPHER"),
 		}),
 	)
 	if err != nil {

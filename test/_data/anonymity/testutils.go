@@ -20,12 +20,12 @@ const (
 	TCWorkSize    = 10
 )
 
-func TestNewNode(pathDB, addr string) anonymity.INode {
+func TestNewNode(dbPath, addr string) anonymity.INode {
 	db, err := database.NewSQLiteDB(
 		database.NewSettings(&database.SSettings{
-			FPath:      pathDB,
+			FPath:      dbPath,
 			FHashing:   true,
-			FCipherKey: []byte(testutils.TcKey1),
+			FCipherKey: []byte("CIPHER"),
 		}),
 	)
 	if err != nil {

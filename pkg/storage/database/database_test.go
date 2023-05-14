@@ -8,7 +8,6 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	testutils "github.com/number571/go-peer/test/_data"
 )
 
 type (
@@ -34,7 +33,9 @@ func testFailCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := dbConstruct(NewSettings(&SSettings{
-		FPath: dbPath,
+		FPath:      dbPath,
+		FHashing:   false,
+		FCipherKey: []byte("CIPHER"),
 	}))
 	if err == nil {
 		t.Errorf("[testFailCreate] incorrect: error is nil")
@@ -47,16 +48,21 @@ func testFailCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 }
 
 func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
-	defer os.RemoveAll(cPath)
+	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
+	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(NewSettings(&SSettings{}))
+	store, err := dbConstruct(NewSettings(&SSettings{
+		FPath:      dbPath,
+		FHashing:   false,
+		FCipherKey: []byte("CIPHER"),
+	}))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer store.Close()
 
-	if !bytes.Equal(store.GetSettings().GetCipherKey(), []byte(cCipherKey)) {
+	if !bytes.Equal(store.GetSettings().GetCipherKey(), []byte("CIPHER")) {
 		t.Error("[testCreate] incorrect default value = cipherKey")
 		return
 	}
@@ -66,17 +72,17 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 		return
 	}
 
-	if store.GetSettings().GetPath() != cPath {
+	if store.GetSettings().GetPath() != dbPath {
 		t.Error("[testCreate] incorrect default value = path")
 		return
 	}
 
-	if err := store.Set([]byte(testutils.TcKey2), []byte(testutils.TcKey3)); err != nil {
+	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if _, err := store.Get([]byte(testutils.TcKey2)); err != nil {
+	if _, err := store.Get([]byte("KEY")); err != nil {
 		t.Error(err)
 		return
 	}
@@ -89,7 +95,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	store, err := dbConstruct(NewSettings(&SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
-		FCipherKey: []byte(testutils.TcKey1),
+		FCipherKey: []byte("CIPHER1"),
 	}))
 	if err != nil {
 		t.Error("[testCipherKey]", err)
@@ -97,13 +103,13 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	}
 	defer store.Close()
 
-	store.Set([]byte(testutils.TcKey2), []byte(testutils.TcKey3))
+	store.Set([]byte("KEY"), []byte("VALUE"))
 
 	store.Close() // open this database with another key
 	store, err = dbConstruct(NewSettings(&SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
-		FCipherKey: []byte(testutils.TcKey2),
+		FCipherKey: []byte("CIPHER2"),
 	}))
 	if err != nil {
 		t.Error("[testCipherKey]", err)
@@ -111,7 +117,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	}
 	defer store.Close()
 
-	if _, err := store.Get([]byte(testutils.TcKey2)); err == nil {
+	if _, err := store.Get([]byte("KEY")); err == nil {
 		t.Error("[testCipherKey] success read value by another cipher key")
 		return
 	}
@@ -124,7 +130,7 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 	store, err := dbConstruct(NewSettings(&SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
-		FCipherKey: []byte(testutils.TcKey1),
+		FCipherKey: []byte("CIPHER"),
 	}))
 	if err != nil {
 		t.Error("[testBasic]", err)
@@ -133,9 +139,9 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer store.Close()
 
 	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
-	store.Set([]byte(testutils.TcKey2), secret1)
+	store.Set([]byte("KEY"), secret1)
 
-	secret2, err := store.Get([]byte(testutils.TcKey2))
+	secret2, err := store.Get([]byte("KEY"))
 	if err != nil {
 		t.Error("[testBasic]", err)
 		return
@@ -146,7 +152,7 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 		return
 	}
 
-	err = store.Del([]byte(testutils.TcKey2))
+	err = store.Del([]byte("KEY"))
 	if err != nil {
 		t.Error("[testBasic]", err)
 		return
