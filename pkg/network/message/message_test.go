@@ -14,13 +14,16 @@ const (
 )
 
 func TestMessage(t *testing.T) {
-	msg := NewMessage(
-		payload.NewPayload(tcHead, []byte(tcBody)),
-		[]byte(tcKey),
-	)
+	pld := payload.NewPayload(tcHead, []byte(tcBody))
+	msg := NewMessage(pld, []byte(tcKey))
 
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
+		return
+	}
+
+	if !bytes.Equal(msg.GetHash(), getHash([]byte(tcKey), pld.ToBytes())) {
+		t.Error("payload hash not equal hash of message")
 		return
 	}
 

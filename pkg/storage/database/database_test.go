@@ -70,6 +70,16 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 		t.Error("[testCreate] incorrect default value = path")
 		return
 	}
+
+	if err := store.Set([]byte(testutils.TcKey2), []byte(testutils.TcKey3)); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := store.Get([]byte(testutils.TcKey2)); err != nil {
+		t.Error(err)
+		return
+	}
 }
 
 func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {

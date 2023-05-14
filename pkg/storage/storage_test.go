@@ -19,6 +19,13 @@ func TestCryptoStorage(t *testing.T) {
 	os.Remove(testStorageName)
 	defer os.Remove(testStorageName)
 
+	_, err := NewCryptoStorage(testStorageName, []byte(testutils.TcKey1), 10)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// try open already exists storage
 	store, err := NewCryptoStorage(testStorageName, []byte(testutils.TcKey1), 10)
 	if err != nil {
 		t.Error(err)
