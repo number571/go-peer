@@ -30,7 +30,6 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:     "",
 				FMaxConnects: 1, // only one HLS from cfg.Connection()
 				FCapacity:    hls_settings.CNetworkCapacity,
 				FConnSettings: conn.NewSettings(&conn.SSettings{

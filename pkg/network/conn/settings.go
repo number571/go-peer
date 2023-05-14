@@ -24,9 +24,6 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FNetworkKey == "" {
-		panic(`p.FNetworkKey == ""`)
-	}
 	if p.FMessageSize == 0 {
 		panic(`p.FMessageSize == 0`)
 	}

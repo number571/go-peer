@@ -21,7 +21,6 @@ func TestConn(t *testing.T) {
 
 	conn, err := NewConn(
 		NewSettings(&SSettings{
-			FNetworkKey:    "_",
 			FMessageSize:   testutils.TCMessageSize,
 			FLimitVoidSize: 1, // not used
 			FFetchTimeWait: 5 * time.Second,
@@ -61,7 +60,6 @@ func testNewService(t *testing.T) net.Listener {
 
 			conn := LoadConn(
 				NewSettings(&SSettings{
-					FNetworkKey:    "_",
 					FMessageSize:   testutils.TCMessageSize,
 					FLimitVoidSize: 1,
 					FFetchTimeWait: 5 * time.Second,

@@ -202,7 +202,6 @@ func testNewNetworkNode(addr string) network.INode {
 			FCapacity:    testutils.TCCapacity,
 			FMaxConnects: testutils.TCMaxConnects,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FNetworkKey:    "_",
 				FMessageSize:   testutils.TCMessageSize,
 				FLimitVoidSize: 1, // not used
 				FFetchTimeWait: 1, // not used
