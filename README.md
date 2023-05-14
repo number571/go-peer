@@ -57,6 +57,14 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 The `Hidden Lake Service` is the core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
 
+Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networkds (1^stage)
+:-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
+Theoretical provability  |  +  |  +  |  +
+Ease of software implementation  |  +  |  -  |  -
+Polymorphism of information  |  -  |  +  |  +
+Static communication delay  |  +  |  -  |  +
+Network scales easily  |  -  |  -  |  -
+
 A feature of HLS (compared to many other anonymous networks) is its easy adaptation to a hostile centralized environment. Anonymity can be restored literally from one node in the network, even if it is the only point of failure.
 
 > More information about HLS in the [habr.com/ru/post/696504](https://habr.com/ru/post/696504/ "Habr HLS")
