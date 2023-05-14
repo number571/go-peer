@@ -1,12 +1,25 @@
-<br>
+
 <p align="center">
     <img src="images/go-peer_logo.png" alt="go-peer_logo.png"/>
 </p>
 
-<h2 align="center" style="font-size: 5vmin;">
-    <strong>
-        Anonymity and Security without compromise
-   </strong>
+<h2>
+	<p align="center">
+    		<strong>
+        		Anonymity and Security without compromise
+   		</strong>
+	</p>
+	<p align="center">
+		<a href="https://github.com/number571/go-peer/actions">
+        		<img src="https://github.com/number571/go-peer/actions/workflows/makefile.yml/badge.svg" alt="Tests" />
+		</a>
+		<a href="https://github.com/number571/go-peer/pulse">
+        		<img src="https://img.shields.io/github/commit-activity/m/number571/go-peer" alt="Activity" />
+		</a>
+	</p>
+	<p>
+		About
+	</p>
 </h2>
 
 The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes in the decentralized form. The library can be divided into several main modules:
