@@ -1,8 +1,13 @@
-# go-peer
+<br>
+<p align="center">
+    <img src="images/go-peer_logo.png" alt="go-peer_logo.png"/>
+</p>
 
-> Library for create secure and anonymity decentralized networks
-
-<img src="images/go-peer_logo.png" alt="go-peer_logo.png"/>
+<h1 align="center" style="font-size: 5vmin;">
+    <strong>
+        Anonymity and Security without compromise
+   </strong>
+</h1>
 
 The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes in the decentralized form. The library can be divided into several main modules:
 
