@@ -18,7 +18,7 @@
 		</a>
 	</p>
 	<p>
-		About
+		About project
 	</p>
 </h2>
 
