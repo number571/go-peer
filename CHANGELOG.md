@@ -14,12 +14,17 @@ Init.
 - Makefiles `hidden_lake`: append all-build, all-clean options
 - Package `anonymity`: create adapter to interface payload.IPayload
 - Article `theory_of_the_structure_of_hidden_systems`: append new section (introduction / economic reasons)
+- NewSettings functions: defaultValues -> mustNotNull (strict validation)
+- Package `storage`: NewCryptoStorage now get ISettings
 
 ### CHANGES
 
 - Package `anonymity`: deleted limit chars in serviceName logger.ILogger
 - Package `anonymity`: BroadcastPayload corresponds to the FetchPayload interface
 - Service `hidden_lake`: rename CHeaderHLS -> CServiceMask
+- Package `storage`: deleted memory storage
+- Package `database`: deleted settings value - salt
+- Package `test/_data`: reduced the dependency of other packages on this
 
 ### BUG FIXES
 

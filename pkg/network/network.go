@@ -6,9 +6,9 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -20,7 +20,7 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
-	fHashMapping  storage.IKeyValueStorage
+	fHashMapping  map[string]struct{}
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
 }
@@ -31,7 +31,7 @@ type sNode struct {
 func NewNode(pSett ISettings) INode {
 	return &sNode{
 		fSettings:     pSett,
-		fHashMapping:  storage.NewMemoryStorage(pSett.GetCapacity()),
+		fHashMapping:  make(map[string]struct{}, pSett.GetCapacity()),
 		fConnections:  make(map[string]conn.IConn),
 		fHandleRoutes: make(map[uint64]IHandlerF),
 	}
@@ -217,14 +217,15 @@ func (p *sNode) inMappingWithSet(pHash []byte) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	sHash := encoding.HexEncode(pHash)
+
 	// skey already exists
-	_, err := p.fHashMapping.Get(pHash)
-	if err == nil {
+	if _, ok := p.fHashMapping[sHash]; ok {
 		return true
 	}
 
 	// push skey to mapping
-	p.fHashMapping.Set(pHash, []byte{1})
+	p.fHashMapping[sHash] = struct{}{}
 	return false
 }
 

@@ -9,9 +9,9 @@ import (
 )
 
 func initCryptoStorage(pCfg config.IConfig, pPathTo string) (storage.IKeyValueStorage, error) {
-	return storage.NewCryptoStorage(
-		fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
-		[]byte(pCfg.GetStorageKey()),
-		hlm_settings.CWorkForKeys,
-	)
+	return storage.NewCryptoStorage(storage.NewSettings(&storage.SSettings{
+		FPath:      fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
+		FWorkSize:  hlm_settings.CWorkForKeys,
+		FCipherKey: []byte(pCfg.GetStorageKey()),
+	}))
 }
