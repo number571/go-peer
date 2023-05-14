@@ -1,5 +1,3 @@
-# go-peer
-
 <br>
 <p align="center">
     <img src="images/go-peer_logo.png" alt="go-peer_logo.png"/>
