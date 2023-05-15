@@ -34,9 +34,7 @@
         		<img src="https://img.shields.io/badge/вконтакте-%232E87FB.svg?&style=for-the-badge&logo=vk&logoColor=white" alt="VKontakte" />
 		</a>
 	</p>
-	<p>
-		About project
-	</p>
+	About project
 </h2>
 
 The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes in the decentralized form. The library can be divided into several main modules:
