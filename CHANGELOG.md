@@ -16,6 +16,7 @@ Init.
 - Article `theory_of_the_structure_of_hidden_systems`: append new section (introduction / economic reasons)
 - Functions `NewSettings`: defaultValues -> mustNotNull (strict validation)
 - Package `storage`: NewCryptoStorage now get ISettings
+- Update `README.md`: append badgers, append table in HLS
 
 ### CHANGES
 
