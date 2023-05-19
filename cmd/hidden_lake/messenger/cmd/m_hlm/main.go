@@ -37,7 +37,7 @@ func main() {
 }
 
 func constructApp() error {
-	if gAppHLS == nil || gAppHLM == nil {
+	if gAppHLS == nil && gAppHLM == nil {
 		var err error
 		gAppHLS, gAppHLM, err = initApp(mobile.CAndroidFullPath)
 		if err != nil {

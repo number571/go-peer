@@ -29,7 +29,8 @@ Init.
 
 ### BUG FIXES
 
-- Gitignore (HLT): change m_hls.apk -> m_hlt.apk 
+- Gitignore `HLT`: change m_hls.apk -> m_hlt.apk 
+- Application `HLM_M`: change `gAppHLS == nil || gAppHLM == nil` -> `gAppHLS == nil && gAppHLM == nil`
 
 <!-- ... -->
 
