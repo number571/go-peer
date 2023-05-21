@@ -17,70 +17,71 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pNode anonymity.INode) htt
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vFriend pkg_settings.SFriend
 
-		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
-			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
-			return
-		}
-
-		if pR.Method == http.MethodGet {
+		switch pR.Method {
+		case http.MethodGet:
 			friends := pWrapper.GetConfig().GetFriends()
 			listFriends := make([]string, 0, len(friends))
 			for name, pubKey := range friends {
 				listFriends = append(listFriends, fmt.Sprintf("%s:%s", name, pubKey.ToString()))
 			}
-			api.Response(pW, pkg_settings.CErrorNone, strings.Join(listFriends, ","))
+			api.Response(pW, http.StatusOK, strings.Join(listFriends, ","))
+			return
+		case http.MethodPost, http.MethodDelete:
+			// next
+		default:
+			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if err := json.NewDecoder(pR.Body).Decode(&vFriend); err != nil {
-			api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
+			api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
 
 		aliasName := strings.TrimSpace(vFriend.FAliasName)
 		if aliasName == "" {
-			api.Response(pW, pkg_settings.CErrorValue, "failed: load alias name")
+			api.Response(pW, http.StatusTeapot, "failed: load alias name")
 			return
 		}
 
+		friends := pWrapper.GetConfig().GetFriends()
+
 		switch pR.Method {
 		case http.MethodPost:
-			pubKey := asymmetric.LoadRSAPubKey(vFriend.FPublicKey)
-			if pubKey == nil {
-				api.Response(pW, pkg_settings.CErrorPubKey, "failed: load public key")
+			if _, ok := friends[aliasName]; ok {
+				api.Response(pW, http.StatusNotAcceptable, "failed: friend already exist")
 				return
 			}
 
-			friends := pWrapper.GetConfig().GetFriends()
-			if _, ok := friends[aliasName]; ok {
-				api.Response(pW, pkg_settings.CErrorExist, "failed: friend already exist")
+			pubKey := asymmetric.LoadRSAPubKey(vFriend.FPublicKey)
+			if pubKey == nil {
+				api.Response(pW, http.StatusBadRequest, "failed: load public key")
 				return
 			}
 
 			friends[aliasName] = pubKey
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
-				api.Response(pW, pkg_settings.CErrorAction, "failed: update friends")
+				api.Response(pW, http.StatusInternalServerError, "failed: update friends")
 				return
 			}
 
 			pNode.GetListPubKeys().AddPubKey(pubKey)
-			api.Response(pW, pkg_settings.CErrorNone, "success: update friends")
+			api.Response(pW, http.StatusOK, "success: update friends")
 		case http.MethodDelete:
-			friends := pWrapper.GetConfig().GetFriends()
 			pubKey, ok := friends[aliasName]
 			if !ok {
-				api.Response(pW, pkg_settings.CErrorNotExist, "failed: friend does not exist")
+				api.Response(pW, http.StatusNotFound, "failed: friend does not exist")
 				return
 			}
 
 			delete(friends, aliasName)
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
-				api.Response(pW, pkg_settings.CErrorAction, "failed: delete friend"+err.Error())
+				api.Response(pW, http.StatusInternalServerError, "failed: delete friend")
 				return
 			}
 
 			pNode.GetListPubKeys().DelPubKey(pubKey)
-			api.Response(pW, pkg_settings.CErrorNone, "success: delete friend")
+			api.Response(pW, http.StatusOK, "success: delete friend")
 		}
 	}
 }

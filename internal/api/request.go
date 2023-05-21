@@ -40,28 +40,19 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 	}
 	defer resp.Body.Close()
 
-	res, err := loadResponse(resp.Body)
+	return loadResponse(resp.StatusCode, resp.Body)
+}
+
+func loadResponse(pStatusCode int, pReader io.ReadCloser) (string, error) {
+	resp, err := io.ReadAll(pReader)
 	if err != nil {
 		return "", err
 	}
 
-	return res.FResult, nil
-}
-
-func loadResponse(pReader io.ReadCloser) (*SResponse, error) {
-	body, err := io.ReadAll(pReader)
-	if err != nil {
-		return nil, err
+	result := string(resp)
+	if pStatusCode != http.StatusOK {
+		return "", fmt.Errorf("error code = %d (%s)", pStatusCode, result)
 	}
 
-	resp := &SResponse{}
-	if err := json.Unmarshal(body, resp); err != nil {
-		return nil, err
-	}
-
-	if resp.FReturn != CErrorNone {
-		return nil, fmt.Errorf("error code = %d (%s)", resp.FReturn, resp.FResult)
-	}
-
-	return resp, nil
+	return result, nil
 }

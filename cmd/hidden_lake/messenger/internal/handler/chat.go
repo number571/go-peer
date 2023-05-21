@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -12,7 +11,6 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
-	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
@@ -88,7 +86,7 @@ func FriendsChatPage(pState state.IState) http.HandlerFunc {
 				return
 			}
 
-			res, err := client.FetchRequest(
+			resp, err := client.FetchRequest(
 				friendPubKey,
 				request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 					WithHead(map[string]string{
@@ -101,13 +99,7 @@ func FriendsChatPage(pState state.IState) http.HandlerFunc {
 				return
 			}
 
-			resp := &api.SResponse{}
-			if err := json.Unmarshal(res, resp); err != nil {
-				fmt.Fprint(pW, "error: receive response")
-				return
-			}
-
-			if resp.FResult != hlm_settings.CTitlePattern {
+			if string(resp.GetBody()) != hlm_settings.CTitlePattern {
 				fmt.Fprint(pW, "error: invalid response")
 				return
 			}

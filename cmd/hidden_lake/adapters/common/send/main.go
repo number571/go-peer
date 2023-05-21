@@ -34,14 +34,14 @@ func main() {
 func trafficPage(portService int) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			api.Response(w, 2, "failed: incorrect method")
+			api.Response(w, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		// get message from HLT
 		msgBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			api.Response(w, 3, "failed: read body")
+			api.Response(w, http.StatusConflict, "failed: read body")
 			return
 		}
 
@@ -58,26 +58,26 @@ func pushMessageToService(portService int, msgBytes []byte) (int, string) {
 		bytes.NewBuffer(msgBytes),
 	)
 	if err != nil {
-		return 4, "failed: build request"
+		return http.StatusNotImplemented, "failed: build request"
 	}
 
 	// send request to service
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 5, "failed: bad request"
+		return http.StatusBadRequest, "failed: bad request"
 	}
 	defer resp.Body.Close()
 
 	// read response from service
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 6, "failed: read body from service"
+		return http.StatusBadGateway, "failed: read body from service"
 	}
 
 	// read body of response
 	if len(res) == 0 || res[0] == '!' {
-		return 7, "failed: incorrect response from service"
+		return http.StatusForbidden, "failed: incorrect response from service"
 	}
 
-	return 1, "success: push to service"
+	return http.StatusOK, "success: push to service"
 }

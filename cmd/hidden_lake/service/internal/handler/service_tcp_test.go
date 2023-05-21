@@ -9,6 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 
@@ -134,13 +135,19 @@ func testStartClientHLS() (anonymity.INode, error) {
 	)
 
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey()
-	res, err := node.FetchPayload(pubKey, pld)
+	respBytes, err := node.FetchPayload(pubKey, pld)
 	if err != nil {
 		return node, err
 	}
 
-	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		return node, fmt.Errorf("result does not match; got '%s'", string(res))
+	resp, err := response.LoadResponse(respBytes)
+	if err != nil {
+		return node, err
+	}
+
+	body := resp.GetBody()
+	if string(body) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
+		return node, fmt.Errorf("result does not match; got '%s'", string(body))
 	}
 
 	return node, nil

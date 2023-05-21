@@ -6,9 +6,9 @@ type IRequest interface {
 	WithHead(map[string]string) IRequest
 	WithBody([]byte) IRequest
 
-	Method() string
-	Host() string
-	Path() string
-	Head() map[string]string
-	Body() []byte
+	GetMethod() string
+	GetHost() string
+	GetPath() string
+	GetHead() map[string]string
+	GetBody() []byte
 }

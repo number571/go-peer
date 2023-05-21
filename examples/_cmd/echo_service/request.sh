@@ -28,4 +28,4 @@ PUSH_FORMAT='{
 
 d="$(date +%s)";
 curl -i -X POST -H 'Accept: application/json' http://localhost:7572/api/network/request --data "${PUSH_FORMAT}";
-echo "Request took $(($(date +%s)-d)) seconds";
+echo && echo "Request took $(($(date +%s)-d)) seconds";

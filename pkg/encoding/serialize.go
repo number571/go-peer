@@ -3,7 +3,7 @@ package encoding
 import "encoding/json"
 
 func Serialize(pData interface{}) []byte {
-	res, err := json.MarshalIndent(pData, "", "\t")
+	res, err := json.Marshal(pData)
 	if err != nil {
 		return nil
 	}

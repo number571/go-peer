@@ -36,22 +36,22 @@ func TestRequest(t *testing.T) {
 		WithHead(tgHead).
 		WithBody(tgBody)
 
-	if request.Host() != tcHost {
+	if request.GetHost() != tcHost {
 		t.Error("host is not equals")
 		return
 	}
 
-	if request.Path() != tcPath {
+	if request.GetPath() != tcPath {
 		t.Error("path is not equals")
 		return
 	}
 
-	if request.Method() != tcMethod {
+	if request.GetMethod() != tcMethod {
 		t.Error("method is not equals")
 		return
 	}
 
-	for k, v := range request.Head() {
+	for k, v := range request.GetHead() {
 		v1, ok := tgHead[k]
 		if !ok {
 			t.Errorf("header undefined '%s'", k)
@@ -63,7 +63,7 @@ func TestRequest(t *testing.T) {
 		}
 	}
 
-	if !bytes.Equal(request.Body(), tgBody) {
+	if !bytes.Equal(request.GetBody(), tgBody) {
 		t.Error("body is not equals")
 		return
 	}
@@ -86,23 +86,23 @@ func TestLoadRequest(t *testing.T) {
 		return
 	}
 
-	if request1.Host() != request2.Host() {
+	if request1.GetHost() != request2.GetHost() {
 		t.Error("host is not equals")
 		return
 	}
 
-	if request1.Path() != request2.Path() {
+	if request1.GetPath() != request2.GetPath() {
 		t.Error("path is not equals")
 		return
 	}
 
-	if request1.Method() != request2.Method() {
+	if request1.GetMethod() != request2.GetMethod() {
 		t.Error("method is not equals")
 		return
 	}
 
-	for k, v := range request1.Head() {
-		v1, ok := request2.Head()[k]
+	for k, v := range request1.GetHead() {
+		v1, ok := request2.GetHead()[k]
 		if !ok {
 			t.Errorf("header undefined '%s'", k)
 			return
@@ -113,7 +113,7 @@ func TestLoadRequest(t *testing.T) {
 		}
 	}
 
-	if !bytes.Equal(request1.Body(), request2.Body()) {
+	if !bytes.Equal(request1.GetBody(), request2.GetBody()) {
 		t.Error("body is not equals")
 		return
 	}

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -54,7 +54,7 @@ func (p *sRequester) HandleMessage(pMsg pkg_settings.SMessage) error {
 	return err
 }
 
-func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) ([]byte, error) {
+func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) (response.IResponse, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodPost,
@@ -64,8 +64,7 @@ func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
-
-	return encoding.HexDecode(res), nil
+	return response.LoadResponse([]byte(res))
 }
 
 func (p *sRequester) BroadcastRequest(pRequest *pkg_settings.SRequest) error {

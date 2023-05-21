@@ -6,26 +6,26 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
-			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
+		switch pR.Method {
+		case http.MethodGet:
+			api.Response(pW, http.StatusOK, strings.Join(pWrapper.GetConfig().GetConnections(), ","))
 			return
-		}
-
-		if pR.Method == http.MethodGet {
-			api.Response(pW, pkg_settings.CErrorNone, strings.Join(pWrapper.GetConfig().GetConnections(), ","))
+		case http.MethodPost, http.MethodDelete:
+			// next
+		default:
+			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		connectBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			api.Response(pW, pkg_settings.CErrorRead, "failed: read connect bytes")
+			api.Response(pW, http.StatusConflict, "failed: read connect bytes")
 			return
 		}
 
@@ -34,22 +34,23 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) ht
 		case http.MethodPost:
 			connects := append(pWrapper.GetConfig().GetConnections(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
-				api.Response(pW, pkg_settings.CErrorAction, "failed: update connections")
+				api.Response(pW, http.StatusInternalServerError, "failed: update connections")
 				return
 			}
 			pNode.GetNetworkNode().AddConnect(connect)
-			api.Response(pW, pkg_settings.CErrorNone, "success: update connections")
+			api.Response(pW, http.StatusOK, "success: update connections")
 		case http.MethodDelete:
 			connects := deleteConnect(pWrapper.GetConfig(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
-				api.Response(pW, pkg_settings.CErrorAction, "failed: delete connection")
+				api.Response(pW, http.StatusInternalServerError, "failed: delete connection")
 				return
 			}
 			pNode.GetNetworkNode().DelConnect(connect)
-			api.Response(pW, pkg_settings.CErrorNone, "success: delete connection")
+			api.Response(pW, http.StatusOK, "success: delete connection")
 		}
 	}
 }
+
 func deleteConnect(pCfg config.IConfig, pConnect string) []string {
 	connects := pCfg.GetConnections()
 	result := make([]string, 0, len(connects))

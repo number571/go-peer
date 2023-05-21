@@ -5,6 +5,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -28,7 +29,7 @@ type IClient interface {
 	HandleMessage(message.IMessage) error
 
 	BroadcastRequest(asymmetric.IPubKey, request.IRequest) error
-	FetchRequest(asymmetric.IPubKey, request.IRequest) ([]byte, error)
+	FetchRequest(asymmetric.IPubKey, request.IRequest) (response.IResponse, error)
 }
 
 type IRequester interface {
@@ -51,7 +52,7 @@ type IRequester interface {
 	HandleMessage(pkg_settings.SMessage) error
 
 	BroadcastRequest(*pkg_settings.SRequest) error
-	FetchRequest(*pkg_settings.SRequest) ([]byte, error)
+	FetchRequest(*pkg_settings.SRequest) (response.IResponse, error)
 }
 
 type IBuilder interface {

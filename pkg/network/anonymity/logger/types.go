@@ -23,10 +23,11 @@ const (
 	CLogInfoWithoutResponse ILogType = "WHRSP"
 
 	// WARN
-	CLogWarnMessageNull  ILogType = "MNULL"
-	CLogWarnNotFriend    ILogType = "NTFRN"
-	CLogWarnUnknownRoute ILogType = "UNKRT"
-	CLogWarnOldResponse  ILogType = "LDRSP"
+	CLogWarnMessageNull       ILogType = "MNULL"
+	CLogWarnNotFriend         ILogType = "NTFRN"
+	CLogWarnUnknownRoute      ILogType = "UNKRT"
+	CLogWarnOldResponse       ILogType = "LDRSP"
+	CLogWarnIncorrectResponse ILogType = "ICRSP"
 
 	// ERRO
 	CLogErroMessageType ILogType = "MTYPE"

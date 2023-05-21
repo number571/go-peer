@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strings"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
@@ -14,7 +13,7 @@ import (
 func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodGet && pR.Method != http.MethodDelete {
-			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -31,20 +30,20 @@ func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
 				return inOnline[i] < inOnline[j]
 			})
 
-			api.Response(pW, pkg_settings.CErrorNone, strings.Join(inOnline, ","))
+			api.Response(pW, http.StatusOK, strings.Join(inOnline, ","))
 		case http.MethodDelete:
 			connectBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
-				api.Response(pW, pkg_settings.CErrorRead, "failed: read connect bytes")
+				api.Response(pW, http.StatusConflict, "failed: read connect bytes")
 				return
 			}
 
 			if err := pNode.GetNetworkNode().DelConnect(string(connectBytes)); err != nil {
-				api.Response(pW, pkg_settings.CErrorNone, "failed: delete online connection")
+				api.Response(pW, http.StatusInternalServerError, "failed: delete online connection")
 				return
 			}
 
-			api.Response(pW, pkg_settings.CErrorNone, "success: delete online connection")
+			api.Response(pW, http.StatusOK, "success: delete online connection")
 		}
 	}
 }

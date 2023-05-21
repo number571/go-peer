@@ -59,11 +59,11 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	return strings.Split(resp, ";"), nil
 }
 
-func (p *sRequester) GetMessage(pRequest *pkg_settings.SLoadRequest) (message.IMessage, error) {
+func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pRequest.FHash),
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pRequest),
 		nil,
 	)
 	if err != nil {
@@ -84,7 +84,7 @@ func (p *sRequester) GetMessage(pRequest *pkg_settings.SLoadRequest) (message.IM
 	return msg, nil
 }
 
-func (p *sRequester) PutMessage(pRequest *pkg_settings.SPushRequest) error {
+func (p *sRequester) PutMessage(pRequest string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,

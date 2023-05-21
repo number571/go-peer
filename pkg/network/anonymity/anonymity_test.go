@@ -115,9 +115,9 @@ func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 	for _, node := range nodes {
 		node.HandleFunc(
 			testutils.TcHead,
-			func(_ INode, _ asymmetric.IPubKey, _, reqBytes []byte) []byte {
+			func(_ INode, _ asymmetric.IPubKey, _, reqBytes []byte) ([]byte, error) {
 				// send response
-				return []byte(fmt.Sprintf("%s (response)", string(reqBytes)))
+				return []byte(fmt.Sprintf("%s (response)", string(reqBytes))), nil
 			},
 		)
 	}

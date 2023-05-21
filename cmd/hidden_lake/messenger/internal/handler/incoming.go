@@ -19,24 +19,24 @@ import (
 func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodPost {
-			api.Response(pW, hls_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if !pState.IsActive() {
-			api.Response(pW, hls_settings.CErrorUnauth, "failed: client unauthorized")
+			api.Response(pW, http.StatusUnauthorized, "failed: client unauthorized")
 			return
 		}
 
 		msgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			api.Response(pW, hls_settings.CErrorResponse, "failed: response message")
+			api.Response(pW, http.StatusConflict, "failed: response message")
 			return
 		}
 
 		msg := strings.TrimSpace(string(msgBytes))
 		if len(msg) == 0 {
-			api.Response(pW, hls_settings.CErrorMessage, "failed: message is null")
+			api.Response(pW, http.StatusTeapot, "failed: message is null")
 			return
 		}
 
@@ -52,7 +52,7 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 
 		myPubKey, err := pState.GetClient().Service().GetPubKey()
 		if err != nil {
-			api.Response(pW, hls_settings.CErrorPubKey, "failed: message is null")
+			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
 		}
 
@@ -61,7 +61,7 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 
 		db := pState.GetWrapperDB().Get()
 		if err := db.Push(rel, dbMsg); err != nil {
-			api.Response(pW, hls_settings.CErrorWrite, "failed: push message to database")
+			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
 		}
 
@@ -70,6 +70,6 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})
-		api.Response(pW, hls_settings.CErrorNone, settings.CTitlePattern)
+		api.Response(pW, http.StatusOK, settings.CTitlePattern)
 	}
 }

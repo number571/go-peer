@@ -5,8 +5,8 @@
 
 <h2>
 	<p align="center">
-    		<strong>
-        		Anonymity and Security without compromise
+    	<strong>
+        	Anonymity and Security without compromise
    		</strong>
 	</p>
 	<p align="center">
@@ -31,7 +31,7 @@
 	</p>
 	<p align="center">
 		<a href="https://vk.me/join/6Px6b0Qh/uZIK4ixUYWQm4Krepzq5xbYjYw=">
-        		<img src="https://img.shields.io/badge/вконтакте-%232E87FB.svg?&style=for-the-badge&logo=vk&logoColor=white" alt="VKontakte" />
+        	<img src="https://img.shields.io/badge/вконтакте-%232E87FB.svg?&style=for-the-badge&logo=vk&logoColor=white" alt="VKontakte" />
 		</a>
 	</p>
 	About project
@@ -74,11 +74,11 @@ The `Hidden Lake Service` is the core of an anonymous network with theoretically
 
 Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networks (1^stage)
 :-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
-Theoretical provability  |  +  |  +  |  +
-Ease of software implementation  |  +  |  -  |  -
-Polymorphism of information  |  -  |  +  |  +
-Static communication delay  |  +  |  -  |  +
-Network scales easily  |  -  |  -  |  -
+Theoretical provability  |  +  |  +  |  + |
+Ease of software implementation  |  +  |  -  |  - |
+Polymorphism of information  |  -  |  +  |  + |
+Static communication delay  |  +  |  -  |  + |
+Network scales easily  |  -  |  -  |  - |
 
 A feature of HLS (compared to many other anonymous networks) is its easy adaptation to a hostile centralized environment. Anonymity can be restored literally from one node in the network, even if it is the only point of failure.
 
@@ -178,15 +178,15 @@ $ ./request.sh
 Get response
 ```bash
 HTTP/1.1 200 OK
-Content-Type: application/json
-Date: Thu, 15 Dec 2022 07:42:49 GMT
-Content-Length: 97
+Date: Sun, 21 May 2023 14:11:24 GMT
+Content-Length: 70
+Content-Type: text/plain; charset=utf-8
 
-{"result":"7b226563686f223a2268656c6c6f2c20776f726c6421222c2272657475726e223a317d0a","return":1}
-Request took 9 seconds
+{"code":200,"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
+Request took 7 seconds
 ```
 
-Decode response
+Return code 200 is HTTP code = StatusOK. Decode base64 response body:
 ```json
 {"echo":"hello, world!","return":1}
 ```
@@ -324,11 +324,11 @@ $ ./request.sh
 Get response
 ```bash
 HTTP/1.1 200 OK
-Content-Type: application/json
-Date: Thu, 16 Mar 2023 20:12:33 GMT
-Content-Length: 97
+Date: Sun, 21 May 2023 14:11:24 GMT
+Content-Length: 70
+Content-Type: text/plain; charset=utf-8
 
-{"result":"7b226563686f223a2268656c6c6f2c20776f726c6421222c2272657475726e223a317d0a","return":1}
+{"code":200,"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
 Request took 7 seconds
 ```
 

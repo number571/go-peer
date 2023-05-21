@@ -14,7 +14,7 @@ import (
 )
 
 type (
-	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) []byte
+	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) ([]byte, error)
 )
 
 type ISettings interface {

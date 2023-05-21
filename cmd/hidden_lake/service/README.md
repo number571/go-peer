@@ -111,13 +111,15 @@ $ ./request.sh
 Get response
 ```bash
 HTTP/1.1 200 OK
-Content-Type: application/json
-Date: Thu, 15 Dec 2022 07:42:49 GMT
-Content-Length: 97
+Date: Sun, 21 May 2023 14:11:24 GMT
+Content-Length: 70
+Content-Type: text/plain; charset=utf-8
 
-{"result":"7b226563686f223a2268656c6c6f2c20776f726c6421222c2272657475726e223a317d0a","return":1}
+{"code":200,"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
+Request took 7 seconds
 ```
 
+Return code 200 is HTTP code = StatusOK. Decode base64 response body:
 Decode response
 ```json
 {"echo":"hello, world!","return":1}

@@ -28,14 +28,3 @@ const (
 	CHandleHashesTemplate  = "%s" + CHandleHashesPath
 	CHandleMessageTemplate = "%s" + CHandleMessagePath
 )
-
-const (
-	CErrorNone = iota + 1
-	CErrorMethod
-	CErrorDecode
-	CErrorLoad
-	CErrorPush
-	CErrorMessage
-	CErrorPackSize
-	CErrorWorkSize
-)

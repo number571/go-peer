@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
@@ -12,13 +12,12 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
 func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.IWrapperDB) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
-			api.Response(pW, pkg_settings.CErrorMethod, "failed: incorrect method")
+			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -30,23 +29,21 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 
 			msg, err := database.Load(query.Get("hash"))
 			if err != nil {
-				api.Response(pW, pkg_settings.CErrorLoad, "failed: load message")
+				api.Response(pW, http.StatusNotFound, "failed: load message")
 				return
 			}
 
-			api.Response(pW, pkg_settings.CErrorNone, encoding.HexEncode(msg.ToBytes()))
+			api.Response(pW, http.StatusOK, encoding.HexEncode(msg.ToBytes()))
 			return
 		case http.MethodPost:
-			var vRequest pkg_settings.SPushRequest
-
-			err := json.NewDecoder(pR.Body).Decode(&vRequest)
+			msgBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
-				api.Response(pW, pkg_settings.CErrorDecode, "failed: decode request")
+				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
 
-			if uint64(len(vRequest.FMessage)/2) > database.Settings().GetMessageSize() {
-				api.Response(pW, pkg_settings.CErrorPackSize, "failed: incorrect package size")
+			if uint64(len(msgBytes)/2) > database.Settings().GetMessageSize() {
+				api.Response(pW, http.StatusLengthRequired, "failed: incorrect package size")
 				return
 			}
 
@@ -55,15 +52,15 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 					FMessageSize: database.Settings().GetMessageSize(),
 					FWorkSize:    database.Settings().GetWorkSize(),
 				}),
-				encoding.HexDecode(vRequest.FMessage),
+				encoding.HexDecode(string(msgBytes)),
 			)
 			if msg == nil {
-				api.Response(pW, pkg_settings.CErrorMessage, "failed: decode message")
+				api.Response(pW, http.StatusBadRequest, "failed: decode message")
 				return
 			}
 
 			if err := database.Push(msg); err != nil {
-				api.Response(pW, pkg_settings.CErrorPush, "failed: push message")
+				api.Response(pW, http.StatusInternalServerError, "failed: push message")
 				return
 			}
 
@@ -74,7 +71,7 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 				),
 			)
 
-			api.Response(pW, pkg_settings.CErrorNone, "success")
+			api.Response(pW, http.StatusOK, "success: handle message")
 			return
 		}
 	}

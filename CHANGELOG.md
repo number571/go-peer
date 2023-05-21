@@ -17,6 +17,8 @@ Init.
 - Functions `NewSettings`: defaultValues -> mustNotNull (strict validation)
 - Package `storage`: NewCryptoStorage now get ISettings
 - Update `README.md`: append badgers, append table in HLS
+- Package `anonymity`: IHandlerF now return ([]byte, error)
+- Project `hidden_lake/service`: append response package
 
 ### CHANGES
 
@@ -26,6 +28,8 @@ Init.
 - Package `storage`: deleted memory storage
 - Package `database`: deleted settings value - salt
 - Package `test/_data`: reduced the dependency of other packages on this
+- Package `internal/api`: JSON (return, result) -> http code, result
+- Package `encoding`: Serialize function now Marshal (not MarshalIndent) data
 
 ### BUG FIXES
 

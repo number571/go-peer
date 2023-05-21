@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
@@ -34,7 +35,7 @@ func (p *sClient) BroadcastRequest(pRecv asymmetric.IPubKey, pData request.IRequ
 	return p.fRequester.BroadcastRequest(p.fBuilder.Request(pRecv, pData))
 }
 
-func (p *sClient) FetchRequest(pRecv asymmetric.IPubKey, pData request.IRequest) ([]byte, error) {
+func (p *sClient) FetchRequest(pRecv asymmetric.IPubKey, pData request.IRequest) (response.IResponse, error) {
 	return p.fRequester.FetchRequest(p.fBuilder.Request(pRecv, pData))
 }
 

@@ -9,6 +9,6 @@ import (
 
 func HandleIndexAPI() http.HandlerFunc {
 	return func(pW http.ResponseWriter, _ *http.Request) {
-		api.Response(pW, pkg_settings.CErrorNone, pkg_settings.CTitlePattern)
+		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
 	}
 }

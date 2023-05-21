@@ -69,8 +69,9 @@ func testFetch(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKe
 		return
 	}
 
-	if string(res) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		t.Errorf("result does not match; get '%s'", string(res))
+	body := res.GetBody()
+	if string(body) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
+		t.Errorf("result does not match; got '%s'", string(body))
 		return
 	}
 }

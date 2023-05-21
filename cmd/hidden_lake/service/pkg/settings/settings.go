@@ -67,26 +67,6 @@ const (
 )
 
 const (
-	CErrorNone = iota + 1
-	CErrorMethod
-	CErrorDecode
-	CErrorPubKey
-	CErrorPrivKey
-	CErrorMessage
-	CErrorResponse
-	CErrorBroadcast
-	CErrorExist
-	CErrorNotExist
-	CErrorAction
-	CErrorValue
-	CErrorOpen
-	CErrorRead
-	CErrorWrite
-	CErrorSize
-	CErrorUnauth
-)
-
-const (
 	// Base
 	CLogWarnResponseFromService anon_logger.ILogType = "RSPSR"
 

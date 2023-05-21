@@ -288,7 +288,11 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			}
 
 			// response can be nil
-			resp := f(p, sender, hash, unwrapBytes(body))
+			resp, err := f(p, sender, hash, unwrapBytes(body))
+			if err != nil {
+				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnIncorrectResponse, hash, proof, sender, pConn))
+				return
+			}
 			if resp == nil {
 				p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
 				return
