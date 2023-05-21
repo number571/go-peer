@@ -12,10 +12,7 @@ type tsMessage struct {
 
 const (
 	tgBytesInNum = uint64(0xABCDEF0123456789)
-	tcJSON       = `{
-	"result": "hello",
-	"return": 5
-}`
+	tcJSON       = `{"result":"hello","return":5}`
 )
 
 var (
