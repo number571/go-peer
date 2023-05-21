@@ -178,12 +178,12 @@ $ ./request.sh
 Get response
 ```bash
 HTTP/1.1 200 OK
-Date: Sun, 21 May 2023 14:11:24 GMT
-Content-Length: 70
+Date: Sun, 21 May 2023 17:52:03 GMT
+Content-Length: 174
 Content-Type: text/plain; charset=utf-8
 
-{"code":200,"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
-Request took 7 seconds
+{"code":200,"head":{"Content-Length":"36","Content-Type":"application/json","Date":"Sun, 21 May 2023 17:51:58 GMT"},"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
+Request took 10 seconds
 ```
 
 Return code 200 is HTTP code = StatusOK. Decode base64 response body:
@@ -324,12 +324,12 @@ $ ./request.sh
 Get response
 ```bash
 HTTP/1.1 200 OK
-Date: Sun, 21 May 2023 14:11:24 GMT
-Content-Length: 70
+Date: Sun, 21 May 2023 17:52:03 GMT
+Content-Length: 174
 Content-Type: text/plain; charset=utf-8
 
-{"code":200,"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
-Request took 7 seconds
+{"code":200,"head":{"Content-Length":"36","Content-Type":"application/json","Date":"Sun, 21 May 2023 17:51:58 GMT"},"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
+Request took 10 seconds
 ```
 
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.

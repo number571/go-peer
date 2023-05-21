@@ -71,15 +71,28 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 		defer resp.Body.Close()
 
-		// read response from service
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			pLogger.PushWarn(logger.GetFmtLog(pkg_settings.CLogWarnResponseFromService, msgHash, 0, sender, nil))
-			return nil, err
-		}
-
 		// send result to client
 		pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogWarnResponseFromService, msgHash, 0, sender, nil))
-		return response.NewResponse(resp.StatusCode, data).ToBytes(), nil
+		return response.NewResponse(resp.StatusCode).
+				WithHead(getHead(resp)).
+				WithBody(getBody(resp)).
+				ToBytes(),
+			nil
 	}
+}
+
+func getHead(pResp *http.Response) map[string]string {
+	headers := make(map[string]string)
+	for k := range pResp.Header {
+		headers[k] = pResp.Header.Get(k)
+	}
+	return headers
+}
+
+func getBody(pResp *http.Response) []byte {
+	data, err := io.ReadAll(pResp.Body)
+	if err != nil {
+		return nil
+	}
+	return data
 }
