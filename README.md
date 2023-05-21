@@ -11,22 +11,22 @@
 	</p>
 	<p align="center">
 		<a href="https://github.com/topics/golang">
-        		<img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg" alt="Commits" />
+        	<img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg" alt="Commits" />
 		</a>
 		<a href="https://github.com/number571/go-peer/actions">
-        		<img src="https://github.com/number571/go-peer/actions/workflows/makefile.yml/badge.svg" alt="Tests" />
+        	<img src="https://github.com/number571/go-peer/actions/workflows/makefile.yml/badge.svg" alt="Tests" />
 		</a>
 		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
-        		<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
+        	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
 		<a href="https://github.com/number571/go-peer/releases">
-        		<img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
+        	<img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
 		</a>
 		<a href="https://github.com/number571/go-peer/pulse">
-        		<img src="https://img.shields.io/github/commit-activity/m/number571/go-peer" alt="Activity" />
+        	<img src="https://img.shields.io/github/commit-activity/m/number571/go-peer" alt="Activity" />
 		</a>
 		<a href="https://github.com/number571/go-peer/commits/master">
-        		<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
+        	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
 		</a>
 	</p>
 	<p align="center">
