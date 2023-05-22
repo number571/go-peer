@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -76,7 +77,14 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 func getHead(pResp *http.Response) map[string]string {
 	headers := make(map[string]string)
 	for k := range pResp.Header {
-		headers[k] = pResp.Header.Get(k)
+		switch strings.ToLower(k) {
+		case "date": // ignore deanonymizing headers
+			continue
+		case "content-length": // ignore redundant headers
+			continue
+		default:
+			headers[k] = pResp.Header.Get(k)
+		}
 	}
 	return headers
 }
