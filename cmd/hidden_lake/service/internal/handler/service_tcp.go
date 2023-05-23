@@ -78,9 +78,7 @@ func getHead(pResp *http.Response) map[string]string {
 	headers := make(map[string]string)
 	for k := range pResp.Header {
 		switch strings.ToLower(k) {
-		case "date": // ignore deanonymizing headers
-			continue
-		case "content-length": // ignore redundant headers
+		case "date", "content-length": // ignore deanonymizing & redundant headers
 			continue
 		default:
 			headers[k] = pResp.Header.Get(k)

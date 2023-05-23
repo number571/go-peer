@@ -19,7 +19,7 @@ Init.
 - Update `README.md`: append badgers, append table in HLS
 - Package `anonymity`: IHandlerF now return ([]byte, error)
 - Project `hidden_lake/service`: append response package
-- Project `hidden_lake/service`: append to response http headers
+- Project `hidden_lake/service`: append response http headers
 
 ### CHANGES
 
@@ -31,6 +31,7 @@ Init.
 - Package `test/_data`: reduced the dependency of other packages on this
 - Package `internal/api`: JSON (return, result) -> http code, result
 - Package `encoding`: Serialize function now Marshal (not MarshalIndent) data
+- Example `images`: replace HLS, HLA gifs with requests
 
 ### BUG FIXES
 
