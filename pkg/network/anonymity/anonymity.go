@@ -133,7 +133,7 @@ func (p *sNode) broadcastPayload(pType iDataType, pRecv asymmetric.IPubKey, pPld
 	case cIsResponse:
 		newBody = wrapResponse(pPld.GetBody())
 	default:
-		return fmt.Errorf("undefined format type")
+		return fmt.Errorf("unknown format type")
 	}
 
 	newPld := payload.NewPayload(pPld.GetHead(), newBody)
