@@ -20,6 +20,7 @@ clean:
 
 ### TEST
 # example run: make test-run N=10
+# for i in {1..100}; do echo $i; go test -count=1 ./...; done;
 test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
