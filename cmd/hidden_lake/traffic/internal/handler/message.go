@@ -42,7 +42,7 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 				return
 			}
 
-			if uint64(len(msgBytes)/2) > database.Settings().GetMessageSize() {
+			if uint64(len(msgBytes)) > database.Settings().GetMessageSize() {
 				api.Response(pW, http.StatusLengthRequired, "failed: incorrect package size")
 				return
 			}
@@ -52,7 +52,7 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 					FMessageSize: database.Settings().GetMessageSize(),
 					FWorkSize:    database.Settings().GetWorkSize(),
 				}),
-				encoding.HexDecode(string(msgBytes)),
+				msgBytes,
 			)
 			if msg == nil {
 				api.Response(pW, http.StatusBadRequest, "failed: decode message")

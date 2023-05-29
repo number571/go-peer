@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -23,5 +22,5 @@ func (p *sBuilder) GetMessage(pHash string) string {
 }
 
 func (p *sBuilder) PutMessage(pMsg message.IMessage) string {
-	return encoding.HexEncode(pMsg.ToBytes())
+	return string(pMsg.ToBytes())
 }
