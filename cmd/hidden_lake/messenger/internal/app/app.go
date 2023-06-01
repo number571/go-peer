@@ -113,7 +113,7 @@ func (p *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		return pkg_errors.AppendError(err, p.Stop())
+		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
 		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
 		return nil
