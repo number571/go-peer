@@ -43,6 +43,15 @@ func TestWrapError(t *testing.T) {
 	}
 }
 
+func TestHasError(t *testing.T) {
+	if HasError(nil, &tsErrType1{}) {
+		t.Error("has error with nil")
+	}
+	if !HasError(&tsErrType1{}, &tsErrType1{}) {
+		t.Error("has error failed")
+	}
+}
+
 func TestAppendError(t *testing.T) {
 	err1 := AppendError(AppendError(&tsErrType1{}, &tsErrType2{}), &tsErrType3{})
 	if !HasError(err1, &tsErrType1{}) || !HasError(err1, &tsErrType2{}) || !HasError(err1, &tsErrType3{}) {
@@ -62,9 +71,15 @@ func TestAppendError(t *testing.T) {
 		t.Error("invalid error type")
 	}
 
-	err2 := AppendError(nil, &tsErrType1{})
-	err3 := AppendError(nil, &tsErrType2{})
+	err2 := AppendError(nil, &tsErrType2{})
+	err3 := AppendError(nil, &tsErrType1{})
 	if err := AppendError(&tsErrType3{}, AppendError(err2, err3)); !HasError(err, &tsErrType2{}) {
+		t.Error("not found error in error stack")
+	}
+
+	err4 := AppendError(nil, AppendError(nil, &tsErrType2{}))
+	err5 := AppendError(AppendError(nil, &tsErrType1{}), nil)
+	if err := AppendError(&tsErrType3{}, AppendError(err4, err5)); !HasError(err, &tsErrType2{}) {
 		t.Error("not found error in error stack")
 	}
 }
