@@ -2,11 +2,17 @@
 
 <!-- ... -->
 
-## ~v1.5.9
+## ~v1.5.10
 
-*May 8, 2023*
+*??? ??, ????*
 
-Init.
+In progress...
+
+<!-- ... -->
+
+## v1.5.9
+
+*June 1, 2023*
 
 ### IMPROVEMENTS
 
@@ -20,6 +26,7 @@ Init.
 - Package `anonymity`: IHandlerF now return ([]byte, error)
 - Project `hidden_lake/service`: append response package
 - Project `hidden_lake/service`: append response http headers
+- Package `pkg/errors`: all packages now use stack errors
 
 ### CHANGES
 
@@ -43,17 +50,3 @@ Init.
 ## v1.5.8
 
 *May 8, 2023*
-
-Init.
-
-### IMPROVEMENTS
-
-- Template
-
-### CHANGES
-
-- Template
-
-### BUG FIXES
-
-- Template
