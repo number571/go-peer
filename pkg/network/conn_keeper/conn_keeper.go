@@ -1,10 +1,10 @@
 package conn_keeper
 
 import (
-	"errors"
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network"
 )
 
@@ -40,7 +40,7 @@ func (p *sConnKeeper) Run() error {
 	defer p.fMutex.Unlock()
 
 	if p.fIsRun {
-		return errors.New("conn keeper already started")
+		return errors.NewError("conn keeper already started")
 	}
 	p.fIsRun = true
 
@@ -66,7 +66,7 @@ func (p *sConnKeeper) Stop() error {
 	defer p.fMutex.Unlock()
 
 	if !p.fIsRun {
-		return errors.New("conn keeper already closed or not started")
+		return errors.NewError("conn keeper already closed or not started")
 	}
 	p.fIsRun = false
 

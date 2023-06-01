@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
 
@@ -29,18 +29,18 @@ func initApp() (types.ICommand, error) {
 	default:
 		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
 		if err != nil {
-			return nil, err
+			return nil, errors.WrapError(err, "read public key")
 		}
 		privKey = asymmetric.LoadRSAPrivKey(string(privKeyStr))
 	}
 
 	if privKey == nil {
-		return nil, fmt.Errorf("private key is invalid")
+		return nil, errors.NewError("private key is invalid")
 	}
 
 	cfg, err := pkg_config.InitConfig(pkg_settings.CPathCFG, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "init config")
 	}
 
 	return app.NewApp(cfg, privKey, "."), nil

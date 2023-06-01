@@ -2,6 +2,7 @@ package request
 
 import (
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -26,8 +27,10 @@ func NewRequest(pMethod, pHost, pPath string) IRequest {
 
 func LoadRequest(pData []byte) (IRequest, error) {
 	request := new(sRequest)
-	err := encoding.Deserialize(pData, request)
-	return request, err
+	if err := encoding.Deserialize(pData, request); err != nil {
+		return nil, errors.WrapError(err, "load request")
+	}
+	return request, nil
 }
 
 func (p *sRequest) ToBytes() []byte {

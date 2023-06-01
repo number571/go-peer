@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -16,7 +17,7 @@ func (p *sApp) initDatabase() error {
 		}),
 	)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "new sqlitedb")
 	}
 	p.fNode.GetWrapperDB().Set(db)
 	return nil

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (string, error) {
@@ -19,7 +21,7 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 	default:
 		jsonValue, err := json.Marshal(pData)
 		if err != nil {
-			return "", err
+			return "", errors.WrapError(err, "marshal request")
 		}
 		requestBytes = jsonValue
 	}
@@ -30,28 +32,32 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 		bytes.NewBuffer(requestBytes),
 	)
 	if err != nil {
-		return "", err
+		return "", errors.WrapError(err, "new request")
 	}
 
 	req.Header.Set("Content-Type", CContentType)
 	resp, err := pClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", errors.WrapError(err, "do request")
 	}
 	defer resp.Body.Close()
 
-	return loadResponse(resp.StatusCode, resp.Body)
+	result, err := loadResponse(resp.StatusCode, resp.Body)
+	if err != nil {
+		return "", errors.WrapError(err, "load response")
+	}
+	return result, nil
 }
 
 func loadResponse(pStatusCode int, pReader io.ReadCloser) (string, error) {
 	resp, err := io.ReadAll(pReader)
 	if err != nil {
-		return "", err
+		return "", errors.WrapError(err, "read response")
 	}
 
 	result := string(resp)
 	if pStatusCode != http.StatusOK {
-		return "", fmt.Errorf("error code = %d (%s)", pStatusCode, result)
+		return "", errors.NewError(fmt.Sprintf("error code = %d (%s)", pStatusCode, result))
 	}
 
 	return result, nil

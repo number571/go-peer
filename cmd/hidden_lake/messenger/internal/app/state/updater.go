@@ -1,6 +1,6 @@
 package state
 
-import "fmt"
+import "github.com/number571/go-peer/pkg/errors"
 
 func (p *sState) stateUpdater(
 	clientUpdater func(storageValue *SStorageState) error,
@@ -10,22 +10,28 @@ func (p *sState) stateUpdater(
 	defer p.fMutex.Unlock()
 
 	if !p.IsActive() {
-		return fmt.Errorf("state does not exist")
+		return errors.NewError("state does not exist")
 	}
 
 	oldStorageValue, err := p.getStorageState(p.fHashLP)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "get old storage state")
 	}
 
 	newStorageValue := copyStorageState(oldStorageValue)
 	middleWare(newStorageValue)
 
 	if err := clientUpdater(newStorageValue); err == nil {
-		return p.setStorageState(newStorageValue)
+		if err := p.setStorageState(newStorageValue); err != nil {
+			return errors.WrapError(err, "get new storage state")
+		}
+		return nil
 	}
 
-	return p.setStorageState(oldStorageValue)
+	if err := p.setStorageState(oldStorageValue); err != nil {
+		return errors.WrapError(err, "update state (old -> new)")
+	}
+	return nil
 }
 
 func copyStorageState(pStorageValue *SStorageState) *SStorageState {

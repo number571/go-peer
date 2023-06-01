@@ -2,7 +2,6 @@ package conn
 
 import (
 	"bytes"
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -28,7 +28,7 @@ type sConn struct {
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 	conn, err := net.Dial("tcp", pAddr)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "tcp connect")
 	}
 	return LoadConn(pSett, conn), nil
 }
@@ -51,7 +51,7 @@ func (p *sConn) GetSocket() net.Conn {
 
 func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
 	if err := p.WritePayload(pPld); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "write payload")
 	}
 
 	chPld := make(chan payload.IPayload)
@@ -60,11 +60,11 @@ func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
 	select {
 	case rpld := <-chPld:
 		if rpld == nil {
-			return nil, fmt.Errorf("failed: read payload")
+			return nil, errors.NewError("read payload")
 		}
 		return rpld, nil
 	case <-time.After(p.fSettings.GetFetchTimeWait()):
-		return nil, fmt.Errorf("failed: time out")
+		return nil, errors.NewError("read payload (timeout)")
 	}
 }
 
@@ -88,18 +88,18 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 
 	// send headers with length of blocks
 	if err := p.sendBlockSize(encMsgBytes); err != nil {
-		return err
+		return errors.WrapError(err, "send block size (encrypted message bytes)")
 	}
 	if err := p.sendBlockSize(voidBytes); err != nil {
-		return err
+		return errors.WrapError(err, "send block size (void bytes)")
 	}
 
 	// send blocks
 	if err := p.sendBytes(encMsgBytes); err != nil {
-		return err
+		return errors.WrapError(err, "send encrypted message bytes")
 	}
 	if err := p.sendBytes(voidBytes); err != nil {
-		return err
+		return errors.WrapError(err, "send void bytes")
 	}
 
 	return nil
@@ -116,7 +116,7 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 	for {
 		n, err := p.GetSocket().Write(pBytes[:bytesPtr])
 		if err != nil {
-			return err
+			return errors.WrapError(err, "write tcp bytes")
 		}
 
 		bytesPtr = bytesPtr - uint64(n)
@@ -133,10 +133,10 @@ func (p *sConn) sendBlockSize(pBytes []byte) error {
 	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
 	n, err := p.GetSocket().Write(p.fCipher.EncryptBytes(blockSize[:]))
 	if err != nil {
-		return err
+		return errors.WrapError(err, "write tcp block size")
 	}
 	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
-		return fmt.Errorf("invalid size of sent package")
+		return errors.NewError("invalid size of sent package")
 	}
 	return nil
 }
@@ -145,10 +145,10 @@ func (p *sConn) recvBlockSize() (uint64, error) {
 	encBufLen := make([]byte, symmetric.CAESBlockSize+encoding.CSizeUint64)
 	n, err := p.GetSocket().Read(encBufLen)
 	if err != nil {
-		return 0, err
+		return 0, errors.WrapError(err, "read tcp block size")
 	}
 	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
-		return 0, fmt.Errorf("block size is invalid")
+		return 0, errors.NewError("block size is invalid")
 	}
 
 	// mustLen = Size[u64] in uint64

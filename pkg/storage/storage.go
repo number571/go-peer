@@ -3,13 +3,13 @@ package storage
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
@@ -69,7 +69,7 @@ func (p *sCryptoStorage) Set(pKey, pValue []byte) error {
 		var err error
 		mapping, err = p.decrypt()
 		if err != nil {
-			return err
+			return errors.WrapError(err, "open & decrypt storage")
 		}
 	}
 
@@ -86,20 +86,20 @@ func (p *sCryptoStorage) Get(pKey []byte) ([]byte, error) {
 
 	// If storage not exists.
 	if !p.isExist() {
-		return nil, fmt.Errorf("error: storage undefined")
+		return nil, errors.NewError("storage undefined")
 	}
 
 	// Open and decrypt storage
 	mapping, err := p.decrypt()
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "decrypt storage")
 	}
 
 	// Open and decrypt secret
 	cipher, hash := p.newCipherWithKeyHash(pKey)
 	encsecret, ok := mapping.FSecrets[hash]
 	if !ok {
-		return nil, fmt.Errorf("error: key undefined")
+		return nil, errors.NewError("key undefined")
 	}
 	secret := cipher.DecryptBytes(encsecret)
 
@@ -112,7 +112,7 @@ func (p *sCryptoStorage) Del(pKey []byte) error {
 
 	// If storage not exists.
 	if !p.isExist() {
-		return fmt.Errorf("error: storage undefined")
+		return errors.NewError("storage undefined")
 	}
 
 	// Open and decrypt storage
@@ -125,7 +125,7 @@ func (p *sCryptoStorage) Del(pKey []byte) error {
 	_, hash := p.newCipherWithKeyHash(pKey)
 	_, ok := mapping.FSecrets[hash]
 	if !ok {
-		return fmt.Errorf("error: key undefined")
+		return errors.NewError("key undefined")
 	}
 
 	delete(mapping.FSecrets, hash)
@@ -140,7 +140,7 @@ func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 	// Encrypt and save storage
 	data, err := json.Marshal(pMapping)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "marshal decrypted map")
 	}
 
 	err = filesystem.OpenFile(p.fSettings.GetPath()).Write(
@@ -150,7 +150,7 @@ func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 		),
 	)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "write to storage")
 	}
 
 	return nil
@@ -161,13 +161,13 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 
 	encdata, err := filesystem.OpenFile(p.fSettings.GetPath()).Read()
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "open encrypted storage")
 	}
 
 	data := p.fCipher.DecryptBytes(encdata[cSaltSize:])
 	err = json.Unmarshal(data, &mapping)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "unmarshal decrypt map")
 	}
 
 	return &mapping, nil

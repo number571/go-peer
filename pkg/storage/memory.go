@@ -1,10 +1,10 @@
 package storage
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -48,7 +48,7 @@ func (p *sMemoryStorage) Get(pKey []byte) ([]byte, error) {
 
 	value, ok := p.fMapping[encoding.HexEncode(pKey)]
 	if !ok {
-		return nil, fmt.Errorf("undefined value by key")
+		return nil, errors.NewError("undefined value by key")
 	}
 
 	return value, nil
@@ -60,7 +60,7 @@ func (p *sMemoryStorage) Del(pKey []byte) error {
 
 	_, ok := p.fMapping[encoding.HexEncode(pKey)]
 	if !ok {
-		return fmt.Errorf("undefined value by key")
+		return errors.NewError("undefined value by key")
 	}
 
 	delete(p.fMapping, encoding.HexEncode(pKey))

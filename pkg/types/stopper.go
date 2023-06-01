@@ -1,12 +1,12 @@
 package types
 
+import "github.com/number571/go-peer/pkg/errors"
+
 // returns last error from slice
 func StopAll(pCommands []ICommand) error {
-	var lastErr error
+	var err error
 	for _, c := range pCommands {
-		if err := c.Stop(); err != nil {
-			lastErr = err
-		}
+		err = errors.AppendError(err, c.Stop())
 	}
-	return lastErr
+	return err
 }

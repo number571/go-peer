@@ -2,12 +2,17 @@ package config
 
 import (
 	"github.com/number571/go-peer/internal/logger"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if filesystem.OpenFile(cfgPath).IsExist() {
-		return LoadConfig(cfgPath)
+		cfg, err := LoadConfig(cfgPath)
+		if err != nil {
+			return nil, errors.WrapError(err, "load config")
+		}
+		return cfg, nil
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
@@ -16,5 +21,9 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FConnection: "localhost:9571",
 		}
 	}
-	return BuildConfig(cfgPath, initCfg)
+	cfg, err := BuildConfig(cfgPath, initCfg)
+	if err != nil {
+		return nil, errors.WrapError(err, "build config")
+	}
+	return cfg, nil
 }

@@ -1,6 +1,9 @@
 package response
 
-import "github.com/number571/go-peer/pkg/encoding"
+import (
+	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
+)
 
 var (
 	_ IResponse = &sResponse{}
@@ -20,8 +23,10 @@ func NewResponse(pCode int) IResponse {
 
 func LoadResponse(pBytes []byte) (IResponse, error) {
 	response := new(sResponse)
-	err := encoding.Deserialize(pBytes, response)
-	return response, err
+	if err := encoding.Deserialize(pBytes, response); err != nil {
+		return nil, errors.WrapError(err, "load response")
+	}
+	return response, nil
 }
 
 func (p *sResponse) ToBytes() []byte {

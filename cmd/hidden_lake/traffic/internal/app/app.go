@@ -15,6 +15,7 @@ import (
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	internal_logger "github.com/number571/go-peer/internal/logger"
+	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
 
 const (
@@ -58,7 +59,7 @@ func (p *sApp) Run() error {
 	defer p.fMutex.Unlock()
 
 	if p.fIsRun {
-		return errors.New("application already running")
+		return pkg_errors.NewError("application already running")
 	}
 	p.fIsRun = true
 
@@ -90,8 +91,7 @@ func (p *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		p.Stop()
-		return err
+		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
 		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
@@ -103,23 +103,23 @@ func (p *sApp) Stop() error {
 	defer p.fMutex.Unlock()
 
 	if !p.fIsRun {
-		return errors.New("application already stopped or not started")
+		return pkg_errors.NewError("application already stopped or not started")
 	}
 	p.fIsRun = false
 	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	lastErr := types.StopAll([]types.ICommand{
-		p.fConnKeeper,
-		p.fConnKeeper.GetNetworkNode(),
-	})
-
-	err := types.CloseAll([]types.ICloser{
-		p.fServiceHTTP,
-		p.fWrapperDB,
-	})
+	err := pkg_errors.AppendError(
+		types.StopAll([]types.ICommand{
+			p.fConnKeeper,
+			p.fConnKeeper.GetNetworkNode(),
+		}),
+		types.CloseAll([]types.ICloser{
+			p.fServiceHTTP,
+			p.fWrapperDB,
+		}),
+	)
 	if err != nil {
-		lastErr = err
+		return pkg_errors.WrapError(err, "close/stop all")
 	}
-
-	return lastErr
+	return nil
 }

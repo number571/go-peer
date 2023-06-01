@@ -6,3 +6,4 @@
 4. Write linters (names with prefixes 'p', 'f', 's', 'i', 'c', 'g'), (objects with name=p)
 5. Create HLC (Hidden Lake Connector)
 6. HLM to service
+7. Errors wrapper

@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
@@ -80,9 +81,12 @@ func (p *sState) GetTemplate() *STemplateState {
 
 func (p *sState) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
 	if _, err := p.GetStorage().Get(pHashLP); err == nil {
-		return fmt.Errorf("state already exists")
+		return errors.NewError("state already exists")
 	}
-	return p.newStorageState(pHashLP, pPrivKey)
+	if err := p.newStorageState(pHashLP, pPrivKey); err != nil {
+		return errors.WrapError(err, "new storage state")
+	}
+	return nil
 }
 
 func (p *sState) UpdateState(pHashLP []byte) error {
@@ -90,22 +94,26 @@ func (p *sState) UpdateState(pHashLP []byte) error {
 	defer p.fMutex.Unlock()
 
 	if p.IsActive() {
-		return fmt.Errorf("state already exists")
+		return errors.NewError("state already exists")
 	}
 
 	stateValue, err := p.getStorageState(pHashLP)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "get storage state")
 	}
 
 	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
-	p.GetWrapperDB().Set(database.NewKeyValueDB(
+	db, err := database.NewKeyValueDB(
 		fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
 		entropyBooster.BoostEntropy(pHashLP),
-	))
+	)
+	if err != nil {
+		return errors.WrapError(err, "open KV database")
+	}
 
+	p.GetWrapperDB().Set(db)
 	if err := p.updateClientState(stateValue); err != nil {
-		return err
+		return errors.WrapError(err, "update client state")
 	}
 	p.fHashLP = pHashLP
 
@@ -118,42 +126,50 @@ func (p *sState) ClearActiveState() error {
 	defer p.fMutex.Unlock()
 
 	if !p.IsActive() {
-		return fmt.Errorf("state does not exist")
+		return errors.NewError("state does not exist")
 	}
 
 	p.fHashLP = nil
 
 	if err := p.GetWrapperDB().Close(); err != nil {
-		return err
+		return errors.WrapError(err, "close database")
 	}
 
 	if err := p.clearClientState(); err != nil {
-		return err
+		return errors.WrapError(err, "clear client state")
 	}
 
 	return nil
 }
 
 func (p *sState) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
-	return p.stateUpdater(
+	err := p.stateUpdater(
 		p.updateClientFriends,
 		func(storageValue *SStorageState) {
 			storageValue.FFriends[pAliasName] = pPubKey.ToString()
 		},
 	)
+	if err != nil {
+		return errors.WrapError(err, "add friend (state updater)")
+	}
+	return nil
 }
 
 func (p *sState) DelFriend(pAliasName string) error {
-	return p.stateUpdater(
+	err := p.stateUpdater(
 		p.updateClientFriends,
 		func(storageValue *SStorageState) {
 			delete(storageValue.FFriends, pAliasName)
 		},
 	)
+	if err != nil {
+		return errors.WrapError(err, "del friend (state updater)")
+	}
+	return nil
 }
 
 func (p *sState) AddConnection(pConnect string) error {
-	return p.stateUpdater(
+	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
 			storageValue.FConnections = append(
@@ -162,10 +178,14 @@ func (p *sState) AddConnection(pConnect string) error {
 			)
 		},
 	)
+	if err != nil {
+		return errors.WrapError(err, "add connection (state updater)")
+	}
+	return nil
 }
 
 func (p *sState) DelConnection(pConnect string) error {
-	return p.stateUpdater(
+	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
 			storageValue.FConnections = remove(
@@ -174,6 +194,10 @@ func (p *sState) DelConnection(pConnect string) error {
 			)
 		},
 	)
+	if err != nil {
+		return errors.WrapError(err, "del connection (state updater)")
+	}
+	return nil
 }
 
 func (p *sState) IsActive() bool {
@@ -184,26 +208,32 @@ func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) e
 	stateValueBytes := encoding.Serialize(&SStorageState{
 		FPrivKey: pPrivKey.ToString(),
 	})
-	return p.GetStorage().Set(pHashLP, stateValueBytes)
+	if err := p.GetStorage().Set(pHashLP, stateValueBytes); err != nil {
+		return errors.WrapError(err, "new storage state")
+	}
+	return nil
 }
 
 func (p *sState) setStorageState(pStateValue *SStorageState) error {
 	stateValueBytes := encoding.Serialize(pStateValue)
-	return p.GetStorage().Set(p.fHashLP, stateValueBytes)
+	if err := p.GetStorage().Set(p.fHashLP, stateValueBytes); err != nil {
+		return errors.WrapError(err, "update storage state")
+	}
+	return nil
 }
 
 func (p *sState) getStorageState(pHashLP []byte) (*SStorageState, error) {
 	stateValueBytes, err := p.GetStorage().Get(pHashLP)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "get storage state")
 	}
 
 	var stateValue = new(SStorageState)
 	if err := encoding.Deserialize(stateValueBytes, stateValue); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "deserialize state")
 	}
 
-	return stateValue, err
+	return stateValue, nil
 }
 
 func remove(pSlice []string, pElem string) []string {

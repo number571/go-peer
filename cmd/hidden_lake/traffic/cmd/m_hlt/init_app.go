@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/app"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
@@ -24,7 +25,7 @@ func initApp(pPathTo string) (types.ICommand, error) {
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "init config")
 	}
 	return app.NewApp(cfg, pPathTo), nil
 }

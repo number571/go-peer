@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -37,11 +38,10 @@ func (p *sRequester) GetIndex() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", err
+		return "", errors.WrapError(err, "get index (requester)")
 	}
-
 	if resp != pkg_settings.CTitlePattern {
-		return "", fmt.Errorf("incorrect title pattern")
+		return "", errors.NewError("incorrect title pattern")
 	}
 	return resp, nil
 }
@@ -54,7 +54,7 @@ func (p *sRequester) GetHashes() ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "get hashes (requester)")
 	}
 	return strings.Split(resp, ";"), nil
 }
@@ -67,7 +67,7 @@ func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "get message (requester)")
 	}
 
 	msg := message.LoadMessage(
@@ -78,7 +78,7 @@ func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
 		encoding.HexDecode(resp),
 	)
 	if msg == nil {
-		return nil, fmt.Errorf("message is nil")
+		return nil, errors.NewError("load message")
 	}
 
 	return msg, nil
@@ -91,5 +91,8 @@ func (p *sRequester) PutMessage(pRequest string) error {
 		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, p.fHost),
 		pRequest,
 	)
-	return err
+	if err != nil {
+		return errors.WrapError(err, "put message (requester)")
+	}
+	return nil
 }

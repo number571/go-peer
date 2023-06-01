@@ -1,12 +1,12 @@
 package database
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	gp_database "github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -27,17 +27,17 @@ func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
 		}),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "new sqlite")
 	}
 	if sqlDB == nil {
-		return nil, fmt.Errorf("storage (hashes) is nil")
+		return nil, errors.NewError("storage (hashes) is nil")
 	}
 	db := &sKeyValueDB{
 		fSettings: pSett,
 		fDB:       sqlDB,
 	}
 	db.fPointer = db.getPointer()
-	return db, err
+	return db, nil
 }
 
 func (p *sKeyValueDB) Settings() ISettings {
@@ -56,7 +56,7 @@ func (p *sKeyValueDB) Hashes() ([]string, error) {
 			break
 		}
 		if len(hash) != hashing.CSHA256Size {
-			return nil, fmt.Errorf("incorrect hash size")
+			return nil, errors.NewError("incorrect hash size")
 		}
 		res = append(res, encoding.HexEncode(hash))
 	}
@@ -78,7 +78,7 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 		FMessageSize: p.Settings().GetMessageSize(),
 	})
 	if !pMsg.IsValid(params) {
-		return fmt.Errorf("invalid push message")
+		return errors.NewError("invalid push message")
 	}
 
 	// delete old message
@@ -86,25 +86,25 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	if hash, err := p.fDB.Get(keyHash); err == nil {
 		keyMsg := getKeyMessage(hash)
 		if err := p.fDB.Del(keyMsg); err != nil {
-			return err
+			return errors.WrapError(err, "delete old key")
 		}
 	}
 
 	// rewrite hash's field
 	newHash := pMsg.GetBody().GetHash()
 	if err := p.fDB.Set(keyHash, newHash); err != nil {
-		return err
+		return errors.WrapError(err, "rewrite key hash")
 	}
 
 	// write message
 	keyMsg := getKeyMessage(newHash)
 	if err := p.fDB.Set(keyMsg, pMsg.ToBytes()); err != nil {
-		return err
+		return errors.WrapError(err, "write message")
 	}
 
 	// update pointer
 	if err := p.incPointer(); err != nil {
-		return err
+		return errors.WrapError(err, "increment pointer")
 	}
 
 	return nil
@@ -116,12 +116,12 @@ func (p *sKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
 
 	hash := encoding.HexDecode(pStrHash)
 	if len(hash) != hashing.CSHA256Size {
-		return nil, fmt.Errorf("key size invalid")
+		return nil, errors.NewError("key size invalid")
 	}
 
 	data, err := p.fDB.Get(getKeyMessage(hash))
 	if err != nil {
-		return nil, fmt.Errorf("message undefined")
+		return nil, errors.NewError("message undefined")
 	}
 
 	msg := message.LoadMessage(
@@ -142,7 +142,10 @@ func (p *sKeyValueDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	return p.fDB.Close()
+	if err := p.fDB.Close(); err != nil {
+		return errors.WrapError(err, "close KV database")
+	}
+	return nil
 }
 
 func (p *sKeyValueDB) getPointer() uint64 {
@@ -159,5 +162,8 @@ func (p *sKeyValueDB) getPointer() uint64 {
 func (p *sKeyValueDB) incPointer() error {
 	msgsLimit := p.Settings().GetCapacity()
 	res := encoding.Uint64ToBytes((p.getPointer() + 1) % msgsLimit)
-	return p.fDB.Set(getKeyPointer(), res[:])
+	if err := p.fDB.Set(getKeyPointer(), res[:]); err != nil {
+		return errors.WrapError(err, "set pointer into KV database")
+	}
+	return nil
 }

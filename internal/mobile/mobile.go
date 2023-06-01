@@ -2,6 +2,7 @@ package mobile
 
 import (
 	"fyne.io/fyne/v2"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -70,13 +71,13 @@ func (p *sMobileState) doDefault() error {
 	case true:
 		if p.fConstructApp != nil {
 			if err := p.fConstructApp(); err != nil {
-				return err
+				return errors.WrapError(err, "construct app")
 			}
 		}
 	case false:
 		if p.fDestructApp != nil {
 			if err := p.fDestructApp(); err != nil {
-				return err
+				return errors.WrapError(err, "destruct app")
 			}
 		}
 	}

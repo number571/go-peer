@@ -2,10 +2,10 @@ package database
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 func doEncrypt(pCipher symmetric.ICipher, pDataBytes []byte) []byte {
@@ -23,12 +23,12 @@ func doEncrypt(pCipher symmetric.ICipher, pDataBytes []byte) []byte {
 
 func tryDecrypt(pCipher symmetric.ICipher, pEncBytes []byte) ([]byte, error) {
 	if len(pEncBytes) < hashing.CSHA256Size+symmetric.CAESBlockSize {
-		return nil, fmt.Errorf("incorrect size of encrypted data")
+		return nil, errors.NewError("incorrect size of encrypted data")
 	}
 
 	decBytes := pCipher.DecryptBytes(pEncBytes[hashing.CSHA256Size:])
 	if decBytes == nil {
-		return nil, fmt.Errorf("failed decrypt message")
+		return nil, errors.NewError("failed decrypt message")
 	}
 
 	gotHashed := pEncBytes[:hashing.CSHA256Size]
@@ -38,7 +38,7 @@ func tryDecrypt(pCipher symmetric.ICipher, pEncBytes []byte) ([]byte, error) {
 	).ToBytes()
 
 	if !bytes.Equal(gotHashed, newHashed) {
-		return nil, fmt.Errorf("incorrect hash of decrypted data")
+		return nil, errors.NewError("incorrect hash of decrypted data")
 	}
 
 	return decBytes, nil

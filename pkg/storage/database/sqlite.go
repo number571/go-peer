@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -37,11 +38,11 @@ type sSQLiteDB struct {
 func NewSQLiteDB(pSett ISettings) (IKeyValueDB, error) {
 	db, err := sql.Open("sqlite3", pSett.GetPath())
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "open database")
 	}
 
 	if _, err := db.Exec(cTabelKV); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "insert KV table")
 	}
 
 	var saltValue string
@@ -50,7 +51,7 @@ func NewSQLiteDB(pSett ISettings) (IKeyValueDB, error) {
 		saltValue = encoding.HexEncode(random.NewStdPRNG().GetBytes(symmetric.CAESKeySize))
 		_, err := db.Exec("REPLACE INTO kv (key, value) VALUES ($1,$2)", cSaltKey, saltValue)
 		if err != nil {
-			return nil, err
+			return nil, errors.WrapError(err, "insert salt into database")
 		}
 	}
 
@@ -75,7 +76,10 @@ func (p *sSQLiteDB) Set(pKey []byte, pValue []byte) error {
 		encoding.HexEncode(p.tryHash(pKey)),
 		encoding.HexEncode(doEncrypt(p.fCipher, pValue)),
 	)
-	return err
+	if err != nil {
+		return errors.WrapError(err, "insert key/value to database")
+	}
+	return nil
 }
 
 func (p *sSQLiteDB) Get(pKey []byte) ([]byte, error) {
@@ -85,7 +89,7 @@ func (p *sSQLiteDB) Get(pKey []byte) ([]byte, error) {
 	var encValue string
 	row := p.fDB.QueryRow("SELECT value FROM kv WHERE key = $1", encoding.HexEncode(p.tryHash(pKey)))
 	if err := row.Scan(&encValue); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "read value by key")
 	}
 
 	return tryDecrypt(
@@ -102,14 +106,20 @@ func (p *sSQLiteDB) Del(pKey []byte) error {
 		"DELETE FROM kv WHERE key = $1",
 		encoding.HexEncode(p.tryHash(pKey)),
 	)
-	return err
+	if err != nil {
+		return errors.WrapError(err, "delete value by key")
+	}
+	return nil
 }
 
 func (p *sSQLiteDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	return p.fDB.Close()
+	if err := p.fDB.Close(); err != nil {
+		return errors.WrapError(err, "close database")
+	}
+	return nil
 }
 
 func (p *sSQLiteDB) tryHash(pKey []byte) []byte {

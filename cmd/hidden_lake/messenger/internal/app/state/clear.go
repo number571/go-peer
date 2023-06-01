@@ -3,25 +3,33 @@ package state
 import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 func (p *sState) clearClientState() error {
 	if err := p.clearClientPrivKey(); err != nil {
-		return err
+		return errors.WrapError(err, "clear client private key")
 	}
 
 	if err := p.clearClientFriends(); err != nil {
-		return err
+		return errors.WrapError(err, "clear client friends")
 	}
 
-	return p.clearClientConnections()
+	if err := p.clearClientConnections(); err != nil {
+		return errors.WrapError(err, "clear client connections")
+	}
+
+	return nil
 }
 
 func (p *sState) clearClientPrivKey() error {
 	client := p.GetClient().Service()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
-	return client.SetPrivKey(pseudoPrivKey)
+	if err := client.SetPrivKey(pseudoPrivKey); err != nil {
+		return errors.WrapError(err, "set pseudo private key")
+	}
+	return nil
 }
 
 func (p *sState) clearClientFriends() error {
@@ -29,12 +37,12 @@ func (p *sState) clearClientFriends() error {
 
 	friends, err := client.GetFriends()
 	if err != nil {
-		return err
+		return errors.WrapError(err, "get friends")
 	}
 
 	for aliasName := range friends {
 		if err := client.DelFriend(aliasName); err != nil {
-			return err
+			return errors.WrapError(err, "del friend")
 		}
 	}
 
@@ -46,11 +54,11 @@ func (p *sState) clearClientConnections() error {
 
 	connects, err := client.GetConnections()
 	if err != nil {
-		return err
+		return errors.WrapError(err, "get connections")
 	}
 	for _, conn := range connects {
 		if err := client.DelConnection(conn); err != nil {
-			return err
+			return errors.WrapError(err, "del connection")
 		}
 	}
 

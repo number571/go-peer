@@ -7,6 +7,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/logger"
 )
@@ -48,15 +49,15 @@ type SAddress struct {
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	configFile := filesystem.OpenFile(pFilepath)
 	if configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
+		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
 	}
 
 	if err := configFile.Write(encoding.Serialize(pCfg)); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "write config")
 	}
 
 	if err := pCfg.initConfig(pFilepath); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "init config")
 	}
 	return pCfg, nil
 }
@@ -65,21 +66,21 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	configFile := filesystem.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
-		return nil, fmt.Errorf("config file '%s' does not exist", pFilepath)
+		return nil, errors.NewError(fmt.Sprintf("config file '%s' does not exist", pFilepath))
 	}
 
 	bytes, err := configFile.Read()
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "read config")
 	}
 
 	cfg := new(SConfig)
 	if err := encoding.Deserialize(bytes, cfg); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "deserialize config")
 	}
 
 	if err := cfg.initConfig(pFilepath); err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "init config")
 	}
 	return cfg, nil
 }
@@ -88,11 +89,11 @@ func (p *SConfig) initConfig(filepath string) error {
 	p.fFilepath = filepath
 
 	if err := p.loadPubKeys(); err != nil {
-		return err
+		return errors.WrapError(err, "load public keys")
 	}
 
 	if err := p.loadLogging(); err != nil {
-		return err
+		return errors.WrapError(err, "load logging")
 	}
 
 	return nil
@@ -111,7 +112,7 @@ func (p *SConfig) loadLogging() error {
 	for _, v := range p.FLogging {
 		logType, ok := mapping[v]
 		if !ok {
-			return fmt.Errorf("undefined log type '%s'", v)
+			return errors.NewError(fmt.Sprintf("undefined log type '%s'", v))
 		}
 		logging[logType] = true
 	}
@@ -130,11 +131,11 @@ func (p *SConfig) loadPubKeys() error {
 		}
 		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
-			return fmt.Errorf("public key is nil for '%s'", name)
+			return errors.NewError(fmt.Sprintf("public key is nil for '%s'", name))
 		}
 		p.fFriends[name] = pubKey
 		if pubKey.GetSize() != pkg_settings.CAKeySize {
-			return fmt.Errorf("not supported key size for '%s'", name)
+			return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))
 		}
 	}
 

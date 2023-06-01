@@ -1,10 +1,10 @@
 package database
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	gp_database "github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -13,7 +13,7 @@ type sKeyValueDB struct {
 	fDB    *gp_database.IKeyValueDB
 }
 
-func NewKeyValueDB(pPath string, pKey []byte) IKeyValueDB {
+func NewKeyValueDB(pPath string, pKey []byte) (IKeyValueDB, error) {
 	db, err := gp_database.NewSQLiteDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pPath,
@@ -22,11 +22,11 @@ func NewKeyValueDB(pPath string, pKey []byte) IKeyValueDB {
 		}),
 	)
 	if err != nil {
-		return nil
+		return nil, errors.WrapError(err, "new sqlite")
 	}
 	return &sKeyValueDB{
 		fDB: &db,
-	}
+	}, nil
 }
 
 func (p *sKeyValueDB) Size(pR IRelation) uint64 {
@@ -41,23 +41,23 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 	defer p.fMutex.Unlock()
 
 	if pStart > pEnd {
-		return nil, fmt.Errorf("start > end")
+		return nil, errors.NewError("start > end")
 	}
 
 	size := p.getSize(pR)
 	if pEnd > size {
-		return nil, fmt.Errorf("end > size")
+		return nil, errors.NewError("end > size")
 	}
 
 	res := make([]IMessage, 0, pEnd-pStart)
 	for i := pStart; i < pEnd; i++ {
 		data, err := (*p.fDB).Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
-			return nil, fmt.Errorf("message undefined")
+			return nil, errors.WrapError(err, "message undefined")
 		}
 		msg := LoadMessage(data)
 		if msg == nil {
-			return nil, fmt.Errorf("message is null")
+			return nil, errors.NewError("message is null")
 		}
 		res = append(res, msg)
 	}
@@ -69,31 +69,35 @@ func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	_, err := (*p.fDB).Get(getKeyMessageByHash(pR, pMsg.GetSHA256UID()))
-	if err == nil {
-		return fmt.Errorf("message is already exist")
+	if _, err := (*p.fDB).Get(getKeyMessageByHash(pR, pMsg.GetSHA256UID())); err == nil {
+		return errors.WrapError(err, "message is already exist")
 	}
 
-	err = (*p.fDB).Set(getKeyMessageByHash(pR, pMsg.GetSHA256UID()), []byte{1})
-	if err != nil {
-		return err
+	if err := (*p.fDB).Set(getKeyMessageByHash(pR, pMsg.GetSHA256UID()), []byte{1}); err != nil {
+		return errors.WrapError(err, "set uid to database")
 	}
 
 	size := p.getSize(pR)
-	err = (*p.fDB).Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes())
-	if err != nil {
-		return err
+	numBytes := encoding.Uint64ToBytes(size + 1)
+	if err := (*p.fDB).Set(getKeySize(pR), numBytes[:]); err != nil {
+		return errors.WrapError(err, "set size of message to database")
 	}
 
-	numBytes := encoding.Uint64ToBytes(size + 1)
-	return (*p.fDB).Set(getKeySize(pR), numBytes[:])
+	if err := (*p.fDB).Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes()); err != nil {
+		return errors.WrapError(err, "set message to database")
+	}
+
+	return nil
 }
 
 func (p *sKeyValueDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	return (*p.fDB).Close()
+	if err := (*p.fDB).Close(); err != nil {
+		return errors.WrapError(err, "close KV database")
+	}
+	return nil
 }
 
 func (p *sKeyValueDB) getSize(pR IRelation) uint64 {

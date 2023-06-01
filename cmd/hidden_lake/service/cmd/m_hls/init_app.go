@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
@@ -19,7 +20,7 @@ const (
 func initApp(pPathTo string) (types.ICommand, error) {
 	privKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
 	if privKey == nil {
-		return nil, fmt.Errorf("private key is invalid")
+		return nil, errors.NewError("private key is invalid")
 	}
 
 	cfg, err := pkg_config.InitConfig(
@@ -33,7 +34,7 @@ func initApp(pPathTo string) (types.ICommand, error) {
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "init config")
 	}
 
 	return app.NewApp(cfg, privKey, pPathTo), nil

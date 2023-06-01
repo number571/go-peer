@@ -1,12 +1,12 @@
 package network
 
 import (
-	"fmt"
 	"net"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
@@ -49,12 +49,8 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 
 	var err error
 	for _, conn := range p.GetConnections() {
-		e := conn.WritePayload(pPld)
-		if e != nil {
-			err = e
-		}
+		err = errors.AppendError(err, conn.WritePayload(pPld))
 	}
-
 	return err
 }
 
@@ -64,7 +60,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 func (p *sNode) Run() error {
 	listener, err := net.Listen("tcp", p.GetSettings().GetAddress())
 	if err != nil {
-		return err
+		return errors.WrapError(err, "run node")
 	}
 
 	go func(pListener net.Listener) {
@@ -108,7 +104,10 @@ func (p *sNode) Stop() error {
 		delete(p.fConnections, id)
 	}
 
-	return types.CloseAll(toClose)
+	if err := types.CloseAll(toClose); err != nil {
+		return errors.WrapError(err, "stop node")
+	}
+	return nil
 }
 
 // Saves the function to the map by key for subsequent redirection.
@@ -137,13 +136,13 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 // Checks the number of connections.
 func (p *sNode) AddConnect(pAddress string) error {
 	if p.hasMaxConnSize() {
-		return fmt.Errorf("has max connections size")
+		return errors.NewError("has max connections size")
 	}
 
 	sett := p.GetSettings().GetConnSettings()
 	conn, err := conn.NewConn(sett, pAddress)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "add connect")
 	}
 
 	p.setConnection(pAddress, conn)
@@ -163,7 +162,10 @@ func (p *sNode) DelConnect(pAddress string) error {
 	}
 
 	delete(p.fConnections, pAddress)
-	return conn.Close()
+	if err := conn.Close(); err != nil {
+		return errors.WrapError(err, "del connect")
+	}
+	return nil
 }
 
 // Processes the received data from the connection.

@@ -7,6 +7,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
@@ -21,7 +22,7 @@ const (
 func initApp(pPathTo string) (types.ICommand, types.ICommand, error) {
 	privKey := asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
 	if privKey == nil {
-		return nil, nil, fmt.Errorf("private key is invalid")
+		return nil, nil, errors.NewError("private key is invalid")
 	}
 
 	cfgHLS, err := hls_config.InitConfig(
@@ -38,7 +39,7 @@ func initApp(pPathTo string) (types.ICommand, types.ICommand, error) {
 		},
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.WrapError(err, "init config HLS")
 	}
 
 	cfgHLM, err := config.InitConfig(
@@ -55,7 +56,7 @@ func initApp(pPathTo string) (types.ICommand, types.ICommand, error) {
 		},
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errors.WrapError(err, "init config HLM")
 	}
 
 	return hls_app.NewApp(cfgHLS, privKey, pPathTo), app.NewApp(cfgHLM, pPathTo), nil

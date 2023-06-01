@@ -7,6 +7,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
@@ -39,14 +40,14 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "load config (update connections)")
 	}
 
 	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(pConns)
 	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
 	if err != nil {
-		return err
+		return errors.WrapError(err, "write config (update connections)")
 	}
 
 	p.fConfig.fMutex.Lock()
@@ -64,13 +65,13 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 		if pubKey.GetSize() == pkg_settings.CAKeySize {
 			continue
 		}
-		return fmt.Errorf("not supported key size for '%s'", name)
+		return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))
 	}
 
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return err
+		return errors.WrapError(err, "load config (update friends)")
 	}
 
 	cfg := icfg.(*SConfig)
@@ -78,7 +79,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	cfg.FFriends = pubKeysToStrings(pFriends)
 	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
 	if err != nil {
-		return err
+		return errors.WrapError(err, "write config (update friends)")
 	}
 
 	p.fConfig.fMutex.Lock()

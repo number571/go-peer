@@ -2,6 +2,8 @@ package filesystem
 
 import (
 	"os"
+
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -21,13 +23,16 @@ func OpenFile(pPath string) IFile {
 func (p *sFile) Read() ([]byte, error) {
 	data, err := os.ReadFile(p.fPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.WrapError(err, "read file")
 	}
 	return data, nil
 }
 
 func (p *sFile) Write(pData []byte) error {
-	return os.WriteFile(p.fPath, pData, 0644)
+	if err := os.WriteFile(p.fPath, pData, 0644); err != nil {
+		return errors.WrapError(err, "write file")
+	}
+	return nil
 }
 
 func (p *sFile) IsExist() bool {

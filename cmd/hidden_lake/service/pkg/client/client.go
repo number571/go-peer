@@ -5,6 +5,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -24,57 +25,105 @@ func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 }
 
 func (p *sClient) GetIndex() (string, error) {
-	return p.fRequester.GetIndex()
+	res, err := p.fRequester.GetIndex()
+	if err != nil {
+		return "", errors.WrapError(err, "get index (client)")
+	}
+	return res, nil
 }
 
 func (p *sClient) HandleMessage(pMsg message.IMessage) error {
-	return p.fRequester.HandleMessage(p.fBuilder.Message(pMsg))
+	if err := p.fRequester.HandleMessage(p.fBuilder.Message(pMsg)); err != nil {
+		return errors.WrapError(err, "handle message (client)")
+	}
+	return nil
 }
 
 func (p *sClient) BroadcastRequest(pRecv asymmetric.IPubKey, pData request.IRequest) error {
-	return p.fRequester.BroadcastRequest(p.fBuilder.Request(pRecv, pData))
+	if err := p.fRequester.BroadcastRequest(p.fBuilder.Request(pRecv, pData)); err != nil {
+		return errors.WrapError(err, "broadcast request (client)")
+	}
+	return nil
 }
 
 func (p *sClient) FetchRequest(pRecv asymmetric.IPubKey, pData request.IRequest) (response.IResponse, error) {
-	return p.fRequester.FetchRequest(p.fBuilder.Request(pRecv, pData))
+	res, err := p.fRequester.FetchRequest(p.fBuilder.Request(pRecv, pData))
+	if err != nil {
+		return nil, errors.WrapError(err, "fetch request (client)")
+	}
+	return res, nil
 }
 
 func (p *sClient) GetFriends() (map[string]asymmetric.IPubKey, error) {
-	return p.fRequester.GetFriends()
+	res, err := p.fRequester.GetFriends()
+	if err != nil {
+		return nil, errors.WrapError(err, "get friends (client)")
+	}
+	return res, nil
 }
 
 func (p *sClient) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
-	return p.fRequester.AddFriend(p.fBuilder.Friend(pAliasName, pPubKey))
+	if err := p.fRequester.AddFriend(p.fBuilder.Friend(pAliasName, pPubKey)); err != nil {
+		return errors.WrapError(err, "add friend (client)")
+	}
+	return nil
 }
 
 func (p *sClient) DelFriend(pAliasName string) error {
-	return p.fRequester.DelFriend(p.fBuilder.Friend(pAliasName, nil))
+	if err := p.fRequester.DelFriend(p.fBuilder.Friend(pAliasName, nil)); err != nil {
+		return errors.WrapError(err, "del friend (client)")
+	}
+	return nil
 }
 
 func (p *sClient) GetOnlines() ([]string, error) {
-	return p.fRequester.GetOnlines()
+	res, err := p.fRequester.GetOnlines()
+	if err != nil {
+		return nil, errors.WrapError(err, "get onlines (client)")
+	}
+	return res, nil
 }
 
 func (p *sClient) DelOnline(pConnect string) error {
-	return p.fRequester.DelOnline(p.fBuilder.Connect(pConnect))
+	if err := p.fRequester.DelOnline(p.fBuilder.Connect(pConnect)); err != nil {
+		return errors.WrapError(err, "del online (client)")
+	}
+	return nil
 }
 
 func (p *sClient) GetConnections() ([]string, error) {
-	return p.fRequester.GetConnections()
+	res, err := p.fRequester.GetConnections()
+	if err != nil {
+		return nil, errors.WrapError(err, "get connections (client)")
+	}
+	return res, nil
 }
 
 func (p *sClient) AddConnection(pConnect string) error {
-	return p.fRequester.AddConnection(p.fBuilder.Connect(pConnect))
+	if err := p.fRequester.AddConnection(p.fBuilder.Connect(pConnect)); err != nil {
+		return errors.WrapError(err, "add connection (client)")
+	}
+	return nil
 }
 
 func (p *sClient) DelConnection(pConnect string) error {
-	return p.fRequester.DelConnection(p.fBuilder.Connect(pConnect))
+	if err := p.fRequester.DelConnection(p.fBuilder.Connect(pConnect)); err != nil {
+		return errors.WrapError(err, "del connection (client)")
+	}
+	return nil
 }
 
 func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey) error {
-	return p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey))
+	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey)); err != nil {
+		return errors.WrapError(err, "set private key (client)")
+	}
+	return nil
 }
 
 func (p *sClient) GetPubKey() (asymmetric.IPubKey, error) {
-	return p.fRequester.GetPubKey()
+	res, err := p.fRequester.GetPubKey()
+	if err != nil {
+		return nil, errors.WrapError(err, "get public key (client)")
+	}
+	return res, nil
 }
