@@ -18,8 +18,8 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FTCP:  "localhost:9571",
-				FHTTP: "localhost:9572",
+				FTCP:  ":9571",
+				FHTTP: ":9572",
 			},
 		}
 	}

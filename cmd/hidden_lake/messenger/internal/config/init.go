@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
@@ -10,12 +11,14 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
+			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FInterface: "localhost:9591",
-				FIncoming:  "localhost:9592",
+				FInterface: ":9591",
+				FIncoming:  ":9592",
 			},
 			FConnection: &SConnection{
 				FService: "localhost:9572",
+				FTraffic: "localhost:9581",
 			},
 		}
 	}

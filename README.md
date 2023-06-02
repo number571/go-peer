@@ -110,6 +110,10 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
+### Installation
+
+TODO
+
 ### Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
@@ -233,6 +237,10 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
+### Installation
+
+TODO
+
 ### Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3`.
@@ -272,6 +280,10 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 <p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 9. Example of running HLT client.</p>
 
+### Installation
+
+TODO
+
 ### Example 
 
 Build and run service
@@ -305,6 +317,10 @@ Adapters adapt to the interfaces of the service for reading/writing data and, th
 
 <p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 10. Example of running HLA client.</p>
+
+### Installation
+
+TODO
 
 ### Example 
 

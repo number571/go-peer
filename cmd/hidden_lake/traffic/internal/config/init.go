@@ -17,7 +17,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FLogging:    []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
-			FAddress:    "localhost:9581",
+			FAddress:    ":9581",
 			FConnection: "localhost:9571",
 		}
 	}

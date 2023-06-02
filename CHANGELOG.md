@@ -8,6 +8,15 @@
 
 In progress...
 
+### IMPROVEMENTS
+
+- Projects `hidden_lake`: append build/run with docker
+<!-- - Text `README`: append installation instructions -->
+
+### CHANGES
+
+- Project `hidden_lake/messenger`: deleted HLS part from hlm_m application
+
 <!-- ... -->
 
 ## v1.5.9

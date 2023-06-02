@@ -1,10 +1,12 @@
 N=1
 GC=go build
-BINPATH=../../../bin
+ROOPATH=../../..
+BINPATH=$(ROOPATH)/bin
 MOBILEPATH=./cmd/m_hlt
 
 .PHONY: default all-build build run test all-clean clean \
-	mobile-default mobile-build mobile-install mobile-clean
+	mobile-default mobile-build mobile-install mobile-clean \
+	docker-default docker-build docker-run docker-clean 
 
 default: build run
 
@@ -33,3 +35,11 @@ mobile-install:
 mobile-clean:
 	rm -f $(MOBILEPATH)/m_hlt.apk $(BINPATH)/hlt_android.apk
 	rm -rf $(MOBILEPATH)/hidden_lake
+
+docker-default: docker-build docker-run
+docker-build:
+	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_traffic
+docker-run:
+	docker run -it --rm -v $$(pwd)/mounted:/mounted -p 9581:9581 hl_traffic
+docker-clean:
+	docker rmi hl_traffic

@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	gAppHLS types.ICommand
 	gAppHLM types.ICommand
 )
 
@@ -37,15 +36,12 @@ func main() {
 }
 
 func constructApp() error {
-	if gAppHLS == nil && gAppHLM == nil {
+	if gAppHLM == nil {
 		var err error
-		gAppHLS, gAppHLM, err = initApp(mobile.CAndroidFullPath)
+		gAppHLM, err = initApp(mobile.CAndroidFullPath)
 		if err != nil {
 			return err
 		}
-	}
-	if err := gAppHLS.Run(); err != nil {
-		return err
 	}
 	if err := gAppHLM.Run(); err != nil {
 		return err
@@ -56,11 +52,6 @@ func constructApp() error {
 func destructApp() error {
 	if gAppHLM != nil {
 		if err := gAppHLM.Stop(); err != nil {
-			return err
-		}
-	}
-	if gAppHLS != nil {
-		if err := gAppHLS.Stop(); err != nil {
 			return err
 		}
 	}

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/app"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -10,10 +13,17 @@ import (
 )
 
 func initApp() (types.ICommand, error) {
-	cfg, err := config.InitConfig(settings.CPathCFG, nil)
+	var (
+		inputPath string
+	)
+
+	flag.StringVar(&inputPath, "path", ".", "path to config/database files")
+	flag.Parse()
+
+	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
 
-	return app.NewApp(cfg, "."), nil
+	return app.NewApp(cfg, inputPath), nil
 }
