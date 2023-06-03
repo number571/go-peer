@@ -35,7 +35,7 @@ func TestBytes(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	if string(Serialize(tgMessage)) != tcJSON {
+	if string(Serialize(tgMessage, false)) != tcJSON {
 		t.Error("serialize string is invalid")
 	}
 

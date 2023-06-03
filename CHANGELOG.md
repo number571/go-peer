@@ -11,11 +11,13 @@ In progress...
 ### IMPROVEMENTS
 
 - Projects `hidden_lake`: append build/run with docker
-<!-- - Text `README`: append installation instructions -->
+- Text `README`: append build and run instructions
 
 ### CHANGES
 
 - Project `hidden_lake/messenger`: deleted HLS part from hlm_m application
+- Package `encoding`: Serialize function with option (indent/not indent)
+- Project `hidden_lake/messenger`: deleted HLS part from hlm application (build and run)
 
 <!-- ... -->
 

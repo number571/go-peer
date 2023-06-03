@@ -14,12 +14,10 @@ all-build: build mobile-build
 all-clean: clean mobile-clean 
 
 build:
-	make build -C ../service
 	$(GC) -o $(BINPATH)/hlm ./cmd/hlm
 	GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hlm_linux ./cmd/hlm
 	GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hlm_windows.exe ./cmd/hlm
 run:
-	./$(BINPATH)/hls &
 	./$(BINPATH)/hlm	
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done

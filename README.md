@@ -110,9 +110,63 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
-### Installation
+### Build and run
 
-TODO
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/service
+$ make build # create hls, hls_linux, hls_windows.exe and copy to ./bin
+$ make run # run ./bin/hls
+
+> [INFO] 2023/06/03 14:32:40 HLS is running...
+> [INFO] 2023/06/03 14:32:42 service=HLS type=BRDCS hash=43A5E9C5...BA73DF43 addr=211494E4...EEA12BBC proof=0000000002256145 conn=127.0.0.1:
+> [INFO] 2023/06/03 14:32:47 service=HLS type=BRDCS hash=EFDDC1D4...C47588AD addr=211494E4...EEA12BBC proof=0000000000090086 conn=127.0.0.1:
+> [INFO] 2023/06/03 14:32:52 service=HLS type=BRDCS hash=8549E257...EDEB2748 addr=211494E4...EEA12BBC proof=0000000000634328 conn=127.0.0.1:
+> ...
+```
+
+Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
+Creates `./hls.cfg` or `./mounted/hls.cfg` (docker) and `./hls.db` or `./mounted/hls.db` (docker) files. 
+The file `hls.db` stores hashes of sent/received messages.
+
+Default config `hls.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": {
+		"tcp": ":9571",
+		"http": ":9572"
+	}
+}
+```
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/service
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 07:36:49 HLS is running...
+> [INFO] 2023/06/03 07:36:51 service=HLS type=BRDCS hash=AF90439F...9F29A036 addr=BB58A8A2...B64D62C2 proof=0000000000479155 conn=127.0.0.1:
+> [INFO] 2023/06/03 07:36:56 service=HLS type=BRDCS hash=2C4CE60A...E55BF9C4 addr=BB58A8A2...B64D62C2 proof=0000000000521434 conn=127.0.0.1:
+> [INFO] 2023/06/03 07:37:01 service=HLS type=BRDCS hash=A9285F98...F96DB93D addr=BB58A8A2...B64D62C2 proof=0000000001256786 conn=127.0.0.1:
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/service
+$ make mobile-build # create hls_android.apk and copy to ./bin
+```
 
 ### Example
 
@@ -237,9 +291,63 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
-### Installation
+### Build and run
 
-TODO
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/messenger
+$ make build # create hlm, hlm_linux, hlm_windows.exe and copy to ./bin
+$ make run # run ./bin/hlm
+
+> [INFO] 2023/06/03 15:30:31 HLM is running...
+> ...
+```
+
+Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
+Creates `./hlm.cfg` or `./mounted/hlm.cfg` (docker), `./hlm.db` or `./mounted/hlm.db` (docker) files and `./hlm.stg` or `./mounted/hlm.stg`.
+The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
+
+Default config `hlm.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": {
+		"interface": ":9591",
+		"incoming": ":9592"
+	},
+	"connection": {
+		"service": "hl_service:9572",
+		"traffic": "hl_traffic:9581"
+	}
+}
+```
+
+If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `hl_service` and `hl_traffic` to IP addresses (example: `127.0.0.1:9571` and also `127.0.0.1:9581` for local network).
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/messenger
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 08:35:50 HLM is running...
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/messenger
+$ make mobile-build # create hlm_android.apk and copy to ./bin
+```
 
 ### Example
 
@@ -280,9 +388,57 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 <p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 9. Example of running HLT client.</p>
 
-### Installation
+### Build and run
 
-TODO
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/traffic
+$ make build # create hlt, hlt_linux, hlt_windows.exe and copy to ./bin
+$ make run # run ./bin/hlt
+
+> [INFO] 2023/06/03 15:39:13 HLT is running...
+> ...
+```
+
+Open ports `9581` (HTTP, interface).
+Creates `./hlt.cfg` or `./mounted/hlt.cfg` (docker), `./hlt.db` or `./mounted/hlt.db` (docker) files.
+The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
+
+Default config `hlt.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": ":9581",
+	"connection": "hl_service:9571"
+}
+```
+
+If messenger works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `hl_service` to IP address (example: `127.0.0.1:9571` for local network).
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/traffic
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 08:44:14 HLT is running...
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/traffic
+$ make mobile-build # create hlt_android.apk and copy to ./bin
+```
 
 ### Example 
 

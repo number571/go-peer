@@ -44,6 +44,64 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
+### Build and run
+
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/service
+$ make build # create hls, hls_linux, hls_windows.exe and copy to ./bin
+$ make run # run ./bin/hls
+
+> [INFO] 2023/06/03 14:32:40 HLS is running...
+> [INFO] 2023/06/03 14:32:42 service=HLS type=BRDCS hash=43A5E9C5...BA73DF43 addr=211494E4...EEA12BBC proof=0000000002256145 conn=127.0.0.1:
+> [INFO] 2023/06/03 14:32:47 service=HLS type=BRDCS hash=EFDDC1D4...C47588AD addr=211494E4...EEA12BBC proof=0000000000090086 conn=127.0.0.1:
+> [INFO] 2023/06/03 14:32:52 service=HLS type=BRDCS hash=8549E257...EDEB2748 addr=211494E4...EEA12BBC proof=0000000000634328 conn=127.0.0.1:
+> ...
+```
+
+Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
+Creates `./hls.cfg` or `./mounted/hls.cfg` (docker) and `./hls.db` or `./mounted/hls.db` (docker) files. 
+The file `hls.db` stores hashes of sent/received messages.
+
+Default config `hls.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": {
+		"tcp": ":9571",
+		"http": ":9572"
+	}
+}
+```
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/service
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 07:36:49 HLS is running...
+> [INFO] 2023/06/03 07:36:51 service=HLS type=BRDCS hash=AF90439F...9F29A036 addr=BB58A8A2...B64D62C2 proof=0000000000479155 conn=127.0.0.1:
+> [INFO] 2023/06/03 07:36:56 service=HLS type=BRDCS hash=2C4CE60A...E55BF9C4 addr=BB58A8A2...B64D62C2 proof=0000000000521434 conn=127.0.0.1:
+> [INFO] 2023/06/03 07:37:01 service=HLS type=BRDCS hash=A9285F98...F96DB93D addr=BB58A8A2...B64D62C2 proof=0000000001256786 conn=127.0.0.1:
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/service
+$ make mobile-build # create hls_android.apk and copy to ./bin
+```
+
 ### Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.

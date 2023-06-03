@@ -43,7 +43,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
 	}
 
-	if err := configFile.Write(encoding.Serialize(pCfg)); err != nil {
+	if err := configFile.Write(encoding.Serialize(pCfg, true)); err != nil {
 		return nil, errors.WrapError(err, "write config")
 	}
 

@@ -15,6 +15,58 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 <p align="center"><img src="../../../examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 1. Example of running HLT client.</p>
 
+### Build and run
+
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/traffic
+$ make build # create hlt, hlt_linux, hlt_windows.exe and copy to ./bin
+$ make run # run ./bin/hlt
+
+> [INFO] 2023/06/03 15:39:13 HLT is running...
+> ...
+```
+
+Open ports `9581` (HTTP, interface).
+Creates `./hlt.cfg` or `./mounted/hlt.cfg` (docker), `./hlt.db` or `./mounted/hlt.db` (docker) files.
+The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
+
+Default config `hlt.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": ":9581",
+	"connection": "hl_service:9571"
+}
+```
+
+If messenger works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `hl_service` to IP address (example: `127.0.0.1:9571` for local network).
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/traffic
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 08:44:14 HLT is running...
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/traffic
+$ make mobile-build # create hlt_android.apk and copy to ./bin
+```
+
 ## Example 
 
 Build and run service

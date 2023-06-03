@@ -32,6 +32,64 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
+### Build and run
+
+Default build and run:
+
+```bash 
+$ cd ./cmd/hidden_lake/messenger
+$ make build # create hlm, hlm_linux, hlm_windows.exe and copy to ./bin
+$ make run # run ./bin/hlm
+
+> [INFO] 2023/06/03 15:30:31 HLM is running...
+> ...
+```
+
+Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
+Creates `./hlm.cfg` or `./mounted/hlm.cfg` (docker), `./hlm.db` or `./mounted/hlm.db` (docker) files and `./hlm.stg` or `./mounted/hlm.stg`.
+The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
+
+Default config `hlm.cfg`:
+
+```json
+{
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"address": {
+		"interface": ":9591",
+		"incoming": ":9592"
+	},
+	"connection": {
+		"service": "hl_service:9572",
+		"traffic": "hl_traffic:9581"
+	}
+}
+```
+
+If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `hl_service` and `hl_traffic` to IP addresses (example: `127.0.0.1:9571` and also `127.0.0.1:9581` for local network).
+
+Build and run with docker:
+
+```bash 
+$ cd ./cmd/hidden_lake/messenger
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 08:35:50 HLM is running...
+> ...
+```
+
+Build mobile app:
+
+```bash 
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/messenger
+$ make mobile-build # create hlm_android.apk and copy to ./bin
+```
+
 ### Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3` (HLS).

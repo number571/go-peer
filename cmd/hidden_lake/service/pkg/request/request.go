@@ -34,7 +34,7 @@ func LoadRequest(pData []byte) (IRequest, error) {
 }
 
 func (p *sRequest) ToBytes() []byte {
-	return encoding.Serialize(p)
+	return encoding.Serialize(p, false)
 }
 
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {

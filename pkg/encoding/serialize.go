@@ -6,8 +6,19 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 )
 
-func Serialize(pData interface{}) []byte {
-	res, err := json.Marshal(pData)
+func Serialize(pData interface{}, withIndent bool) []byte {
+	var (
+		res []byte
+		err error
+	)
+
+	switch withIndent {
+	case true:
+		res, err = json.MarshalIndent(pData, "", "\t")
+	case false:
+		res, err = json.Marshal(pData)
+	}
+
 	if err != nil {
 		return nil
 	}

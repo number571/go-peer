@@ -30,7 +30,7 @@ func LoadResponse(pBytes []byte) (IResponse, error) {
 }
 
 func (p *sResponse) ToBytes() []byte {
-	return encoding.Serialize(p)
+	return encoding.Serialize(p, false)
 }
 
 func (p *sResponse) WithHead(pHead map[string]string) IResponse {

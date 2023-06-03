@@ -207,7 +207,7 @@ func (p *sState) IsActive() bool {
 func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
 	stateValueBytes := encoding.Serialize(&SStorageState{
 		FPrivKey: pPrivKey.ToString(),
-	})
+	}, false)
 	if err := p.GetStorage().Set(pHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "new storage state")
 	}
@@ -215,7 +215,7 @@ func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) e
 }
 
 func (p *sState) setStorageState(pStateValue *SStorageState) error {
-	stateValueBytes := encoding.Serialize(pStateValue)
+	stateValueBytes := encoding.Serialize(pStateValue, false)
 	if err := p.GetStorage().Set(p.fHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "update storage state")
 	}

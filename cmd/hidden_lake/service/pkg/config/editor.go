@@ -45,7 +45,7 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(pConns)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
+	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update connections)")
 	}
@@ -77,7 +77,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	cfg := icfg.(*SConfig)
 	cfg.fFriends = deleteDuplicatePubKeys(pFriends)
 	cfg.FFriends = pubKeysToStrings(pFriends)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg))
+	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update friends)")
 	}
