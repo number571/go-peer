@@ -479,10 +479,6 @@ Adapters adapt to the interfaces of the service for reading/writing data and, th
 <p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 10. Example of running HLA client.</p>
 
-### Installation
-
-TODO
-
 ### Example 
 
 Since the adapters are capable of performing the same functions as the source programs, without secret communication channels, then all the examples become similar. So, let's analyze one of the examples based on the echo service.
