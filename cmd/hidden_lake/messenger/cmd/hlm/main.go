@@ -5,12 +5,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/internal/pprof"
 )
 
 func main() {
-	pprof.RunPprofService(hlm_settings.CServiceName)
+	pprof.RunPprofService(pkg_settings.CServiceName)
 
 	app, err := initApp()
 	if err != nil {

@@ -8,11 +8,11 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -70,6 +70,6 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 			FMessage:   dbMsg.GetMessage(),
 			FTimestamp: dbMsg.GetTimestamp(),
 		})
-		api.Response(pW, http.StatusOK, settings.CTitlePattern)
+		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
 	}
 }

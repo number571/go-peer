@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -26,7 +27,7 @@ func initApp(pPathTo string) (types.ICommand, error) {
 	cfgHLM, err := config.InitConfig(
 		fmt.Sprintf("%s/%s", pPathTo, settings.CPathCFG),
 		&config.SConfig{
-			FStorageKey: "mobile_" + settings.CServiceName,
+			FStorageKey: "mobile_" + pkg_settings.CServiceName,
 			FAddress: &config.SAddress{
 				FInterface: hlmURL,
 				FIncoming:  "localhost:9592",

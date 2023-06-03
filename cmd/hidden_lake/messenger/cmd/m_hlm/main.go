@@ -9,10 +9,11 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/internal/mobile"
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
+
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 )
 
 var (
@@ -69,7 +70,7 @@ func buttonActions(a fyne.App) *widget.Button {
 		}
 	}
 
-	state := mobile.NewState(a, settings.CServiceName).
+	state := mobile.NewState(a, pkg_settings.CServiceName).
 		WithConstructApp(constructApp).
 		WithDestructApp(destructApp)
 

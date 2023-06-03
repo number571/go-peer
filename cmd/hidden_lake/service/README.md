@@ -76,9 +76,14 @@ Default config `hls.cfg`:
 	"address": {
 		"tcp": ":9571",
 		"http": ":9572"
+	},
+	"services": {
+		"go-peer/hidden-lake-messenger": "hl_messenger:9592"
 	}
 }
 ```
+
+If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `hl_messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker:
 

@@ -10,11 +10,11 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
 
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
@@ -115,7 +115,7 @@ func (p *sApp) Run() error {
 	case err := <-res:
 		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
-		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
+		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
@@ -128,7 +128,7 @@ func (p *sApp) Stop() error {
 		return pkg_errors.NewError("application already stopped or not started")
 	}
 	p.fIsRun = false
-	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
+	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	// state may be already closed
 	_ = p.fState.ClearActiveState()

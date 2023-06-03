@@ -4,6 +4,8 @@ import (
 	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
+
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 )
 
 func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
@@ -20,6 +22,9 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FAddress: &SAddress{
 				FTCP:  ":9571",
 				FHTTP: ":9572",
+			},
+			FServices: map[string]string{
+				hlm_settings.CTitlePattern: "hl_messenger:9592",
 			},
 		}
 	}
