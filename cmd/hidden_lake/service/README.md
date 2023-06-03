@@ -61,7 +61,7 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.cfg` or `./mounted/hls.cfg` (docker) and `./hls.db` or `./mounted/hls.db` (docker) files. 
+Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
 Default config `hls.cfg`:

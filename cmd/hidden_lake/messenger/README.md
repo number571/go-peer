@@ -46,7 +46,7 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.cfg` or `./mounted/hlm.cfg` (docker), `./hlm.db` or `./mounted/hlm.db` (docker) files and `./hlm.stg` or `./mounted/hlm.stg`.
+Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker), `./hlm.db` or `./_mounted/hlm.db` (docker) files and `./hlm.stg` or `./_mounted/hlm.stg` (docker).
 The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
 
 Default config `hlm.cfg`:

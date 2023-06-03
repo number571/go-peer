@@ -29,7 +29,7 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581` (HTTP, interface).
-Creates `./hlt.cfg` or `./mounted/hlt.cfg` (docker), `./hlt.db` or `./mounted/hlt.db` (docker) files.
+Creates `./hlt.cfg` or `./_mounted/hlt.cfg` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
 Default config `hlt.cfg`:

@@ -127,7 +127,7 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.cfg` or `./mounted/hls.cfg` (docker) and `./hls.db` or `./mounted/hls.db` (docker) files. 
+Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
 Default config `hls.cfg`:
@@ -310,7 +310,7 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.cfg` or `./mounted/hlm.cfg` (docker), `./hlm.db` or `./mounted/hlm.db` (docker) files and `./hlm.stg` or `./mounted/hlm.stg`.
+Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker), `./hlm.db` or `./_mounted/hlm.db` (docker) files and `./hlm.stg` or `./_mounted/hlm.stg` (docker).
 The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
 
 Default config `hlm.cfg`:
@@ -407,7 +407,7 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581` (HTTP, interface).
-Creates `./hlt.cfg` or `./mounted/hlt.cfg` (docker), `./hlt.db` or `./mounted/hlt.db` (docker) files.
+Creates `./hlt.cfg` or `./_mounted/hlt.cfg` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
 Default config `hlt.cfg`:
