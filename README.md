@@ -144,12 +144,12 @@ Default config `hls.cfg`:
 		"http": ":9572"
 	},
 	"services": {
-		"go-peer/hidden-lake-messenger": "hl_messenger:9592"
+		"go-peer/hidden-lake-messenger": "messenger:9592"
 	}
 }
 ```
 
-If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `hl_messenger`to IP address (example: `127.0.0.1:9592` for local network).
+If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker:
 
@@ -327,13 +327,13 @@ Default config `hlm.cfg`:
 		"incoming": ":9592"
 	},
 	"connection": {
-		"service": "hl_service:9572",
-		"traffic": "hl_traffic:9581"
+		"service": "service:9572",
+		"traffic": "traffic:9581"
 	}
 }
 ```
 
-If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `hl_service` and `hl_traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
+If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
 Build and run with docker:
 
@@ -420,11 +420,11 @@ Default config `hlt.cfg`:
 		"erro"
 	],
 	"address": ":9581",
-	"connection": "hl_service:9571"
+	"connection": "service:9571"
 }
 ```
 
-If traffic works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `hl_service` to IP address (example: `127.0.0.1:9571` for local network).
+If traffic works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
 Build and run with docker:
 

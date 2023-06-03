@@ -1,6 +1,6 @@
 version: "3"
 services:
-  hl_service:
+  service:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
@@ -9,7 +9,9 @@ services:
     ports:
       - "9571:9571"
       - "9572:9572"
-  hl_traffic:
+    networks:
+      - hidden-lake
+  traffic:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/traffic/Dockerfile
@@ -17,9 +19,9 @@ services:
       - ./_mounted:/mounted
     ports:
       - "9581:9581"
-    depends_on:
-      - hl_service
-  hl_messenger:
+    networks:
+      - hidden-lake
+  messenger:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/messenger/Dockerfile
@@ -28,6 +30,8 @@ services:
     ports:
       - "9591:9591"
       - "9592:9592"
-    depends_on:
-      - hl_service
-      - hl_traffic
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

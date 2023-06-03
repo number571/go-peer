@@ -63,13 +63,13 @@ Default config `hlm.cfg`:
 		"incoming": ":9592"
 	},
 	"connection": {
-		"service": "hl_service:9572",
-		"traffic": "hl_traffic:9581"
+		"service": "service:9572",
+		"traffic": "traffic:9581"
 	}
 }
 ```
 
-If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `hl_service` and `hl_traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
+If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
 Build and run with docker:
 
