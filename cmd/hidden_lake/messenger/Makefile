@@ -45,6 +45,7 @@ docker-default: docker-build docker-run
 docker-build:
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_messenger
 docker-run:
-	docker run -it --rm -v $$(pwd)/mounted:/mounted -p 9591:9591 -p 9592:9592 hl_messenger
+	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9591:9591 -p 9592:9592 hl_messenger
 docker-clean:
+	rm -f ./_mounted/hlm.*
 	docker rmi hl_messenger

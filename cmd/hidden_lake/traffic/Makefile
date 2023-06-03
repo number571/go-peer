@@ -40,6 +40,7 @@ docker-default: docker-build docker-run
 docker-build:
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_traffic
 docker-run:
-	docker run -it --rm -v $$(pwd)/mounted:/mounted -p 9581:9581 hl_traffic
+	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9581:9581 hl_traffic
 docker-clean:
+	rm -f ./_mounted/hlt.*
 	docker rmi hl_traffic

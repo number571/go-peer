@@ -19,5 +19,6 @@ docker-build:
 docker-run: 
 	docker-compose up
 docker-clean:
+	rm -f ./_mounted/hls.* ./_mounted/hlt.* ./_mounted/hlm.*
 	docker-compose down 
 	docker-compose rm -f

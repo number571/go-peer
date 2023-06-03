@@ -40,6 +40,7 @@ docker-default: docker-build docker-run
 docker-build:
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_service
 docker-run:
-	docker run -it --rm -v $$(pwd)/mounted:/mounted -p 9571:9571 -p 9572:9572 hl_service
+	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9571:9571 -p 9572:9572 hl_service
 docker-clean:
+	rm -f ./_mounted/hls.*
 	docker rmi hl_service

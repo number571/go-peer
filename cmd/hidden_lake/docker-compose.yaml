@@ -5,7 +5,7 @@ services:
       context: ./../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     volumes:
-      - ./mounted:/mounted
+      - ./_mounted:/mounted
     ports:
       - "9571:9571"
       - "9572:9572"
@@ -14,7 +14,7 @@ services:
       context: ./../../
       dockerfile: cmd/hidden_lake/traffic/Dockerfile
     volumes:
-      - ./mounted:/mounted
+      - ./_mounted:/mounted
     ports:
       - "9581:9581"
     depends_on:
@@ -24,7 +24,7 @@ services:
       context: ./../../
       dockerfile: cmd/hidden_lake/messenger/Dockerfile
     volumes:
-      - ./mounted:/mounted
+      - ./_mounted:/mounted
     ports:
       - "9591:9591"
       - "9592:9592"
