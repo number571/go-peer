@@ -13,8 +13,8 @@ The `Hidden Lake Adapters` are a way to exchange data between multiple HLS proce
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
-<p align="center"><img src="../../../examples/images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 1. Example of running HLA client.</p>
+<p align="center"><img src="../../../examples/images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
+<p align="center">Figure 1. Architecture of HLA.</p>
 
 ### Example 
 
@@ -44,4 +44,8 @@ Request took 8 seconds
 ```
 
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
+
+<p align="center"><img src="../../../examples/images/hla_request.gif" alt="hla_request.gif"/></p>
+<p align="center">Figure 2. Example of running HLA client.</p>
+
 Similarly, you can use a more complex composition, as shown in the example `examples/_cmd/anon_messenger/secret_channel`.
