@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	_ IKeyValueStorage = &sCryptoStorage{}
+	_ IKVStorage = &sCryptoStorage{}
 )
 
 type sCryptoStorage struct {
@@ -32,7 +32,7 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-func NewCryptoStorage(pSettings ISettings) (IKeyValueStorage, error) {
+func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	store := &sCryptoStorage{
 		fSettings: pSettings,
 	}

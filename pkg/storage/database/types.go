@@ -12,7 +12,7 @@ type ISettings interface {
 }
 
 type IKeyValueDB interface {
-	storage.IKeyValueStorage
+	storage.IKVStorage
 	types.ICloser
 
 	GetSettings() ISettings

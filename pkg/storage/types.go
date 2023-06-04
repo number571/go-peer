@@ -6,7 +6,7 @@ type ISettings interface {
 	GetCipherKey() []byte
 }
 
-type IKeyValueStorage interface {
+type IKVStorage interface {
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)
 	Del([]byte) error

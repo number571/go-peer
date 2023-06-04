@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 )
 
-func initCryptoStorage(pCfg config.IConfig, pPathTo string) (storage.IKeyValueStorage, error) {
+func initCryptoStorage(pCfg config.IConfig, pPathTo string) (storage.IKVStorage, error) {
 	stg, err := storage.NewCryptoStorage(storage.NewSettings(&storage.SSettings{
 		FPath:      fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
 		FWorkSize:  hlm_settings.CWorkForKeys,

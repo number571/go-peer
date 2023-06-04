@@ -24,7 +24,7 @@ var (
 type sState struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
-	fStorage  storage.IKeyValueStorage
+	fStorage  storage.IKVStorage
 	fDatabase database.IWrapperDB
 	fClient   *sClient
 	fPathTo   string
@@ -36,7 +36,7 @@ type sClient struct {
 }
 
 func NewState(
-	pStorage storage.IKeyValueStorage,
+	pStorage storage.IKVStorage,
 	pDatabase database.IWrapperDB,
 	pHlsClient hls_client.IClient,
 	pHltClient hlt_client.IClient,
@@ -65,7 +65,7 @@ func (p *sState) GetClient() iClient {
 	return p.fClient
 }
 
-func (p *sState) GetStorage() storage.IKeyValueStorage {
+func (p *sState) GetKVStorage() storage.IKVStorage {
 	return p.fStorage
 }
 
@@ -80,7 +80,7 @@ func (p *sState) GetTemplate() *STemplateState {
 }
 
 func (p *sState) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
-	if _, err := p.GetStorage().Get(pHashLP); err == nil {
+	if _, err := p.GetKVStorage().Get(pHashLP); err == nil {
 		return errors.NewError("state already exists")
 	}
 	if err := p.newStorageState(pHashLP, pPrivKey); err != nil {
@@ -208,7 +208,7 @@ func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) e
 	stateValueBytes := encoding.Serialize(&SStorageState{
 		FPrivKey: pPrivKey.ToString(),
 	}, false)
-	if err := p.GetStorage().Set(pHashLP, stateValueBytes); err != nil {
+	if err := p.GetKVStorage().Set(pHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "new storage state")
 	}
 	return nil
@@ -216,14 +216,14 @@ func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) e
 
 func (p *sState) setStorageState(pStateValue *SStorageState) error {
 	stateValueBytes := encoding.Serialize(pStateValue, false)
-	if err := p.GetStorage().Set(p.fHashLP, stateValueBytes); err != nil {
+	if err := p.GetKVStorage().Set(p.fHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "update storage state")
 	}
 	return nil
 }
 
 func (p *sState) getStorageState(pHashLP []byte) (*SStorageState, error) {
-	stateValueBytes, err := p.GetStorage().Get(pHashLP)
+	stateValueBytes, err := p.GetKVStorage().Get(pHashLP)
 	if err != nil {
 		return nil, errors.WrapError(err, "get storage state")
 	}

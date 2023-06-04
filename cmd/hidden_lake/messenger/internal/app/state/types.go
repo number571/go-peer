@@ -20,7 +20,7 @@ type SStorageState struct {
 
 type IState interface {
 	GetClient() iClient
-	GetStorage() storage.IKeyValueStorage
+	GetKVStorage() storage.IKVStorage
 	GetWrapperDB() database.IWrapperDB
 
 	IsActive() bool

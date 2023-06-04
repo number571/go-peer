@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	_ IKeyValueStorage = &sMemoryStorage{}
+	_ IKVStorage = &sMemoryStorage{}
 )
 
 type sMemoryStorage struct {
@@ -18,7 +18,7 @@ type sMemoryStorage struct {
 	fMapping  map[string][]byte
 }
 
-func NewMemoryStorage(pMaximum uint64) IKeyValueStorage {
+func NewMemoryStorage(pMaximum uint64) IKVStorage {
 	return &sMemoryStorage{
 		fMaximum:  pMaximum,
 		fKeyQueue: make([]string, 0, pMaximum),
