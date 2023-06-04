@@ -17,7 +17,7 @@ type sMobileState struct {
 	fDestructApp  func() error
 }
 
-func NewState(pApp fyne.App, pServiceName string) IMobileState {
+func NewMobileState(pApp fyne.App, pServiceName string) IMobileState {
 	return &sMobileState{
 		fApp:         pApp,
 		fIsRun:       false,

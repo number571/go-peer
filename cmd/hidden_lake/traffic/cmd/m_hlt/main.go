@@ -68,7 +68,7 @@ func buttonActions(a fyne.App) *widget.Button {
 		}
 	}
 
-	state := mobile.NewState(a, settings.CServiceName).
+	state := mobile.NewMobileState(a, settings.CServiceName).
 		WithConstructApp(constructApp).
 		WithDestructApp(destructApp)
 

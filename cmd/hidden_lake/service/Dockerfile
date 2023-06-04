@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-RUN apt-get update && apt-get install -y wget gcc make
+RUN apt-get update && apt-get install -y wget gcc
 RUN wget https://dl.google.com/go/go1.20.3.linux-amd64.tar.gz && \ 
     tar -C /opt -xzf go1.20.3.linux-amd64.tar.gz
 
