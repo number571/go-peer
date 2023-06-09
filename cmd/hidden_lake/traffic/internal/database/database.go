@@ -19,7 +19,7 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
-	sqlDB, err := gp_database.NewSQLiteDB(
+	sqlDB, err := gp_database.NewKeyValueDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pSett.GetPath(),
 			FHashing:   false,

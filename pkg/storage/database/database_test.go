@@ -19,10 +19,10 @@ const (
 )
 
 func TestAllDBs(t *testing.T) {
-	testFailCreate(t, NewSQLiteDB)
-	testCreate(t, NewSQLiteDB)
-	testCipherKey(t, NewSQLiteDB)
-	testBasic(t, NewSQLiteDB)
+	testFailCreate(t, NewKeyValueDB)
+	testCreate(t, NewKeyValueDB)
+	testCipherKey(t, NewKeyValueDB)
+	testBasic(t, NewKeyValueDB)
 }
 
 func testFailCreate(t *testing.T, dbConstruct tiDBConsctruct) {

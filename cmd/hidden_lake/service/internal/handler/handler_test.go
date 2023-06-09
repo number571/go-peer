@@ -156,7 +156,7 @@ func testRunNewNode(dbPath, addr string) anonymity.INode {
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {
-	db, err := database.NewSQLiteDB(
+	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:      dbPath,
 			FHashing:   true,

@@ -14,7 +14,7 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pPath string, pKey []byte) (IKeyValueDB, error) {
-	db, err := gp_database.NewSQLiteDB(
+	db, err := gp_database.NewKeyValueDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pPath,
 			FHashing:   true,

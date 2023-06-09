@@ -23,7 +23,7 @@ const (
 
 func initDB() database.IKeyValueDB {
 	var err error
-	db, err := database.NewSQLiteDB(
+	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:      databasePath,
 			FHashing:   false,

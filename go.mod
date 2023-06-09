@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.3.3
+	github.com/akrylysov/pogreb v0.10.1
 	github.com/boombuler/barcode v1.0.1
-	github.com/mattn/go-sqlite3 v1.14.16
 	golang.org/x/net v0.7.0
 )
 

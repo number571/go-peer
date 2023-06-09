@@ -108,7 +108,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 }
 
 func newNode(serviceAddress, dbPath string) anonymity.INode {
-	db, err := database.NewSQLiteDB(
+	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:      dbPath,
 			FHashing:   false,

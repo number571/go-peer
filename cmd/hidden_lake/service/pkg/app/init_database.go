@@ -9,7 +9,7 @@ import (
 )
 
 func (p *sApp) initDatabase() error {
-	db, err := database.NewSQLiteDB(
+	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
 			FPath:      fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
 			FHashing:   false,
