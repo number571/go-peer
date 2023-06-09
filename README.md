@@ -262,12 +262,6 @@ The `Hidden Lake Messenger` is a messenger based on the core of an anonymous net
 
 HLM is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com /. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
-Running application in mobile  |  Running application in browser
-:-----------------------------:|:------------------------------:
-![hlm_mobile_1.png](examples/images/hlm_mobile_1.png)  |  ![hlm_mobile_2.png](examples/images/hlm_mobile_2.png)
-
-<p align="center">Figure 5. Runnin HLM in mobile platform.</p>
-
 > More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
 ### How it works
@@ -275,14 +269,14 @@ Running application in mobile  |  Running application in browser
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
 <p align="center"><img src="examples/images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
-<p align="center">Figure 6. Example of chat room in HLM.</p>
+<p align="center">Figure 5. Example of chat room in HLM.</p>
 
 Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
 <p align="center"><img src="examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
-<p align="center">Figure 7. Data encryption with different types of input parameters.</p>
+<p align="center">Figure 6. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
 
@@ -352,7 +346,7 @@ The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
 <p align="center"><img src="examples/images/hlm_about.png" alt="hlm_about.png"/></p>
-<p align="center">Figure 8. Home page of the HLM application.</p>
+<p align="center">Figure 7. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 
@@ -375,7 +369,7 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
 <p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
-<p align="center">Figure 9. Example of running HLT client.</p>
+<p align="center">Figure 8. Example of running HLT client.</p>
 
 ### Build and run
 
@@ -453,7 +447,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="examples/images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
-<p align="center">Figure 10. Architecture of HLA.</p>
+<p align="center">Figure 9. Architecture of HLA.</p>
 
 ### Example 
 
@@ -485,7 +479,7 @@ Request took 8 seconds
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
 <p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 11. Example of running HLA client.</p>
+<p align="center">Figure 10. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/_cmd/anon_messenger/secret_channel`.
 

@@ -8,10 +8,6 @@ The `Hidden Lake Messenger` is a messenger based on the core of an anonymous net
 
 HLM is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com /. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
-Running application in mobile  |  Running application in browser
-:-----------------------------:|:------------------------------:
-![hlm_mobile_1.png](../../../examples/images/hlm_mobile_1.png)  |  ![hlm_mobile_2.png](../../../examples/images/hlm_mobile_2.png)
-
 > More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
 ## How it works
