@@ -16,10 +16,10 @@ const (
 )
 
 var (
-	_ IKeyValueDB = &sSQLiteDB{}
+	_ IKeyValueDB = &sKeyValueDB{}
 )
 
-type sSQLiteDB struct {
+type sKeyValueDB struct {
 	fMutex    sync.Mutex
 	fSalt     []byte
 	fDB       *pogreb.DB
@@ -43,7 +43,7 @@ func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
 		db.Put([]byte(cSaltKey), salt)
 	}
 
-	return &sSQLiteDB{
+	return &sKeyValueDB{
 		fSalt:     salt,
 		fDB:       db,
 		fSettings: pSett,
@@ -51,11 +51,11 @@ func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
 	}, nil
 }
 
-func (p *sSQLiteDB) GetSettings() ISettings {
+func (p *sKeyValueDB) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sSQLiteDB) Set(pKey []byte, pValue []byte) error {
+func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -65,7 +65,7 @@ func (p *sSQLiteDB) Set(pKey []byte, pValue []byte) error {
 	return nil
 }
 
-func (p *sSQLiteDB) Get(pKey []byte) ([]byte, error) {
+func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -84,7 +84,7 @@ func (p *sSQLiteDB) Get(pKey []byte) ([]byte, error) {
 	)
 }
 
-func (p *sSQLiteDB) Del(pKey []byte) error {
+func (p *sKeyValueDB) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -94,7 +94,7 @@ func (p *sSQLiteDB) Del(pKey []byte) error {
 	return nil
 }
 
-func (p *sSQLiteDB) Close() error {
+func (p *sKeyValueDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -104,7 +104,7 @@ func (p *sSQLiteDB) Close() error {
 	return nil
 }
 
-func (p *sSQLiteDB) tryHash(pKey []byte) []byte {
+func (p *sKeyValueDB) tryHash(pKey []byte) []byte {
 	if !p.fSettings.GetHashing() {
 		return pKey
 	}
