@@ -27,7 +27,7 @@ func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
 		}),
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "new sqlite")
+		return nil, errors.WrapError(err, "new key/value database")
 	}
 	if sqlDB == nil {
 		return nil, errors.NewError("storage (hashes) is nil")

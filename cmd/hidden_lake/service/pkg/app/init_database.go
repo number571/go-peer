@@ -17,7 +17,7 @@ func (p *sApp) initDatabase() error {
 		}),
 	)
 	if err != nil {
-		return errors.WrapError(err, "new sqlitedb")
+		return errors.WrapError(err, "new key/value database")
 	}
 	p.fNode.GetWrapperDB().Set(db)
 	return nil

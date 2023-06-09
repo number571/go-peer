@@ -22,7 +22,7 @@ func NewKeyValueDB(pPath string, pKey []byte) (IKeyValueDB, error) {
 		}),
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "new sqlite")
+		return nil, errors.WrapError(err, "new key/value database")
 	}
 	return &sKeyValueDB{
 		fDB: &db,
