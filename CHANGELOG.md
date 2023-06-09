@@ -18,7 +18,7 @@ In progress...
 - Project `hidden_lake/messenger`: deleted HLS part from hlm_m application
 - Package `encoding`: Serialize function with option (indent/not indent)
 - Project `hidden_lake/messenger`: deleted HLS part from hlm application (build and run)
-- Package `pkg/storage/database`: replace sqlite3 to leveldb database
+- Package `pkg/storage/database`: replace sqlite3 to leveldb
 
 <!-- ... -->
 

@@ -51,7 +51,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 ## Dependencies
 
-1. Go library (used by `pkg/storage/database`) [github.com/mattn/go-sqlite3](https://github.com/mattn/go-sqlite3 "go-sqlite3");
+1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
 2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
 4. Go library (used by `cmd/hidden_lake`) [github.com/fyne-io/fyne](https://github.com/fyne-io/fyne "fyne")
