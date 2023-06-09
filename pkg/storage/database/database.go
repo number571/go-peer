@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/errors"
 
-	"github.com/akrylysov/pogreb"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
@@ -22,25 +22,24 @@ var (
 type sKeyValueDB struct {
 	fMutex    sync.Mutex
 	fSalt     []byte
-	fDB       *pogreb.DB
+	fDB       *leveldb.DB
 	fSettings ISettings
 	fCipher   symmetric.ICipher
 }
 
 func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
-	db, err := pogreb.Open(pSett.GetPath(), nil)
+	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "open database")
 	}
 
-	salt, err := db.Get([]byte(cSaltKey))
+	salt, err := db.Get([]byte(cSaltKey), nil)
 	if err != nil {
-		return nil, errors.WrapError(err, "read salt")
-	}
-
-	if salt == nil {
+		if !errors.HasError(err, leveldb.ErrNotFound) {
+			return nil, errors.WrapError(err, "read salt")
+		}
 		salt = random.NewStdPRNG().GetBytes(symmetric.CAESKeySize)
-		db.Put([]byte(cSaltKey), salt)
+		db.Put([]byte(cSaltKey), salt, nil)
 	}
 
 	return &sKeyValueDB{
@@ -59,7 +58,7 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := p.fDB.Put(p.tryHash(pKey), doEncrypt(p.fCipher, pValue)); err != nil {
+	if err := p.fDB.Put(p.tryHash(pKey), doEncrypt(p.fCipher, pValue), nil); err != nil {
 		return errors.WrapError(err, "insert key/value to database")
 	}
 	return nil
@@ -69,7 +68,7 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	encValue, err := p.fDB.Get(p.tryHash(pKey))
+	encValue, err := p.fDB.Get(p.tryHash(pKey), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "read value by key")
 	}
@@ -88,7 +87,7 @@ func (p *sKeyValueDB) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := p.fDB.Delete(p.tryHash(pKey)); err != nil {
+	if err := p.fDB.Delete(p.tryHash(pKey), nil); err != nil {
 		return errors.WrapError(err, "delete value by key")
 	}
 	return nil

@@ -25,7 +25,7 @@ clean:
 	pkill -15 hls || true
 	make clean -C ../service
 	rm -f $(BINPATH)/hlm $(BINPATH)/hlm_linux $(BINPATH)/hlm_windows.exe 
-	rm -f hlm.cfg hlm.db hlm.stg
+	rm -rf hlm.cfg hlm.db hlm.stg
 
 mobile-default: mobile-build mobile-install
 # fyne not supported "--sourceDir cmd/m_hlm"

@@ -23,7 +23,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hls $(BINPATH)/hls_linux $(BINPATH)/hls_windows.exe 
-	rm -f hls.cfg hls.db
+	rm -rf hls.cfg hls.db
 
 mobile-default: mobile-build mobile-install
 # fyne not supported "--sourceDir cmd/m_hls"
