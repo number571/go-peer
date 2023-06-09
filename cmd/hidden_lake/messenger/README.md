@@ -82,14 +82,6 @@ $ make docker-run
 > ...
 ```
 
-Build mobile app:
-
-```bash 
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/messenger
-$ make mobile-build # create hlm_android.apk and copy to ./bin
-```
-
 ### Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3` (HLS).

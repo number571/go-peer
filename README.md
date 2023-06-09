@@ -165,14 +165,6 @@ $ make docker-run
 > ...
 ```
 
-Build mobile app:
-
-```bash 
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/service
-$ make mobile-build # create hls_android.apk and copy to ./bin
-```
-
 ### Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
@@ -346,14 +338,6 @@ $ make docker-run
 > ...
 ```
 
-Build mobile app:
-
-```bash 
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/messenger
-$ make mobile-build # create hlm_android.apk and copy to ./bin
-```
-
 ### Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3`.
@@ -435,14 +419,6 @@ $ make docker-run
 
 > [INFO] 2023/06/03 08:44:14 HLT is running...
 > ...
-```
-
-Build mobile app:
-
-```bash 
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/traffic
-$ make mobile-build # create hlt_android.apk and copy to ./bin
 ```
 
 ### Example 

@@ -59,14 +59,6 @@ $ make docker-run
 > ...
 ```
 
-Build mobile app:
-
-```bash 
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/traffic
-$ make mobile-build # create hlt_android.apk and copy to ./bin
-```
-
 ## Example 
 
 Build and run service

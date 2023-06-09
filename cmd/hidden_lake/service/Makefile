@@ -2,16 +2,14 @@ N=1
 GC=go build
 ROOPATH=../../..
 BINPATH=$(ROOPATH)/bin
-MOBILEPATH=./cmd/m_hls
 
 .PHONY: default all-build build run test all-clean clean \
-	mobile-default mobile-build mobile-install mobile-clean \
 	docker-default docker-build docker-run docker-clean 
 
 default: build run
 
-all-build: build mobile-build
-all-clean: clean mobile-clean 
+all-build: build
+all-clean: clean
 
 build:
 	$(GC) -o $(BINPATH)/hls ./cmd/hls # main 
@@ -24,17 +22,6 @@ test:
 clean:
 	rm -f $(BINPATH)/hls $(BINPATH)/hls_linux $(BINPATH)/hls_windows.exe 
 	rm -rf hls.cfg hls.db
-
-mobile-default: mobile-build mobile-install
-# fyne not supported "--sourceDir cmd/m_hls"
-mobile-build:
-	cd ./cmd/m_hls && fyne package -os android -appID hidden_lake.service -icon icon.png
-	cp ./cmd/m_hls/m_hls.apk $(BINPATH)/hls_android.apk
-mobile-install:
-	cd ./cmd/m_hls && fyne install -os android -appID hidden_lake.service -icon icon.png
-mobile-clean:
-	rm -f $(MOBILEPATH)/m_hls.apk $(BINPATH)/hls_android.apk
-	rm -rf $(MOBILEPATH)/hidden_lake
 
 docker-default: docker-build docker-run
 docker-build:
