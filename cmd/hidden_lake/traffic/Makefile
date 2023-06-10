@@ -29,5 +29,5 @@ docker-build:
 docker-run:
 	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9581:9581 hl_traffic
 docker-clean:
-	rm -f ./_mounted/hlt.*
+	rm -rf ./_mounted/hlt.*
 	docker rmi hl_traffic
