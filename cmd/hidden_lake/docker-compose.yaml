@@ -4,6 +4,8 @@ services:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
     volumes:
       - ./_mounted:/mounted
     ports:
@@ -15,6 +17,8 @@ services:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/traffic/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
     volumes:
       - ./_mounted:/mounted
     ports:
@@ -25,6 +29,8 @@ services:
     build:
       context: ./../../
       dockerfile: cmd/hidden_lake/messenger/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
     volumes:
       - ./_mounted:/mounted
     ports:

@@ -1,0 +1,69 @@
+version: "3"
+services:
+  service-middle:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_middle:/mounted
+    networks:
+      - hidden-lake
+  traffic-middle:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/traffic/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_middle:/mounted
+    networks:
+      - hidden-lake
+  service-node1:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_node1:/mounted
+    networks:
+      - hidden-lake
+  messenger-node1:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/messenger/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_node1:/mounted
+    ports:
+      - "8080:9592"
+    networks:
+      - hidden-lake
+  service-node2:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_node2:/mounted
+    networks:
+      - hidden-lake
+  messenger-node2:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/messenger/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted_node2:/mounted
+    ports:
+      - "7070:9592"
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

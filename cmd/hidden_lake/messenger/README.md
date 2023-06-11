@@ -30,7 +30,7 @@ Secondly, the received key K is also used to encrypt all incoming and outgoing m
 
 ### Build and run
 
-Default build and run:
+Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
@@ -45,7 +45,7 @@ Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
 Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker), `./hlm.db` or `./_mounted/hlm.db` (docker) files and `./hlm.stg` or `./_mounted/hlm.stg` (docker).
 The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
 
-Default config `hlm.cfg`:
+Default config `hlm.cfg`
 
 ```json
 {
@@ -67,7 +67,7 @@ Default config `hlm.cfg`:
 
 If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
-Build and run with docker:
+Build and run with docker
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
@@ -97,6 +97,15 @@ Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
+
+Also you can run example with docker-compose. In this example, all nodes have logging enabled
+```bash
+$ cd examples/_cmd/anon_messenger/_docker/default
+$ make
+```
+
+<p align="center"><img src="../../../examples/images/hlm_logger.png" alt="hlm_logger.png"/></p>
+<p align="center">Figure 4. Log of three nodes with request/response actions.</p>
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 

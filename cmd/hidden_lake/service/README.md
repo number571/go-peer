@@ -46,7 +46,7 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 ### Build and run
 
-Default build and run:
+Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
@@ -64,7 +64,7 @@ Service was running with random private key. Open ports `9571` (TCP, traffic) an
 Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
-Default config `hls.cfg`:
+Default config `hls.cfg`
 
 ```json
 {
@@ -85,7 +85,7 @@ Default config `hls.cfg`:
 
 If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
-Build and run with docker:
+Build and run with docker
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
@@ -174,7 +174,7 @@ Content-Type: text/plain; charset=utf-8
 Request took 8 seconds
 ```
 
-Return code 200 is HTTP code = StatusOK. Decode base64 response body:
+Return code 200 is HTTP code = StatusOK. Decode base64 response body
 ```bash
 echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 > {"echo":"hello, world!","return":1}
@@ -182,6 +182,12 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 
 <p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
+
+Also you can run example with docker-compose. In this example, all nodes have logging enabled
+```bash
+$ cd examples/_cmd/echo_service/_docker/default
+$ make
+```
 
 > Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
 

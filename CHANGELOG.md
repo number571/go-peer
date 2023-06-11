@@ -13,6 +13,7 @@ In progress...
 - Projects `hidden_lake`: append build/run with docker
 - Text `README`: append build and run instructions
 - Example `_cmd/echo_service`: append docker-compose examples
+- Example `_cmd/anon_messenger`: append docker-compose examples
 
 ### CHANGES
 

@@ -112,7 +112,7 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 ### Build and run
 
-Default build and run:
+Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
@@ -130,7 +130,7 @@ Service was running with random private key. Open ports `9571` (TCP, traffic) an
 Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
-Default config `hls.cfg`:
+Default config `hls.cfg`
 
 ```json
 {
@@ -151,7 +151,7 @@ Default config `hls.cfg`:
 
 If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
-Build and run with docker:
+Build and run with docker
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
@@ -241,7 +241,7 @@ Content-Type: text/plain; charset=utf-8
 Request took 8 seconds
 ```
 
-Return code 200 is HTTP code = StatusOK. Decode base64 response body:
+Return code 200 is HTTP code = StatusOK. Decode base64 response body
 ```bash
 echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 > {"echo":"hello, world!","return":1}
@@ -249,6 +249,12 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 
 <p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
+
+Also you can run example with docker-compose. In this example, all nodes have logging enabled
+```bash
+$ cd examples/_cmd/echo_service/_docker/default
+$ make
+```
 
 > Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
 
@@ -284,7 +290,7 @@ Secondly, the received key K is also used to encrypt all incoming and outgoing m
 
 ### Build and run
 
-Default build and run:
+Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
@@ -299,7 +305,7 @@ Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
 Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker), `./hlm.db` or `./_mounted/hlm.db` (docker) files and `./hlm.stg` or `./_mounted/hlm.stg` (docker).
 The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
 
-Default config `hlm.cfg`:
+Default config `hlm.cfg`
 
 ```json
 {
@@ -321,7 +327,7 @@ Default config `hlm.cfg`:
 
 If messenger works not in docker's enviroment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
-Build and run with docker:
+Build and run with docker
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
@@ -352,6 +358,15 @@ Next, you need to login by going to the Sign in page. Enter your `login=user` an
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
+Also you can run example with docker-compose. In this example, all nodes have logging enabled
+```bash
+$ cd examples/_cmd/anon_messenger/_docker/default
+$ make
+```
+
+<p align="center"><img src="examples/images/hlm_logger.png" alt="hlm_logger.png"/></p>
+<p align="center">Figure 8. Log of three nodes with request/response actions.</p>
+
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/examples/images "Path to HLM images")
 
 ## 3. Hidden Lake Traffic
@@ -369,11 +384,11 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
 <p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
-<p align="center">Figure 8. Example of running HLT client.</p>
+<p align="center">Figure 9. Example of running HLT client.</p>
 
 ### Build and run
 
-Default build and run:
+Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/traffic
@@ -388,7 +403,7 @@ Open ports `9581` (HTTP, interface).
 Creates `./hlt.cfg` or `./_mounted/hlt.cfg` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
-Default config `hlt.cfg`:
+Default config `hlt.cfg`
 
 ```json
 {
@@ -404,7 +419,7 @@ Default config `hlt.cfg`:
 
 If traffic works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
-Build and run with docker:
+Build and run with docker
 
 ```bash 
 $ cd ./cmd/hidden_lake/traffic
@@ -447,7 +462,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="examples/images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
-<p align="center">Figure 9. Architecture of HLA.</p>
+<p align="center">Figure 10. Architecture of HLA.</p>
 
 ### Example 
 
@@ -479,7 +494,7 @@ Request took 8 seconds
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
 <p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 10. Example of running HLA client.</p>
+<p align="center">Figure 11. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/_cmd/anon_messenger/secret_channel`.
 

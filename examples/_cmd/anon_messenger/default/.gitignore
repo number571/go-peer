@@ -2,6 +2,7 @@ prog_*
 hls
 hlm 
 hlt
-web/
 !*.cfg
 !*.stg 
+node1_hlm/hls.cfg 
+node2_hlm/hls.cfg 

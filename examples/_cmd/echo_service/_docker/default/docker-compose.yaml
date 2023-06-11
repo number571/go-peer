@@ -6,7 +6,6 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted
-      SERVICE_KEY: /mounted/priv.key
     volumes:
       - ./_mounted_middle:/mounted
     networks:
