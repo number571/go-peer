@@ -9,5 +9,5 @@ ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
 RUN go build -o hlm ./cmd/hidden_lake/messenger/cmd/hlm
 
-ENTRYPOINT ["./hlm"]
-CMD ["-path", "/mounted"]
+ENV SERVICE_PATH="/mounted"
+CMD ./hlm -path="${SERVICE_PATH}"

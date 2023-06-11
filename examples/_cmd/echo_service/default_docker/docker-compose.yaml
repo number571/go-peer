@@ -1,0 +1,51 @@
+version: "3"
+services:
+  service-middle:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+      SERVICE_KEY: /mounted/priv.key
+    volumes:
+      - ./_mounted_middle:/mounted
+    networks:
+      - hidden-lake
+  service-recv:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+      SERVICE_KEY: /mounted/priv.key
+    volumes:
+      - ./_mounted_recv:/mounted
+    depends_on:
+      - recv-echo-service
+    networks:
+      - hidden-lake
+      - local-relation
+  recv-echo-service:
+    build:
+      context: ./
+      dockerfile: recv_echo_service/Dockerfile
+    networks:
+      - local-relation
+  service-send:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+      SERVICE_KEY: /mounted/priv.key
+    volumes:
+      - ./_mounted_send:/mounted
+    ports:
+      - "7572:9572"
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge
+  local-relation:
+    driver: bridge

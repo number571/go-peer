@@ -9,5 +9,6 @@ ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
 RUN go build -o hls ./cmd/hidden_lake/service/cmd/hls
 
-ENTRYPOINT ["./hls"]
-CMD ["-path", "/mounted"]
+ENV SERVICE_PATH="/mounted"
+ENV SERVICE_KEY=""
+CMD ./hls -path="${SERVICE_PATH}" -key="${SERVICE_KEY}"

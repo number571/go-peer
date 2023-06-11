@@ -7,7 +7,6 @@ RUN wget https://dl.google.com/go/go1.16.4.linux-amd64.tar.gz && \
 WORKDIR /go-peer
 ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
-RUN go build -o hlt ./cmd/hidden_lake/traffic/cmd/hlt
+RUN go build -o service ./recv_echo_service/main.go
 
-ENV SERVICE_PATH="/mounted"
-CMD ./hlt -path="${SERVICE_PATH}"
+ENTRYPOINT ["./service"]
