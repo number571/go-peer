@@ -14,7 +14,7 @@
         	<img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg" alt="Commits" />
 		</a>
 		<a href="https://github.com/number571/go-peer/actions">
-        	<img src="https://github.com/number571/go-peer/actions/workflows/makefile.yml/badge.svg" alt="Tests" />
+        	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Tests" />
 		</a>
 		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
