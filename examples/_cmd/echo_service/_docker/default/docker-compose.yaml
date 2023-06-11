@@ -2,7 +2,7 @@ version: "3"
 services:
   service-middle:
     build:
-      context: ./../../../../
+      context: ./../../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted
@@ -13,7 +13,7 @@ services:
       - hidden-lake
   service-recv:
     build:
-      context: ./../../../../
+      context: ./../../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted
@@ -33,7 +33,7 @@ services:
       - local-relation
   service-send:
     build:
-      context: ./../../../../
+      context: ./../../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted
