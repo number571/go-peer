@@ -11,7 +11,7 @@
 	</p>
 	<p align="center">
 		<a href="https://github.com/topics/golang">
-        	<img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg" alt="Commits" />
+        	<img src="https://img.shields.io/github/go-mod/go-version/number571/go-peer" alt="Go" />
 		</a>
 		<a href="https://github.com/number571/go-peer/actions">
         	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Tests" />
