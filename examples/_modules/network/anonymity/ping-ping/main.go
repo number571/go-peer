@@ -80,7 +80,7 @@ func main() {
 }
 
 func handler(serviceName string) anonymity.IHandlerF {
-	return func(node anonymity.INode, pubKey asymmetric.IPubKey, _, reqBytes []byte) []byte {
+	return func(node anonymity.INode, pubKey asymmetric.IPubKey, _, reqBytes []byte) ([]byte, error) {
 		num, err := strconv.Atoi(string(reqBytes))
 		if err != nil {
 			panic(err)
@@ -103,7 +103,8 @@ func handler(serviceName string) anonymity.IHandlerF {
 		if err != nil {
 			panic(err)
 		}
-		return nil
+
+		return nil, nil
 	}
 }
 

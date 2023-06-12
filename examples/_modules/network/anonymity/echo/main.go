@@ -42,8 +42,8 @@ func main() {
 		client  = newNode("", dbPath2)
 	)
 
-	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) []byte {
-		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes)))
+	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) ([]byte, error) {
+		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes))), nil
 	})
 
 	service.GetListPubKeys().AddPubKey(client.GetMessageQueue().GetClient().GetPubKey())

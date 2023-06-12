@@ -120,13 +120,38 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
-	if err := p.broadcastPayload(cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
+	if err := p.enqueuePayload(cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
 		return errors.WrapError(err, "broadcast payload")
 	}
 	return nil
 }
 
-func (p *sNode) broadcastPayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+// Send message with response waiting.
+// Payload head must be uint32.
+func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
+	headAction := uint32(random.NewStdPRNG().GetUint64())
+	newPld := payload.NewPayload(
+		joinHead(headAction, pPld.GetHead()).uint64(),
+		pPld.GetBody(),
+	)
+
+	actionKey := newActionKey(pRecv, headAction)
+
+	p.setAction(actionKey)
+	defer p.delAction(actionKey)
+
+	if err := p.enqueuePayload(cIsRequest, pRecv, newPld); err != nil {
+		return nil, errors.WrapError(err, "fetch payload")
+	}
+
+	resp, err := p.recv(actionKey)
+	if err != nil {
+		return nil, errors.WrapError(err, "receive response from fetch")
+	}
+	return resp, nil
+}
+
+func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	if len(p.GetNetworkNode().GetConnections()) == 0 {
 		return errors.NewError("length of connections = 0")
 	}
@@ -151,31 +176,6 @@ func (p *sNode) broadcastPayload(pType iDataType, pRecv asymmetric.IPubKey, pPld
 		return errors.WrapError(err, "send message")
 	}
 	return nil
-}
-
-// Send message with response waiting.
-// Payload head must be uint32.
-func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
-	headAction := uint32(random.NewStdPRNG().GetUint64())
-	newPld := payload.NewPayload(
-		joinHead(headAction, pPld.GetHead()).uint64(),
-		pPld.GetBody(),
-	)
-
-	actionKey := newActionKey(pRecv, headAction)
-
-	p.setAction(actionKey)
-	defer p.delAction(actionKey)
-
-	if err := p.broadcastPayload(cIsRequest, pRecv, newPld); err != nil {
-		return nil, errors.WrapError(err, "fetch payload")
-	}
-
-	resp, err := p.recv(actionKey)
-	if err != nil {
-		return nil, errors.WrapError(err, "receive response from fetch")
-	}
-	return resp, nil
 }
 
 func (p *sNode) send(pMsg message.IMessage) error {
@@ -312,7 +312,7 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			}
 
 			// create the message and put this to the queue
-			if err := p.broadcastPayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
+			if err := p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
 				p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 				return
 			}
