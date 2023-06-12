@@ -11,7 +11,7 @@ In progress...
 ### IMPROVEMENTS
 
 - Projects `hidden_lake`: append build/run with docker
-- Text `README`: append build and run instructions
+- Update `README.md`: append build and run instructions
 - Example `_cmd/echo_service`: append docker-compose examples
 - Example `_cmd/anon_messenger`: append docker-compose examples
 
@@ -23,6 +23,7 @@ In progress...
 - Package `pkg/storage/database`: replace sqlite3 to leveldb
 - Project `mobile_applications`: deleted mobile applications HLS, HLM, HLT
 - Module `go.mod`: decrease version from 1.17 to 1.16
+- Update `README.md`: append requirements
 
 <!-- ... -->
 

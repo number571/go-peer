@@ -49,6 +49,10 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 > Examples of works in the directory [github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 
+## Requirements
+
+1. Go version >= 1.16
+
 ## Dependencies
 
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
