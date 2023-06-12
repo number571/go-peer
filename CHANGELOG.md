@@ -23,7 +23,7 @@ In progress...
 - Package `pkg/storage/database`: replace sqlite3 to leveldb
 - Project `mobile_applications`: deleted mobile applications HLS, HLM, HLT
 - Module `go.mod`: decrease version from 1.17 to 1.16
-- Update `README.md`: append requirements
+- Update `README.md`: append installation, requirements
 
 <!-- ... -->
 
