@@ -49,9 +49,15 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 > Examples of works in the directory [github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
 
+## Installation
+
+```bash
+$ go get github.com/number571/go-peer
+```
+
 ## Requirements
 
-1. Go version >= 1.16
+1. Go version `>=1.16`
 
 ## Dependencies
 
