@@ -11,7 +11,7 @@ import (
 )
 
 type (
-	tiDBConsctruct func(ISettings) (IKeyValueDB, error)
+	tiDBConsctruct func(ISettings) (IKVDatabase, error)
 )
 
 const (

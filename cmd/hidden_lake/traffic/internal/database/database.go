@@ -15,10 +15,10 @@ type sKeyValueDB struct {
 	fPointer uint64
 
 	fSettings ISettings
-	fDB       gp_database.IKeyValueDB
+	fDB       gp_database.IKVDatabase
 }
 
-func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
+func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	sqlDB, err := gp_database.NewKeyValueDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pSett.GetPath(),

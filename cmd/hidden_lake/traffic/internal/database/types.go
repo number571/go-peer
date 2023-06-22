@@ -5,7 +5,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IKeyValueDB interface {
+type IKVDatabase interface {
 	Push(message.IMessage) error
 	Load(string) (message.IMessage, error)
 	Hashes() ([]string, error)
@@ -24,6 +24,6 @@ type ISettings interface {
 type IWrapperDB interface {
 	types.ICloser
 
-	Get() IKeyValueDB
-	Set(IKeyValueDB) IWrapperDB
+	Get() IKVDatabase
+	Set(IKVDatabase) IWrapperDB
 }

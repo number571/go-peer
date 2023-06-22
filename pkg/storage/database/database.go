@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	_ IKeyValueDB = &sKeyValueDB{}
+	_ IKVDatabase = &sKeyValueDB{}
 )
 
 type sKeyValueDB struct {
@@ -27,7 +27,7 @@ type sKeyValueDB struct {
 	fCipher   symmetric.ICipher
 }
 
-func NewKeyValueDB(pSett ISettings) (IKeyValueDB, error) {
+func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "open database")

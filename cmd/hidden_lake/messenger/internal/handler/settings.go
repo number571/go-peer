@@ -24,14 +24,14 @@ type sSettings struct {
 	FConnections []sConnection
 }
 
-func SettingsPage(pState state.IState) http.HandlerFunc {
+func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/settings" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if !pState.IsActive() {
+		if !pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -50,7 +50,7 @@ func SettingsPage(pState state.IState) http.HandlerFunc {
 				fmt.Fprint(pW, "error: port is not a number")
 				return
 			}
-			err := pState.AddConnection(fmt.Sprintf("%s:%s", host, port))
+			err := pStateManager.AddConnection(fmt.Sprintf("%s:%s", host, port))
 			if err != nil {
 				fmt.Fprint(pW, "error: add connection")
 				return
@@ -61,17 +61,17 @@ func SettingsPage(pState state.IState) http.HandlerFunc {
 				fmt.Fprint(pW, "error: address is null")
 				return
 			}
-			err := pState.DelConnection(address)
+			err := pStateManager.DelConnection(address)
 			if err != nil {
 				fmt.Fprint(pW, "error: del connection")
 				return
 			}
 		}
 
-		client := pState.GetClient().Service()
+		client := pStateManager.GetClient().Service()
 
 		result := new(sSettings)
-		result.STemplateState = pState.GetTemplate()
+		result.STemplateState = pStateManager.GetTemplate()
 
 		pubKey, err := client.GetPubKey()
 		if err != nil {

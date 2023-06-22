@@ -5,7 +5,6 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/storage"
 )
 
 type STemplateState struct {
@@ -18,12 +17,15 @@ type SStorageState struct {
 	FFriends     map[string]string `json:"friends"`
 }
 
-type IState interface {
-	GetClient() iClient
-	GetKVStorage() storage.IKVStorage
-	GetWrapperDB() database.IWrapperDB
+type IStateManager interface {
+	StateIsActive() bool
 
-	IsActive() bool
+	CreateState([]byte, asymmetric.IPrivKey) error
+	OpenState([]byte) error
+	CloseState() error
+
+	GetClient() iClient
+	GetWrapperDB() database.IWrapperDB
 	GetTemplate() *STemplateState
 
 	AddFriend(string, asymmetric.IPubKey) error
@@ -31,10 +33,6 @@ type IState interface {
 
 	AddConnection(string) error
 	DelConnection(string) error
-
-	CreateState([]byte, asymmetric.IPrivKey) error
-	UpdateState([]byte) error
-	ClearActiveState() error
 }
 
 type iClient interface {

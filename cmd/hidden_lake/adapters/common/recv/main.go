@@ -21,7 +21,7 @@ const (
 	dataCountKey = "count_recv"
 )
 
-func initDB() database.IKeyValueDB {
+func initDB() database.IKVDatabase {
 	var err error
 	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
@@ -63,7 +63,7 @@ func main() {
 	transferTraffic(db, portService, portHLT)
 }
 
-func transferTraffic(db database.IKeyValueDB, portService, portHLT int) {
+func transferTraffic(db database.IKVDatabase, portService, portHLT int) {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -189,7 +189,7 @@ func loadCountFromService(portService int) (uint64, error) {
 	return countService, nil
 }
 
-func loadCountFromDB(db database.IKeyValueDB) (uint64, error) {
+func loadCountFromDB(db database.IKVDatabase) (uint64, error) {
 	res, err := db.Get([]byte(dataCountKey))
 	if err != nil {
 		return 0, err
@@ -203,7 +203,7 @@ func loadCountFromDB(db database.IKeyValueDB) (uint64, error) {
 	return count, nil
 }
 
-func incrementCountInDB(db database.IKeyValueDB) error {
+func incrementCountInDB(db database.IKVDatabase) error {
 	count, err := loadCountFromDB(db)
 	if err != nil {
 		return err

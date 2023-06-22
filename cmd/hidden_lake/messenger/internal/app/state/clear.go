@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 )
 
-func (p *sState) clearClientState() error {
+func (p *sStateManager) clearClientState() error {
 	if err := p.clearClientPrivKey(); err != nil {
 		return errors.WrapError(err, "clear client private key")
 	}
@@ -22,7 +22,7 @@ func (p *sState) clearClientState() error {
 	return nil
 }
 
-func (p *sState) clearClientPrivKey() error {
+func (p *sStateManager) clearClientPrivKey() error {
 	client := p.GetClient().Service()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
@@ -32,7 +32,7 @@ func (p *sState) clearClientPrivKey() error {
 	return nil
 }
 
-func (p *sState) clearClientFriends() error {
+func (p *sStateManager) clearClientFriends() error {
 	client := p.GetClient().Service()
 
 	friends, err := client.GetFriends()
@@ -49,7 +49,7 @@ func (p *sState) clearClientFriends() error {
 	return nil
 }
 
-func (p *sState) clearClientConnections() error {
+func (p *sStateManager) clearClientConnections() error {
 	client := p.GetClient().Service()
 
 	connects, err := client.GetConnections()

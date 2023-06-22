@@ -20,10 +20,10 @@ const (
 
 var (
 	mtx sync.Mutex
-	db  database.IKeyValueDB
+	db  database.IKVDatabase
 )
 
-func initDB() database.IKeyValueDB {
+func initDB() database.IKVDatabase {
 	var err error
 	db, err = database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{

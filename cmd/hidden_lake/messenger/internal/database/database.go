@@ -10,10 +10,10 @@ import (
 
 type sKeyValueDB struct {
 	fMutex sync.Mutex
-	fDB    *gp_database.IKeyValueDB
+	fDB    *gp_database.IKVDatabase
 }
 
-func NewKeyValueDB(pPath string, pKey []byte) (IKeyValueDB, error) {
+func NewKeyValueDB(pPath string, pKey []byte) (IKVDatabase, error) {
 	db, err := gp_database.NewKeyValueDB(
 		gp_database.NewSettings(&gp_database.SSettings{
 			FPath:      pPath,

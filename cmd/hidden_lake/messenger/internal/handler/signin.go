@@ -13,14 +13,14 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 )
 
-func SignInPage(pState state.IState) http.HandlerFunc {
+func SignInPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/sign/in" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if pState.IsActive() {
+		if pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
@@ -49,7 +49,7 @@ func SignInPage(pState state.IState) http.HandlerFunc {
 				[]byte{},
 			)).ToBytes()
 
-			if err := pState.UpdateState(hashLP); err != nil {
+			if err := pStateManager.OpenState(hashLP); err != nil {
 				fmt.Fprintf(pW, "error: %s", err.Error())
 				return
 			}
@@ -66,6 +66,6 @@ func SignInPage(pState state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(pW, pState.GetTemplate())
+		t.Execute(pW, pStateManager.GetTemplate())
 	}
 }

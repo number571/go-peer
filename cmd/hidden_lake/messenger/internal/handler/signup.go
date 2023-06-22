@@ -15,14 +15,14 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func SignUpPage(pState state.IState) http.HandlerFunc {
+func SignUpPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/sign/up" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if pState.IsActive() {
+		if pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
@@ -77,7 +77,7 @@ func SignUpPage(pState state.IState) http.HandlerFunc {
 				return
 			}
 
-			if err := pState.CreateState(hashLP, privKey); err != nil {
+			if err := pStateManager.CreateState(hashLP, privKey); err != nil {
 				fmt.Fprint(pW, "error: create account")
 				return
 			}
@@ -94,6 +94,6 @@ func SignUpPage(pState state.IState) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
-		t.Execute(pW, pState.GetTemplate())
+		t.Execute(pW, pStateManager.GetTemplate())
 	}
 }

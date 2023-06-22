@@ -11,7 +11,7 @@ type ISettings interface {
 	GetCipherKey() []byte
 }
 
-type IKeyValueDB interface {
+type IKVDatabase interface {
 	storage.IKVStorage
 	types.ICloser
 

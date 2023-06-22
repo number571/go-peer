@@ -16,14 +16,14 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
+func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodPost {
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
-		if !pState.IsActive() {
+		if !pStateManager.StateIsActive() {
 			api.Response(pW, http.StatusUnauthorized, "failed: client unauthorized")
 			return
 		}
@@ -50,7 +50,7 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 			panic("message hash is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := pState.GetClient().Service().GetPubKey()
+		myPubKey, err := pStateManager.GetClient().Service().GetPubKey()
 		if err != nil {
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
@@ -59,7 +59,12 @@ func HandleIncomigHTTP(pState state.IState) http.HandlerFunc {
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
 
-		db := pState.GetWrapperDB().Get()
+		db := pStateManager.GetWrapperDB().Get()
+		if db == nil {
+			api.Response(pW, http.StatusForbidden, "failed: database closed")
+			return
+		}
+
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return

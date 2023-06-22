@@ -10,19 +10,19 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 )
 
-func QRPublicKeyPage(pState state.IState) http.HandlerFunc {
+func QRPublicKeyPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/qr/public_key" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if !pState.IsActive() {
+		if !pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
-		pubKey, err := pState.GetClient().Service().GetPubKey()
+		pubKey, err := pStateManager.GetClient().Service().GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, "error: read public key")
 			return

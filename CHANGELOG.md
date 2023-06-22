@@ -24,6 +24,11 @@ In progress...
 - Project `mobile_applications`: deleted mobile applications HLS, HLM, HLT
 - Module `go.mod`: decrease version from 1.17 to 1.16
 - Update `README.md`: append installation, requirements
+- Project `hidden_lake/messenger`: rename interface and methods in IState -> IStateManager
+
+### BUG FIXES
+
+- Project `hidden_lake/messenger`: append checks pStateManager.GetWrapperDB().Get() on nil
 
 <!-- ... -->
 

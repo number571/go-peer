@@ -5,7 +5,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 )
 
-func (p *sState) updateClientState(pStateValue *SStorageState) error {
+func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 	if err := p.updateClientPrivKey(pStateValue); err != nil {
 		return errors.WrapError(err, "update client private key")
 	}
@@ -21,7 +21,7 @@ func (p *sState) updateClientState(pStateValue *SStorageState) error {
 	return nil
 }
 
-func (p *sState) updateClientPrivKey(pStateValue *SStorageState) error {
+func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
 	hlsClient := p.GetClient().Service()
 
 	if err := p.clearClientPrivKey(); err != nil {
@@ -39,7 +39,7 @@ func (p *sState) updateClientPrivKey(pStateValue *SStorageState) error {
 	return nil
 }
 
-func (p *sState) updateClientFriends(pStateValue *SStorageState) error {
+func (p *sStateManager) updateClientFriends(pStateValue *SStorageState) error {
 	client := p.GetClient().Service()
 
 	if err := p.clearClientFriends(); err != nil {
@@ -56,7 +56,7 @@ func (p *sState) updateClientFriends(pStateValue *SStorageState) error {
 	return nil
 }
 
-func (p *sState) updateClientConnections(pStateValue *SStorageState) error {
+func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) error {
 	client := p.GetClient().Service()
 
 	if err := p.clearClientConnections(); err != nil {
@@ -72,7 +72,7 @@ func (p *sState) updateClientConnections(pStateValue *SStorageState) error {
 	return nil
 }
 
-func (p *sState) updateClientTraffic(pStateValue *SStorageState) error {
+func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) error {
 	hlsClient := p.GetClient().Service()
 	hltClient := p.GetClient().Traffic()
 

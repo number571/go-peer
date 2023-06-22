@@ -17,11 +17,11 @@ import (
 )
 
 var (
-	_ IState  = &sState{}
-	_ iClient = &sClient{}
+	_ IStateManager = &sStateManager{}
+	_ iClient       = &sClient{}
 )
 
-type sState struct {
+type sStateManager struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
 	fStorage  storage.IKVStorage
@@ -35,14 +35,14 @@ type sClient struct {
 	fTraffic hlt_client.IClient
 }
 
-func NewState(
+func NewStateManager(
 	pStorage storage.IKVStorage,
 	pDatabase database.IWrapperDB,
 	pHlsClient hls_client.IClient,
 	pHltClient hlt_client.IClient,
 	pPathTo string,
-) IState {
-	return &sState{
+) IStateManager {
+	return &sStateManager{
 		fStorage:  pStorage,
 		fDatabase: pDatabase,
 		fClient: &sClient{
@@ -61,26 +61,22 @@ func (p *sClient) Traffic() hlt_client.IClient {
 	return p.fTraffic
 }
 
-func (p *sState) GetClient() iClient {
+func (p *sStateManager) GetClient() iClient {
 	return p.fClient
 }
 
-func (p *sState) GetKVStorage() storage.IKVStorage {
-	return p.fStorage
-}
-
-func (p *sState) GetWrapperDB() database.IWrapperDB {
+func (p *sStateManager) GetWrapperDB() database.IWrapperDB {
 	return p.fDatabase
 }
 
-func (p *sState) GetTemplate() *STemplateState {
+func (p *sStateManager) GetTemplate() *STemplateState {
 	return &STemplateState{
-		FAuthorized: p.IsActive(),
+		FAuthorized: p.StateIsActive(),
 	}
 }
 
-func (p *sState) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
-	if _, err := p.GetKVStorage().Get(pHashLP); err == nil {
+func (p *sStateManager) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
+	if _, err := p.fStorage.Get(pHashLP); err == nil {
 		return errors.NewError("state already exists")
 	}
 	if err := p.newStorageState(pHashLP, pPrivKey); err != nil {
@@ -89,11 +85,11 @@ func (p *sState) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error
 	return nil
 }
 
-func (p *sState) UpdateState(pHashLP []byte) error {
+func (p *sStateManager) OpenState(pHashLP []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if p.IsActive() {
+	if p.StateIsActive() {
 		return errors.NewError("state already exists")
 	}
 
@@ -121,11 +117,11 @@ func (p *sState) UpdateState(pHashLP []byte) error {
 	return nil
 }
 
-func (p *sState) ClearActiveState() error {
+func (p *sStateManager) CloseState() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if !p.IsActive() {
+	if !p.StateIsActive() {
 		return errors.NewError("state does not exist")
 	}
 
@@ -142,7 +138,7 @@ func (p *sState) ClearActiveState() error {
 	return nil
 }
 
-func (p *sState) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
+func (p *sStateManager) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error {
 	err := p.stateUpdater(
 		p.updateClientFriends,
 		func(storageValue *SStorageState) {
@@ -155,7 +151,7 @@ func (p *sState) AddFriend(pAliasName string, pPubKey asymmetric.IPubKey) error 
 	return nil
 }
 
-func (p *sState) DelFriend(pAliasName string) error {
+func (p *sStateManager) DelFriend(pAliasName string) error {
 	err := p.stateUpdater(
 		p.updateClientFriends,
 		func(storageValue *SStorageState) {
@@ -168,7 +164,7 @@ func (p *sState) DelFriend(pAliasName string) error {
 	return nil
 }
 
-func (p *sState) AddConnection(pConnect string) error {
+func (p *sStateManager) AddConnection(pConnect string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
@@ -184,7 +180,7 @@ func (p *sState) AddConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sState) DelConnection(pConnect string) error {
+func (p *sStateManager) DelConnection(pConnect string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
@@ -200,30 +196,30 @@ func (p *sState) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sState) IsActive() bool {
+func (p *sStateManager) StateIsActive() bool {
 	return p.fHashLP != nil
 }
 
-func (p *sState) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
+func (p *sStateManager) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
 	stateValueBytes := encoding.Serialize(&SStorageState{
 		FPrivKey: pPrivKey.ToString(),
 	}, false)
-	if err := p.GetKVStorage().Set(pHashLP, stateValueBytes); err != nil {
+	if err := p.fStorage.Set(pHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "new storage state")
 	}
 	return nil
 }
 
-func (p *sState) setStorageState(pStateValue *SStorageState) error {
+func (p *sStateManager) setStorageState(pStateValue *SStorageState) error {
 	stateValueBytes := encoding.Serialize(pStateValue, false)
-	if err := p.GetKVStorage().Set(p.fHashLP, stateValueBytes); err != nil {
+	if err := p.fStorage.Set(p.fHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "update storage state")
 	}
 	return nil
 }
 
-func (p *sState) getStorageState(pHashLP []byte) (*SStorageState, error) {
-	stateValueBytes, err := p.GetKVStorage().Get(pHashLP)
+func (p *sStateManager) getStorageState(pHashLP []byte) (*SStorageState, error) {
+	stateValueBytes, err := p.fStorage.Get(pHashLP)
 	if err != nil {
 		return nil, errors.WrapError(err, "get storage state")
 	}

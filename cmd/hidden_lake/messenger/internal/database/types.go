@@ -8,11 +8,11 @@ import (
 type IWrapperDB interface {
 	types.ICloser
 
-	Get() IKeyValueDB
-	Set(IKeyValueDB) IWrapperDB
+	Get() IKVDatabase
+	Set(IKVDatabase) IWrapperDB
 }
 
-type IKeyValueDB interface {
+type IKVDatabase interface {
 	types.ICloser
 
 	Size(IRelation) uint64

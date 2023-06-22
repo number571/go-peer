@@ -35,7 +35,7 @@ type sApp struct {
 	fMutex sync.Mutex
 
 	fConfig         config.IConfig
-	fState          state.IState
+	fStateManager   state.IStateManager
 	fLogger         logger.ILogger
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
@@ -50,7 +50,7 @@ func NewApp(
 		panic(err)
 	}
 
-	state := state.NewState(
+	state := state.NewStateManager(
 		stg,
 		database.NewWrapperDB(),
 		hls_client.NewClient(
@@ -75,9 +75,9 @@ func NewApp(
 	)
 
 	return &sApp{
-		fConfig: pCfg,
-		fState:  state,
-		fLogger: internal_logger.StdLogger(pCfg.GetLogging()),
+		fConfig:       pCfg,
+		fStateManager: state,
+		fLogger:       internal_logger.StdLogger(pCfg.GetLogging()),
 	}
 }
 
@@ -130,13 +130,13 @@ func (p *sApp) Stop() error {
 	p.fIsRun = false
 	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	// state may be already closed
-	_ = p.fState.ClearActiveState()
+	// state may be already closed by HLS
+	_ = p.fStateManager.CloseState()
 
 	err := types.CloseAll([]types.ICloser{
 		p.fIntServiceHTTP,
 		p.fIncServiceHTTP,
-		p.fState.GetWrapperDB(),
+		p.fStateManager.GetWrapperDB(),
 	})
 	if err != nil {
 		return pkg_errors.WrapError(err, "close/stop all")

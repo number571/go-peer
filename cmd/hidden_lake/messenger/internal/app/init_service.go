@@ -13,7 +13,7 @@ import (
 
 func (p *sApp) initIncomingServiceHTTP() {
 	mux := http.NewServeMux()
-	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(p.fState)) // POST
+	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(p.fStateManager)) // POST
 
 	p.fIncServiceHTTP = &http.Server{
 		Addr:    p.fConfig.GetAddress().GetIncoming(),
@@ -25,19 +25,19 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
-		handleFileServer(p.fState, http.FS(web.GetStaticPath()))),
+		handleFileServer(p.fStateManager, http.FS(web.GetStaticPath()))),
 	)
 
-	mux.HandleFunc("/", handler.IndexPage(p.fState))                    // GET
-	mux.HandleFunc("/sign/out", handler.SignOutPage(p.fState))          // GET
-	mux.HandleFunc("/sign/in", handler.SignInPage(p.fState))            // GET, POST
-	mux.HandleFunc("/sign/up", handler.SignUpPage(p.fState))            // GET, POST
-	mux.HandleFunc("/favicon.ico", handler.FaviconPage(p.fState))       // GET
-	mux.HandleFunc("/about", handler.AboutPage(p.fState))               // GET
-	mux.HandleFunc("/settings", handler.SettingsPage(p.fState))         // GET, POST, DELETE
-	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(p.fState)) // GET
-	mux.HandleFunc("/friends", handler.FriendsPage(p.fState))           // GET, POST, DELETE
-	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(p.fState))  // GET, POST
+	mux.HandleFunc("/", handler.IndexPage(p.fStateManager))                    // GET
+	mux.HandleFunc("/sign/out", handler.SignOutPage(p.fStateManager))          // GET
+	mux.HandleFunc("/sign/in", handler.SignInPage(p.fStateManager))            // GET, POST
+	mux.HandleFunc("/sign/up", handler.SignUpPage(p.fStateManager))            // GET, POST
+	mux.HandleFunc("/favicon.ico", handler.FaviconPage(p.fStateManager))       // GET
+	mux.HandleFunc("/about", handler.AboutPage(p.fStateManager))               // GET
+	mux.HandleFunc("/settings", handler.SettingsPage(p.fStateManager))         // GET, POST, DELETE
+	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(p.fStateManager)) // GET
+	mux.HandleFunc("/friends", handler.FriendsPage(p.fStateManager))           // GET, POST, DELETE
+	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(p.fStateManager))  // GET, POST
 
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
@@ -47,10 +47,10 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	}
 }
 
-func handleFileServer(pState state.IState, pFS http.FileSystem) http.Handler {
+func handleFileServer(pStateManager state.IStateManager, pFS http.FileSystem) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, err := pFS.Open(r.URL.Path); os.IsNotExist(err) {
-			handler.NotFoundPage(pState)(w, r)
+			handler.NotFoundPage(pStateManager)(w, r)
 			return
 		}
 		http.FileServer(pFS).ServeHTTP(w, r)

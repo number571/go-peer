@@ -44,6 +44,6 @@ type INode interface {
 type IWrapperDB interface {
 	types.ICloser
 
-	Get() database.IKeyValueDB
-	Set(database.IKeyValueDB) IWrapperDB
+	Get() database.IKVDatabase
+	Set(database.IKVDatabase) IWrapperDB
 }

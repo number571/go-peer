@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	tgDB IKeyValueDB
+	tgDB IKVDatabase
 )
 
 func testHmsDefaultInit(dbPath string) error {

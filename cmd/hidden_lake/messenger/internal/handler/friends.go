@@ -17,14 +17,14 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(pState state.IState) http.HandlerFunc {
+func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/friends" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if !pState.IsActive() {
+		if !pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -44,7 +44,7 @@ func FriendsPage(pState state.IState) http.HandlerFunc {
 				fmt.Fprint(pW, "error: public key is nil")
 				return
 			}
-			if err := pState.AddFriend(aliasName, pubKey); err != nil {
+			if err := pStateManager.AddFriend(aliasName, pubKey); err != nil {
 				fmt.Fprint(pW, "error: add friend")
 				return
 			}
@@ -54,19 +54,19 @@ func FriendsPage(pState state.IState) http.HandlerFunc {
 				fmt.Fprint(pW, "error: alias_name is null")
 				return
 			}
-			if err := pState.DelFriend(aliasName); err != nil {
+			if err := pStateManager.DelFriend(aliasName); err != nil {
 				fmt.Fprint(pW, "error: del friend")
 				return
 			}
 		}
-		res, err := pState.GetClient().Service().GetFriends()
+		res, err := pStateManager.GetClient().Service().GetFriends()
 		if err != nil {
 			fmt.Fprint(pW, "error: read friends")
 			return
 		}
 
 		result := new(sFriends)
-		result.STemplateState = pState.GetTemplate()
+		result.STemplateState = pStateManager.GetTemplate()
 		result.FFriends = make([]string, 0, len(res))
 
 		for aliasName := range res {

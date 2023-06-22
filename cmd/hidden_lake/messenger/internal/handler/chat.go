@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 
@@ -36,14 +37,14 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pState state.IState) http.HandlerFunc {
+func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/friends/chat" {
-			NotFoundPage(pState)(pW, pR)
+			NotFoundPage(pStateManager)(pW, pR)
 			return
 		}
 
-		if !pState.IsActive() {
+		if !pStateManager.StateIsActive() {
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -54,11 +55,13 @@ func FriendsChatPage(pState state.IState) http.HandlerFunc {
 			return
 		}
 
-		var (
-			client = pState.GetClient().Service()
-			db     = pState.GetWrapperDB().Get()
-		)
+		db := pStateManager.GetWrapperDB().Get()
+		if db == nil {
+			api.Response(pW, http.StatusForbidden, "failed: database closed")
+			return
+		}
 
+		client := pStateManager.GetClient().Service()
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, "error: read public key")
@@ -138,7 +141,7 @@ func FriendsChatPage(pState state.IState) http.HandlerFunc {
 		}
 
 		res := &sChatMessages{
-			STemplateState: pState.GetTemplate(),
+			STemplateState: pStateManager.GetTemplate(),
 			FAddress: sChatAddress{
 				FClient: clientPubKey.GetAddress().ToString(),
 				FFriend: friendPubKey.GetAddress().ToString(),

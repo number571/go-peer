@@ -2,14 +2,14 @@ package state
 
 import "github.com/number571/go-peer/pkg/errors"
 
-func (p *sState) stateUpdater(
+func (p *sStateManager) stateUpdater(
 	clientUpdater func(storageValue *SStorageState) error,
 	middleWare func(storageValue *SStorageState),
 ) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if !p.IsActive() {
+	if !p.StateIsActive() {
 		return errors.NewError("state does not exist")
 	}
 
@@ -23,7 +23,7 @@ func (p *sState) stateUpdater(
 
 	if err := clientUpdater(newStorageValue); err == nil {
 		if err := p.setStorageState(newStorageValue); err != nil {
-			return errors.WrapError(err, "get new storage state")
+			return errors.WrapError(err, "set new storage state")
 		}
 		return nil
 	}
