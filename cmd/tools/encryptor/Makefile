@@ -1,5 +1,5 @@
 N=4096
-PHONY: default genkey clean 
+.PHONY: default genkey clean 
 default: genkey 
 genkey:
 	go run ../keygen $(N)
