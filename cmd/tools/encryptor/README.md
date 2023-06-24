@@ -18,7 +18,7 @@ Generate keys
 ```bash
 make # default key size = 4096 bits
 # OR
-make N=4096 # with custom set key size
+make N=1024 # with custom set key size
 ```
 
 Encrypt/Decrypt

@@ -1,6 +1,7 @@
 N=4096
-PHONY: default genkey
+PHONY: default genkey clean 
 default: genkey 
 genkey:
 	go run ../keygen $(N)
-	cp ../keygen/*.key .
+clean:
+	rm -f *.msg *.key 

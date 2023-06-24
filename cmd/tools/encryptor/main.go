@@ -88,6 +88,6 @@ func readUntilEOF() []byte {
 }
 
 func getMessageSize(param types.IParameter, dataValue []byte) uint64 {
-	defaultSize := (4 << 10) + (param.GetSize() / 8)   // in bytes with sign+pubKey
+	defaultSize := param.GetSize() << 1                // init size by key size
 	return (defaultSize + uint64(len(dataValue))) << 1 // size with hex encode
 }
