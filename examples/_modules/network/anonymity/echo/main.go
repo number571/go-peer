@@ -60,7 +60,6 @@ func main() {
 	if err := client.Run(); err != nil {
 		panic(err)
 	}
-
 	if err := client.GetNetworkNode().AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}

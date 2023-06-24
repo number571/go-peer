@@ -16,7 +16,7 @@ const (
 
 func main() {
 	service := network.NewNode(nodeSettings(serviceAddress))
-	service.HandleFunc(serviceHeader, func(n network.INode, c conn.IConn, reqBytes []byte) {
+	service.HandleFunc(serviceHeader, func(_ network.INode, c conn.IConn, reqBytes []byte) {
 		c.WritePayload(payload.NewPayload(
 			serviceHeader,
 			[]byte(fmt.Sprintf("echo: [%s]", string(reqBytes))),

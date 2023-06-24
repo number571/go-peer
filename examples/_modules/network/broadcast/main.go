@@ -53,7 +53,7 @@ func main() {
 }
 
 func handlerPingPong(serviceName string) network.IHandlerF {
-	return func(n network.INode, c conn.IConn, reqBytes []byte) {
+	return func(n network.INode, _ conn.IConn, reqBytes []byte) {
 		defer n.BroadcastPayload(payload.NewPayload(serviceHeader, reqBytes))
 		fmt.Printf("service '%s' got '%s'\n", serviceName, string(reqBytes))
 	}

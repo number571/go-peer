@@ -44,7 +44,7 @@ func main() {
 }
 
 func handler(serviceName string) network.IHandlerF {
-	return func(n network.INode, c conn.IConn, reqBytes []byte) {
+	return func(n network.INode, _ conn.IConn, reqBytes []byte) {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 
 		num, err := strconv.Atoi(string(reqBytes))

@@ -14,6 +14,8 @@ In progress...
 - Update `README.md`: append build and run instructions
 - Example `_cmd/echo_service`: append docker-compose examples
 - Example `_cmd/anon_messenger`: append docker-compose examples
+- Projects `tools`: append encryptor application
+- Projects `tools`: refactoring storage application
 
 ### CHANGES
 
@@ -25,6 +27,7 @@ In progress...
 - Module `go.mod`: decrease version from 1.17 to 1.16
 - Update `README.md`: append installation, requirements
 - Project `hidden_lake/messenger`: rename interface and methods in IState -> IStateManager
+- Directory `tools`: removed to cmd/tools
 
 ### BUG FIXES
 

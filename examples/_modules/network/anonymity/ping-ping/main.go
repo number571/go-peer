@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
@@ -38,6 +40,9 @@ func main() {
 	deleteDBs()
 	defer deleteDBs()
 
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
 	var (
 		service1 = newNode(serviceAddress, dbPath1)
 		service2 = newNode("", dbPath2)
@@ -60,7 +65,6 @@ func main() {
 	if err := service2.Run(); err != nil {
 		panic(err)
 	}
-
 	if err := service2.GetNetworkNode().AddConnect(serviceAddress); err != nil {
 		panic(err)
 	}
@@ -76,7 +80,7 @@ func main() {
 		panic(err)
 	}
 
-	select {}
+	<-shutdown
 }
 
 func handler(serviceName string) anonymity.IHandlerF {

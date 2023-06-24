@@ -12,7 +12,7 @@ import (
 func main() {
 	if len(os.Args) != 2 {
 		panic(fmt.Sprintf(
-			"usage: \n\t%s",
+			"usage: \n\t%s\n\n",
 			"./main [key-size]",
 		))
 	}
