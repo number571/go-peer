@@ -2,11 +2,17 @@
 
 <!-- ... -->
 
-## ~v1.5.10
+## v1.5.11
 
 *??? ??, ????*
 
 In progress...
+
+<!-- ... -->
+
+## v1.5.10
+
+*June 25, 2023*
 
 ### IMPROVEMENTS
 
@@ -17,6 +23,7 @@ In progress...
 - Projects `tools`: append encryptor application
 - Projects `tools`: append pmanager application
 - Projects `tools`: refactoring storage application
+- Article `abstract_anonymous_networks`: append info about periods of state in entropy increase networks
 
 ### CHANGES
 
