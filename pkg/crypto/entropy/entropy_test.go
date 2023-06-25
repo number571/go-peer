@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 	testutils "github.com/number571/go-peer/test/_data"
+)
+
+const (
+	tcHash = "57daf58ec9ea7be6dbcb8a67aea76bdcfa32db40a7a3cae3d90bc977dc293599"
 )
 
 func TestEntropy(t *testing.T) {
@@ -15,8 +19,7 @@ func TestEntropy(t *testing.T) {
 	)
 
 	hash := NewEntropyBooster(testutils.TCWorkSize, salt).BoostEntropy(msg)
-
-	if bytes.Equal(hash, hashing.NewSHA256Hasher(msg).ToBytes()) {
+	if encoding.HexEncode(hash) != tcHash {
 		t.Error("hash is correct?")
 		return
 	}

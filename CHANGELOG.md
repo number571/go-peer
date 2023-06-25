@@ -15,6 +15,7 @@ In progress...
 - Example `_cmd/echo_service`: append docker-compose examples
 - Example `_cmd/anon_messenger`: append docker-compose examples
 - Projects `tools`: append encryptor application
+- Projects `tools`: append pmanager application
 - Projects `tools`: refactoring storage application
 
 ### CHANGES
@@ -32,6 +33,7 @@ In progress...
 ### BUG FIXES
 
 - Project `hidden_lake/messenger`: append checks pStateManager.GetWrapperDB().Get() on nil
+- Package `crypto/entropy`: fix range hashes with one input data
 
 <!-- ... -->
 

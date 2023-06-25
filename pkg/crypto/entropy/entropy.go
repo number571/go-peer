@@ -32,7 +32,7 @@ func (p *sEntropyBooster) BoostEntropy(pData []byte) []byte {
 	for i := uint64(0); i < lim; i++ {
 		data = hashing.NewSHA256Hasher(bytes.Join(
 			[][]byte{
-				pData,
+				data,
 				p.fSalt,
 			},
 			[]byte{},
