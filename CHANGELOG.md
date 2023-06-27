@@ -8,6 +8,15 @@
 
 In progress...
 
+### IMPROVEMENTS
+
+- Projects `tools`: append builds with makefiles
+- Update `README.md`: append info about tools applications
+
+### CHANGES
+
+- Package `storage`: deleted in-memory-storage
+
 <!-- ... -->
 
 ## v1.5.10
