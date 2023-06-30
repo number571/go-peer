@@ -9,7 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -71,7 +71,7 @@ func runService(addr string) {
 		if logEnabled {
 			log.Println("RECV FROM", r.RemoteAddr)
 		}
-		encBytes, err := ioutil.ReadAll(r.Body)
+		encBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -121,7 +121,7 @@ func runQueue(nickname string) {
 }
 
 func getPubKey(filename string, pubKey *rsa.PublicKey) error {
-	pubKeyBytes, err := ioutil.ReadFile(keysDir + filename) // v1.16
+	pubKeyBytes, err := os.ReadFile(keysDir + filename) // v1.16
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func getPubKey(filename string, pubKey *rsa.PublicKey) error {
 }
 
 func getAuthKey() string {
-	authKeyBytes, err := ioutil.ReadFile(initDir + "auth.key") // v1.16
+	authKeyBytes, err := os.ReadFile(initDir + "auth.key") // v1.16
 	if err != nil || len(authKeyBytes) == 0 {
 		panic(err)
 	}
@@ -149,7 +149,7 @@ func getAuthKey() string {
 }
 
 func getPrivKey() *rsa.PrivateKey {
-	privKeyBytes, err := ioutil.ReadFile(initDir + "priv.key") // v1.16
+	privKeyBytes, err := os.ReadFile(initDir + "priv.key") // v1.16
 	if err != nil {
 		panic(err)
 	}
