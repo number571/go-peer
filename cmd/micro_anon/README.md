@@ -8,11 +8,10 @@ The M-A network is based on a queue-based task (also as HL).
 
 ```bash
 usage: 
-    ./main [nickname] [host:port] (log-off|log-on)
+    ./main [nickname] [host:port]
 where:
     nickname - prints on another nodes
     host:port - listen address
-    log-off|log-on - turn off/on logger
 ```
 
 > More information about M-A in the [???](??? "Habr M-A")
@@ -29,7 +28,7 @@ By default program attach self public key. Therefore, if you write the `send$` c
 ### Build and run
 
 ```bash
-go run . node1 :7070 log-off
+go run . node1 :7070
 > attach$ node2.key
 ok
 > send$ hello, world!

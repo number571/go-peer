@@ -10,7 +10,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -21,31 +20,26 @@ const (
 	initDir    = "_init/"
 	keysDir    = "_keys/"
 	startInput = "> "
+	queueSize  = 32
 )
 
 var (
 	authBytes = getAuthKey()
 	privKey   = getPrivKey()
 	connects  = getConnects()
-)
-
-var (
-	queue      = make(chan string, 32)
-	attach     = &privKey.PublicKey
-	logEnabled bool
+	queueVoid = make(chan []byte, queueSize)
+	queue     = make(chan []byte, queueSize)
+	attach    = &privKey.PublicKey
 )
 
 func main() {
-	if len(os.Args) != 4 {
-		panic("example run: ./main [nickname] [host:port] [log-on|log-off]")
-	}
-
-	if os.Args[3] == "log-on" {
-		logEnabled = true
+	if len(os.Args) != 3 {
+		panic("example run: ./main [nickname] [host:port]")
 	}
 
 	go runService(os.Args[2])
-	go runQueue(os.Args[1])
+	go runQueueVoid()
+	go runQueue()
 
 	for {
 		cmd := readCmd(startInput)
@@ -61,16 +55,18 @@ func main() {
 			}
 			fmt.Println("ok")
 		case "send":
-			queue <- strings.TrimSpace(cmd[1])
+			msg := fmt.Sprintf("%s%s: %s", authBytes, os.Args[1], strings.TrimSpace(cmd[1]))
+			encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, attach, []byte(msg), nil)
+			if err != nil {
+				panic(err)
+			}
+			queue <- encBytes
 		}
 	}
 }
 
 func runService(addr string) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if logEnabled {
-			log.Println("RECV FROM", r.RemoteAddr)
-		}
 		encBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -91,27 +87,15 @@ func runService(addr string) {
 	http.ListenAndServe(addr, nil)
 }
 
-func runQueue(nickname string) {
+func runQueue() {
 	for {
 		time.Sleep(5 * time.Second)
-		msg := ""
-		if len(queue) != 0 {
-			msg = fmt.Sprintf("%s%s: %s", authBytes, nickname, <-queue)
-		}
-
-		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, attach, []byte(msg), nil)
-		if err != nil {
-			panic(err)
-		}
-
+		encBytes := <-getQueue()
 		for _, conn := range connects {
 			go func(conn string) {
 				req, err := http.NewRequest(http.MethodPost, conn, bytes.NewBuffer(encBytes))
 				if err != nil {
 					panic(err)
-				}
-				if logEnabled {
-					log.Println("SEND TO", conn)
 				}
 				client := &http.Client{Timeout: 5 * time.Second}
 				_, _ = client.Do(req)
@@ -121,7 +105,7 @@ func runQueue(nickname string) {
 }
 
 func getPubKey(filename string, pubKey *rsa.PublicKey) error {
-	pubKeyBytes, err := os.ReadFile(keysDir + filename) // v1.16
+	pubKeyBytes, err := os.ReadFile(keysDir + filename)
 	if err != nil {
 		return err
 	}
@@ -141,7 +125,7 @@ func getPubKey(filename string, pubKey *rsa.PublicKey) error {
 }
 
 func getAuthKey() string {
-	authKeyBytes, err := os.ReadFile(initDir + "auth.key") // v1.16
+	authKeyBytes, err := os.ReadFile(initDir + "auth.key")
 	if err != nil || len(authKeyBytes) == 0 {
 		panic(err)
 	}
@@ -149,7 +133,7 @@ func getAuthKey() string {
 }
 
 func getPrivKey() *rsa.PrivateKey {
-	privKeyBytes, err := os.ReadFile(initDir + "priv.key") // v1.16
+	privKeyBytes, err := os.ReadFile(initDir + "priv.key")
 	if err != nil {
 		panic(err)
 	}
@@ -197,4 +181,26 @@ func readCmd(s string) []string {
 		cmd[i] = strings.TrimSpace(cmd[i])
 	}
 	return cmd
+}
+
+func runQueueVoid() {
+	for {
+		if len(queueVoid) == queueSize {
+			time.Sleep(time.Second)
+			continue
+		}
+		msg := ""
+		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, attach, []byte(msg), nil)
+		if err != nil {
+			panic(err)
+		}
+		queueVoid <- encBytes
+	}
+}
+
+func getQueue() chan []byte {
+	if len(queue) == 0 {
+		return queueVoid
+	}
+	return queue
 }
