@@ -1,0 +1,39 @@
+## M-A
+
+> Micro-Anonymous network
+
+<img src="../../images/ma_logo.png" alt="ma_logo.png"/>
+
+The M-A network is based on a queue-based task (also as HL).
+
+```bash
+usage: 
+    ./main [nickname] [host:port] (log-off|log-on)
+where:
+    nickname - prints on another nodes
+    host:port - listen address
+    log-off|log-on - turn off/on logger
+```
+
+> More information about M-A in the [???](??? "Habr M-A")
+
+### How it works
+
+<p align="center"><img src="../../examples/images/ma_logger.gif" alt="ma_logger.gif"/></p>
+<p align="center">Figure 1. Output of all actions and all received traffic from the node3.</p>
+
+In `_init/` directory should be exists `priv.key` (can be generated with `keygen` program), `auth.key` (key of network) and `connects.txt` (list of http nodes).
+In `_keys/` directory should be exists public keys of nodes. The file names can be any. The attach to the public key is made via the `attach$` command.
+By default program attach self public key. Therefore, if you write the `send$` command, you will send a message to yourself.
+
+### Build and run
+
+```bash
+go run . node1 :7070 log-off
+> attach$ node2.key
+ok
+> send$ hello, world!
+> 
+node2: hi!
+>
+```
