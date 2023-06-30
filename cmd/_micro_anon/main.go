@@ -74,13 +74,16 @@ func runService(addr string) {
 		}
 
 		defer w.WriteHeader(http.StatusOK)
+
 		msg, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privKey, encBytes, nil)
 		if err != nil {
 			return
 		}
+
 		if !bytes.HasPrefix(msg, []byte(authBytes)) {
 			return
 		}
+
 		msg = bytes.TrimPrefix(msg, []byte(authBytes))
 		fmt.Printf("\n%s\n%s", string(msg), startInput)
 	})
