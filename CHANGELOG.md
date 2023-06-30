@@ -12,6 +12,7 @@ In progress...
 
 - Projects `tools`: append builds with makefiles
 - Update `README.md`: append info about tools applications
+- Append `micro_anon`: new project with micro-anonymous network
 
 ### CHANGES
 
