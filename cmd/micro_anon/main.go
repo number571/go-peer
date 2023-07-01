@@ -24,20 +24,32 @@ const (
 )
 
 var (
-	authBytes = getAuthKey()
-	privKey   = getPrivKey()
-	connects  = getConnects()
 	queueVoid = make(chan []byte, queueSize)
 	queue     = make(chan []byte, queueSize)
-	attach    = &privKey.PublicKey
 )
 
-func main() {
+var (
+	authBytes string
+	connects  []string
+	privKey   *rsa.PrivateKey
+	attach    *rsa.PublicKey
+)
+
+func initApp() {
 	if len(os.Args) != 3 {
 		panic("example run: ./main [nickname] [host:port]")
 	}
 
-	go runService(os.Args[2])
+	authBytes = getAuthKey()
+	connects = getConnects()
+	privKey = getPrivKey()
+	attach = &privKey.PublicKey
+}
+
+func main() {
+	initApp()
+
+	go runService()
 	go runQueueVoid()
 	go runQueue()
 
@@ -65,14 +77,17 @@ func main() {
 	}
 }
 
-func runService(addr string) {
+func runService() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
 		encBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
 		defer w.WriteHeader(http.StatusOK)
 		msg, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privKey, encBytes, nil)
 		if err != nil {
@@ -84,7 +99,7 @@ func runService(addr string) {
 		msg = bytes.TrimPrefix(msg, []byte(authBytes))
 		fmt.Printf("\n%s\n%s", string(msg), startInput)
 	})
-	http.ListenAndServe(addr, nil)
+	http.ListenAndServe(os.Args[2], nil)
 }
 
 func runQueue() {
@@ -131,17 +146,14 @@ func getPubKey(filename string, pubKey *rsa.PublicKey) error {
 	if err != nil {
 		return err
 	}
-
 	pubKeyBlock, _ := pem.Decode(pubKeyBytes)
 	if pubKeyBlock == nil || pubKeyBlock.Type != "PUBLIC KEY" {
 		panic("pem block is invalid")
 	}
-
 	pub, err := x509.ParsePKCS1PublicKey(pubKeyBlock.Bytes)
 	if err != nil {
 		panic(err)
 	}
-
 	*pubKey = *pub
 	return nil
 }
@@ -159,17 +171,14 @@ func getPrivKey() *rsa.PrivateKey {
 	if err != nil {
 		panic(err)
 	}
-
 	privateKeyBlock, _ := pem.Decode(privKeyBytes)
 	if privateKeyBlock == nil || privateKeyBlock.Type != "PRIVATE KEY" {
 		panic("pem block is invalid")
 	}
-
 	priv, err := x509.ParsePKCS1PrivateKey(privateKeyBlock.Bytes)
 	if err != nil {
 		panic(err)
 	}
-
 	return priv
 }
 

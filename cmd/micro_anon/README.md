@@ -25,14 +25,27 @@ In `_init/` directory should be exists `priv.key` (can be generated with `keygen
 In `_keys/` directory should be exists public keys of nodes. The file names can be any. The attach to the public key is made via the `attach$` command.
 By default program attach self public key. Therefore, if you write the `send$` command, you will send a message to yourself.
 
+### Initialization
+
+```bash
+$ cd _init
+$ go run ../keygen # creates priv.key, pub.key
+$ cp pub.key ../_keys/node1.key # you can use public key to yourself
+$ echo http://localhost:8080 > connects.txt # connect to yourself
+$ echo "secret_key" > auth.key # set network key
+```
+
 ### Build and run
 
 ```bash
-go run . node1 :7070
-> attach$ node2.key
+$ go run . node1 :8080
+> send$ test1!
+>
+node1: test1!
+> attach$ node1.key
 ok
 > send$ hello, world!
 > 
-node2: hi!
+node1: hello, world!
 >
 ```
