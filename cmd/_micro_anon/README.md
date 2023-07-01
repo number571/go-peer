@@ -14,7 +14,7 @@ where:
     host:port - listen address
 ```
 
-> More information about M-A in the [???](??? "Habr M-A")
+> More information about M-A in the [habr.com/ru/articles/745256/](https://habr.com/ru/articles/745256/ "Habr M-A")
 
 ### How it works
 
