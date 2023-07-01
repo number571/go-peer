@@ -74,16 +74,13 @@ func runService(addr string) {
 		}
 
 		defer w.WriteHeader(http.StatusOK)
-
 		msg, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privKey, encBytes, nil)
 		if err != nil {
 			return
 		}
-
 		if !bytes.HasPrefix(msg, []byte(authBytes)) {
 			return
 		}
-
 		msg = bytes.TrimPrefix(msg, []byte(authBytes))
 		fmt.Printf("\n%s\n%s", string(msg), startInput)
 	})
@@ -105,6 +102,28 @@ func runQueue() {
 			}(conn)
 		}
 	}
+}
+
+func runQueueVoid() {
+	for {
+		if len(queueVoid) == queueSize {
+			time.Sleep(time.Second)
+			continue
+		}
+		msg := ""
+		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &privKey.PublicKey, []byte(msg), nil)
+		if err != nil {
+			panic(err)
+		}
+		queueVoid <- encBytes
+	}
+}
+
+func getQueue() chan []byte {
+	if len(queue) == 0 {
+		return queueVoid
+	}
+	return queue
 }
 
 func getPubKey(filename string, pubKey *rsa.PublicKey) error {
@@ -184,26 +203,4 @@ func readCmd(s string) []string {
 		cmd[i] = strings.TrimSpace(cmd[i])
 	}
 	return cmd
-}
-
-func runQueueVoid() {
-	for {
-		if len(queueVoid) == queueSize {
-			time.Sleep(time.Second)
-			continue
-		}
-		msg := ""
-		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, attach, []byte(msg), nil)
-		if err != nil {
-			panic(err)
-		}
-		queueVoid <- encBytes
-	}
-}
-
-func getQueue() chan []byte {
-	if len(queue) == 0 {
-		return queueVoid
-	}
-	return queue
 }
