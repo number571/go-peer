@@ -111,7 +111,7 @@ $ make
 
 ## Cryptographic algorithms and functions
 
-1. AES-256-CTR (Data encryption)
+1. AES-256-CFB (Data encryption)
 2. RSA-4096-OAEP (Key encryption)
 3. RSA-4096-PSS (Hash signing)
 4. SHA-256 (Data hashing)
