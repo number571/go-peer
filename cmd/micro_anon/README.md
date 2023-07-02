@@ -4,7 +4,8 @@
 
 <img src="../../images/ma_logo.png" alt="ma_logo.png"/>
 
-The M-A network is based on a queue-based task (also as HL).
+The M-A network is based on a queue-based task (also as HL). The implementation uses only the standard library of the Go language (also does not call the components of the go-peer library in any way).
+The goal of this network is to minimalize the source code so that even a novice programmer can understand the entire mechanism of its functioning.
 
 ```bash
 usage: 
