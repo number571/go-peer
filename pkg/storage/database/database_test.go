@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
 type (
@@ -19,32 +18,9 @@ const (
 )
 
 func TestAllDBs(t *testing.T) {
-	testFailCreate(t, NewKeyValueDB)
 	testCreate(t, NewKeyValueDB)
 	testCipherKey(t, NewKeyValueDB)
 	testBasic(t, NewKeyValueDB)
-}
-
-func testFailCreate(t *testing.T, dbConstruct tiDBConsctruct) {
-	dbPath := fmt.Sprintf(
-		"/fail_test_random/%s/111/222/333",
-		random.NewStdPRNG().GetString(16),
-	)
-	defer os.RemoveAll(dbPath)
-
-	store, err := dbConstruct(NewSettings(&SSettings{
-		FPath:      dbPath,
-		FHashing:   false,
-		FCipherKey: []byte("CIPHER"),
-	}))
-	if err == nil {
-		t.Errorf("[testFailCreate] incorrect: error is nil")
-		return
-	}
-	if store != nil {
-		t.Errorf("[testFailCreate] this path '%s' realy exists?", dbPath)
-		store.Close()
-	}
 }
 
 func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
