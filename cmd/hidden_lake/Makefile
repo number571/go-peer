@@ -13,7 +13,7 @@ clean:
 	make -C ./traffic all-clean
 	make -C ./adapters clean
 
-docker-default: build 
+docker-default: docker-build 
 docker-build:
 	docker-compose build
 docker-run: 

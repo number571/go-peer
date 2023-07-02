@@ -13,11 +13,16 @@ In progress...
 - Projects `tools`: append builds with makefiles
 - Update `README.md`: append info about tools applications
 - Append `micro_anon`: new project with micro-anonymous network
+- Append `examples`: mathematical calculations of resources consumed
 
 ### CHANGES
 
 - Package `storage`: deleted in-memory-storage
 - Project `hidden_lake/messegner`: fetch request -> broadcast request
+
+### BUG FIXES
+
+- Project `hidden_lake`: makefile docker-default: build -> docker-build
 
 <!-- ... -->
 
