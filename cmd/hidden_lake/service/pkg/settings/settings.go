@@ -22,8 +22,9 @@ const (
 )
 
 const (
-	CHeaderPubKey  = "Service-Public-Key"
-	CHeaderMsgHash = "Service-Message-Hash"
+	CHeaderPublicKey   = "Service-Public-Key"
+	CHeaderMessageHash = "Service-Message-Hash"
+	CHeaderOffResponse = "Service-Off-Response"
 )
 
 const (
@@ -68,7 +69,8 @@ const (
 
 const (
 	// Base
-	CLogWarnResponseFromService anon_logger.ILogType = "RSPSR"
+	CLogWarnOffResponseFromService anon_logger.ILogType = "OFRSP"
+	CLogWarnResponseFromService    anon_logger.ILogType = "RSPSR"
 
 	// WARN
 	CLogWarnRequestToService anon_logger.ILogType = "RQTSR"

@@ -17,6 +17,7 @@ In progress...
 ### CHANGES
 
 - Package `storage`: deleted in-memory-storage
+- Project `hidden_lake/messegner`: fetch request -> broadcast request
 
 <!-- ... -->
 

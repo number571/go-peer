@@ -52,8 +52,8 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		for key, val := range loadReq.GetHead() {
 			pushReq.Header.Set(key, val)
 		}
-		pushReq.Header.Set(pkg_settings.CHeaderPubKey, sender.ToString())
-		pushReq.Header.Set(pkg_settings.CHeaderMsgHash, encoding.HexEncode(msgHash))
+		pushReq.Header.Set(pkg_settings.CHeaderPublicKey, sender.ToString())
+		pushReq.Header.Set(pkg_settings.CHeaderMessageHash, encoding.HexEncode(msgHash))
 
 		// send request to service
 		// and receive response from service
@@ -63,6 +63,12 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, err
 		}
 		defer resp.Body.Close()
+
+		// the response is not required by the client side
+		if resp.Header.Get(pkg_settings.CHeaderOffResponse) != "" {
+			pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogWarnOffResponseFromService, msgHash, 0, sender, nil))
+			return nil, nil
+		}
 
 		// send result to client
 		pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogWarnResponseFromService, msgHash, 0, sender, nil))

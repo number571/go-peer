@@ -18,6 +18,8 @@ import (
 
 func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		pW.Header().Set(hls_settings.CHeaderOffResponse, "true")
+
 		if pR.Method != http.MethodPost {
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
@@ -40,12 +42,12 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPubKey))
+		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
 		if fPubKey == nil {
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		msgHash := pR.Header.Get(hls_settings.CHeaderMsgHash)
+		msgHash := pR.Header.Get(hls_settings.CHeaderMessageHash)
 		if msgHash == "" {
 			panic("message hash is null (invalid data from HLS)!")
 		}

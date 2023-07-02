@@ -91,7 +91,7 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 				return
 			}
 
-			resp, err := client.FetchRequest(
+			err := client.BroadcastRequest(
 				friendPubKey,
 				request.NewRequest(http.MethodPost, pkg_settings.CTitlePattern, hlm_settings.CPushPath).
 					WithHead(map[string]string{
@@ -101,11 +101,6 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 			)
 			if err != nil {
 				fmt.Fprint(pW, "error: push message to network")
-				return
-			}
-
-			if string(resp.GetBody()) != pkg_settings.CTitlePattern {
-				fmt.Fprint(pW, "error: invalid response")
 				return
 			}
 
