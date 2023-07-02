@@ -25,9 +25,9 @@ docker-clean:
 
 composite-default: composite-build 
 composite-build: build
-	cp _std_cfg/hls.cfg ./service
-	cp _std_cfg/hlt.cfg ./traffic
-	cp _std_cfg/hlm.cfg ./messenger
+	cp _std_cfgs/hls.cfg ./service
+	cp _std_cfgs/hlt.cfg ./traffic
+	cp _std_cfgs/hlm.cfg ./messenger
 composite-run: 
 	make run -C ./service & 
 	make run -C ./traffic & 

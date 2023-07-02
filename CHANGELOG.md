@@ -8,11 +8,13 @@
 
 In progress...
 
+### BUG FIXES
+
+- Makefule `hidden_lake`: _std_cfg -> _std_cfgs
+
 ## v1.5.11
 
 *Jule 03, 2023*
-
-In progress...
 
 ### IMPROVEMENTS
 
