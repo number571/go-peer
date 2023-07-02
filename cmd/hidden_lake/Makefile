@@ -22,3 +22,17 @@ docker-clean:
 	rm -rf ./_mounted/hls.* ./_mounted/hlt.* ./_mounted/hlm.*
 	docker-compose down 
 	docker-compose rm -f
+
+composite-default: composite-build 
+composite-build: build
+	cp _std_cfg/hls.cfg ./service
+	cp _std_cfg/hlt.cfg ./traffic
+	cp _std_cfg/hlm.cfg ./messenger
+composite-run: 
+	make run -C ./service & 
+	make run -C ./traffic & 
+	make run -C ./messenger & 
+composite-clean: clean
+	pkill -15 hls || true
+	pkill -15 hlt || true
+	pkill -15 hlm || true

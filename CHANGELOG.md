@@ -19,6 +19,9 @@ In progress...
 
 - Package `storage`: deleted in-memory-storage
 - Project `hidden_lake/messegner`: fetch request -> broadcast request
+- Test `pkg/storage/database`: delete testFailCreate
+- Append `hidden_lake/_std_configs`: standart configs for HLS, HLM, HLT
+- Append `hidden_lake`: composite build and run applications
 
 ### BUG FIXES
 
