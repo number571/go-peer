@@ -6,7 +6,7 @@ BINPATH=$(ROOPATH)/bin
 default: build 
 build: 
 	$(GC) -o $(BINPATH)/tpmanager . # main 
-	GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/tpmanager_linux .
-	GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/tpmanager_windows.exe .
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/tpmanager_linux .
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/tpmanager_windows.exe .
 clean:
 	rm -f $(BINPATH)/tpmanager $(BINPATH)/tpmanager_linux $(BINPATH)/tpmanager_windows.exe 

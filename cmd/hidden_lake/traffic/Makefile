@@ -13,8 +13,8 @@ all-clean: clean
 
 build:
 	$(GC) -o $(BINPATH)/hlt ./cmd/hlt
-	GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hlt_linux ./cmd/hlt
-	GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hlt_windows.exe ./cmd/hlt
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hlt_linux ./cmd/hlt
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hlt_windows.exe ./cmd/hlt
 run:
 	./$(BINPATH)/hlt
 test:

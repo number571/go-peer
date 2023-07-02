@@ -13,8 +13,8 @@ all-clean: clean
 
 build:
 	$(GC) -o $(BINPATH)/hls ./cmd/hls # main 
-	GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hls_linux ./cmd/hls
-	GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hls_windows.exe ./cmd/hls
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hls_linux ./cmd/hls
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hls_windows.exe ./cmd/hls
 run:
 	./$(BINPATH)/hls
 test:

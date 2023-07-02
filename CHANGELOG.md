@@ -8,6 +8,10 @@
 
 In progress...
 
+### CHANGES
+
+- Makefiles `cmd`: change CGO_ENABLED=1 -> CGO_ENABLED=0
+
 ### BUG FIXES
 
 - Makefule `hidden_lake`: _std_cfg -> _std_cfgs
