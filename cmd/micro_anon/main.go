@@ -119,26 +119,25 @@ func runQueue() {
 	}
 }
 
+func getQueue() chan []byte {
+	if len(queue) == 0 {
+		return queueVoid
+	}
+	return queue
+}
+
 func runQueueVoid() {
 	for {
 		if len(queueVoid) == queueSize {
 			time.Sleep(time.Second)
 			continue
 		}
-		msg := ""
-		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &privKey.PublicKey, []byte(msg), nil)
+		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &privKey.PublicKey, []byte(""), nil)
 		if err != nil {
 			panic(err)
 		}
 		queueVoid <- encBytes
 	}
-}
-
-func getQueue() chan []byte {
-	if len(queue) == 0 {
-		return queueVoid
-	}
-	return queue
 }
 
 func getPubKey(filename string, pubKey *rsa.PublicKey) error {
@@ -148,7 +147,7 @@ func getPubKey(filename string, pubKey *rsa.PublicKey) error {
 	}
 	pubKeyBlock, _ := pem.Decode(pubKeyBytes)
 	if pubKeyBlock == nil || pubKeyBlock.Type != "PUBLIC KEY" {
-		panic("pem block is invalid")
+		panic("public key: pem block is invalid")
 	}
 	pub, err := x509.ParsePKCS1PublicKey(pubKeyBlock.Bytes)
 	if err != nil {
@@ -173,7 +172,7 @@ func getPrivKey() *rsa.PrivateKey {
 	}
 	privateKeyBlock, _ := pem.Decode(privKeyBytes)
 	if privateKeyBlock == nil || privateKeyBlock.Type != "PRIVATE KEY" {
-		panic("pem block is invalid")
+		panic("private key: pem block is invalid")
 	}
 	priv, err := x509.ParsePKCS1PrivateKey(privateKeyBlock.Bytes)
 	if err != nil {
