@@ -8,9 +8,14 @@
 
 In progress...
 
+### IMPROVEMENTS
+
+- Append `examples`: daemons installers
+
 ### CHANGES
 
 - Makefiles `cmd`: change CGO_ENABLED=1 -> CGO_ENABLED=0
+- Tests `make test`: replace race modifier from test-run to test-race
 
 ### BUG FIXES
 

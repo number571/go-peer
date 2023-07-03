@@ -7,7 +7,7 @@ PPROF_NAME=_
 PPROF_PORT=_
 
 .PHONY: default clean \
-	test-run test-coverage test-benchmark \
+	test-run test-race test-coverage test-benchmark \
 	pprof-run \
 	git-status git-push 
 
@@ -26,10 +26,13 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -race -cover -count=1 `go list ./...`; \
+		go test -cover -count=1 `go list ./...`; \
 		$(CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
+
+test-race:
+	go test -race -cover -count=1 `go list ./...`; \
 
 test-coverage:
 	go vet ./...;
