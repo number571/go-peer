@@ -18,7 +18,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			FServiceName:   pkg_settings.CServiceName,
 			FNetworkMask:   pkg_settings.CNetworkMask,
 			FRetryEnqueue:  pkg_settings.CRetryEnqueue,
-			FFetchTimeWait: pkg_settings.CActionTimeout,
+			FFetchTimeWait: pkg_settings.CFetchTimeout,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -26,14 +26,16 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 		anonymity.NewWrapperDB(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:       pCfg.GetAddress().GetTCP(),
-				FCapacity:      pkg_settings.CNetworkCapacity,
-				FMaxConnects:   pkg_settings.CNetworkMaxConns,
-				FActionTimeout: pkg_settings.CActionTimeout,
+				FAddress:      pCfg.GetAddress().GetTCP(),
+				FCapacity:     pkg_settings.CNetworkCapacity,
+				FMaxConnects:  pkg_settings.CNetworkMaxConns,
+				FWriteTimeout: pkg_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:    pCfg.GetNetwork(),
 					FMessageSize:   pkg_settings.CMessageSize,
-					FLimitVoidSize: pkg_settings.CLimitVoidSize,
+					FLimitVoidSize: pkg_settings.CConnLimitVoidSize,
+					FReadDeadline:  pkg_settings.CConnReadDeadline,
+					FWriteDeadline: pkg_settings.CConnWriteDeadline,
 					FFetchTimeWait: 1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),

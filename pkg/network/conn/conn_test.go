@@ -22,8 +22,10 @@ func TestConn(t *testing.T) {
 	conn, err := NewConn(
 		NewSettings(&SSettings{
 			FMessageSize:   testutils.TCMessageSize,
-			FLimitVoidSize: 1, // not used
+			FReadDeadline:  time.Minute,
+			FWriteDeadline: time.Minute,
 			FFetchTimeWait: 5 * time.Second,
+			FLimitVoidSize: 1, // not used
 		}),
 		testutils.TgAddrs[17],
 	)
@@ -61,8 +63,10 @@ func testNewService(t *testing.T) net.Listener {
 			conn := LoadConn(
 				NewSettings(&SSettings{
 					FMessageSize:   testutils.TCMessageSize,
-					FLimitVoidSize: 1,
+					FReadDeadline:  time.Minute,
+					FWriteDeadline: time.Minute,
 					FFetchTimeWait: 5 * time.Second,
+					FLimitVoidSize: 1, // not used
 				}),
 				aconn,
 			)

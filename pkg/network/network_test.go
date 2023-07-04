@@ -99,12 +99,14 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
-			FAddress:       addrs[i],
-			FCapacity:      testutils.TCCapacity,
-			FMaxConnects:   testutils.TCMaxConnects,
-			FActionTimeout: tcTimeWait,
+			FAddress:      addrs[i],
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSize:   testutils.TCMessageSize,
+				FReadDeadline:  time.Minute,
+				FWriteDeadline: time.Minute,
 				FLimitVoidSize: 1, // not used
 				FFetchTimeWait: 1, // not used
 			}),

@@ -129,12 +129,14 @@ func testNewClient() client.IClient {
 func testNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
-			FAddress:       addr,
-			FCapacity:      testutils.TCCapacity,
-			FMaxConnects:   testutils.TCMaxConnects,
-			FActionTimeout: time.Minute,
+			FAddress:      addr,
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSize:   testutils.TCMessageSize,
+				FReadDeadline:  time.Minute,
+				FWriteDeadline: time.Minute,
 				FLimitVoidSize: 1, // not used
 				FFetchTimeWait: 1, // not used
 			}),

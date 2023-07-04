@@ -30,13 +30,15 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FMaxConnects:   1, // only one HLS from cfg.Connection()
-				FCapacity:      hls_settings.CNetworkCapacity,
-				FActionTimeout: hls_settings.CActionTimeout,
+				FMaxConnects:  1, // only one HLS from cfg.Connection()
+				FCapacity:     hls_settings.CNetworkCapacity,
+				FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:    pCfg.GetNetwork(),
 					FMessageSize:   hls_settings.CMessageSize,
-					FLimitVoidSize: hls_settings.CLimitVoidSize,
+					FLimitVoidSize: hls_settings.CConnLimitVoidSize,
+					FReadDeadline:  hls_settings.CConnReadDeadline,
+					FWriteDeadline: hls_settings.CConnWriteDeadline,
 					FFetchTimeWait: 1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),

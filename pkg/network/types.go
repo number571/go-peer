@@ -14,7 +14,7 @@ type ISettings interface {
 	GetAddress() string
 	GetCapacity() uint64
 	GetMaxConnects() uint64
-	GetActionTimeout() time.Duration
+	GetWriteTimeout() time.Duration
 	GetConnSettings() conn.ISettings
 }
 

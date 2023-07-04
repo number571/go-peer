@@ -63,16 +63,12 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 
 		go func(c conn.IConn) {
 			defer wg.Done()
-
 			select {
-			case x := <-err:
-				if x == nil {
-					return
-				}
+			case e := <-err:
 				mutex.Lock()
-				errList = append(errList, x)
+				errList = append(errList, e)
 				mutex.Unlock()
-			case <-time.After(p.GetSettings().GetActionTimeout()):
+			case <-time.After(p.GetSettings().GetWriteTimeout()):
 				mutex.Lock()
 				errMsg := fmt.Sprintf("write timeout %s", c.GetSocket().RemoteAddr().String())
 				errList = append(errList, errors.NewError(errMsg))

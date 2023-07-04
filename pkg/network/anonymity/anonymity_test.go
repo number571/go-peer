@@ -165,12 +165,14 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 		NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:       addr,
-				FCapacity:      testutils.TCCapacity,
-				FMaxConnects:   testutils.TCMaxConnects,
-				FActionTimeout: timeWait,
+				FAddress:      addr,
+				FCapacity:     testutils.TCCapacity,
+				FMaxConnects:  testutils.TCMaxConnects,
+				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSize:   testutils.TCMessageSize,
+					FReadDeadline:  time.Minute,
+					FWriteDeadline: time.Minute,
 					FLimitVoidSize: 1, // not used
 					FFetchTimeWait: 1, // not used
 				}),

@@ -12,6 +12,8 @@ type ISettings interface {
 	GetNetworkKey() string
 	GetMessageSize() uint64
 	GetLimitVoidSize() uint64
+	GetReadDeadline() time.Duration
+	GetWriteDeadline() time.Duration
 	GetFetchTimeWait() time.Duration
 }
 

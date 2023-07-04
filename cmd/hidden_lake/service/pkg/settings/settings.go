@@ -28,8 +28,14 @@ const (
 )
 
 const (
-	CRetryEnqueue  = 2
-	CActionTimeout = time.Minute
+	CRetryEnqueue = 2
+	CFetchTimeout = time.Minute
+)
+
+const (
+	CAKeySize    = 4096      // bits
+	CWorkSize    = 20        // bits
+	CMessageSize = (1 << 20) // 1MiB
 )
 
 const (
@@ -39,12 +45,19 @@ const (
 )
 
 const (
-	CAKeySize        = 4096      // bits
-	CNetworkCapacity = (1 << 10) // hashes
-	CNetworkMaxConns = (1 << 6)  // 64
-	CWorkSize        = 20        // bits
-	CMessageSize     = (1 << 20) // 1MiB
-	CLimitVoidSize   = (1 << 20) // 1MiB
+	CNetworkWriteTimeout = time.Minute
+	CNetworkCapacity     = (1 << 10) // hashes
+	CNetworkMaxConns     = (1 << 6)  // 64
+)
+
+const (
+	CConnLimitVoidSize = (1 << 20) // 1MiB
+	CConnReadDeadline  = time.Minute
+	CConnWriteDeadline = time.Minute
+)
+
+const (
+	CConnKeeperDuration = time.Minute
 )
 
 const (
