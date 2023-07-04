@@ -15,8 +15,9 @@ func TestConnKeeper(t *testing.T) {
 	defer testFreeService(listener)
 
 	node := network.NewNode(network.NewSettings(&network.SSettings{
-		FCapacity:    testutils.TCCapacity,
-		FMaxConnects: testutils.TCMaxConnects,
+		FCapacity:      testutils.TCCapacity,
+		FMaxConnects:   testutils.TCMaxConnects,
+		FActionTimeout: time.Minute,
 		FConnSettings: conn.NewSettings(&conn.SSettings{
 			FMessageSize:   testutils.TCMessageSize,
 			FLimitVoidSize: 1, // not used

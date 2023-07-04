@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	tcIter = 1000
+	tcIter     = 1000
+	tcTimeWait = time.Minute
 )
 
 func TestBroadcast(t *testing.T) {
@@ -67,7 +68,7 @@ func TestBroadcast(t *testing.T) {
 
 	select {
 	case <-ch:
-	case <-time.After(time.Minute):
+	case <-time.After(tcTimeWait):
 		t.Error("limit of waiting time for group")
 		return
 	}
@@ -98,9 +99,10 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 	for i := 0; i < 5; i++ {
 		sett := NewSettings(&SSettings{
-			FAddress:     addrs[i],
-			FCapacity:    testutils.TCCapacity,
-			FMaxConnects: testutils.TCMaxConnects,
+			FAddress:       addrs[i],
+			FCapacity:      testutils.TCCapacity,
+			FMaxConnects:   testutils.TCMaxConnects,
+			FActionTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSize:   testutils.TCMessageSize,
 				FLimitVoidSize: 1, // not used

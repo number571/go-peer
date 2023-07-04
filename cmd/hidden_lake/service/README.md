@@ -44,6 +44,12 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
+### Minimum system requirements
+
+1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)
+2. Memory: `0.5GB RAM` (~250MB of memory is consumed)
+3. Storage: `5Gib available space` (the size of hashes per year from one node)
+
 ### Build and run
 
 Default build and run

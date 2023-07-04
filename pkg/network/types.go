@@ -1,6 +1,8 @@
 package network
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
@@ -12,6 +14,7 @@ type ISettings interface {
 	GetAddress() string
 	GetCapacity() uint64
 	GetMaxConnects() uint64
+	GetActionTimeout() time.Duration
 	GetConnSettings() conn.ISettings
 }
 

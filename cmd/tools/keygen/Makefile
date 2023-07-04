@@ -6,8 +6,13 @@ BINPATH=$(ROOPATH)/bin
 default: build 
 build: 
 	$(GC) -o $(BINPATH)/tkeygen . # main 
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/tkeygen_linux .
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/tkeygen_windows.exe .
+	
+	for arch in amd64 arm64; \
+	do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/tkeygen_$${arch}_linux .; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/tkeygen_$${arch}_windows .; \
+		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/tkeygen_$${arch}_darwin .; \
+	done;
 clean:
 	rm -f *.key 
 	rm -f $(BINPATH)/tkeygen $(BINPATH)/tkeygen_linux $(BINPATH)/tkeygen_windows.exe 

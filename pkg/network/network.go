@@ -1,8 +1,10 @@
 package network
 
 import (
+	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -47,11 +49,44 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
 	p.inMappingWithSet(hasher.ToBytes())
 
-	var err error
-	for _, conn := range p.GetConnections() {
-		err = errors.AppendError(err, conn.WritePayload(pPld))
+	errList := make([]error, 0, p.GetSettings().GetMaxConnects())
+	mutex := sync.Mutex{}
+	wg := sync.WaitGroup{}
+
+	for _, c := range p.GetConnections() {
+		wg.Add(1)
+
+		err := make(chan error)
+		go func(c conn.IConn) {
+			err <- c.WritePayload(pPld)
+		}(c)
+
+		go func(c conn.IConn) {
+			defer wg.Done()
+
+			select {
+			case x := <-err:
+				if x == nil {
+					return
+				}
+				mutex.Lock()
+				errList = append(errList, x)
+				mutex.Unlock()
+			case <-time.After(p.GetSettings().GetActionTimeout()):
+				mutex.Lock()
+				errMsg := fmt.Sprintf("write timeout %s", c.GetSocket().RemoteAddr().String())
+				errList = append(errList, errors.NewError(errMsg))
+				mutex.Unlock()
+			}
+		}(c)
 	}
-	return err
+	wg.Wait()
+
+	var resErr error
+	for _, err := range errList {
+		resErr = errors.AppendError(resErr, err)
+	}
+	return resErr
 }
 
 // Opens a tcp connection to receive data from outside.

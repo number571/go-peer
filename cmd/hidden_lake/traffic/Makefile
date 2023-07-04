@@ -13,8 +13,13 @@ all-clean: clean
 
 build:
 	$(GC) -o $(BINPATH)/hlt ./cmd/hlt
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hlt_linux ./cmd/hlt
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hlt_windows.exe ./cmd/hlt
+
+	for arch in amd64 arm64; \
+	do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/hlt_$${arch}_linux ./cmd/hlt; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hlt_$${arch}_windows ./cmd/hlt; \
+		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/hlt_$${arch}_darwin ./cmd/hlt; \
+	done;
 run:
 	./$(BINPATH)/hlt
 test:

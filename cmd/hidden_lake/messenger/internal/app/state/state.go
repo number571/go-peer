@@ -221,7 +221,7 @@ func (p *sStateManager) setStorageState(pStateValue *SStorageState) error {
 func (p *sStateManager) getStorageState(pHashLP []byte) (*SStorageState, error) {
 	stateValueBytes, err := p.fStorage.Get(pHashLP)
 	if err != nil {
-		return nil, errors.WrapError(err, "get storage state")
+		return nil, errors.WrapError(err, "get storage state bytes")
 	}
 
 	var stateValue = new(SStorageState)

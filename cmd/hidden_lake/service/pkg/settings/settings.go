@@ -29,7 +29,7 @@ const (
 
 const (
 	CRetryEnqueue  = 2
-	CFetchTimeWait = time.Minute
+	CActionTimeout = time.Minute
 )
 
 const (

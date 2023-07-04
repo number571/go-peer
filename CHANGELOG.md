@@ -11,6 +11,7 @@ In progress...
 ### IMPROVEMENTS
 
 - Append `examples`: daemons installers
+- Update `cmd`: append builds os=darwin and arch=arm64 for makefiles
 
 ### CHANGES
 
@@ -20,6 +21,7 @@ In progress...
 ### BUG FIXES
 
 - Makefule `hidden_lake`: _std_cfg -> _std_cfgs
+- Package `network`: fix deadlock BroadcastPayload on WritePayload method
 
 ## v1.5.11
 

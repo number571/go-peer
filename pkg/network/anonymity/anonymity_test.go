@@ -23,7 +23,7 @@ import (
 
 const (
 	tcPathDBTemplate = "database_test_%d_%d.db"
-	tcWait           = time.Minute
+	tcTimeWait       = time.Minute
 	tcIter           = 10
 )
 
@@ -32,7 +32,7 @@ func TestComplex(t *testing.T) {
 		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 0))
 	}
 
-	nodes := testNewNodes(t, tcWait, 0)
+	nodes := testNewNodes(t, tcTimeWait, 0)
 	if nodes[0] == nil {
 		return
 	}
@@ -165,9 +165,10 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 		NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:     addr,
-				FCapacity:    testutils.TCCapacity,
-				FMaxConnects: testutils.TCMaxConnects,
+				FAddress:       addr,
+				FCapacity:      testutils.TCCapacity,
+				FMaxConnects:   testutils.TCMaxConnects,
+				FActionTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSize:   testutils.TCMessageSize,
 					FLimitVoidSize: 1, // not used

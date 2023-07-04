@@ -1,6 +1,8 @@
 package network
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -10,18 +12,20 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FAddress      string
-	FCapacity     uint64
-	FMaxConnects  uint64
-	FConnSettings conn.ISettings
+	FAddress       string
+	FCapacity      uint64
+	FMaxConnects   uint64
+	FActionTimeout time.Duration
+	FConnSettings  conn.ISettings
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FAddress:      pSett.FAddress,
-		FCapacity:     pSett.FCapacity,
-		FMaxConnects:  pSett.FMaxConnects,
-		FConnSettings: pSett.FConnSettings,
+		FAddress:       pSett.FAddress,
+		FCapacity:      pSett.FCapacity,
+		FMaxConnects:   pSett.FMaxConnects,
+		FActionTimeout: pSett.FActionTimeout,
+		FConnSettings:  pSett.FConnSettings,
 	}).mustNotNull()
 }
 
@@ -31,6 +35,9 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FMaxConnects == 0 {
 		panic(`p.FMaxConnects == 0`)
+	}
+	if p.FActionTimeout == 0 {
+		panic(`p.FActionTimeout == 0`)
 	}
 	if p.FConnSettings == nil {
 		panic(`p.FConnSettings == nil`)
@@ -52,4 +59,8 @@ func (p *sSettings) GetMaxConnects() uint64 {
 
 func (p *sSettings) GetConnSettings() conn.ISettings {
 	return p.FConnSettings
+}
+
+func (p *sSettings) GetActionTimeout() time.Duration {
+	return p.FActionTimeout
 }

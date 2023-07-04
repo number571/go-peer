@@ -13,14 +13,19 @@ all-clean: clean
 
 build:
 	$(GC) -o $(BINPATH)/hlm ./cmd/hlm
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/hlm_linux ./cmd/hlm
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/hlm_windows.exe ./cmd/hlm
+	
+	for arch in amd64 arm64; \
+	do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/hlm_$${arch}_linux ./cmd/hlm; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hlm_$${arch}_windows ./cmd/hlm; \
+		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/hlm_$${arch}_darwin ./cmd/hlm; \
+	done;
 run:
 	./$(BINPATH)/hlm	
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	pkill -15 hls || true
+	pkill -15 hlm || true
 	make clean -C ../service
 	rm -f $(BINPATH)/hlm $(BINPATH)/hlm_linux $(BINPATH)/hlm_windows.exe 
 	rm -rf hlm.cfg hlm.db hlm.stg

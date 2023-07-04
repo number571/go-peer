@@ -8,8 +8,13 @@ BINPATH=$(ROOPATH)/bin
 default: build
 build: 
 	$(GC) -o $(BINPATH)/tencryptor . # main 
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux $(GC) -o $(BINPATH)/tencryptor_linux .
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows $(GC) -o $(BINPATH)/tencryptor_windows.exe .
+
+	for arch in amd64 arm64; \
+	do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/tencryptor_$${arch}_linux .; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/tencryptor_$${arch}_windows .; \
+		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/tencryptor_$${arch}_darwin .; \
+	done;
 clean:
 	rm -f *.msg *.key 
 	rm -f $(BINPATH)/tencryptor $(BINPATH)/tencryptor_linux $(BINPATH)/tencryptor_windows.exe 

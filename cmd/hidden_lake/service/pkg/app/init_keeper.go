@@ -12,7 +12,7 @@ func initConnKeeper(pCfg config.IConfig, pNode anonymity.INode) conn_keeper.ICon
 	return conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(&conn_keeper.SSettings{
 			FConnections: func() []string { return pCfg.GetConnections() },
-			FDuration:    pkg_settings.CFetchTimeWait,
+			FDuration:    pkg_settings.CActionTimeout,
 		}),
 		pNode.GetNetworkNode(),
 	)
