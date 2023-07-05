@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -26,7 +27,7 @@ var (
 func initDB() database.IKVDatabase {
 	var err error
 	db, err = database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      databasePath,
 			FHashing:   false,
 			FCipherKey: []byte("_"),

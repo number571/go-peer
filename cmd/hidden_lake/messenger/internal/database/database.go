@@ -5,6 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/storage"
 	gp_database "github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -15,7 +16,7 @@ type sKeyValueDB struct {
 
 func NewKeyValueDB(pPath string, pKey []byte) (IKVDatabase, error) {
 	db, err := gp_database.NewKeyValueDB(
-		gp_database.NewSettings(&gp_database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      pPath,
 			FHashing:   true,
 			FCipherKey: pKey,

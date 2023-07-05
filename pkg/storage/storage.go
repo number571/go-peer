@@ -25,6 +25,7 @@ type sCryptoStorage struct {
 	fMutex    sync.Mutex
 	fSalt     []byte
 	fSettings ISettings
+	fWorkSize uint64
 	fCipher   symmetric.ICipher
 }
 
@@ -32,9 +33,11 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
+// pSettings.Hashing always = true
+func NewCryptoStorage(pSettings ISettings, pWorkSize uint64) (IKVStorage, error) {
 	store := &sCryptoStorage{
 		fSettings: pSettings,
+		fWorkSize: pWorkSize,
 	}
 	isExist := store.isExist()
 
@@ -47,7 +50,7 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 		store.fSalt = encdata[:cSaltSize]
 	}
 
-	entropy := entropy.NewEntropyBooster(pSettings.GetWorkSize(), store.fSalt)
+	entropy := entropy.NewEntropyBooster(pWorkSize, store.fSalt)
 	store.fCipher = symmetric.NewAESCipher(entropy.BoostEntropy(pSettings.GetCipherKey()))
 
 	if !isExist {
@@ -55,6 +58,10 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	}
 
 	return store, nil
+}
+
+func (p *sCryptoStorage) GetSettings() ISettings {
+	return p.fSettings
 }
 
 func (p *sCryptoStorage) Set(pKey, pValue []byte) error {
@@ -74,8 +81,8 @@ func (p *sCryptoStorage) Set(pKey, pValue []byte) error {
 	}
 
 	// Encrypt and save secret into storage
-	cipher, hash := p.newCipherWithKeyHash(pKey)
-	mapping.FSecrets[hash] = cipher.EncryptBytes(pValue)
+	cipher, mapKey := p.newCipherWithMapKey(pKey)
+	mapping.FSecrets[mapKey] = cipher.EncryptBytes(pValue)
 
 	return p.encrypt(mapping)
 }
@@ -96,8 +103,8 @@ func (p *sCryptoStorage) Get(pKey []byte) ([]byte, error) {
 	}
 
 	// Open and decrypt secret
-	cipher, hash := p.newCipherWithKeyHash(pKey)
-	encsecret, ok := mapping.FSecrets[hash]
+	cipher, mapKey := p.newCipherWithMapKey(pKey)
+	encsecret, ok := mapping.FSecrets[mapKey]
 	if !ok {
 		return nil, errors.NewError("key undefined")
 	}
@@ -122,13 +129,13 @@ func (p *sCryptoStorage) Del(pKey []byte) error {
 	}
 
 	// Open and decrypt private key
-	_, hash := p.newCipherWithKeyHash(pKey)
-	_, ok := mapping.FSecrets[hash]
+	_, mapKey := p.newCipherWithMapKey(pKey)
+	_, ok := mapping.FSecrets[mapKey]
 	if !ok {
 		return errors.NewError("key undefined")
 	}
 
-	delete(mapping.FSecrets, hash)
+	delete(mapping.FSecrets, mapKey)
 	return p.encrypt(mapping)
 }
 
@@ -173,8 +180,8 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 	return &mapping, nil
 }
 
-func (p *sCryptoStorage) newCipherWithKeyHash(pKey []byte) (symmetric.ICipher, string) {
-	entropy := entropy.NewEntropyBooster(p.fSettings.GetWorkSize(), p.fSalt)
+func (p *sCryptoStorage) newCipherWithMapKey(pKey []byte) (symmetric.ICipher, string) {
+	entropy := entropy.NewEntropyBooster(p.fWorkSize, p.fSalt)
 	ekey := entropy.BoostEntropy(pKey)
 	hash := hashing.NewSHA256Hasher(ekey).ToString()
 	return symmetric.NewAESCipher(ekey), hash

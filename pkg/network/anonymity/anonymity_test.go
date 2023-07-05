@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -145,7 +146,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 
 func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 	db, err := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      fmt.Sprintf(tcPathDBTemplate, i, typeDB),
 			FHashing:   true,
 			FCipherKey: []byte("CIPHER"),

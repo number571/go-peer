@@ -17,6 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -114,7 +115,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 
 func newNode(serviceAddress, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      dbPath,
 			FHashing:   false,
 			FCipherKey: []byte("CIPHER"),

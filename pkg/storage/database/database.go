@@ -7,6 +7,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/storage"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -23,11 +24,11 @@ type sKeyValueDB struct {
 	fMutex    sync.Mutex
 	fSalt     []byte
 	fDB       *leveldb.DB
-	fSettings ISettings
+	fSettings storage.ISettings
 	fCipher   symmetric.ICipher
 }
 
-func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
+func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "open database")
@@ -50,7 +51,7 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	}, nil
 }
 
-func (p *sKeyValueDB) GetSettings() ISettings {
+func (p *sKeyValueDB) GetSettings() storage.ISettings {
 	return p.fSettings
 }
 

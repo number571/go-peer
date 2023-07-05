@@ -49,7 +49,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
 	p.inMappingWithSet(hasher.ToBytes())
 
-	errList := make([]error, 0, p.GetSettings().GetMaxConnects())
+	errList := make([]error, 0, p.fSettings.GetMaxConnects())
 	mutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
 
@@ -68,7 +68,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 				mutex.Lock()
 				errList = append(errList, e)
 				mutex.Unlock()
-			case <-time.After(p.GetSettings().GetWriteTimeout()):
+			case <-time.After(p.fSettings.GetWriteTimeout()):
 				mutex.Lock()
 				errMsg := fmt.Sprintf("write timeout %s", c.GetSocket().RemoteAddr().String())
 				errList = append(errList, errors.NewError(errMsg))
@@ -89,7 +89,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
 func (p *sNode) Run() error {
-	listener, err := net.Listen("tcp", p.GetSettings().GetAddress())
+	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
 		return errors.WrapError(err, "run node")
 	}
@@ -108,7 +108,7 @@ func (p *sNode) Run() error {
 				continue
 			}
 
-			sett := p.GetSettings().GetConnSettings()
+			sett := p.fSettings.GetConnSettings()
 			conn := conn.LoadConn(sett, tconn)
 			address := tconn.RemoteAddr().String()
 
@@ -170,7 +170,7 @@ func (p *sNode) AddConnect(pAddress string) error {
 		return errors.NewError("has max connections size")
 	}
 
-	sett := p.GetSettings().GetConnSettings()
+	sett := p.fSettings.GetConnSettings()
 	conn, err := conn.NewConn(sett, pAddress)
 	if err != nil {
 		return errors.WrapError(err, "add connect")
@@ -240,7 +240,7 @@ func (p *sNode) hasMaxConnSize() bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	maxConns := p.GetSettings().GetMaxConnects()
+	maxConns := p.fSettings.GetMaxConnects()
 	return uint64(len(p.fConnections)) > maxConns
 }
 

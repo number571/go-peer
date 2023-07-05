@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/storage"
 )
 
 type (
-	tiDBConsctruct func(ISettings) (IKVDatabase, error)
+	tiDBConsctruct func(storage.ISettings) (IKVDatabase, error)
 )
 
 const (
@@ -27,7 +28,7 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(NewSettings(&SSettings{
+	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:      dbPath,
 		FHashing:   false,
 		FCipherKey: []byte("CIPHER"),
@@ -68,7 +69,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(NewSettings(&SSettings{
+	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
 		FCipherKey: []byte("CIPHER1"),
@@ -82,7 +83,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	store.Set([]byte("KEY"), []byte("VALUE"))
 
 	store.Close() // open this database with another key
-	store, err = dbConstruct(NewSettings(&SSettings{
+	store, err = dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
 		FCipherKey: []byte("CIPHER2"),
@@ -103,7 +104,7 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(NewSettings(&SSettings{
+	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:      dbPath,
 		FHashing:   true,
 		FCipherKey: []byte("CIPHER"),

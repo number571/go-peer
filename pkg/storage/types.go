@@ -2,11 +2,13 @@ package storage
 
 type ISettings interface {
 	GetPath() string
-	GetWorkSize() uint64
+	GetHashing() bool
 	GetCipherKey() []byte
 }
 
 type IKVStorage interface {
+	GetSettings() ISettings
+
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)
 	Del([]byte) error

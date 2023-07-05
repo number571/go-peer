@@ -10,6 +10,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/common"
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -24,7 +25,7 @@ const (
 func initDB() database.IKVDatabase {
 	var err error
 	db, err := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      databasePath,
 			FHashing:   false,
 			FCipherKey: []byte("_"),

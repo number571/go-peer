@@ -32,10 +32,9 @@ func main() {
 
 	sett := storage.NewSettings(&storage.SSettings{
 		FPath:      storagePath,
-		FWorkSize:  cWorkSize,
 		FCipherKey: []byte(readLine("Password> ")),
 	})
-	stg, err := storage.NewCryptoStorage(sett)
+	stg, err := storage.NewCryptoStorage(sett, cWorkSize)
 	if err != nil {
 		panic(err)
 	}

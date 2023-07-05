@@ -19,6 +19,8 @@ In progress...
 - Tests `make test`: replace race modifier from test-run to test-race
 - Package `conn_keeper`: tryConnectToAll "for range map" -> "_, ok := map by key-address"
 - Package `network/conn`: append wait read deadline method
+- Docs `README.md`: Append 'Calling functions/methods' to code style go-peer
+- Package `storage`: Change ISettings, delete ISettings from storage/database
 
 ### BUG FIXES
 

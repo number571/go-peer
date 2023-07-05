@@ -15,7 +15,6 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/types"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -58,23 +57,20 @@ func NewNode(
 }
 
 func (p *sNode) Run() error {
-	logger := anon_logger.NewLogger(p.GetSettings().GetServiceName())
+	logger := anon_logger.NewLogger(p.fSettings.GetServiceName())
 	if err := p.runQueue(logger); err != nil {
 		return errors.WrapError(err, "run node")
 	}
-	p.GetNetworkNode().HandleFunc(
-		p.GetSettings().GetNetworkMask(),
+	p.fNetwork.HandleFunc(
+		p.fSettings.GetNetworkMask(),
 		p.handleWrapper(logger),
 	)
 	return nil
 }
 
 func (p *sNode) Stop() error {
-	p.GetNetworkNode().HandleFunc(p.GetSettings().GetNetworkMask(), nil)
-	err := types.StopAll([]types.ICommand{
-		p.GetMessageQueue(),
-	})
-	if err != nil {
+	p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
+	if err := p.fQueue.Stop(); err != nil {
 		return errors.WrapError(err, "stop node")
 	}
 	return nil
@@ -106,8 +102,9 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 }
 
 func (p *sNode) HandleMessage(pMsg message.IMessage) {
-	p.handleWrapper(anon_logger.NewLogger(p.GetSettings().GetServiceName()))(
-		p.GetNetworkNode(),
+	logger := anon_logger.NewLogger(p.fSettings.GetServiceName())
+	p.handleWrapper(logger)(
+		p.fNetwork,
 		nil,
 		pMsg.ToBytes(),
 	)
@@ -152,7 +149,7 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 }
 
 func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
-	if len(p.GetNetworkNode().GetConnections()) == 0 {
+	if len(p.fNetwork.GetConnections()) == 0 {
 		return errors.NewError("length of connections = 0")
 	}
 
@@ -167,7 +164,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	}
 
 	newPld := payload.NewPayload(pPld.GetHead(), newBody)
-	msg, err := p.GetMessageQueue().GetClient().EncryptPayload(pRecv, newPld)
+	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
 	if err != nil {
 		return errors.WrapError(err, "encrypt payload")
 	}
@@ -179,9 +176,9 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 }
 
 func (p *sNode) send(pMsg message.IMessage) error {
-	for i := uint64(0); i <= p.GetSettings().GetRetryEnqueue(); i++ {
-		if err := p.GetMessageQueue().EnqueueMessage(pMsg); err != nil {
-			time.Sleep(p.GetMessageQueue().GetSettings().GetDuration())
+	for i := uint64(0); i <= p.fSettings.GetRetryEnqueue(); i++ {
+		if err := p.fQueue.EnqueueMessage(pMsg); err != nil {
+			time.Sleep(p.fQueue.GetSettings().GetDuration())
 			continue
 		}
 		return nil
@@ -200,19 +197,19 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 			return nil, errors.NewError("chan is closed")
 		}
 		return result, nil
-	case <-time.After(p.GetSettings().GetFetchTimeWait()):
+	case <-time.After(p.fSettings.GetFetchTimeWait()):
 		return nil, errors.NewError("recv time is over")
 	}
 }
 
 func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
-	if err := p.GetMessageQueue().Run(); err != nil {
+	if err := p.fQueue.Run(); err != nil {
 		return errors.WrapError(err, "run queue")
 	}
 
 	go func() {
 		for {
-			msg, ok := <-p.GetMessageQueue().DequeueMessage()
+			msg, ok := <-p.fQueue.DequeueMessage()
 			if !ok {
 				break
 			}
@@ -227,7 +224,7 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 				anon_logger.CLogBaseBroadcast,
 				msg.GetBody().GetHash(),
 				msg.GetBody().GetProof(),
-				p.GetMessageQueue().GetClient().GetPubKey(),
+				p.fQueue.GetClient().GetPubKey(),
 				nil,
 			))
 		}
@@ -238,7 +235,7 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 
 func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
-		client := p.GetMessageQueue().GetClient()
+		client := p.fQueue.GetClient()
 		settings := client.GetSettings()
 
 		msg := message.LoadMessage(
@@ -263,13 +260,13 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 		// try decrypt message
 		sender, pld, err := client.DecryptMessage(msg)
 		if err != nil {
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
+			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
 			return
 		}
 
 		// check sender in f2f list
-		if !p.GetListPubKeys().InPubKeys(sender) {
-			p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnNotFriend, hash, proof, sender, pConn))
+		if !p.fFriends.InPubKeys(sender) {
+			p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnNotFriend, hash, proof, sender, pConn))
 			return
 		}
 
@@ -284,11 +281,11 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			actionKey := newActionKey(sender, head.getAction())
 			action, ok := p.getAction(actionKey)
 			if !ok {
-				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
 				return
 			}
 
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
+			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
 			action <- unwrapBytes(body)
 			return
 		// got request from another side (need generate response)
@@ -296,32 +293,32 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			// get function by payload head
 			f, ok := p.getRoute(head.getRoute())
 			if !ok || f == nil {
-				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, sender, pConn))
 				return
 			}
 
 			// response can be nil
 			resp, err := f(p, sender, hash, unwrapBytes(body))
 			if err != nil {
-				p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnIncorrectResponse, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnIncorrectResponse, hash, proof, sender, pConn))
 				return
 			}
 			if resp == nil {
-				p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
+				p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
 				return
 			}
 
 			// create the message and put this to the queue
 			if err := p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
-				p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+				p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 				return
 			}
 
-			p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
 			return
 		// undefined type of message (not request/response)
 		default:
-			p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMessageType, hash, proof, sender, pConn))
+			p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMessageType, hash, proof, sender, pConn))
 			return
 		}
 	}
@@ -329,19 +326,19 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 
 func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.IConn, pMsg message.IMessage) bool {
 	if pMsg == nil {
-		p.GetLogger().PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
+		p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
 		return false
 	}
 
 	var (
 		hash      = pMsg.GetBody().GetHash()
 		proof     = pMsg.GetBody().GetProof()
-		database  = p.GetWrapperDB().Get()
-		myAddress = p.GetMessageQueue().GetClient().GetPubKey().GetAddress().ToString()
+		database  = p.fWrapperDB.Get()
+		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToString()
 	)
 
 	if database == nil {
-		p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, pConn))
+		p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, pConn))
 		return false
 	}
 
@@ -351,14 +348,14 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 	// check already received data by hash
 	hashIsExist := (err == nil)
 	if hashIsExist && strings.Contains(string(gotAddrs), myAddress) {
-		p.GetLogger().PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
+		p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
 		return false
 	}
 
 	// set hash to database
 	updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), myAddress)
 	if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
-		p.GetLogger().PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
+		p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
 		return false
 	}
 
@@ -376,9 +373,9 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 
 func (p *sNode) networkBroadcast(pLogger anon_logger.ILogger, pMsg message.IMessage) error {
 	// redirect message to another nodes
-	err := p.GetNetworkNode().BroadcastPayload(
+	err := p.fNetwork.BroadcastPayload(
 		payload.NewPayload(
-			p.GetSettings().GetNetworkMask(),
+			p.fSettings.GetNetworkMask(),
 			pMsg.ToBytes(),
 		),
 	)

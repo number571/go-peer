@@ -8,4 +8,5 @@
 6. HLM to service
 7. HLM: append smiles, upload/download files
 8. HLM: do error pages
-9. Fix docker build for arm macOS 
+9. HLM: group chats, name of senders
+10. Fix docker build for arm macOS 

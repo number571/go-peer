@@ -17,6 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -157,7 +158,7 @@ func testRunNewNode(dbPath, addr string) anonymity.INode {
 
 func testNewNode(dbPath, addr string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
+		storage.NewSettings(&storage.SSettings{
 			FPath:      dbPath,
 			FHashing:   true,
 			FCipherKey: []byte("CIPHER"),

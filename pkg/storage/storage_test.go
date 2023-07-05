@@ -19,18 +19,17 @@ func TestCryptoStorage(t *testing.T) {
 
 	sett := NewSettings(&SSettings{
 		FPath:      testStorageName,
-		FWorkSize:  testutils.TCWorkSize,
 		FCipherKey: []byte("CIPHER"),
 	})
 
-	_, err := NewCryptoStorage(sett)
+	_, err := NewCryptoStorage(sett, testutils.TCWorkSize)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	// try open already exists storage
-	store, err := NewCryptoStorage(sett)
+	store, err := NewCryptoStorage(sett, testutils.TCWorkSize)
 	if err != nil {
 		t.Error(err)
 		return

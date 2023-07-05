@@ -52,7 +52,7 @@ func (p *sConnKeeper) Run() error {
 			select {
 			case <-p.readSignal():
 				return
-			case <-time.After(p.GetSettings().GetDuration()):
+			case <-time.After(p.fSettings.GetDuration()):
 				p.tryConnectToAll()
 			}
 		}
@@ -76,7 +76,7 @@ func (p *sConnKeeper) Stop() error {
 
 func (p *sConnKeeper) tryConnectToAll() {
 NEXT:
-	for _, address := range p.GetSettings().GetConnections() {
+	for _, address := range p.fSettings.GetConnections() {
 		mapConns := p.fNode.GetConnections()
 		if _, ok := mapConns[address]; ok {
 			continue NEXT

@@ -180,3 +180,30 @@ var (
 	_ types.ICommand = &sApp{}
 )
 ```
+
+### 5. Calling functions/methods
+
+External simple getter functions/methods should not be used inside the package.
+```go
+func (p *sObject) GetSettings() ISettings {
+	return p.fSettings
+}
+func (p *sObject) GetValue() IValue {
+    p.fMutex.Lock()
+    defer p.fMutex.Unlock()
+
+    return p.fValue
+}
+...
+func (p *sObject) DoSomething() {
+	_ = p.fSettings // correct
+    _ = p.GetSettings() // incorrect
+
+    // incorrect
+    p.fMutex.Lock()
+    _ = p.fValue
+    p.fMutex.Unlock()
+
+    _ = p.GetValue() // correct
+}
+```

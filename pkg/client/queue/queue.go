@@ -48,7 +48,7 @@ func (p *sMessageQueue) UpdateClient(pClient client.IClient) {
 	defer p.fMutex.Unlock()
 
 	p.fClient = pClient
-	p.fQueue = make(chan message.IMessage, p.GetSettings().GetMainCapacity())
+	p.fQueue = make(chan message.IMessage, p.fSettings.GetMainCapacity())
 }
 
 func (p *sMessageQueue) GetClient() client.IClient {
@@ -73,9 +73,9 @@ func (p *sMessageQueue) Run() error {
 			select {
 			case <-p.readSignal():
 				return
-			case <-time.After(p.GetSettings().GetDuration() / 2):
+			case <-time.After(p.fSettings.GetDuration() / 2):
 				currLen := len(p.fMsgPool.fQueue)
-				if uint64(currLen) >= p.GetSettings().GetPoolCapacity() {
+				if uint64(currLen) >= p.fSettings.GetPoolCapacity() {
 					continue
 				}
 				p.fMsgPool.fQueue <- p.newPseudoMessage()
@@ -103,7 +103,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if uint64(len(p.fQueue)) >= p.GetSettings().GetMainCapacity() {
+	if uint64(len(p.fQueue)) >= p.fSettings.GetMainCapacity() {
 		return errors.NewError("queue already full, need wait and retry")
 	}
 
@@ -119,7 +119,7 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 		case <-p.readSignal():
 			closed <- true
 			return
-		case <-time.After(p.GetSettings().GetDuration()):
+		case <-time.After(p.fSettings.GetDuration()):
 			p.fMutex.Lock()
 			defer p.fMutex.Unlock()
 

@@ -48,7 +48,7 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 
 // Get public key from client object.
 func (p *sClient) GetPubKey() asymmetric.IPubKey {
-	return p.GetPrivKey().GetPubKey()
+	return p.fPrivKey.GetPubKey()
 }
 
 // Get private key from client object.
@@ -69,7 +69,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	}
 
 	var (
-		maxMsgSize = p.GetSettings().GetMessageSize() >> 1 // limit of bytes without hex
+		maxMsgSize = p.fSettings.GetMessageSize() >> 1 // limit of bytes without hex
 		resultSize = uint64(p.fVoidMsgSize) + uint64(len(pPld.ToBytes()))
 	)
 
@@ -84,7 +84,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	return p.encryptWithParams(
 		pRecv,
 		pPld,
-		p.GetSettings().GetWorkSize(),
+		p.fSettings.GetWorkSize(),
 		maxMsgSize-resultSize,
 	), nil
 }
@@ -128,7 +128,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 		FBody: message.SBodyMessage{
 			FPayload: encoding.HexEncode(cipher.EncryptBytes(doublePayload.ToBytes())),
 			FHash:    encoding.HexEncode(hash),
-			FSign:    encoding.HexEncode(cipher.EncryptBytes(p.GetPrivKey().SignBytes(hash))),
+			FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
 		},
 	}
@@ -147,14 +147,14 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Proof of work. Prevent spam.
-	diff := p.GetSettings().GetWorkSize()
+	diff := p.fSettings.GetWorkSize()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.VerifyBytes(pMsg.GetBody().GetHash(), pMsg.GetBody().GetProof()) {
 		return nil, nil, errors.NewError("invalid proof of msg")
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.GetPrivKey().DecryptBytes(pMsg.GetHead().GetSession())
+	session := p.fPrivKey.DecryptBytes(pMsg.GetHead().GetSession())
 	if session == nil {
 		return nil, nil, errors.NewError("failed decrypt session key")
 	}
