@@ -51,9 +51,10 @@ const (
 )
 
 const (
-	CConnLimitVoidSize = (1 << 20) // 1MiB
-	CConnReadDeadline  = time.Minute
-	CConnWriteDeadline = time.Minute
+	CConnLimitVoidSize    = (1 << 20) // 1MiB
+	CConnWaitReadDeadline = time.Hour
+	CConnReadDeadline     = time.Minute
+	CConnWriteDeadline    = time.Minute
 )
 
 const (

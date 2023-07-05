@@ -77,11 +77,9 @@ func (p *sConnKeeper) Stop() error {
 func (p *sConnKeeper) tryConnectToAll() {
 NEXT:
 	for _, address := range p.GetSettings().GetConnections() {
-		for addr := range p.fNode.GetConnections() {
-			if addr == address {
-				// no need add connect
-				continue NEXT
-			}
+		mapConns := p.fNode.GetConnections()
+		if _, ok := mapConns[address]; ok {
+			continue NEXT
 		}
 		p.fNode.AddConnect(address)
 	}

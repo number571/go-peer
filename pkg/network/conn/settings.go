@@ -8,22 +8,24 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FNetworkKey    string
-	FMessageSize   uint64
-	FLimitVoidSize uint64
-	FReadDeadline  time.Duration
-	FWriteDeadline time.Duration
-	FFetchTimeWait time.Duration
+	FNetworkKey       string
+	FMessageSize      uint64
+	FLimitVoidSize    uint64
+	FWaitReadDeadline time.Duration
+	FReadDeadline     time.Duration
+	FWriteDeadline    time.Duration
+	FFetchTimeWait    time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkKey:    pSett.FNetworkKey,
-		FMessageSize:   pSett.FMessageSize,
-		FLimitVoidSize: pSett.FLimitVoidSize,
-		FReadDeadline:  pSett.FReadDeadline,
-		FWriteDeadline: pSett.FWriteDeadline,
-		FFetchTimeWait: pSett.FFetchTimeWait,
+		FNetworkKey:       pSett.FNetworkKey,
+		FMessageSize:      pSett.FMessageSize,
+		FLimitVoidSize:    pSett.FLimitVoidSize,
+		FWaitReadDeadline: pSett.FWaitReadDeadline,
+		FReadDeadline:     pSett.FReadDeadline,
+		FWriteDeadline:    pSett.FWriteDeadline,
+		FFetchTimeWait:    pSett.FFetchTimeWait,
 	}).mustNotNull()
 }
 
@@ -33,6 +35,9 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FLimitVoidSize == 0 {
 		panic(`p.FMaxVoidSize == 0`)
+	}
+	if p.FWaitReadDeadline == 0 {
+		panic(`p.FWaitReadDeadline == 0`)
 	}
 	if p.FReadDeadline == 0 {
 		panic(`p.FReadDeadline == 0`)
@@ -56,6 +61,10 @@ func (p *sSettings) GetMessageSize() uint64 {
 
 func (p *sSettings) GetLimitVoidSize() uint64 {
 	return p.FLimitVoidSize
+}
+
+func (p *sSettings) GetWaitReadDeadline() time.Duration {
+	return p.FWaitReadDeadline
 }
 
 func (p *sSettings) GetReadDeadline() time.Duration {

@@ -203,11 +203,12 @@ func testNewNetworkNode(addr string) network.INode {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize:   testutils.TCMessageSize,
-				FReadDeadline:  time.Minute,
-				FWriteDeadline: time.Minute,
-				FLimitVoidSize: 1, // not used
-				FFetchTimeWait: 1, // not used
+				FMessageSize:      testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+				FLimitVoidSize:    1, // not used
+				FFetchTimeWait:    1, // not used
 			}),
 		}),
 	)

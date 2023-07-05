@@ -34,12 +34,13 @@ func initConnKeeper(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger
 				FCapacity:     hls_settings.CNetworkCapacity,
 				FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:    pCfg.GetNetwork(),
-					FMessageSize:   hls_settings.CMessageSize,
-					FLimitVoidSize: hls_settings.CConnLimitVoidSize,
-					FReadDeadline:  hls_settings.CConnReadDeadline,
-					FWriteDeadline: hls_settings.CConnWriteDeadline,
-					FFetchTimeWait: 1, // conn.FetchPayload not used in anonymity package
+					FNetworkKey:       pCfg.GetNetwork(),
+					FMessageSize:      hls_settings.CMessageSize,
+					FLimitVoidSize:    hls_settings.CConnLimitVoidSize,
+					FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
+					FReadDeadline:     hls_settings.CConnReadDeadline,
+					FWriteDeadline:    hls_settings.CConnWriteDeadline,
+					FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),
 		).HandleFunc(

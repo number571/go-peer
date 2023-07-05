@@ -31,12 +31,13 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FMaxConnects:  pkg_settings.CNetworkMaxConns,
 				FWriteTimeout: pkg_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:    pCfg.GetNetwork(),
-					FMessageSize:   pkg_settings.CMessageSize,
-					FLimitVoidSize: pkg_settings.CConnLimitVoidSize,
-					FReadDeadline:  pkg_settings.CConnReadDeadline,
-					FWriteDeadline: pkg_settings.CConnWriteDeadline,
-					FFetchTimeWait: 1, // conn.FetchPayload not used in anonymity package
+					FNetworkKey:       pCfg.GetNetwork(),
+					FMessageSize:      pkg_settings.CMessageSize,
+					FLimitVoidSize:    pkg_settings.CConnLimitVoidSize,
+					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
+					FReadDeadline:     pkg_settings.CConnReadDeadline,
+					FWriteDeadline:    pkg_settings.CConnWriteDeadline,
+					FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),
 		),

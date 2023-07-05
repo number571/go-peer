@@ -17,6 +17,8 @@ In progress...
 
 - Makefiles `cmd`: change CGO_ENABLED=1 -> CGO_ENABLED=0
 - Tests `make test`: replace race modifier from test-run to test-race
+- Package `conn_keeper`: tryConnectToAll "for range map" -> "_, ok := map by key-address"
+- Package `network/conn`: append wait read deadline method
 
 ### BUG FIXES
 

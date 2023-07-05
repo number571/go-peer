@@ -170,11 +170,12 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 				FMaxConnects:  testutils.TCMaxConnects,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FMessageSize:   testutils.TCMessageSize,
-					FReadDeadline:  time.Minute,
-					FWriteDeadline: time.Minute,
-					FLimitVoidSize: 1, // not used
-					FFetchTimeWait: 1, // not used
+					FMessageSize:      testutils.TCMessageSize,
+					FWaitReadDeadline: time.Hour,
+					FReadDeadline:     time.Minute,
+					FWriteDeadline:    time.Minute,
+					FLimitVoidSize:    1, // not used
+					FFetchTimeWait:    1, // not used
 				}),
 			}),
 		),
