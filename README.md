@@ -75,7 +75,7 @@ $ go get github.com/number571/go-peer
 
 ## 1. Hidden Lake Service
 
-> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service "HLS")
+> [github.com/number571/go-peer/cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service "HLS")
 
 <img src="cmd/hidden_lake/service/_images/hls_logo.png" alt="hls_logo.png"/>
 
@@ -282,7 +282,7 @@ $ make
 
 ## 2. Hidden Lake Messenger
 
-> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger "HLM");
+> [github.com/number571/go-peer/cmd/hidden_lake/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger "HLM");
 
 <img src="cmd/hidden_lake/messenger/_images/hlm_logo.png" alt="hlm_logo.png"/>
 
@@ -395,11 +395,11 @@ $ make
 <p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 9. Log of the three nodes with request/response actions.</p>
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/_images "Path to HLM images")
 
 ## 3. Hidden Lake Traffic
 
-> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
+> [github.com/number571/go-peer/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
 
 <img src="cmd/hidden_lake/traffic/_images/hlt_logo.png" alt="hlt_logo.png"/>
 
@@ -482,7 +482,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 
 ## 4. Hidden Lake Adapters
 
-> [github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
+> [github.com/number571/go-peer/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 
 <img src="cmd/hidden_lake/adapters/_images/hla_logo.png" alt="hla_logo.png"/>
 

@@ -113,7 +113,7 @@ $ make
 <p align="center"><img src="_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 4. Log of the three nodes with request/response actions.</p>
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hlm/_images "Path to HLM images")
 
 ## Pages
 

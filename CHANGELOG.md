@@ -8,6 +8,14 @@
 
 In progress...
 
+### CHANGES
+
+- Update `README.md`: delete tree/master suffix in view urls
+
+### BUG FIXES
+
+- Update `README.md`: url with images -> _images
+
 ## v1.5.12
 
 *Jule 08, 2023*
