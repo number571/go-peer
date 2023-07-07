@@ -40,7 +40,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
-$ make build # create hlm, hlm_linux, hlm_windows.exe and copy to ./bin
+$ make build # create hlm, hlm_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlm
 
 > [INFO] 2023/06/03 15:30:31 HLM is running...

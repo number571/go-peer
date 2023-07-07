@@ -6,7 +6,7 @@ NICKNAME=init_node
 HOST=127.0.0.1
 PORT=8080
 
-.PHONY: default build run clean 
+.PHONY: default genkey build run clean 
 default: build run 
 build:
 	$(GC) -o $(BINPATH)/ma . # main 

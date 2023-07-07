@@ -2,16 +2,22 @@
 
 <!-- ... -->
 
-## v1.5.12
+## v1.5.13
 
 *??? ??, ????*
 
 In progress...
 
+## v1.5.12
+
+*Jule 08, 2023*
+
 ### IMPROVEMENTS
 
 - Append `examples`: daemons installers
 - Update `cmd`: append builds os=darwin and arch=arm64 for makefiles
+- Update `cmd/micro_anon`: append makefile build to bin/
+- Update `bin`: append remove-std option to makefile
 
 ### CHANGES
 
@@ -132,3 +138,5 @@ In progress...
 ## v1.5.8
 
 *May 8, 2023*
+
+### INIT

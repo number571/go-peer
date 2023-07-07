@@ -63,7 +63,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
-$ make build # create hls, hls_linux, hls_windows.exe and copy to ./bin
+$ make build # create hls, hls_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hls
 
 > [INFO] 2023/06/03 14:32:40 HLS is running...

@@ -27,7 +27,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/traffic
-$ make build # create hlt, hlt_linux, hlt_windows.exe and copy to ./bin
+$ make build # create hlt, hlt_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlt
 
 > [INFO] 2023/06/03 15:39:13 HLT is running...

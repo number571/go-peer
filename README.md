@@ -138,7 +138,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/service
-$ make build # create hls, hls_linux, hls_windows.exe and copy to ./bin
+$ make build # create hls, hls_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hls
 
 > [INFO] 2023/06/03 14:32:40 HLS is running...
@@ -322,7 +322,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/messenger
-$ make build # create hlm, hlm_linux, hlm_windows.exe and copy to ./bin
+$ make build # create hlm, hlm_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlm
 
 > [INFO] 2023/06/03 15:30:31 HLM is running...
@@ -426,7 +426,7 @@ Default build and run
 
 ```bash 
 $ cd ./cmd/hidden_lake/traffic
-$ make build # create hlt, hlt_linux, hlt_windows.exe and copy to ./bin
+$ make build # create hlt, hlt_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlt
 
 > [INFO] 2023/06/03 15:39:13 HLT is running...

@@ -17,7 +17,7 @@ where:
 
 > More information about M-A in the [habr.com/ru/articles/745256/](https://habr.com/ru/articles/745256/ "Habr M-A")
 
-### How it works
+## How it works
 
 <p align="center"><img src="_images/ma_chat.gif" alt="ma_chat.gif"/></p>
 <p align="center">Figure 1. Chat node1 with node2.</p>
@@ -26,20 +26,26 @@ In `_init/` directory should be exists `priv.key` (can be generated with `keygen
 In `_keys/` directory should be exists public keys of nodes. The file names can be any. The attach to the public key is made via the `attach$` command.
 By default program attach self public key. Therefore, if you write the `send$` command, you will send a message to yourself.
 
-### Initialization
+## Initialization
 
 ```bash
-$ cd _init
-$ go run ../keygen # creates priv.key, pub.key
+$ make genkey # creates priv.key, pub.key
 $ cp pub.key ../_keys/node1.key # you can use public key to yourself
-$ echo http://localhost:8080 > connects.txt # connect to yourself
+$ echo http://localhost:8080 > connects.txt # you can connect to yourself
 $ echo "secret_key" > auth.key # set network key
 ```
 
-### Build and run
+## Build and run
 
 ```bash
-$ go run . node1 :8080
+$ cd ./cmd/micro_anon
+$ make build # create ma, ma_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # ./bin/ma init_node 127.0.0.1:8080
+```
+
+## Example
+
+```bash
 > send$ test1!
 >
 node1: test1!
