@@ -192,7 +192,7 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 > {"echo":"hello, world!","return":1}
 ```
 
-<p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
+<p align="center"><img src="../../../examples/images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
 
 Also you can run example with docker-compose. In this example, all nodes have logging enabled
