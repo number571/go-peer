@@ -119,6 +119,12 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ### Minimum system requirements
 
 1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)
@@ -303,6 +309,12 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ### Build and run
 
 Default build and run
@@ -400,6 +412,12 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 
 <p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 9. Example of running HLT client.</p>
+
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
 
 ### Build and run
 

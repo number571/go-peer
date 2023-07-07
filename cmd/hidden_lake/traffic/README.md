@@ -15,6 +15,12 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 <p align="center"><img src="../../../examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 1. Example of running HLT client.</p>
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ### Build and run
 
 Default build and run

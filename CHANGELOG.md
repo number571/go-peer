@@ -21,6 +21,7 @@ In progress...
 - Package `network/conn`: append wait read deadline method
 - Docs `README.md`: Append 'Calling functions/methods' to code style go-peer
 - Package `storage`: Change ISettings, delete ISettings from storage/database
+- Update `theory_of_the_structure_of_hidden_systems`: Append information about obfuscating routing algorithm
 
 ### BUG FIXES
 

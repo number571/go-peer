@@ -44,6 +44,12 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 >> 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 >> 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ### Minimum system requirements
 
 1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)

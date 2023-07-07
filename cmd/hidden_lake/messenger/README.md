@@ -28,6 +28,12 @@ Authorization is performed by entering a `login/password`, their subsequent conv
 
 Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ### Build and run
 
 Default build and run
