@@ -115,46 +115,39 @@ $ make
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
 
-## Cryptographic algorithms and functions
+## Pages
 
-1. AES-256-CFB (Data encryption)
-2. RSA-4096-OAEP (Key encryption)
-3. RSA-4096-PSS (Hash signing)
-4. SHA-256 (Data hashing)
-5. HMAC-SHA-256 (Network hashing)
-6. PoW-20 (Hash proof)
-
-## Signup page
+### Signup page
 
 Sign up login/password and additional private key. If field with private key is null than private key generated.
 
 <img src="examples/images/v2/signup.png" alt="signup.png"/>
 
-## Signin page
+### Signin page
 
 Sign in with login/password. Authorized client identified by a private key and can push messages into database.
 
 <img src="examples/images/v2/signin.png" alt="signin.png"/>
 
-## About page
+### About page
 
 Base information about projects HLM and HLS with links to source.
 
 <img src="examples/images/v2/about.png" alt="about.png"/>
 
-## Settings page
+### Settings page
 
 Information about public key and connections. Connections can be appended and deleted.
 
 <img src="examples/images/v2/settings.png" alt="settings.png"/>
 
-## Friends page
+### Friends page
 
 Information about friends. Friends can be appended and deleted.
 
 <img src="examples/images/v2/friends.png" alt="friends.png"/>
 
-## Chat page
+### Chat page
 
 Chat with friend. The chat is based on web sockets, so it can update messages in real time. Messages can be sent.
 
