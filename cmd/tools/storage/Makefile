@@ -15,4 +15,4 @@ build:
 	done;
 clean:
 	rm -f *.stg 
-	rm -f $(BINPATH)/tstorage $(BINPATH)/tstorage_linux $(BINPATH)/tstorage_windows.exe 
+	rm -f $(BINPATH)/tstorage $(BINPATH)/tstorage_*

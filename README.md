@@ -47,7 +47,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 6. The `storage` module includes two types of storage: `memory` and `crypto`. The second type of storage can be used for secure storage of passwords and private keys.
 7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
-> Examples of works in the directory [github.com/number571/go-peer/examples/modules](https://github.com/number571/go-peer/tree/master/examples/modules "Modules");
+> Examples of works in the directory [github.com/number571/go-peer/examples](https://github.com/number571/go-peer/tree/master/examples "Examples");
 
 ## Installation
 
@@ -77,7 +77,7 @@ $ go get github.com/number571/go-peer
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service "HLS")
 
-<img src="images/hls_logo.png" alt="hls_logo.png"/>
+<img src="cmd/hidden_lake/service/_images/hls_logo.png" alt="hls_logo.png"/>
 
 The `Hidden Lake Service` is the core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
 
@@ -97,19 +97,19 @@ A feature of HLS (compared to many other anonymous networks) is its easy adaptat
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.
 
-<p align="center"><img src="examples/images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/service/_images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
 <p align="center">Figure 1. Queue and message generation in HLS.</p>
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
-> Simple example of the `client` module (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/examples/_modules/client](https://github.com/number571/go-peer/tree/master/examples/_modules/client "Module client");
+> Simple example of the `client` package (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/pkg/client/_examples](https://github.com/number571/go-peer/tree/master/pkg/client/_examples "Package client");
 
-<p align="center"><img src="examples/images/hls_view.jpg" alt="hls_view.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/service/_images/hls_view.jpg" alt="hls_view.jpg"/></p>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
 
 Data exchange between network participants is carried out using application services. HLS has a dual role: 1) packages traffic from pure to anonymizing and vice versa; 2) converts external traffic to internal and vice versa. The second property is the redirection of traffic from the network to the local service and back.
 
-<p align="center"><img src="examples/images/hls_service.jpg" alt="hls_service.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/service/_images/hls_service.jpg" alt="hls_service.jpg"/></p>
 <p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.</p>
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
@@ -242,12 +242,12 @@ $ make
 
 Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
 
-<p align="center"><img src="examples/images/hls_logger.gif" alt="hls_logger.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/service/_images/hls_logger.gif" alt="hls_logger.gif"/></p>
 <p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
 
 Send request
 ```bash
-$ cd examples/_cmd/echo_service
+$ cd examples/echo_service
 $ ./request.sh
 ```
 
@@ -268,22 +268,22 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 > {"echo":"hello, world!","return":1}
 ```
 
-<p align="center"><img src="examples/images/hls_request.gif" alt="hls_request.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/service/_images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
 
 Also you can run example with docker-compose. In this example, all nodes have logging enabled
 ```bash
-$ cd examples/_cmd/echo_service/_docker/default
+$ cd examples/echo_service/_docker/default
 $ make
 ```
 
-> Simple examples of the `anonymity` module in the directory [github.com/number571/go-peer/examples/_modules/network/anonymity](https://github.com/number571/go-peer/tree/master/examples/_modules/network/anonymity "Module anonymity");
+> Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/_examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/_examples "Package anonymity");
 
 ## 2. Hidden Lake Messenger
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger "HLM");
 
-<img src="images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="cmd/hidden_lake/messenger/_images/hlm_logo.png" alt="hlm_logo.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 
@@ -295,14 +295,14 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
-<p align="center"><img src="examples/images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 5. Example of chat room in HLM.</p>
 
 Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
-<p align="center"><img src="examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
 <p align="center">Figure 6. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
@@ -371,14 +371,14 @@ The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm 
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/anon_messenger/default
+$ cd examples/anon_messenger/default
 $ make
 ```
 
 The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-<p align="center"><img src="examples/images/hlm_about.png" alt="hlm_about.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 7. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
@@ -387,20 +387,20 @@ To see the success of sending and receiving messages, you need to do all the sam
 
 Also you can run example with docker-compose. In this example, all nodes have logging enabled
 ```bash
-$ cd examples/_cmd/anon_messenger/_docker/default
+$ cd examples/anon_messenger/_docker/default
 $ make
 ```
 
-<p align="center"><img src="examples/images/hlm_logger.png" alt="hlm_logger.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 8. Log of the three nodes with request/response actions.</p>
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/examples/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/images "Path to HLM images")
 
 ## 3. Hidden Lake Traffic
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
 
-<img src="images/hlt_logo.png" alt="hlt_logo.png"/>
+<img src="cmd/hidden_lake/traffic/_images/hlt_logo.png" alt="hlt_logo.png"/>
 
 The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
 
@@ -410,7 +410,7 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
-<p align="center"><img src="examples/images/hlt_client.gif" alt="hlt_client.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 9. Example of running HLT client.</p>
 
 ### Supported platforms
@@ -467,7 +467,7 @@ $ make docker-run
 
 Build and run service
 ```bash
-$ cd examples/_cmd/traffic_keeper
+$ cd examples/traffic_keeper
 $ make
 ```
 
@@ -483,7 +483,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 
 > [github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 
-<img src="images/hla_logo.png" alt="hla_logo.png"/>
+<img src="cmd/hidden_lake/adapters/_images/hla_logo.png" alt="hla_logo.png"/>
 
 The `Hidden Lake Adapters` are a way to exchange data between multiple HLS processes via third-party services. Thus, there is no need to use your own computing resources in the face of individual servers to store or distribute the traffic generated by HLS. 
 
@@ -494,7 +494,7 @@ The `Hidden Lake Adapters` are a way to exchange data between multiple HLS proce
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
-<p align="center"><img src="examples/images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
 <p align="center">Figure 10. Architecture of HLA.</p>
 
 ### Example 
@@ -503,13 +503,13 @@ Since the adapters are capable of performing the same functions as the source pr
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/echo_service/secret_channel
+$ cd examples/echo_service/secret_channel
 $ make
 ```
 
 Send request
 ```bash
-$ cd examples/_cmd/echo_service
+$ cd examples/echo_service
 $ ./request.sh
 ```
 
@@ -526,7 +526,7 @@ Request took 8 seconds
 
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
-<p align="center"><img src="examples/images/hla_request.gif" alt="hla_request.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 11. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/_cmd/anon_messenger/secret_channel`.

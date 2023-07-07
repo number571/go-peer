@@ -15,7 +15,7 @@ default: clean test-run
 
 clean:
 	make -C ./cmd/hidden_lake clean 
-	make -C ./examples/_cmd clean
+	make -C ./examples clean
 
 
 ### TEST

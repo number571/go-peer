@@ -25,9 +25,7 @@ run:
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	pkill -15 hlm || true
-	make clean -C ../service
-	rm -f $(BINPATH)/hlm $(BINPATH)/hlm_linux $(BINPATH)/hlm_windows.exe 
+	rm -f $(BINPATH)/hlm $(BINPATH)/hlm_*
 	rm -rf hlm.cfg hlm.db hlm.stg
 
 docker-default: docker-build docker-run

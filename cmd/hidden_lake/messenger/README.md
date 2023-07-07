@@ -2,7 +2,7 @@
 
 > Hidden Lake Messenger
 
-<img src="../../../images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="_images/hlm_logo.png" alt="hlm_logo.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 
@@ -14,14 +14,14 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
 
-<p align="center"><img src="../../../examples/images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
+<p align="center"><img src="_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 1. Example of chat room in HLM.</p>
 
 Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
 
 The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
 
-<p align="center"><img src="../../../examples/images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
+<p align="center"><img src="_images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
 <p align="center">Figure 2. Data encryption with different types of input parameters.</p>
 
 Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
@@ -90,14 +90,14 @@ The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm 
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/anon_messenger
+$ cd examples/anon_messenger
 $ make
 ```
 
 The output of the `middle_hls` node is similar to `Figure 4` (HLS).
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-<p align="center"><img src="../../../examples/images/hlm_about.png" alt="hlm_about.png"/></p>
+<p align="center"><img src="_images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 3. Home page of the HLM application.</p>
 
 Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
@@ -106,14 +106,14 @@ To see the success of sending and receiving messages, you need to do all the sam
 
 Also you can run example with docker-compose. In this example, all nodes have logging enabled
 ```bash
-$ cd examples/_cmd/anon_messenger/_docker/default
+$ cd examples/anon_messenger/_docker/default
 $ make
 ```
 
-<p align="center"><img src="../../../examples/images/hlm_logger.png" alt="hlm_logger.png"/></p>
+<p align="center"><img src="_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 4. Log of the three nodes with request/response actions.</p>
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/examples/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/examples/images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/images](https://github.com/number571/go-peer/tree/master/cmd/hlm/images "Path to HLM images")
 
 ## Pages
 
@@ -121,34 +121,34 @@ $ make
 
 Sign up login/password and additional private key. If field with private key is null than private key generated.
 
-<img src="examples/images/v2/signup.png" alt="signup.png"/>
+<img src="images/v2/signup.png" alt="signup.png"/>
 
 ### Signin page
 
 Sign in with login/password. Authorized client identified by a private key and can push messages into database.
 
-<img src="examples/images/v2/signin.png" alt="signin.png"/>
+<img src="images/v2/signin.png" alt="signin.png"/>
 
 ### About page
 
 Base information about projects HLM and HLS with links to source.
 
-<img src="examples/images/v2/about.png" alt="about.png"/>
+<img src="images/v2/about.png" alt="about.png"/>
 
 ### Settings page
 
 Information about public key and connections. Connections can be appended and deleted.
 
-<img src="examples/images/v2/settings.png" alt="settings.png"/>
+<img src="images/v2/settings.png" alt="settings.png"/>
 
 ### Friends page
 
 Information about friends. Friends can be appended and deleted.
 
-<img src="examples/images/v2/friends.png" alt="friends.png"/>
+<img src="images/v2/friends.png" alt="friends.png"/>
 
 ### Chat page
 
 Chat with friend. The chat is based on web sockets, so it can update messages in real time. Messages can be sent.
 
-<img src="examples/images/v2/chat.png" alt="chat.png"/>
+<img src="images/v2/chat.png" alt="chat.png"/>

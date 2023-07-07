@@ -2,7 +2,7 @@
 
 > Micro-Anonymous network
 
-<img src="../../images/ma_logo.png" alt="ma_logo.png"/>
+<img src="images/ma_logo.png" alt="ma_logo.png"/>
 
 The M-A network is based on a queue-based task (also as HL). The implementation uses only the standard library of the Go language (also does not call the components of the go-peer library in any way).
 The goal of this network is to minimalize the source code so that even a novice programmer can understand the entire mechanism of its functioning.
@@ -19,7 +19,7 @@ where:
 
 ### How it works
 
-<p align="center"><img src="../../examples/images/ma_chat.gif" alt="ma_chat.gif"/></p>
+<p align="center"><img src="images/ma_chat.gif" alt="ma_chat.gif"/></p>
 <p align="center">Figure 1. Chat node1 with node2.</p>
 
 In `_init/` directory should be exists `priv.key` (can be generated with `keygen` program), `auth.key` (key of network) and `connects.txt` (list of http nodes).

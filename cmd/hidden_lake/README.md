@@ -2,7 +2,7 @@
 
 > Hidden Lake
 
-<img src="../../images/hl_logo.png" alt="hl_logo.png"/>
+<img src="_images/hl_logo.png" alt="hl_logo.png"/>
 
 The `Hidden Lake` is an anonymous network built on a `micro-service` architecture. At the heart of HL is the core - `HLS` (service), which generates anonymizing traffic and combines many other services (for example, `HLT` and `HLM`). Thus, Hidden Lake is not a whole and monolithic solution, but a composition of several combined services.
 

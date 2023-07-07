@@ -25,7 +25,7 @@ run:
 test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
-	rm -f $(BINPATH)/hlt $(BINPATH)/hlt_linux $(BINPATH)/hlt_windows.exe 
+	rm -f $(BINPATH)/hlt $(BINPATH)/hlt_*
 	rm -rf hlt.cfg hlt.db
 
 docker-default: docker-build docker-run

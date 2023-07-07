@@ -22,12 +22,16 @@ In progress...
 - Docs `README.md`: Append 'Calling functions/methods' to code style go-peer
 - Package `storage`: Change ISettings, delete ISettings from storage/database
 - Update `theory_of_the_structure_of_hidden_systems`: Append information about obfuscating routing algorithm
+- Makefule `hidden_lake`: _std_cfg -> _default_cfg
+- Move `images`: to projects HLS, HLM, HLT, HLA, MA
+- Move `examples/_modules`: to packages network, network/anonimity, client, client/queue
 
 ### BUG FIXES
 
-- Makefule `hidden_lake`: _std_cfg -> _std_cfgs
+- Makefile `hidden_lake`: _std_cfg -> _std_cfgs
 - Package `network`: fix deadlock BroadcastPayload on WritePayload method
 - Package `network/conn`: append read/write deadline methods
+- Makefiles `cmd`: fix clean commands for (arch, os) names
 
 ## v1.5.11
 
