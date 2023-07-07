@@ -21,7 +21,7 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 - Linux (x86_64, arm64)
 - MacOS (x86_64, arm64)
 
-### Build and run
+## Build and run
 
 Default build and run
 

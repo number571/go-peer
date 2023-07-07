@@ -8,7 +8,7 @@ The `Hidden Lake Adapters` are a way to exchange data between multiple HLS proce
 
 > More information about HLA in the [habr.com/ru/post/720544](https://habr.com/ru/post/720544/ "Habr HLA")
 
-### How it works
+## How it works
 
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
@@ -16,7 +16,7 @@ Adapters adapt to the interfaces of the service for reading/writing data and, th
 <p align="center"><img src="../../../examples/images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
 <p align="center">Figure 1. Architecture of HLA.</p>
 
-### Example 
+## Example 
 
 Since the adapters are capable of performing the same functions as the source programs, without secret communication channels, then all the examples become similar. So, let's analyze one of the examples based on the echo service.
 

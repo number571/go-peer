@@ -50,13 +50,13 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 - Linux (x86_64, arm64)
 - MacOS (x86_64, arm64)
 
-### Minimum system requirements
+## Minimum system requirements
 
 1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)
 2. Memory: `0.5GB RAM` (~250MB of memory is consumed)
 3. Storage: `5Gib available space` (the size of hashes per year from one node)
 
-### Build and run
+## Build and run
 
 Default build and run
 
@@ -111,7 +111,7 @@ $ make docker-run
 > ...
 ```
 
-### Example
+## Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
 

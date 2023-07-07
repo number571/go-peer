@@ -34,7 +34,7 @@ Secondly, the received key K is also used to encrypt all incoming and outgoing m
 - Linux (x86_64, arm64)
 - MacOS (x86_64, arm64)
 
-### Build and run
+## Build and run
 
 Default build and run
 
@@ -84,7 +84,7 @@ $ make docker-run
 > ...
 ```
 
-### Example
+## Example
 
 The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3` (HLS).
 
