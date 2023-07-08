@@ -70,7 +70,8 @@ func main() {
 			msg := fmt.Sprintf("%s%s: %s", authBytes, os.Args[1], strings.TrimSpace(cmd[1]))
 			encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, attach, []byte(msg), nil)
 			if err != nil {
-				panic(err)
+				fmt.Println("error:", err)
+				continue
 			}
 			queue <- encBytes
 		}
@@ -132,7 +133,7 @@ func runQueueVoid() {
 			time.Sleep(time.Second)
 			continue
 		}
-		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &privKey.PublicKey, []byte(""), nil)
+		encBytes, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, &privKey.PublicKey, []byte("123"), nil)
 		if err != nil {
 			panic(err)
 		}

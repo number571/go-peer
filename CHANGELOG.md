@@ -15,6 +15,7 @@ In progress...
 ### BUG FIXES
 
 - Update `README.md`: url with images -> _images
+- Update `cmd/micro-anon`: change panic error -> print error
 
 ## v1.5.12
 
