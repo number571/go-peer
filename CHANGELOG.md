@@ -14,6 +14,7 @@ In progress...
 - Update `hidden_lake/traffic`: delete redirect message to nodes from HTTP handler
 - Update `hidden_lake/traffic`: append redirect message to nodes from TCP handler
 - Change `examples`: replace middle_hls to middle_hlt
+- Change `hidden_lake/adapters`: change recv: hlt-port -> hls-port
 
 ### BUG FIXES
 
