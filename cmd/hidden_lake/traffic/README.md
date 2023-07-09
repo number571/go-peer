@@ -47,8 +47,13 @@ Default config `hlt.cfg`
 		"warn",
 		"erro"
 	],
-	"address": ":9581",
-	"connection": "service:9571"
+	"address": {
+		"tcp": ":9581",
+		"http": ":9582"
+	},
+	"connections": [
+		"service:9571"
+	]
 }
 ```
 
@@ -84,16 +89,31 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 ## Config structure
 
 ```
+"logging"      Enable loggins in/out actions in the network
 "network"      A network key created to encapsulate connections
-"address"      API address for HLT functions
-"connection"   Connection to HLS as HLS
+"address"      API addresses for HLT functions
+"connections"  Connections to HLS's
+"consumers"    HTTP consumers of raw messages
 ```
 
 ```json
 {
-    "network": "network-key",
-	"address": "localhost:9573",
-	"connection": "localhost:9571"
+	"logging": [
+		"info",
+		"warn",
+		"erro"
+	],
+	"network": "network-key",
+	"address": {
+		"tcp": ":9581",
+		"http": ":9582"
+	},
+	"connections": [
+		"service:9571"
+	],
+	"consumers": [
+        "localhost:8082/traffic"
+    ]
 }
 ```
 

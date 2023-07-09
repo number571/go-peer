@@ -18,7 +18,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			},
 			FConnection: &SConnection{
 				FService: "service:9572",
-				FTraffic: "traffic:9581",
+				FTraffic: "traffic:9582",
 			},
 		}
 	}

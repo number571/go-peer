@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
 
@@ -34,6 +35,7 @@ type sApp struct {
 	fConfig      config.IConfig
 	fWrapperDB   database.IWrapperDB
 	fLogger      logger.ILogger
+	fNode        network.INode
 	fConnKeeper  conn_keeper.IConnKeeper
 	fServiceHTTP *http.Server
 }
@@ -44,11 +46,13 @@ func NewApp(
 ) types.ICommand {
 	wDB := database.NewWrapperDB()
 	logger := internal_logger.StdLogger(pCfg.GetLogging())
-	connKeeper := initConnKeeper(pCfg, wDB, logger)
+	node := initNode(pCfg, wDB, logger)
+	connKeeper := initConnKeeper(pCfg, node)
 	return &sApp{
 		fConfig:     pCfg,
 		fWrapperDB:  wDB,
 		fLogger:     logger,
+		fNode:       node,
 		fConnKeeper: connKeeper,
 		fPathTo:     pPathTo,
 	}
@@ -78,12 +82,25 @@ func (p *sApp) Run() error {
 	}()
 
 	go func() {
-		if p.fConfig.GetAddress() == "" {
+		if p.fConfig.GetAddress().GetHTTP() == "" {
 			return
 		}
 
 		err := p.fServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			res <- err
+			return
+		}
+	}()
+
+	go func() {
+		// if node in client mode
+		tcpAddress := p.fConfig.GetAddress().GetTCP()
+		if tcpAddress == "" {
+			return
+		}
+
+		if err := p.fNode.Run(); err != nil {
 			res <- err
 			return
 		}

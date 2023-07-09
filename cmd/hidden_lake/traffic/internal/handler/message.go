@@ -8,13 +8,9 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
-	"github.com/number571/go-peer/pkg/payload"
-
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.IWrapperDB) http.HandlerFunc {
+func HandleMessageAPI(pWrapperDB database.IWrapperDB) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
@@ -63,13 +59,6 @@ func HandleMessageAPI(pConnKeeper conn_keeper.IConnKeeper, pWrapperDB database.I
 				api.Response(pW, http.StatusInternalServerError, "failed: push message")
 				return
 			}
-
-			pConnKeeper.GetNetworkNode().BroadcastPayload(
-				payload.NewPayload(
-					hls_settings.CNetworkMask,
-					msg.ToBytes(),
-				),
-			)
 
 			api.Response(pW, http.StatusOK, "success: handle message")
 			return

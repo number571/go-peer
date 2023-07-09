@@ -6,19 +6,27 @@ import (
 )
 
 const (
-	tcConfigFile = "config_test.txt"
-	tcLogging    = true
-	tcNetwork    = "test_network"
-	tcAddress    = "test_address"
-	tcConnection = "test_connection"
+	tcConfigFile  = "config_test.txt"
+	tcLogging     = true
+	tcNetwork     = "test_network"
+	tcAddress1    = "test_address1"
+	tcAddress2    = "test_address2"
+	tcConnection1 = "test_connection1"
+	tcConnection2 = "test_connection2"
 )
 
 func testConfigDefaultInit(configPath string) {
 	_, _ = BuildConfig(configPath, &SConfig{
-		FLogging:    []string{"info", "erro"},
-		FNetwork:    tcNetwork,
-		FAddress:    tcAddress,
-		FConnection: tcConnection,
+		FLogging: []string{"info", "erro"},
+		FNetwork: tcNetwork,
+		FAddress: &SAddress{
+			FTCP:  tcAddress1,
+			FHTTP: tcAddress2,
+		},
+		FConnections: []string{
+			tcConnection1,
+			tcConnection2,
+		},
 	})
 }
 
@@ -29,6 +37,7 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	if cfg.GetLogging().HasInfo() != tcLogging {
@@ -48,13 +57,26 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetNetwork() != tcNetwork {
 		t.Error("network is invalid")
+		return
 	}
 
-	if cfg.GetAddress() != tcAddress {
-		t.Error("address is invalid")
+	if cfg.GetAddress().GetTCP() != tcAddress1 {
+		t.Error("address tcp is invalid")
+		return
 	}
 
-	if cfg.GetConnection() != tcConnection {
+	if cfg.GetAddress().GetHTTP() != tcAddress2 {
+		t.Error("address http is invalid")
+		return
+	}
+
+	if len(cfg.GetConnections()) != 2 {
+		t.Error("length of connections != 2")
+		return
+	}
+
+	if cfg.GetConnections()[0] != tcConnection1 {
 		t.Error("connection is invalid")
+		return
 	}
 }

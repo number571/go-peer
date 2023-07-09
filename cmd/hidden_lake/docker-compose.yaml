@@ -23,6 +23,7 @@ services:
       - ./_mounted:/mounted
     ports:
       - "9581:9581"
+      - "9582:9582"
     networks:
       - hidden-lake
   messenger:

@@ -33,7 +33,9 @@ func TestApp(t *testing.T) {
 		tcPathConfig,
 		&config.SConfig{
 			FNetwork: "_",
-			FAddress: testutils.TgAddrs[23],
+			FAddress: &config.SAddress{
+				FHTTP: testutils.TgAddrs[23],
+			},
 		},
 	)
 	if err != nil {

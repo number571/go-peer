@@ -13,8 +13,8 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 const (
@@ -48,7 +48,7 @@ func main() {
 	defer db.Close()
 
 	if len(os.Args) != 3 {
-		panic("./receiver [service-port] [hlt-port]")
+		panic("./receiver [service-port] [hls-port]")
 	}
 
 	portService, err := strconv.Atoi(os.Args[1])
@@ -65,15 +65,11 @@ func main() {
 }
 
 func transferTraffic(db database.IKVDatabase, portService, portHLT int) {
-	hltClient := hlt_client.NewClient(
-		hlt_client.NewBuilder(),
-		hlt_client.NewRequester(
+	hlsClient := hls_client.NewClient(
+		hls_client.NewBuilder(),
+		hls_client.NewRequester(
 			fmt.Sprintf("http://%s:%d", "localhost", portHLT),
 			&http.Client{Timeout: time.Minute},
-			message.NewSettings(&message.SSettings{
-				FMessageSize: hls_settings.CMessageSize,
-				FWorkSize:    hls_settings.CWorkSize,
-			}),
 		),
 	)
 
@@ -101,7 +97,7 @@ func transferTraffic(db database.IKVDatabase, portService, portHLT int) {
 				continue
 			}
 
-			if err := hltClient.PutMessage(msg); err != nil {
+			if err := hlsClient.HandleMessage(msg); err != nil {
 				fmt.Println(err)
 				continue
 			}

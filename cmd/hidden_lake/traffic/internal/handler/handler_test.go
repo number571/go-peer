@@ -101,7 +101,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(connKeeper, wDB))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(wDB))
 
 	srv := &http.Server{
 		Addr:    addr,

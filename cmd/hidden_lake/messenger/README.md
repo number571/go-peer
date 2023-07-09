@@ -66,7 +66,7 @@ Default config `hlm.cfg`
 	},
 	"connection": {
 		"service": "service:9572",
-		"traffic": "traffic:9581"
+		"traffic": "traffic:9582"
 	}
 }
 ```

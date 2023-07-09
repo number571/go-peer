@@ -7,7 +7,7 @@ run:
 	./prog_hlt1 &
 	./prog_hlm1 &
 	./prog_send1 8082 6060 &
-	./prog_recv1 6060 8573 &
+	./prog_recv1 6060 8572 &
 clean:
 	pkill -15 prog_hlm1 || true
 	pkill -15 prog_hls1 || true

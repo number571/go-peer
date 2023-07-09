@@ -11,6 +11,9 @@ In progress...
 ### CHANGES
 
 - Update `README.md`: delete tree/master suffix in view urls
+- Update `hidden_lake/traffic`: delete redirect message to nodes from HTTP handler
+- Update `hidden_lake/traffic`: append redirect message to nodes from TCP handler
+- Change `examples`: replace middle_hls to middle_hlt
 
 ### BUG FIXES
 

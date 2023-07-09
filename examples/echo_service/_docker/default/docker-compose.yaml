@@ -1,9 +1,9 @@
 version: "3"
 services:
-  service-middle:
+  traffic-middle:
     build:
-      context: ./../../../../../
-      dockerfile: cmd/hidden_lake/service/Dockerfile
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/traffic/Dockerfile
     environment:
       SERVICE_PATH: /mounted
     volumes:
@@ -12,7 +12,7 @@ services:
       - hidden-lake
   service-recv:
     build:
-      context: ./../../../../../
+      context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted
@@ -32,7 +32,7 @@ services:
       - local-relation
   service-send:
     build:
-      context: ./../../../../../
+      context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       SERVICE_PATH: /mounted

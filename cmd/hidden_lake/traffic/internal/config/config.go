@@ -15,13 +15,19 @@ var (
 )
 
 type SConfig struct {
-	FLogging    []string `json:"logging,omitempty"`
-	FNetwork    string   `json:"network,omitempty"`
-	FAddress    string   `json:"address,omitempty"`
-	FConnection string   `json:"connection,omitempty"`
-	FConsumers  []string `json:"consumers,omitempty"`
+	FLogging []string `json:"logging,omitempty"`
+	FNetwork string   `json:"network,omitempty"`
+
+	FAddress     *SAddress `json:"address,omitempty"`
+	FConnections []string  `json:"connections,omitempty"`
+	FConsumers   []string  `json:"consumers,omitempty"`
 
 	fLogging *sLogging
+}
+
+type SAddress struct {
+	FTCP  string `json:"tcp,omitempty"`
+	FHTTP string `json:"http,omitempty"`
 }
 
 type sLogging []bool
@@ -92,12 +98,26 @@ func (p *SConfig) GetNetwork() string {
 	return p.FNetwork
 }
 
-func (p *SConfig) GetAddress() string {
+func (p *SConfig) GetAddress() IAddress {
 	return p.FAddress
 }
 
-func (p *SConfig) GetConnection() string {
-	return p.FConnection
+func (p *SAddress) GetTCP() string {
+	if p == nil {
+		return ""
+	}
+	return p.FTCP
+}
+
+func (p *SAddress) GetHTTP() string {
+	if p == nil {
+		return ""
+	}
+	return p.FHTTP
+}
+
+func (p *SConfig) GetConnections() []string {
+	return p.FConnections
 }
 
 func (p *SConfig) GetConsumers() []string {

@@ -16,9 +16,14 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
-			FLogging:    []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
-			FAddress:    ":9581",
-			FConnection: "service:9571",
+			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
+			FAddress: &SAddress{
+				FTCP:  ":9581",
+				FHTTP: ":9582",
+			},
+			FConnections: []string{
+				"service:9571",
+			},
 		}
 	}
 	cfg, err := BuildConfig(cfgPath, initCfg)

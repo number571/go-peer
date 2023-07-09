@@ -44,8 +44,8 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 3. The `client/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client` module.
 4. The `network` module is a decentralized communication between network nodes. It does not represent any protection of information and anonymity of participants.
 5. The `network/anonymity` module to ensure anonymity based on the fifth stage. Presents the main functions for working with the network on top of the `network` and `queue` modules.
-6. The `storage` module includes two types of storage: `memory` and `crypto`. The second type of storage can be used for secure storage of passwords and private keys.
-7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
+6. The `storage` module includes `crypto` type storage. This type of storage can be used for secure storage of passwords and private keys.
+7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing inherited from the `storage` module.
 
 > Examples of works in the directory [github.com/number571/go-peer/examples](https://github.com/number571/go-peer/tree/master/examples "Examples");
 
@@ -128,7 +128,7 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 ### Minimum system requirements
 
-1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)
+1. Processor: `1x2.2GHz` (limit of communication = ~4 nodes)
 2. Memory: `0.5GB RAM` (~250MB of memory is consumed)
 3. Storage: `5Gib available space` (the size of hashes per year from one node)
 
