@@ -237,7 +237,7 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/_cmd/echo_service/default
+$ cd examples/echo_service/default
 $ make
 ```
 
@@ -348,7 +348,7 @@ Default config `hlm.cfg`
 	},
 	"connection": {
 		"service": "service:9572",
-		"traffic": "traffic:9581"
+		"traffic": "traffic:9582"
 	}
 }
 ```
@@ -446,8 +446,13 @@ Default config `hlt.cfg`
 		"warn",
 		"erro"
 	],
-	"address": ":9581",
-	"connection": "service:9571"
+	"address": {
+		"tcp": ":9581",
+		"http": ":9582"
+	},
+	"connections": [
+		"service:9571"
+	]
 }
 ```
 
@@ -530,7 +535,7 @@ There are no external differences, but there are internal ones. While the origin
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 12. Example of running HLA client.</p>
 
-Similarly, you can use a more complex composition, as shown in the example `examples/_cmd/anon_messenger/secret_channel`.
+Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 
 ## Deprecated applications
 
