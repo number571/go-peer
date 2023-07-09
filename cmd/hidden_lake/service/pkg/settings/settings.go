@@ -82,9 +82,9 @@ const (
 )
 
 const (
-	// Base
-	CLogWarnOffResponseFromService anon_logger.ILogType = "OFRSP"
-	CLogWarnResponseFromService    anon_logger.ILogType = "RSPSR"
+	// INFO
+	CLogInfoOffResponseFromService anon_logger.ILogType = "OFRSP"
+	CLogInfoResponseFromService    anon_logger.ILogType = "RSPSR"
 
 	// WARN
 	CLogWarnRequestToService anon_logger.ILogType = "RQTSR"

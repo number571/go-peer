@@ -73,6 +73,6 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			}
 		}
 
-		pLogger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
+		pLogger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogBaseBroadcast, hash, proof, nil, pConn))
 	}
 }

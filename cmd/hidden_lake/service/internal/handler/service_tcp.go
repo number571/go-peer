@@ -66,12 +66,12 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 
 		// the response is not required by the client side
 		if resp.Header.Get(pkg_settings.CHeaderOffResponse) != "" {
-			pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogWarnOffResponseFromService, msgHash, 0, sender, nil))
+			pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogInfoOffResponseFromService, msgHash, 0, sender, nil))
 			return nil, nil
 		}
 
 		// send result to client
-		pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogWarnResponseFromService, msgHash, 0, sender, nil))
+		pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogInfoResponseFromService, msgHash, 0, sender, nil))
 		return response.NewResponse(resp.StatusCode).
 				WithHead(getHead(resp)).
 				WithBody(getBody(resp)).

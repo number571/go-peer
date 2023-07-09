@@ -13,11 +13,10 @@ RestartSec=10
 WantedBy=multi-user.target
 " > /etc/systemd/system/hidden_lake_service.service
 
-chdir /root
-wget https://github.com/number571/go-peer/releases/download/v1.5.12/hls_amd64_linux
+cd /root && wget https://github.com/number571/go-peer/releases/download/v1.5.12/hls_amd64_linux
 
 chmod +x /root/hls_amd64_linux
 systemctl daemon-reload
 systemctl enable hidden_lake_service.service
 systemctl restart hidden_lake_service.service
-watch systemctl status hidden_lake_service.service
+watch -c SYSTEMD_COLORS=1 systemctl status hidden_lake_service.service

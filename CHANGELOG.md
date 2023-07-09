@@ -19,6 +19,7 @@ In progress...
 
 - Update `README.md`: url with images -> _images
 - Update `cmd/micro-anon`: change panic error -> print error
+- Change `hidden_lake/service`: rename CLogWarnOffResponseFromService, CLogWarnResponseFromService -> CLogInfoOffResponseFromService, CLogInfoResponseFromService
 
 ## v1.5.12
 
