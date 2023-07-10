@@ -43,8 +43,8 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		)
 
 		database := pWrapperDB.Get()
-		strHash := encoding.HexEncode(hash)
-		if _, err := database.Load(strHash); err == nil {
+
+		if _, err := database.Load(encoding.HexEncode(hash)); err == nil {
 			pLogger.PushInfo(anonLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
 			return
 		}
