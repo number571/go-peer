@@ -4,5 +4,5 @@ hlm
 hlt
 !*.cfg
 !*.stg 
-node1_hlm/hls.cfg 
-node2_hlm/hls.cfg 
+hlm.stg 
+hls.cfg 

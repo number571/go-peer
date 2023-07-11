@@ -1,4 +1,4 @@
 !*.cfg
 !*.stg 
-_mounted_node1/hls.cfg 
-_mounted_node2/hls.cfg 
+hls.cfg 
+hlm.stg 
