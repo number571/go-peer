@@ -1,4 +1,4 @@
-# Changelog
+# CHANGELOG
 
 <!-- ... -->
 
@@ -7,6 +7,12 @@
 *??? ??, ????*
 
 In progress...
+
+### IMPROVEMENTS
+
+- Append `examples`: routing to echo_service 
+- Create `CONNECTIONS.md`: list of connections to HLT relayers and HLS nodes
+- Update `hidden_lake/traffic`: append option 'storage'=(true|false)
 
 ### CHANGES
 

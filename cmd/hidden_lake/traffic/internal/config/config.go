@@ -18,6 +18,7 @@ type SConfig struct {
 	FLogging []string `json:"logging,omitempty"`
 	FNetwork string   `json:"network,omitempty"`
 
+	FStorage     bool      `json:"storage,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
 	FConnections []string  `json:"connections,omitempty"`
 	FConsumers   []string  `json:"consumers,omitempty"`
@@ -96,6 +97,10 @@ func (p *SConfig) loadLogging() error {
 
 func (p *SConfig) GetNetwork() string {
 	return p.FNetwork
+}
+
+func (p *SConfig) GetStorage() bool {
+	return p.FStorage
 }
 
 func (p *SConfig) GetAddress() IAddress {

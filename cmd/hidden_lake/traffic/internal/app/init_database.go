@@ -11,17 +11,23 @@ import (
 )
 
 func (p *sApp) initDatabase() error {
-	db, err := database.NewKeyValueDB(
-		database.NewSettings(&database.SSettings{
-			FPath:        fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
-			FCapacity:    hlt_settings.CCapacity,
-			FMessageSize: hls_settings.CMessageSize,
-			FWorkSize:    hls_settings.CWorkSize,
-		}),
-	)
+	sett := database.NewSettings(&database.SSettings{
+		FPath:        fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
+		FCapacity:    hlt_settings.CCapacity,
+		FMessageSize: hls_settings.CMessageSize,
+		FWorkSize:    hls_settings.CWorkSize,
+	})
+
+	if !p.fConfig.GetStorage() {
+		p.fWrapperDB.Set(database.NewVoidKeyValueDB(sett))
+		return nil
+	}
+
+	db, err := database.NewKeyValueDB(sett)
 	if err != nil {
 		return errors.WrapError(err, "init database")
 	}
+
 	p.fWrapperDB.Set(db)
 	return nil
 }

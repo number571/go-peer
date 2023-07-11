@@ -91,6 +91,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 ```
 "logging"      Enable loggins in/out actions in the network
 "network"      A network key created to encapsulate connections
+"storage"      Enables the option of storing received messages in a ring
 "address"      API addresses for HLT functions
 "connections"  Connections to HLS's
 "consumers"    HTTP consumers of raw messages
@@ -103,6 +104,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 		"warn",
 		"erro"
 	],
+	"storage": true,
 	"network": "network-key",
 	"address": {
 		"tcp": ":9581",
@@ -179,7 +181,7 @@ Transfer-Encoding: chunked
 #### 2.2. POST Request
 
 ```bash
-curl -i -X POST -H 'Accept: application/json' http://localhost:9573/api/message -d @README_message.txt
+curl -i -X POST -H 'Accept: application/json' http://localhost:9573/api/message -d @README_message.json
 ```
 
 #### 2.2. POST Response
