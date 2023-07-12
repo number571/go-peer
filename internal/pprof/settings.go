@@ -3,7 +3,7 @@ package pprof
 import "time"
 
 const (
-	cPProfEnabled = true
+	cPProfEnabled = false
 )
 
 const (
