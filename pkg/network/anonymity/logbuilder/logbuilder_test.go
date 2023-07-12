@@ -1,4 +1,4 @@
-package logger
+package logbuilder
 
 import (
 	"testing"
@@ -15,16 +15,12 @@ const (
 )
 
 func TestLogger(t *testing.T) {
-	logger := NewLogger(tcService)
-	fmtLog := logger.GetFmtLog(
-		CLogBaseEnqueueResponse,
-		encoding.HexDecode(tcHash),
-		12345,
-		asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]),
-		nil,
-	)
+	logger := NewLogBuilder(tcService).
+		WithHash(encoding.HexDecode(tcHash)).
+		WithProof(12345).
+		WithPubKey(asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]))
 
-	if fmtLog != tcFmtLog {
+	if logger.Get(CLogBaseEnqueueResponse) != tcFmtLog {
 		t.Error("result fmtLog != tcFmtLog")
 		return
 	}

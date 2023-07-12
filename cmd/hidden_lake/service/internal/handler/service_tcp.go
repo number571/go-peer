@@ -16,24 +16,27 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
-	logger := anon_logger.NewLogger(pkg_settings.CServiceName)
-
 	return func(_ anonymity.INode, sender asymmetric.IPubKey, msgHash, reqBytes []byte) ([]byte, error) {
+		logBuilder := logbuilder.NewLogBuilder(pkg_settings.CServiceName)
+
+		// enrich logger
+		logBuilder.WithHash(msgHash).WithPubKey(sender)
+
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
 		if err != nil {
-			pLogger.PushErro(logger.GetFmtLog(pkg_settings.CLogErroLoadRequestType, msgHash, 0, sender, nil))
+			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogErroLoadRequestType))
 			return nil, err
 		}
 
 		// get service's address by hostname
 		address, ok := pCfg.GetService(loadReq.GetHost())
 		if !ok {
-			pLogger.PushWarn(logger.GetFmtLog(pkg_settings.CLogWarnUndefinedService, msgHash, 0, sender, nil))
+			pLogger.PushWarn(logBuilder.Get(pkg_settings.CLogWarnUndefinedService))
 			return nil, fmt.Errorf("failed: address undefined")
 		}
 
@@ -44,7 +47,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			bytes.NewReader(loadReq.GetBody()),
 		)
 		if err != nil {
-			pLogger.PushErro(logger.GetFmtLog(pkg_settings.CLogErroProxyRequestType, msgHash, 0, sender, nil))
+			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogErroProxyRequestType))
 			return nil, err
 		}
 
@@ -59,19 +62,19 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		// and receive response from service
 		resp, err := http.DefaultClient.Do(pushReq)
 		if err != nil {
-			pLogger.PushWarn(logger.GetFmtLog(pkg_settings.CLogWarnRequestToService, msgHash, 0, sender, nil))
+			pLogger.PushWarn(logBuilder.Get(pkg_settings.CLogWarnRequestToService))
 			return nil, err
 		}
 		defer resp.Body.Close()
 
 		// the response is not required by the client side
 		if resp.Header.Get(pkg_settings.CHeaderOffResponse) != "" {
-			pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogInfoOffResponseFromService, msgHash, 0, sender, nil))
+			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoOffResponseFromService))
 			return nil, nil
 		}
 
 		// send result to client
-		pLogger.PushInfo(logger.GetFmtLog(pkg_settings.CLogInfoResponseFromService, msgHash, 0, sender, nil))
+		pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoResponseFromService))
 		return response.NewResponse(resp.StatusCode).
 				WithHead(getHead(resp)).
 				WithBody(getBody(resp)).

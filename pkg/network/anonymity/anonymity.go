@@ -17,7 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
 )
 
 var (
@@ -57,13 +57,12 @@ func NewNode(
 }
 
 func (p *sNode) Run() error {
-	logger := anon_logger.NewLogger(p.fSettings.GetServiceName())
-	if err := p.runQueue(logger); err != nil {
+	if err := p.runQueue(); err != nil {
 		return errors.WrapError(err, "run node")
 	}
 	p.fNetwork.HandleFunc(
 		p.fSettings.GetNetworkMask(),
-		p.handleWrapper(logger),
+		p.handleWrapper(),
 	)
 	return nil
 }
@@ -102,8 +101,7 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 }
 
 func (p *sNode) HandleMessage(pMsg message.IMessage) {
-	logger := anon_logger.NewLogger(p.fSettings.GetServiceName())
-	p.handleWrapper(logger)(
+	p.handleWrapper()(
 		p.fNetwork,
 		nil,
 		pMsg.ToBytes(),
@@ -202,7 +200,7 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	}
 }
 
-func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
+func (p *sNode) runQueue() error {
 	if err := p.fQueue.Run(); err != nil {
 		return errors.WrapError(err, "run queue")
 	}
@@ -215,26 +213,29 @@ func (p *sNode) runQueue(pLogger anon_logger.ILogger) error {
 			}
 
 			// store hash and push message to network
-			if ok := p.storeHashWithBroadcast(pLogger, nil, msg); !ok {
+			logb := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
+			if ok := p.storeHashWithBroadcast(logb, msg); !ok {
 				// internal logger
 				continue
 			}
 
-			p.fLogger.PushInfo(pLogger.GetFmtLog(
-				anon_logger.CLogBaseBroadcast,
-				msg.GetBody().GetHash(),
-				msg.GetBody().GetProof(),
-				p.fQueue.GetClient().GetPubKey(),
-				nil,
-			))
+			// enrich logger
+			logb.WithPubKey(p.fQueue.GetClient().GetPubKey())
+
+			p.fLogger.PushInfo(logb.Get(logbuilder.CLogBaseBroadcast))
 		}
 	}()
 
 	return nil
 }
 
-func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
+func (p *sNode) handleWrapper() network.IHandlerF {
 	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
+		logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
+
+		// enrich logger
+		logBuilder.WithConn(pConn)
+
 		client := p.fQueue.GetClient()
 		settings := client.GetSettings()
 
@@ -247,26 +248,24 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 		)
 
 		// try store hash of message
-		if ok := p.storeHashWithBroadcast(pLogger, pConn, msg); !ok {
+		if ok := p.storeHashWithBroadcast(logBuilder, msg); !ok {
 			// internal logger
 			return
 		}
 
-		var (
-			hash  = msg.GetBody().GetHash()
-			proof = msg.GetBody().GetProof()
-		)
-
 		// try decrypt message
 		sender, pld, err := client.DecryptMessage(msg)
 		if err != nil {
-			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoUndecryptable, hash, proof, nil, pConn))
+			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoUndecryptable))
 			return
 		}
 
+		// enrich logger
+		logBuilder.WithPubKey(sender)
+
 		// check sender in f2f list
 		if !p.fFriends.InPubKeys(sender) {
-			p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnNotFriend, hash, proof, sender, pConn))
+			p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnNotFriend))
 			return
 		}
 
@@ -281,11 +280,11 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			actionKey := newActionKey(sender, head.getAction())
 			action, ok := p.getAction(actionKey)
 			if !ok {
-				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogInfoAction))
 				return
 			}
 
-			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoAction, hash, proof, sender, pConn))
+			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoAction))
 			action <- unwrapBytes(body)
 			return
 		// got request from another side (need generate response)
@@ -293,40 +292,40 @@ func (p *sNode) handleWrapper(pLogger anon_logger.ILogger) network.IHandlerF {
 			// get function by payload head
 			f, ok := p.getRoute(head.getRoute())
 			if !ok || f == nil {
-				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnUnknownRoute, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnUnknownRoute))
 				return
 			}
 
 			// response can be nil
-			resp, err := f(p, sender, hash, unwrapBytes(body))
+			resp, err := f(p, sender, msg.GetBody().GetHash(), unwrapBytes(body))
 			if err != nil {
-				p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnIncorrectResponse, hash, proof, sender, pConn))
+				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnIncorrectResponse))
 				return
 			}
 			if resp == nil {
-				p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoWithoutResponse, hash, proof, sender, pConn))
+				p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoWithoutResponse))
 				return
 			}
 
 			// create the message and put this to the queue
 			if err := p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
-				p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+				p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogBaseEnqueueResponse))
 				return
 			}
 
-			p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogBaseEnqueueResponse, hash, proof, sender, pConn))
+			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseEnqueueResponse))
 			return
 		// undefined type of message (not request/response)
 		default:
-			p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroMessageType, hash, proof, sender, pConn))
+			p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogErroMessageType))
 			return
 		}
 	}
 }
 
-func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.IConn, pMsg message.IMessage) bool {
+func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg message.IMessage) bool {
 	if pMsg == nil {
-		p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogWarnMessageNull, nil, 0, nil, pConn))
+		p.fLogger.PushWarn(pLogb.Get(logbuilder.CLogWarnMessageNull))
 		return false
 	}
 
@@ -337,8 +336,11 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToString()
 	)
 
+	// enrich logger
+	pLogb.WithHash(hash).WithProof(proof)
+
 	if database == nil {
-		p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseGet, hash, proof, nil, pConn))
+		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseGet))
 		return false
 	}
 
@@ -348,22 +350,22 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 	// check already received data by hash
 	hashIsExist := (err == nil)
 	if hashIsExist && strings.Contains(string(gotAddrs), myAddress) {
-		p.fLogger.PushInfo(pLogger.GetFmtLog(anon_logger.CLogInfoExist, hash, proof, nil, pConn))
+		p.fLogger.PushInfo(pLogb.Get(logbuilder.CLogInfoExist))
 		return false
 	}
 
 	// set hash to database
 	updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), myAddress)
 	if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
-		p.fLogger.PushErro(pLogger.GetFmtLog(anon_logger.CLogErroDatabaseSet, hash, proof, nil, pConn))
+		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseSet))
 		return false
 	}
 
 	// do not send data if than already received
 	if !hashIsExist {
 		// broadcast message to network
-		if err := p.networkBroadcast(pLogger, pMsg); err != nil {
-			p.fLogger.PushWarn(pLogger.GetFmtLog(anon_logger.CLogBaseBroadcast, hash, proof, nil, nil))
+		if err := p.networkBroadcast(pMsg); err != nil {
+			p.fLogger.PushWarn(pLogb.Get(logbuilder.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
 	}
@@ -371,7 +373,7 @@ func (p *sNode) storeHashWithBroadcast(pLogger anon_logger.ILogger, pConn conn.I
 	return true
 }
 
-func (p *sNode) networkBroadcast(pLogger anon_logger.ILogger, pMsg message.IMessage) error {
+func (p *sNode) networkBroadcast(pMsg message.IMessage) error {
 	// redirect message to another nodes
 	err := p.fNetwork.BroadcastPayload(
 		payload.NewPayload(

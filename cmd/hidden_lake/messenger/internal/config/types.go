@@ -1,6 +1,6 @@
 package config
 
-import "github.com/number571/go-peer/pkg/logger"
+import "github.com/number571/go-peer/internal/logger"
 
 type IConfig interface {
 	GetAddress() IAddress

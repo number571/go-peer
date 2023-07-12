@@ -3,10 +3,10 @@ package config
 import (
 	"fmt"
 
+	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
-	"github.com/number571/go-peer/pkg/logger"
 )
 
 var (

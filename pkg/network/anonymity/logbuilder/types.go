@@ -1,12 +1,17 @@
-package logger
+package logbuilder
 
 import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
-type ILogger interface {
-	GetFmtLog(ILogType, []byte, uint64, asymmetric.IPubKey, conn.IConn) string
+type ILogBuilder interface {
+	Get(pType ILogType) string
+
+	WithProof(pProof uint64) ILogBuilder
+	WithHash(pMsgHash []byte) ILogBuilder
+	WithConn(pConn conn.IConn) ILogBuilder
+	WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder
 }
 
 type ILogType string

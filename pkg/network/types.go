@@ -10,14 +10,6 @@ import (
 
 type IHandlerF func(INode, conn.IConn, []byte)
 
-type ISettings interface {
-	GetAddress() string
-	GetCapacity() uint64
-	GetMaxConnects() uint64
-	GetWriteTimeout() time.Duration
-	GetConnSettings() conn.ISettings
-}
-
 type INode interface {
 	types.ICommand
 
@@ -29,4 +21,12 @@ type INode interface {
 
 	HandleFunc(uint64, IHandlerF) INode
 	BroadcastPayload(payload.IPayload) error
+}
+
+type ISettings interface {
+	GetAddress() string
+	GetCapacity() uint64
+	GetMaxConnects() uint64
+	GetWriteTimeout() time.Duration
+	GetConnSettings() conn.ISettings
 }

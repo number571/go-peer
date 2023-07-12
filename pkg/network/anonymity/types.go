@@ -17,13 +17,6 @@ type (
 	IHandlerF func(INode, asymmetric.IPubKey, []byte, []byte) ([]byte, error)
 )
 
-type ISettings interface {
-	GetServiceName() string
-	GetNetworkMask() uint64
-	GetRetryEnqueue() uint64
-	GetFetchTimeWait() time.Duration
-}
-
 type INode interface {
 	types.ICommand
 
@@ -39,6 +32,13 @@ type INode interface {
 
 	BroadcastPayload(asymmetric.IPubKey, adapters.IPayload) error
 	FetchPayload(asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
+}
+
+type ISettings interface {
+	GetServiceName() string
+	GetNetworkMask() uint64
+	GetRetryEnqueue() uint64
+	GetFetchTimeWait() time.Duration
 }
 
 type IWrapperDB interface {

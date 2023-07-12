@@ -8,16 +8,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type ISettings interface {
-	GetNetworkKey() string
-	GetMessageSize() uint64
-	GetLimitVoidSize() uint64
-	GetFetchTimeWait() time.Duration
-	GetWaitReadDeadline() time.Duration
-	GetReadDeadline() time.Duration
-	GetWriteDeadline() time.Duration
-}
-
 type IConn interface {
 	types.ICloser
 
@@ -27,4 +17,14 @@ type IConn interface {
 	FetchPayload(pld payload.IPayload) (payload.IPayload, error)
 	WritePayload(payload.IPayload) error
 	ReadPayload() payload.IPayload
+}
+
+type ISettings interface {
+	GetNetworkKey() string
+	GetMessageSize() uint64
+	GetLimitVoidSize() uint64
+	GetFetchTimeWait() time.Duration
+	GetWaitReadDeadline() time.Duration
+	GetReadDeadline() time.Duration
+	GetWriteDeadline() time.Duration
 }

@@ -3,7 +3,7 @@ package settings
 import (
 	"time"
 
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
 )
 
 const (
@@ -83,14 +83,14 @@ const (
 
 const (
 	// INFO
-	CLogInfoOffResponseFromService anon_logger.ILogType = "OFRSP"
-	CLogInfoResponseFromService    anon_logger.ILogType = "RSPSR"
+	CLogInfoOffResponseFromService logbuilder.ILogType = "OFRSP"
+	CLogInfoResponseFromService    logbuilder.ILogType = "RSPSR"
 
 	// WARN
-	CLogWarnRequestToService anon_logger.ILogType = "RQTSR"
-	CLogWarnUndefinedService anon_logger.ILogType = "UNDSR"
+	CLogWarnRequestToService logbuilder.ILogType = "RQTSR"
+	CLogWarnUndefinedService logbuilder.ILogType = "UNDSR"
 
 	// ERRO
-	CLogErroLoadRequestType  anon_logger.ILogType = "LDRQT"
-	CLogErroProxyRequestType anon_logger.ILogType = "PXRQT"
+	CLogErroLoadRequestType  logbuilder.ILogType = "LDRQT"
+	CLogErroProxyRequestType logbuilder.ILogType = "PXRQT"
 )
