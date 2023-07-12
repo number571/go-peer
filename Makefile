@@ -14,9 +14,8 @@ PPROF_PORT=_
 default: clean test-run
 
 clean:
-	make -C ./cmd/hidden_lake clean 
+	make -C ./cmd clean 
 	make -C ./examples clean
-
 
 ### TEST
 # example run: make test-run N=10
@@ -31,9 +30,6 @@ test-run:
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
-test-race:
-	go test -race -cover -count=1 `go list ./...`; \
-
 test-coverage:
 	go vet ./...;
 	$(CHECK_ERROR);
@@ -42,23 +38,9 @@ test-coverage:
 	$(CHECK_ERROR);
 
 	go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out;
-	$(CHECK_ERROR);
-	
+
+test-coverage-view:
 	go tool cover -html=$(TEST_PATH)/coverage.out
-	$(CHECK_ERROR);
-
-test-benchmark:
-	# TODO 
-
-
-### PPROF
-# example run: make pprof-run PPROF_NAME=hls PPROF_PORT=62109
-
-pprof-run:
-	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile
-	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
-	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
-
 
 ### GIT
 
@@ -69,3 +51,11 @@ git-status:
 git-push:
 	git commit -m "update"
 	git push 
+
+### PPROF
+# example run: make pprof-run PPROF_NAME=hls PPROF_PORT=62109
+
+pprof-run:
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
