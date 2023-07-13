@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -80,6 +81,12 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	rawCFG := &config.SConfig{
 		FServices: map[string]string{
 			tcServiceAddressInHLS: testutils.TgAddrs[5],
+		},
+		SConfigSettings: settings.SConfigSettings{
+			FSettings: settings.SConfigSettingsBlock{
+				FMessageSize: testutils.TCMessageSize,
+				FWorkSize:    testutils.TCWorkSize,
+			},
 		},
 	}
 

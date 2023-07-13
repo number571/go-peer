@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -108,6 +109,12 @@ func testAllPushFree(node anonymity.INode, srv *http.Server) {
 func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 	node := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
+		SConfigSettings: settings.SConfigSettings{
+			FSettings: settings.SConfigSettingsBlock{
+				FMessageSize: testutils.TCMessageSize,
+				FWorkSize:    testutils.TCWorkSize,
+			},
+		},
 		FServices: map[string]string{
 			tcServiceAddressInHLS: testutils.TgAddrs[10],
 		},

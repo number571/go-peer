@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/number571/go-peer/internal/logger"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -16,6 +17,8 @@ type IEditor interface {
 }
 
 type IConfig interface {
+	settings.IConfigSettings
+
 	GetNetwork() string
 	GetLogging() logger.ILogging
 	GetAddress() IAddress

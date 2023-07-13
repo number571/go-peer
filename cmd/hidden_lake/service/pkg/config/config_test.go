@@ -24,6 +24,8 @@ const (
 	tcPubKeyAlias2 = "test_alias2"
 	tcServiceName1 = "test_service1"
 	tcServiceName2 = "test_service2"
+	tcMessageSize  = (1 << 20)
+	tcWorkSize     = 20
 )
 
 var (
@@ -43,6 +45,10 @@ var (
 
 const (
 	tcConfigTemplate = `{
+	"settings": {
+		"message_size": %d,
+		"work_size": %d
+	},
 	"logging": ["info", "erro"],
 	"network": "%s",
 	"address": {
@@ -67,6 +73,8 @@ const (
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
+		tcMessageSize,
+		tcWorkSize,
 		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
@@ -94,6 +102,16 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if cfg.GetWorkSize() != tcWorkSize {
+		t.Error("settings work size is invalid")
+		return
+	}
+
+	if cfg.GetMessageSize() != tcMessageSize {
+		t.Error("settings message size is invalid")
 		return
 	}
 

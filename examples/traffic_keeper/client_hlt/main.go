@@ -8,6 +8,7 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -19,14 +20,21 @@ const (
 )
 
 func main() {
+	cfg := &settings.SConfigSettings{
+		FSettings: settings.SConfigSettingsBlock{
+			FWorkSize:    20,
+			FMessageSize: (1 << 20),
+		},
+	}
+
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			"http://localhost:9573",
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FWorkSize:    hls_settings.CWorkSize,
-				FMessageSize: hls_settings.CMessageSize,
+				FWorkSize:    cfg.GetWorkSize(),
+				FMessageSize: cfg.GetMessageSize(),
 			}),
 		),
 	)
@@ -37,7 +45,7 @@ func main() {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(string(readPrivKey))
-	client := hls_settings.InitClient(privKey)
+	client := hls_settings.InitClient(cfg, privKey)
 
 	if len(os.Args) < 2 {
 		panic("len os.Args < 2")

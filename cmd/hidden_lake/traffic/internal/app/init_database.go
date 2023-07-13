@@ -6,7 +6,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	"github.com/number571/go-peer/pkg/errors"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
@@ -14,8 +13,8 @@ func (p *sApp) initDatabase() error {
 	sett := database.NewSettings(&database.SSettings{
 		FPath:        fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
 		FCapacity:    hlt_settings.CCapacity,
-		FMessageSize: hls_settings.CMessageSize,
-		FWorkSize:    hls_settings.CWorkSize,
+		FMessageSize: p.fConfig.GetMessageSize(),
+		FWorkSize:    p.fConfig.GetWorkSize(),
 	})
 
 	if !p.fConfig.GetStorage() {

@@ -16,7 +16,6 @@ import (
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	internal_logger "github.com/number571/go-peer/internal/logger"
 	pkg_errors "github.com/number571/go-peer/pkg/errors"
@@ -66,8 +65,8 @@ func NewApp(
 				fmt.Sprintf("http://%s", pCfg.GetConnection().GetTraffic()),
 				&http.Client{Timeout: time.Minute},
 				message.NewSettings(&message.SSettings{
-					FWorkSize:    hls_settings.CWorkSize,
-					FMessageSize: hls_settings.CMessageSize,
+					FWorkSize:    pCfg.GetWorkSize(),
+					FMessageSize: pCfg.GetMessageSize(),
 				}),
 			),
 		),

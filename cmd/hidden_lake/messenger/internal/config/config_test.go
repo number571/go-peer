@@ -15,6 +15,10 @@ const (
 
 const (
 	tcConfigTemplate = `{
+	"settings": {
+		"message_size": %d,
+		"work_size": %d
+	},
 	"logging": ["info", "erro"],
 	"address": {
 		"interface": "%s",
@@ -34,11 +38,15 @@ const (
 	tcConnectionService = "connection_service"
 	tcConnectionTraffic = "connection_traffic"
 	tcStorageKey        = "storage_key"
+	tcMessageSize       = (1 << 20)
+	tcWorkSize          = 20
 )
 
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
+		tcMessageSize,
+		tcWorkSize,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcConnectionService,
@@ -58,6 +66,16 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if cfg.GetWorkSize() != tcWorkSize {
+		t.Error("settings work size is invalid")
+		return
+	}
+
+	if cfg.GetMessageSize() != tcMessageSize {
+		t.Error("settings message size is invalid")
 		return
 	}
 

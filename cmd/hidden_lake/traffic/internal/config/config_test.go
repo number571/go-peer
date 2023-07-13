@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"testing"
+
+	"github.com/number571/go-peer/internal/settings"
 )
 
 const (
@@ -16,10 +18,18 @@ const (
 	tcConnection2 = "test_connection2"
 	tcConsumer1   = "test_consumer1"
 	tcConsumer2   = "test_consumer2"
+	tcMessageSize = (1 << 20)
+	tcWorkSize    = 20
 )
 
 func testConfigDefaultInit(configPath string) {
 	_, _ = BuildConfig(configPath, &SConfig{
+		SConfigSettings: settings.SConfigSettings{
+			FSettings: settings.SConfigSettingsBlock{
+				FMessageSize: tcMessageSize,
+				FWorkSize:    tcWorkSize,
+			},
+		},
 		FLogging: []string{"info", "erro"},
 		FNetwork: tcNetwork,
 		FStorage: tcStorage,
@@ -45,6 +55,16 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if cfg.GetWorkSize() != tcWorkSize {
+		t.Error("settings work size is invalid")
+		return
+	}
+
+	if cfg.GetMessageSize() != tcMessageSize {
+		t.Error("settings message size is invalid")
 		return
 	}
 

@@ -32,7 +32,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FWriteTimeout: pkg_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetwork(),
-					FMessageSize:      pkg_settings.CMessageSize,
+					FMessageSize:      pCfg.GetMessageSize(),
 					FLimitVoidSize:    pkg_settings.CConnLimitVoidSize,
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
 					FReadDeadline:     pkg_settings.CConnReadDeadline,
@@ -47,7 +47,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
 				FDuration:     pkg_settings.CQueueDuration,
 			}),
-			pkg_settings.InitClient(pPrivKey),
+			pkg_settings.InitClient(pCfg, pPrivKey),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

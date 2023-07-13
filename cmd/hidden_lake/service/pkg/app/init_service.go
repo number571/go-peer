@@ -16,7 +16,7 @@ func (p *sApp) initServiceHTTP() {
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, handler.HandleNetworkOnlineAPI(p.fNode))
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(p.fNode))
 	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, handler.HandleNetworkMessageAPI(p.fNode))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(p.fNode))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(p.fWrapper, p.fNode))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:    p.fWrapper.GetConfig().GetAddress().GetHTTP(),

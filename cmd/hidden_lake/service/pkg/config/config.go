@@ -6,6 +6,7 @@ import (
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/logger"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
@@ -19,6 +20,8 @@ var (
 )
 
 type SConfig struct {
+	settings.SConfigSettings
+
 	FLogging []string `json:"logging,omitempty"`
 
 	FNetwork string    `json:"network,omitempty"`
@@ -87,6 +90,10 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 
 func (p *SConfig) initConfig(filepath string) error {
 	p.fFilepath = filepath
+
+	if !p.FSettings.IsValid() {
+		return errors.NewError("load config settings")
+	}
 
 	if err := p.loadPubKeys(); err != nil {
 		return errors.WrapError(err, "load public keys")

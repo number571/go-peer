@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/internal/logger"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -16,6 +17,8 @@ var (
 )
 
 type SConfig struct {
+	settings.SConfigSettings
+
 	FLogging    []string     `json:"logging,omitempty"`
 	FAddress    *SAddress    `json:"address"`
 	FConnection *SConnection `json:"connection"`
@@ -47,8 +50,8 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, errors.WrapError(err, "write config")
 	}
 
-	if err := pCfg.loadLogging(); err != nil {
-		return nil, errors.WrapError(err, "load logging")
+	if err := pCfg.initConfig(); err != nil {
+		return nil, errors.WrapError(err, "init config")
 	}
 	return pCfg, nil
 }
@@ -70,10 +73,21 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 		return nil, errors.WrapError(err, "deserialize config")
 	}
 
-	if err := cfg.loadLogging(); err != nil {
-		return nil, errors.WrapError(err, "load logging")
+	if err := cfg.initConfig(); err != nil {
+		return nil, errors.WrapError(err, "init config")
 	}
 	return cfg, nil
+}
+
+func (p *SConfig) initConfig() error {
+	if !p.FSettings.IsValid() {
+		return errors.NewError("load config settings")
+	}
+
+	if err := p.loadLogging(); err != nil {
+		return errors.WrapError(err, "load logging")
+	}
+	return nil
 }
 
 func (p *SConfig) loadLogging() error {

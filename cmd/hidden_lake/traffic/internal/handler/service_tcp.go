@@ -31,8 +31,8 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 
 		msg := message.LoadMessage(
 			message.NewSettings(&message.SSettings{
-				FMessageSize: hls_settings.CMessageSize,
-				FWorkSize:    hls_settings.CWorkSize,
+				FMessageSize: pCfg.GetMessageSize(),
+				FWorkSize:    pCfg.GetWorkSize(),
 			}),
 			pMsgBytes,
 		)

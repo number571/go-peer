@@ -31,6 +31,10 @@ const (
 
 const (
 	tcConfig = `{
+	"settings": {
+		"message_size": 1048576,
+		"work_size": 20
+	},
 	"network": "test_network_key",
 	"address": {
 		"tcp": "test_address_tcp",
@@ -125,7 +129,7 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(node))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, node))
 
 	srv := &http.Server{
 		Addr:    addr,

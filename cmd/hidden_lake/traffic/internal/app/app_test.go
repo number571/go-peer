@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
@@ -32,6 +33,12 @@ func TestApp(t *testing.T) {
 	cfg, err := config.BuildConfig(
 		tcPathConfig,
 		&config.SConfig{
+			SConfigSettings: settings.SConfigSettings{
+				FSettings: settings.SConfigSettingsBlock{
+					FMessageSize: testutils.TCMessageSize,
+					FWorkSize:    testutils.TCWorkSize,
+				},
+			},
 			FNetwork: "_",
 			FAddress: &config.SAddress{
 				FHTTP: testutils.TgAddrs[23],

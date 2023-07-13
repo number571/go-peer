@@ -33,9 +33,7 @@ const (
 )
 
 const (
-	CAKeySize    = 4096      // bits
-	CWorkSize    = 20        // bits
-	CMessageSize = (1 << 20) // 1MiB
+	CAKeySize = 4096 // bits
 )
 
 const (

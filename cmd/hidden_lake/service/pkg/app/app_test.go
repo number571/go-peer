@@ -9,6 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
 
@@ -31,6 +32,12 @@ func TestApp(t *testing.T) {
 
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
+		SConfigSettings: settings.SConfigSettings{
+			FSettings: settings.SConfigSettingsBlock{
+				FMessageSize: testutils.TCMessageSize,
+				FWorkSize:    testutils.TCWorkSize,
+			},
+		},
 		FNetwork: "_",
 		FAddress: &config.SAddress{
 			FTCP:  testutils.TgAddrs[14],
