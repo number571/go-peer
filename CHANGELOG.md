@@ -22,6 +22,7 @@ In progress...
 - Update `hidden_lake/traffic`: append redirect message to nodes from TCP handler
 - Change `examples`: replace middle_hls to middle_hlt
 - Change `hidden_lake/adapters`: change recv: hlt-port -> hls-port
+- Update `theory_of_the_structure_of_hidden_systems`: Append link to economic reasons
 
 ### BUG FIXES
 

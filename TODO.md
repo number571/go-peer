@@ -10,4 +10,3 @@
 8. HLM: do error pages
 9. HLM: group chats, name of senders
 10. Fix docker build for arm macOS 
-11. initNode, initConnKeeper, initDatabase -> to methods
