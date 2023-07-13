@@ -2,16 +2,19 @@ package database
 
 import (
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 )
 
 type IKVDatabase interface {
+	types.ICloser
+
 	Push(message.IMessage) error
 	Load(string) (message.IMessage, error)
 	Hashes() ([]string, error)
 
 	Settings() ISettings
-	types.ICloser
+	GetOriginal() database.IKVDatabase
 }
 
 type ISettings interface {

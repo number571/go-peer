@@ -7,7 +7,6 @@ import (
 
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -50,11 +49,20 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		// enrich logger
 		logBuilder.WithHash(hash).WithProof(proof)
 
-		if _, err := database.Load(encoding.HexEncode(hash)); err == nil {
-			pLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoExist))
-			return
+		// check/push hash of message
+		if db := database.GetOriginal(); db != nil {
+			hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
+			if _, err := db.Get(hashDB); err == nil {
+				pLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoExist))
+				return
+			}
+			if err := db.Set(hashDB, []byte{1}); err != nil {
+				pLogger.PushErro(logBuilder.Get(logbuilder.CLogErroDatabaseSet))
+				return
+			}
 		}
 
+		// push message
 		if err := database.Push(msg); err != nil {
 			pLogger.PushErro(logBuilder.Get(logbuilder.CLogErroDatabaseSet))
 			return

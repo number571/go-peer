@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
-	gp_database "github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 type sKeyValueDB struct {
@@ -16,11 +16,11 @@ type sKeyValueDB struct {
 	fPointer uint64
 
 	fSettings ISettings
-	fDB       gp_database.IKVDatabase
+	fDB       database.IKVDatabase
 }
 
 func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
-	sqlDB, err := gp_database.NewKeyValueDB(
+	sqlDB, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:      pSett.GetPath(),
 			FHashing:   false,
@@ -39,6 +39,10 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	}
 	db.fPointer = db.getPointer()
 	return db, nil
+}
+
+func (p *sKeyValueDB) GetOriginal() database.IKVDatabase {
+	return p.fDB
 }
 
 func (p *sKeyValueDB) Settings() ISettings {

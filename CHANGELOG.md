@@ -15,6 +15,7 @@ In progress...
 - Update `hidden_lake/traffic`: append option 'storage'=(true|false)
 - Update `network/anonymous`: change logger -> logBuilder
 - Remove `hidden_lake/service`: constants (message_size, work_size) to configs .hls, .hlt, .hlm
+- Update `hidden_lake/traffic`: append check/push hash messages into database
 
 ### CHANGES
 
