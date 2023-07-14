@@ -27,9 +27,9 @@ func testConfigDefaultInit(configPath string) {
 	_, _ = BuildConfig(configPath, &SConfig{
 		SConfigSettings: settings.SConfigSettings{
 			FSettings: settings.SConfigSettingsBlock{
-				FMessageSize: tcMessageSize,
-				FWorkSize:    tcWorkSize,
-				FCapMessages: tcCapMessages,
+				FMessageSizeBytes: tcMessageSize,
+				FWorkSizeBits:     tcWorkSize,
+				FMessagesCapacity: tcCapMessages,
 			},
 		},
 		FLogging: []string{"info", "erro"},
@@ -59,17 +59,17 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetWorkSize() != tcWorkSize {
+	if cfg.GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings work size is invalid")
 		return
 	}
 
-	if cfg.GetMessageSize() != tcMessageSize {
+	if cfg.GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
 		return
 	}
 
-	if cfg.GetCapMessages() != tcCapMessages {
+	if cfg.GetMessagesCapacity() != tcCapMessages {
 		t.Error("settings cap messages is invalid")
 		return
 	}

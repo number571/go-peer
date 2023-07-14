@@ -31,8 +31,8 @@ func TestHandleMessageAPI(t *testing.T) {
 
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FMessageSize: testutils.TCMessageSize,
-			FWorkSize:    testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
 		}),
 		privKey,
 	)

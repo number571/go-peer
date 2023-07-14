@@ -48,10 +48,10 @@ var (
 const (
 	tcConfigTemplate = `{
 	"settings": {
-		"message_size": %d,
-		"work_size": %d,
-		"key_size": %d,
-		"queue_period": %d
+		"message_size_bytes": %d,
+		"work_size_bits": %d,
+		"key_size_bits": %d,
+		"queue_period_ms": %d
 	},
 	"logging": ["info", "erro"],
 	"network": "%s",
@@ -111,22 +111,22 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetWorkSize() != tcWorkSize {
+	if cfg.GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings work size is invalid")
 		return
 	}
 
-	if cfg.GetMessageSize() != tcMessageSize {
+	if cfg.GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
 		return
 	}
 
-	if cfg.GetKeySize() != tcKeySize {
+	if cfg.GetKeySizeBits() != tcKeySize {
 		t.Error("settings key size is invalid")
 		return
 	}
 
-	if cfg.GetQueuePeriod() != tcQueuePeriod {
+	if cfg.GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
 		return
 	}

@@ -30,8 +30,8 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 
 		msg := message.LoadMessage(
 			message.NewSettings(&message.SSettings{
-				FMessageSize: pCfg.GetMessageSize(),
-				FWorkSize:    pCfg.GetWorkSize(),
+				FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
+				FWorkSizeBits:     pCfg.GetWorkSizeBits(),
 			}),
 			pMsgBytes,
 		)

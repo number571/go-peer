@@ -9,8 +9,8 @@ import (
 func InitClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    pSett.GetWorkSize(),
-			FMessageSize: pSett.GetMessageSize(),
+			FWorkSizeBits:     pSett.GetWorkSizeBits(),
+			FMessageSizeBytes: pSett.GetMessageSizeBytes(),
 		}),
 		pPrivKey,
 	)

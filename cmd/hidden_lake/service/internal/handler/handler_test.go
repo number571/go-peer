@@ -32,10 +32,10 @@ const (
 const (
 	tcConfig = `{
 	"settings": {
-		"message_size": 1048576,
-		"work_size": 20,
-		"key_size": 4096,
-		"queue_period": 1000
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096,
+		"queue_period_ms": 1000
 	},
 	"network": "test_network_key",
 	"address": {
@@ -191,8 +191,8 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSize:    testutils.TCWorkSize,
-					FMessageSize: testutils.TCMessageSize,
+					FWorkSizeBits:     testutils.TCWorkSize,
+					FMessageSizeBytes: testutils.TCMessageSize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 			),
@@ -210,7 +210,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize:      testutils.TCMessageSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,

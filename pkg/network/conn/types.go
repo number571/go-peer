@@ -21,7 +21,7 @@ type IConn interface {
 
 type ISettings interface {
 	GetNetworkKey() string
-	GetMessageSize() uint64
+	GetMessageSizeBytes() uint64
 	GetLimitVoidSize() uint64
 	GetFetchTimeWait() time.Duration
 	GetWaitReadDeadline() time.Duration

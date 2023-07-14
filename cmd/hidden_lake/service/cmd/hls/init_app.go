@@ -33,7 +33,7 @@ func initApp() (types.ICommand, error) {
 	var privKey asymmetric.IPrivKey
 	switch inputKey {
 	case "":
-		privKey = asymmetric.NewRSAPrivKey(cfg.GetKeySize())
+		privKey = asymmetric.NewRSAPrivKey(cfg.GetKeySizeBits())
 	default:
 		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
 		if err != nil {

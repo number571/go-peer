@@ -57,8 +57,8 @@ func main() {
 
 	dataValue := readUntilEOF()
 	sett := message.NewSettings(&message.SSettings{
-		FWorkSize:    cWorkSize,
-		FMessageSize: getMessageSize(param, dataValue),
+		FWorkSizeBits:     cWorkSize,
+		FMessageSizeBytes: getMessageSize(param, dataValue),
 	})
 
 	switch mod {

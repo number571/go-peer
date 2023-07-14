@@ -22,8 +22,8 @@ const (
 func main() {
 	cfg := &settings.SConfigSettings{
 		FSettings: settings.SConfigSettingsBlock{
-			FWorkSize:    20,
-			FMessageSize: (1 << 20),
+			FWorkSizeBits:     20,
+			FMessageSizeBytes: (1 << 20),
 		},
 	}
 
@@ -33,8 +33,8 @@ func main() {
 			"http://localhost:9573",
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FWorkSize:    cfg.GetWorkSize(),
-				FMessageSize: cfg.GetMessageSize(),
+				FWorkSizeBits:     cfg.GetWorkSizeBits(),
+				FMessageSizeBytes: cfg.GetMessageSizeBytes(),
 			}),
 		),
 	)

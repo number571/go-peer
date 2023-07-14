@@ -81,8 +81,8 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	}
 
 	params := message.NewSettings(&message.SSettings{
-		FWorkSize:    p.Settings().GetWorkSize(),
-		FMessageSize: p.Settings().GetMessageSize(),
+		FWorkSizeBits:     p.Settings().GetWorkSizeBits(),
+		FMessageSizeBytes: p.Settings().GetMessageSizeBytes(),
 	})
 	if !pMsg.IsValid(params) {
 		return errors.NewError("invalid push message")
@@ -133,8 +133,8 @@ func (p *sKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
 
 	msg := message.LoadMessage(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    p.Settings().GetWorkSize(),
-			FMessageSize: p.Settings().GetMessageSize(),
+			FWorkSizeBits:     p.Settings().GetWorkSizeBits(),
+			FMessageSizeBytes: p.Settings().GetMessageSizeBytes(),
 		}),
 		data,
 	)

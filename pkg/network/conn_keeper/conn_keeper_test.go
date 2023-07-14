@@ -19,7 +19,7 @@ func TestConnKeeper(t *testing.T) {
 		FMaxConnects:  testutils.TCMaxConnects,
 		FWriteTimeout: time.Minute,
 		FConnSettings: conn.NewSettings(&conn.SSettings{
-			FMessageSize:      testutils.TCMessageSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
 			FWriteDeadline:    time.Minute,

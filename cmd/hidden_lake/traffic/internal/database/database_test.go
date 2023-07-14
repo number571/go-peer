@@ -25,10 +25,10 @@ func testHmsDefaultInit(dbPath string) error {
 	os.RemoveAll(dbPath)
 	var err error
 	tgDB, err = NewKeyValueDB(NewSettings(&SSettings{
-		FPath:        dbPath,
-		FMessageSize: testutils.TCMessageSize,
-		FWorkSize:    testutils.TCWorkSize,
-		FCapacity:    testutils.TCCapacity,
+		FPath:             dbPath,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FCapacity:         testutils.TCCapacity,
 	}))
 	if err != nil {
 		return err
@@ -50,8 +50,8 @@ func TestDB(t *testing.T) {
 
 	cl := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    testutils.TCWorkSize,
-			FMessageSize: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)

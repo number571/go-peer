@@ -69,7 +69,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	}
 
 	var (
-		maxMsgSize = p.fSettings.GetMessageSize() >> 1 // limit of bytes without hex
+		maxMsgSize = p.fSettings.GetMessageSizeBytes() >> 1 // limit of bytes without hex
 		resultSize = uint64(p.fVoidMsgSize) + uint64(len(pPld.ToBytes()))
 	)
 
@@ -84,7 +84,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	return p.encryptWithParams(
 		pRecv,
 		pPld,
-		p.fSettings.GetWorkSize(),
+		p.fSettings.GetWorkSizeBits(),
 		maxMsgSize-resultSize,
 	), nil
 }
@@ -147,7 +147,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Proof of work. Prevent spam.
-	diff := p.fSettings.GetWorkSize()
+	diff := p.fSettings.GetWorkSizeBits()
 	puzzle := puzzle.NewPoWPuzzle(diff)
 	if !puzzle.VerifyBytes(pMsg.GetBody().GetHash(), pMsg.GetBody().GetProof()) {
 		return nil, nil, errors.NewError("invalid proof of msg")

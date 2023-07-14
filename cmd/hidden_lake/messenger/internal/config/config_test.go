@@ -16,9 +16,9 @@ const (
 const (
 	tcConfigTemplate = `{
 	"settings": {
-		"message_size": %d,
-		"work_size": %d,
-		"key_size": %d
+		"message_size_bytes": %d,
+		"work_size_bits": %d,
+		"key_size_bits": %d
 	},
 	"logging": ["info", "erro"],
 	"address": {
@@ -72,17 +72,17 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetWorkSize() != tcWorkSize {
+	if cfg.GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings work size is invalid")
 		return
 	}
 
-	if cfg.GetMessageSize() != tcMessageSize {
+	if cfg.GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
 		return
 	}
 
-	if cfg.GetKeySize() != tcKeySize {
+	if cfg.GetKeySizeBits() != tcKeySize {
 		t.Error("settings key size is invalid")
 		return
 	}

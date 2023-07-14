@@ -20,7 +20,7 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 			FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FNetworkKey:       pCfg.GetNetwork(),
-				FMessageSize:      pCfg.GetMessageSize(),
+				FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
 				FLimitVoidSize:    hls_settings.CConnLimitVoidSize,
 				FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
 				FReadDeadline:     hls_settings.CConnReadDeadline,

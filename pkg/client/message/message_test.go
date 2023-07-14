@@ -27,8 +27,8 @@ func TestMessage(t *testing.T) {
 	}
 
 	params := NewSettings(&SSettings{
-		FWorkSize:    testutils.TCWorkSize,
-		FMessageSize: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessageSizeBytes: testutils.TCMessageSize,
 	})
 	msg := LoadMessage(params, msgBytes)
 	if msg == nil {

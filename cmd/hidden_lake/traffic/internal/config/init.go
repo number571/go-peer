@@ -22,9 +22,9 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			SConfigSettings: settings.SConfigSettings{
 				FSettings: settings.SConfigSettingsBlock{
-					FMessageSize: hls_settings.CDefaultMessageSize,
-					FWorkSize:    hls_settings.CDefaultWorkSize,
-					FCapMessages: hlt_settings.CDefaultCapMessages,
+					FMessageSizeBytes: hls_settings.CDefaultMessageSize,
+					FWorkSizeBits:     hls_settings.CDefaultWorkSize,
+					FMessagesCapacity: hlt_settings.CDefaultCapMessages,
 				},
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

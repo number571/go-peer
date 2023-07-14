@@ -6,18 +6,18 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FPath        string
-	FMessageSize uint64
-	FWorkSize    uint64
-	FCapacity    uint64
+	FPath             string
+	FMessageSizeBytes uint64
+	FWorkSizeBits     uint64
+	FCapacity         uint64
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FPath:        pSett.FPath,
-		FWorkSize:    pSett.FWorkSize,
-		FMessageSize: pSett.FMessageSize,
-		FCapacity:    pSett.FCapacity,
+		FPath:             pSett.FPath,
+		FWorkSizeBits:     pSett.FWorkSizeBits,
+		FMessageSizeBytes: pSett.FMessageSizeBytes,
+		FCapacity:         pSett.FCapacity,
 	}).mustNotNull()
 }
 
@@ -25,11 +25,11 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
 		panic(`p.FPath == ""`)
 	}
-	if p.FWorkSize == 0 {
-		panic(`p.FWorkSize == 0`)
+	if p.FWorkSizeBits == 0 {
+		panic(`p.FWorkSizeBits == 0`)
 	}
-	if p.FMessageSize == 0 {
-		panic(`p.FMessageSize == 0`)
+	if p.FMessageSizeBytes == 0 {
+		panic(`p.FMessageSizeBytes == 0`)
 	}
 	// if capacity=0 -> then storage=false
 	return p
@@ -43,10 +43,10 @@ func (s *sSettings) GetCapacity() uint64 {
 	return s.FCapacity
 }
 
-func (p *sSettings) GetMessageSize() uint64 {
-	return p.FMessageSize
+func (p *sSettings) GetMessageSizeBytes() uint64 {
+	return p.FMessageSizeBytes
 }
 
-func (p *sSettings) GetWorkSize() uint64 {
-	return p.FWorkSize
+func (p *sSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
 }

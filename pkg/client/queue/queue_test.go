@@ -16,8 +16,8 @@ import (
 func TestQueue(t *testing.T) {
 	oldClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    testutils.TCWorkSize,
-			FMessageSize: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
 	)
@@ -37,8 +37,8 @@ func TestQueue(t *testing.T) {
 
 	newClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    testutils.TCWorkSize,
-			FMessageSize: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2),
 	)

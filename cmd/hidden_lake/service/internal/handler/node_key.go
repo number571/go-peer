@@ -34,7 +34,7 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.Hand
 				return
 			}
 
-			if privKey.GetSize() != pWrapper.GetConfig().GetKeySize() {
+			if privKey.GetSize() != pWrapper.GetConfig().GetKeySizeBits() {
 				api.Response(pW, http.StatusNotAcceptable, "failed: incorrect private key size")
 				return
 			}

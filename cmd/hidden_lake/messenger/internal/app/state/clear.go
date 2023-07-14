@@ -24,7 +24,7 @@ func (p *sStateManager) clearClientState() error {
 func (p *sStateManager) clearClientPrivKey() error {
 	client := p.GetClient().Service()
 
-	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySize())
+	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySizeBits())
 	if err := client.SetPrivKey(pseudoPrivKey); err != nil {
 		return errors.WrapError(err, "set pseudo private key")
 	}

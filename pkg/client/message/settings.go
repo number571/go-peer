@@ -6,31 +6,31 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FWorkSize    uint64
-	FMessageSize uint64
+	FWorkSizeBits     uint64
+	FMessageSizeBytes uint64
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FWorkSize:    pSett.FWorkSize,
-		FMessageSize: pSett.FMessageSize,
+		FWorkSizeBits:     pSett.FWorkSizeBits,
+		FMessageSizeBytes: pSett.FMessageSizeBytes,
 	}).mustNotNull()
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FWorkSize == 0 {
-		panic(`p.FWorkSize == 0`)
+	if p.FWorkSizeBits == 0 {
+		panic(`p.FWorkSizeBits == 0`)
 	}
-	if p.FMessageSize == 0 {
-		panic(`p.FMessageSize == 0`)
+	if p.FMessageSizeBytes == 0 {
+		panic(`p.FMessageSizeBytes == 0`)
 	}
 	return p
 }
 
-func (p *sSettings) GetWorkSize() uint64 {
-	return p.FWorkSize
+func (p *sSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
 }
 
-func (p *sSettings) GetMessageSize() uint64 {
-	return p.FMessageSize
+func (p *sSettings) GetMessageSizeBytes() uint64 {
+	return p.FMessageSizeBytes
 }

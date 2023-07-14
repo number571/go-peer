@@ -66,8 +66,8 @@ func NewApp(
 				fmt.Sprintf("http://%s", pCfg.GetConnection().GetTraffic()),
 				&http.Client{Timeout: time.Minute},
 				message.NewSettings(&message.SSettings{
-					FWorkSize:    pCfg.GetWorkSize(),
-					FMessageSize: pCfg.GetMessageSize(),
+					FWorkSizeBits:     pCfg.GetWorkSizeBits(),
+					FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
 				}),
 			),
 		),

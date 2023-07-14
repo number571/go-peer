@@ -174,7 +174,7 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}()
 
 	msgSize, err := p.recvBlockSize(p.fSettings.GetWaitReadDeadline()) // the connection has not sent anything yet
-	if err != nil || msgSize > p.fSettings.GetMessageSize() {
+	if err != nil || msgSize > p.fSettings.GetMessageSizeBytes() {
 		return
 	}
 

@@ -72,8 +72,8 @@ func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
 
 	msg := message.LoadMessage(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    p.fParams.GetWorkSize(),
-			FMessageSize: p.fParams.GetMessageSize(),
+			FWorkSizeBits:     p.fParams.GetWorkSizeBits(),
+			FMessageSizeBytes: p.fParams.GetMessageSizeBytes(),
 		}),
 		encoding.HexDecode(resp),
 	)

@@ -63,13 +63,13 @@ func (p *SMessage) ToBytes() []byte {
 }
 
 func (p *SMessage) IsValid(psett ISettings) bool {
-	if uint64(len(p.ToBytes())) > psett.GetMessageSize() {
+	if uint64(len(p.ToBytes())) > psett.GetMessageSizeBytes() {
 		return false
 	}
 	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
 		return false
 	}
-	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSize())
+	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSizeBits())
 	return puzzle.VerifyBytes(p.GetBody().GetHash(), p.GetBody().GetProof())
 }
 

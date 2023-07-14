@@ -10,39 +10,39 @@ type SConfigSettings struct {
 
 type SConfigSettingsBlock struct {
 	// basic values
-	FMessageSize uint64 `json:"message_size"`
-	FWorkSize    uint64 `json:"work_size"`
+	FMessageSizeBytes uint64 `json:"message_size_bytes"`
+	FWorkSizeBits     uint64 `json:"work_size_bits"`
 
 	// HLS, HLM
-	FKeySize uint64 `json:"key_size,omitempty"`
+	FKeySizeBits uint64 `json:"key_size_bits,omitempty"`
 
 	// HLS
-	FQueuePeriod uint64 `json:"queue_period,omitempty"`
+	FQueuePeriodMS uint64 `json:"queue_period_ms,omitempty"`
 
 	// HLT
-	FCapMessages uint64 `json:"cap_messages,omitempty"`
+	FMessagesCapacity uint64 `json:"messages_capacity,omitempty"`
 }
 
 func (p *SConfigSettingsBlock) IsValid() bool {
-	return p.FMessageSize != 0 && p.FWorkSize != 0
+	return p.FMessageSizeBytes != 0 && p.FWorkSizeBits != 0
 }
 
-func (p *SConfigSettings) GetMessageSize() uint64 {
-	return p.FSettings.FMessageSize
+func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
+	return p.FSettings.FMessageSizeBytes
 }
 
-func (p *SConfigSettings) GetWorkSize() uint64 {
-	return p.FSettings.FWorkSize
+func (p *SConfigSettings) GetWorkSizeBits() uint64 {
+	return p.FSettings.FWorkSizeBits
 }
 
-func (p *SConfigSettings) GetKeySize() uint64 {
-	return p.FSettings.FKeySize
+func (p *SConfigSettings) GetKeySizeBits() uint64 {
+	return p.FSettings.FKeySizeBits
 }
 
-func (p *SConfigSettings) GetQueuePeriod() uint64 {
-	return p.FSettings.FQueuePeriod
+func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
+	return p.FSettings.FQueuePeriodMS
 }
 
-func (p *SConfigSettings) GetCapMessages() uint64 {
-	return p.FSettings.FCapMessages
+func (p *SConfigSettings) GetMessagesCapacity() uint64 {
+	return p.FSettings.FMessagesCapacity
 }

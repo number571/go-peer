@@ -136,15 +136,15 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 
 	cfg := &settings.SConfigSettings{
 		FSettings: settings.SConfigSettingsBlock{
-			FWorkSize:    20,
-			FMessageSize: (1 << 20),
+			FWorkSizeBits:     20,
+			FMessageSizeBytes: (1 << 20),
 		},
 	}
 
 	msg := message.LoadMessage(
 		message.NewSettings(&message.SSettings{
-			FMessageSize: cfg.GetMessageSize(),
-			FWorkSize:    cfg.GetWorkSize(),
+			FMessageSizeBytes: cfg.GetMessageSizeBytes(),
+			FWorkSizeBits:     cfg.GetWorkSizeBits(),
 		}),
 		bytesMsg[1:],
 	)

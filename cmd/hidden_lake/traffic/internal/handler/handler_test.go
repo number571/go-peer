@@ -27,10 +27,10 @@ const (
 func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IWrapperDB, hlt_client.IClient) {
 	db, err := database.NewKeyValueDB(
 		database.NewSettings(&database.SSettings{
-			FPath:        fmt.Sprintf(databaseTemplate, addr),
-			FMessageSize: testutils.TCMessageSize,
-			FWorkSize:    testutils.TCWorkSize,
-			FCapacity:    testutils.TCCapacity,
+			FPath:             fmt.Sprintf(databaseTemplate, addr),
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FCapacity:         testutils.TCCapacity,
 		}),
 	)
 	if err != nil {
@@ -46,8 +46,8 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 			fmt.Sprintf("http://%s", addr),
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FMessageSize: testutils.TCMessageSize,
-				FWorkSize:    testutils.TCWorkSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWorkSizeBits:     testutils.TCWorkSize,
 			}),
 		),
 	)
@@ -119,8 +119,8 @@ func testNewClient() client.IClient {
 	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FMessageSize: testutils.TCMessageSize,
-			FWorkSize:    testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
 		}),
 		privKey,
 	)
@@ -134,7 +134,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize:      testutils.TCMessageSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,

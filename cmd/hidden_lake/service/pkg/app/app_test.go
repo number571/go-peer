@@ -34,10 +34,10 @@ func TestApp(t *testing.T) {
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
 		SConfigSettings: settings.SConfigSettings{
 			FSettings: settings.SConfigSettingsBlock{
-				FMessageSize: testutils.TCMessageSize,
-				FWorkSize:    testutils.TCWorkSize,
-				FKeySize:     testutils.TcAKeySize,
-				FQueuePeriod: testutils.TCQueuePeriod,
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWorkSizeBits:     testutils.TCWorkSize,
+				FKeySizeBits:      testutils.TcAKeySize,
+				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
 		FNetwork: "_",

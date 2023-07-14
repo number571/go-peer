@@ -38,15 +38,15 @@ func HandleMessageAPI(pWrapperDB database.IWrapperDB) http.HandlerFunc {
 				return
 			}
 
-			if uint64(len(msgBytes)) > database.Settings().GetMessageSize() {
+			if uint64(len(msgBytes)) > database.Settings().GetMessageSizeBytes() {
 				api.Response(pW, http.StatusLengthRequired, "failed: incorrect package size")
 				return
 			}
 
 			msg := message.LoadMessage(
 				message.NewSettings(&message.SSettings{
-					FMessageSize: database.Settings().GetMessageSize(),
-					FWorkSize:    database.Settings().GetWorkSize(),
+					FMessageSizeBytes: database.Settings().GetMessageSizeBytes(),
+					FWorkSizeBits:     database.Settings().GetWorkSizeBits(),
 				}),
 				msgBytes,
 			)

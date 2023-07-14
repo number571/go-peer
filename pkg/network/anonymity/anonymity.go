@@ -241,8 +241,8 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 
 		msg := message.LoadMessage(
 			message.NewSettings(&message.SSettings{
-				FWorkSize:    settings.GetWorkSize(),
-				FMessageSize: settings.GetMessageSize(),
+				FWorkSizeBits:     settings.GetWorkSizeBits(),
+				FMessageSizeBytes: settings.GetMessageSizeBytes(),
 			}),
 			pMsgBytes,
 		)

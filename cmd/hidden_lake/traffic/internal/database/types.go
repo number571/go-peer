@@ -20,8 +20,8 @@ type IKVDatabase interface {
 type ISettings interface {
 	GetPath() string
 	GetCapacity() uint64
-	GetMessageSize() uint64
-	GetWorkSize() uint64
+	GetMessageSizeBytes() uint64
+	GetWorkSizeBits() uint64
 }
 
 type IWrapperDB interface {

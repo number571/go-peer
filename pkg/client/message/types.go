@@ -11,8 +11,8 @@ type IMessage interface {
 }
 
 type ISettings interface {
-	GetMessageSize() uint64
-	GetWorkSize() uint64
+	GetMessageSizeBytes() uint64
+	GetWorkSizeBits() uint64
 }
 
 type IHead interface {

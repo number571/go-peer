@@ -90,7 +90,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 func (p *SConfig) initConfig(filepath string) error {
 	p.fFilepath = filepath
 
-	if !p.FSettings.IsValid() || p.FSettings.FKeySize == 0 || p.FSettings.FQueuePeriod == 0 {
+	if !p.FSettings.IsValid() || p.FSettings.FKeySizeBits == 0 || p.FSettings.FQueuePeriodMS == 0 {
 		return errors.NewError("load config settings")
 	}
 
@@ -140,7 +140,7 @@ func (p *SConfig) loadPubKeys() error {
 			return errors.NewError(fmt.Sprintf("public key is nil for '%s'", name))
 		}
 		p.fFriends[name] = pubKey
-		if pubKey.GetSize() != p.FSettings.FKeySize {
+		if pubKey.GetSize() != p.FSettings.FKeySizeBits {
 			return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))
 		}
 	}

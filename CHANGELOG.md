@@ -14,7 +14,7 @@ In progress...
 - Create `CONNECTIONS.md`: list of connections to HLT relayers and HLS nodes
 - Update `hidden_lake/traffic`: append option 'storage'=(true|false)
 - Update `network/anonymous`: change logger -> logBuilder
-- Replace `hidden_lake/service`: constants (message_size, work_size, key_size, queue_period, cap_messaged) to configs .hls, .hlt, .hlm
+- Replace `hidden_lake/service`: constants (message_size_bytes, work_size_bits, key_size_bits, queue_period_ms, messages_capacity) to configs .hls, .hlt, .hlm
 - Update `hidden_lake/traffic`: append check/push hash messages into database
 
 ### CHANGES

@@ -66,7 +66,7 @@ func SignUpPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 			switch privateKey {
 			case "":
-				privKey = asymmetric.NewRSAPrivKey(pStateManager.GetConfig().GetKeySize())
+				privKey = asymmetric.NewRSAPrivKey(pStateManager.GetConfig().GetKeySizeBits())
 			default:
 				privKey = asymmetric.LoadRSAPrivKey(privateKey)
 			}

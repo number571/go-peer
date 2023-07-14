@@ -104,7 +104,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSize:      testutils.TCMessageSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,

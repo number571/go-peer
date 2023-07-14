@@ -110,10 +110,10 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 	cfg, err := config.BuildConfig(cfgPath, &config.SConfig{
 		SConfigSettings: settings.SConfigSettings{
 			FSettings: settings.SConfigSettingsBlock{
-				FMessageSize: testutils.TCMessageSize,
-				FWorkSize:    testutils.TCWorkSize,
-				FKeySize:     testutils.TcAKeySize,
-				FQueuePeriod: testutils.TCQueuePeriod,
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWorkSizeBits:     testutils.TCWorkSize,
+				FKeySizeBits:      testutils.TcAKeySize,
+				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
 	})

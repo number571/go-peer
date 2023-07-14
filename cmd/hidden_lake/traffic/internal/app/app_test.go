@@ -35,8 +35,8 @@ func TestApp(t *testing.T) {
 		&config.SConfig{
 			SConfigSettings: settings.SConfigSettings{
 				FSettings: settings.SConfigSettingsBlock{
-					FMessageSize: testutils.TCMessageSize,
-					FWorkSize:    testutils.TCWorkSize,
+					FMessageSizeBytes: testutils.TCMessageSize,
+					FWorkSizeBits:     testutils.TCWorkSize,
 				},
 			},
 			FNetwork: "_",
@@ -68,8 +68,8 @@ func TestApp(t *testing.T) {
 			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FMessageSize: testutils.TCMessageSize,
-				FWorkSize:    testutils.TCWorkSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWorkSizeBits:     testutils.TCWorkSize,
 			}),
 		),
 	)

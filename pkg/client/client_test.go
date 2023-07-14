@@ -105,8 +105,8 @@ func TestMessageSize(t *testing.T) {
 func testNewClient() IClient {
 	return NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSize:    testutils.TCWorkSize,
-			FMessageSize: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)

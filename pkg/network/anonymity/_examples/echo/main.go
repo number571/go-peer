@@ -104,8 +104,8 @@ func newNode(serviceAddress, dbPath string) anonymity.INode {
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSize:    10,
-					FMessageSize: msgSize,
+					FWorkSizeBits:     10,
+					FMessageSizeBytes: msgSize,
 				}),
 				asymmetric.NewRSAPrivKey(1024),
 			),
@@ -125,8 +125,8 @@ func nodeSettings(serviceAddress string) network.ISettings {
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FMessageSize:   msgSize,
-		FLimitVoidSize: 1, // not used
-		FFetchTimeWait: 1, // not used
+		FMessageSizeBytes: msgSize,
+		FLimitVoidSize:    1, // not used
+		FFetchTimeWait:    1, // not used
 	})
 }
