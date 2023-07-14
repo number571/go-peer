@@ -20,6 +20,7 @@ const (
 	tcConsumer2   = "test_consumer2"
 	tcMessageSize = (1 << 20)
 	tcWorkSize    = 20
+	tcCapMessages = 1000
 )
 
 func testConfigDefaultInit(configPath string) {
@@ -28,11 +29,11 @@ func testConfigDefaultInit(configPath string) {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSize: tcMessageSize,
 				FWorkSize:    tcWorkSize,
+				FCapMessages: tcCapMessages,
 			},
 		},
 		FLogging: []string{"info", "erro"},
 		FNetwork: tcNetwork,
-		FStorage: tcStorage,
 		FAddress: &SAddress{
 			FTCP:  tcAddress1,
 			FHTTP: tcAddress2,
@@ -68,6 +69,11 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
+	if cfg.GetCapMessages() != tcCapMessages {
+		t.Error("settings cap messages is invalid")
+		return
+	}
+
 	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
@@ -85,11 +91,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetNetwork() != tcNetwork {
 		t.Error("network is invalid")
-		return
-	}
-
-	if cfg.GetStorage() != tcStorage {
-		t.Error("storage is invalid")
 		return
 	}
 

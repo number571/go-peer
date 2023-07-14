@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -91,7 +90,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 func (p *SConfig) initConfig(filepath string) error {
 	p.fFilepath = filepath
 
-	if !p.FSettings.IsValid() {
+	if !p.FSettings.IsValid() || p.FSettings.FKeySize == 0 || p.FSettings.FQueuePeriod == 0 {
 		return errors.NewError("load config settings")
 	}
 
@@ -141,7 +140,7 @@ func (p *SConfig) loadPubKeys() error {
 			return errors.NewError(fmt.Sprintf("public key is nil for '%s'", name))
 		}
 		p.fFriends[name] = pubKey
-		if pubKey.GetSize() != pkg_settings.CAKeySize {
+		if pubKey.GetSize() != p.FSettings.FKeySize {
 			return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))
 		}
 	}

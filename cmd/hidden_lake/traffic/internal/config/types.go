@@ -6,11 +6,10 @@ import (
 )
 
 type IConfig interface {
-	settings.IConfigSettings
+	settings.IConfigSettingsHLT
 
 	GetLogging() logger.ILogging
 	GetNetwork() string
-	GetStorage() bool
 	GetAddress() IAddress
 	GetConnections() []string
 	GetConsumers() []string

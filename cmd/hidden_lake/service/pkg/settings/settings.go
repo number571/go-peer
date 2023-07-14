@@ -33,13 +33,15 @@ const (
 )
 
 const (
-	CAKeySize = 4096 // bits
+	CDefaultMessageSize = (1 << 20) // 1MiB
+	CDefaultWorkSize    = 20        // bits
+	CDefaultKeySize     = 4096      // bits
+	CDefaultQueuePeriod = 5000      // 5seconds
 )
 
 const (
 	CQueueCapacity     = (1 << 6) // messages in queue
 	CQueuePoolCapacity = (1 << 5) // generated fake messages
-	CQueueDuration     = 5 * time.Second
 )
 
 const (
@@ -53,10 +55,7 @@ const (
 	CConnWaitReadDeadline = time.Hour
 	CConnReadDeadline     = time.Minute
 	CConnWriteDeadline    = time.Minute
-)
-
-const (
-	CConnKeeperDuration = time.Minute
+	CConnKeeperDuration   = time.Minute
 )
 
 const (

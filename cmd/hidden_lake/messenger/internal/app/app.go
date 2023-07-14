@@ -50,6 +50,7 @@ func NewApp(
 	}
 
 	state := state.NewStateManager(
+		pCfg,
 		stg,
 		database.NewWrapperDB(),
 		hls_client.NewClient(

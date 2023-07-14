@@ -36,6 +36,8 @@ func TestApp(t *testing.T) {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSize: testutils.TCMessageSize,
 				FWorkSize:    testutils.TCWorkSize,
+				FKeySize:     testutils.TcAKeySize,
+				FQueuePeriod: testutils.TCQueuePeriod,
 			},
 		},
 		FNetwork: "_",

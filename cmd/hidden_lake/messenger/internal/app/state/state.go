@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/entropy"
@@ -24,6 +25,7 @@ var (
 type sStateManager struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
+	fConfig   config.IConfig
 	fStorage  storage.IKVStorage
 	fDatabase database.IWrapperDB
 	fClient   *sClient
@@ -36,6 +38,7 @@ type sClient struct {
 }
 
 func NewStateManager(
+	pConfig config.IConfig,
 	pStorage storage.IKVStorage,
 	pDatabase database.IWrapperDB,
 	pHlsClient hls_client.IClient,
@@ -43,6 +46,7 @@ func NewStateManager(
 	pPathTo string,
 ) IStateManager {
 	return &sStateManager{
+		fConfig:   pConfig,
 		fStorage:  pStorage,
 		fDatabase: pDatabase,
 		fClient: &sClient{
@@ -63,6 +67,10 @@ func (p *sClient) Traffic() hlt_client.IClient {
 
 func (p *sStateManager) GetClient() iClient {
 	return p.fClient
+}
+
+func (p *sStateManager) GetConfig() config.IConfig {
+	return p.fConfig
 }
 
 func (p *sStateManager) GetWrapperDB() database.IWrapperDB {

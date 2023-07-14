@@ -31,9 +31,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FMessageSize == 0 {
 		panic(`p.FMessageSize == 0`)
 	}
-	if p.FCapacity == 0 {
-		panic(`p.FLimitMessages == 0`)
-	}
+	// if capacity=0 -> then storage=false
 	return p
 }
 

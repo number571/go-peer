@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func SignUpPage(pStateManager state.IStateManager) http.HandlerFunc {
@@ -67,7 +66,7 @@ func SignUpPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 			switch privateKey {
 			case "":
-				privKey = asymmetric.NewRSAPrivKey(hls_settings.CAKeySize)
+				privKey = asymmetric.NewRSAPrivKey(pStateManager.GetConfig().GetKeySize())
 			default:
 				privKey = asymmetric.LoadRSAPrivKey(privateKey)
 			}

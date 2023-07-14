@@ -1,7 +1,6 @@
 package state
 
 import (
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
 )
@@ -25,7 +24,7 @@ func (p *sStateManager) clearClientState() error {
 func (p *sStateManager) clearClientPrivKey() error {
 	client := p.GetClient().Service()
 
-	pseudoPrivKey := asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
+	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySize())
 	if err := client.SetPrivKey(pseudoPrivKey); err != nil {
 		return errors.WrapError(err, "set pseudo private key")
 	}

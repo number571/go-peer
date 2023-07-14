@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
@@ -62,7 +61,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	defer p.fMutex.Unlock()
 
 	for name, pubKey := range pFriends {
-		if pubKey.GetSize() == pkg_settings.CAKeySize {
+		if pubKey.GetSize() == p.fConfig.GetKeySize() {
 			continue
 		}
 		return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))

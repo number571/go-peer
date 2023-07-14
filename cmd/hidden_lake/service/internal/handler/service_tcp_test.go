@@ -86,6 +86,8 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSize: testutils.TCMessageSize,
 				FWorkSize:    testutils.TCWorkSize,
+				FKeySize:     testutils.TcAKeySize,
+				FQueuePeriod: testutils.TCQueuePeriod,
 			},
 		},
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 type IConfig interface {
-	settings.IConfigSettings
+	settings.IConfigSettingsHLM
 
 	GetAddress() IAddress
 	GetLogging() logger.ILogging

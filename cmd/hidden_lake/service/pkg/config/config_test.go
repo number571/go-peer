@@ -26,6 +26,8 @@ const (
 	tcServiceName2 = "test_service2"
 	tcMessageSize  = (1 << 20)
 	tcWorkSize     = 20
+	tcKeySize      = 4096
+	tcQueuePeriod  = 1000
 )
 
 var (
@@ -47,7 +49,9 @@ const (
 	tcConfigTemplate = `{
 	"settings": {
 		"message_size": %d,
-		"work_size": %d
+		"work_size": %d,
+		"key_size": %d,
+		"queue_period": %d
 	},
 	"logging": ["info", "erro"],
 	"network": "%s",
@@ -75,6 +79,8 @@ func testNewConfigString() string {
 		tcConfigTemplate,
 		tcMessageSize,
 		tcWorkSize,
+		tcKeySize,
+		tcQueuePeriod,
 		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
@@ -112,6 +118,16 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetMessageSize() != tcMessageSize {
 		t.Error("settings message size is invalid")
+		return
+	}
+
+	if cfg.GetKeySize() != tcKeySize {
+		t.Error("settings key size is invalid")
+		return
+	}
+
+	if cfg.GetQueuePeriod() != tcQueuePeriod {
+		t.Error("settings queue period is invalid")
 		return
 	}
 

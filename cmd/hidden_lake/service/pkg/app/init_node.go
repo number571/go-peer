@@ -1,6 +1,8 @@
 package app
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -45,7 +47,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: pkg_settings.CQueueCapacity,
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
-				FDuration:     pkg_settings.CQueueDuration,
+				FDuration:     time.Duration(pCfg.GetQueuePeriod()) * time.Millisecond,
 			}),
 			pkg_settings.InitClient(pCfg, pPrivKey),
 		),

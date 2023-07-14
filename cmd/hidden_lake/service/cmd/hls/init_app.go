@@ -25,10 +25,15 @@ func initApp() (types.ICommand, error) {
 	flag.StringVar(&inputKey, "key", "", "input private key from file")
 	flag.Parse()
 
+	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
+	if err != nil {
+		return nil, errors.WrapError(err, "init config")
+	}
+
 	var privKey asymmetric.IPrivKey
 	switch inputKey {
 	case "":
-		privKey = asymmetric.NewRSAPrivKey(pkg_settings.CAKeySize)
+		privKey = asymmetric.NewRSAPrivKey(cfg.GetKeySize())
 	default:
 		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
 		if err != nil {
@@ -39,11 +44,6 @@ func initApp() (types.ICommand, error) {
 
 	if privKey == nil {
 		return nil, errors.NewError("private key is invalid")
-	}
-
-	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
-	if err != nil {
-		return nil, errors.WrapError(err, "init config")
 	}
 
 	return app.NewApp(cfg, privKey, inputPath), nil

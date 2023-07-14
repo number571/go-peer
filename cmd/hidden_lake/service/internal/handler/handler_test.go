@@ -33,7 +33,9 @@ const (
 	tcConfig = `{
 	"settings": {
 		"message_size": 1048576,
-		"work_size": 20
+		"work_size": 20,
+		"key_size": 4096,
+		"queue_period": 1000
 	},
 	"network": "test_network_key",
 	"address": {

@@ -20,7 +20,11 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
-	sqlDB, err := database.NewKeyValueDB(
+	if pSett.GetCapacity() == 0 {
+		return nil, errors.NewError("capacity of messages = 0")
+	}
+
+	kvDB, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:      pSett.GetPath(),
 			FHashing:   false,
@@ -30,12 +34,10 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	if err != nil {
 		return nil, errors.WrapError(err, "new key/value database")
 	}
-	if sqlDB == nil {
-		return nil, errors.NewError("storage (hashes) is nil")
-	}
+
 	db := &sKeyValueDB{
 		fSettings: pSett,
-		fDB:       sqlDB,
+		fDB:       kvDB,
 	}
 	db.fPointer = db.getPointer()
 	return db, nil

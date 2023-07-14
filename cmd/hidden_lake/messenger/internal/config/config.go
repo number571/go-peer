@@ -80,7 +80,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 }
 
 func (p *SConfig) initConfig() error {
-	if !p.FSettings.IsValid() {
+	if !p.FSettings.IsValid() || p.FSettings.FKeySize == 0 {
 		return errors.NewError("load config settings")
 	}
 

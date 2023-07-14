@@ -17,7 +17,7 @@ type IEditor interface {
 }
 
 type IConfig interface {
-	settings.IConfigSettings
+	settings.IConfigSettingsHLS
 
 	GetNetwork() string
 	GetLogging() logger.ILogging

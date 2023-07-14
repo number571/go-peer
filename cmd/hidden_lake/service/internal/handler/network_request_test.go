@@ -113,6 +113,8 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSize: testutils.TCMessageSize,
 				FWorkSize:    testutils.TCWorkSize,
+				FKeySize:     testutils.TcAKeySize,
+				FQueuePeriod: testutils.TCQueuePeriod,
 			},
 		},
 		FServices: map[string]string{
