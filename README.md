@@ -156,6 +156,12 @@ Default config `hls.cfg`
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096,
+		"queue_period_ms": 5000
+	},
 	"logging": [
 		"info",
 		"warn",
@@ -166,7 +172,7 @@ Default config `hls.cfg`
 		"http": ":9572"
 	},
 	"services": {
-		"go-peer/hidden-lake-messenger": "messenger:9592"
+		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"
 	}
 }
 ```
@@ -337,6 +343,11 @@ Default config `hlm.cfg`
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096
+	},
 	"logging": [
 		"info",
 		"warn",
@@ -347,8 +358,8 @@ Default config `hlm.cfg`
 		"incoming": ":9592"
 	},
 	"connection": {
-		"service": "service:9572",
-		"traffic": "traffic:9582"
+		"service": "127.0.0.1:9572",
+		"traffic": "127.0.0.1:9582"
 	}
 }
 ```
@@ -441,6 +452,11 @@ Default config `hlt.cfg`
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"messages_capacity": 1000
+	},
 	"logging": [
 		"info",
 		"warn",
@@ -451,7 +467,7 @@ Default config `hlt.cfg`
 		"http": ":9582"
 	},
 	"connections": [
-		"service:9571"
+		"127.0.0.1:9571"
 	]
 }
 ```

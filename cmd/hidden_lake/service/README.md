@@ -81,6 +81,12 @@ Default config `hls.cfg`
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096,
+		"queue_period_ms": 5000
+	},
 	"logging": [
 		"info",
 		"warn",
@@ -91,7 +97,7 @@ Default config `hls.cfg`
 		"http": ":9572"
 	},
 	"services": {
-		"go-peer/hidden-lake-messenger": "messenger:9592"
+		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"
 	}
 }
 ```
@@ -227,6 +233,12 @@ $ make
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096,
+		"queue_period_ms": 5000
+	},
 	"logging": ["info", "warn", "erro"],
 	"network": "hls-network-key",
 	"address": {

@@ -55,6 +55,11 @@ Default config `hlm.cfg`
 
 ```json
 {
+	"settings": {
+		"message_size_bytes": 1048576,
+		"work_size_bits": 20,
+		"key_size_bits": 4096
+	},
 	"logging": [
 		"info",
 		"warn",
@@ -65,8 +70,8 @@ Default config `hlm.cfg`
 		"incoming": ":9592"
 	},
 	"connection": {
-		"service": "service:9572",
-		"traffic": "traffic:9582"
+		"service": "127.0.0.1:9572",
+		"traffic": "127.0.0.1:9582"
 	}
 }
 ```
