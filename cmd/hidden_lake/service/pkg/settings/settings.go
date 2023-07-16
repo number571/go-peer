@@ -55,7 +55,7 @@ const (
 	CConnWaitReadDeadline = time.Hour
 	CConnReadDeadline     = time.Minute
 	CConnWriteDeadline    = time.Minute
-	CConnKeeperDuration   = time.Minute
+	CConnKeeperDuration   = 10 * time.Second
 )
 
 const (

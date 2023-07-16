@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // Test enviroment (cmd/hidden_lake)
+        {
+            "label": "preLaunchTask/cmd/hidden_lake",
+            "type": "shell",
+            "command": "make composite-build",
+            "options": {
+                "cwd": "${workspaceFolder}/cmd/hidden_lake"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "revealProblems": "onProblem",
+                "close": true
+            }
+        },
+        {
+            "label": "postDebugTask/cmd/hidden_lake",
+            "type": "shell",
+            "command": "make composite-clean",
+            "options": {
+                "cwd": "${workspaceFolder}/cmd/hidden_lake"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "revealProblems": "onProblem",
+                "close": true
+            }
+        },
+        // Test enviroment (examples/echo_service/default)
+        {
+            "label": "preLaunchTask/examples/echo_service/default",
+            "type": "shell",
+            "command": "make build",
+            "options": {
+                "cwd": "${workspaceFolder}/examples/echo_service/default"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "revealProblems": "onProblem",
+                "close": true
+            }
+        },
+        {
+            "label": "postDebugTask/examples/echo_service/default",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}/examples/echo_service/default"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "revealProblems": "onProblem",
+                "close": true
+            }
+        }
+    ]
+}

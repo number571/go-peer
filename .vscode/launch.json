@@ -1,0 +1,124 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        // Original applications
+        {
+            "name": "/cmd/hidden_lake/service",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/service/cmd/hls",
+            "cwd": "${workspaceFolder}/cmd/hidden_lake/service",
+            "postDebugTask": "postDebugTask/cmd/hidden_lake",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/cmd/hidden_lake/messenger",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
+            "cwd": "${workspaceFolder}/cmd/hidden_lake/messenger",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/cmd/hidden_lake/traffic",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
+            "cwd": "${workspaceFolder}/cmd/hidden_lake/traffic",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        // Test enviroment (examples/echo_service/default)
+        {
+            "name": "/examples/echo_service/default/middle_hlt",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
+            "cwd": "${workspaceFolder}/examples/echo_service/default/middle_hlt",
+            "postDebugTask": "postDebugTask/examples/echo_service/default",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/echo_service/default/send_hls",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/service/cmd/hls",
+            "cwd": "${workspaceFolder}/examples/echo_service/default/send_hls",
+            "args": [
+                "--key", "priv.key"
+            ],
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/echo_service/default/recv_hls",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/service/cmd/hls",
+            "cwd": "${workspaceFolder}/examples/echo_service/default/recv_hls",
+            "args": [
+                "--key", "priv.key"
+            ],
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/echo_service/default/recv_hls/service",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/examples/echo_service/default/recv_hls/service",
+            "cwd": "${workspaceFolder}/examples/echo_service/default/recv_hls",
+            "presentation": {
+                "hidden": true
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Run Hidden Lake",
+            "configurations": [
+                "/cmd/hidden_lake/service",
+                "/cmd/hidden_lake/traffic",
+                "/cmd/hidden_lake/messenger",
+            ],
+            "preLaunchTask": "preLaunchTask/cmd/hidden_lake",
+            // the postDebugTask is not executed
+            // vs code bug: https://github.com/microsoft/vscode/issues/162745
+            // solution: remove postDebugTask to "/hidden_lake/service"
+            "stopAll": true,
+        },
+        {
+            "name": "Test Echo Service",
+            "configurations": [
+                "/examples/echo_service/default/middle_hlt",
+                "/examples/echo_service/default/send_hls",
+                "/examples/echo_service/default/recv_hls",
+                "/examples/echo_service/default/recv_hls/service"
+            ],
+            "preLaunchTask": "preLaunchTask/examples/echo_service/default",
+            // the postDebugTask is not executed
+            // vs code bug: https://github.com/microsoft/vscode/issues/162745
+            // solution: remove postDebugTask to "/echo_service/default/middle_hlt"
+            "stopAll": true,
+        }
+    ]
+}
