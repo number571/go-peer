@@ -1,7 +1,7 @@
 {
     "version": "2.0.0",
     "tasks": [
-        // Test enviroment (cmd/hidden_lake)
+        // Run Hidden Lake
         {
             "label": "preLaunchTask/cmd/hidden_lake",
             "type": "shell",
@@ -28,7 +28,7 @@
                 "close": true
             }
         },
-        // Test enviroment (examples/echo_service/default)
+        // Test Echo Service
         {
             "label": "preLaunchTask/examples/echo_service/default",
             "type": "shell",
