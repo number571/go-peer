@@ -42,7 +42,7 @@
                 "close": true
             }
         },
-        // Test Echo Service
+        // Test Anon Messenger
         {
             "label": "preLaunchTask/examples/anon_messenger/default",
             "type": "shell",
