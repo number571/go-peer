@@ -30,19 +30,6 @@
         },
         // Test Echo Service
         {
-            "label": "preLaunchTask/examples/echo_service/default",
-            "type": "shell",
-            "command": "make build",
-            "options": {
-                "cwd": "${workspaceFolder}/examples/echo_service/default"
-            },
-            "presentation": {
-                "reveal": "silent",
-                "revealProblems": "onProblem",
-                "close": true
-            }
-        },
-        {
             "label": "postDebugTask/examples/echo_service/default",
             "type": "shell",
             "command": "make clean",

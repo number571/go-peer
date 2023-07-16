@@ -103,7 +103,7 @@
             "preLaunchTask": "preLaunchTask/cmd/hidden_lake",
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
-            // solution: remove postDebugTask to "/hidden_lake/service"
+            // solution: remove postDebugTask to "/cmd/hidden_lake/service"
             "stopAll": true,
         },
         {
@@ -114,10 +114,9 @@
                 "/examples/echo_service/default/recv_hls",
                 "/examples/echo_service/default/recv_hls/service"
             ],
-            "preLaunchTask": "preLaunchTask/examples/echo_service/default",
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
-            // solution: remove postDebugTask to "/echo_service/default/middle_hlt"
+            // solution: remove postDebugTask to "/examples/echo_service/default/middle_hlt"
             "stopAll": true,
         }
     ]
