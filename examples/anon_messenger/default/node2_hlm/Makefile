@@ -1,9 +1,10 @@
 GC=go build
-.PHONY: default run clean 
-default: clean run 
-run:
+.PHONY: default build run clean 
+default: clean build run 
+build:
 	cp hls_copy.cfg hls.cfg 
 	cp hlm_copy.stg hlm.stg 
+run:
 	./prog_hls2 &
 	./prog_hlm2 &
 clean:

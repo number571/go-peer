@@ -90,7 +90,64 @@
             "presentation": {
                 "hidden": true
             }
-        }
+        },
+        // Test Anon Messenger
+        {
+            "name": "/examples/anon_messenger/default/middle_hlt",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
+            "cwd": "${workspaceFolder}/examples/anon_messenger/default/middle_hlt",
+            "postDebugTask": "postDebugTask/examples/anon_messenger/default",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/anon_messenger/default/node1_hlm",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
+            "cwd": "${workspaceFolder}/examples/anon_messenger/default/node1_hlm",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/anon_messenger/default/node1_hls",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/service/cmd/hls",
+            "cwd": "${workspaceFolder}/examples/anon_messenger/default/node1_hlm",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/anon_messenger/default/node2_hlm",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
+            "cwd": "${workspaceFolder}/examples/anon_messenger/default/node2_hlm",
+            "presentation": {
+                "hidden": true
+            }
+        },
+        {
+            "name": "/examples/anon_messenger/default/node2_hls",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/hidden_lake/service/cmd/hls",
+            "cwd": "${workspaceFolder}/examples/anon_messenger/default/node2_hlm",
+            "presentation": {
+                "hidden": true
+            }
+        },
     ],
     "compounds": [
         {
@@ -117,6 +174,21 @@
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
             // solution: remove postDebugTask to "/examples/echo_service/default/middle_hlt"
+            "stopAll": true,
+        },
+        {
+            "name": "Test Anon Messenger",
+            "configurations": [
+                "/examples/anon_messenger/default/middle_hlt",
+                "/examples/anon_messenger/default/node1_hlm",
+                "/examples/anon_messenger/default/node1_hls",
+                "/examples/anon_messenger/default/node2_hlm",
+                "/examples/anon_messenger/default/node2_hls",
+            ],
+            "preLaunchTask": "preLaunchTask/examples/anon_messenger/default",
+            // the postDebugTask is not executed
+            // vs code bug: https://github.com/microsoft/vscode/issues/162745
+            // solution: remove postDebugTask to "/examples/anon_messenger/default/middle_hlt"
             "stopAll": true,
         }
     ]
