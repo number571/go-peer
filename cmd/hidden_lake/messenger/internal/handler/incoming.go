@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"unicode"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue"
@@ -36,7 +37,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		msg := strings.TrimSpace(string(msgBytes))
+		msg := onlyWritableCharacters(strings.TrimSpace(string(msgBytes)))
 		if len(msg) == 0 {
 			api.Response(pW, http.StatusTeapot, "failed: message is null")
 			return
@@ -79,4 +80,14 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 		})
 		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
 	}
+}
+
+func onlyWritableCharacters(str string) string {
+	s := make([]rune, 0, len(str))
+	for _, c := range str {
+		if unicode.IsGraphic(c) {
+			s = append(s, c)
+		}
+	}
+	return string(s)
 }

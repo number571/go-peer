@@ -17,6 +17,7 @@ In progress...
 - Replace `hidden_lake/service`: constants (message_size_bytes, work_size_bits, key_size_bits, queue_period_ms, messages_capacity) to configs .hls, .hlt, .hlm
 - Update `hidden_lake/traffic`: append check/push hash messages into database
 - Create `.vscode`: append debug running options "Run Hidden Lake" and "Test Echo Service"
+- Update `hidden_lake/messenger`: append onlyWritableCharacters into HandleIncomigHTTP 
 
 ### CHANGES
 
@@ -32,6 +33,7 @@ In progress...
 - Update `README.md`: url with images -> _images
 - Update `cmd/micro_anon`: change panic error -> print error
 - Change `hidden_lake/service`: rename CLogWarnOffResponseFromService, CLogWarnResponseFromService -> CLogInfoOffResponseFromService, CLogInfoResponseFromService
+- Update `hidden_lake/messenger`: replace convertToPlain -> escapeOutput function
 
 ## v1.5.12
 

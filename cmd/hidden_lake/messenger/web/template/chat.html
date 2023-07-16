@@ -11,15 +11,13 @@ Chat
 </script>
 
 <script type="text/javascript" defer>
-  function convertToPlain(html){
-    // Create a new div element
-    var tempDivElement = document.createElement("div");
-
-    // Set the HTML content with the given value
-    tempDivElement.innerHTML = html;
-
-    // Retrieve the text property of the element 
-    return tempDivElement.textContent || tempDivElement.innerText || "";
+  function escapeOutput(toOutput){
+    return toOutput.replace(/\&/g, '&amp;')
+        .replace(/\</g, '&lt;')
+        .replace(/\>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/\'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
   }
 
   function switchToInputField() {
@@ -48,7 +46,7 @@ Chat
       d1.insertAdjacentHTML('beforeend', `
   <div class="d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
-      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-secondary">`+ convertToPlain(obj.message) +`</p>
+      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-secondary">`+ escapeOutput(obj.message) +`</p>
       <p class="small ms-3 mb-3 rounded-3 text-muted">`+ obj.timestamp +`</p>
     </div>
   </div>
