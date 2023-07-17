@@ -12,6 +12,10 @@ In progress...
 
 - Update `hidden_lake/messenger`: than got new message -> auto scroll to bottom
 
+### CHANGES
+
+- Remove `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
+
 <!-- ... -->
 
 ## v1.5.13

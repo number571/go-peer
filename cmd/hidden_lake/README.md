@@ -6,7 +6,7 @@
 
 The `Hidden Lake` is an anonymous network built on a `micro-service` architecture. At the heart of HL is the core - `HLS` (service), which generates anonymizing traffic and combines many other services (for example, `HLT` and `HLM`). Thus, Hidden Lake is not a whole and monolithic solution, but a composition of several combined services.
 
-### Build and run
+## Build and run
 
 ```bash
 $ cd ./cmd/hidden_lake
@@ -23,3 +23,67 @@ $ make docker-run
 > hidden_lake-traffic-1    | [INFO] 2023/06/03 16:46:02 service=HLT type=UNDEC hash=0615BD44...5DD1B0DB addr=00000000...00000000 proof=0000000000495814 conn=172.20.0.3:9571
 ...
 ```
+
+## Connections
+
+<table style="width: 100%">
+  <tr>
+    <th>Available network</th>
+    <th>Types of services</th>
+  </tr>
+  <tr>
+    <td>
+        <table style="width: 100%">
+            <tr>
+                <th>Type</th>
+                <th>Host</th>
+                <th>Port</th>
+            </tr>
+            <tr>
+                <td>HLTr</td>
+                <td>195.2.79.213</td>
+                <td>9581</td>
+            </tr>
+            <tr>
+                <td>HLTr</td>
+                <td>194.32.248.60</td>
+                <td>9581</td>
+            </tr>
+            <tr>
+                <td>HLTr</td>
+                <td>193.124.117.164</td>
+                <td>9581</td>
+            </tr>
+        </table>
+    </td>
+    <td>
+        <table style="width: 100%">
+            <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Default ports</th>
+            </tr>
+            <tr>
+                <td>HLS</td>
+                <td>node</td>
+                <td>9571</td>
+            </tr>
+            <tr>
+                <td>HLTr</td>
+                <td>relayer</td>
+                <td>9581</td>
+            </tr>
+            <tr>
+                <td>HLTs</td>
+                <td>storage</td>
+                <td>9582</td>
+            </tr>
+            <tr>
+                <td>HLTrs</td>
+                <td>relayer/storage</td>
+                <td>9581, 9582</td>
+            </tr>
+        </table>
+    </td>
+  </tr>
+</table>
