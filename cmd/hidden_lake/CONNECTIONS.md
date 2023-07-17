@@ -1,19 +1,13 @@
 # CONNECTIONS
 
-Public relayers/storages (HLT) and nodes (HLS) for easy use.
+Type | Host | Port |
+:---:|:----:|:-----:
+HLTr | 195.2.79.213 | 9581
+HLTr | 194.32.248.60 | 9581
+HLTr | 193.124.117.164 | 9581
 
-## HLT
+## Types of services
 
-### Relayers
-
-- 195.2.79.213:9581
-- 194.32.248.60:9581
-- 193.124.117.164:9581
-
-### Storages
-
-- null
-
-## HLS
-
-- null
+- HLTr = relayer
+- HLTs = storage/relayer
+- HLS  = node
