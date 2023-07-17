@@ -8,6 +8,10 @@
 
 In progress...
 
+### IMPROVEMENTS
+
+- Update `hidden_lake/messenger`: than got new message -> auto scroll to bottom
+
 <!-- ... -->
 
 ## v1.5.13

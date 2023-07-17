@@ -20,9 +20,13 @@ Chat
         .replace(/\//g, '&#x2F;');
   }
 
-  function switchToInputField() {
+  function scrollToBottom() {
     var objDiv = document.getElementById("chat_body");
     objDiv.scrollTop = objDiv.scrollHeight;
+  }
+
+  function switchToInputField() {
+    scrollToBottom();
 
     var input = document.getElementById('input_message');
     input.focus();
@@ -51,6 +55,7 @@ Chat
     </div>
   </div>
       `);
+      scrollToBottom();
     };
 
     socket.onclose = (e) => {
