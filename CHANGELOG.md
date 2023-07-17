@@ -11,6 +11,8 @@ In progress...
 ### IMPROVEMENTS
 
 - Update `hidden_lake/messenger`: than got new message -> auto scroll to bottom
+- Update `hidden_lake/messenger`: append emoji's text
+- Update `hidden_lake/messenger`: append constant chat with ourself
 
 ### CHANGES
 

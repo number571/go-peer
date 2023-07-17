@@ -1,8 +1,13 @@
 package settings
 
 const (
-	CPushPath    = "/push"
-	CWorkForKeys = 20
+	CPushPath     = "/push"
+	CIamAliasName = "__iam__"
+)
+
+const (
+	CWorkForKeys       = 20
+	CChatLimitMessages = 1000
 )
 
 const (

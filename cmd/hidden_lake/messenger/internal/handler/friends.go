@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
@@ -35,7 +36,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		case http.MethodPost:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
-			if aliasName == "" || pubStrKey == "" {
+			if aliasName == settings.CIamAliasName || aliasName == "" || pubStrKey == "" {
 				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
@@ -50,7 +51,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 			}
 		case http.MethodDelete:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
-			if aliasName == "" {
+			if aliasName == settings.CIamAliasName || aliasName == "" {
 				fmt.Fprint(pW, "error: alias_name is null")
 				return
 			}
@@ -59,6 +60,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 				return
 			}
 		}
+
 		res, err := pStateManager.GetClient().Service().GetFriends()
 		if err != nil {
 			fmt.Fprint(pW, "error: read friends")
@@ -67,11 +69,13 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 		result := new(sFriends)
 		result.STemplateState = pStateManager.GetTemplate()
-		result.FFriends = make([]string, 0, len(res))
+		result.FFriends = make([]string, 0, len(res)+1) // +1 CIamAliasName
 
+		result.FFriends = append(result.FFriends, settings.CIamAliasName)
 		for aliasName := range res {
 			result.FFriends = append(result.FFriends, aliasName)
 		}
+
 		sort.Strings(result.FFriends)
 
 		t, err := template.ParseFS(

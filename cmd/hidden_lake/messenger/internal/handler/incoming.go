@@ -4,11 +4,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"unicode"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -37,9 +37,14 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		msg := onlyWritableCharacters(strings.TrimSpace(string(msgBytes)))
-		if len(msg) == 0 {
+		rawMsg := strings.TrimSpace(string(msgBytes))
+		if len(rawMsg) == 0 {
 			api.Response(pW, http.StatusTeapot, "failed: message is null")
+			return
+		}
+
+		if utils.HasNotWritableCharacters(rawMsg) {
+			api.Response(pW, http.StatusUnsupportedMediaType, "failed: message has not writable characters")
 			return
 		}
 
@@ -59,14 +64,14 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, msg, encoding.HexDecode(msgHash))
-
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
 			api.Response(pW, http.StatusForbidden, "failed: database closed")
 			return
 		}
+
+		rel := database.NewRelation(myPubKey, fPubKey)
+		dbMsg := database.NewMessage(true, utils.ReplaceTextToEmoji(rawMsg), encoding.HexDecode(msgHash))
 
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
@@ -80,14 +85,4 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 		})
 		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
 	}
-}
-
-func onlyWritableCharacters(str string) string {
-	s := make([]rune, 0, len(str))
-	for _, c := range str {
-		if unicode.IsGraphic(c) {
-			s = append(s, c)
-		}
-	}
-	return string(s)
 }
