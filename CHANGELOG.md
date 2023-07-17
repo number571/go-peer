@@ -2,11 +2,17 @@
 
 <!-- ... -->
 
-## v1.5.13
+## v1.5.14
 
 *??? ??, ????*
 
 In progress...
+
+<!-- ... -->
+
+## v1.5.13
+
+*Jule 17, 2023*
 
 ### IMPROVEMENTS
 
@@ -34,6 +40,8 @@ In progress...
 - Update `cmd/micro_anon`: change panic error -> print error
 - Change `hidden_lake/service`: rename CLogWarnOffResponseFromService, CLogWarnResponseFromService -> CLogInfoOffResponseFromService, CLogInfoResponseFromService
 - Update `hidden_lake/messenger`: replace convertToPlain -> escapeOutput function
+
+<!-- ... -->
 
 ## v1.5.12
 
@@ -65,6 +73,8 @@ In progress...
 - Package `network`: fix deadlock BroadcastPayload on WritePayload method
 - Package `network/conn`: append read/write deadline methods
 - Makefiles `cmd`: fix clean commands for (arch, os) names
+
+<!-- ... -->
 
 ## v1.5.11
 
