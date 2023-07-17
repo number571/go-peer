@@ -23,7 +23,7 @@ docker-clean:
 	docker-compose down 
 	docker-compose rm -f
 
-composite-default: composite-build 
+composite-default: composite-build composite-run
 composite-build: build
 	cp _default_cfg/hls.cfg ./service
 	cp _default_cfg/hlt.cfg ./traffic

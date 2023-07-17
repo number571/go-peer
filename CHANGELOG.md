@@ -15,6 +15,7 @@ In progress...
 ### CHANGES
 
 - Remove `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
+- Change `cmd/hidden_lake/Makefile`: "composite-default: composite-build" -> "composite-default: composite-build composite-run"
 
 <!-- ... -->
 
