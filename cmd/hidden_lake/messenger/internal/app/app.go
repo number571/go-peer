@@ -9,14 +9,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
-	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	internal_logger "github.com/number571/go-peer/internal/logger"
 	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
@@ -44,39 +40,9 @@ func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
 ) types.ICommand {
-	stg, err := initCryptoStorage(pCfg, pPathTo)
-	if err != nil {
-		panic(err)
-	}
-
-	state := state.NewStateManager(
-		pCfg,
-		stg,
-		database.NewWrapperDB(),
-		hls_client.NewClient(
-			hls_client.NewBuilder(),
-			hls_client.NewRequester(
-				fmt.Sprintf("http://%s", pCfg.GetConnection().GetService()),
-				&http.Client{Timeout: time.Minute},
-			),
-		),
-		hlt_client.NewClient(
-			hlt_client.NewBuilder(),
-			hlt_client.NewRequester(
-				fmt.Sprintf("http://%s", pCfg.GetConnection().GetTraffic()),
-				&http.Client{Timeout: time.Minute},
-				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     pCfg.GetWorkSizeBits(),
-					FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
-				}),
-			),
-		),
-		pPathTo,
-	)
-
 	return &sApp{
 		fConfig:       pCfg,
-		fStateManager: state,
+		fStateManager: state.NewStateManager(pCfg, pPathTo),
 		fLogger:       internal_logger.StdLogger(pCfg.GetLogging()),
 	}
 }

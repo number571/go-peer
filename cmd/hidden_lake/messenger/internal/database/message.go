@@ -16,10 +16,10 @@ type sMessage struct {
 	fIsIncoming bool
 	fSHA256UID  []byte
 	fTimestamp  string
-	fMessage    string
+	fMessage    []byte
 }
 
-func NewMessage(pIsIncoming bool, pMessage string, pHashUID []byte) IMessage {
+func NewMessage(pIsIncoming bool, pMessage []byte, pHashUID []byte) IMessage {
 	t := time.Now()
 	return &sMessage{
 		fIsIncoming: pIsIncoming,
@@ -45,7 +45,7 @@ func LoadMessage(pMsgBytes []byte) IMessage {
 		fIsIncoming: isIncoming,                                                          // 1 byte
 		fSHA256UID:  pMsgBytes[1 : hashing.CSHA256Size+1],                                // 32 bytes
 		fTimestamp:  string(pMsgBytes[hashing.CSHA256Size+1 : hashing.CSHA256Size+1+19]), // 19 bytes
-		fMessage:    string(pMsgBytes[hashing.CSHA256Size+1+19:]),                        // n bytes
+		fMessage:    pMsgBytes[hashing.CSHA256Size+1+19:],                                // n bytes
 	}
 }
 
@@ -57,7 +57,7 @@ func (p *sMessage) GetSHA256UID() string {
 	return string(p.fSHA256UID)
 }
 
-func (p *sMessage) GetMessage() string {
+func (p *sMessage) GetMessage() []byte {
 	return p.fMessage
 }
 

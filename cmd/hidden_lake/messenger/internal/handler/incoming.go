@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -31,20 +32,15 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		msgBytes, err := io.ReadAll(pR.Body)
+		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			api.Response(pW, http.StatusConflict, "failed: response message")
 			return
 		}
 
-		rawMsg := strings.TrimSpace(string(msgBytes))
-		if len(rawMsg) == 0 {
-			api.Response(pW, http.StatusTeapot, "failed: message is null")
-			return
-		}
-
-		if utils.HasNotWritableCharacters(rawMsg) {
-			api.Response(pW, http.StatusUnsupportedMediaType, "failed: message has not writable characters")
+		msgBytes, err := getMessageBytesRecv(rawMsgBytes)
+		if err != nil {
+			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
 		}
 
@@ -71,18 +67,58 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, utils.ReplaceTextToEmoji(rawMsg), encoding.HexDecode(msgHash))
-
+		dbMsg := database.NewMessage(true, msgBytes, encoding.HexDecode(msgHash))
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:   fPubKey.GetAddress().ToString(),
-			FMessage:   dbMsg.GetMessage(),
-			FTimestamp: dbMsg.GetTimestamp(),
+			FAddress:     fPubKey.GetAddress().ToString(),
+			FMessageInfo: getMessageInfo(msgBytes, dbMsg.GetTimestamp()),
 		})
 		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
+	}
+}
+
+func getMessageBytesRecv(rawMsgBytes []byte) ([]byte, error) {
+	switch {
+	case isText(rawMsgBytes):
+		rawMsg := strings.TrimSpace(string(unwrapText(rawMsgBytes)))
+		if len(rawMsg) == 0 {
+			return nil, errors.NewError("failed: message is null")
+		}
+		if utils.HasNotWritableCharacters(rawMsg) {
+			return nil, errors.NewError("failed: message has not writable characters")
+		}
+		return wrapText(utils.ReplaceTextToEmoji(rawMsg)), nil
+	case isFile(rawMsgBytes):
+		filename, msgBytes := unwrapFile(rawMsgBytes)
+		if filename == "" || len(msgBytes) == 0 {
+			return nil, errors.NewError("failed: unwrap file")
+		}
+		return rawMsgBytes, nil
+	default:
+		return nil, errors.NewError("failed: unknown message type")
+	}
+}
+
+func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
+	switch {
+	case isText(pRawMsgBytes):
+		return utils.SMessageInfo{
+			FFileName:  "",
+			FMessage:   unwrapText(pRawMsgBytes),
+			FTimestamp: pTimestamp,
+		}
+	case isFile(pRawMsgBytes):
+		filename, msgData := unwrapFile(pRawMsgBytes)
+		return utils.SMessageInfo{
+			FFileName:  filename,
+			FMessage:   msgData,
+			FTimestamp: pTimestamp,
+		}
+	default:
+		panic("got unknown message type")
 	}
 }

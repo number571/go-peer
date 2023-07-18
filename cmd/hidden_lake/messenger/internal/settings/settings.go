@@ -7,7 +7,12 @@ const (
 
 const (
 	CWorkForKeys       = 20
-	CChatLimitMessages = 1000
+	CChatLimitMessages = 100
+)
+
+const (
+	CMessageIsText byte = 1
+	CMessageIsFile byte = 2
 )
 
 const (

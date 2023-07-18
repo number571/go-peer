@@ -18,6 +18,9 @@ const (
 )
 
 var (
+	//go:embed static/json/emoji.json
+	GEmojisJSON []byte
+
 	//go:embed static
 	gEmbededStatic embed.FS
 

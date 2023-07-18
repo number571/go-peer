@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"unicode"
+
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 )
 
 type sEmojis struct {
@@ -15,15 +17,12 @@ type sEmojis struct {
 }
 
 var (
-	//go:embed emoji.json
-	gEmojisJSON []byte
-
 	gEmojiReplacer *strings.Replacer
 )
 
 func init() {
 	emojis := new(sEmojis)
-	if err := json.Unmarshal(gEmojisJSON, emojis); err != nil {
+	if err := json.Unmarshal(web.GEmojisJSON, emojis); err != nil {
 		panic(err)
 	}
 
@@ -35,12 +34,12 @@ func init() {
 	gEmojiReplacer = strings.NewReplacer(replacerList...)
 }
 
-func ReplaceTextToEmoji(s string) string {
-	return gEmojiReplacer.Replace(s)
+func ReplaceTextToEmoji(pS string) string {
+	return gEmojiReplacer.Replace(pS)
 }
 
-func HasNotWritableCharacters(str string) bool {
-	for _, c := range str {
+func HasNotWritableCharacters(pS string) bool {
+	for _, c := range pS {
 		if !unicode.IsGraphic(c) {
 			return true
 		}
@@ -48,9 +47,9 @@ func HasNotWritableCharacters(str string) bool {
 	return false
 }
 
-func GetOnlyWritableCharacters(str string) string {
-	s := make([]rune, 0, len(str))
-	for _, c := range str {
+func GetOnlyWritableCharacters(pS string) string {
+	s := make([]rune, 0, len(pS))
+	for _, c := range pS {
 		if unicode.IsGraphic(c) {
 			s = append(s, c)
 		}

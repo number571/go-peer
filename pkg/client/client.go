@@ -23,7 +23,7 @@ var (
 type sClient struct {
 	fSettings    message.ISettings
 	fPrivKey     asymmetric.IPrivKey
-	fVoidMsgSize int
+	fVoidMsgSize uint64
 }
 
 // Create client by private key as identification.
@@ -42,8 +42,20 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 	// saved message size with hex encoding
 	// because exists not encoded chars <{}",>
 	// of JSON format
-	client.fVoidMsgSize = len(msg.ToBytes())
+	client.fVoidMsgSize = uint64(len(msg.ToBytes()))
 	return client
+}
+
+// Create PrivateKey by size and return limit message size.
+// Message is raw bytes of body payload without payload head.
+func GetMessageLimit(msgSize, keySize uint64) uint64 {
+	privKey := asymmetric.NewRSAPrivKey(keySize)
+	sett := message.NewSettings(&message.SSettings{
+		FMessageSizeBytes: msgSize,
+		FWorkSizeBits:     1,
+	})
+	client := NewClient(sett, privKey).(*sClient)
+	return (msgSize >> 1) - client.fVoidMsgSize - encoding.CSizeUint64
 }
 
 // Get public key from client object.

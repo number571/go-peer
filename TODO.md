@@ -11,3 +11,4 @@
 9. HLM: group chats, name of senders
 10. Fix docker build for arm macOS 
 11. Update README for configs HLS, HLM, HLT
+12. HLM: CChatLimitMessages to config

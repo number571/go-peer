@@ -26,7 +26,7 @@ type IStateManager interface {
 	OpenState([]byte) error
 	CloseState() error
 
-	GetClient() iClient
+	GetClient() IClient
 	GetWrapperDB() database.IWrapperDB
 	GetTemplate() *STemplateState
 
@@ -37,7 +37,7 @@ type IStateManager interface {
 	DelConnection(string) error
 }
 
-type iClient interface {
+type IClient interface {
 	Service() hls_client.IClient
 	Traffic() hlt_client.IClient
 }

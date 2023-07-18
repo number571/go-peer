@@ -1,0 +1,14 @@
+{{define "title"}}
+Upload file
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <form class="card-footer d-flex" enctype="multipart/form-data" action="/friends/chat?alias_name={{.FAliasName}}" method="POST">
+        <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+        <input hidden name="method" value="PUT">
+        <input class="form-control form-control-lg bg-secondary text-white m-1" name="input_file" type="file">
+        <input type="submit" style="width:20em;" class="btn btn-info m-1" value="Send">
+    </form> 
+</div>
+{{end}}

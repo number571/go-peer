@@ -13,11 +13,22 @@ Chat
 <script type="text/javascript" defer>
   function escapeOutput(toOutput) {
     return toOutput.replace(/\&/g, '&amp;')
-        .replace(/\</g, '&lt;')
-        .replace(/\>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/\'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;');
+      .replace(/\</g, '&lt;')
+      .replace(/\>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/\'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
+  function downloadBase64File(contentBase64, fileName) {
+    const linkSource = `data:application/octet-stream;base64,${contentBase64}`;
+    const downloadLink = document.createElement('a');
+    document.body.appendChild(downloadLink);
+
+    downloadLink.href = linkSource;
+    downloadLink.target = '_self';
+    downloadLink.download = fileName;
+    downloadLink.click();
   }
 
   function scrollToBottom() {
@@ -46,21 +57,38 @@ Chat
 
     socket.onmessage = (e) => {
       let obj = JSON.parse(e.data);
+      let messageInfo = obj.message_info;
+
       var d1 = document.getElementById('chat_body');
-      d1.insertAdjacentHTML('beforeend', `
-  <div class="d-flex flex-row justify-content-start mb-2 pt-1">
-    <div>
-      <p class="small p-2 ms-3 mb-1 text-black rounded-3 bg-secondary">`+ escapeOutput(obj.message) +`</p>
-      <p class="small ms-3 mb-3 rounded-3 text-muted">`+ obj.timestamp +`</p>
-    </div>
-  </div>
-      `);
+      var insertHTML = "";
+      if (messageInfo.filename == "") { // got text message
+        insertHTML = `
+          <div class="d-flex flex-row justify-content-start mb-2 pt-1">
+            <div>
+              <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + escapeOutput(messageInfo.message) + `</p>
+              <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
+            </div>
+          </div>
+        `
+      } else { // got file message
+        insertHTML = `
+          <div class="d-flex flex-row justify-content-start mb-2 pt-1">
+            <div>
+              <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + escapeOutput(messageInfo.filename) + `')">
+                ` + messageInfo.filename + `
+              </button>
+              <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
+            </div>
+          </div>
+        `
+      }
+      d1.insertAdjacentHTML('beforeend', insertHTML);
       scrollToBottom();
     };
 
     socket.onclose = (e) => {
       console.warn('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-      setTimeout(function() {
+      setTimeout(function () {
         connectToService();
       }, 1000);
     };
@@ -78,17 +106,17 @@ Chat
 </script>
 
 <style type="text/css" rel="stylesheet">
-.need-break-text {
-  -ms-word-break: break-all;
-  word-break: break-all;
+  .need-break-text {
+    -ms-word-break: break-all;
+    word-break: break-all;
 
-  /* Non standard for webkit */
-  word-break: break-word;
+    /* Non standard for webkit */
+    word-break: break-word;
 
-  -webkit-hyphens: auto;
-  -moz-hyphens: auto;
-  hyphens: auto;
-}
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
+  }
 </style>
 
 <div id="chat_body" class="card-body" style="position: relative; height: 100%; overflow:auto;">
@@ -96,15 +124,29 @@ Chat
   {{if .FIsIncoming}}
   <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
-      <p class="small p-2 ms-3 mb-1 text-white rounded-3 bg-secondary">{{.FMessage}}</p>
-      <p class="small ms-3 mb-3 rounded-3 text-muted">{{.FTimestamp}}</p>
+      {{if (eq .FMessageInfo.FFileName "")}}
+      <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
+      {{else}}
+      <button class="btn btn-muted text-center text-dark w-100"
+        onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
+        {{.FMessageInfo.FFileName}}
+      </button>
+      {{end}}
+      <p class="small ms-3 mb-3 text-muted">{{.FMessageInfo.FTimestamp}}</p>
     </div>
   </div>
   {{else}}
   <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
     <div>
-      <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-info">{{.FMessage}}</p></b>
-      <p class="small me-3 mb-3 rounded-3 text-muted d-flex justify-content-end">{{.FTimestamp}}</p>
+      {{if (eq .FMessageInfo.FFileName "")}}
+      <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
+      {{else}}
+      <button class="btn btn-primary text-center text-white w-100"
+        onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
+        {{.FMessageInfo.FFileName}}
+      </button>
+      {{end}}
+      <p class="small me-3 mb-3 text-muted d-flex justify-content-end">{{.FMessageInfo.FTimestamp}}</p>
     </div>
   </div>
   {{end}}
@@ -112,9 +154,12 @@ Chat
 </div>
 
 <form class="card-footer d-flex" method="POST">
+  <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
   <input hidden name="method" value="POST">
   <input type="text" autocomplete="off" class="form-control form-control-lg bg-dark text-white m-1" name="input_message"
     placeholder="Type message ..." id="input_message">
-  <input type="submit" name="submit" value="Send message" class="btn btn-info m-1">
+  <input type="submit" style="width:5em;" name="send" value="Send" class="btn btn-info m-1">
+  <button type="button" style="width:5em;" class="btn btn-info m-1"
+    onclick="location.href='/friends/upload?alias_name={{.FAddress.FAliasName}}';">File</button>
 </form>
 {{end}}

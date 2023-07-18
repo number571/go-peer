@@ -71,12 +71,14 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		result.STemplateState = pStateManager.GetTemplate()
 		result.FFriends = make([]string, 0, len(res)+1) // +1 CIamAliasName
 
-		result.FFriends = append(result.FFriends, settings.CIamAliasName)
+		friendsList := make([]string, 0, len(res))
 		for aliasName := range res {
-			result.FFriends = append(result.FFriends, aliasName)
+			friendsList = append(friendsList, aliasName)
 		}
+		sort.Strings(friendsList)
 
-		sort.Strings(result.FFriends)
+		result.FFriends = append(result.FFriends, settings.CIamAliasName) // in top
+		result.FFriends = append(result.FFriends, friendsList...)
 
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),

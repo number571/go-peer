@@ -102,6 +102,36 @@ func TestMessageSize(t *testing.T) {
 	}
 }
 
+func TestGetMessageLimit(t *testing.T) {
+	client1 := testNewClient()
+
+	msg1 := random.NewStdPRNG().GetBytes(
+		GetMessageLimit(
+			client1.GetSettings().GetMessageSizeBytes(),
+			client1.GetPubKey().GetSize(),
+		),
+	)
+
+	pld1 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg1))
+	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld1); err != nil {
+		t.Error("message1 > message limit")
+		return
+	}
+
+	msg2 := random.NewStdPRNG().GetBytes(
+		GetMessageLimit(
+			client1.GetSettings().GetMessageSizeBytes(),
+			client1.GetPubKey().GetSize(),
+		) + 1,
+	)
+
+	pld2 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg2))
+	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld2); err == nil {
+		t.Error("message2 > message limit but not alert")
+		return
+	}
+}
+
 func testNewClient() IClient {
 	return NewClient(
 		message.NewSettings(&message.SSettings{

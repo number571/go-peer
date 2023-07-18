@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"strings"
 
@@ -20,16 +21,16 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
+	pkg_client "github.com/number571/go-peer/pkg/client"
 )
 
 type sChatMessage struct {
-	FIsIncoming bool
-	FTimestamp  string
-	FMessage    string
+	FIsIncoming  bool
+	FMessageInfo utils.SMessageInfo
 }
 type sChatAddress struct {
-	FClient string
-	FFriend string
+	FAliasName string
+	FFriend    string
 }
 type sChatMessages struct {
 	*state.STemplateState
@@ -38,6 +39,10 @@ type sChatMessages struct {
 }
 
 func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
+	msgSize := pStateManager.GetConfig().GetMessageSizeBytes()
+	keySize := pStateManager.GetConfig().GetKeySizeBits()
+	msgLimit := pkg_client.GetMessageLimit(msgSize, keySize)
+
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/friends/chat" {
 			NotFoundPage(pStateManager)(pW, pR)
@@ -48,6 +53,9 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
+
+		pR.ParseForm()
+		pR.ParseMultipartForm(10 << 20) // default value
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
@@ -62,7 +70,6 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 
 		client := pStateManager.GetClient().Service()
-
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, "error: read public key")
@@ -76,28 +83,21 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 
 		rel := database.NewRelation(myPubKey, recvPubKey)
-		pR.ParseForm()
-
 		switch pR.FormValue("method") {
-		case http.MethodPost:
-			rawMsg := strings.TrimSpace(pR.FormValue("input_message"))
-
-			// ReplaceTextToEmoji not used in trySendMessage
-			// because can be exists emoji (🕵️‍♂️ => 🕵️♂️) more than 4 bytes (rune)
-			// that creates more than 1 emoji after use GetOnlyWritableCharacters
-			msg := utils.GetOnlyWritableCharacters(rawMsg)
-			if msg == "" {
-				fmt.Fprint(pW, "error: message is null")
+		case http.MethodPost, http.MethodPut:
+			msgBytes, err := getMessageBytesSend(pStateManager, pR)
+			if err != nil {
+				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
 				return
 			}
 
-			if err := trySendMessage(client, recvPubKey, myPubKey, msg); err != nil {
-				fmt.Fprint(pW, "error: push message to network")
+			if err := trySendMessage(client, recvPubKey, myPubKey, msgBytes, msgLimit); err != nil {
+				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
 			}
 
 			uid := random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-			dbMsg := database.NewMessage(false, utils.ReplaceTextToEmoji(msg), uid)
+			dbMsg := database.NewMessage(false, msgBytes, uid)
 
 			if err := db.Push(rel, dbMsg); err != nil {
 				fmt.Fprint(pW, "error: add message to database")
@@ -122,25 +122,19 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		clientPubKey, err := client.GetPubKey()
-		if err != nil {
-			fmt.Fprint(pW, "error: read public key")
-			return
-		}
-
 		res := &sChatMessages{
 			STemplateState: pStateManager.GetTemplate(),
 			FAddress: sChatAddress{
-				FClient: clientPubKey.GetAddress().ToString(),
-				FFriend: recvPubKey.GetAddress().ToString(),
+				FAliasName: aliasName,
+				FFriend:    recvPubKey.GetAddress().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),
 		}
+
 		for _, msg := range msgs {
 			res.FMessages = append(res.FMessages, sChatMessage{
-				FIsIncoming: msg.IsIncoming(),
-				FTimestamp:  msg.GetTimestamp(),
-				FMessage:    msg.GetMessage(),
+				FIsIncoming:  msg.IsIncoming(),
+				FMessageInfo: getMessageInfo(msg.GetMessage(), msg.GetTimestamp()),
 			})
 		}
 
@@ -150,17 +144,61 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 			"chat.html",
 		)
 		if err != nil {
-			panic("can't load hmtl files")
+			panic(err)
 		}
 
 		t.Execute(pW, res)
 	}
 }
 
-func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubKey, msg string) error {
+func getMessageBytesSend(pStateManager state.IStateManager, pR *http.Request) ([]byte, error) {
+	switch pR.FormValue("method") {
+	case http.MethodPost:
+		rawMsg := strings.TrimSpace(pR.FormValue("input_message"))
+		strMsg := utils.GetOnlyWritableCharacters(utils.ReplaceTextToEmoji(rawMsg))
+		if strMsg == "" {
+			return nil, errors.NewError("error: message is null")
+		}
+		return wrapText(strMsg), nil
+	case http.MethodPut:
+		filename, fileBytes, err := getUploadFile(pStateManager, pR)
+		if err != nil {
+			return nil, errors.WrapError(err, "error: upload file")
+		}
+		return wrapFile(filename, fileBytes), nil
+	default:
+		panic("got not supported method")
+	}
+}
+
+func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string, []byte, error) {
+	// Get handler for filename, size and headers
+	file, handler, err := pR.FormFile("input_file")
+	if err != nil {
+		return "", nil, errors.NewError("error: receive file")
+	}
+	defer file.Close()
+
+	if handler.Size == 0 {
+		return "", nil, errors.NewError("error: file size is nil")
+	}
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		return "", nil, errors.NewError("error: read file bytes")
+	}
+
+	return handler.Filename, fileBytes, nil
+}
+
+func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubKey, msgBytes []byte, msgLimit uint64) error {
 	// if the sender = receiver then there is no need to send a message to the network
 	if myPubKey.GetAddress().ToString() == recvPubKey.GetAddress().ToString() {
 		return nil
+	}
+
+	if uint64(len(msgBytes)) > msgLimit {
+		return errors.NewError("error: len message > limit")
 	}
 
 	return client.BroadcastRequest(
@@ -169,7 +207,7 @@ func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubK
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
-			WithBody([]byte(msg)),
+			WithBody(msgBytes),
 	)
 }
 

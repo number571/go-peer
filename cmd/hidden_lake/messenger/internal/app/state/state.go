@@ -2,10 +2,13 @@ package state
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -19,17 +22,17 @@ import (
 
 var (
 	_ IStateManager = &sStateManager{}
-	_ iClient       = &sClient{}
+	_ IClient       = &sClient{}
 )
 
 type sStateManager struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
 	fConfig   config.IConfig
+	fPathTo   string
 	fStorage  storage.IKVStorage
 	fDatabase database.IWrapperDB
 	fClient   *sClient
-	fPathTo   string
 }
 
 type sClient struct {
@@ -39,21 +42,37 @@ type sClient struct {
 
 func NewStateManager(
 	pConfig config.IConfig,
-	pStorage storage.IKVStorage,
-	pDatabase database.IWrapperDB,
-	pHlsClient hls_client.IClient,
-	pHltClient hlt_client.IClient,
 	pPathTo string,
 ) IStateManager {
+	stg, err := initCryptoStorage(pConfig, pPathTo)
+	if err != nil {
+		panic(err)
+	}
 	return &sStateManager{
 		fConfig:   pConfig,
-		fStorage:  pStorage,
-		fDatabase: pDatabase,
+		fPathTo:   pPathTo,
+		fStorage:  stg,
+		fDatabase: database.NewWrapperDB(),
 		fClient: &sClient{
-			fService: pHlsClient,
-			fTraffic: pHltClient,
+			fService: hls_client.NewClient(
+				hls_client.NewBuilder(),
+				hls_client.NewRequester(
+					fmt.Sprintf("http://%s", pConfig.GetConnection().GetService()),
+					&http.Client{Timeout: time.Minute},
+				),
+			),
+			fTraffic: hlt_client.NewClient(
+				hlt_client.NewBuilder(),
+				hlt_client.NewRequester(
+					fmt.Sprintf("http://%s", pConfig.GetConnection().GetTraffic()),
+					&http.Client{Timeout: time.Minute},
+					message.NewSettings(&message.SSettings{
+						FWorkSizeBits:     pConfig.GetWorkSizeBits(),
+						FMessageSizeBytes: pConfig.GetMessageSizeBytes(),
+					}),
+				),
+			),
 		},
-		fPathTo: pPathTo,
 	}
 }
 
@@ -65,12 +84,12 @@ func (p *sClient) Traffic() hlt_client.IClient {
 	return p.fTraffic
 }
 
-func (p *sStateManager) GetClient() iClient {
-	return p.fClient
-}
-
 func (p *sStateManager) GetConfig() config.IConfig {
 	return p.fConfig
+}
+
+func (p *sStateManager) GetClient() IClient {
+	return p.fClient
 }
 
 func (p *sStateManager) GetWrapperDB() database.IWrapperDB {

@@ -28,16 +28,17 @@ func (p *sApp) initInterfaceServiceHTTP() {
 		handleFileServer(p.fStateManager, http.FS(web.GetStaticPath()))),
 	)
 
-	mux.HandleFunc("/", handler.IndexPage(p.fStateManager))                    // GET
-	mux.HandleFunc("/sign/out", handler.SignOutPage(p.fStateManager))          // GET
-	mux.HandleFunc("/sign/in", handler.SignInPage(p.fStateManager))            // GET, POST
-	mux.HandleFunc("/sign/up", handler.SignUpPage(p.fStateManager))            // GET, POST
-	mux.HandleFunc("/favicon.ico", handler.FaviconPage(p.fStateManager))       // GET
-	mux.HandleFunc("/about", handler.AboutPage(p.fStateManager))               // GET
-	mux.HandleFunc("/settings", handler.SettingsPage(p.fStateManager))         // GET, POST, DELETE
-	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(p.fStateManager)) // GET
-	mux.HandleFunc("/friends", handler.FriendsPage(p.fStateManager))           // GET, POST, DELETE
-	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(p.fStateManager))  // GET, POST
+	mux.HandleFunc("/", handler.IndexPage(p.fStateManager))                       // GET
+	mux.HandleFunc("/sign/out", handler.SignOutPage(p.fStateManager))             // GET
+	mux.HandleFunc("/sign/in", handler.SignInPage(p.fStateManager))               // GET, POST
+	mux.HandleFunc("/sign/up", handler.SignUpPage(p.fStateManager))               // GET, POST
+	mux.HandleFunc("/favicon.ico", handler.FaviconPage(p.fStateManager))          // GET
+	mux.HandleFunc("/about", handler.AboutPage(p.fStateManager))                  // GET
+	mux.HandleFunc("/settings", handler.SettingsPage(p.fStateManager))            // GET, POST, DELETE
+	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(p.fStateManager))    // GET
+	mux.HandleFunc("/friends", handler.FriendsPage(p.fStateManager))              // GET, POST, DELETE
+	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(p.fStateManager))     // GET, POST, PUT
+	mux.HandleFunc("/friends/upload", handler.FriendsUploadPage(p.fStateManager)) // GET
 
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
