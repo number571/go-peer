@@ -112,8 +112,10 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 		start := uint64(0)
 		size := db.Size(rel)
-		if size > hlm_settings.CChatLimitMessages {
-			start = size - hlm_settings.CChatLimitMessages
+
+		messagesCap := pStateManager.GetConfig().GetMessagesCapacity()
+		if size > messagesCap {
+			start = size - messagesCap
 		}
 
 		msgs, err := db.Load(rel, start, size)

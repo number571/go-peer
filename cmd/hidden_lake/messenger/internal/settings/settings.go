@@ -6,8 +6,7 @@ const (
 )
 
 const (
-	CWorkForKeys       = 20
-	CChatLimitMessages = 100
+	CWorkForKeys = 20
 )
 
 const (

@@ -19,12 +19,12 @@ type SConfigSettingsBlock struct {
 	// HLS
 	FQueuePeriodMS uint64 `json:"queue_period_ms,omitempty"`
 
-	// HLT
+	// HLT, HLM
 	FMessagesCapacity uint64 `json:"messages_capacity,omitempty"`
 }
 
-func (p *SConfigSettingsBlock) IsValid() bool {
-	return p.FMessageSizeBytes != 0 && p.FWorkSizeBits != 0
+func (p *SConfigSettings) IsValid() bool {
+	return p.FSettings.FMessageSizeBytes != 0 && p.FSettings.FWorkSizeBits != 0
 }
 
 func (p *SConfigSettings) GetMessageSizeBytes() uint64 {

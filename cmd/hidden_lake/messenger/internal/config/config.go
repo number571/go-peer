@@ -79,8 +79,12 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
+func (p *SConfig) IsValidHLM() bool {
+	return p.FSettings.FKeySizeBits != 0 && p.FSettings.FMessagesCapacity != 0
+}
+
 func (p *SConfig) initConfig() error {
-	if !p.FSettings.IsValid() || p.FSettings.FKeySizeBits == 0 {
+	if !p.IsValid() || !p.IsValidHLM() {
 		return errors.NewError("load config settings")
 	}
 

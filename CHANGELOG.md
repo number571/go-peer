@@ -11,13 +11,15 @@ In progress...
 ### IMPROVEMENTS
 
 - Update `hidden_lake/messenger`: than got new message -> auto scroll to bottom
-- Update `hidden_lake/messenger`: append emoji's text
+- Update `hidden_lake/messenger`: append support emoji's text
 - Update `hidden_lake/messenger`: append constant chat with ourself
+- Update `hidden_lake/messenger`: append support file transfer
 
 ### CHANGES
 
-- Remove `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
-- Change `cmd/hidden_lake/Makefile`: "composite-default: composite-build" -> "composite-default: composite-build composite-run"
+- Move `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
+- Change `hidden_lake/Makefile`: "composite-default: composite-build" -> "composite-default: composite-build composite-run"
+- Change `hidden_lake/messenger`: move CChatLimitMessages to config value as "messages_capacity"
 
 <!-- ... -->
 
@@ -137,7 +139,7 @@ In progress...
 - Module `go.mod`: decrease version from 1.17 to 1.16
 - Update `README.md`: append installation, requirements
 - Project `hidden_lake/messenger`: rename interface and methods in IState -> IStateManager
-- Directory `tools`: removed to cmd/tools
+- Directory `tools`: moved to cmd/tools
 
 ### BUG FIXES
 

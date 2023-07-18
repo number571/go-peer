@@ -58,7 +58,8 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, errors.WrapError(err, "write config")
 	}
 
-	if err := pCfg.initConfig(pFilepath); err != nil {
+	pCfg.fFilepath = pFilepath
+	if err := pCfg.initConfig(); err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
 	return pCfg, nil
@@ -81,16 +82,19 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 		return nil, errors.WrapError(err, "deserialize config")
 	}
 
-	if err := cfg.initConfig(pFilepath); err != nil {
+	cfg.fFilepath = pFilepath
+	if err := cfg.initConfig(); err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
 	return cfg, nil
 }
 
-func (p *SConfig) initConfig(filepath string) error {
-	p.fFilepath = filepath
+func (p *SConfig) IsValidHLS() bool {
+	return p.FSettings.FKeySizeBits != 0 && p.FSettings.FQueuePeriodMS != 0
+}
 
-	if !p.FSettings.IsValid() || p.FSettings.FKeySizeBits == 0 || p.FSettings.FQueuePeriodMS == 0 {
+func (p *SConfig) initConfig() error {
+	if !p.IsValid() || !p.IsValidHLS() {
 		return errors.NewError("load config settings")
 	}
 

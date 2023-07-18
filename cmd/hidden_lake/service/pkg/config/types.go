@@ -17,7 +17,7 @@ type IEditor interface {
 }
 
 type IConfig interface {
-	settings.IConfigSettingsHLS
+	IConfigSettingsHLS
 
 	GetNetwork() string
 	GetLogging() logger.ILogging
@@ -25,6 +25,14 @@ type IConfig interface {
 	GetConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
 	GetService(string) (string, bool)
+}
+
+type IConfigSettingsHLS interface {
+	IsValidHLS() bool
+	settings.IConfigSettings
+
+	GetKeySizeBits() uint64
+	GetQueuePeriodMS() uint64
 }
 
 type IAddress interface {

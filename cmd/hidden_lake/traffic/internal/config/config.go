@@ -75,8 +75,12 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
+func (p *SConfig) IsValidHLT() bool {
+	return true // nothing append validates
+}
+
 func (p *SConfig) initConfig() error {
-	if !p.FSettings.IsValid() {
+	if !p.IsValid() || !p.IsValidHLT() {
 		return errors.NewError("load config settings")
 	}
 

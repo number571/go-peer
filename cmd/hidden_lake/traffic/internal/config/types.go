@@ -6,13 +6,20 @@ import (
 )
 
 type IConfig interface {
-	settings.IConfigSettingsHLT
+	IConfigSettingsHLT
 
 	GetLogging() logger.ILogging
 	GetNetwork() string
 	GetAddress() IAddress
 	GetConnections() []string
 	GetConsumers() []string
+}
+
+type IConfigSettingsHLT interface {
+	IsValidHLT() bool
+	settings.IConfigSettings
+
+	GetMessagesCapacity() uint64
 }
 
 type IAddress interface {

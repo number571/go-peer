@@ -6,12 +6,20 @@ import (
 )
 
 type IConfig interface {
-	settings.IConfigSettingsHLM
+	IConfigSettingsHLM
 
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() IConnection
 	GetStorageKey() string
+}
+
+type IConfigSettingsHLM interface {
+	IsValidHLM() bool
+	settings.IConfigSettings
+
+	GetKeySizeBits() uint64
+	GetMessagesCapacity() uint64
 }
 
 type IAddress interface {
