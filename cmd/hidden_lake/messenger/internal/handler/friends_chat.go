@@ -72,20 +72,21 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 		client := pStateManager.GetClient().Service()
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
-			fmt.Fprint(pW, "error: read public key")
+			fmt.Fprint(pW, errors.WrapError(err, "error: read public key"))
 			return
 		}
 
 		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
 		if err != nil {
-			fmt.Fprint(pW, err.Error())
+			fmt.Fprint(pW, errors.WrapError(err, "error: get receiver by public key"))
 			return
 		}
 
 		rel := database.NewRelation(myPubKey, recvPubKey)
+
 		switch pR.FormValue("method") {
 		case http.MethodPost, http.MethodPut:
-			msgBytes, err := getMessageBytesSend(pStateManager, pR)
+			msgBytes, err := getMessageBytesToSend(pStateManager, pR)
 			if err != nil {
 				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
 				return
@@ -97,10 +98,10 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 			}
 
 			uid := random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-			dbMsg := database.NewMessage(false, msgBytes, uid)
+			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes), uid)
 
 			if err := db.Push(rel, dbMsg); err != nil {
-				fmt.Fprint(pW, "error: add message to database")
+				fmt.Fprint(pW, errors.WrapError(err, "error: add message to database"))
 				return
 			}
 
@@ -120,7 +121,7 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 		msgs, err := db.Load(rel, start, size)
 		if err != nil {
-			fmt.Fprint(pW, "error: read database")
+			fmt.Fprint(pW, errors.WrapError(err, "error: read database"))
 			return
 		}
 
@@ -153,13 +154,15 @@ func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
 	}
 }
 
-func getMessageBytesSend(pStateManager state.IStateManager, pR *http.Request) ([]byte, error) {
+func getMessageBytesToSend(pStateManager state.IStateManager, pR *http.Request) ([]byte, error) {
 	switch pR.FormValue("method") {
 	case http.MethodPost:
-		rawMsg := strings.TrimSpace(pR.FormValue("input_message"))
-		strMsg := utils.GetOnlyWritableCharacters(utils.ReplaceTextToEmoji(rawMsg))
+		strMsg := strings.TrimSpace(pR.FormValue("input_message"))
 		if strMsg == "" {
 			return nil, errors.NewError("error: message is null")
+		}
+		if utils.HasNotWritableCharacters(strMsg) {
+			return nil, errors.NewError("error: message has not writable characters")
 		}
 		return wrapText(strMsg), nil
 	case http.MethodPut:
@@ -177,7 +180,7 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 	// Get handler for filename, size and headers
 	file, handler, err := pR.FormFile("input_file")
 	if err != nil {
-		return "", nil, errors.NewError("error: receive file")
+		return "", nil, errors.WrapError(err, "error: receive file")
 	}
 	defer file.Close()
 
@@ -187,7 +190,7 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		return "", nil, errors.NewError("error: read file bytes")
+		return "", nil, errors.WrapError(err, "error: read file bytes")
 	}
 
 	return handler.Filename, fileBytes, nil
@@ -214,13 +217,13 @@ func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubK
 }
 
 func getReceiverPubKey(client client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {
-	friends, err := client.GetFriends()
-	if err != nil {
-		return nil, errors.NewError("error: read friends")
-	}
-
 	if aliasName == hlm_settings.CIamAliasName {
 		return myPubKey, nil
+	}
+
+	friends, err := client.GetFriends()
+	if err != nil {
+		return nil, errors.WrapError(err, "error: read friends")
 	}
 
 	friendPubKey, ok := friends[aliasName]

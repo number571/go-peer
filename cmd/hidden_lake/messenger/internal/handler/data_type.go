@@ -45,14 +45,14 @@ func wrapFile(filename string, pBytes []byte) []byte {
 }
 
 func unwrapText(pBytes []byte) string {
-	if len(pBytes) == 0 {
+	if len(pBytes) == 0 { // need use first isText
 		panic("length of bytes = 0")
 	}
 	return string(pBytes[1:])
 }
 
 func unwrapFile(pBytes []byte) (string, string) {
-	if len(pBytes) == 0 {
+	if len(pBytes) == 0 { // need use first isFile
 		panic("length of bytes = 0")
 	}
 	splited := bytes.Split(pBytes[1:], []byte{byte(cIsFile)})

@@ -21,13 +21,22 @@ var (
 )
 
 func init() {
-	emojis := new(sEmojis)
-	if err := json.Unmarshal(web.GEmojisJSON, emojis); err != nil {
+	emojiSimple := new(sEmojis)
+	if err := json.Unmarshal(web.GEmojiSimpleJSON, emojiSimple); err != nil {
 		panic(err)
 	}
 
-	replacerList := make([]string, 0, len(emojis.Emojis))
-	for _, emoji := range emojis.Emojis {
+	emoji := new(sEmojis)
+	if err := json.Unmarshal(web.GEmojiJSON, emoji); err != nil {
+		panic(err)
+	}
+
+	replacerList := make([]string, 0, len(emojiSimple.Emojis)+len(emoji.Emojis))
+
+	for _, emoji := range emojiSimple.Emojis {
+		replacerList = append(replacerList, emoji.Shortname, emoji.Emoji)
+	}
+	for _, emoji := range emoji.Emojis {
 		replacerList = append(replacerList, emoji.Shortname, emoji.Emoji)
 	}
 
@@ -45,14 +54,4 @@ func HasNotWritableCharacters(pS string) bool {
 		}
 	}
 	return false
-}
-
-func GetOnlyWritableCharacters(pS string) string {
-	s := make([]rune, 0, len(pS))
-	for _, c := range pS {
-		if unicode.IsGraphic(c) {
-			s = append(s, c)
-		}
-	}
-	return string(s)
 }

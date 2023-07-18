@@ -38,7 +38,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			return
 		}
 
-		msgBytes, err := getMessageBytesRecv(rawMsgBytes)
+		msgBytes, err := getMessageBytesToRecv(rawMsgBytes)
 		if err != nil {
 			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
@@ -67,7 +67,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, msgBytes, encoding.HexDecode(msgHash))
+		dbMsg := database.NewMessage(true, doMessageProcessor(msgBytes), encoding.HexDecode(msgHash))
 		if err := db.Push(rel, dbMsg); err != nil {
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
@@ -75,23 +75,30 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 
 		gChatQueue.Push(&chat_queue.SMessage{
 			FAddress:     fPubKey.GetAddress().ToString(),
-			FMessageInfo: getMessageInfo(msgBytes, dbMsg.GetTimestamp()),
+			FMessageInfo: getMessageInfo(dbMsg.GetMessage(), dbMsg.GetTimestamp()),
 		})
 		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
 	}
 }
 
-func getMessageBytesRecv(rawMsgBytes []byte) ([]byte, error) {
+func doMessageProcessor(msgBytes []byte) []byte {
+	if isText(msgBytes) {
+		return []byte(utils.ReplaceTextToEmoji(string(msgBytes)))
+	}
+	return msgBytes
+}
+
+func getMessageBytesToRecv(rawMsgBytes []byte) ([]byte, error) {
 	switch {
 	case isText(rawMsgBytes):
-		rawMsg := strings.TrimSpace(string(unwrapText(rawMsgBytes)))
-		if len(rawMsg) == 0 {
+		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes))
+		if strMsg == "" {
 			return nil, errors.NewError("failed: message is null")
 		}
-		if utils.HasNotWritableCharacters(rawMsg) {
+		if utils.HasNotWritableCharacters(strMsg) {
 			return nil, errors.NewError("failed: message has not writable characters")
 		}
-		return wrapText(utils.ReplaceTextToEmoji(rawMsg)), nil
+		return wrapText(strMsg), nil
 	case isFile(rawMsgBytes):
 		filename, msgBytes := unwrapFile(rawMsgBytes)
 		if filename == "" || len(msgBytes) == 0 {
@@ -106,13 +113,20 @@ func getMessageBytesRecv(rawMsgBytes []byte) ([]byte, error) {
 func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 	switch {
 	case isText(pRawMsgBytes):
+		msgData := unwrapText(pRawMsgBytes)
+		if msgData == "" {
+			panic("message data = nil")
+		}
 		return utils.SMessageInfo{
 			FFileName:  "",
-			FMessage:   unwrapText(pRawMsgBytes),
+			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
 	case isFile(pRawMsgBytes):
 		filename, msgData := unwrapFile(pRawMsgBytes)
+		if filename == "" || msgData == "" {
+			panic("filename = nil OR message data = nil")
+		}
 		return utils.SMessageInfo{
 			FFileName:  filename,
 			FMessage:   msgData,

@@ -6,9 +6,7 @@
 4. Write linters (names with prefixes 'p', 'f', 's', 'i', 'c', 'g'), (objects with name=p)
 5. Create HLC (Hidden Lake Connector)
 6. HLM to service
-7. HLM: append smiles, upload/download files
-8. HLM: do error pages
-9. HLM: group chats, name of senders
-10. Fix docker build for arm macOS 
-11. Update README for configs HLS, HLM, HLT
-12. HLM: CChatLimitMessages to config
+7. HLM: do error pages
+8. HLM: group chats, name of senders
+9. Fix docker build for arm macOS 
+10. Update README for configs HLS, HLM, HLT
