@@ -346,7 +346,8 @@ Default config `hlm.cfg`
 	"settings": {
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
-		"key_size_bits": 4096
+		"key_size_bits": 4096,
+		"messages_capacity": 1000
 	},
 	"logging": [
 		"info",
