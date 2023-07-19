@@ -1,13 +1,16 @@
 package message
 
-import "github.com/number571/go-peer/pkg/payload"
+import (
+	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/types"
+)
 
 type IMessage interface {
+	types.IConverter
+	IsValid(ISettings) bool
+
 	GetHead() IHead
 	GetBody() IBody
-
-	IsValid(ISettings) bool
-	ToBytes() []byte
 }
 
 type ISettings interface {

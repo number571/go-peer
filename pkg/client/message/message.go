@@ -62,6 +62,10 @@ func (p *SMessage) ToBytes() []byte {
 	return jsonData
 }
 
+func (p *SMessage) ToString() string {
+	return string(p.ToBytes())
+}
+
 func (p *SMessage) IsValid(psett ISettings) bool {
 	if uint64(len(p.ToBytes())) > psett.GetMessageSizeBytes() {
 		return false

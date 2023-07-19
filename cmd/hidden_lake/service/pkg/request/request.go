@@ -37,6 +37,10 @@ func (p *sRequest) ToBytes() []byte {
 	return encoding.Serialize(p, false)
 }
 
+func (p *sRequest) ToString() string {
+	return string(p.ToBytes())
+}
+
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {
 	p.FHead = make(map[string]string)
 	for k, v := range pHead {

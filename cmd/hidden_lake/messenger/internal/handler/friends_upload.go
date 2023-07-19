@@ -45,7 +45,7 @@ func FriendsUploadPage(pStateManager state.IStateManager, msgLimit uint64) http.
 		res := &sUploadFile{
 			STemplateState: pStateManager.GetTemplate(),
 			FAliasName:     aliasName,
-			FMessageLimit:  msgLimit >> 1, // hex encode in the request.NewRequest.ToBytes()
+			FMessageLimit:  msgLimit,
 		}
 		t.Execute(pW, res)
 	}
