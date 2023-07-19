@@ -40,7 +40,7 @@ func wrapFile(filename string, pBytes []byte) []byte {
 		{byte(cIsFile)},
 		[]byte(filename),
 		{byte(cIsFile)},
-		[]byte(base64.StdEncoding.EncodeToString(pBytes)),
+		pBytes,
 	}, []byte{})
 }
 
@@ -63,15 +63,9 @@ func unwrapFile(pBytes []byte) (string, string) {
 	if utils.HasNotWritableCharacters(filename) {
 		return "", ""
 	}
-	fileBytes := string(splited[1]) // in base64
+	fileBytes := bytes.Join(splited[1:], []byte{byte(cIsFile)}) // in base64
 	if len(fileBytes) == 0 {
 		return "", ""
 	}
-	if utils.HasNotWritableCharacters(fileBytes) {
-		return "", ""
-	}
-	if _, err := base64.StdEncoding.DecodeString(fileBytes); err != nil {
-		return "", ""
-	}
-	return filename, fileBytes
+	return filename, base64.StdEncoding.EncodeToString(fileBytes)
 }

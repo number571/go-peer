@@ -21,7 +21,6 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
-	pkg_client "github.com/number571/go-peer/pkg/client"
 )
 
 type sChatMessage struct {
@@ -38,11 +37,7 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pStateManager state.IStateManager) http.HandlerFunc {
-	msgSize := pStateManager.GetConfig().GetMessageSizeBytes()
-	keySize := pStateManager.GetConfig().GetKeySizeBits()
-	msgLimit := pkg_client.GetMessageLimit(msgSize, keySize)
-
+func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/friends/chat" {
 			NotFoundPage(pStateManager)(pW, pR)

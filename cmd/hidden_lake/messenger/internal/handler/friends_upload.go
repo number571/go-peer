@@ -11,10 +11,11 @@ import (
 
 type sUploadFile struct {
 	*state.STemplateState
-	FAliasName string
+	FAliasName    string
+	FMessageLimit uint64
 }
 
-func FriendsUploadPage(pStateManager state.IStateManager) http.HandlerFunc {
+func FriendsUploadPage(pStateManager state.IStateManager, msgLimit uint64) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/friends/upload" {
 			NotFoundPage(pStateManager)(pW, pR)
@@ -44,6 +45,7 @@ func FriendsUploadPage(pStateManager state.IStateManager) http.HandlerFunc {
 		res := &sUploadFile{
 			STemplateState: pStateManager.GetTemplate(),
 			FAliasName:     aliasName,
+			FMessageLimit:  msgLimit >> 1, // hex encode in the request.NewRequest.ToBytes()
 		}
 		t.Execute(pW, res)
 	}
