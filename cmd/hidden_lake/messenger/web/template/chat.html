@@ -5,8 +5,8 @@ Chat
 {{define "main"}}
 <script type="text/javascript" defer>
   window.onload = function () {
-    switchToInputField();
     connectToService();
+    switchToInputField();
   }
 </script>
 
@@ -71,17 +71,19 @@ Chat
           </div>
         `
       } else { // got file message
+        let filename = escapeOutput(messageInfo.filename);
         insertHTML = `
           <div class="d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + escapeOutput(messageInfo.filename) + `')">
-                ` + messageInfo.filename + `
+              <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">
+                ` + filename + `
               </button>
               <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
             </div>
           </div>
         `
       }
+
       d1.insertAdjacentHTML('beforeend', insertHTML);
       scrollToBottom();
     };
