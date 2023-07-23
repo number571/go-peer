@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"

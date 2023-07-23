@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
 
-	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 

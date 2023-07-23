@@ -3,7 +3,7 @@ package app
 import (
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"

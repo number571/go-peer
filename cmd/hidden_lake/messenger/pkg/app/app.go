@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/config"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
 

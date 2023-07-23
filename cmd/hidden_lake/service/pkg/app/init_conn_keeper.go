@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 

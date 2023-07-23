@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/config"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/entropy"

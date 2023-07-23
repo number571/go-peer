@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"

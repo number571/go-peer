@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"

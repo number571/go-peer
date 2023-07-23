@@ -2,9 +2,17 @@
 
 <!-- ... -->
 
-## v1.5.14
+## v1.5.15
 
 *??? ??, ????*
+
+In progress...
+
+<!-- ... -->
+
+## v1.5.14
+
+*Jule 24, 2023*
 
 In progress...
 
@@ -21,6 +29,7 @@ In progress...
 - Move `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
 - Change `hidden_lake/Makefile`: "composite-default: composite-build" -> "composite-default: composite-build composite-run"
 - Change `hidden_lake/messenger`: move CChatLimitMessages to config value as "messages_capacity"
+- Change `hidden_lake`: move app path's from internal/ to pkg/, move config path's from pkg/ to internal/
 
 <!-- ... -->
 

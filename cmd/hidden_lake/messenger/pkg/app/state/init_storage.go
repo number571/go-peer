@@ -3,7 +3,7 @@ package state
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
