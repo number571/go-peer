@@ -1,29 +1,23 @@
-package main
+package app
 
 import (
-	"flag"
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/app"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/internal/flag"
 
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 )
 
-func initApp() (types.ICommand, error) {
-	var (
-		inputPath string
-	)
-
-	flag.StringVar(&inputPath, "path", ".", "path to config/database files")
-	flag.Parse()
+func InitApp() (types.ICommand, error) {
+	inputPath := flag.GetFlagValue("path", ".", "path to config/database files")
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
 
-	return app.NewApp(cfg, inputPath), nil
+	return NewApp(cfg, inputPath), nil
 }

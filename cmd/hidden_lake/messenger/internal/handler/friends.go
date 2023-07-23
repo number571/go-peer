@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )

@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 )
 

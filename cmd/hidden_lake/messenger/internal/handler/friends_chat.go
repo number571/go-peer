@@ -7,10 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -20,7 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/errors"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 )
 
 type sChatMessage struct {
@@ -203,7 +202,7 @@ func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubK
 
 	return client.BroadcastRequest(
 		recvPubKey,
-		request.NewRequest(http.MethodPost, pkg_settings.CTitlePattern, hlm_settings.CPushPath).
+		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).

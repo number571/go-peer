@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler"
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	pkg_client "github.com/number571/go-peer/pkg/client"
 	"golang.org/x/net/websocket"

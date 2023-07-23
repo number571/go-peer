@@ -7,7 +7,7 @@ import (
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 )
 
 func QRPublicKeyPage(pStateManager state.IStateManager) http.HandlerFunc {

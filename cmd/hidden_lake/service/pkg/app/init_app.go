@@ -1,10 +1,9 @@
-package main
+package app
 
 import (
-	"flag"
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
+	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -15,15 +14,9 @@ import (
 )
 
 // initApp work with the raw data = read files, read args
-func initApp() (types.ICommand, error) {
-	var (
-		inputPath string
-		inputKey  string
-	)
-
-	flag.StringVar(&inputPath, "path", ".", "path to config/database files")
-	flag.StringVar(&inputKey, "key", "", "input private key from file")
-	flag.Parse()
+func InitApp() (types.ICommand, error) {
+	inputPath := flag.GetFlagValue("path", ".", "path to config/database files")
+	inputKey := flag.GetFlagValue("key", "", "input private key from file")
 
 	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
 	if err != nil {
@@ -46,5 +39,5 @@ func initApp() (types.ICommand, error) {
 		return nil, errors.NewError("private key is invalid")
 	}
 
-	return app.NewApp(cfg, privKey, inputPath), nil
+	return NewApp(cfg, privKey, inputPath), nil
 }

@@ -3,15 +3,17 @@
 
 default: build 
 build:
-	make -C ./service all-build
-	make -C ./messenger all-build
-	make -C ./traffic all-build
+	make -C ./service build
+	make -C ./messenger build
+	make -C ./traffic build
 	make -C ./adapters build
+	make -C ./_monolith build
 clean:
-	make -C ./service all-clean
-	make -C ./messenger all-clean
-	make -C ./traffic all-clean
+	make -C ./service clean
+	make -C ./messenger clean
+	make -C ./traffic clean
 	make -C ./adapters clean
+	make -C ./_monolith clean
 
 docker-default: docker-build docker-run
 docker-build:
@@ -23,11 +25,7 @@ docker-clean:
 	docker-compose down 
 	docker-compose rm -f
 
-composite-default: composite-build composite-run
-composite-build: build
-	cp _default_cfg/hls.cfg ./service
-	cp _default_cfg/hlt.cfg ./traffic
-	cp _default_cfg/hlm.cfg ./messenger
+composite-default: build composite-run
 composite-run: 
 	make run -C ./service & 
 	make run -C ./traffic & 

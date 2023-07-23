@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 )
 
 func IndexPage(pStateManager state.IStateManager) http.HandlerFunc {

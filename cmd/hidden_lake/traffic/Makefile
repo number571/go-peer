@@ -3,15 +3,13 @@ GC=go build
 ROOPATH=../../..
 BINPATH=$(ROOPATH)/bin
 
-.PHONY: default all-build build run test all-clean clean \
+.PHONY: default build run test clean \
 	docker-default docker-build docker-run docker-clean 
 
 default: build run
-
-all-build: build
-all-clean: clean
-
-build:
+default-config: 
+	cp ../_default_cfg/hlt.cfg .
+build: default-config
 	$(GC) -o $(BINPATH)/hlt ./cmd/hlt
 
 	for arch in amd64 arm64; \

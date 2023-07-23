@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/pprof"
 )
@@ -12,7 +13,7 @@ import (
 func main() {
 	pprof.RunPprofService(pkg_settings.CServiceName)
 
-	app, err := initApp()
+	app, err := app.InitApp()
 	if err != nil {
 		panic(err)
 	}

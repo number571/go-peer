@@ -74,8 +74,9 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	if err := cfg.initConfig(); err != nil {
-		return nil, errors.WrapError(err, "init config")
+		return nil, errors.WrapError(err, "internal init config")
 	}
+
 	return cfg, nil
 }
 
