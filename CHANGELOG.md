@@ -6,15 +6,15 @@
 
 *??? ??, ????*
 
-In progress...
+### CHANGES
+
+- Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/
 
 <!-- ... -->
 
 ## v1.5.14
 
 *Jule 24, 2023*
-
-In progress...
 
 ### IMPROVEMENTS
 
