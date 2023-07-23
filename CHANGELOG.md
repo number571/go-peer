@@ -14,6 +14,7 @@ In progress...
 - Update `hidden_lake/messenger`: append support emoji's text
 - Update `hidden_lake/messenger`: append constant chat with ourself
 - Update `hidden_lake/messenger`: append support file transfer
+- Create `hidden_lake/_monolith`: create service+messenger, service+traffic, service+traffic+messenger
 
 ### CHANGES
 
