@@ -5,7 +5,7 @@
         {
             "label": "preLaunchTask/cmd/hidden_lake",
             "type": "shell",
-            "command": "make composite-build",
+            "command": "make build",
             "options": {
                 "cwd": "${workspaceFolder}/cmd/hidden_lake"
             },
