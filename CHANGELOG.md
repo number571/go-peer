@@ -10,6 +10,7 @@
 
 - Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/
 - Change `hidden_lake/composite`: changed the order stop apps
+- Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
 
 ### BUG FIXES
 
