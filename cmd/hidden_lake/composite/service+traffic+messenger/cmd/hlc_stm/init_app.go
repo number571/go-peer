@@ -45,7 +45,10 @@ func (p *sApp) Run() error {
 	if err := p.fHLS.Run(); err != nil {
 		return err
 	}
-	return p.fHLT.Run()
+	if err := p.fHLT.Run(); err != nil {
+		return err
+	}
+	return p.fHLM.Run()
 }
 
 func (p *sApp) Stop() error {
