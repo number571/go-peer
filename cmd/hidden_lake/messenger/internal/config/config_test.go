@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
@@ -22,6 +23,7 @@ const (
 		"messages_capacity": %d
 	},
 	"logging": ["info", "erro"],
+	"language": "RUS",
 	"address": {
 		"interface": "%s",
 		"incoming": "%s"
@@ -107,6 +109,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
+		return
+	}
+
+	if cfg.GetLanguage() != utils.CLangRUS {
+		t.Error("language is invalid")
 		return
 	}
 

@@ -1,22 +1,52 @@
 {{define "title"}}
+
+{{if (eq .FLanguage 0)}}
 Friends
+{{else if (eq .FLanguage 1)}}
+Друзья
+{{end}}
+
 {{end}}
 
 {{define "main"}}
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Communications</h1>
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
+        {{if (eq .FLanguage 0)}}
+        Communications
+        {{else if (eq .FLanguage 1)}}
+        Коммуникации
+        {{end}}
+    </h1>
     <div class="card mb-3 bg-dark">
-        <h5 class="card-header text-white bg-secondary p-2">Friends</h5>
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Friends
+            {{else if (eq .FLanguage 1)}}
+            Друзья
+            {{end}}
+        </h5>
         <div class="card-body">
             <form class="mb-3" method="POST" action="/friends">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-                <input hidden name="method" value="POST"> 
+                <input hidden name="method" value="POST">
                 <div class="row">
                     <div class="col-md-5 w-50">
-                        <input type="text" name="alias_name" placeholder="Alias" class="text-center form-control bg-dark text-white w-100">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="alias_name" placeholder="Alias"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="alias_name" placeholder="Имя"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
                     </div>
                     <div class="col-md-3 w-25">
-                        <input type="text" name="public_key" placeholder="PK" class="text-center form-control bg-dark text-white w-100">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="public_key" placeholder="Key"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="public_key" placeholder="Ключ"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
                     </div>
                     <div class="col-md-4 w-25">
                         <input type="submit" name="submit" value="+" class="btn btn-info w-100">
@@ -29,7 +59,8 @@ Friends
                 <input hidden name="method" value="DELETE">
                 <div class="row">
                     <div class="col-md-8 w-75">
-                        <input hidden type="text" name="alias_name" value="{{.}}" class="text-center form-control w-100">
+                        <input hidden type="text" name="alias_name" value="{{.}}"
+                            class="text-center form-control w-100">
                         <!-- GET -->
                         <a href="/friends/chat?alias_name={{.}}" class="btn btn-secondary button w-100">{{.}}</a>
                     </div>

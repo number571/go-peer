@@ -19,12 +19,8 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) pkg_settings.SPrivKey {
+func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) string {
 	return pPrivKey.ToString()
-}
-
-func (p *sBuilder) Connect(pConnect string) pkg_settings.SConnect {
-	return pConnect
 }
 
 func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {
@@ -46,6 +42,6 @@ func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg
 	}
 }
 
-func (p *sBuilder) Message(pMsg message.IMessage) pkg_settings.SMessage {
+func (p *sBuilder) Message(pMsg message.IMessage) string {
 	return pMsg.ToString()
 }

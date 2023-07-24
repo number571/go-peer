@@ -3,12 +3,14 @@ package state
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 type STemplateState struct {
+	FLanguage   utils.ILanguage
 	FAuthorized bool
 }
 

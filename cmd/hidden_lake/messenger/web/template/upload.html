@@ -1,15 +1,32 @@
 {{define "title"}}
+
+{{if (eq .FLanguage 0)}}
 Upload file
+{{else if (eq .FLanguage 1)}}
+Загрузка файла
+{{end}}
+
 {{end}}
 
 {{define "main"}}
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h2 class="col-md-10 mb-3 mx-auto h3 text-white">Message limit ≈ {{.FMessageLimit}} bytes</h2>
-    <form class="card-footer d-flex" enctype="multipart/form-data" action="/friends/chat?alias_name={{.FAliasName}}" method="POST">
+    <h2 class="col-md-10 mb-3 mx-auto h3 text-white">
+        {{if (eq .FLanguage 0)}}
+        Message limit ≈ {{.FMessageLimit}} bytes
+        {{else if (eq .FLanguage 1)}}
+        Ограничение сообщения ≈ {{.FMessageLimit}} байт
+        {{end}}
+    </h2>
+    <form class="card-footer d-flex" enctype="multipart/form-data" action="/friends/chat?alias_name={{.FAliasName}}"
+        method="POST">
         <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
         <input hidden name="method" value="PUT">
         <input class="form-control form-control-lg bg-secondary text-white m-1" name="input_file" type="file">
+        {{if (eq .FLanguage 0)}}
         <input type="submit" style="width:20em;" class="btn btn-info m-1" value="Send">
-    </form> 
+        {{else if (eq .FLanguage 1)}}
+        <input type="submit" style="width:20em;" class="btn btn-info m-1" value="Отправить">
+        {{end}}
+    </form>
 </div>
 {{end}}

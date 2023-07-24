@@ -98,6 +98,7 @@ func (p *sStateManager) GetWrapperDB() database.IWrapperDB {
 
 func (p *sStateManager) GetTemplate() *STemplateState {
 	return &STemplateState{
+		FLanguage:   p.fConfig.GetLanguage(),
 		FAuthorized: p.StateIsActive(),
 	}
 }

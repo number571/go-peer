@@ -83,6 +83,10 @@
         {
             "emoji": "❤️",
             "shortname": "<3"
+        },
+        {
+            "emoji": "🤡",
+            "shortname": ":^"
         }
     ]
 }

@@ -1,5 +1,11 @@
 {{define "title"}}
+
+{{if (eq .FLanguage 0)}}
 Chat
+{{else if (eq .FLanguage 1)}}
+Чат
+{{end}}
+
 {{end}}
 
 {{define "main"}}
@@ -160,8 +166,8 @@ Chat
   <input hidden name="method" value="POST">
   <input type="text" autocomplete="off" class="form-control form-control-lg bg-dark text-white m-1" name="input_message"
     placeholder="Type message ..." id="input_message">
-  <input type="submit" style="width:5em;" name="send" value="Send" class="btn btn-info m-1">
+  <input type="submit" style="width:5em;" name="send" value="🗨" class="btn btn-info m-1">
   <button type="button" style="width:5em;" class="btn btn-info m-1"
-    onclick="location.href='/friends/upload?alias_name={{.FAddress.FAliasName}}';">File</button>
+    onclick="location.href='/friends/upload?alias_name={{.FAddress.FAliasName}}';">📂</button>
 </form>
 {{end}}

@@ -2,7 +2,9 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -20,11 +22,13 @@ type SConfig struct {
 	settings.SConfigSettings
 
 	FLogging    []string     `json:"logging,omitempty"`
+	FLanguage   string       `json:"language,omitempty"`
 	FAddress    *SAddress    `json:"address"`
 	FConnection *SConnection `json:"connection"`
 	FStorageKey string       `json:"storage_key,omitempty"`
 
-	fLogging *sLogging
+	fLanguage utils.ILanguage
+	fLogging  *sLogging
 }
 
 type sLogging []bool
@@ -92,6 +96,21 @@ func (p *SConfig) initConfig() error {
 	if err := p.loadLogging(); err != nil {
 		return errors.WrapError(err, "load logging")
 	}
+	if err := p.loadLanguage(); err != nil {
+		return errors.WrapError(err, "load language")
+	}
+	return nil
+}
+
+func (p *SConfig) loadLanguage() error {
+	switch strings.ToUpper(p.FLanguage) {
+	case "", "ENG":
+		p.fLanguage = utils.CLangENG
+	case "RUS":
+		p.fLanguage = utils.CLangRUS
+	default:
+		return errors.NewError("unknown language")
+	}
 	return nil
 }
 
@@ -115,6 +134,10 @@ func (p *SConfig) loadLogging() error {
 
 	p.fLogging = &logging
 	return nil
+}
+
+func (p *SConfig) GetLanguage() utils.ILanguage {
+	return p.fLanguage
 }
 
 func (p *SConfig) GetAddress() IAddress {

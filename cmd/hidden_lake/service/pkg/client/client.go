@@ -85,7 +85,7 @@ func (p *sClient) GetOnlines() ([]string, error) {
 }
 
 func (p *sClient) DelOnline(pConnect string) error {
-	if err := p.fRequester.DelOnline(p.fBuilder.Connect(pConnect)); err != nil {
+	if err := p.fRequester.DelOnline(pConnect); err != nil {
 		return errors.WrapError(err, "del online (client)")
 	}
 	return nil
@@ -100,14 +100,14 @@ func (p *sClient) GetConnections() ([]string, error) {
 }
 
 func (p *sClient) AddConnection(pConnect string) error {
-	if err := p.fRequester.AddConnection(p.fBuilder.Connect(pConnect)); err != nil {
+	if err := p.fRequester.AddConnection(pConnect); err != nil {
 		return errors.WrapError(err, "add connection (client)")
 	}
 	return nil
 }
 
 func (p *sClient) DelConnection(pConnect string) error {
-	if err := p.fRequester.DelConnection(p.fBuilder.Connect(pConnect)); err != nil {
+	if err := p.fRequester.DelConnection(pConnect); err != nil {
 		return errors.WrapError(err, "del connection (client)")
 	}
 	return nil

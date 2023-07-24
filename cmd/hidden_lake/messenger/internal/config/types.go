@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/logger"
 	"github.com/number571/go-peer/internal/settings"
 )
@@ -12,6 +13,7 @@ type IConfig interface {
 	GetLogging() logger.ILogging
 	GetConnection() IConnection
 	GetStorageKey() string
+	GetLanguage() utils.ILanguage
 }
 
 type IConfigSettingsHLM interface {

@@ -1,24 +1,69 @@
 {{define "title"}}
+
+{{if (eq .FLanguage 0)}}
 Sign in
+{{else if (eq .FLanguage 1)}}
+Вход
+{{end}}
+
 {{end}}
 
 {{define "main"}}
+<script type="text/javascript" defer>
+    window.onload = function () {
+        switchToInputField();
+    }
+</script>
+
+<script type="text/javascript" defer>
+    function switchToInputField() {
+        var input = document.getElementById('input_login');
+        input.focus();
+        input.select();
+    }
+</script>
+
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Authentication</h1>
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
+        {{if (eq .FLanguage 0)}}
+        Authentication
+        {{else if (eq .FLanguage 1)}}
+        Аутентификация
+        {{end}}
+    </h1>
     <div class="card mb-3 bg-dark">
-        <h5 class="card-header text-white bg-secondary p-2">Sign in</h5>
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Sign in
+            {{else if (eq .FLanguage 1)}}
+            Вход
+            {{end}}
+        </h5>
         <div class="card-body">
             <form method="POST" action="/sign/in">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST">
                 <div class="mb-3">
-                    <input type="text" class="form-control bg-dark text-white" name="login" placeholder="Login">
+                    {{if (eq .FLanguage 0)}}
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Login">
+                    {{else if (eq .FLanguage 1)}}
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Логин">
+                    {{end}}
                 </div>
                 <div class="mb-3">
-                    <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Password">
+                    {{if (eq .FLanguage 0)}}
+                    <input type="password" class="form-control bg-dark text-white" name="password"
+                        placeholder="Password">
+                    {{else if (eq .FLanguage 1)}}
+                    <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Пароль">
+                    {{end}}
                 </div>
                 <div class="mb-3">
+                    {{if (eq .FLanguage 0)}}
                     <input type="submit" name="submit" value="Confirm" class="btn btn-info w-100">
+                    {{else if (eq .FLanguage 1)}}
+                    <input type="submit" name="submit" value="Подтвердить" class="btn btn-info w-100">
+                    {{end}}
                 </div>
             </form>
         </div>

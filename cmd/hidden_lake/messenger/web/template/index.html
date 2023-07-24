@@ -18,11 +18,21 @@
             </div>
             <div>
                 {{if .FAuthorized}}
+                {{if (eq .FLanguage 0)}}
                 <a href="/friends" class="btn btn-secondary button"><b>Friends</b></a>
                 <a href="/settings" class="btn btn-secondary button"><b>Settings</b></a>
+                {{else if (eq .FLanguage 1)}}
+                <a href="/friends" class="btn btn-secondary button"><b>Друзья</b></a>
+                <a href="/settings" class="btn btn-secondary button"><b>Настройки</b></a>
+                {{end}}
                 {{else}}
+                {{if (eq .FLanguage 0)}}
                 <a href="/sign/up" class="btn btn-secondary button"><b>Sign up</b></a>
                 <a href="/sign/in" class="btn btn-secondary button"><b>Sign in</b></a>
+                {{else if (eq .FLanguage 1)}}
+                <a href="/sign/up" class="btn btn-secondary button"><b>Регистрация</b></a>
+                <a href="/sign/in" class="btn btn-secondary button"><b>Вход</b></a>
+                {{end}}
                 {{end}}
             </div>
         </div>

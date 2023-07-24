@@ -1,5 +1,11 @@
 {{define "title"}}
+
+{{if (eq .FLanguage 0)}}
 Settings
+{{else if (eq .FLanguage 1)}}
+Настройки
+{{end}}
+
 {{end}}
 
 {{define "main"}}
@@ -17,35 +23,84 @@ Settings
 </script>
 
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Base information</h1>
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
+        {{if (eq .FLanguage 0)}}
+        Base information
+        {{else if (eq .FLanguage 1)}}
+        Основная информация
+        {{end}}
+    </h1>
     <div class="card mb-3 bg-dark">
-        <h5 class="card-header text-white bg-secondary p-2">Account</h5>
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Account
+            {{else if (eq .FLanguage 1)}}
+            Аккаунт
+            {{end}}
+        </h5>
         <div class="card-body">
             <div class="form-group row">
                 <div class="col-md-6 w-50">
-                    <button id="button_copy" type="button" class="btn btn-secondary w-100" onclick="copy_text('public_key');set_info_color('button_copy');">Copy to clipboard</button>
+                    <button id="button_copy" type="button" class="btn btn-secondary w-100"
+                        onclick="copy_text('public_key');set_info_color('button_copy');">
+                        {{if (eq .FLanguage 0)}}
+                        Copy to clipboard
+                        {{else if (eq .FLanguage 1)}}
+                        Скопировать в буффер обмена
+                        {{end}}
+                    </button>
                 </div>
                 <div class="col-md-6 w-50">
-                    <a href="/qr/public_key" class="btn btn-secondary button w-100">QR code</a>
+                    <a href="/qr/public_key" class="btn btn-secondary button w-100">
+                        {{if (eq .FLanguage 0)}}
+                        QR code
+                        {{else if (eq .FLanguage 1)}}
+                        QR код
+                        {{end}}
+                    </a>
                 </div>
             </div>
             <div>
-                <a href="/sign/out" class="btn btn-info button w-100">Sign out</a>
+                <a href="/sign/out" class="btn btn-info button w-100">
+                    {{if (eq .FLanguage 0)}}
+                    Sign out
+                    {{else if (eq .FLanguage 1)}}
+                    Выйти
+                    {{end}}
+                </a>
             </div>
         </div>
     </div>
     <div class="card mb-3 bg-dark">
-        <h5 class="card-header text-white bg-secondary p-2">Connections</h5>
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Connections
+            {{else if (eq .FLanguage 1)}}
+            Соединения
+            {{end}}
+        </h5>
         <div class="card-body">
             <form class="mb-3" method="POST" action="/settings">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-                <input hidden name="method" value="POST"> 
+                <input hidden name="method" value="POST">
                 <div class="row">
                     <div class="col-md-5 w-50">
-                        <input type="text" name="host" placeholder="Host" class="text-center form-control bg-dark text-white w-100">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="host" placeholder="Host"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="host" placeholder="Хост"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
                     </div>
                     <div class="col-md-3 w-25">
-                        <input type="text" name="port" placeholder="PT" class="text-center form-control bg-dark text-white w-100">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="port" placeholder="Port"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="port" placeholder="Порт"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
                     </div>
                     <div class="col-md-4 w-25">
                         <input type="submit" name="submit" value="+" class="btn btn-info w-100">
@@ -58,11 +113,14 @@ Settings
                 <input hidden name="method" value="DELETE">
                 <div class="row">
                     <div class="col-md-8 w-75">
-                        <input hidden type="text" name="address" value="{{.FAddress}}" class="text-center form-control w-100">
+                        <input hidden type="text" name="address" value="{{.FAddress}}"
+                            class="text-center form-control w-100">
                         {{if .FOnline}}
-                            <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">{{.FAddress}}</button>
+                        <button disabled type="button" class="btn btn-info w-100"
+                            style="overflow: hidden;">{{.FAddress}}</button>
                         {{else}}
-                            <button disabled type="button" class="btn btn-secondary w-100" style="overflow: hidden;">{{.FAddress}}</button>
+                        <button disabled type="button" class="btn btn-secondary w-100"
+                            style="overflow: hidden;">{{.FAddress}}</button>
                         {{end}}
                     </div>
                     <div class="col-md-4 w-25">

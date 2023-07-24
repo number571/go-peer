@@ -13,7 +13,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
-	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -59,7 +58,7 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
-			api.Response(pW, http.StatusForbidden, "failed: database closed")
+			fmt.Fprint(pW, "error: database closed")
 			return
 		}
 

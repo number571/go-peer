@@ -36,29 +36,28 @@ type IRequester interface {
 	GetIndex() (string, error)
 
 	GetPubKey() (asymmetric.IPubKey, error)
-	SetPrivKey(pkg_settings.SPrivKey) error
+	SetPrivKey(string) error
 
 	GetOnlines() ([]string, error)
-	DelOnline(pkg_settings.SConnect) error
+	DelOnline(string) error
 
 	GetFriends() (map[string]asymmetric.IPubKey, error)
 	AddFriend(*pkg_settings.SFriend) error
 	DelFriend(*pkg_settings.SFriend) error
 
 	GetConnections() ([]string, error)
-	AddConnection(pkg_settings.SConnect) error
-	DelConnection(pkg_settings.SConnect) error
+	AddConnection(string) error
+	DelConnection(string) error
 
-	HandleMessage(pkg_settings.SMessage) error
+	HandleMessage(string) error
 
 	BroadcastRequest(*pkg_settings.SRequest) error
 	FetchRequest(*pkg_settings.SRequest) (response.IResponse, error)
 }
 
 type IBuilder interface {
-	SetPrivKey(asymmetric.IPrivKey) pkg_settings.SPrivKey
-	Connect(string) pkg_settings.SConnect
+	SetPrivKey(asymmetric.IPrivKey) string
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
-	Message(message.IMessage) pkg_settings.SMessage
+	Message(message.IMessage) string
 	Request(asymmetric.IPubKey, request.IRequest) *pkg_settings.SRequest
 }
