@@ -4,6 +4,8 @@
 About
 {{else if (eq .FLanguage 1)}}
 О проекте
+{{else if (eq .FLanguage 2)}}
+Pri la projekto
 {{end}}
 
 {{end}}
@@ -20,6 +22,8 @@ About
                     Project
                     {{else if (eq .FLanguage 1)}}
                     Проект
+                    {{else if (eq .FLanguage 2)}}
+                    Projekto
                     {{end}}
                 </a>
             </li>
@@ -30,6 +34,8 @@ About
                     Theory
                     {{else if (eq .FLanguage 1)}}
                     Теория
+                    {{else if (eq .FLanguage 2)}}
+                    Teorio
                     {{end}}
                 </a>
             </li>
@@ -40,6 +46,8 @@ About
                     Source
                     {{else if (eq .FLanguage 1)}}
                     Исходные коды
+                    {{else if (eq .FLanguage 2)}}
+                    Fontaj kodoj
                     {{end}}
                 </a>
             </li>
@@ -59,6 +67,12 @@ About
                     Особенностью данного мессенджера является анонимность факта совершения
                     транзакций (отправление, получение). HLM может использовать HLT для загрузки сообщений, когда
                     пользователь находится не в сети.
+                    {{else if (eq .FLanguage 2)}}
+                    HLM estas mesaĝisto bazita sur La Anonima Retkerno (HLS) kun teorie pruvebla
+                    anonimeco.
+                    La propreco de ĉi tiu mesaĝisto estas la anonimeco de la fakto de komisiono
+                    transakcioj (sendo, ricevo). HLM povas uzi HLT por ŝarĝi mesaĝojn kiam
+                    la uzanto estas eksterreta.
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -70,6 +84,10 @@ About
                     HLS - это ядро анонимной сети с теоретически доказуемой анонимностью, построенной на
                     основе соединений "друг с другом" (F2F). Ядро основано на модели "очередей". В определенных
                     реализациях ядро HLS может обладать свойством "абстрактности".
+                    {{else if (eq .FLanguage 2)}}
+                    HLS estas la kerno de anonima reto kun teorie pruvebla anonimeco, konstruita sur
+                    la bazo de ligoj "unu kun la alia" (F2F). La kerno estas bazita sur "vico" modelo. En certaj kazoj
+                    En efektivigoj, LA hls-kerno povas havi la posedaĵon de "abstrakteco".
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -83,6 +101,11 @@ About
                     сохраняет загруженные сообщения в своей базе данных для последующей выдачи. База данных работает как
                     структура кольцо, в которой старые сообщения перезаписываются новыми. HLT может работать также в
                     режиме ретранслятора.
+                    {{else if (eq .FLanguage 2)}}
+                    HLT estas apliko kiu kopias sin kiel hls por ricevi mesaĝojn de la reto. HLT
+                    konservas la elŝutitajn mesaĝojn en sia datumbazo por posta liberigo. La datumbazo funkcias kiel
+                    ringa strukturo en kiu malnovaj mesaĝoj estas superskribitaj per novaj. HLT ankaŭ povas funkcii en
+                    ripetila reĝimo.
                     {{end}}
                 </p>
             </div>
@@ -98,6 +121,11 @@ About
                     разработку анонимных коммуникаций и защищенных приложений. Анализ основан на
                     диалектическом подходе, позволяющем рассматривать закономерности развития через сумму
                     накопленных противоречий.
+                    {{else if (eq .FLanguage 2)}}
+                    La teorio de la strukturo de kaŝitaj sistemoj estas scienca kaj teoria artikolo priskribanta
+                    evoluo de anonimaj komunikadoj kaj sekuraj aplikoj. La analizo baziĝas sur
+                    dialektika aliro kiu permesas al ni konsideri la padronojn de evoluo tra la sumo
+                    akumulitaj kontraŭdiroj.
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -105,6 +133,8 @@ About
                     Theory of the structure of hidden systems:
                     {{else if (eq .FLanguage 1)}}
                     Теория строения скрытых систем:
+                    {{else if (eq .FLanguage 2)}}
+                    Teorio de la strukturo de kaŝitaj sistemoj:
                     {{end}}
                     <a href="https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf"
                         class="text-info">theory_of_the_structure_of_hidden_systems.pdf</a>;
@@ -118,6 +148,10 @@ About
                     Монолитный криптографический протокол - это научно-аналитическая статья, описывающая анализ
                     криптографического протокола, применимого в анонимных сетях и клиент-безопасных приложениях с
                     последующей реализацией на языке программирования Go.
+                    {{else if (eq .FLanguage 2)}}
+                    Monolita kriptografia protokolo estas scienca kaj analiza artikolo priskribanta la analizon
+                    kriptografia protokolo uzebla en anonimaj retoj kaj klient-sekuraj aplikoj kun
+                    posta efektivigo en la programlingvo go.
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -125,6 +159,8 @@ About
                     Monolithic cryptographic protocol:
                     {{else if (eq .FLanguage 1)}}
                     Монолитный криптографический протокол:
+                    {{else if (eq .FLanguage 2)}}
+                    Monolita Kriptografia Protokolo:
                     {{end}}
                     <a href="https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf"
                         class="text-info">monolithic_cryptographic_protocol.pdf</a>;
@@ -138,6 +174,10 @@ About
                     Абстрактные анонимные сети - это научно-аналитическая статья, описывающая
                     анализ теоретически доказуемых анонимных сетей с уникальными характеристиками невосприимчивости к
                     уровню централизации и количеству узлов в сети.
+                    {{else if (eq .FLanguage 2)}}
+                    Abstraktaj anonimaj Retoj estas scienca kaj analiza artikolo priskribanta
+                    analizo de teorie pruveblaj anonimaj retoj kun unikaj karakterizaĵoj de imuneco al
+                    la nivelo de centraligo kaj la nombro de nodoj en la reto.
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -145,6 +185,8 @@ About
                     Abstract anonymous networks:
                     {{else if (eq .FLanguage 1)}}
                     Абстрактные анонимные сети:
+                    {{else if (eq .FLanguage 2)}}
+                    Abstraktaj anonimaj retoj:
                     {{end}}
                     <a href="https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf"
                         class="text-info">abstract_anonymous_networks.pdf</a>;
@@ -161,6 +203,10 @@ About
                     Все приложения типа HL (Hidden Lake) находятся в директории cmd проекта/библиотеки go-peer.
                     Библиотека go-peer представляет пакеты на языке программирования Go для реализации безопасных и
                     анонимных децентрализованный сетей и приложений.
+                    {{else if (eq .FLanguage 2)}}
+                    Ĉiuj HL (Hidden Lake) tipo aplikoj situas en la cmd adresaro de la go-peer projekto/biblioteko.
+                    La go-peer biblioteko disponigas pakaĵojn en La go programlingvo por efektivigi secure kaj
+                    anonimaj malcentralizitaj retoj kaj aplikoj.
                     {{end}}
                 </p>
                 <ol>

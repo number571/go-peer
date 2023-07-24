@@ -4,6 +4,8 @@
 Sign in
 {{else if (eq .FLanguage 1)}}
 Вход
+{{else if (eq .FLanguage 2)}}
+Enirejo
 {{end}}
 
 {{end}}
@@ -29,6 +31,8 @@ Sign in
         Authentication
         {{else if (eq .FLanguage 1)}}
         Аутентификация
+        {{else if (eq .FLanguage 2)}}
+        Aŭtentikigo
         {{end}}
     </h1>
     <div class="card mb-3 bg-dark">
@@ -37,6 +41,8 @@ Sign in
             Sign in
             {{else if (eq .FLanguage 1)}}
             Вход
+            {{else if (eq .FLanguage 2)}}
+            Enirejo
             {{end}}
         </h5>
         <div class="card-body">
@@ -45,9 +51,14 @@ Sign in
                 <input hidden name="method" value="POST">
                 <div class="mb-3">
                     {{if (eq .FLanguage 0)}}
-                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Login">
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login"
+                        placeholder="Login">
                     {{else if (eq .FLanguage 1)}}
-                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Логин">
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login"
+                        placeholder="Логин">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login"
+                        placeholder="Ensaluto">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -56,6 +67,9 @@ Sign in
                         placeholder="Password">
                     {{else if (eq .FLanguage 1)}}
                     <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Пароль">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="password" class="form-control bg-dark text-white" name="password"
+                        placeholder="Pasvorto">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -63,6 +77,8 @@ Sign in
                     <input type="submit" name="submit" value="Confirm" class="btn btn-info w-100">
                     {{else if (eq .FLanguage 1)}}
                     <input type="submit" name="submit" value="Подтвердить" class="btn btn-info w-100">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="submit" name="submit" value="Konfirmi" class="btn btn-info w-100">
                     {{end}}
                 </div>
             </form>

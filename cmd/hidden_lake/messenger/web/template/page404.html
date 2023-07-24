@@ -4,6 +4,8 @@
 404 page
 {{else if (eq .FLanguage 1)}}
 Страница 404
+{{else if (eq .FLanguage 2)}}
+Paĝo 404
 {{end}}
 
 {{end}}
@@ -14,6 +16,8 @@
     <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Page not found</h1>
     {{else if (eq .FLanguage 1)}}
     <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Страница не найдена</h1>
+    {{else if (eq .FLanguage 2)}}
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Paĝo ne trovita</h1>
     {{end}}
 </div>
 {{end}}

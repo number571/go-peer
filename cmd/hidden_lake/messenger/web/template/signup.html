@@ -4,6 +4,8 @@
 Sign up
 {{else if (eq .FLanguage 1)}}
 Регистрация
+{{else if (eq .FLanguage 2)}}
+Registrado
 {{end}}
 
 {{end}}
@@ -29,6 +31,8 @@ Sign up
         Authentication
         {{else if (eq .FLanguage 1)}}
         Аутентификация
+        {{else if (eq .FLanguage 2)}}
+        Aŭtentikigo
         {{end}}
     </h1>
     <div class="card mb-3 bg-dark">
@@ -37,6 +41,8 @@ Sign up
             Sign up
             {{else if (eq .FLanguage 1)}}
             Регистрация
+            {{else if (eq .FLanguage 2)}}
+            Registrado
             {{end}}</h5>
         <div class="card-body">
             <form method="POST" action="/sign/up">
@@ -47,6 +53,8 @@ Sign up
                     <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Login">
                     {{else if (eq .FLanguage 1)}}
                     <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Логин">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="text" class="form-control bg-dark text-white" id="input_login" name="login" placeholder="Ensaluto">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -54,6 +62,8 @@ Sign up
                     <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Password">
                     {{else if (eq .FLanguage 1)}}
                     <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Пароль">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="password" class="form-control bg-dark text-white" name="password" placeholder="Pasvorto">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -61,6 +71,8 @@ Sign up
                     <input type="password" class="form-control bg-dark text-white" name="password_repeat" placeholder="Repeat password">
                     {{else if (eq .FLanguage 1)}}
                     <input type="password" class="form-control bg-dark text-white" name="password_repeat" placeholder="Повторите пароль">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="password" class="form-control bg-dark text-white" name="password_repeat" placeholder="Ripetu la pasvorton">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -68,6 +80,8 @@ Sign up
                     <input type="password" class="form-control bg-dark text-white" name="private_key" placeholder="Private key (can be null)">
                     {{else if (eq .FLanguage 1)}}
                     <input type="password" class="form-control bg-dark text-white" name="private_key" placeholder="Приватный ключ (может быть пустым)">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="password" class="form-control bg-dark text-white" name="private_key" placeholder="Privata ŝlosilo (povas esti malplena)">
                     {{end}}
                 </div>
                 <div class="mb-3">
@@ -75,6 +89,8 @@ Sign up
                     <input type="submit" name="submit" value="Confirm" class="btn btn-info w-100">
                     {{else if (eq .FLanguage 1)}}
                     <input type="submit" name="submit" value="Подтвердить" class="btn btn-info w-100">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="submit" name="submit" value="Konfirmi" class="btn btn-info w-100">
                     {{end}}
                 </div>
             </form>

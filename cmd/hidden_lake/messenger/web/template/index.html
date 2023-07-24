@@ -24,6 +24,9 @@
                 {{else if (eq .FLanguage 1)}}
                 <a href="/friends" class="btn btn-secondary button"><b>Друзья</b></a>
                 <a href="/settings" class="btn btn-secondary button"><b>Настройки</b></a>
+                {{else if (eq .FLanguage 2)}}
+                <a href="/friends" class="btn btn-secondary button"><b>Amikoj</b></a>
+                <a href="/settings" class="btn btn-secondary button"><b>Agordoj</b></a>
                 {{end}}
                 {{else}}
                 {{if (eq .FLanguage 0)}}
@@ -32,6 +35,9 @@
                 {{else if (eq .FLanguage 1)}}
                 <a href="/sign/up" class="btn btn-secondary button"><b>Регистрация</b></a>
                 <a href="/sign/in" class="btn btn-secondary button"><b>Вход</b></a>
+                {{else if (eq .FLanguage 2)}}
+                <a href="/sign/up" class="btn btn-secondary button"><b>Registrado</b></a>
+                <a href="/sign/in" class="btn btn-secondary button"><b>Enirejo</b></a>
                 {{end}}
                 {{end}}
             </div>

@@ -92,7 +92,6 @@ func (p *SConfig) initConfig() error {
 	if !p.IsValid() || !p.IsValidHLM() {
 		return errors.NewError("load config settings")
 	}
-
 	if err := p.loadLogging(); err != nil {
 		return errors.WrapError(err, "load logging")
 	}
@@ -108,6 +107,8 @@ func (p *SConfig) loadLanguage() error {
 		p.fLanguage = utils.CLangENG
 	case "RUS":
 		p.fLanguage = utils.CLangRUS
+	case "ESP":
+		p.fLanguage = utils.CLangESP
 	default:
 		return errors.NewError("unknown language")
 	}
