@@ -66,6 +66,7 @@ Default config `hlm.cfg`
 		"warn",
 		"erro"
 	],
+	"language": "ENG",
 	"address": {
 		"interface": ":9591",
 		"incoming": ":9592"

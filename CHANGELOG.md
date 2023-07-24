@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `hidden_lake/messenger`: append RUS language
+
 ### CHANGES
 
 - Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/

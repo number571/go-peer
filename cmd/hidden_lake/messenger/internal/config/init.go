@@ -23,7 +23,8 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 					FMessagesCapacity: hlm_settings.CDefaultCapMessages,
 				},
 			},
-			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
+			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
+			FLanguage: "ENG",
 			FAddress: &SAddress{
 				FInterface: ":9591",
 				FIncoming:  ":9592",
