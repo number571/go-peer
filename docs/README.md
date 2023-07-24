@@ -14,6 +14,8 @@
 2. [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
 3. [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
 4. [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
+5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
+6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 
 ## Default applications ports
 
