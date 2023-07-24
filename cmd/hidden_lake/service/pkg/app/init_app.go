@@ -15,8 +15,8 @@ import (
 
 // initApp work with the raw data = read files, read args
 func InitApp() (types.ICommand, error) {
-	inputPath := flag.GetFlagValue("path", ".", "path to config/database files")
-	inputKey := flag.GetFlagValue("key", "", "input private key from file")
+	inputPath := flag.GetFlagValue("path", ".")
+	inputKey := flag.GetFlagValue("key", "")
 
 	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
 	if err != nil {

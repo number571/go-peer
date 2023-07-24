@@ -9,6 +9,11 @@
 ### CHANGES
 
 - Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/
+- Change `hidden_lake/composite`: changed the order stop apps
+
+### BUG FIXES
+
+- Update `hidden_lake/service`: fix bug with -key flag
 
 <!-- ... -->
 

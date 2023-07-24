@@ -11,7 +11,7 @@ import (
 )
 
 func InitApp() (types.ICommand, error) {
-	inputPath := flag.GetFlagValue("path", ".", "path to config/database files")
+	inputPath := flag.GetFlagValue("path", ".")
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
 	if err != nil {

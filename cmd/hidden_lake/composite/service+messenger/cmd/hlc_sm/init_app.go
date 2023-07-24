@@ -41,5 +41,6 @@ func (p *sApp) Run() error {
 }
 
 func (p *sApp) Stop() error {
-	return errors.AppendError(p.fHLS.Stop(), p.fHLM.Stop())
+	err := p.fHLM.Stop()
+	return errors.AppendError(p.fHLS.Stop(), err)
 }
