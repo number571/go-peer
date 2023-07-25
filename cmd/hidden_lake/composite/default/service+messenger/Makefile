@@ -7,8 +7,8 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-configs: 
-	cp ../../_default_cfg/hls.cfg .
-	cp ../../_default_cfg/hlm.cfg .
+	cp $(ROOPATH)/cmd/hidden_lake/_default_cfg/hls.cfg .
+	cp $(ROOPATH)/cmd/hidden_lake/_default_cfg/hlm.cfg .
 build: default-configs
 	$(GC) -o $(BINPATH)/hlc_sm ./cmd/hlc_sm
 

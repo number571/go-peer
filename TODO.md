@@ -10,3 +10,4 @@
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
 10. Append HLS/HLM to android
+11. HLM: config editor (HLS connection, HLT connection, Language)
