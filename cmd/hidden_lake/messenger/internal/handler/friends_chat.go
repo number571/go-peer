@@ -190,13 +190,13 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 }
 
 func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubKey, msgBytes []byte, msgLimit uint64) error {
+	if uint64(len(msgBytes)) > msgLimit {
+		return errors.NewError("error: len message > limit")
+	}
+
 	// if the sender = receiver then there is no need to send a message to the network
 	if myPubKey.GetAddress().ToString() == recvPubKey.GetAddress().ToString() {
 		return nil
-	}
-
-	if uint64(len(msgBytes)) > msgLimit {
-		return errors.NewError("error: len message > limit")
 	}
 
 	return client.BroadcastRequest(
