@@ -364,10 +364,7 @@ Default config `hlm.cfg`
 		"interface": ":9591",
 		"incoming": ":9592"
 	},
-	"connection": {
-		"service": "127.0.0.1:9572",
-		"traffic": "127.0.0.1:9582"
-	}
+	"connection": "127.0.0.1:9572"
 }
 ```
 

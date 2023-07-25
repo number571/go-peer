@@ -54,7 +54,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			panic("message hash is null (invalid data from HLS)!")
 		}
 
-		myPubKey, err := pStateManager.GetClient().Service().GetPubKey()
+		myPubKey, err := pStateManager.GetClient().GetPubKey()
 		if err != nil {
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return

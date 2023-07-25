@@ -61,7 +61,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 			}
 		}
 
-		res, err := pStateManager.GetClient().Service().GetFriends()
+		res, err := pStateManager.GetClient().GetFriends()
 		if err != nil {
 			fmt.Fprint(pW, "error: read friends")
 			return

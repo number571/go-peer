@@ -8,7 +8,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -17,12 +16,10 @@ import (
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 var (
 	_ IStateManager = &sStateManager{}
-	_ IClient       = &sClient{}
 )
 
 type sStateManager struct {
@@ -32,12 +29,7 @@ type sStateManager struct {
 	fPathTo   string
 	fStorage  storage.IKVStorage
 	fDatabase database.IWrapperDB
-	fClient   *sClient
-}
-
-type sClient struct {
-	fService hls_client.IClient
-	fTraffic hlt_client.IClient
+	fClient   hls_client.IClient
 }
 
 func NewStateManager(
@@ -53,42 +45,21 @@ func NewStateManager(
 		fPathTo:   pPathTo,
 		fStorage:  stg,
 		fDatabase: database.NewWrapperDB(),
-		fClient: &sClient{
-			fService: hls_client.NewClient(
-				hls_client.NewBuilder(),
-				hls_client.NewRequester(
-					fmt.Sprintf("http://%s", pConfig.GetConnection().GetService()),
-					&http.Client{Timeout: time.Minute},
-				),
+		fClient: hls_client.NewClient(
+			hls_client.NewBuilder(),
+			hls_client.NewRequester(
+				fmt.Sprintf("http://%s", pConfig.GetConnection()),
+				&http.Client{Timeout: time.Minute},
 			),
-			fTraffic: hlt_client.NewClient(
-				hlt_client.NewBuilder(),
-				hlt_client.NewRequester(
-					fmt.Sprintf("http://%s", pConfig.GetConnection().GetTraffic()),
-					&http.Client{Timeout: time.Minute},
-					message.NewSettings(&message.SSettings{
-						FWorkSizeBits:     pConfig.GetWorkSizeBits(),
-						FMessageSizeBytes: pConfig.GetMessageSizeBytes(),
-					}),
-				),
-			),
-		},
+		),
 	}
-}
-
-func (p *sClient) Service() hls_client.IClient {
-	return p.fService
-}
-
-func (p *sClient) Traffic() hlt_client.IClient {
-	return p.fTraffic
 }
 
 func (p *sStateManager) GetConfig() config.IConfig {
 	return p.fConfig
 }
 
-func (p *sStateManager) GetClient() IClient {
+func (p *sStateManager) GetClient() hls_client.IClient {
 	return p.fClient
 }
 
@@ -192,13 +163,36 @@ func (p *sStateManager) DelFriend(pAliasName string) error {
 	return nil
 }
 
-func (p *sStateManager) AddConnection(pConnect string) error {
+func (p *sStateManager) GetConnections() ([]IConnection, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	if !p.StateIsActive() {
+		return nil, errors.NewError("state does not exist")
+	}
+
+	state, err := p.getStorageState(p.fHashLP)
+	if err != nil {
+		return nil, err
+	}
+
+	var iconns []IConnection
+	for _, conn := range state.FConnections {
+		iconns = append(iconns, conn)
+	}
+	return iconns, nil
+}
+
+func (p *sStateManager) AddConnection(pAddress string, pIsBackup bool) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
 			storageValue.FConnections = append(
 				storageValue.FConnections,
-				pConnect,
+				&SConnection{
+					FAddress:  pAddress,
+					FIsBackup: pIsBackup,
+				},
 			)
 		},
 	)
@@ -212,7 +206,7 @@ func (p *sStateManager) DelConnection(pConnect string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
-			storageValue.FConnections = remove(
+			storageValue.FConnections = removeConnection(
 				storageValue.FConnections,
 				pConnect,
 			)
@@ -260,9 +254,9 @@ func (p *sStateManager) getStorageState(pHashLP []byte) (*SStorageState, error) 
 	return stateValue, nil
 }
 
-func remove(pSlice []string, pElem string) []string {
+func removeConnection(pSlice []*SConnection, pElem string) []*SConnection {
 	for i, sElem := range pSlice {
-		if pElem == sElem {
+		if pElem == sElem.FAddress {
 			return append(pSlice[:i], pSlice[i+1:]...)
 		}
 	}

@@ -28,10 +28,7 @@ const (
 		"interface": "%s",
 		"incoming": "%s"
 	},
-	"connection": {
-		"service": "%s",
-		"traffic": "%s"
-	},
+	"connection": "%s",
 	"storage_key": "%s"
 }`
 )
@@ -40,7 +37,6 @@ const (
 	tcAddressInterface  = "address_interface"
 	tcAddressIncoming   = "address_incoming"
 	tcConnectionService = "connection_service"
-	tcConnectionTraffic = "connection_traffic"
 	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
 	tcWorkSize          = 20
@@ -58,7 +54,6 @@ func testNewConfigString() string {
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcConnectionService,
-		tcConnectionTraffic,
 		tcStorageKey,
 	)
 }
@@ -125,12 +120,8 @@ func TestConfig(t *testing.T) {
 		t.Error("address.incoming is invalid")
 	}
 
-	if cfg.GetConnection().GetService() != tcConnectionService {
+	if cfg.GetConnection() != tcConnectionService {
 		t.Error("connection.service is invalid")
-	}
-
-	if cfg.GetConnection().GetTraffic() != tcConnectionTraffic {
-		t.Error("connection.traffic is invalid")
 	}
 
 	if cfg.GetStorageKey() != tcStorageKey {

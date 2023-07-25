@@ -17,7 +17,7 @@ func (p *sApp) initIncomingServiceHTTP() {
 	mux.HandleFunc(hlm_settings.CPushPath, handler.HandleIncomigHTTP(p.fStateManager)) // POST
 
 	p.fIncServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetIncoming(),
+		Addr:    p.fWrapper.GetConfig().GetAddress().GetIncoming(),
 		Handler: mux,
 	}
 }
@@ -29,8 +29,8 @@ func (p *sApp) initInterfaceServiceHTTP() {
 		handleFileServer(p.fStateManager, http.FS(web.GetStaticPath()))),
 	)
 
-	msgSize := p.fConfig.GetMessageSizeBytes()
-	keySize := p.fConfig.GetKeySizeBits()
+	msgSize := p.fWrapper.GetConfig().GetMessageSizeBytes()
+	keySize := p.fWrapper.GetConfig().GetKeySizeBits()
 	msgLimitBytes := pkg_client.GetMessageLimit(msgSize, keySize)
 	msgLimitBase64 := msgLimitBytes - (msgLimitBytes / 4) // https://ru.wikipedia.org/wiki/Base64
 
@@ -40,7 +40,7 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	mux.HandleFunc("/sign/up", handler.SignUpPage(p.fStateManager))                               // GET, POST
 	mux.HandleFunc("/favicon.ico", handler.FaviconPage(p.fStateManager))                          // GET
 	mux.HandleFunc("/about", handler.AboutPage(p.fStateManager))                                  // GET
-	mux.HandleFunc("/settings", handler.SettingsPage(p.fStateManager))                            // GET, POST, DELETE
+	mux.HandleFunc("/settings", handler.SettingsPage(p.fStateManager, p.fWrapper.GetEditor()))    // GET, POST, DELETE
 	mux.HandleFunc("/qr/public_key", handler.QRPublicKeyPage(p.fStateManager))                    // GET
 	mux.HandleFunc("/friends", handler.FriendsPage(p.fStateManager))                              // GET, POST, DELETE
 	mux.HandleFunc("/friends/chat", handler.FriendsChatPage(p.fStateManager, msgLimitBase64))     // GET, POST, PUT
@@ -49,7 +49,7 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	mux.Handle("/friends/chat/ws", websocket.Handler(handler.FriendsChatWS))
 
 	p.fIntServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetInterface(),
+		Addr:    p.fWrapper.GetConfig().GetAddress().GetInterface(),
 		Handler: mux,
 	}
 }

@@ -7,15 +7,19 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	"github.com/number571/go-peer/pkg/errors"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
 
 type sConnection struct {
-	FAddress string
-	FOnline  bool
+	FAddress  string
+	FIsBackup bool
+	FOnline   bool
 }
 
 type sSettings struct {
@@ -24,7 +28,7 @@ type sSettings struct {
 	FConnections []sConnection
 }
 
-func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
+func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.URL.Path != "/settings" {
 			NotFoundPage(pStateManager)(pW, pR)
@@ -39,9 +43,21 @@ func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		pR.ParseForm()
 
 		switch pR.FormValue("method") {
+		case http.MethodPut:
+			language := strings.TrimSpace(pR.FormValue("language"))
+			res, err := utils.ToILanguage(language)
+			if err != nil {
+				fmt.Fprint(pW, "error: load unknown language")
+				return
+			}
+			if err := pEditor.UpdateLanguage(res); err != nil {
+				fmt.Fprint(pW, "error: update language")
+				return
+			}
 		case http.MethodPost:
 			host := strings.TrimSpace(pR.FormValue("host"))
 			port := strings.TrimSpace(pR.FormValue("port"))
+
 			if host == "" || port == "" {
 				fmt.Fprint(pW, "error: host or port is null")
 				return
@@ -50,7 +66,10 @@ func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 				fmt.Fprint(pW, "error: port is not a number")
 				return
 			}
-			err := pStateManager.AddConnection(fmt.Sprintf("%s:%s", host, port))
+			err := pStateManager.AddConnection(
+				fmt.Sprintf("%s:%s", host, port),
+				strings.TrimSpace(pR.FormValue("is_backup")) != "",
+			)
 			if err != nil {
 				fmt.Fprint(pW, "error: add connection")
 				return
@@ -68,7 +87,7 @@ func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 			}
 		}
 
-		client := pStateManager.GetClient().Service()
+		client := pStateManager.GetClient()
 
 		result := new(sSettings)
 		result.STemplateState = pStateManager.GetTemplate()
@@ -80,14 +99,20 @@ func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 		result.FPublicKey = pubKey.ToString()
 
-		conns, err := getConnections(client)
+		allConns, err := pStateManager.GetConnections()
 		if err != nil {
-			fmt.Fprint(pW, err.Error())
+			fmt.Fprint(pW, errors.WrapError(err, "error: get connections"))
 			return
 		}
 
-		result.FConnections = conns
+		// HLS connections
+		connsWithOnline, err := getOnlineConnections(client, allConns)
+		if err != nil {
+			fmt.Fprint(pW, errors.WrapError(err, "error: get online connections"))
+			return
+		}
 
+		result.FConnections = connsWithOnline
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),
 			"index.html",
@@ -100,25 +125,21 @@ func SettingsPage(pStateManager state.IStateManager) http.HandlerFunc {
 	}
 }
 
-func getConnections(client hls_client.IClient) ([]sConnection, error) {
+func getOnlineConnections(client hls_client.IClient, allConns []state.IConnection) ([]sConnection, error) {
 	var connections []sConnection
-
-	conns, err := client.GetConnections()
-	if err != nil {
-		return nil, fmt.Errorf("error: read connections")
-	}
 
 	onlines, err := client.GetOnlines()
 	if err != nil {
 		return nil, fmt.Errorf("error: read online connections")
 	}
 
-	for _, c := range conns {
+	for _, c := range allConns {
 		connections = append(
 			connections,
 			sConnection{
-				FAddress: c,
-				FOnline:  getState(onlines, c),
+				FAddress:  c.GetAddress(),
+				FIsBackup: c.IsBackup(),
+				FOnline:   getOnline(onlines, c),
 			},
 		)
 	}
@@ -126,9 +147,12 @@ func getConnections(client hls_client.IClient) ([]sConnection, error) {
 	return connections, nil
 }
 
-func getState(onlines []string, c string) bool {
+func getOnline(onlines []string, c state.IConnection) bool {
+	if c.IsBackup() {
+		return false
+	}
 	for _, o := range onlines {
-		if o == c {
+		if o == c.GetAddress() {
 			return true
 		}
 	}

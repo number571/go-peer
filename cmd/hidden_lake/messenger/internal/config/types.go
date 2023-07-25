@@ -6,12 +6,21 @@ import (
 	"github.com/number571/go-peer/internal/settings"
 )
 
+type IWrapper interface {
+	GetConfig() IConfig
+	GetEditor() IEditor
+}
+
+type IEditor interface {
+	UpdateLanguage(utils.ILanguage) error
+}
+
 type IConfig interface {
 	IConfigSettingsHLM
 
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
-	GetConnection() IConnection
+	GetConnection() string
 	GetStorageKey() string
 	GetLanguage() utils.ILanguage
 }
@@ -27,9 +36,4 @@ type IConfigSettingsHLM interface {
 type IAddress interface {
 	GetInterface() string
 	GetIncoming() string
-}
-
-type IConnection interface {
-	GetService() string
-	GetTraffic() string
 }

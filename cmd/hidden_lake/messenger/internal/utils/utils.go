@@ -7,6 +7,7 @@ import (
 	"unicode"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	"github.com/number571/go-peer/pkg/errors"
 )
 
 type sEmojis struct {
@@ -41,6 +42,32 @@ func init() {
 	}
 
 	gEmojiReplacer = strings.NewReplacer(replacerList...)
+}
+
+func ToILanguage(s string) (ILanguage, error) {
+	switch strings.ToUpper(s) {
+	case "", "ENG":
+		return CLangENG, nil
+	case "RUS":
+		return CLangRUS, nil
+	case "ESP":
+		return CLangESP, nil
+	default:
+		return 0, errors.NewError("unknown language")
+	}
+}
+
+func FromILanguage(pLang ILanguage) string {
+	switch pLang {
+	case CLangENG:
+		return "ENG"
+	case CLangRUS:
+		return "RUS"
+	case CLangESP:
+		return "ESP"
+	default:
+		panic("unknown language")
+	}
 }
 
 func ReplaceTextToEmoji(pS string) string {

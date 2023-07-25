@@ -155,13 +155,13 @@
             "configurations": [
                 "/cmd/hidden_lake/service",
                 "/cmd/hidden_lake/traffic",
-                "/cmd/hidden_lake/messenger",
+                "/cmd/hidden_lake/messenger"
             ],
             "preLaunchTask": "preLaunchTask/cmd/hidden_lake",
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
             // solution: remove postDebugTask to "/cmd/hidden_lake/service"
-            "stopAll": true,
+            "stopAll": true
         },
         {
             "name": "Test Echo Service",
@@ -174,7 +174,7 @@
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
             // solution: remove postDebugTask to "/examples/echo_service/default/middle_hlt"
-            "stopAll": true,
+            "stopAll": true
         },
         {
             "name": "Test Anon Messenger",
@@ -183,13 +183,13 @@
                 "/examples/anon_messenger/default/node1_hlm",
                 "/examples/anon_messenger/default/node1_hls",
                 "/examples/anon_messenger/default/node2_hlm",
-                "/examples/anon_messenger/default/node2_hls",
+                "/examples/anon_messenger/default/node2_hls"
             ],
             "preLaunchTask": "preLaunchTask/examples/anon_messenger/default",
             // the postDebugTask is not executed
             // vs code bug: https://github.com/microsoft/vscode/issues/162745
             // solution: remove postDebugTask to "/examples/anon_messenger/default/middle_hlt"
-            "stopAll": true,
+            "stopAll": true
         }
     ]
 }

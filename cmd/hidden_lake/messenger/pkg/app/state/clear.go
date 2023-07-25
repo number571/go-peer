@@ -22,7 +22,7 @@ func (p *sStateManager) clearClientState() error {
 }
 
 func (p *sStateManager) clearClientPrivKey() error {
-	client := p.GetClient().Service()
+	client := p.GetClient()
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySizeBits())
 	if err := client.SetPrivKey(pseudoPrivKey); err != nil {
@@ -32,7 +32,7 @@ func (p *sStateManager) clearClientPrivKey() error {
 }
 
 func (p *sStateManager) clearClientFriends() error {
-	client := p.GetClient().Service()
+	client := p.GetClient()
 
 	friends, err := client.GetFriends()
 	if err != nil {
@@ -49,7 +49,7 @@ func (p *sStateManager) clearClientFriends() error {
 }
 
 func (p *sStateManager) clearClientConnections() error {
-	client := p.GetClient().Service()
+	client := p.GetClient()
 
 	connects, err := client.GetConnections()
 	if err != nil {

@@ -1,8 +1,15 @@
 package state
 
 import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
+
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
@@ -22,7 +29,7 @@ func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 }
 
 func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
-	hlsClient := p.GetClient().Service()
+	hlsClient := p.GetClient()
 
 	if err := p.clearClientPrivKey(); err != nil {
 		return errors.WrapError(err, "clear client private key")
@@ -40,7 +47,7 @@ func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
 }
 
 func (p *sStateManager) updateClientFriends(pStateValue *SStorageState) error {
-	client := p.GetClient().Service()
+	client := p.GetClient()
 
 	if err := p.clearClientFriends(); err != nil {
 		return errors.WrapError(err, "clear client friends")
@@ -57,14 +64,17 @@ func (p *sStateManager) updateClientFriends(pStateValue *SStorageState) error {
 }
 
 func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) error {
-	client := p.GetClient().Service()
+	client := p.GetClient()
 
 	if err := p.clearClientConnections(); err != nil {
 		return errors.WrapError(err, "clear client connections")
 	}
 
 	for _, conn := range pStateValue.FConnections {
-		if err := client.AddConnection(conn); err != nil {
+		if conn.FIsBackup {
+			continue
+		}
+		if err := client.AddConnection(conn.FAddress); err != nil {
 			return errors.WrapError(err, "add connections")
 		}
 	}
@@ -73,21 +83,38 @@ func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) erro
 }
 
 func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) error {
-	hlsClient := p.GetClient().Service()
-	hltClient := p.GetClient().Traffic()
+	hlsClient := p.GetClient()
 
-	hashes, err := hltClient.GetHashes()
-	if err != nil {
-		return errors.WrapError(err, "get hashes")
-	}
-
-	for _, hash := range hashes {
-		msg, err := hltClient.GetMessage(hash)
-		if err != nil {
+	for _, conn := range pStateValue.FConnections {
+		if !conn.FIsBackup {
 			continue
 		}
-		if err := hlsClient.HandleMessage(msg); err != nil {
-			continue
+
+		hltClient := hlt_client.NewClient(
+			hlt_client.NewBuilder(),
+			hlt_client.NewRequester(
+				fmt.Sprintf("http://%s", conn.FAddress),
+				&http.Client{Timeout: time.Minute},
+				message.NewSettings(&message.SSettings{
+					FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),
+					FMessageSizeBytes: p.fConfig.GetMessageSizeBytes(),
+				}),
+			),
+		)
+
+		hashes, err := hltClient.GetHashes()
+		if err != nil {
+			return errors.WrapError(err, "get hashes")
+		}
+
+		for _, hash := range hashes {
+			msg, err := hltClient.GetMessage(hash)
+			if err != nil {
+				continue
+			}
+			if err := hlsClient.HandleMessage(msg); err != nil {
+				continue
+			}
 		}
 	}
 

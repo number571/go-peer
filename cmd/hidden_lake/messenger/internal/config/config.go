@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"strings"
+	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/logger"
@@ -13,20 +13,21 @@ import (
 )
 
 var (
-	_ IConfig     = &SConfig{}
-	_ IAddress    = &SAddress{}
-	_ IConnection = &SConnection{}
+	_ IConfig  = &SConfig{}
+	_ IAddress = &SAddress{}
 )
 
 type SConfig struct {
 	settings.SConfigSettings
 
-	FLogging    []string     `json:"logging,omitempty"`
-	FLanguage   string       `json:"language,omitempty"`
-	FAddress    *SAddress    `json:"address"`
-	FConnection *SConnection `json:"connection"`
-	FStorageKey string       `json:"storage_key,omitempty"`
+	FLogging    []string  `json:"logging,omitempty"`
+	FLanguage   string    `json:"language,omitempty"`
+	FAddress    *SAddress `json:"address"`
+	FConnection string    `json:"connection"`
+	FStorageKey string    `json:"storage_key,omitempty"`
 
+	fFilepath string
+	fMutex    sync.Mutex
 	fLanguage utils.ILanguage
 	fLogging  *sLogging
 }
@@ -36,11 +37,6 @@ type sLogging []bool
 type SAddress struct {
 	FInterface string `json:"interface"`
 	FIncoming  string `json:"incoming"`
-}
-
-type SConnection struct {
-	FService string `json:"service"`
-	FTraffic string `json:"traffic,omitempty"`
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
@@ -54,6 +50,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, errors.WrapError(err, "write config")
 	}
 
+	pCfg.fFilepath = pFilepath
 	if err := pCfg.initConfig(); err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
@@ -77,6 +74,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 		return nil, errors.WrapError(err, "deserialize config")
 	}
 
+	cfg.fFilepath = pFilepath
 	if err := cfg.initConfig(); err != nil {
 		return nil, errors.WrapError(err, "internal init config")
 	}
@@ -102,16 +100,11 @@ func (p *SConfig) initConfig() error {
 }
 
 func (p *SConfig) loadLanguage() error {
-	switch strings.ToUpper(p.FLanguage) {
-	case "", "ENG":
-		p.fLanguage = utils.CLangENG
-	case "RUS":
-		p.fLanguage = utils.CLangRUS
-	case "ESP":
-		p.fLanguage = utils.CLangESP
-	default:
-		return errors.NewError("unknown language")
+	res, err := utils.ToILanguage(p.FLanguage)
+	if err != nil {
+		return err
 	}
+	p.fLanguage = res
 	return nil
 }
 
@@ -138,6 +131,9 @@ func (p *SConfig) loadLogging() error {
 }
 
 func (p *SConfig) GetLanguage() utils.ILanguage {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	return p.fLanguage
 }
 
@@ -145,20 +141,12 @@ func (p *SConfig) GetAddress() IAddress {
 	return p.FAddress
 }
 
-func (p *SConfig) GetConnection() IConnection {
+func (p *SConfig) GetConnection() string {
 	return p.FConnection
 }
 
 func (p *SConfig) GetStorageKey() string {
 	return p.FStorageKey
-}
-
-func (p *SConnection) GetService() string {
-	return p.FService
-}
-
-func (p *SConnection) GetTraffic() string {
-	return p.FTraffic
 }
 
 func (p *SAddress) GetInterface() string {

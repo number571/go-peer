@@ -26,3 +26,8 @@ docker-clean:
 	rm -rf ./_mounted/hls.* ./_mounted/hlt.* ./_mounted/hlm.*
 	docker-compose down 
 	docker-compose rm -f
+
+build-main:
+	make -C ./service build
+	make -C ./messenger build
+	make -C ./traffic build

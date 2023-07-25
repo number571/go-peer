@@ -11,12 +11,15 @@
 - Update `hidden_lake/messenger`: append RUS language
 - Update `hidden_lake/messenger`: append ESP language
 - Update `hidden_lake/messenger`: append mobile/android app
+- Update `hidden_lake/messenger`: append config editor (Language)
+- Update `hidden_lake/messenger`: append connect to storage nodes (HLT) 
 
 ### CHANGES
 
 - Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/
 - Change `hidden_lake/composite`: changed the order stop apps
 - Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
+- Delete `hidden_lake/messenger`: delete config field "traffic"
 
 ### BUG FIXES
 

@@ -29,7 +29,7 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fConfig         config.IConfig
+	fWrapper        config.IWrapper
 	fStateManager   state.IStateManager
 	fLogger         logger.ILogger
 	fIntServiceHTTP *http.Server
@@ -41,7 +41,7 @@ func NewApp(
 	pPathTo string,
 ) types.ICommand {
 	return &sApp{
-		fConfig:       pCfg,
+		fWrapper:      config.NewWrapper(pCfg),
 		fStateManager: state.NewStateManager(pCfg, pPathTo),
 		fLogger:       internal_logger.StdLogger(pCfg.GetLogging()),
 	}

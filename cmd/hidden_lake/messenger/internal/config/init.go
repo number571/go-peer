@@ -29,10 +29,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FInterface: ":9591",
 				FIncoming:  ":9592",
 			},
-			FConnection: &SConnection{
-				FService: "127.0.0.1:9572",
-				FTraffic: "127.0.0.1:9582",
-			},
+			FConnection: "127.0.0.1:9572",
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

@@ -52,7 +52,7 @@ Agordoj
                         {{if (eq .FLanguage 0)}}
                         Copy to clipboard
                         {{else if (eq .FLanguage 1)}}
-                        Скопировать в буфер обмена
+                        Скопировать в БО
                         {{else if (eq .FLanguage 2)}}
                         Kopii Al Tondujo
                         {{end}}
@@ -86,11 +86,46 @@ Agordoj
     <div class="card mb-3 bg-dark">
         <h5 class="card-header text-white bg-secondary p-2">
             {{if (eq .FLanguage 0)}}
+            Language
+            {{else if (eq .FLanguage 1)}}
+            Язык
+            {{else if (eq .FLanguage 2)}}
+            Lingvo
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="PUT">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        <select class="form-select form-control bg-dark bg-secondary btn btn-info w-100" name="language" aria-label="Default select example">
+                            <option {{if (eq .FLanguage 0)}} selected {{end}} value="ENG">English</option>
+                            <option {{if (eq .FLanguage 1)}} selected {{end}} value="RUS">Русский</option>
+                            <option {{if (eq .FLanguage 2)}} selected {{end}} value="ESP">Esperanto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 w-25">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="submit" name="submit" value="Get" class="btn btn-info w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="submit" name="submit" value="Взять" class="btn btn-info w-100">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="submit" name="submit" value="Ŝanĝi" class="btn btn-info w-100">
+                        {{end}}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
             Connections
             {{else if (eq .FLanguage 1)}}
             Соединения
             {{else if (eq .FLanguage 2)}}
-            Konektoj
+            Ligoj
             {{end}}
         </h5>
         <div class="card-body">
@@ -98,7 +133,7 @@ Agordoj
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST">
                 <div class="row">
-                    <div class="col-md-5 w-50">
+                    <div class="col-md-5 w-25">
                         {{if (eq .FLanguage 0)}}
                         <input type="text" name="host" placeholder="Host"
                             class="text-center form-control bg-dark text-white w-100">
@@ -122,8 +157,11 @@ Agordoj
                             class="text-center form-control bg-dark text-white w-100">
                         {{end}}
                     </div>
-                    <div class="col-md-4 w-25">
-                        <input type="submit" name="submit" value="+" class="btn btn-info w-100">
+                    <div class="col-md-2 w-25">
+                        <input type="submit" name="is_conn" value="Conn" class="btn btn-info w-100">
+                    </div>
+                    <div class="col-md-2 w-25">
+                        <input type="submit" name="is_backup" value="Backup" class="btn btn-primary w-100">
                     </div>
                 </div>
             </form>
@@ -137,6 +175,9 @@ Agordoj
                             class="text-center form-control w-100">
                         {{if .FOnline}}
                         <button disabled type="button" class="btn btn-info w-100"
+                            style="overflow: hidden;">{{.FAddress}}</button>
+                        {{else if .FIsBackup}}
+                        <button disabled type="button" class="btn btn-primary w-100"
                             style="overflow: hidden;">{{.FAddress}}</button>
                         {{else}}
                         <button disabled type="button" class="btn btn-secondary w-100"
