@@ -18,18 +18,18 @@ type sApp struct {
 	fHLM types.ICommand
 }
 
-func initApp() (types.ICommand, error) {
-	hlsApp, err := hls_app.InitApp(".")
+func initApp(pPath string) (types.ICommand, error) {
+	hlsApp, err := hls_app.InitApp(pPath)
 	if err != nil {
 		return nil, err
 	}
 
-	hltApp, err := hlt_app.InitApp(".")
+	hltApp, err := hlt_app.InitApp(pPath)
 	if err != nil {
 		return nil, err
 	}
 
-	hlmApp, err := hlm_app.InitApp(".")
+	hlmApp, err := hlm_app.InitApp(pPath)
 	if err != nil {
 		return nil, err
 	}
