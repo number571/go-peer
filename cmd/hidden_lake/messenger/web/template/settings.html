@@ -50,11 +50,11 @@ Agordoj
                     <button id="button_copy" type="button" class="btn btn-secondary w-100"
                         onclick="copy_text('public_key');set_info_color('button_copy');">
                         {{if (eq .FLanguage 0)}}
-                        Copy to clipboard
+                        Key
                         {{else if (eq .FLanguage 1)}}
-                        Скопировать в БО
+                        Ключ
                         {{else if (eq .FLanguage 2)}}
-                        Kopii Al Tondujo
+                        Ŝlosilo
                         {{end}}
                     </button>
                 </div>
@@ -106,13 +106,7 @@ Agordoj
                         </select>
                     </div>
                     <div class="col-md-4 w-25">
-                        {{if (eq .FLanguage 0)}}
-                        <input type="submit" name="submit" value="Choose" class="btn btn-info w-100">
-                        {{else if (eq .FLanguage 1)}}
-                        <input type="submit" name="submit" value="Выбрать" class="btn btn-info w-100">
-                        {{else if (eq .FLanguage 2)}}
-                        <input type="submit" name="submit" value="Elektu" class="btn btn-info w-100">
-                        {{end}}
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
                     </div>
                 </div>
             </form>
@@ -158,22 +152,10 @@ Agordoj
                         {{end}}
                     </div>
                     <div class="col-md-2 w-25">
-                        {{if (eq .FLanguage 0)}}
-                        <input type="submit" name="is_node" value="Node" class="btn btn-info w-100">
-                        {{else if (eq .FLanguage 1)}}
-                        <input type="submit" name="is_node" value="Узел" class="btn btn-info w-100">
-                        {{else if (eq .FLanguage 2)}}
-                        <input type="submit" name="is_node" value="Nodo" class="btn btn-info w-100">
-                        {{end}}
+                        <input type="submit" name="is_node" value="◀ 🖧" class="btn btn-info w-100">
                     </div>
                     <div class="col-md-2 w-25">
-                        {{if (eq .FLanguage 0)}}
-                        <input type="submit" name="is_backup" value="Storage" class="btn btn-primary w-100">
-                        {{else if (eq .FLanguage 1)}}
-                        <input type="submit" name="is_backup" value="Хранилище" class="btn btn-primary w-100">
-                        {{else if (eq .FLanguage 2)}}
-                        <input type="submit" name="is_backup" value="Stokado" class="btn btn-primary w-100">
-                        {{end}}
+                        <input type="submit" name="is_backup" value="◀ 🗂" class="btn btn-primary w-100">
                     </div>
                 </div>
             </form>
@@ -197,7 +179,7 @@ Agordoj
                         {{end}}
                     </div>
                     <div class="col-md-4 w-25">
-                        <input type="submit" name="submit" value="-" class="btn btn-info w-100">
+                        <input type="submit" name="submit" value="✖" class="btn btn-info w-100">
                     </div>
                 </div>
             </form>
