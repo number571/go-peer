@@ -169,6 +169,9 @@ func (p *sNode) AddConnect(pAddress string) error {
 	if p.hasMaxConnSize() {
 		return errors.NewError("has max connections size")
 	}
+	if _, ok := p.getConnection(pAddress); ok {
+		return errors.NewError("connection already exist")
+	}
 
 	sett := p.fSettings.GetConnSettings()
 	conn, err := conn.NewConn(sett, pAddress)
@@ -260,6 +263,15 @@ func (p *sNode) inMappingWithSet(pHash []byte) bool {
 	// push skey to mapping
 	p.fHashMapping[sHash] = struct{}{}
 	return false
+}
+
+// Saves the connection to the map.
+func (p *sNode) getConnection(pAddress string) (conn.IConn, bool) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	conn, ok := p.fConnections[pAddress]
+	return conn, ok
 }
 
 // Saves the connection to the map.

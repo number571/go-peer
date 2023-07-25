@@ -12,7 +12,7 @@
 - Update `hidden_lake/messenger`: append ESP language
 - Update `hidden_lake/messenger`: append mobile/android app
 - Update `hidden_lake/messenger`: append config editor (Language)
-- Update `hidden_lake/messenger`: append connect to storage nodes (HLT) 
+- Update `hidden_lake/messenger`: append connect to storage/backup nodes (HLT) 
 
 ### CHANGES
 

@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
+	"github.com/number571/go-peer/pkg/stringtools"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -163,36 +164,16 @@ func (p *sStateManager) DelFriend(pAliasName string) error {
 	return nil
 }
 
-func (p *sStateManager) GetConnections() ([]IConnection, error) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if !p.StateIsActive() {
-		return nil, errors.NewError("state does not exist")
-	}
-
-	state, err := p.getStorageState(p.fHashLP)
-	if err != nil {
-		return nil, err
-	}
-
-	var iconns []IConnection
-	for _, conn := range state.FConnections {
-		iconns = append(iconns, conn)
-	}
-	return iconns, nil
-}
-
-func (p *sStateManager) AddConnection(pAddress string, pIsBackup bool) error {
+func (p *sStateManager) AddConnection(pAddress string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
+			if stringtools.HasInSlice(storageValue.FConnections, pAddress) {
+				return
+			}
 			storageValue.FConnections = append(
 				storageValue.FConnections,
-				&SConnection{
-					FAddress:  pAddress,
-					FIsBackup: pIsBackup,
-				},
+				pAddress,
 			)
 		},
 	)
@@ -206,7 +187,7 @@ func (p *sStateManager) DelConnection(pConnect string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
-			storageValue.FConnections = removeConnection(
+			storageValue.FConnections = stringtools.DeleteFromSlice(
 				storageValue.FConnections,
 				pConnect,
 			)
@@ -252,13 +233,4 @@ func (p *sStateManager) getStorageState(pHashLP []byte) (*SStorageState, error) 
 	}
 
 	return stateValue, nil
-}
-
-func removeConnection(pSlice []*SConnection, pElem string) []*SConnection {
-	for i, sElem := range pSlice {
-		if pElem == sElem.FAddress {
-			return append(pSlice[:i], pSlice[i+1:]...)
-		}
-	}
-	return pSlice
 }

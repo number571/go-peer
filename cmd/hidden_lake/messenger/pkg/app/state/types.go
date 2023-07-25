@@ -15,7 +15,7 @@ type STemplateState struct {
 
 type SStorageState struct {
 	FPrivKey     string            `json:"priv_key"`
-	FConnections []*SConnection    `json:"connections"`
+	FConnections []string          `json:"connections"`
 	FFriends     map[string]string `json:"friends"`
 }
 
@@ -34,8 +34,7 @@ type IStateManager interface {
 	AddFriend(string, asymmetric.IPubKey) error
 	DelFriend(string) error
 
-	GetConnections() ([]IConnection, error)
-	AddConnection(string, bool) error
+	AddConnection(string) error
 	DelConnection(string) error
 }
 

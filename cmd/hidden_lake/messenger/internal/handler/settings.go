@@ -11,7 +11,9 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/stringtools"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
@@ -66,32 +68,54 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 				fmt.Fprint(pW, "error: port is not a number")
 				return
 			}
-			err := pStateManager.AddConnection(
-				fmt.Sprintf("%s:%s", host, port),
-				strings.TrimSpace(pR.FormValue("is_backup")) != "",
-			)
-			if err != nil {
-				fmt.Fprint(pW, "error: add connection")
-				return
+
+			connect := fmt.Sprintf("%s:%s", host, port)
+			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
+
+			switch isBackup {
+			case true:
+				connects := stringtools.UniqAppendToSlice(
+					pStateManager.GetConfig().GetBackupConnections(),
+					connect,
+				)
+				if err := pEditor.UpdateBackupConnections(connects); err != nil {
+					fmt.Fprint(pW, errors.WrapError(err, "error: update backup connections"))
+					return
+				}
+			case false:
+				err := pStateManager.AddConnection(connect)
+				if err != nil {
+					fmt.Fprint(pW, "error: add connection")
+					return
+				}
 			}
 		case http.MethodDelete:
-			address := strings.TrimSpace(pR.FormValue("address"))
-			if address == "" {
-				fmt.Fprint(pW, "error: address is null")
+			connect := strings.TrimSpace(pR.FormValue("address"))
+			if connect == "" {
+				fmt.Fprint(pW, "error: connect is null")
 				return
 			}
-			err := pStateManager.DelConnection(address)
+
+			connects := stringtools.DeleteFromSlice(
+				pStateManager.GetConfig().GetBackupConnections(),
+				connect,
+			)
+			if err := pEditor.UpdateBackupConnections(connects); err != nil {
+				api.Response(pW, http.StatusInternalServerError, "failed: delete backup connection")
+				return
+			}
+
+			err := pStateManager.DelConnection(connect)
 			if err != nil {
 				fmt.Fprint(pW, "error: del connection")
 				return
 			}
 		}
 
-		client := pStateManager.GetClient()
-
 		result := new(sSettings)
 		result.STemplateState = pStateManager.GetTemplate()
 
+		client := pStateManager.GetClient()
 		pubKey, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, "error: read public key")
@@ -99,20 +123,15 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		}
 		result.FPublicKey = pubKey.ToString()
 
-		allConns, err := pStateManager.GetConnections()
-		if err != nil {
-			fmt.Fprint(pW, errors.WrapError(err, "error: get connections"))
-			return
-		}
-
 		// HLS connections
-		connsWithOnline, err := getOnlineConnections(client, allConns)
+		cfg := pStateManager.GetConfig()
+		allConns, err := getAllConnections(client, cfg.GetBackupConnections())
 		if err != nil {
 			fmt.Fprint(pW, errors.WrapError(err, "error: get online connections"))
 			return
 		}
 
-		result.FConnections = connsWithOnline
+		result.FConnections = allConns
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),
 			"index.html",
@@ -125,21 +144,35 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 	}
 }
 
-func getOnlineConnections(client hls_client.IClient, allConns []state.IConnection) ([]sConnection, error) {
+func getAllConnections(client hls_client.IClient, backupConns []string) ([]sConnection, error) {
 	var connections []sConnection
+
+	conns, err := client.GetConnections()
+	if err != nil {
+		return nil, fmt.Errorf("error: read connections")
+	}
 
 	onlines, err := client.GetOnlines()
 	if err != nil {
 		return nil, fmt.Errorf("error: read online connections")
 	}
 
-	for _, c := range allConns {
+	for _, c := range conns {
 		connections = append(
 			connections,
 			sConnection{
-				FAddress:  c.GetAddress(),
-				FIsBackup: c.IsBackup(),
-				FOnline:   getOnline(onlines, c),
+				FAddress: c,
+				FOnline:  getOnline(onlines, c),
+			},
+		)
+	}
+
+	for _, c := range backupConns {
+		connections = append(
+			connections,
+			sConnection{
+				FAddress:  c,
+				FIsBackup: true,
 			},
 		)
 	}
@@ -147,12 +180,9 @@ func getOnlineConnections(client hls_client.IClient, allConns []state.IConnectio
 	return connections, nil
 }
 
-func getOnline(onlines []string, c state.IConnection) bool {
-	if c.IsBackup() {
-		return false
-	}
+func getOnline(onlines []string, c string) bool {
 	for _, o := range onlines {
-		if o == c.GetAddress() {
+		if o == c {
 			return true
 		}
 	}

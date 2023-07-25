@@ -71,10 +71,7 @@ func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) erro
 	}
 
 	for _, conn := range pStateValue.FConnections {
-		if conn.FIsBackup {
-			continue
-		}
-		if err := client.AddConnection(conn.FAddress); err != nil {
+		if err := client.AddConnection(conn); err != nil {
 			return errors.WrapError(err, "add connections")
 		}
 	}
@@ -85,15 +82,11 @@ func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) erro
 func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) error {
 	hlsClient := p.GetClient()
 
-	for _, conn := range pStateValue.FConnections {
-		if !conn.FIsBackup {
-			continue
-		}
-
+	for _, conn := range p.fConfig.GetBackupConnections() {
 		hltClient := hlt_client.NewClient(
 			hlt_client.NewBuilder(),
 			hlt_client.NewRequester(
-				fmt.Sprintf("http://%s", conn.FAddress),
+				fmt.Sprintf("http://%s", conn),
 				&http.Client{Timeout: time.Minute},
 				message.NewSettings(&message.SSettings{
 					FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),

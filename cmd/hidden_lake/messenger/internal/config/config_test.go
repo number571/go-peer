@@ -29,6 +29,9 @@ const (
 		"incoming": "%s"
 	},
 	"connection": "%s",
+	"backup_connections": [
+		"%s"
+	],
 	"storage_key": "%s"
 }`
 )
@@ -37,6 +40,7 @@ const (
 	tcAddressInterface  = "address_interface"
 	tcAddressIncoming   = "address_incoming"
 	tcConnectionService = "connection_service"
+	tcConnectionBackup  = "connection_backup"
 	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
 	tcWorkSize          = 20
@@ -54,6 +58,7 @@ func testNewConfigString() string {
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcConnectionService,
+		tcConnectionBackup,
 		tcStorageKey,
 	)
 }
@@ -114,17 +119,31 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetInterface() != tcAddressInterface {
 		t.Error("address.interface is invalid")
+		return
 	}
 
 	if cfg.GetAddress().GetIncoming() != tcAddressIncoming {
 		t.Error("address.incoming is invalid")
+		return
 	}
 
 	if cfg.GetConnection() != tcConnectionService {
 		t.Error("connection.service is invalid")
+		return
+	}
+
+	if len(cfg.GetBackupConnections()) != 1 {
+		t.Error("length of connections.backup is invalid")
+		return
+	}
+
+	if cfg.GetBackupConnections()[0] != tcConnectionBackup {
+		t.Error("connections[0].backup is invalid")
+		return
 	}
 
 	if cfg.GetStorageKey() != tcStorageKey {
 		t.Error("storage_key is invalid")
+		return
 	}
 }
