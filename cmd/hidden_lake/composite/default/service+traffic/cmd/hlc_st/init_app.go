@@ -1,8 +1,8 @@
 package main
 
 import (
-	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
+	hlt_app "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -13,23 +13,23 @@ var (
 
 type sApp struct {
 	fHLS types.ICommand
-	fHLM types.ICommand
+	fHLT types.ICommand
 }
 
 func initApp() (types.ICommand, error) {
-	hlsApp, err := hls_app.InitApp()
+	hlsApp, err := hls_app.InitApp(".")
 	if err != nil {
 		return nil, err
 	}
 
-	hlmApp, err := hlm_app.InitApp()
+	hltApp, err := hlt_app.InitApp(".")
 	if err != nil {
 		return nil, err
 	}
 
 	return &sApp{
 		fHLS: hlsApp,
-		fHLM: hlmApp,
+		fHLT: hltApp,
 	}, nil
 }
 
@@ -37,10 +37,9 @@ func (p *sApp) Run() error {
 	if err := p.fHLS.Run(); err != nil {
 		return err
 	}
-	return p.fHLM.Run()
+	return p.fHLT.Run()
 }
 
 func (p *sApp) Stop() error {
-	err := p.fHLM.Stop()
-	return errors.AppendError(p.fHLS.Stop(), err)
+	return errors.AppendError(p.fHLS.Stop(), p.fHLT.Stop())
 }

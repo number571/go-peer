@@ -8,4 +8,4 @@ require (
 	golang.org/x/net v0.7.0
 )
 
-require gopkg.in/yaml.v2 v2.4.0 // indirect
+require fyne.io/fyne/v2 v2.3.5

@@ -14,7 +14,7 @@ import (
 func main() {
 	pprof.RunPprofService(pkg_settings.CServiceName)
 
-	app, err := app.InitApp()
+	app, err := app.InitApp(".")
 	if err != nil {
 		panic(err)
 	}

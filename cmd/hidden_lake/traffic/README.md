@@ -62,7 +62,7 @@ Default config `hlt.cfg`
 }
 ```
 
-If traffic works not in docker's enviroment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
+If traffic works not in docker's environment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
 Build and run with docker
 

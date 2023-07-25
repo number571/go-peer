@@ -52,7 +52,7 @@ func TestConnKeeper(t *testing.T) {
 
 	time.Sleep(time.Second)
 	if len(node.GetConnections()) != 1 {
-		t.Error("lenght of connections != 1")
+		t.Error("length of connections != 1")
 		return
 	}
 

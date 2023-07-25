@@ -6,8 +6,12 @@ import (
 )
 
 func GetFlagValue(pKey, pDefault string) string {
+	return getFlagValueBySlice(os.Args[1:], pKey, pDefault)
+}
+
+func getFlagValueBySlice(args []string, pKey, pDefault string) string {
 	isNextValue := false
-	for _, arg := range os.Args[1:] {
+	for _, arg := range args {
 		if isNextValue {
 			return arg
 		}

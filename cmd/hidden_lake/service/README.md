@@ -102,7 +102,7 @@ Default config `hls.cfg`
 }
 ```
 
-If service works not in docker's enviroment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
+If service works not in docker's environment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker
 

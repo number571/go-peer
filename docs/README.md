@@ -76,7 +76,7 @@ func f(pK, pV int) {}
 func (p *sObject) m() {}
 ```
 
-The name of the global constants, variables, structures, fields, interfaces in the test enviroment must begin with prefix 't' or 'T'.
+The name of the global constants, variables, structures, fields, interfaces in the test environment must begin with prefix 't' or 'T'.
 ```go
 const (
     tcInternalConst = 1
