@@ -37,8 +37,3 @@ type IStateManager interface {
 	AddConnection(string) error
 	DelConnection(string) error
 }
-
-type IConnection interface {
-	GetAddress() string
-	IsBackup() bool
-}

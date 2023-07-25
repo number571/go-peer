@@ -100,7 +100,10 @@ func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) error {
 			return errors.WrapError(err, "get hashes")
 		}
 
-		for _, hash := range hashes {
+		for i, hash := range hashes {
+			if uint64(i) >= p.fConfig.GetMessagesCapacity() {
+				break
+			}
 			msg, err := hltClient.GetMessage(hash)
 			if err != nil {
 				continue
