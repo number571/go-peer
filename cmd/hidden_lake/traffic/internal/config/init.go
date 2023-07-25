@@ -33,7 +33,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FHTTP: ":9582",
 			},
 			FConnections: []string{
-				"service:9571",
+				"127.0.0.1:9571",
 			},
 		}
 	}

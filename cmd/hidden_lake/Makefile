@@ -16,8 +16,10 @@ clean:
 	make -C ./composite clean
 
 docker-default: docker-build docker-run
-docker-build:
+docker-build: docker-configs
 	docker-compose build
+docker-configs:
+	cp ./_default_cfg/docker/* ./_mounted
 docker-run: 
 	docker-compose up
 docker-clean:

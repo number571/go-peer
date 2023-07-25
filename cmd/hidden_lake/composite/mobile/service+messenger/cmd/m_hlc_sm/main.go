@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -16,17 +17,21 @@ import (
 )
 
 var (
-	gApp types.ICommand
+	gPath string
+	gApp  types.ICommand
 )
 
 func main() {
 	a := app.New()
 	w := a.NewWindow("app")
 
+	rootPath := a.Storage().RootURI().Path()
+	gPath = strings.Split(rootPath, "/fyne/")[0] + "/hidden_lake"
+
 	w.SetContent(container.New(
 		layout.NewCenterLayout(),
 		container.NewVBox(
-			widget.NewLabel("Hidden Lake Service+Messenger"),
+			widget.NewLabel("Hidden Lake Messenger"),
 			buttonActions(a),
 		),
 	))
@@ -38,7 +43,7 @@ func main() {
 func constructApp() error {
 	if gApp == nil {
 		var err error
-		gApp, err = initApp()
+		gApp, err = initApp(gPath)
 		if err != nil {
 			return err
 		}
@@ -58,8 +63,8 @@ func buttonActions(a fyne.App) *widget.Button {
 		button *widget.Button
 	)
 
-	if !filesystem.OpenFile(mobile.CAndroidFullPath).IsExist() {
-		if err := os.Mkdir(mobile.CAndroidFullPath, 0744); err != nil {
+	if !filesystem.OpenFile(gPath).IsExist() {
+		if err := os.Mkdir(gPath, 0744); err != nil {
 			panic(err)
 		}
 	}

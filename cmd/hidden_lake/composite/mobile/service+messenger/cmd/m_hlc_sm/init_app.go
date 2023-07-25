@@ -3,7 +3,6 @@ package main
 import (
 	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
-	"github.com/number571/go-peer/internal/mobile"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -17,13 +16,13 @@ type sApp struct {
 	fHLM types.ICommand
 }
 
-func initApp() (types.ICommand, error) {
-	hlsApp, err := hls_app.InitApp(mobile.CAndroidFullPath)
+func initApp(pPath string) (types.ICommand, error) {
+	hlsApp, err := hls_app.InitApp(pPath)
 	if err != nil {
 		return nil, err
 	}
 
-	hlmApp, err := hlm_app.InitApp(mobile.CAndroidFullPath)
+	hlmApp, err := hlm_app.InitApp(pPath)
 	if err != nil {
 		return nil, err
 	}

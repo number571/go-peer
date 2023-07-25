@@ -34,7 +34,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FHTTP: ":9572",
 			},
 			FServices: map[string]string{
-				hlm_settings.CTitlePattern: "messenger:9592",
+				hlm_settings.CTitlePattern: "127.0.0.1:9592",
 			},
 		}
 	}

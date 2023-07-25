@@ -10,6 +10,7 @@
 
 - Update `hidden_lake/messenger`: append RUS language
 - Update `hidden_lake/messenger`: append ESP language
+- Update `hidden_lake/messenger`: append mobile/android app
 
 ### CHANGES
 
