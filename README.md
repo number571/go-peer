@@ -64,7 +64,8 @@ $ go get github.com/number571/go-peer
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
 2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
-4. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+4. Go library (used by `cmd/hidden_lake/composite`) [fyne.io/fyne/v2](https://github.com/fyne-io/fyne "fyne/v2");
+5. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -381,6 +382,14 @@ $ make docker-run
 
 > [INFO] 2023/06/03 08:35:50 HLM is running...
 > ...
+```
+
+Build mobile app:
+
+```bash
+$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
+$ cd ./cmd/hidden_lake/composite/mobile/service+messenger
+$ make build # create hlc_sm_arm_android.apk and copy to ./bin
 ```
 
 ### Example
