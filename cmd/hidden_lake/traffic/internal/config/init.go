@@ -25,6 +25,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 					FMessageSizeBytes: hls_settings.CDefaultMessageSize,
 					FWorkSizeBits:     hls_settings.CDefaultWorkSize,
 					FMessagesCapacity: hlt_settings.CDefaultCapMessages,
+					FQueuePeriodMS:    hls_settings.CDefaultQueuePeriod,
 				},
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
