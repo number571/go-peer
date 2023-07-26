@@ -46,7 +46,7 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>195.2.79.213</td>
                 <td>9581</td>
-                <th>1</th>
+                <td>1</td>
                 <td>3</td>
                 <td>02.08.2023</td>
             </tr>
@@ -54,7 +54,7 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>194.32.248.60</td>
                 <td>9581</td>
-                <th>2</th>
+                <td>2</td>
                 <td>3</td>
                 <td>02.08.2023</td>
             </tr>
@@ -62,7 +62,7 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>193.124.117.164</td>
                 <td>9581</td>
-                <th>3</th>
+                <td>3</td>
                 <td>-</td>
                 <td>25.11.2023</td>
             </tr>
