@@ -78,11 +78,6 @@ $ make docker-run
                 <td>storage</td>
                 <td>9582</td>
             </tr>
-            <tr>
-                <td>HLTrs</td>
-                <td>relayer/storage</td>
-                <td>9581, 9582</td>
-            </tr>
         </table>
     </td>
   </tr>
