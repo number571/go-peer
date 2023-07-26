@@ -35,36 +35,36 @@ $ make docker-run
     <td>
         <table style="width: 100%">
             <tr>
+                <th>ID</th>
                 <th>Type</th>
                 <th>Host</th>
                 <th>Port</th>
-                <th>ID</th>
                 <th>Connections</th>
                 <th>Expired time</th>
             </tr>
             <tr>
+                <td>1</td>
                 <td>HLTr</td>
                 <td>195.2.79.213</td>
                 <td>9581</td>
-                <td>1</td>
-                <td>3</td>
-                <td>02.08.2023</td>
+                <td>[]</td>
+                <td>25.11.2023</td>
             </tr>
             <tr>
+                <td>2</td>
                 <td>HLTr</td>
                 <td>194.32.248.60</td>
                 <td>9581</td>
-                <td>2</td>
-                <td>3</td>
+                <td>[1]</td>
                 <td>02.08.2023</td>
             </tr>
             <tr>
+                <td>3</td>
                 <td>HLTr</td>
                 <td>193.124.117.164</td>
                 <td>9581</td>
-                <td>3</td>
-                <td>-</td>
-                <td>25.11.2023</td>
+                <td>[1]</td>
+                <td>02.08.2023</td>
             </tr>
         </table>
     </td>
@@ -73,7 +73,7 @@ $ make docker-run
             <tr>
                 <th>Type</th>
                 <th>Name</th>
-                <th>Default ports</th>
+                <th>Default port</th>
             </tr>
             <tr>
                 <td>HLS</td>
