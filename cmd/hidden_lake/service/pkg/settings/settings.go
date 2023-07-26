@@ -40,6 +40,12 @@ const (
 )
 
 const (
+	CDefaultTCPAddress        = "127.0.0.1:9571"
+	CDefaultHTTPAddress       = "127.0.0.1:9572"
+	CDefaultServiceHLMAddress = "127.0.0.1:9592"
+)
+
+const (
 	CQueueCapacity     = (1 << 6) // messages in queue
 	CQueuePoolCapacity = (1 << 5) // generated fake messages
 )

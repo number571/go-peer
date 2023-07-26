@@ -30,11 +30,11 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FTCP:  ":9571",
-				FHTTP: ":9572",
+				FTCP:  hls_settings.CDefaultTCPAddress,
+				FHTTP: hls_settings.CDefaultHTTPAddress,
 			},
 			FServices: map[string]string{
-				hlm_settings.CTitlePattern: "127.0.0.1:9592",
+				hlm_settings.CTitlePattern: hls_settings.CDefaultServiceHLMAddress,
 			},
 		}
 	}

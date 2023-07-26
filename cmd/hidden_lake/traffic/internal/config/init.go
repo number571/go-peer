@@ -29,11 +29,11 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FTCP:  ":9581",
-				FHTTP: ":9582",
+				FTCP:  hlt_settings.CDefaultTCPAddress,
+				FHTTP: hlt_settings.CDefaultHTTPAddress,
 			},
 			FConnections: []string{
-				"127.0.0.1:9571",
+				hlt_settings.CDefaultConnectionAddress,
 			},
 		}
 	}

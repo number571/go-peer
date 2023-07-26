@@ -12,8 +12,15 @@ const (
 )
 
 const (
-	CPushPath     = "/push"
-	CIamAliasName = "__iam__"
+	CPushPath        = "/push"
+	CIamAliasName    = "__iam__"
+	CDefaultLanguage = "ENG"
+)
+
+const (
+	CDefaultInterfaceAddress     = "127.0.0.1:9591"
+	CDefaultIncomingAddress      = "127.0.0.1:9592"
+	CDefaultConnectionHLSAddress = "127.0.0.1:9592"
 )
 
 const (

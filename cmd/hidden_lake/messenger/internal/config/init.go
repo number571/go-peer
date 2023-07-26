@@ -24,12 +24,12 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				},
 			},
 			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
-			FLanguage: "ENG",
+			FLanguage: hlm_settings.CDefaultLanguage,
 			FAddress: &SAddress{
-				FInterface: ":9591",
-				FIncoming:  ":9592",
+				FInterface: hlm_settings.CDefaultInterfaceAddress,
+				FIncoming:  hlm_settings.CDefaultIncomingAddress,
 			},
-			FConnection: "127.0.0.1:9572",
+			FConnection: hlm_settings.CDefaultConnectionHLSAddress,
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)
