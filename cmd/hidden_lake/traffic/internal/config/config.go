@@ -76,7 +76,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 }
 
 func (p *SConfig) IsValidHLT() bool {
-	return true // nothing append validates
+	return p.FSettings.FQueuePeriodMS != 0
 }
 
 func (p *SConfig) initConfig() error {

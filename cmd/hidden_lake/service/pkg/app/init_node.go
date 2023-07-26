@@ -15,6 +15,7 @@ import (
 )
 
 func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
+	queueDuration := time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
@@ -31,14 +32,14 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FAddress:      pCfg.GetAddress().GetTCP(),
 				FCapacity:     pkg_settings.CNetworkCapacity,
 				FMaxConnects:  pkg_settings.CNetworkMaxConns,
-				FWriteTimeout: pkg_settings.CNetworkWriteTimeout,
+				FWriteTimeout: queueDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetwork(),
 					FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
 					FLimitVoidSize:    pkg_settings.CConnLimitVoidSize,
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
-					FReadDeadline:     pkg_settings.CConnReadDeadline,
-					FWriteDeadline:    pkg_settings.CConnWriteDeadline,
+					FReadDeadline:     queueDuration,
+					FWriteDeadline:    queueDuration,
 					FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),
@@ -47,7 +48,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: pkg_settings.CQueueCapacity,
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
-				FDuration:     time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond,
+				FDuration:     queueDuration,
 			}),
 			pkg_settings.InitClient(pCfg, pPrivKey),
 		),

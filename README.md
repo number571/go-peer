@@ -169,8 +169,8 @@ Default config `hls.cfg`
 		"erro"
 	],
 	"address": {
-		"tcp": ":9571",
-		"http": ":9572"
+		"tcp": "127.0.0.1:9571",
+		"http": "127.0.0.1:9572"
 	},
 	"services": {
 		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"
@@ -361,8 +361,8 @@ Default config `hlm.cfg`
 	],
 	"language": "ENG",
 	"address": {
-		"interface": ":9591",
-		"incoming": ":9592"
+		"interface": "127.0.0.1:9591",
+		"incoming": "127.0.0.1:9592"
 	},
 	"connection": "127.0.0.1:9572",
 	"backup_connections": [
@@ -470,7 +470,8 @@ Default config `hlt.cfg`
 	"settings": {
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
-		"messages_capacity": 1024
+		"messages_capacity": 1024,
+		"queue_period_ms": 5000
 	},
 	"logging": [
 		"info",
@@ -478,8 +479,8 @@ Default config `hlt.cfg`
 		"erro"
 	],
 	"address": {
-		"tcp": ":9581",
-		"http": ":9582"
+		"tcp": "127.0.0.1:9581",
+		"http": "127.0.0.1:9582"
 	},
 	"connections": [
 		"127.0.0.1:9571"

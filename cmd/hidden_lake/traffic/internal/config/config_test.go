@@ -8,19 +8,20 @@ import (
 )
 
 const (
-	tcConfigFile  = "config_test.txt"
-	tcLogging     = true
-	tcStorage     = true
-	tcNetwork     = "test_network"
-	tcAddress1    = "test_address1"
-	tcAddress2    = "test_address2"
-	tcConnection1 = "test_connection1"
-	tcConnection2 = "test_connection2"
-	tcConsumer1   = "test_consumer1"
-	tcConsumer2   = "test_consumer2"
-	tcMessageSize = (1 << 20)
-	tcWorkSize    = 20
-	tcCapMessages = 1000
+	tcConfigFile    = "config_test.txt"
+	tcLogging       = true
+	tcStorage       = true
+	tcNetwork       = "test_network"
+	tcAddress1      = "test_address1"
+	tcAddress2      = "test_address2"
+	tcConnection1   = "test_connection1"
+	tcConnection2   = "test_connection2"
+	tcConsumer1     = "test_consumer1"
+	tcConsumer2     = "test_consumer2"
+	tcMessageSize   = (1 << 20)
+	tcWorkSize      = 20
+	tcCapMessages   = 1000
+	tcQueuePeriodMS = 5000
 )
 
 func testConfigDefaultInit(configPath string) {
@@ -30,6 +31,7 @@ func testConfigDefaultInit(configPath string) {
 				FMessageSizeBytes: tcMessageSize,
 				FWorkSizeBits:     tcWorkSize,
 				FMessagesCapacity: tcCapMessages,
+				FQueuePeriodMS:    tcQueuePeriodMS,
 			},
 		},
 		FLogging: []string{"info", "erro"},
@@ -71,6 +73,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetMessagesCapacity() != tcCapMessages {
 		t.Error("settings cap messages is invalid")
+		return
+	}
+
+	if cfg.GetQueuePeriodMS() != tcQueuePeriodMS {
+		t.Error("settings queue period is invalid")
 		return
 	}
 

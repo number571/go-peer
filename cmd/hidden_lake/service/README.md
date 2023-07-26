@@ -93,8 +93,8 @@ Default config `hls.cfg`
 		"erro"
 	],
 	"address": {
-		"tcp": ":9571",
-		"http": ":9572"
+		"tcp": "127.0.0.1:9571",
+		"http": "127.0.0.1:9572"
 	},
 	"services": {
 		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"

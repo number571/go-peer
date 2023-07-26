@@ -21,10 +21,12 @@
 - Change `hidden_lake/composite`: changed the order stop apps
 - Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
 - Delete `hidden_lake/messenger`: delete config field "traffic"
+- Update `*.cfg`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
 
 ### BUG FIXES
 
 - Update `hidden_lake/service`: fix bug with -key flag
+- Update `hidden_lake/service`: change timeout read/write to queue duration
 
 <!-- ... -->
 

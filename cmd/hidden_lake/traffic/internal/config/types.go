@@ -20,6 +20,7 @@ type IConfigSettingsHLT interface {
 	settings.IConfigSettings
 
 	GetMessagesCapacity() uint64
+	GetQueuePeriodMS() uint64
 }
 
 type IAddress interface {

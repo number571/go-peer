@@ -72,8 +72,8 @@ Default config `hlm.cfg`
 	],
 	"language": "ENG",
 	"address": {
-		"interface": ":9591",
-		"incoming": ":9592"
+		"interface": "127.0.0.1:9591",
+		"incoming": "127.0.0.1:9592"
 	},
 	"connection": "127.0.0.1:9572",
 	"backup_connections": [

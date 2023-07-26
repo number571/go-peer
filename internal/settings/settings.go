@@ -16,7 +16,7 @@ type SConfigSettingsBlock struct {
 	// HLS, HLM
 	FKeySizeBits uint64 `json:"key_size_bits,omitempty"`
 
-	// HLS
+	// HLS, HLT
 	FQueuePeriodMS uint64 `json:"queue_period_ms,omitempty"`
 
 	// HLT, HLM

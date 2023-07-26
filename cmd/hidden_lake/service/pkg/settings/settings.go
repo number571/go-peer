@@ -51,16 +51,13 @@ const (
 )
 
 const (
-	CNetworkWriteTimeout = time.Minute
-	CNetworkCapacity     = (1 << 10) // hashes
-	CNetworkMaxConns     = (1 << 6)  // 64
+	CNetworkCapacity = (1 << 10) // 1024 hashes
+	CNetworkMaxConns = (1 << 6)  // 64 conns
 )
 
 const (
 	CConnLimitVoidSize    = (1 << 20) // 1MiB
 	CConnWaitReadDeadline = time.Hour
-	CConnReadDeadline     = time.Minute
-	CConnWriteDeadline    = time.Minute
 	CConnKeeperDuration   = 10 * time.Second
 )
 

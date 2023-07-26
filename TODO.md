@@ -9,3 +9,4 @@
 7. HLM: do error pages
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
+10. :9571 -> 127.0.0.1:9571

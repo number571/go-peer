@@ -1,6 +1,8 @@
 package app
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/handler"
@@ -12,19 +14,20 @@ import (
 )
 
 func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.INode {
+	queueDuration := time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      pCfg.GetAddress().GetTCP(),
 			FMaxConnects:  hls_settings.CNetworkMaxConns,
 			FCapacity:     hls_settings.CNetworkCapacity,
-			FWriteTimeout: hls_settings.CNetworkWriteTimeout,
+			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FNetworkKey:       pCfg.GetNetwork(),
 				FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
 				FLimitVoidSize:    hls_settings.CConnLimitVoidSize,
 				FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
-				FReadDeadline:     hls_settings.CConnReadDeadline,
-				FWriteDeadline:    hls_settings.CConnWriteDeadline,
+				FReadDeadline:     queueDuration,
+				FWriteDeadline:    queueDuration,
 				FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 			}),
 		}),

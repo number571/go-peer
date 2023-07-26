@@ -45,7 +45,8 @@ Default config `hlt.cfg`
 	"settings": {
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
-		"messages_capacity": 1024
+		"messages_capacity": 1024,
+		"queue_period_ms": 5000
 	},
 	"logging": [
 		"info",
@@ -53,8 +54,8 @@ Default config `hlt.cfg`
 		"erro"
 	],
 	"address": {
-		"tcp": ":9581",
-		"http": ":9582"
+		"tcp": "127.0.0.1:9581",
+		"http": "127.0.0.1:9582"
 	},
 	"connections": [
 		"127.0.0.1:9571"
@@ -107,7 +108,8 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 	"settings": {
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
-		"messages_capacity": 1024
+		"messages_capacity": 1024,
+		"queue_period_ms": 5000
 	},
 	"logging": [
 		"info",
@@ -116,8 +118,8 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 	],
 	"network": "network-key",
 	"address": {
-		"tcp": ":9581",
-		"http": ":9582"
+		"tcp": "127.0.0.1:9581",
+		"http": "127.0.0.1:9582"
 	},
 	"connections": [
 		"service:9571"
