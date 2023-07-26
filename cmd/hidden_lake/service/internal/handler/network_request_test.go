@@ -34,7 +34,7 @@ func TestHandleRequestAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnect(testutils.TgAddrs[11])
+	node.GetNetworkNode().AddConnection(testutils.TgAddrs[11])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	testBroadcast(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())

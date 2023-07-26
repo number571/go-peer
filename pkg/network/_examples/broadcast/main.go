@@ -29,7 +29,7 @@ func main() {
 	}
 	time.Sleep(time.Second) // wait
 
-	if err := service2.AddConnect(serviceAddress); err != nil {
+	if err := service2.AddConnection(serviceAddress); err != nil {
 		panic(err)
 	}
 

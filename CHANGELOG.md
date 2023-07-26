@@ -13,6 +13,7 @@
 - Update `hidden_lake/messenger`: append mobile/android app
 - Update `hidden_lake/messenger`: append config editor (Language)
 - Update `hidden_lake/messenger`: append connect to storage/backup nodes (HLT) 
+- Update `hidden_lake/messenger`: append parallel load traffic from HLTs
 
 ### CHANGES
 

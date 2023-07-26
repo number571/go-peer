@@ -134,12 +134,12 @@ func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 	time.Sleep(time.Second)
 
 	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
-	nodes[0].GetNetworkNode().AddConnect(testutils.TgAddrs[2])
-	nodes[1].GetNetworkNode().AddConnect(testutils.TgAddrs[3])
+	nodes[0].GetNetworkNode().AddConnection(testutils.TgAddrs[2])
+	nodes[1].GetNetworkNode().AddConnection(testutils.TgAddrs[3])
 
 	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
-	nodes[3].GetNetworkNode().AddConnect(testutils.TgAddrs[2])
-	nodes[3].GetNetworkNode().AddConnect(testutils.TgAddrs[3])
+	nodes[3].GetNetworkNode().AddConnection(testutils.TgAddrs[2])
+	nodes[3].GetNetworkNode().AddConnection(testutils.TgAddrs[3])
 
 	return nodes
 }

@@ -33,7 +33,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnect(testutils.TgAddrs[13])
+	node.GetNetworkNode().AddConnection(testutils.TgAddrs[13])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
 	testGetOnlines(t, client, node)

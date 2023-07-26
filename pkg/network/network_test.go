@@ -124,11 +124,11 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	nodes[0].AddConnect(testutils.TgAddrs[0])
-	nodes[1].AddConnect(testutils.TgAddrs[1])
+	nodes[0].AddConnection(testutils.TgAddrs[0])
+	nodes[1].AddConnection(testutils.TgAddrs[1])
 
-	nodes[3].AddConnect(testutils.TgAddrs[0])
-	nodes[3].AddConnect(testutils.TgAddrs[1])
+	nodes[3].AddConnection(testutils.TgAddrs[0])
+	nodes[3].AddConnection(testutils.TgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {

@@ -165,7 +165,7 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 
 // Connects to the node at the specified address and automatically starts reading all incoming messages.
 // Checks the number of connections.
-func (p *sNode) AddConnect(pAddress string) error {
+func (p *sNode) AddConnection(pAddress string) error {
 	if p.hasMaxConnSize() {
 		return errors.NewError("has max connections size")
 	}
@@ -186,7 +186,7 @@ func (p *sNode) AddConnect(pAddress string) error {
 }
 
 // Disables the connection at the address and removes the connection from the connection list.
-func (p *sNode) DelConnect(pAddress string) error {
+func (p *sNode) DelConnection(pAddress string) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -204,7 +204,7 @@ func (p *sNode) DelConnect(pAddress string) error {
 
 // Processes the received data from the connection.
 func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
-	defer p.DelConnect(pAddress)
+	defer p.DelConnection(pAddress)
 	for {
 		ok := p.handleMessage(pConn, pConn.ReadPayload())
 		if !ok {

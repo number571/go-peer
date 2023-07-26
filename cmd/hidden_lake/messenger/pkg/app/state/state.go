@@ -113,7 +113,7 @@ func (p *sStateManager) OpenState(pHashLP []byte) error {
 	}
 	p.fHashLP = pHashLP
 
-	_ = p.updateClientTraffic(stateValue) // connect to HLT
+	p.updateClientTraffic(stateValue)
 	return nil
 }
 

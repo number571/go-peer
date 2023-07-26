@@ -66,7 +66,7 @@ func main() {
 	if err := service2.Run(); err != nil {
 		panic(err)
 	}
-	if err := service2.GetNetworkNode().AddConnect(serviceAddress); err != nil {
+	if err := service2.GetNetworkNode().AddConnection(serviceAddress); err != nil {
 		panic(err)
 	}
 

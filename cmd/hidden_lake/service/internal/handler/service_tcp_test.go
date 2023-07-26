@@ -129,7 +129,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 	}
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
-	if err := node.GetNetworkNode().AddConnect(testutils.TgAddrs[4]); err != nil {
+	if err := node.GetNetworkNode().AddConnection(testutils.TgAddrs[4]); err != nil {
 		return nil, err
 	}
 

@@ -79,40 +79,41 @@ func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) erro
 	return nil
 }
 
-func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) error {
-	hlsClient := p.GetClient()
-
+func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) {
 	for _, conn := range p.fConfig.GetBackupConnections() {
-		hltClient := hlt_client.NewClient(
-			hlt_client.NewBuilder(),
-			hlt_client.NewRequester(
-				fmt.Sprintf("http://%s", conn),
-				&http.Client{Timeout: time.Minute},
-				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),
-					FMessageSizeBytes: p.fConfig.GetMessageSizeBytes(),
-				}),
-			),
-		)
+		go p.handleMessages(conn)
+	}
+}
 
-		hashes, err := hltClient.GetHashes()
-		if err != nil {
-			return errors.WrapError(err, "get hashes")
-		}
+func (p *sStateManager) handleMessages(pConn string) {
+	hltClient := hlt_client.NewClient(
+		hlt_client.NewBuilder(),
+		hlt_client.NewRequester(
+			fmt.Sprintf("http://%s", pConn),
+			&http.Client{Timeout: time.Minute},
+			message.NewSettings(&message.SSettings{
+				FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),
+				FMessageSizeBytes: p.fConfig.GetMessageSizeBytes(),
+			}),
+		),
+	)
 
-		for i, hash := range hashes {
-			if uint64(i) >= p.fConfig.GetMessagesCapacity() {
-				break
-			}
-			msg, err := hltClient.GetMessage(hash)
-			if err != nil {
-				continue
-			}
-			if err := hlsClient.HandleMessage(msg); err != nil {
-				continue
-			}
-		}
+	hashes, err := hltClient.GetHashes()
+	if err != nil {
+		return
 	}
 
-	return nil
+	hlsClient := p.GetClient()
+	for i, hash := range hashes {
+		if uint64(i) >= p.fConfig.GetMessagesCapacity() {
+			break
+		}
+		msg, err := hltClient.GetMessage(hash)
+		if err != nil {
+			continue
+		}
+		if err := hlsClient.HandleMessage(msg); err != nil {
+			continue
+		}
+	}
 }

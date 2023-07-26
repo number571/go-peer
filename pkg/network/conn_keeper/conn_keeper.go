@@ -81,7 +81,7 @@ NEXT:
 		if _, ok := mapConns[address]; ok {
 			continue NEXT
 		}
-		p.fNode.AddConnect(address)
+		p.fNode.AddConnection(address)
 	}
 }
 

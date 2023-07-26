@@ -38,7 +38,7 @@ func HandleNetworkOnlineAPI(pNode anonymity.INode) http.HandlerFunc {
 				return
 			}
 
-			if err := pNode.GetNetworkNode().DelConnect(string(connectBytes)); err != nil {
+			if err := pNode.GetNetworkNode().DelConnection(string(connectBytes)); err != nil {
 				api.Response(pW, http.StatusInternalServerError, "failed: delete online connection")
 				return
 			}

@@ -16,8 +16,8 @@ type INode interface {
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn
 
-	AddConnect(string) error
-	DelConnect(string) error
+	AddConnection(string) error
+	DelConnection(string) error
 
 	HandleFunc(uint64, IHandlerF) INode
 	BroadcastPayload(payload.IPayload) error

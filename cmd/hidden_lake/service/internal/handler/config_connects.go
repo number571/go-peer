@@ -41,7 +41,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) ht
 				api.Response(pW, http.StatusInternalServerError, "failed: update connections")
 				return
 			}
-			_ = pNode.GetNetworkNode().AddConnect(connect) // connection may be refused (closed)
+			_ = pNode.GetNetworkNode().AddConnection(connect) // connection may be refused (closed)
 			api.Response(pW, http.StatusOK, "success: update connections")
 		case http.MethodDelete:
 			connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetConnections(), connect)
@@ -49,7 +49,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pNode anonymity.INode) ht
 				api.Response(pW, http.StatusInternalServerError, "failed: delete connection")
 				return
 			}
-			if err := pNode.GetNetworkNode().DelConnect(connect); err != nil {
+			if err := pNode.GetNetworkNode().DelConnection(connect); err != nil {
 				api.Response(pW, http.StatusInternalServerError, "failed: del connection")
 				return
 			}
