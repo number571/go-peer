@@ -11,6 +11,6 @@ type SRequest struct {
 }
 
 type SPrivKey struct {
-	FEphPubKey  string `json:"eph_pub_key"`
-	FEncPrivKey string `json:"enc_priv_key"`
+	FEncPrivKey    string `json:"enc_priv_key"`
+	FEncSessionKey string `json:"enc_session_key"`
 }

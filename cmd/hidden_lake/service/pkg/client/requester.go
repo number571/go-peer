@@ -218,7 +218,7 @@ func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
 	return nil
 }
 
-func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IEphPubKey, error) {
+func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -239,7 +239,7 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IEphPubKey, err
 		return nil, nil, errors.NewError("got invalid public key")
 	}
 
-	ephPubKey := asymmetric.LoadECDHPubKey(splited[1])
+	ephPubKey := asymmetric.LoadRSAPubKey(splited[1])
 	if ephPubKey == nil {
 		return nil, nil, errors.NewError("got invalid eph public key")
 	}

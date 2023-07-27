@@ -15,7 +15,8 @@ import (
 )
 
 func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
-	ephPrivKey := asymmetric.NewECDHPrivKey()
+	keySize := pWrapper.GetConfig().GetKeySizeBits()
+	ephPrivKey := asymmetric.NewRSAPrivKey(keySize)
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
@@ -32,20 +33,9 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.Hand
 				return
 			}
 
-			ephPubKey := asymmetric.LoadECDHPubKey(vPrivKey.FEphPubKey)
-			if ephPubKey == nil {
-				api.Response(pW, http.StatusTeapot, "failed: decode public exponent")
-				return
-			}
-
-			sharedKey, err := ephPrivKey.GetSharedKey(ephPubKey)
-			if err != nil {
-				api.Response(pW, http.StatusUnauthorized, "failed: decode shared key")
-				return
-			}
-
-			privKeyEncBytes := encoding.HexDecode(vPrivKey.FEncPrivKey)
-			privKeyBytes := symmetric.NewAESCipher(sharedKey).DecryptBytes(privKeyEncBytes)
+			sessionKey := ephPrivKey.DecryptBytes(encoding.HexDecode(vPrivKey.FEncSessionKey))
+			encPrivKey := encoding.HexDecode(vPrivKey.FEncPrivKey)
+			privKeyBytes := symmetric.NewAESCipher(sessionKey).DecryptBytes(encPrivKey)
 
 			privKey := asymmetric.LoadRSAPrivKey(privKeyBytes)
 			if privKey == nil {

@@ -388,7 +388,7 @@ Build mobile app:
 
 ```bash
 $ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/composite/mobile/service+messenger
+$ cd ./cmd/hidden_lake/composite/mobile/service_messenger
 $ make build # create hlc_sm_arm_android.apk and copy to ./bin
 ```
 

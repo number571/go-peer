@@ -113,14 +113,14 @@ func (p *sClient) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pPubExp asymmetric.IEphPubKey) error {
+func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pPubExp asymmetric.IPubKey) error {
 	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey, pPubExp)); err != nil {
 		return errors.WrapError(err, "set private key (client)")
 	}
 	return nil
 }
 
-func (p *sClient) GetPubKey() (asymmetric.IPubKey, asymmetric.IEphPubKey, error) {
+func (p *sClient) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error) {
 	pubKey, ephPubKey, err := p.fRequester.GetPubKey()
 	if err != nil {
 		return nil, nil, errors.WrapError(err, "get public key (client)")
