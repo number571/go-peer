@@ -53,8 +53,8 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.Hand
 		}
 
 		pubKey := pNode.GetMessageQueue().GetClient().GetPubKey().ToString()
-		pubExp := ephPrivKey.GetPubKey().ToString()
+		ephPubKey := ephPrivKey.GetPubKey().ToString()
 
-		api.Response(pW, http.StatusOK, fmt.Sprintf("%s,%s", pubKey, pubExp))
+		api.Response(pW, http.StatusOK, fmt.Sprintf("%s,%s", pubKey, ephPubKey))
 	}
 }

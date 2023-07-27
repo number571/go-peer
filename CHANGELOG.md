@@ -14,6 +14,7 @@
 - Update `hidden_lake/messenger`: append config editor (Language)
 - Update `hidden_lake/messenger`: append connect to storage/backup nodes (HLT) 
 - Update `hidden_lake/messenger`: append parallel load traffic from HLTs
+- Update `hidden_lake/service`: append to SetPrivKey ephemeral public key
 
 ### CHANGES
 
@@ -22,6 +23,7 @@
 - Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
 - Delete `hidden_lake/messenger`: delete config field "traffic"
 - Update `*.cfg`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
+- Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
 
 ### BUG FIXES
 
