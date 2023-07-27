@@ -116,7 +116,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		result.STemplateState = pStateManager.GetTemplate()
 
 		client := pStateManager.GetClient()
-		pubKey, err := client.GetPubKey()
+		pubKey, _, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, "error: read public key")
 			return

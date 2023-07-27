@@ -10,6 +10,10 @@ var (
 	_ IHasher = &sHMACSHA256Hasher{}
 )
 
+const (
+	CHMACSHA256KeyType = "go-peer/hmac-sha256"
+)
+
 type sHMACSHA256Hasher struct {
 	fHash []byte
 }
@@ -23,7 +27,7 @@ func NewHMACSHA256Hasher(pKey []byte, pData []byte) IHasher {
 }
 
 func (p *sHMACSHA256Hasher) ToString() string {
-	return fmt.Sprintf("HMAC(%s){%X}", p.GetType(), p.ToBytes())
+	return fmt.Sprintf(cHashPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
 }
 
 func (p *sHMACSHA256Hasher) ToBytes() []byte {
@@ -31,7 +35,7 @@ func (p *sHMACSHA256Hasher) ToBytes() []byte {
 }
 
 func (p *sHMACSHA256Hasher) GetType() string {
-	return CSHA256KeyType
+	return CHMACSHA256KeyType
 }
 
 func (p *sHMACSHA256Hasher) GetSize() uint64 {

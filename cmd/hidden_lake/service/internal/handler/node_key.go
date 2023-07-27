@@ -1,17 +1,22 @@
 package handler
 
 import (
-	"io"
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
 func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
+	ephPrivKey := asymmetric.NewECDHPrivKey()
+
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
@@ -19,16 +24,30 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.Hand
 		}
 
 		switch pR.Method {
-		case http.MethodGet:
-			// next
 		case http.MethodPost:
-			privKeyBytes, err := io.ReadAll(pR.Body)
-			if err != nil {
-				api.Response(pW, http.StatusConflict, "failed: read private key bytes")
+			var vPrivKey pkg_settings.SPrivKey
+
+			if err := json.NewDecoder(pR.Body).Decode(&vPrivKey); err != nil {
+				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
 
-			privKey := asymmetric.LoadRSAPrivKey(string(privKeyBytes))
+			ephPubKey := asymmetric.LoadECDHPubKey(vPrivKey.FEphPubKey)
+			if ephPubKey == nil {
+				api.Response(pW, http.StatusTeapot, "failed: decode public exponent")
+				return
+			}
+
+			sharedKey, err := ephPrivKey.GetSharedKey(ephPubKey)
+			if err != nil {
+				api.Response(pW, http.StatusUnauthorized, "failed: decode shared key")
+				return
+			}
+
+			privKeyEncBytes := encoding.HexDecode(vPrivKey.FEncPrivKey)
+			privKeyBytes := symmetric.NewAESCipher(sharedKey).DecryptBytes(privKeyEncBytes)
+
+			privKey := asymmetric.LoadRSAPrivKey(privKeyBytes)
 			if privKey == nil {
 				api.Response(pW, http.StatusBadRequest, "failed: decode private key")
 				return
@@ -43,6 +62,9 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.Hand
 			pNode.GetMessageQueue().UpdateClient(client)
 		}
 
-		api.Response(pW, http.StatusOK, pNode.GetMessageQueue().GetClient().GetPubKey().ToString())
+		pubKey := pNode.GetMessageQueue().GetClient().GetPubKey().ToString()
+		pubExp := ephPrivKey.GetPubKey().ToString()
+
+		api.Response(pW, http.StatusOK, fmt.Sprintf("%s,%s", pubKey, pubExp))
 	}
 }

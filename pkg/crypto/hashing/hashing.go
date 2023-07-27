@@ -10,6 +10,11 @@ var (
 )
 
 const (
+	cHashPrefixTemplate = "Hash(%s){"
+	cKeySuffix          = "}"
+)
+
+const (
 	CSHA256Size    = sha256.Size
 	CSHA256KeyType = "go-peer/sha256"
 )
@@ -27,7 +32,7 @@ func NewSHA256Hasher(pData []byte) IHasher {
 }
 
 func (p *sSHA256Hasher) ToString() string {
-	return fmt.Sprintf("Hash(%s){%X}", p.GetType(), p.ToBytes())
+	return fmt.Sprintf(cHashPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
 }
 
 func (p *sSHA256Hasher) ToBytes() []byte {

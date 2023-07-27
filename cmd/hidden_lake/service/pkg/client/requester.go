@@ -205,7 +205,7 @@ func (p *sRequester) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) SetPrivKey(pPrivKey string) error {
+func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
@@ -218,7 +218,7 @@ func (p *sRequester) SetPrivKey(pPrivKey string) error {
 	return nil
 }
 
-func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
+func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IEphPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -226,13 +226,25 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "get public key (requester)")
+		return nil, nil, errors.WrapError(err, "get public key (requester)")
 	}
-	pubKey := asymmetric.LoadRSAPubKey(res)
+
+	splited := strings.Split(res, ",")
+	if len(splited) != 2 {
+		return nil, nil, errors.NewError("got length of splited != 2")
+	}
+
+	pubKey := asymmetric.LoadRSAPubKey(splited[0])
 	if pubKey == nil {
-		return nil, errors.NewError("got invalid public key")
+		return nil, nil, errors.NewError("got invalid public key")
 	}
-	return pubKey, nil
+
+	ephPubKey := asymmetric.LoadECDHPubKey(splited[1])
+	if ephPubKey == nil {
+		return nil, nil, errors.NewError("got invalid eph public key")
+	}
+
+	return pubKey, ephPubKey, nil
 }
 
 func deleteVoidStrings(pS []string) []string {

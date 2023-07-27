@@ -34,3 +34,16 @@ type IPrivKey interface {
 	SignBytes([]byte) []byte
 	GetPubKey() IPubKey
 }
+
+type IEphPubKey interface {
+	types.IConverter
+	types.IParameter
+}
+
+type IEphPrivKey interface {
+	types.IConverter
+	types.IParameter
+
+	GetSharedKey(IEphPubKey) ([]byte, error)
+	GetPubKey() IEphPubKey
+}

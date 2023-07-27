@@ -26,8 +26,7 @@ const (
 )
 
 const (
-	cFormatBlock = 32
-	CRSAKeyType  = "go-peer/rsa"
+	CRSAKeyType = "go-peer/rsa"
 )
 
 /*
@@ -39,9 +38,9 @@ type sRSAPrivKey struct {
 	fPrivKey *rsa.PrivateKey
 }
 
-func newPrivKey(pPrivKey *rsa.PrivateKey) IPrivKey {
+func newRSAPrivKey(pPrivKey *rsa.PrivateKey) IPrivKey {
 	return &sRSAPrivKey{
-		fPubKey:  newPubKey(&pPrivKey.PublicKey),
+		fPubKey:  newRSAPubKey(&pPrivKey.PublicKey),
 		fPrivKey: pPrivKey,
 	}
 }
@@ -50,9 +49,9 @@ func newPrivKey(pPrivKey *rsa.PrivateKey) IPrivKey {
 func NewRSAPrivKey(pBits uint64) IPrivKey {
 	privKey, err := rsa.GenerateKey(rand.Reader, int(pBits))
 	if err != nil {
-		return nil
+		panic(err)
 	}
-	return newPrivKey(privKey)
+	return newRSAPrivKey(privKey)
 }
 
 func LoadRSAPrivKey(pPrivKey interface{}) IPrivKey {
@@ -62,7 +61,7 @@ func LoadRSAPrivKey(pPrivKey interface{}) IPrivKey {
 		if privKey == nil {
 			return nil
 		}
-		return newPrivKey(privKey)
+		return newRSAPrivKey(privKey)
 	case string:
 		x = skipSpaceChars(x)
 		var (
@@ -158,9 +157,9 @@ type sRSAPubKey struct {
 	fPubKey *rsa.PublicKey
 }
 
-func newPubKey(pPubKey *rsa.PublicKey) IPubKey {
+func newRSAPubKey(pPubKey *rsa.PublicKey) IPubKey {
 	return &sRSAPubKey{
-		fAddr:   newAddress(pPubKey),
+		fAddr:   newRSAAddress(pPubKey),
 		fPubKey: pPubKey,
 	}
 }
@@ -168,11 +167,11 @@ func newPubKey(pPubKey *rsa.PublicKey) IPubKey {
 func LoadRSAPubKey(pPubKey interface{}) IPubKey {
 	switch x := pPubKey.(type) {
 	case []byte:
-		pub := bytesToPublicKey(x)
+		pub := bytesToRSAPublicKey(x)
 		if pub == nil {
 			return nil
 		}
-		return newPubKey(pub)
+		return newRSAPubKey(pub)
 	case string:
 		x = skipSpaceChars(x)
 		var (
@@ -209,11 +208,11 @@ func (p *sRSAPubKey) GetAddress() IAddress {
 }
 
 func (p *sRSAPubKey) VerifyBytes(pMsg []byte, pSign []byte) bool {
-	return verify(p.fPubKey, hashing.NewSHA256Hasher(pMsg).ToBytes(), pSign) == nil
+	return verifyRSA(p.fPubKey, hashing.NewSHA256Hasher(pMsg).ToBytes(), pSign) == nil
 }
 
 func (p *sRSAPubKey) ToBytes() []byte {
-	return publicKeyToBytes(p.fPubKey)
+	return rsaPublicKeyToBytes(p.fPubKey)
 }
 
 func (p *sRSAPubKey) ToString() string {
@@ -236,10 +235,10 @@ type sAddress struct {
 	fBytes []byte
 }
 
-func newAddress(pPubKey *rsa.PublicKey) IAddress {
+func newRSAAddress(pPubKey *rsa.PublicKey) IAddress {
 	return &sAddress{
 		fBytes: hashing.NewSHA256Hasher(
-			publicKeyToBytes(pPubKey),
+			rsaPublicKeyToBytes(pPubKey),
 		).ToBytes(),
 	}
 }
@@ -270,7 +269,7 @@ func encryptRSA(pPubKey *rsa.PublicKey, pData []byte) []byte {
 }
 
 // Used PKCS1.
-func bytesToPublicKey(pPubData []byte) *rsa.PublicKey {
+func bytesToRSAPublicKey(pPubData []byte) *rsa.PublicKey {
 	pub, err := x509.ParsePKCS1PublicKey(pPubData)
 	if err != nil {
 		return nil
@@ -279,12 +278,12 @@ func bytesToPublicKey(pPubData []byte) *rsa.PublicKey {
 }
 
 // Used PKCS1.
-func publicKeyToBytes(pPubKey *rsa.PublicKey) []byte {
+func rsaPublicKeyToBytes(pPubKey *rsa.PublicKey) []byte {
 	return x509.MarshalPKCS1PublicKey(pPubKey)
 }
 
 // Used RSA(PSS).
-func verify(pPubKey *rsa.PublicKey, pHash, pSign []byte) error {
+func verifyRSA(pPubKey *rsa.PublicKey, pHash, pSign []byte) error {
 	return rsa.VerifyPSS(pPubKey, crypto.SHA256, pHash, pSign, nil)
 }
 

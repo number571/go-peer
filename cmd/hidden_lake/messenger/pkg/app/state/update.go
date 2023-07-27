@@ -31,17 +31,18 @@ func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
 	hlsClient := p.GetClient()
 
-	if err := p.clearClientPrivKey(); err != nil {
-		return errors.WrapError(err, "clear client private key")
+	_, ephPubKey, err := hlsClient.GetPubKey()
+	if err != nil {
+		return errors.WrapError(err, "get public key from node (update)")
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(pStateValue.FPrivKey)
 	if privKey == nil {
-		return errors.NewError("private key is null")
+		return errors.NewError("private key is null (update)")
 	}
 
-	if err := hlsClient.SetPrivKey(privKey); err != nil {
-		return errors.WrapError(err, "set private key")
+	if err := hlsClient.SetPrivKey(privKey, ephPubKey); err != nil {
+		return errors.WrapError(err, "set private key (update)")
 	}
 	return nil
 }

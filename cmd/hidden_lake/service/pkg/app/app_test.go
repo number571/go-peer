@@ -73,7 +73,7 @@ func TestApp(t *testing.T) {
 	)
 
 	// Check public key of node
-	pubKey, err := client.GetPubKey()
+	pubKey, _, err := client.GetPubKey()
 	if err != nil {
 		t.Error(err)
 		return

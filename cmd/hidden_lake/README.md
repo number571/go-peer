@@ -66,6 +66,14 @@ $ make docker-run
                 <td>[1]</td>
                 <td>02.08.2023</td>
             </tr>
+            <tr>
+                <td>4</td>
+                <td>HLTr</td>
+                <td>6a20015eacd8.vps.myjino.ru</td>
+                <td>49356</td>
+                <td>[1]</td>
+                <td>~28.08.2026</td>
+            </tr>
         </table>
     </td>
     <td>

@@ -14,7 +14,7 @@ var (
 )
 
 const (
-	CAESBlockSize = 16
+	CAESBlockSize = aes.BlockSize
 	CAESKeySize   = hashing.CSHA256Size
 	CAESKeyType   = "go-peer/aes"
 )

@@ -113,17 +113,17 @@ func (p *sClient) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey) error {
-	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey)); err != nil {
+func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pPubExp asymmetric.IEphPubKey) error {
+	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey, pPubExp)); err != nil {
 		return errors.WrapError(err, "set private key (client)")
 	}
 	return nil
 }
 
-func (p *sClient) GetPubKey() (asymmetric.IPubKey, error) {
-	res, err := p.fRequester.GetPubKey()
+func (p *sClient) GetPubKey() (asymmetric.IPubKey, asymmetric.IEphPubKey, error) {
+	pubKey, ephPubKey, err := p.fRequester.GetPubKey()
 	if err != nil {
-		return nil, errors.WrapError(err, "get public key (client)")
+		return nil, nil, errors.WrapError(err, "get public key (client)")
 	}
-	return res, nil
+	return pubKey, ephPubKey, nil
 }

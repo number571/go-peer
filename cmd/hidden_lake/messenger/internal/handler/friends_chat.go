@@ -63,7 +63,7 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 		}
 
 		client := pStateManager.GetClient()
-		myPubKey, err := client.GetPubKey()
+		myPubKey, _, err := client.GetPubKey()
 		if err != nil {
 			fmt.Fprint(pW, errors.WrapError(err, "error: read public key"))
 			return

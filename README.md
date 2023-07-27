@@ -446,6 +446,12 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 - Linux (x86_64, arm64)
 - MacOS (x86_64, arm64)
 
+### Minimum system requirements
+
+1. Processor: `1x2.2GHz` (characteristic for relayer mode)
+2. Memory: `0.5GB RAM` (~200MB of memory is consumed in relayer mode)
+3. Storage: `20Gib available space` (the size of messages per day from one node in storage mode)
+
 ### Build and run
 
 Default build and run

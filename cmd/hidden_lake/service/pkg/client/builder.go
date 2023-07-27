@@ -5,6 +5,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -19,8 +20,21 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey) string {
-	return pPrivKey.ToString()
+func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey, ephPubKey asymmetric.IEphPubKey) *pkg_settings.SPrivKey {
+	ephPrivKey := asymmetric.NewECDHPrivKey()
+
+	sharedKey, err := ephPrivKey.GetSharedKey(ephPubKey)
+	if err != nil {
+		return nil
+	}
+
+	privKeyBytes := symmetric.NewAESCipher(sharedKey).EncryptBytes(pPrivKey.ToBytes())
+	privKeyStr := encoding.HexEncode(privKeyBytes)
+
+	return &pkg_settings.SPrivKey{
+		FEphPubKey:  ephPrivKey.GetPubKey().ToString(),
+		FEncPrivKey: privKeyStr,
+	}
 }
 
 func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {
