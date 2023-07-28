@@ -45,7 +45,7 @@ $ make docker-run
             <tr>
                 <td>1</td>
                 <td>HLTr</td>
-                <td>195.2.79.213</td>
+                <td>v1989393.hosted-by-vdsina.ru</td>
                 <td>9581</td>
                 <td>[]</td>
                 <td>25.11.2023</td>
