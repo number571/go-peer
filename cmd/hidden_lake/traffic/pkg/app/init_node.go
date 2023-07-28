@@ -15,6 +15,9 @@ import (
 
 func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.INode {
 	queueDuration := time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond
+	if queueDuration == 0 {
+		queueDuration = 1 // queue_period_ms in HLT can be = 0 (as only-storage mode)
+	}
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      pCfg.GetAddress().GetTCP(),
