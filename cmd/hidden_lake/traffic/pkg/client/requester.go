@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"strings"
@@ -59,11 +60,16 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	return strings.Split(resp, ";"), nil
 }
 
-func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
+func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
+	hashBytes := encoding.HexDecode(pHash)
+	if hashBytes == nil {
+		return nil, errors.NewError("input hex-hash is invalid")
+	}
+
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pRequest),
+		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pHash),
 		nil,
 	)
 	if err != nil {
@@ -81,6 +87,9 @@ func (p *sRequester) GetMessage(pRequest string) (message.IMessage, error) {
 		return nil, errors.NewError("load message")
 	}
 
+	if !bytes.Equal(msg.GetBody().GetHash(), hashBytes) {
+		return nil, errors.NewError("got invalid hash")
+	}
 	return msg, nil
 }
 

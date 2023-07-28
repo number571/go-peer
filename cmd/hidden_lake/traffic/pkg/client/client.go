@@ -38,7 +38,7 @@ func (p *sClient) GetHashes() ([]string, error) {
 }
 
 func (p *sClient) GetMessage(pHash string) (message.IMessage, error) {
-	msg, err := p.fRequester.GetMessage(p.fBuilder.GetMessage(pHash))
+	msg, err := p.fRequester.GetMessage(pHash)
 	if err != nil {
 		return nil, errors.WrapError(err, "get message (client)")
 	}

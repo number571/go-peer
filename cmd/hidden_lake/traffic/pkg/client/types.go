@@ -14,7 +14,6 @@ type IClient interface {
 }
 
 type IBuilder interface {
-	GetMessage(string) string
 	PutMessage(message.IMessage) string
 }
 
