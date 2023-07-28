@@ -33,6 +33,10 @@ func (p *sResponse) ToBytes() []byte {
 	return encoding.Serialize(p, false)
 }
 
+func (p *sResponse) ToString() string {
+	return string(encoding.Serialize(p, true))
+}
+
 func (p *sResponse) WithHead(pHead map[string]string) IResponse {
 	p.FHead = make(map[string]string)
 	for k, v := range pHead {

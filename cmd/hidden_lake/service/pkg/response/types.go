@@ -1,12 +1,14 @@
 package response
 
-type IResponse interface {
-	ToBytes() []byte
+import "github.com/number571/go-peer/pkg/types"
 
-	WithBody(pBody []byte) IResponse
+type IResponse interface {
+	types.IConverter
+
 	WithHead(map[string]string) IResponse
+	WithBody(pBody []byte) IResponse
 
 	GetCode() int
-	GetBody() []byte
 	GetHead() map[string]string
+	GetBody() []byte
 }

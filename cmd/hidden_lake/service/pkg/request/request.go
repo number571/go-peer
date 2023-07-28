@@ -38,7 +38,7 @@ func (p *sRequest) ToBytes() []byte {
 }
 
 func (p *sRequest) ToString() string {
-	return string(p.ToBytes())
+	return string(encoding.Serialize(p, true))
 }
 
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {

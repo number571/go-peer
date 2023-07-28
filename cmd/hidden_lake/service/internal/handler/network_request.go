@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
@@ -36,6 +37,11 @@ func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
 		data := encoding.HexDecode(vPush.FHexData)
 		if data == nil {
 			api.Response(pW, http.StatusTeapot, "failed: decode hex format data")
+			return
+		}
+
+		if _, err := request.LoadRequest(data); err != nil {
+			api.Response(pW, http.StatusForbidden, "failed: decode request")
 			return
 		}
 

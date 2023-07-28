@@ -1,13 +1,7 @@
 #!/bin/bash
 
-# Works only if users are logged in to the account!
-# node2[localhost:7070] -> node1[localhost:8080]
-
-# body[AWhlbGxvLCB3b3JsZCE=] -> byte(0x01) || bytes("hello, world!")
-# body[AmV4YW1wbGUudHh0AmhlbGxvLCB3b3JsZCE=] -> byte(0x02) || bytes("example.txt") || byte(0x02) || bytes("hello, world!")
-
-# byte(0x01) -> text format
-# byte(0x02) -> file format
+## Works only if users are logged in to the account!
+## node2[localhost:7070] -> node1[localhost:8080]
 
 str2hex() {
     local str=${1:-""}
@@ -20,6 +14,12 @@ str2hex() {
     done
 }
 
+## byte(0x01) -> text format
+## byte(0x02) -> file format
+
+# SENT_DATA=$(echo -ne "\x01hello, world!" | base64)
+SENT_DATA=$(echo -ne "\x02example.txt\x02hello, world!" | base64)
+
 JSON_DATA='{
         "method":"POST",
         "host":"go-peer/hidden-lake-messenger",
@@ -27,7 +27,7 @@ JSON_DATA='{
         "head":{
             "Accept": "application/json"
         },
-        "body":"AWhlbGxvLCB3b3JsZCE="
+        "body":"'${SENT_DATA}'"
 }';
 
 PUSH_FORMAT='{
@@ -36,4 +36,4 @@ PUSH_FORMAT='{
 }';
 
 curl -i -X PUT -H 'Accept: application/json' http://localhost:7572/api/network/request --data "${PUSH_FORMAT}";
-echo && echo && sleep 5 # seconds, queue period
+echo 
