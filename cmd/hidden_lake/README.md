@@ -72,7 +72,15 @@ $ make docker-run
                 <td>6a20015eacd8.vps.myjino.ru</td>
                 <td>49356</td>
                 <td>[1]</td>
-                <td>~28.08.2026</td>
+                <td>28.08.2024</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>HLTr</td>
+                <td>195.133.1.126</td>
+                <td>9581</td>
+                <td>[4]</td>
+                <td>28.08.2024</td>
             </tr>
         </table>
     </td>
