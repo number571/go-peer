@@ -35,8 +35,5 @@ PUSH_FORMAT='{
         "hex_data":"'$(str2hex "$JSON_DATA")'"
 }';
 
-while true
-do
-    curl -i -X PUT -H 'Accept: application/json' http://localhost:7572/api/network/request --data "${PUSH_FORMAT}";
-    echo && echo && sleep 5 # seconds, queue period
-done
+curl -i -X PUT -H 'Accept: application/json' http://localhost:7572/api/network/request --data "${PUSH_FORMAT}";
+echo && echo && sleep 5 # seconds, queue period
