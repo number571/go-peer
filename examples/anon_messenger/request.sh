@@ -14,11 +14,14 @@ str2hex() {
     done
 }
 
-## byte(0x01) -> text format
-## byte(0x02) -> file format
-
-# SENT_DATA=$(echo -ne "\x01hello, world!" | base64)
-SENT_DATA=$(echo -ne "\x02example.txt\x02hello, world!" | base64)
+randVal=$((RANDOM % 2))
+if [ "$randVal" -eq "0" ]; then
+    echo "Sending text..." && echo # byte(0x01) -> text format
+    SENT_DATA=$(echo -ne "\x01hello, world!" | base64);
+else
+    echo "Sending file..." && echo # byte(0x02) -> file format
+    SENT_DATA=$(echo -ne "\x02example.txt\x02hello, world!" | base64);
+fi
 
 JSON_DATA='{
         "method":"POST",
