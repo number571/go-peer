@@ -79,7 +79,7 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>195.133.1.126</td>
                 <td>9581</td>
-                <td>[4]</td>
+                <td>[1,4]</td>
                 <td>28.08.2024</td>
             </tr>
         </table>
