@@ -212,17 +212,19 @@ func (p *sNode) runQueue() error {
 				break
 			}
 
+			logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
+			logBuilder.WithSize(len(msg.ToBytes()))
+
 			// store hash and push message to network
-			logb := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
-			if ok := p.storeHashWithBroadcast(logb, msg); !ok {
+			if ok := p.storeHashWithBroadcast(logBuilder, msg); !ok {
 				// internal logger
 				continue
 			}
 
 			// enrich logger
-			logb.WithPubKey(p.fQueue.GetClient().GetPubKey())
+			logBuilder.WithPubKey(p.fQueue.GetClient().GetPubKey())
 
-			p.fLogger.PushInfo(logb.Get(logbuilder.CLogBaseBroadcast))
+			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseBroadcast))
 		}
 	}()
 
@@ -235,6 +237,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 
 		// enrich logger
 		logBuilder.WithConn(pConn)
+		logBuilder.WithSize(len(pMsgBytes))
 
 		client := p.fQueue.GetClient()
 		settings := client.GetSettings()

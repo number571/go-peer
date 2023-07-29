@@ -8,6 +8,7 @@ import (
 type ILogBuilder interface {
 	Get(pType ILogType) string
 
+	WithSize(pSize int) ILogBuilder
 	WithProof(pProof uint64) ILogBuilder
 	WithHash(pMsgHash []byte) ILogBuilder
 	WithConn(pConn conn.IConn) ILogBuilder

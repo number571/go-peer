@@ -9,13 +9,14 @@ import (
 )
 
 const (
-	cLogTemplate = "service=%s type=%s hash=%08X...%08X addr=%08X...%08X proof=%016d conn=%s"
+	cLogTemplate = "service=%s type=%s hash=%08X...%08X addr=%08X...%08X proof=%010d size=%dB conn=%s"
 )
 
 type sLogger struct {
 	fService string
 	fHash    []byte
 	fProof   uint64
+	fSize    int
 	fPubKey  asymmetric.IPubKey
 	fConn    conn.IConn
 }
@@ -46,6 +47,11 @@ func (p *sLogger) WithConn(pConn conn.IConn) ILogBuilder {
 	return p
 }
 
+func (p *sLogger) WithSize(pSize int) ILogBuilder {
+	p.fSize = pSize
+	return p
+}
+
 func (p *sLogger) Get(pType ILogType) string {
 	conn := "127.0.0.1:"
 	if p.fConn != nil {
@@ -59,5 +65,5 @@ func (p *sLogger) Get(pType ILogType) string {
 	if p.fHash != nil {
 		hash = p.fHash
 	}
-	return fmt.Sprintf(cLogTemplate, p.fService, pType, hash[:4], hash[28:], addr[:4], addr[28:], p.fProof, conn)
+	return fmt.Sprintf(cLogTemplate, p.fService, pType, hash[:4], hash[28:], addr[:4], addr[28:], p.fProof, p.fSize, conn)
 }

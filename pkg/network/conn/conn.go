@@ -6,12 +6,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
+)
+
+const (
+	// IV + Hash + PayloadHead
+	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + encoding.CSizeUint64
 )
 
 var (
@@ -174,7 +180,7 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}()
 
 	msgSize, err := p.recvBlockSize(p.fSettings.GetWaitReadDeadline()) // the connection has not sent anything yet
-	if err != nil || msgSize > p.fSettings.GetMessageSizeBytes() {
+	if err != nil || msgSize > (p.fSettings.GetMessageSizeBytes()+cPayloadSizeOverHead) {
 		return
 	}
 

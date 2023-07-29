@@ -55,11 +55,7 @@ func (p *SMessage) GetBody() IBody {
 }
 
 func (p *SMessage) ToBytes() []byte {
-	jsonData, err := json.Marshal(p)
-	if err != nil {
-		return nil
-	}
-	return jsonData
+	return encoding.Serialize(p, false)
 }
 
 func (p *SMessage) ToString() string {

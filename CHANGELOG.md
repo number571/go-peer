@@ -25,12 +25,14 @@
 - Delete `hidden_lake/messenger`: delete config field "traffic"
 - Update `*.cfg`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
 - Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
+- Update `pkg/anonymity/logbuilder`: append size of messages
 
 ### BUG FIXES
 
 - Update `hidden_lake/service`: fix bug with -key flag
 - Update `hidden_lake/service`: change timeout read/write to queue duration
 - Update `hidden_lake/service`: append check for hex_data is an IRequest?
+- Update `hidden_lake/service`: fix size of the encrypted messages
 
 <!-- ... -->
 

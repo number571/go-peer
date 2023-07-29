@@ -1,0 +1,4 @@
+prog_*
+hls
+other_nodes
+!*.cfg

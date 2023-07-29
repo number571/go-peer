@@ -27,6 +27,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 
 		// enrich logger
 		logBuilder.WithConn(pConn)
+		logBuilder.WithSize(len(pMsgBytes))
 
 		msg := message.LoadMessage(
 			message.NewSettings(&message.SSettings{

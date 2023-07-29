@@ -40,8 +40,8 @@ func HandleMessageAPI(pWrapperDB database.IWrapperDB) http.HandlerFunc {
 
 			msg := message.LoadMessage(
 				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: database.Settings().GetMessageSizeBytes(),
 					FWorkSizeBits:     database.Settings().GetWorkSizeBits(),
+					FMessageSizeBytes: database.Settings().GetMessageSizeBytes(),
 				}),
 				msgBytes,
 			)

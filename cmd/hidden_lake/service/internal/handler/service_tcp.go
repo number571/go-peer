@@ -24,6 +24,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		logBuilder := logbuilder.NewLogBuilder(pkg_settings.CServiceName)
 
 		// enrich logger
+		logBuilder.WithSize(len(reqBytes))
 		logBuilder.WithHash(msgHash).WithPubKey(sender)
 
 		// load request from message's body

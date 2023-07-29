@@ -9,4 +9,6 @@
 7. HLM: do error pages
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
-10. :9571 -> 127.0.0.1:9571
+10. HLS: examples/echo_service = "receiver": "pub_key" -> "receiver": "alias"
+11. HLS: Void bytes to config
+12. HLS: optimize connections

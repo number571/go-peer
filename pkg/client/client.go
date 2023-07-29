@@ -33,16 +33,22 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		fSettings: pSett,
 		fPrivKey:  pPrivKey,
 	}
-	msg := client.encryptWithParams(
+
+	rawMsgLen := len(new(message.SMessage).ToBytes())
+	encMsg := client.encryptWithParams(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte{}),
 		0,
 		0,
 	)
-	// saved message size with hex encoding
-	// because exists not encoded chars <{}",>
-	// of JSON format
-	client.fVoidMsgSize = uint64(len(msg.ToBytes()))
+
+	// clean encrypted payload because message is nil
+	encMsg.(*message.SMessage).FBody.FPayload = "00000000000000000000000000000000" // IV
+	encMsgLen := len(encMsg.ToBytes())
+
+	client.fVoidMsgSize = uint64(rawMsgLen) + uint64((encMsgLen-rawMsgLen)>>1) // size of the full message
+	client.fVoidMsgSize -= (client.fVoidMsgSize - uint64((encMsgLen)>>1))      // remove additional padding
+
 	return client
 }
 
@@ -52,10 +58,14 @@ func GetMessageLimit(msgSize, keySize uint64) uint64 {
 	privKey := asymmetric.NewRSAPrivKey(keySize)
 	sett := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: msgSize,
-		FWorkSizeBits:     1,
+		FWorkSizeBits:     1, // default value
 	})
 	client := NewClient(sett, privKey).(*sClient)
-	return (msgSize >> 1) - client.fVoidMsgSize - encoding.CSizeUint64
+	// (msg limit without hex) - (void msg size) - (payload and doublePayload heads)
+	if (msgSize >> 1) < client.fVoidMsgSize+(2*encoding.CSizeUint64) {
+		panic("the message size is very low")
+	}
+	return (msgSize >> 1) - client.fVoidMsgSize - (2 * encoding.CSizeUint64)
 }
 
 // Get public key from client object.
@@ -82,7 +92,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 
 	var (
 		maxMsgSize = p.fSettings.GetMessageSizeBytes() >> 1 // limit of bytes without hex
-		resultSize = uint64(p.fVoidMsgSize) + uint64(len(pPld.ToBytes()))
+		resultSize = uint64(len(pPld.ToBytes())) + p.fVoidMsgSize + encoding.CSizeUint64
 	)
 
 	if resultSize > maxMsgSize {
@@ -93,12 +103,14 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 		))
 	}
 
-	return p.encryptWithParams(
+	res := p.encryptWithParams(
 		pRecv,
 		pPld,
 		p.fSettings.GetWorkSizeBits(),
 		maxMsgSize-resultSize,
-	), nil
+	)
+
+	return res, nil
 }
 
 func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pWorkSize, pPadd uint64) message.IMessage {
@@ -131,6 +143,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 
 	cipher := symmetric.NewAESCipher(session)
 	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(pWorkSize).ProofBytes(hash))
+
 	return &message.SMessage{
 		FHead: message.SHeadMessage{
 			FSender:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
