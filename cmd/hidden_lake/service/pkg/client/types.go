@@ -28,8 +28,8 @@ type IClient interface {
 
 	HandleMessage(message.IMessage) error
 
-	BroadcastRequest(asymmetric.IPubKey, request.IRequest) error
-	FetchRequest(asymmetric.IPubKey, request.IRequest) (response.IResponse, error)
+	BroadcastRequest(string, request.IRequest) error
+	FetchRequest(string, request.IRequest) (response.IResponse, error)
 }
 
 type IRequester interface {
@@ -59,5 +59,5 @@ type IBuilder interface {
 	SetPrivKey(asymmetric.IPrivKey, asymmetric.IPubKey) *pkg_settings.SPrivKey
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
 	Message(message.IMessage) string
-	Request(asymmetric.IPubKey, request.IRequest) *pkg_settings.SRequest
+	Request(string, request.IRequest) *pkg_settings.SRequest
 }

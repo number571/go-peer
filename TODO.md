@@ -9,7 +9,6 @@
 7. HLM: do error pages
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
-10. HLS: examples/echo_service = "receiver": "pub_key" -> "receiver": "alias"
-11. HLS: optimize connections
-12. HLS: messageSize > limit -> messageSize = limit
-13. HLS: hybrid json+binary for encrypted message (json || binary payload)
+10. HLS: optimize connections
+11. HLS: messageSize > limit -> messageSize = limit
+12. HLS: hybrid json+binary for encrypted message (json || binary payload)

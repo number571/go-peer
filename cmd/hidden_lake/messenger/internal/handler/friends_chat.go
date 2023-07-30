@@ -85,7 +85,7 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 				return
 			}
 
-			if err := trySendMessage(client, recvPubKey, myPubKey, msgBytes, msgLimit); err != nil {
+			if err := trySendMessage(client, aliasName, myPubKey, msgBytes, msgLimit); err != nil {
 				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
 			}
@@ -189,18 +189,18 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(client client.IClient, recvPubKey, myPubKey asymmetric.IPubKey, msgBytes []byte, msgLimit uint64) error {
+func trySendMessage(client client.IClient, aliasName string, myPubKey asymmetric.IPubKey, msgBytes []byte, msgLimit uint64) error {
 	if uint64(len(msgBytes)) > msgLimit {
 		return errors.NewError("error: len message > limit")
 	}
 
 	// if the sender = receiver then there is no need to send a message to the network
-	if myPubKey.GetAddress().ToString() == recvPubKey.GetAddress().ToString() {
+	if aliasName == hlm_settings.CIamAliasName {
 		return nil
 	}
 
 	return client.BroadcastRequest(
-		recvPubKey,
+		aliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(map[string]string{
 				"Content-Type": "application/json",

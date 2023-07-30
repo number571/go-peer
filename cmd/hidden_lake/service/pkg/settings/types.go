@@ -6,7 +6,7 @@ type SFriend struct {
 }
 
 type SRequest struct {
-	FReceiver string `json:"receiver"` // public key
+	FReceiver string `json:"receiver"` // alias_name
 	FHexData  string `json:"hex_data"` // data in hex encode
 }
 

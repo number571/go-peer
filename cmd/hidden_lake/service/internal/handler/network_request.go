@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 )
 
-func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		var vPush pkg_settings.SRequest
 
@@ -28,8 +28,9 @@ func HandleNetworkRequestAPI(pNode anonymity.INode) http.HandlerFunc {
 			return
 		}
 
-		pubKey := asymmetric.LoadRSAPubKey(vPush.FReceiver)
-		if pubKey == nil {
+		friends := pWrapper.GetConfig().GetFriends()
+		pubKey, ok := friends[vPush.FReceiver]
+		if !ok {
 			api.Response(pW, http.StatusBadRequest, "failed: load public key")
 			return
 		}

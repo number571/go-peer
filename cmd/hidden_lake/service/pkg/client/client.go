@@ -39,14 +39,14 @@ func (p *sClient) HandleMessage(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sClient) BroadcastRequest(pRecv asymmetric.IPubKey, pData request.IRequest) error {
+func (p *sClient) BroadcastRequest(pRecv string, pData request.IRequest) error {
 	if err := p.fRequester.BroadcastRequest(p.fBuilder.Request(pRecv, pData)); err != nil {
 		return errors.WrapError(err, "broadcast request (client)")
 	}
 	return nil
 }
 
-func (p *sClient) FetchRequest(pRecv asymmetric.IPubKey, pData request.IRequest) (response.IResponse, error) {
+func (p *sClient) FetchRequest(pRecv string, pData request.IRequest) (response.IResponse, error) {
 	res, err := p.fRequester.FetchRequest(p.fBuilder.Request(pRecv, pData))
 	if err != nil {
 		return nil, errors.WrapError(err, "fetch request (client)")

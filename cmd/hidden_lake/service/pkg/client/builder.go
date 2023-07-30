@@ -42,9 +42,9 @@ func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_se
 	}
 }
 
-func (p *sBuilder) Request(pRecv asymmetric.IPubKey, pReq request.IRequest) *pkg_settings.SRequest {
+func (p *sBuilder) Request(pReceiver string, pReq request.IRequest) *pkg_settings.SRequest {
 	return &pkg_settings.SRequest{
-		FReceiver: pRecv.ToString(),
+		FReceiver: pReceiver,
 		FHexData:  encoding.HexEncode(pReq.ToBytes()),
 	}
 }

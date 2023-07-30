@@ -37,13 +37,13 @@ func TestHandleRequestAPI(t *testing.T) {
 	node.GetNetworkNode().AddConnection(testutils.TgAddrs[11])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
 
-	testBroadcast(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
-	testFetch(t, client, pushNode.GetMessageQueue().GetClient().GetPubKey())
+	testBroadcast(t, client)
+	testFetch(t, client)
 }
 
-func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
+func testBroadcast(t *testing.T, client hls_client.IClient) {
 	err := client.BroadcastRequest(
-		pubKey,
+		"test_recvr",
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
@@ -56,9 +56,9 @@ func testBroadcast(t *testing.T, client hls_client.IClient, pubKey asymmetric.IP
 	}
 }
 
-func testFetch(t *testing.T, client hls_client.IClient, pubKey asymmetric.IPubKey) {
+func testFetch(t *testing.T, client hls_client.IClient) {
 	res, err := client.FetchRequest(
-		pubKey,
+		"test_recvr",
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
