@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client/message"
@@ -80,13 +79,6 @@ func TestEncrypt(t *testing.T) {
 func TestMessageSize(t *testing.T) {
 	client1 := testNewClient()
 	sizes := make([]int, 0, len(tgMessages))
-
-	pld := payload.NewPayload(uint64(testutils.TcHead), []byte(tgMessages[0]))
-	msg, err := client1.EncryptPayload(client1.GetPubKey(), pld)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(msg.ToString())
 
 	for _, smsg := range tgMessages {
 		pl := payload.NewPayload(uint64(testutils.TcHead), []byte(smsg))

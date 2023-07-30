@@ -33,22 +33,13 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		fSettings: pSett,
 		fPrivKey:  pPrivKey,
 	}
-
-	rawMsgLen := len(new(message.SMessage).ToBytes())
 	encMsg := client.encryptWithParams(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte{}),
 		0,
 		0,
 	)
-
-	// clean encrypted payload because message is nil
-	encMsg.(*message.SMessage).FBody.FPayload = "00000000000000000000000000000000" // IV
-	encMsgLen := len(encMsg.ToBytes())
-
-	client.fVoidMsgSize = uint64(rawMsgLen) + uint64((encMsgLen-rawMsgLen)>>1) // size of the full message
-	client.fVoidMsgSize -= (client.fVoidMsgSize - uint64((encMsgLen)>>1))      // remove additional padding
-
+	client.fVoidMsgSize = uint64(len(encMsg.ToBytes())) - symmetric.CAESBlockSize
 	return client
 }
 
@@ -61,11 +52,11 @@ func GetMessageLimit(msgSize, keySize uint64) uint64 {
 		FWorkSizeBits:     1, // default value
 	})
 	client := NewClient(sett, privKey).(*sClient)
-	// (msg limit without hex) - (void msg size) - (payload and doublePayload heads)
-	if (msgSize >> 1) < client.fVoidMsgSize+(2*encoding.CSizeUint64) {
+	// msg limit - (void msg size) - (payload and doublePayload heads)
+	if msgSize < client.fVoidMsgSize+(2*encoding.CSizeUint64) {
 		panic("the message size is very low")
 	}
-	return (msgSize >> 1) - client.fVoidMsgSize - (2 * encoding.CSizeUint64)
+	return msgSize - client.fVoidMsgSize - (2 * encoding.CSizeUint64)
 }
 
 // Get public key from client object.
@@ -91,7 +82,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	}
 
 	var (
-		maxMsgSize = p.fSettings.GetMessageSizeBytes() >> 1 // limit of bytes without hex
+		maxMsgSize = p.fSettings.GetMessageSizeBytes() // limit of bytes without hex
 		resultSize = uint64(len(pPld.ToBytes())) + p.fVoidMsgSize + encoding.CSizeUint64
 	)
 
@@ -151,10 +142,10 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 			FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
 		},
 		FBody: message.SBodyMessage{
-			FPayload: encoding.HexEncode(cipher.EncryptBytes(doublePayload.ToBytes())),
 			FHash:    encoding.HexEncode(hash),
 			FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
 			FProof:   encoding.HexEncode(bProof[:]),
+			FPayload: cipher.EncryptBytes(doublePayload.ToBytes()),
 		},
 	}
 }

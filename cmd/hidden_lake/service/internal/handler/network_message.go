@@ -24,10 +24,10 @@ func HandleNetworkMessageAPI(pNode anonymity.INode) http.HandlerFunc {
 
 		msg := message.LoadMessage(
 			pNode.GetMessageQueue().GetClient().GetSettings(),
-			msgBytes,
+			string(msgBytes),
 		)
 		if msg == nil {
-			api.Response(pW, http.StatusBadRequest, "failed: decode hex format message")
+			api.Response(pW, http.StatusBadRequest, "failed: decode message")
 			return
 		}
 

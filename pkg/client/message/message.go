@@ -1,8 +1,9 @@
 package message
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
@@ -29,22 +30,47 @@ type SHeadMessage struct {
 }
 
 type SBodyMessage struct {
-	FPayload string `json:"payload"`
 	FSign    string `json:"sign"`
 	FHash    string `json:"hash"`
 	FProof   string `json:"proof"`
+	FPayload []byte `json:"-"`
 }
 
 // Message can be created only with client module.
-func LoadMessage(psett ISettings, pMsg []byte) IMessage {
+func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 	msg := new(SMessage)
-	if err := json.Unmarshal(pMsg, msg); err != nil {
-		fmt.Println(err)
+
+	var recvMsg []byte
+	switch x := pMsg.(type) {
+	case []byte:
+		recvMsg = x
+	case string:
+		recvMsg = []byte(x)
+	}
+
+	i := bytes.Index(recvMsg, []byte("\n\n"))
+	if i == -1 {
 		return nil
 	}
+
+	if err := json.Unmarshal(recvMsg[:i], msg); err != nil {
+		return nil
+	}
+
+	switch x := pMsg.(type) {
+	case []byte:
+		msg.FBody.FPayload = x[i+2:]
+	case string:
+		msg.FBody.FPayload = encoding.HexDecode(x[i+2:])
+		if msg.FBody.FPayload == nil {
+			return nil
+		}
+	}
+
 	if !msg.IsValid(psett) {
 		return nil
 	}
+
 	return msg
 }
 
@@ -57,20 +83,32 @@ func (p *SMessage) GetBody() IBody {
 }
 
 func (p *SMessage) ToBytes() []byte {
-	return encoding.Serialize(p, false)
+	return bytes.Join(
+		[][]byte{
+			encoding.Serialize(p, false),
+			[]byte("\n\n"),
+			p.FBody.FPayload,
+		},
+		[]byte{},
+	)
 }
 
 func (p *SMessage) ToString() string {
-	return string(p.ToBytes())
+	return strings.Join(
+		[]string{
+			string(encoding.Serialize(p, false)),
+			"\n\n",
+			encoding.HexEncode(p.FBody.FPayload),
+		},
+		"",
+	)
 }
 
 func (p *SMessage) IsValid(psett ISettings) bool {
 	if uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes() {
-		fmt.Println(uint64(len(p.ToBytes())), psett.GetMessageSizeBytes())
 		return false
 	}
 	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
-		fmt.Println("b")
 		return false
 	}
 	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSizeBits())
@@ -94,7 +132,7 @@ func (p SHeadMessage) GetSalt() []byte {
 // IBody
 
 func (p SBodyMessage) GetPayload() payload.IPayload {
-	return payload.LoadPayload(encoding.HexDecode(p.FPayload))
+	return payload.LoadPayload(p.FPayload)
 }
 
 func (p SBodyMessage) GetHash() []byte {
