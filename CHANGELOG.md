@@ -35,6 +35,7 @@
 - Update `hidden_lake/service`: change timeout read/write to queue duration
 - Update `hidden_lake/service`: append check for hex_data is an IRequest?
 - Update `hidden_lake/service`: fix size of the encrypted messages
+- Update `pkg/client/message`: replace lax verification on size of message to strict verification
 
 <!-- ... -->
 

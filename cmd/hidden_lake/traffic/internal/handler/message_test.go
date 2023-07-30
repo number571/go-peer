@@ -20,7 +20,7 @@ func TestHandleMessageAPI(t *testing.T) {
 	client := testNewClient()
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
-		payload.NewPayload(0, []byte(testutils.TcLargeBody)),
+		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		t.Error(err)
@@ -50,7 +50,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	if string(gotPld.GetBody()) != testutils.TcLargeBody {
+	if string(gotPld.GetBody()) != testutils.TcBody {
 		t.Error(err)
 		return
 	}

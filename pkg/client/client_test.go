@@ -81,6 +81,13 @@ func TestMessageSize(t *testing.T) {
 	client1 := testNewClient()
 	sizes := make([]int, 0, len(tgMessages))
 
+	pld := payload.NewPayload(uint64(testutils.TcHead), []byte(tgMessages[0]))
+	msg, err := client1.EncryptPayload(client1.GetPubKey(), pld)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(msg.ToString())
+
 	for _, smsg := range tgMessages {
 		pl := payload.NewPayload(uint64(testutils.TcHead), []byte(smsg))
 		msg, err := client1.EncryptPayload(client1.GetPubKey(), pl)
@@ -105,8 +112,6 @@ func TestMessageSize(t *testing.T) {
 
 func TestGetMessageLimit(t *testing.T) {
 	client1 := testNewClient()
-
-	fmt.Println(tgMsgLimit)
 
 	msg1 := random.NewStdPRNG().GetBytes(tgMsgLimit)
 	pld1 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg1))

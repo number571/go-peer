@@ -45,7 +45,7 @@ func TestComplex(t *testing.T) {
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
-			reqBody := fmt.Sprintf("%s (%d)", testutils.TcLargeBody, i)
+			reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, i)
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
@@ -85,7 +85,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		return

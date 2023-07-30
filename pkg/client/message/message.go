@@ -2,6 +2,7 @@ package message
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
@@ -38,6 +39,7 @@ type SBodyMessage struct {
 func LoadMessage(psett ISettings, pMsg []byte) IMessage {
 	msg := new(SMessage)
 	if err := json.Unmarshal(pMsg, msg); err != nil {
+		fmt.Println(err)
 		return nil
 	}
 	if !msg.IsValid(psett) {
@@ -63,10 +65,12 @@ func (p *SMessage) ToString() string {
 }
 
 func (p *SMessage) IsValid(psett ISettings) bool {
-	if uint64(len(p.ToBytes())) > psett.GetMessageSizeBytes() {
+	if uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes() {
+		fmt.Println(uint64(len(p.ToBytes())), psett.GetMessageSizeBytes())
 		return false
 	}
 	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
+		fmt.Println("b")
 		return false
 	}
 	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSizeBits())
