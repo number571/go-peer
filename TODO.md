@@ -10,5 +10,4 @@
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
 10. HLS: optimize connections
-11. HLS: messageSize > limit -> messageSize = limit
-12. HLS: hybrid json+binary for encrypted message (json || binary payload)
+11. HLS: hybrid json+binary for encrypted message (json || binary payload)
