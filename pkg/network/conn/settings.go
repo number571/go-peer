@@ -33,9 +33,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FMessageSizeBytes == 0 {
 		panic(`p.FMessageSizeBytes == 0`)
 	}
-	if p.FLimitVoidSize == 0 {
-		panic(`p.FMaxVoidSize == 0`)
-	}
 	if p.FWaitReadDeadline == 0 {
 		panic(`p.FWaitReadDeadline == 0`)
 	}

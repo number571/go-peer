@@ -33,6 +33,7 @@ type IConfigSettingsHLS interface {
 
 	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
+	GetLimitVoidSizeBytes() uint64
 }
 
 type IAddress interface {

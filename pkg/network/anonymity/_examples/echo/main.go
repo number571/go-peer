@@ -126,7 +126,6 @@ func nodeSettings(serviceAddress string) network.ISettings {
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
 		FMessageSizeBytes: msgSize,
-		FLimitVoidSize:    1, // not used
 		FFetchTimeWait:    1, // not used
 	})
 }

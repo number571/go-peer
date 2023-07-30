@@ -36,7 +36,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetwork(),
 					FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
-					FLimitVoidSize:    pkg_settings.CConnLimitVoidSize,
+					FLimitVoidSize:    pCfg.GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
 					FReadDeadline:     queueDuration,
 					FWriteDeadline:    queueDuration,

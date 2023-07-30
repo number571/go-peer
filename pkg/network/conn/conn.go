@@ -90,7 +90,7 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	)
 
 	prng := random.NewStdPRNG()
-	voidBytes := prng.GetBytes(prng.GetUint64() % p.fSettings.GetLimitVoidSize())
+	voidBytes := prng.GetBytes(prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1))
 
 	// send headers with length of blocks
 	if err := p.sendBlockSize(encMsgBytes); err != nil {

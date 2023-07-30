@@ -35,7 +35,8 @@ const (
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
-		"queue_period_ms": 1000
+		"queue_period_ms": 1000,
+		"limit_void_size_bytes": 1048576
 	},
 	"network": "test_network_key",
 	"address": {
@@ -214,7 +215,6 @@ func testNewNetworkNode(addr string) network.INode {
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,
-				FLimitVoidSize:    1, // not used
 				FFetchTimeWait:    1, // not used
 			}),
 		}),

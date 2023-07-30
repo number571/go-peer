@@ -26,7 +26,6 @@ func TestConn(t *testing.T) {
 			FReadDeadline:     time.Minute,
 			FWriteDeadline:    time.Minute,
 			FFetchTimeWait:    5 * time.Second,
-			FLimitVoidSize:    1, // not used
 		}),
 		testutils.TgAddrs[17],
 	)
@@ -68,7 +67,6 @@ func testNewService(t *testing.T) net.Listener {
 					FReadDeadline:     time.Minute,
 					FWriteDeadline:    time.Minute,
 					FFetchTimeWait:    5 * time.Second,
-					FLimitVoidSize:    1, // not used
 				}),
 				aconn,
 			)

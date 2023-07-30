@@ -13,11 +13,12 @@ type SConfigSettingsBlock struct {
 	FMessageSizeBytes uint64 `json:"message_size_bytes"`
 	FWorkSizeBits     uint64 `json:"work_size_bits"`
 
+	// HLS, HLT
+	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty"`
+	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+
 	// HLS, HLM
 	FKeySizeBits uint64 `json:"key_size_bits,omitempty"`
-
-	// HLS, HLT
-	FQueuePeriodMS uint64 `json:"queue_period_ms,omitempty"`
 
 	// HLT, HLM
 	FMessagesCapacity uint64 `json:"messages_capacity,omitempty"`
@@ -45,4 +46,8 @@ func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {
 	return p.FSettings.FMessagesCapacity
+}
+
+func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
+	return p.FSettings.FLimitVoidSizeBytes
 }

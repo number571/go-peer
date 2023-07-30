@@ -161,7 +161,8 @@ Default config `hls.cfg`
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
-		"queue_period_ms": 5000
+		"queue_period_ms": 5000,
+		"limit_void_size_bytes": 1048576
 	},
 	"logging": [
 		"info",
@@ -477,7 +478,8 @@ Default config `hlt.cfg`
 		"message_size_bytes": 1048576,
 		"work_size_bits": 20,
 		"messages_capacity": 1024,
-		"queue_period_ms": 5000
+		"queue_period_ms": 5000,
+		"limit_void_size_bytes": 1048576
 	},
 	"logging": [
 		"info",

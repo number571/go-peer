@@ -8,12 +8,16 @@ import (
 
 const (
 	cMessageSizeBytes = (4 << 10)
-	cLenOtherNodes    = 5
+	cLenOtherNodes    = 1
 )
 
 var (
 	gListOfConnects = []string{
+		"v1989393.hosted-by-vdsina.ru:9581",
+		"194.32.248.60:9581",
 		"193.124.117.164:9581",
+		"6a20015eacd8.vps.myjino.ru:49356",
+		"195.133.1.126:9581",
 	}
 )
 
@@ -57,7 +61,8 @@ func initRecvNode(pConnects string) *sNodeHLS {
 		"message_size_bytes": %d,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
-		"queue_period_ms": 5000
+		"queue_period_ms": 5000,
+		"limit_void_size_bytes": 1048576
 	},
 	"logging": ["info", "warn", "erro"],
 	"services": {
@@ -84,7 +89,8 @@ func initSendNode(pConnects string) *sNodeHLS {
 		"message_size_bytes": %d,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
-		"queue_period_ms": 5000
+		"queue_period_ms": 5000,
+		"limit_void_size_bytes": 1048576
 	},
 	"logging": ["info", "warn", "erro"],
 	"address": {
@@ -122,7 +128,8 @@ clean:
 		"message_size_bytes": %d,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
-		"queue_period_ms": 5000
+		"queue_period_ms": 5000,
+		"limit_void_size_bytes": 1048576
 	},
 	"connections": [%s]
 }

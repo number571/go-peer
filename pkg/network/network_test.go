@@ -108,7 +108,6 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,
-				FLimitVoidSize:    1, // not used
 				FFetchTimeWait:    1, // not used
 			}),
 		})

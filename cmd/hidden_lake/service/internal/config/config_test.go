@@ -14,20 +14,21 @@ const (
 )
 
 const (
-	tcLogging      = true
-	tcNetwork      = "test_network_key"
-	tcDownloader   = "test_downloader"
-	tcUploader     = "test_uploader"
-	tcAddressTCP   = "test_address_tcp"
-	tcAddressHTTP  = "test_address_http"
-	tcPubKeyAlias1 = "test_alias1"
-	tcPubKeyAlias2 = "test_alias2"
-	tcServiceName1 = "test_service1"
-	tcServiceName2 = "test_service2"
-	tcMessageSize  = (1 << 20)
-	tcWorkSize     = 20
-	tcKeySize      = 4096
-	tcQueuePeriod  = 1000
+	tcLogging       = true
+	tcNetwork       = "test_network_key"
+	tcDownloader    = "test_downloader"
+	tcUploader      = "test_uploader"
+	tcAddressTCP    = "test_address_tcp"
+	tcAddressHTTP   = "test_address_http"
+	tcPubKeyAlias1  = "test_alias1"
+	tcPubKeyAlias2  = "test_alias2"
+	tcServiceName1  = "test_service1"
+	tcServiceName2  = "test_service2"
+	tcMessageSize   = (1 << 20)
+	tcWorkSize      = 20
+	tcKeySize       = 4096
+	tcQueuePeriod   = 1000
+	tcLimitVoidSize = (1 << 20)
 )
 
 var (
@@ -51,7 +52,8 @@ const (
 		"message_size_bytes": %d,
 		"work_size_bits": %d,
 		"key_size_bits": %d,
-		"queue_period_ms": %d
+		"queue_period_ms": %d,
+		"limit_void_size_bytes": %d
 	},
 	"logging": ["info", "erro"],
 	"network": "%s",
@@ -81,6 +83,7 @@ func testNewConfigString() string {
 		tcWorkSize,
 		tcKeySize,
 		tcQueuePeriod,
+		tcLimitVoidSize,
 		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
@@ -128,6 +131,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
+		return
+	}
+
+	if cfg.GetLimitVoidSizeBytes() != tcLimitVoidSize {
+		t.Error("settings limit void size is invalid")
 		return
 	}
 

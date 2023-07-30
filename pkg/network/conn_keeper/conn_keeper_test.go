@@ -23,7 +23,6 @@ func TestConnKeeper(t *testing.T) {
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
 			FWriteDeadline:    time.Minute,
-			FLimitVoidSize:    1, // not used
 			FFetchTimeWait:    1, // not used
 		}),
 	}))

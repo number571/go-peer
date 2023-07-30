@@ -56,7 +56,6 @@ const (
 )
 
 const (
-	CConnLimitVoidSize    = (1 << 20) // 1MiB
 	CConnWaitReadDeadline = time.Hour
 	CConnKeeperDuration   = 10 * time.Second
 )
