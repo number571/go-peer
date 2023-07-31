@@ -22,10 +22,11 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			SConfigSettings: settings.SConfigSettings{
 				FSettings: settings.SConfigSettingsBlock{
-					FMessageSizeBytes: hls_settings.CDefaultMessageSize,
-					FWorkSizeBits:     hls_settings.CDefaultWorkSize,
-					FKeySizeBits:      hls_settings.CDefaultKeySize,
-					FQueuePeriodMS:    hls_settings.CDefaultQueuePeriod,
+					FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
+					FWorkSizeBits:       hls_settings.CDefaultWorkSize,
+					FKeySizeBits:        hls_settings.CDefaultKeySize,
+					FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
+					FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				},
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

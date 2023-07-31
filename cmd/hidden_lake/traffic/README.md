@@ -49,11 +49,11 @@ Default config `hlt.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 1048576,
+		"message_size_bytes": 4096,
 		"work_size_bits": 20,
 		"messages_capacity": 1024,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 1048576
+		"limit_void_size_bytes": 4096
 	},
 	"logging": [
 		"info",
@@ -113,11 +113,11 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 ```json
 {
 	"settings": {
-		"message_size_bytes": 1048576,
+		"message_size_bytes": 4096,
 		"work_size_bits": 20,
 		"messages_capacity": 1024,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 1048576
+		"limit_void_size_bytes": 4096
 	},
 	"logging": [
 		"info",

@@ -82,11 +82,11 @@ Default config `hls.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 1048576,
+		"message_size_bytes": 4096,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 1048576
+		"limit_void_size_bytes": 4096
 	},
 	"logging": [
 		"info",
@@ -235,11 +235,11 @@ $ make
 ```json
 {
 	"settings": {
-		"message_size_bytes": 1048576,
+		"message_size_bytes": 4096,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 1048576
+		"limit_void_size_bytes": 4096
 	},
 	"logging": ["info", "warn", "erro"],
 	"network": "hls-network-key",

@@ -32,11 +32,11 @@ const (
 const (
 	tcConfig = `{
 	"settings": {
-		"message_size_bytes": 1048576,
+		"message_size_bytes": 4096,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 1000,
-		"limit_void_size_bytes": 1048576
+		"limit_void_size_bytes": 4096
 	},
 	"network": "test_network_key",
 	"address": {
