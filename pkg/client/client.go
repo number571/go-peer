@@ -52,7 +52,7 @@ func GetMessageLimit(msgSize, keySize uint64) uint64 {
 		FWorkSizeBits:     1, // default value
 	})
 	client := NewClient(sett, privKey).(*sClient)
-	// msg limit - (void msg size) - (payload and doublePayload heads)
+	// (msg limit) < (void msg size) + (payload head + payload head)
 	if msgSize < client.fVoidMsgSize+(2*encoding.CSizeUint64) {
 		panic("the message size is very low")
 	}
@@ -94,14 +94,12 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 		))
 	}
 
-	res := p.encryptWithParams(
+	return p.encryptWithParams(
 		pRecv,
 		pPld,
 		p.fSettings.GetWorkSizeBits(),
 		maxMsgSize-resultSize,
-	)
-
-	return res, nil
+	), nil
 }
 
 func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pWorkSize, pPadd uint64) message.IMessage {

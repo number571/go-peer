@@ -8,7 +8,7 @@ import (
 
 const (
 	cMessageSizeBytes = (4 << 10)
-	cLenOtherNodes    = 10
+	cLenOtherNodes    = 20
 )
 
 var (
