@@ -20,22 +20,37 @@ const (
 )
 
 func TestMessage(t *testing.T) {
-	msgBytes, err := os.ReadFile("test.msg")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
 		FWorkSizeBits:     testutils.TCWorkSize,
 	})
-	msg := LoadMessage(params, msgBytes)
-	if msg == nil {
+
+	msgBytes, err := os.ReadFile("test_binary.msg")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	msg1 := LoadMessage(params, msgBytes)
+	if msg1 == nil {
 		t.Error("failed load message")
 		return
 	}
+	testMessage(t, msg1)
 
+	msgStrBytes, err := os.ReadFile("test_string.msg")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	msg2 := LoadMessage(params, string(msgStrBytes))
+	if msg2 == nil {
+		t.Error("failed load message")
+		return
+	}
+	testMessage(t, msg2)
+}
+
+func testMessage(t *testing.T, msg IMessage) {
 	if !bytes.Equal(msg.GetHead().GetSalt(), encoding.HexDecode(tcSalt)) {
 		t.Error("incorrect salt value")
 		return
