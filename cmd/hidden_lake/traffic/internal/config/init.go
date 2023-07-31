@@ -24,7 +24,6 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FSettings: settings.SConfigSettingsBlock{
 					FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
 					FWorkSizeBits:       hls_settings.CDefaultWorkSize,
-					FMessagesCapacity:   hlt_settings.CDefaultCapMessages,
 					FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 					FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				},

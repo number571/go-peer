@@ -11,10 +11,6 @@ const (
 )
 
 const (
-	CDefaultCapMessages = (1 << 10)
-)
-
-const (
 	CHandleIndexPath   = "/api/index"
 	CHandleHashesPath  = "/api/hashes"
 	CHandleMessagePath = "/api/message"
