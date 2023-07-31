@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	cMessageSizeBytes = (4 << 10)
+	cMessageSizeBytes = (8 << 10)
 	cLenOtherNodes    = 20
 )
 

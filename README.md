@@ -158,7 +158,7 @@ Default config `hls.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 4096,
+		"message_size_bytes": 8192,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
@@ -350,7 +350,7 @@ Default config `hlm.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 4096,
+		"message_size_bytes": 8192,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"messages_capacity": 1024
@@ -475,7 +475,7 @@ Default config `hlt.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 4096,
+		"message_size_bytes": 8192,
 		"work_size_bits": 20,
 		"messages_capacity": 1024,
 		"queue_period_ms": 5000,

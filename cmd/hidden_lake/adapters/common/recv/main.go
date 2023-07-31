@@ -18,6 +18,10 @@ import (
 )
 
 const (
+	messageSize = (8 << 10)
+)
+
+const (
 	databasePath = "common_recv.db"
 	dataCountKey = "count_recv"
 )
@@ -137,7 +141,7 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 	cfg := &settings.SConfigSettings{
 		FSettings: settings.SConfigSettingsBlock{
 			FWorkSizeBits:     20,
-			FMessageSizeBytes: (4 << 10),
+			FMessageSizeBytes: messageSize,
 		},
 	}
 

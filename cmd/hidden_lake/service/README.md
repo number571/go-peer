@@ -82,7 +82,7 @@ Default config `hls.cfg`
 ```json
 {
 	"settings": {
-		"message_size_bytes": 4096,
+		"message_size_bytes": 8192,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
@@ -235,7 +235,7 @@ $ make
 ```json
 {
 	"settings": {
-		"message_size_bytes": 4096,
+		"message_size_bytes": 8192,
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,

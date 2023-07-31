@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cfgs[message_size_bytes]`: change from 4KiB to 8KiB
+
 ### BUG FIXES
 
 - Update `hidden_lake/service`: messageSize (4 << 20) -> (4 << 10)
