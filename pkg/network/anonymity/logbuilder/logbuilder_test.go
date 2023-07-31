@@ -1,7 +1,6 @@
 package logbuilder
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -23,8 +22,6 @@ func TestLogger(t *testing.T) {
 		WithPubKey(asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]))
 
 	if logger.Get(CLogBaseEnqueueResponse) != tcFmtLog {
-		fmt.Println(logger.Get(CLogBaseEnqueueResponse))
-		fmt.Println(tcFmtLog)
 		t.Error("result fmtLog != tcFmtLog")
 		return
 	}

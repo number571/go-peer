@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -37,8 +36,6 @@ func TestWrapError(t *testing.T) {
 	}
 
 	if WrapError(nil, "test_1").Error() != NewError("test_1").Error() {
-		fmt.Println(WrapError(nil, "test_1").Error())
-		fmt.Println(NewError("test_1").Error())
 		t.Error("wrap error not equal new error")
 	}
 }

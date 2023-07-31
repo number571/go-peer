@@ -17,6 +17,7 @@
 - Update `hidden_lake/service`: append to SetPrivKey ephemeral public key
 - Update `examples/anon_messenger`: append request.sh for sending text, files
 - Update `hidden_lake/service`: replace LimitVoidSize from code to config
+- Update `pkg/client/message`: change IMessage from JSON format to JSON/Binary ([]byte), JSON/Hex (string)
 
 ### CHANGES
 
@@ -36,6 +37,7 @@
 - Update `hidden_lake/service`: append check for hex_data is an IRequest?
 - Update `hidden_lake/service`: fix size of the encrypted messages
 - Update `pkg/client/message`: replace lax verification on size of message to strict verification
+- Update `pkg`: delete all debug logs
 
 <!-- ... -->
 

@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -32,7 +31,6 @@ type sKeyValueDB struct {
 func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
 	if err != nil {
-		fmt.Println(pSett.GetPath())
 		return nil, errors.WrapError(err, "open database")
 	}
 

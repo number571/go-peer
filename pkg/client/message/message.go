@@ -61,7 +61,8 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 	case []byte:
 		msg.FBody.FPayload = x[i+2:]
 	case string:
-		msg.FBody.FPayload = encoding.HexDecode(x[i+2:])
+		encStr := strings.TrimSpace(x[i+2:])
+		msg.FBody.FPayload = encoding.HexDecode(encStr)
 		if msg.FBody.FPayload == nil {
 			return nil
 		}
