@@ -8,16 +8,12 @@ import (
 
 const (
 	cMessageSizeBytes = (4 << 10)
-	cLenOtherNodes    = 1
+	cLenOtherNodes    = 10
 )
 
 var (
 	gListOfConnects = []string{
-		"v1989393.hosted-by-vdsina.ru:9581",
-		"194.32.248.60:9581",
-		"193.124.117.164:9581",
-		"6a20015eacd8.vps.myjino.ru:49356",
-		"195.133.1.126:9581",
+		"195.133.1.126:9581", // 1x2.2ГГц, 0.5Гб RAM, 10Гб HDD
 	}
 )
 

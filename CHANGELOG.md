@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `hidden_lake/service`: messageSize (4 << 20) -> (4 << 10)
+
 <!-- ... -->
 
 ## v1.5.15
