@@ -33,7 +33,7 @@ const (
 )
 
 const (
-	CDefaultMessageSize   = (4 << 20) // 4KiB
+	CDefaultMessageSize   = (4 << 10) // 4KiB
 	CDefaultWorkSize      = 20        // bits
 	CDefaultKeySize       = 4096      // bits
 	CDefaultQueuePeriod   = 5000      // 5seconds
