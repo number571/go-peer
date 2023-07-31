@@ -29,6 +29,7 @@
 - Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
 - Update `pkg/anonymity/logbuilder`: append size of messages
 - Update `hidden_lake/service`: change receiver ID from PubKey to AliasName
+- Update `cfgs[message_size_bytes]`: change from 1MiB to 4KiB (also limit_void_size_bytes)
 
 ### BUG FIXES
 
