@@ -9,6 +9,7 @@
 ### BUG FIXES
 
 - Update `hidden_lake/service`: messageSize (4 << 20) -> (4 << 10)
+- Update `Makefiles`: append .exe extenstion to windows compile
 
 <!-- ... -->
 
