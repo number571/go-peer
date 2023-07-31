@@ -15,7 +15,7 @@ build: default-config
 	for arch in amd64 arm64; \
 	do \
 		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/hls_$${arch}_linux ./cmd/hls; \
-		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hls_$${arch}_windows ./cmd/hls; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hls_$${arch}_windows.exe ./cmd/hls; \
 		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/hls_$${arch}_darwin ./cmd/hls; \
 	done;
 run:

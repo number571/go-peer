@@ -10,7 +10,7 @@ init:
 	pkill -15 --version
 
 generate-configs: 
-	go run ./_generate_configs
+	go run ./gen_cfgs
 
 build: generate-configs
 	# MAKEFILE BUILD
