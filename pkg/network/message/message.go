@@ -59,7 +59,7 @@ func (p *sMessage) GetPayload() payload.IPayload {
 	return p.fPayload
 }
 
-func (p *sMessage) GetBytes() []byte {
+func (p *sMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			p.fHashPayload,

@@ -29,7 +29,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FInterface: hlm_settings.CDefaultInterfaceAddress,
 				FIncoming:  hlm_settings.CDefaultIncomingAddress,
 			},
-			FConnection: hlm_settings.CDefaultConnectionHLSAddress,
+			FConnection: hls_settings.CDefaultHTTPAddress,
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

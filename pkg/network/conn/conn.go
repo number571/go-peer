@@ -86,7 +86,7 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 		message.NewMessage(
 			pPld,
 			[]byte(p.fSettings.GetNetworkKey()),
-		).GetBytes(),
+		).ToBytes(),
 	)
 
 	prng := random.NewStdPRNG()
