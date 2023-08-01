@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -79,7 +80,8 @@ func buttonActions(a fyne.App) *widget.Button {
 			button.SetText("Processing...")
 			state.SwitchOnSuccess(func() error {
 				if !state.IsRun() {
-					return mobile.OpenURL(a, "http://127.0.0.1:9591/about")
+					urlPage := fmt.Sprintf("http://%s/about", pkg_settings.CDefaultInterfaceAddress)
+					return mobile.OpenURL(a, urlPage)
 				}
 				return nil
 			})
