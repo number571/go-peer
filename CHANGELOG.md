@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `docs`: append article decentralized_key_exchange_protocol
+
 ### CHANGES
 
 - Update `cfgs[message_size_bytes]`: change from 4KiB to 8KiB
