@@ -40,47 +40,39 @@ $ make docker-run
                 <th>Host</th>
                 <th>Port</th>
                 <th>Connections</th>
+                <th>Provider</th>
+                <th>Characteristics</th>
                 <th>Expired time</th>
             </tr>
             <tr>
                 <td>1</td>
-                <td>HLTr</td>
+                <td>HLTr/HLTs</td>
                 <td>v1989393.hosted-by-vdsina.ru</td>
                 <td>9581</td>
                 <td>[]</td>
-                <td>25.11.2023</td>
+                <td><a href="https://vdsina.ru">vdsina.ru</a></td>
+                <td>1x3.4GHz, 1.0GB RAM, 30GB HDD</td>
+                <td>±02.08.2025</td>
             </tr>
             <tr>
                 <td>2</td>
                 <td>HLTr</td>
-                <td>194.32.248.60</td>
-                <td>9581</td>
+                <td>6a20015eacd8.vps.myjino.ru</td>
+                <td>49356</td>
                 <td>[1]</td>
-                <td>02.08.2023</td>
+                <td><a href="https://jino.ru">jino.ru</a></td>
+                <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
+                <td>±28.07.2026</td>
             </tr>
             <tr>
                 <td>3</td>
                 <td>HLTr</td>
-                <td>193.124.117.164</td>
-                <td>9581</td>
-                <td>[1]</td>
-                <td>02.08.2023</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>HLTr</td>
-                <td>6a20015eacd8.vps.myjino.ru</td>
-                <td>49356</td>
-                <td>[1]</td>
-                <td>28.08.2024</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>HLTr</td>
                 <td>195.133.1.126</td>
                 <td>9581</td>
-                <td>[1,4]</td>
-                <td>28.08.2024</td>
+                <td>[1,2]</td>
+                <td><a href="https://ruvds.com">ruvds.ru</a></td>
+                <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
+                <td>±28.07.2027</td>
             </tr>
         </table>
     </td>

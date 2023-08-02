@@ -24,5 +24,5 @@ const (
 
 const (
 	CWorkForKeys        = 20
-	CDefaultCapMessages = (1 << 10)
+	CDefaultCapMessages = (2 << 10)
 )

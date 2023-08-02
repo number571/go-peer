@@ -9,12 +9,14 @@
 ### IMPROVEMENTS
 
 - Update `docs`: append article decentralized_key_exchange_protocol
+- Update `cmd/hidden_lake/README.md`: append to connections "characteristics", "provider" fields
 
 ### CHANGES
 
 - Update `cfgs[message_size_bytes]`: change from 4KiB to 8KiB
 - Update `hidden_lake/*/init_app.go`: append trimsuffix "/" for path value
 - Update `composite/mobile/service_messenger`: app.New -> app.NewWithID
+- Update `cfgs[messages_capacity]`: change from (1 << 10) to (1 << 20)
 
 ### BUG FIXES
 
