@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -12,7 +13,7 @@ import (
 )
 
 func InitApp(pDefaultPath string) (types.ICommand, error) {
-	inputPath := flag.GetFlagValue("path", pDefaultPath)
+	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
 	if err != nil {

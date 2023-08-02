@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -15,7 +16,7 @@ import (
 
 // initApp work with the raw data = read files, read args
 func InitApp(pDefaultPath string) (types.ICommand, error) {
-	inputPath := flag.GetFlagValue("path", pDefaultPath)
+	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", "")
 
 	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
