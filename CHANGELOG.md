@@ -13,6 +13,8 @@
 ### CHANGES
 
 - Update `cfgs[message_size_bytes]`: change from 4KiB to 8KiB
+- Update `hidden_lake/*/init_app.go`: append trimsuffix "/" for path value
+- Update `composite/mobile/service_messenger`: app.New -> app.NewWithID
 
 ### BUG FIXES
 

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/number571/go-peer/internal/mobile"
-	"github.com/number571/go-peer/pkg/filesystem"
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -23,12 +20,10 @@ var (
 )
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("hidden_lake")
+	gPath = a.Storage().RootURI().Path()
+
 	w := a.NewWindow("app")
-
-	rootPath := a.Storage().RootURI().Path()
-	gPath = strings.Split(rootPath, "/fyne/")[0] + "/hidden_lake"
-
 	w.SetContent(container.New(
 		layout.NewCenterLayout(),
 		container.NewVBox(
@@ -63,12 +58,6 @@ func buttonActions(a fyne.App) *widget.Button {
 	var (
 		button *widget.Button
 	)
-
-	if !filesystem.OpenFile(gPath).IsExist() {
-		if err := os.Mkdir(gPath, 0744); err != nil {
-			panic(err)
-		}
-	}
 
 	state := mobile.NewMobileState(a, pkg_settings.CServiceName).
 		WithConstructApp(constructApp).
