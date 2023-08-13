@@ -8,6 +8,10 @@
 
 <!-- ... -->
 
+### CHANGES
+
+- Update `cmd/hidden_lake/messenger`: append check of message size
+
 ## v1.5.16
 
 *August 13, 2023*
