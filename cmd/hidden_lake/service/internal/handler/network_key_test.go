@@ -12,13 +12,13 @@ import (
 )
 
 func TestHandleNetworkKeyAPI(t *testing.T) {
-	wcfg, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[24])
+	wcfg, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[26])
 	defer testAllFree(node, srv)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(
-			fmt.Sprintf("http://%s", testutils.TgAddrs[24]),
+			fmt.Sprintf("http://%s", testutils.TgAddrs[26]),
 			&http.Client{Timeout: time.Minute},
 		),
 	)
