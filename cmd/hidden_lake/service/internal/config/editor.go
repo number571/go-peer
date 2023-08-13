@@ -32,6 +32,30 @@ func newEditor(pCfg IConfig) IEditor {
 	}
 }
 
+func (p *sEditor) UpdateNetworkKey(pNetworkKey string) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	filepath := p.fConfig.fFilepath
+	icfg, err := LoadConfig(filepath)
+	if err != nil {
+		return errors.WrapError(err, "load config (update connections)")
+	}
+
+	cfg := icfg.(*SConfig)
+	cfg.FNetworkKey = pNetworkKey
+	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
+	if err != nil {
+		return errors.WrapError(err, "write config (update connections)")
+	}
+
+	p.fConfig.fMutex.Lock()
+	defer p.fConfig.fMutex.Unlock()
+
+	p.fConfig.FNetworkKey = cfg.FNetworkKey
+	return nil
+}
+
 func (p *sEditor) UpdateConnections(pConns []string) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

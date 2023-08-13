@@ -25,12 +25,19 @@ func NewRequest(pMethod, pHost, pPath string) IRequest {
 	}
 }
 
-func LoadRequest(pData []byte) (IRequest, error) {
+func LoadRequest(pData interface{}) (IRequest, error) {
 	request := new(sRequest)
-	if err := encoding.Deserialize(pData, request); err != nil {
-		return nil, errors.WrapError(err, "load request")
+	switch x := pData.(type) {
+	case []byte:
+		if err := encoding.Deserialize(x, request); err != nil {
+			return nil, errors.WrapError(err, "load request")
+		}
+		return request, nil
+	case string:
+		return LoadRequest([]byte(x))
+	default:
+		panic("type not supported")
 	}
-	return request, nil
 }
 
 func (p *sRequest) ToBytes() []byte {

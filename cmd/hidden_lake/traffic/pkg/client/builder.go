@@ -16,5 +16,5 @@ func NewBuilder() IBuilder {
 }
 
 func (p *sBuilder) PutMessage(pMsg message.IMessage) string {
-	return string(pMsg.ToBytes())
+	return pMsg.ToString()
 }

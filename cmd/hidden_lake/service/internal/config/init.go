@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/number571/go-peer/internal/logger"
+	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"

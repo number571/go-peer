@@ -64,6 +64,9 @@ func TestEncrypt(t *testing.T) {
 		return
 	}
 
+	// os.WriteFile("test_binary.msg", msg.ToBytes(), 0644)
+	// os.WriteFile("test_string.msg", []byte(msg.ToString()), 0644)
+
 	_, decPl, err := client2.DecryptMessage(msg)
 	if err != nil {
 		t.Error(err)
@@ -108,14 +111,14 @@ func TestGetMessageLimit(t *testing.T) {
 	msg1 := random.NewStdPRNG().GetBytes(tgMsgLimit)
 	pld1 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg1))
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld1); err != nil {
-		t.Error("message1 > message limit")
+		t.Error("message1 > message limit:", err)
 		return
 	}
 
 	msg2 := random.NewStdPRNG().GetBytes(tgMsgLimit + 1)
 	pld2 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg2))
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld2); err == nil {
-		t.Error("message2 > message limit but not alert")
+		t.Error("message2 > message limit but not alert:", err)
 		return
 	}
 }

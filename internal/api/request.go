@@ -2,40 +2,42 @@ package api
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 )
 
 func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (string, error) {
-	var requestBytes []byte
+	var (
+		contentType = ""
+		reqBytes    []byte
+	)
 
 	switch x := pData.(type) {
 	case []byte:
-		requestBytes = x
+		contentType = cTextPlain
+		reqBytes = x
 	case string:
-		requestBytes = []byte(x)
+		contentType = cTextPlain
+		reqBytes = []byte(x)
 	default:
-		jsonValue, err := json.Marshal(pData)
-		if err != nil {
-			return "", errors.WrapError(err, "marshal request")
-		}
-		requestBytes = jsonValue
+		contentType = cApplicationJSON
+		reqBytes = encoding.Serialize(x, false)
 	}
 
 	req, err := http.NewRequest(
 		pMethod,
 		pURL,
-		bytes.NewBuffer(requestBytes),
+		bytes.NewBuffer(reqBytes),
 	)
 	if err != nil {
 		return "", errors.WrapError(err, "new request")
 	}
 
-	req.Header.Set("Content-Type", CContentType)
+	req.Header.Set("Content-Type", contentType)
 	resp, err := pClient.Do(req)
 	if err != nil {
 		return "", errors.WrapError(err, "do request")

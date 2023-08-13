@@ -14,4 +14,4 @@ build:
 		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/tpmanager_$${arch}_darwin .; \
 	done;
 clean:
-	rm -f $(BINPATH)/tpmanager $(BINPATH)/tpmanager_*
+	rm -f tpmanager $(BINPATH)/tpmanager $(BINPATH)/tpmanager_*

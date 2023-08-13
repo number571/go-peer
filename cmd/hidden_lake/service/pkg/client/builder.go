@@ -21,12 +21,11 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey, ephPubKey asymmetric.IPubKey) *pkg_settings.SPrivKey {
+func (p *sBuilder) SetPrivKey(pEphPubKey asymmetric.IPubKey, pPrivKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
 	sessionKey := random.NewStdPRNG().GetBytes(32)
-	encPrivKeyBytes := symmetric.NewAESCipher(sessionKey).EncryptBytes(pPrivKey.ToBytes())
 	return &pkg_settings.SPrivKey{
-		FEncPrivKey:    encoding.HexEncode(encPrivKeyBytes),
-		FEncSessionKey: encoding.HexEncode(ephPubKey.EncryptBytes(sessionKey)),
+		FSessionKey: encoding.HexEncode(pEphPubKey.EncryptBytes(sessionKey)),
+		FPrivKey:    encoding.HexEncode(symmetric.NewAESCipher(sessionKey).EncryptBytes(pPrivKey.ToBytes())),
 	}
 }
 
@@ -45,7 +44,7 @@ func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_se
 func (p *sBuilder) Request(pReceiver string, pReq request.IRequest) *pkg_settings.SRequest {
 	return &pkg_settings.SRequest{
 		FReceiver: pReceiver,
-		FHexData:  encoding.HexEncode(pReq.ToBytes()),
+		FReqData:  pReq.ToString(),
 	}
 }
 

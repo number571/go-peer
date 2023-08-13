@@ -26,6 +26,7 @@ var (
 type sStateManager struct {
 	fMutex    sync.Mutex
 	fHashLP   []byte
+	fPrivKey  asymmetric.IPrivKey
 	fConfig   config.IConfig
 	fPathTo   string
 	fStorage  storage.IKVStorage
@@ -75,6 +76,24 @@ func (p *sStateManager) GetTemplate() *STemplateState {
 	}
 }
 
+func (p *sStateManager) GetPrivKey() asymmetric.IPrivKey {
+	if !p.StateIsActive() {
+		return nil
+	}
+	return p.fPrivKey
+}
+
+func (p *sStateManager) IsMyPubKey(pPubKey asymmetric.IPubKey) bool {
+	if !p.StateIsActive() {
+		return false
+	}
+	myPubKey := p.fPrivKey.GetPubKey()
+	if myPubKey == nil || pPubKey == nil {
+		return false
+	}
+	return myPubKey.ToString() == pPubKey.ToString()
+}
+
 func (p *sStateManager) CreateState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
 	if _, err := p.fStorage.Get(pHashLP); err == nil {
 		return errors.NewError("state already exists")
@@ -111,7 +130,14 @@ func (p *sStateManager) OpenState(pHashLP []byte) error {
 	if err := p.updateClientState(stateValue); err != nil {
 		return errors.WrapError(err, "update client state")
 	}
+
+	privKey := asymmetric.LoadRSAPrivKey(stateValue.FPrivKey)
+	if privKey == nil {
+		return errors.NewError("private key is null (open state)")
+	}
+
 	p.fHashLP = pHashLP
+	p.fPrivKey = privKey
 
 	p.updateClientTraffic(stateValue)
 	return nil
@@ -164,6 +190,19 @@ func (p *sStateManager) DelFriend(pAliasName string) error {
 	return nil
 }
 
+func (p *sStateManager) SetNetworkKey(pNetworkKey string) error {
+	err := p.stateUpdater(
+		p.updateClientNetworkKey,
+		func(storageValue *SStorageState) {
+			storageValue.FNetworkKey = pNetworkKey
+		},
+	)
+	if err != nil {
+		return errors.WrapError(err, "set network key (state updater)")
+	}
+	return nil
+}
+
 func (p *sStateManager) AddConnection(pAddress string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
@@ -204,9 +243,12 @@ func (p *sStateManager) StateIsActive() bool {
 }
 
 func (p *sStateManager) newStorageState(pHashLP []byte, pPrivKey asymmetric.IPrivKey) error {
-	stateValueBytes := encoding.Serialize(&SStorageState{
-		FPrivKey: pPrivKey.ToString(),
-	}, false)
+	stateValueBytes := encoding.Serialize(
+		&SStorageState{
+			FPrivKey: pPrivKey.ToString(),
+		},
+		false,
+	)
 	if err := p.fStorage.Set(pHashLP, stateValueBytes); err != nil {
 		return errors.WrapError(err, "new storage state")
 	}

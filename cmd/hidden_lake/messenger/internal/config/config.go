@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	"github.com/number571/go-peer/internal/logger"
+	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"

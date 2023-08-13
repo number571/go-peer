@@ -22,6 +22,7 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
+	fNetworkKey   string
 	fHashMapping  map[string]struct{}
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
@@ -33,6 +34,7 @@ type sNode struct {
 func NewNode(pSett ISettings) INode {
 	return &sNode{
 		fSettings:     pSett,
+		fNetworkKey:   pSett.GetConnSettings().GetNetworkKey(),
 		fHashMapping:  make(map[string]struct{}, pSett.GetCapacity()),
 		fConnections:  make(map[string]conn.IConn),
 		fHandleRoutes: make(map[uint64]IHandlerF),
@@ -42,6 +44,23 @@ func NewNode(pSett ISettings) INode {
 // Return settings interface.
 func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
+}
+
+func (p *sNode) GetNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fNetworkKey
+}
+
+func (p *sNode) SetNetworkKey(pNetworkKey string) {
+	for _, c := range p.GetConnections() {
+		c.SetNetworkKey(pNetworkKey)
+	}
+
+	p.fMutex.Lock()
+	p.fNetworkKey = pNetworkKey
+	p.fMutex.Unlock()
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.

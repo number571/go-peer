@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io"
@@ -13,10 +14,14 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 )
@@ -35,14 +40,17 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.HandlerFunc {
+func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, msgLimit uint64) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+
 		if pR.URL.Path != "/friends/chat" {
-			NotFoundPage(pStateManager)(pW, pR)
+			NotFoundPage(pStateManager, pLogger)(pW, pR)
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -52,25 +60,29 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
+			pLogger.PushWarn(httpLogger.Get("get_alias_name"))
 			fmt.Fprint(pW, "alias name is null")
 			return
 		}
 
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
+			pLogger.PushErro(httpLogger.Get("get_database"))
 			fmt.Fprint(pW, "error: database closed")
 			return
 		}
 
 		client := pStateManager.GetClient()
 		myPubKey, _, err := client.GetPubKey()
-		if err != nil {
+		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+			pLogger.PushWarn(httpLogger.Get("get_public_key"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: read public key"))
 			return
 		}
 
 		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
 		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("get_receiver"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: get receiver by public key"))
 			return
 		}
@@ -81,11 +93,13 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 		case http.MethodPost, http.MethodPut:
 			msgBytes, err := getMessageBytesToSend(pStateManager, pR)
 			if err != nil {
+				pLogger.PushWarn(httpLogger.Get("get_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
 				return
 			}
 
-			if err := trySendMessage(client, aliasName, myPubKey, msgBytes, msgLimit); err != nil {
+			if err := trySendMessage(client, aliasName, recvPubKey, msgBytes, msgLimit); err != nil {
+				pLogger.PushWarn(httpLogger.Get("send_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
 			}
@@ -94,10 +108,12 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes), uid)
 
 			if err := db.Push(rel, dbMsg); err != nil {
+				pLogger.PushWarn(httpLogger.Get("push_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: add message to database"))
 				return
 			}
 
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			http.Redirect(pW, pR,
 				fmt.Sprintf("/friends/chat?alias_name=%s", aliasName),
 				http.StatusSeeOther)
@@ -114,6 +130,7 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 
 		msgs, err := db.Load(rel, start, size)
 		if err != nil {
+			pLogger.PushErro(httpLogger.Get("read_database"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: read database"))
 			return
 		}
@@ -143,6 +160,7 @@ func FriendsChatPage(pStateManager state.IStateManager, msgLimit uint64) http.Ha
 			panic(err)
 		}
 
+		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 		t.Execute(pW, res)
 	}
 }
@@ -189,23 +207,31 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(client client.IClient, aliasName string, myPubKey asymmetric.IPubKey, msgBytes []byte, msgLimit uint64) error {
-	if uint64(len(msgBytes)) > msgLimit {
+func trySendMessage(pClient client.IClient, pAliasName string, pPubKey asymmetric.IPubKey, pMsgBytes []byte, pMsgLimit uint64) error {
+	if uint64(len(pMsgBytes)) > pMsgLimit {
 		return errors.NewError("error: len message > limit")
 	}
 
 	// if the sender = receiver then there is no need to send a message to the network
-	if aliasName == hlm_settings.CIamAliasName {
+	if pAliasName == hlm_settings.CIamAliasName {
 		return nil
 	}
 
-	return client.BroadcastRequest(
-		aliasName,
+	sessionKey := random.NewStdPRNG().GetBytes(32)
+	return pClient.BroadcastRequest(
+		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
-			WithBody(msgBytes),
+			WithBody(bytes.Join(
+				[][]byte{
+					[]byte(encoding.HexEncode(pPubKey.EncryptBytes(sessionKey))),
+					[]byte(hlm_settings.CSeparator),
+					symmetric.NewAESCipher(sessionKey).EncryptBytes(pMsgBytes),
+				},
+				[]byte{},
+			)),
 	)
 }
 

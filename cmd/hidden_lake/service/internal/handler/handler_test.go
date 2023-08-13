@@ -38,11 +38,11 @@ const (
 		"queue_period_ms": 1000,
 		"limit_void_size_bytes": 4096
 	},
-	"network": "test_network_key",
 	"address": {
 		"tcp": "test_address_tcp",
 		"http": "test_address_http"
 	},
+	"network_key": "test",
 	"connections": [
 		"test_connect1",
 		"test_connect2",
@@ -126,13 +126,19 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(wcfg, node))
-	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(node))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, node))
+	keySize := wcfg.GetConfig().GetKeySizeBits()
+	ephPrivKey := asymmetric.NewRSAPrivKey(keySize)
+
+	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
+
+	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
+	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node, ephPrivKey))
+	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, HandleNetworkKeyAPI(wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node, ephPrivKey))
 
 	srv := &http.Server{
 		Addr:    addr,

@@ -10,9 +10,11 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	"github.com/number571/go-peer/internal/api"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/stringtools"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -27,17 +29,21 @@ type sConnection struct {
 type sSettings struct {
 	*state.STemplateState
 	FPublicKey   string
+	FNetworkKey  string
 	FConnections []sConnection
 }
 
-func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) http.HandlerFunc {
+func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+
 		if pR.URL.Path != "/settings" {
-			NotFoundPage(pStateManager)(pW, pR)
+			NotFoundPage(pStateManager, pLogger)(pW, pR)
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -45,14 +51,23 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		pR.ParseForm()
 
 		switch pR.FormValue("method") {
+		case http.MethodPatch:
+			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
+			if err := pStateManager.SetNetworkKey(networkKey); err != nil {
+				pLogger.PushWarn(httpLogger.Get("set_network_key"))
+				fmt.Fprint(pW, "error: update network key")
+				return
+			}
 		case http.MethodPut:
 			language := strings.TrimSpace(pR.FormValue("language"))
 			res, err := utils.ToILanguage(language)
 			if err != nil {
+				pLogger.PushWarn(httpLogger.Get("to_language"))
 				fmt.Fprint(pW, "error: load unknown language")
 				return
 			}
 			if err := pEditor.UpdateLanguage(res); err != nil {
+				pLogger.PushWarn(httpLogger.Get("update_language"))
 				fmt.Fprint(pW, "error: update language")
 				return
 			}
@@ -61,10 +76,12 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 			port := strings.TrimSpace(pR.FormValue("port"))
 
 			if host == "" || port == "" {
+				pLogger.PushWarn(httpLogger.Get("get_host_port"))
 				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
 			if _, err := strconv.Atoi(port); err != nil {
+				pLogger.PushWarn(httpLogger.Get("port_to_int"))
 				fmt.Fprint(pW, "error: port is not a number")
 				return
 			}
@@ -79,12 +96,13 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 					connect,
 				)
 				if err := pEditor.UpdateBackupConnections(connects); err != nil {
+					pLogger.PushWarn(httpLogger.Get("update_backup_connections"))
 					fmt.Fprint(pW, errors.WrapError(err, "error: update backup connections"))
 					return
 				}
 			case false:
-				err := pStateManager.AddConnection(connect)
-				if err != nil {
+				if err := pStateManager.AddConnection(connect); err != nil {
+					pLogger.PushWarn(httpLogger.Get("add_connection"))
 					fmt.Fprint(pW, "error: add connection")
 					return
 				}
@@ -92,6 +110,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		case http.MethodDelete:
 			connect := strings.TrimSpace(pR.FormValue("address"))
 			if connect == "" {
+				pLogger.PushWarn(httpLogger.Get("get_connection"))
 				fmt.Fprint(pW, "error: connect is null")
 				return
 			}
@@ -101,12 +120,13 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 				connect,
 			)
 			if err := pEditor.UpdateBackupConnections(connects); err != nil {
-				api.Response(pW, http.StatusInternalServerError, "failed: delete backup connection")
+				pLogger.PushWarn(httpLogger.Get("delete_backup_connection"))
+				fmt.Fprint(pW, "failed: delete backup connection")
 				return
 			}
 
-			err := pStateManager.DelConnection(connect)
-			if err != nil {
+			if err := pStateManager.DelConnection(connect); err != nil {
+				pLogger.PushWarn(httpLogger.Get("delete_connection"))
 				fmt.Fprint(pW, "error: del connection")
 				return
 			}
@@ -116,17 +136,27 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		result.STemplateState = pStateManager.GetTemplate()
 
 		client := pStateManager.GetClient()
-		pubKey, _, err := client.GetPubKey()
-		if err != nil {
+
+		myPubKey, _, err := client.GetPubKey()
+		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+			pLogger.PushWarn(httpLogger.Get("get_public_key"))
 			fmt.Fprint(pW, "error: read public key")
 			return
 		}
-		result.FPublicKey = pubKey.ToString()
+		result.FPublicKey = myPubKey.ToString()
 
-		// HLS connections
-		cfg := pStateManager.GetConfig()
-		allConns, err := getAllConnections(client, cfg.GetBackupConnections())
+		networkKey, err := client.GetNetworkKey()
 		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("get_network_key"))
+			fmt.Fprint(pW, "error: read network key")
+			return
+		}
+		result.FNetworkKey = networkKey
+
+		// append HLS connections to backup connections
+		allConns, err := getAllConnections(pStateManager.GetConfig(), client)
+		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("get_all_connections"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: get online connections"))
 			return
 		}
@@ -140,19 +170,21 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor) htt
 		if err != nil {
 			panic("can't load hmtl files")
 		}
+
+		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 		t.Execute(pW, result)
 	}
 }
 
-func getAllConnections(client hls_client.IClient, backupConns []string) ([]sConnection, error) {
+func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sConnection, error) {
 	var connections []sConnection
 
-	conns, err := client.GetConnections()
+	conns, err := pClient.GetConnections()
 	if err != nil {
 		return nil, fmt.Errorf("error: read connections")
 	}
 
-	onlines, err := client.GetOnlines()
+	onlines, err := pClient.GetOnlines()
 	if err != nil {
 		return nil, fmt.Errorf("error: read online connections")
 	}
@@ -167,7 +199,7 @@ func getAllConnections(client hls_client.IClient, backupConns []string) ([]sConn
 		)
 	}
 
-	for _, c := range backupConns {
+	for _, c := range pConfig.GetBackupConnections() {
 		connections = append(
 			connections,
 			sConnection{

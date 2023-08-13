@@ -8,9 +8,11 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 type sFriends struct {
@@ -18,14 +20,17 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
+func FriendsPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+
 		if pR.URL.Path != "/friends" {
-			NotFoundPage(pStateManager)(pW, pR)
+			NotFoundPage(pStateManager, pLogger)(pW, pR)
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -36,26 +41,31 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		case http.MethodPost:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
-			if aliasName == settings.CIamAliasName || aliasName == "" || pubStrKey == "" {
+			if aliasName == hlm_settings.CIamAliasName || aliasName == "" || pubStrKey == "" {
+				pLogger.PushWarn(httpLogger.Get("get_alias_name"))
 				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
 			pubKey := asymmetric.LoadRSAPubKey(pubStrKey)
 			if pubKey == nil {
+				pLogger.PushWarn(httpLogger.Get("get_public_key"))
 				fmt.Fprint(pW, "error: public key is nil")
 				return
 			}
 			if err := pStateManager.AddFriend(aliasName, pubKey); err != nil {
+				pLogger.PushWarn(httpLogger.Get("add_friend"))
 				fmt.Fprint(pW, "error: add friend")
 				return
 			}
 		case http.MethodDelete:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
-			if aliasName == settings.CIamAliasName || aliasName == "" {
+			if aliasName == hlm_settings.CIamAliasName || aliasName == "" {
+				pLogger.PushWarn(httpLogger.Get("get_alias_name"))
 				fmt.Fprint(pW, "error: alias_name is null")
 				return
 			}
 			if err := pStateManager.DelFriend(aliasName); err != nil {
+				pLogger.PushWarn(httpLogger.Get("del_friend"))
 				fmt.Fprint(pW, "error: del friend")
 				return
 			}
@@ -63,6 +73,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 
 		res, err := pStateManager.GetClient().GetFriends()
 		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("get_friends"))
 			fmt.Fprint(pW, "error: read friends")
 			return
 		}
@@ -77,7 +88,7 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		}
 		sort.Strings(friendsList)
 
-		result.FFriends = append(result.FFriends, settings.CIamAliasName) // in top
+		result.FFriends = append(result.FFriends, hlm_settings.CIamAliasName) // in top
 		result.FFriends = append(result.FFriends, friendsList...)
 
 		t, err := template.ParseFS(
@@ -88,6 +99,8 @@ func FriendsPage(pStateManager state.IStateManager) http.HandlerFunc {
 		if err != nil {
 			panic("can't load hmtl files")
 		}
+
+		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 		t.Execute(pW, result)
 	}
 }

@@ -23,14 +23,14 @@ func main() {
 	cfg := &settings.SConfigSettings{
 		FSettings: settings.SConfigSettingsBlock{
 			FWorkSizeBits:     20,
-			FMessageSizeBytes: (1 << 20),
+			FMessageSizeBytes: (8 << 10),
 		},
 	}
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			"http://localhost:9573",
+			"http://localhost:9582",
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
 				FWorkSizeBits:     cfg.GetWorkSizeBits(),

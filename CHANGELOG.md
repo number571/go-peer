@@ -2,14 +2,22 @@
 
 <!-- ... -->
 
-## v1.5.16
+## v1.5.17
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.5.16
+
+*August 13, 2023*
 
 ### IMPROVEMENTS
 
 - Update `docs`: append article decentralized_key_exchange_protocol
 - Update `cmd/hidden_lake/README.md`: append to connections "characteristics", "provider" fields
+- Update `cmd/hidden_lake/messenger`: append network key updater 
+- Update `cmd/hidden_lake`: append http loggers to service, traffic, messenger
 
 ### CHANGES
 
@@ -17,12 +25,20 @@
 - Update `hidden_lake/*/init_app.go`: append trimsuffix "/" for path value
 - Update `composite/mobile/service_messenger`: app.New -> app.NewWithID
 - Update `cfgs[messages_capacity]`: change from (1 << 10) to (1 << 20)
+- Update `pkg/client/message`: change separator from \n\n to ===
+- Update `examples/anon_messenger`: change request.sh -> _request/main.go
+- Update `examples/echo_service`: append _request/main.go, move request.sh -> _request/
 
 ### BUG FIXES
 
 - Update `hidden_lake/service`: messageSize (4 << 20) -> (4 << 10)
 - Update `Makefiles`: append .exe extenstion to windows compile
 - Update `hidden_lake/messenger`: edit CDefaultConnectionHLSAddress -> hls_settings.CDefaultHTTPAddress
+- Update `cmd/hidden_lake/service,traffic`: update README API
+- Update `cmd/hidden_lake/messenger`: fix relation priv_key with HLS (append check IsMyPubKey?)
+- Update `cmd/hidden_lake/messenger`: append check in state/update.go for got messages from HLT
+- Update `cmd/hidden_lake/messenger`: append E2E encryption of request messages HLM <-> HLM throw HLS
+- Update `pkg/client`: fix static size of messages
 
 <!-- ... -->
 

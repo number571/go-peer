@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/internal/logger"
+	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
@@ -18,10 +18,9 @@ var (
 type SConfig struct {
 	settings.SConfigSettings
 
-	FLogging []string `json:"logging,omitempty"`
-	FNetwork string   `json:"network,omitempty"`
-
+	FLogging     []string  `json:"logging,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
+	FNetworkKey  string    `json:"network_key,omitempty"`
 	FConnections []string  `json:"connections,omitempty"`
 	FConsumers   []string  `json:"consumers,omitempty"`
 
@@ -113,8 +112,8 @@ func (p *SConfig) loadLogging() error {
 	return nil
 }
 
-func (p *SConfig) GetNetwork() string {
-	return p.FNetwork
+func (p *SConfig) GetNetworkKey() string {
+	return p.FNetworkKey
 }
 
 func (p *SConfig) GetAddress() IAddress {

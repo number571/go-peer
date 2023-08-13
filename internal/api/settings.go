@@ -1,5 +1,6 @@
 package api
 
 const (
-	CContentType = "text/plain"
+	cTextPlain       = "text/plain"
+	cApplicationJSON = "application/json"
 )

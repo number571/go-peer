@@ -15,4 +15,4 @@ build:
 	done;
 clean:
 	rm -f *.stg 
-	rm -f $(BINPATH)/tstorage $(BINPATH)/tstorage_*
+	rm -f tstorage $(BINPATH)/tstorage $(BINPATH)/tstorage_*

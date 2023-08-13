@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/number571/go-peer/internal/logger"
+	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/internal/settings"
 )
 
@@ -9,8 +9,8 @@ type IConfig interface {
 	IConfigSettingsHLT
 
 	GetLogging() logger.ILogging
-	GetNetwork() string
 	GetAddress() IAddress
+	GetNetworkKey() string
 	GetConnections() []string
 	GetConsumers() []string
 }

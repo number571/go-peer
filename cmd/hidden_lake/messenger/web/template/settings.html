@@ -99,7 +99,8 @@ Agordoj
                 <input hidden name="method" value="PUT">
                 <div class="row">
                     <div class="col-md-8 w-75">
-                        <select class="form-select form-control bg-dark bg-secondary btn btn-info w-100" name="language" aria-label="Default select example">
+                        <select class="form-select form-control bg-dark bg-secondary btn btn-info w-100" name="language"
+                            aria-label="Default select example">
                             <option {{if (eq .FLanguage 0)}} selected {{end}} value="ENG">English</option>
                             <option {{if (eq .FLanguage 1)}} selected {{end}} value="RUS">Русский</option>
                             <option {{if (eq .FLanguage 2)}} selected {{end}} value="ESP">Esperanto</option>
@@ -111,6 +112,39 @@ Agordoj
                 </div>
             </form>
         </div>
+    </div>
+    <div class="card bg-dark"></div>
+    <h5 class="card-header text-white bg-secondary p-2">
+        {{if (eq .FLanguage 0)}}
+        Network key
+        {{else if (eq .FLanguage 1)}}
+        Ключ сети
+        {{else if (eq .FLanguage 2)}}
+        Reto-ŝlosilo
+        {{end}}
+    </h5>
+    <div class="card-body">
+        <form class="mb-3" method="POST" action="/settings">
+            <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+            <input hidden name="method" value="PATCH">
+            <div class="row">
+                <div class="col-md-9 w-75">
+                    {{if (eq .FLanguage 0)}}
+                    <input type="text" name="network_key" placeholder="Network key" value="{{.FNetworkKey}}"
+                        class="text-center form-control bg-dark text-white w-100">
+                    {{else if (eq .FLanguage 1)}}
+                    <input type="text" name="network_key" placeholder="Ключ сети" value="{{.FNetworkKey}}"
+                        class="text-center form-control bg-dark text-white w-100">
+                    {{else if (eq .FLanguage 2)}}
+                    <input type="text" name="network_key" placeholder="Reto-ŝlosilo" value="{{.FNetworkKey}}"
+                        class="text-center form-control bg-dark text-white w-100">
+                    {{end}}
+                </div>
+                <div class="col-md-3 w-25">
+                    <input type="submit" name="is_backup" value="◀" class="btn btn-info w-100">
+                </div>
+            </div>
+        </form>
     </div>
     <div class="card bg-dark">
         <h5 class="card-header text-white bg-secondary p-2">

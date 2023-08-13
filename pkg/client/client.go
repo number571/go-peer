@@ -21,9 +21,9 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings    message.ISettings
-	fPrivKey     asymmetric.IPrivKey
-	fVoidMsgSize uint64
+	fSettings   message.ISettings
+	fPrivKey    asymmetric.IPrivKey
+	fStructSize uint64
 }
 
 // Create client by private key as identification.
@@ -39,7 +39,8 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		0,
 		0,
 	)
-	client.fVoidMsgSize = uint64(len(encMsg.ToBytes())) - symmetric.CAESBlockSize
+
+	client.fStructSize = uint64(len(encMsg.ToBytes()))
 	return client
 }
 
@@ -53,10 +54,10 @@ func GetMessageLimit(msgSize, keySize uint64) uint64 {
 	})
 	client := NewClient(sett, privKey).(*sClient)
 	// (msg limit) < (void msg size) + (payload head + payload head)
-	if msgSize < client.fVoidMsgSize+(2*encoding.CSizeUint64) {
+	if msgSize < client.fStructSize {
 		panic("the message size is very low")
 	}
-	return msgSize - client.fVoidMsgSize - (2 * encoding.CSizeUint64)
+	return msgSize - client.fStructSize
 }
 
 // Get public key from client object.
@@ -82,8 +83,8 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	}
 
 	var (
-		maxMsgSize = p.fSettings.GetMessageSizeBytes() // limit of bytes without hex
-		resultSize = uint64(len(pPld.ToBytes())) + p.fVoidMsgSize + encoding.CSizeUint64
+		maxMsgSize = p.fSettings.GetMessageSizeBytes()
+		resultSize = uint64(len(pPld.GetBody())) + p.fStructSize
 	)
 
 	if resultSize > maxMsgSize {

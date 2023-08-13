@@ -32,6 +32,22 @@ func (p *sClient) GetIndex() (string, error) {
 	return res, nil
 }
 
+func (p *sClient) GetNetworkKey() (string, error) {
+	res, err := p.fRequester.GetNetworkKey()
+	if err != nil {
+		return "", errors.WrapError(err, "get network key (client)")
+	}
+	return res, nil
+}
+
+func (p *sClient) SetNetworkKey(pNetworkKey string) error {
+	err := p.fRequester.SetNetworkKey(pNetworkKey)
+	if err != nil {
+		return errors.WrapError(err, "set network key (client)")
+	}
+	return nil
+}
+
 func (p *sClient) HandleMessage(pMsg message.IMessage) error {
 	if err := p.fRequester.HandleMessage(p.fBuilder.Message(pMsg)); err != nil {
 		return errors.WrapError(err, "handle message (client)")
@@ -113,8 +129,8 @@ func (p *sClient) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pPubExp asymmetric.IPubKey) error {
-	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey, pPubExp)); err != nil {
+func (p *sClient) SetPrivKey(pEphPubKey asymmetric.IPubKey, pPrivKey asymmetric.IPrivKey) error {
+	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pEphPubKey, pPrivKey)); err != nil {
 		return errors.WrapError(err, "set private key (client)")
 	}
 	return nil

@@ -6,13 +6,13 @@ import (
 )
 
 type ILogBuilder interface {
-	Get(pType ILogType) string
+	Get(ILogType) string
 
-	WithSize(pSize int) ILogBuilder
-	WithProof(pProof uint64) ILogBuilder
-	WithHash(pMsgHash []byte) ILogBuilder
-	WithConn(pConn conn.IConn) ILogBuilder
-	WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder
+	WithSize(int) ILogBuilder
+	WithProof(uint64) ILogBuilder
+	WithHash([]byte) ILogBuilder
+	WithConn(conn.IConn) ILogBuilder
+	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }
 
 type ILogType string

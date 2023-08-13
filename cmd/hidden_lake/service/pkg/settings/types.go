@@ -7,10 +7,10 @@ type SFriend struct {
 
 type SRequest struct {
 	FReceiver string `json:"receiver"` // alias_name
-	FHexData  string `json:"hex_data"` // data in hex encode
+	FReqData  string `json:"req_data"` // data in hex encode
 }
 
 type SPrivKey struct {
-	FEncPrivKey    string `json:"enc_priv_key"`
-	FEncSessionKey string `json:"enc_session_key"`
+	FSessionKey string `json:"session_key,omitempty"`
+	FPrivKey    string `json:"priv_key"`
 }

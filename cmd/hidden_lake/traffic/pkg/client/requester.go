@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-	"strings"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
@@ -57,7 +56,13 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	if err != nil {
 		return nil, errors.WrapError(err, "get hashes (requester)")
 	}
-	return strings.Split(resp, ";"), nil
+
+	var hashes []string
+	if err := encoding.Deserialize([]byte(resp), &hashes); err != nil {
+		return nil, errors.WrapError(err, "deserialize hashes (requeser)")
+	}
+
+	return hashes, nil
 }
 
 func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
@@ -81,7 +86,7 @@ func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
 			FWorkSizeBits:     p.fParams.GetWorkSizeBits(),
 			FMessageSizeBytes: p.fParams.GetMessageSizeBytes(),
 		}),
-		encoding.HexDecode(resp),
+		string(resp),
 	)
 	if msg == nil {
 		return nil, errors.NewError("load message")

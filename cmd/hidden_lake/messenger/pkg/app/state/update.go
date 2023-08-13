@@ -1,12 +1,14 @@
 package state
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
@@ -22,6 +24,10 @@ func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 	}
 
 	if err := p.updateClientConnections(pStateValue); err != nil {
+		return errors.WrapError(err, "update client connections")
+	}
+
+	if err := p.updateClientNetworkKey(pStateValue); err != nil {
 		return errors.WrapError(err, "update client connections")
 	}
 
@@ -41,7 +47,7 @@ func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
 		return errors.NewError("private key is null (update)")
 	}
 
-	if err := hlsClient.SetPrivKey(privKey, ephPubKey); err != nil {
+	if err := hlsClient.SetPrivKey(ephPubKey, privKey); err != nil {
 		return errors.WrapError(err, "set private key (update)")
 	}
 	return nil
@@ -80,6 +86,16 @@ func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) erro
 	return nil
 }
 
+func (p *sStateManager) updateClientNetworkKey(pStateValue *SStorageState) error {
+	client := p.GetClient()
+
+	if err := client.SetNetworkKey(pStateValue.FNetworkKey); err != nil {
+		return errors.WrapError(err, "update client network key")
+	}
+
+	return nil
+}
+
 func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) {
 	for _, conn := range p.fConfig.GetBackupConnections() {
 		go p.handleMessages(conn)
@@ -112,6 +128,10 @@ func (p *sStateManager) handleMessages(pConn string) {
 		msg, err := hltClient.GetMessage(hash)
 		if err != nil {
 			continue
+		}
+		bytesHash := encoding.HexDecode(hash)
+		if !bytes.Equal(msg.GetBody().GetHash(), bytesHash) {
+			break
 		}
 		if err := hlsClient.HandleMessage(msg); err != nil {
 			continue

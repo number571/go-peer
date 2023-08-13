@@ -15,4 +15,4 @@ build:
 	done;
 clean:
 	rm -f *.key 
-	rm -f $(BINPATH)/tkeygen $(BINPATH)/tkeygen_*
+	rm -f tkeygen $(BINPATH)/tkeygen $(BINPATH)/tkeygen_*

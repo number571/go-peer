@@ -68,6 +68,7 @@ const (
 	CHandleNetworkOnlinePath  = "/api/network/online"
 	CHandleNetworkRequestPath = "/api/network/request"
 	CHandleNetworkMessagePath = "/api/network/message"
+	CHandleNetworkKeyPath     = "/api/network/key"
 	CHandleNodeKeyPath        = "/api/node/key"
 )
 
@@ -78,6 +79,7 @@ const (
 	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath
 	CHandleNetworkRequestTemplate = "%s" + CHandleNetworkRequestPath
 	CHandleNetworkMessageTemplate = "%s" + CHandleNetworkMessagePath
+	CHandleNetworkKeyTemplate     = "%s" + CHandleNetworkKeyPath
 	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
 )
 

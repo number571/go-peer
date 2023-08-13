@@ -11,6 +11,11 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+const (
+	cSeparator    = "==="
+	cSeparatorLen = len(cSeparator)
+)
+
 var (
 	_ IMessage = &SMessage{}
 	_ IHead    = SHeadMessage{}
@@ -48,7 +53,7 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 		recvMsg = []byte(x)
 	}
 
-	i := bytes.Index(recvMsg, []byte("\n\n"))
+	i := bytes.Index(recvMsg, []byte(cSeparator))
 	if i == -1 {
 		return nil
 	}
@@ -59,9 +64,9 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 
 	switch x := pMsg.(type) {
 	case []byte:
-		msg.FBody.FPayload = x[i+2:]
+		msg.FBody.FPayload = x[i+cSeparatorLen:]
 	case string:
-		encStr := strings.TrimSpace(x[i+2:])
+		encStr := strings.TrimSpace(x[i+cSeparatorLen:])
 		msg.FBody.FPayload = encoding.HexDecode(encStr)
 		if msg.FBody.FPayload == nil {
 			return nil
@@ -87,7 +92,7 @@ func (p *SMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			encoding.Serialize(p, false),
-			[]byte("\n\n"),
+			[]byte(cSeparator),
 			p.FBody.FPayload,
 		},
 		[]byte{},
@@ -98,7 +103,7 @@ func (p *SMessage) ToString() string {
 	return strings.Join(
 		[]string{
 			string(encoding.Serialize(p, false)),
-			"\n\n",
+			cSeparator,
 			encoding.HexEncode(p.FBody.FPayload),
 		},
 		"",

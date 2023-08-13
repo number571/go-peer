@@ -25,10 +25,11 @@ var (
 )
 
 type sConn struct {
-	fMutex    sync.Mutex
-	fSocket   net.Conn
-	fSettings ISettings
-	fCipher   symmetric.ICipher
+	fMutex      sync.Mutex
+	fSocket     net.Conn
+	fSettings   ISettings
+	fCipher     symmetric.ICipher
+	fNetworkKey string
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
@@ -41,10 +42,26 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	return &sConn{
-		fSettings: pSett,
-		fSocket:   pConn,
-		fCipher:   symmetric.NewAESCipher([]byte(pSett.GetNetworkKey())),
+		fSettings:   pSett,
+		fSocket:     pConn,
+		fNetworkKey: pSett.GetNetworkKey(),
+		fCipher:     symmetric.NewAESCipher([]byte(pSett.GetNetworkKey())),
 	}
+}
+
+func (p *sConn) GetNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fNetworkKey
+}
+
+func (p *sConn) SetNetworkKey(pNetworkKey string) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	p.fNetworkKey = pNetworkKey
+	p.fCipher = symmetric.NewAESCipher([]byte(pNetworkKey))
 }
 
 func (p *sConn) GetSettings() ISettings {
@@ -85,7 +102,7 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	encMsgBytes := p.fCipher.EncryptBytes(
 		message.NewMessage(
 			pPld,
-			[]byte(p.fSettings.GetNetworkKey()),
+			[]byte(p.fNetworkKey),
 		).ToBytes(),
 	)
 
@@ -216,12 +233,26 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 
 	// try unpack message from bytes
 	msg := message.LoadMessage(
-		p.fCipher.DecryptBytes(dataRaw[:msgSize]),
-		[]byte(p.fSettings.GetNetworkKey()),
+		p.getCipher().DecryptBytes(dataRaw[:msgSize]),
+		[]byte(p.getNetworkKey()),
 	)
 	if msg == nil {
 		return
 	}
 
 	pld = msg.GetPayload()
+}
+
+func (p *sConn) getNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fNetworkKey
+}
+
+func (p *sConn) getCipher() symmetric.ICipher {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fCipher
 }

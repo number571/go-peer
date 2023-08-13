@@ -56,11 +56,11 @@ const (
 		"limit_void_size_bytes": %d
 	},
 	"logging": ["info", "erro"],
-	"network": "%s",
 	"address": {
 		"tcp": "%s",
 		"http": "%s"
 	},
+	"network_key": "%s",
 	"connections": [
 		"%s",
 		"%s"
@@ -84,9 +84,9 @@ func testNewConfigString() string {
 		tcKeySize,
 		tcQueuePeriod,
 		tcLimitVoidSize,
-		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
+		tcNetwork,
 		tgConnects[0],
 		tgConnects[1],
 		tcPubKeyAlias1,
@@ -154,7 +154,7 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetNetwork() != tcNetwork {
+	if cfg.GetNetworkKey() != tcNetwork {
 		t.Error("network is invalid")
 		return
 	}

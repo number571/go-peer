@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/internal/logger"
+	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -21,11 +21,9 @@ var (
 type SConfig struct {
 	settings.SConfigSettings
 
-	FLogging []string `json:"logging,omitempty"`
-
-	FNetwork string    `json:"network,omitempty"`
-	FAddress *SAddress `json:"address,omitempty"`
-
+	FLogging     []string          `json:"logging,omitempty"`
+	FAddress     *SAddress         `json:"address,omitempty"`
+	FNetworkKey  string            `json:"network_key,omitempty"`
 	FConnections []string          `json:"connections,omitempty"`
 	FServices    map[string]string `json:"services,omitempty"`
 	FFriends     map[string]string `json:"friends,omitempty"`
@@ -152,8 +150,8 @@ func (p *SConfig) loadPubKeys() error {
 	return nil
 }
 
-func (p *SConfig) GetNetwork() string {
-	return p.FNetwork
+func (p *SConfig) GetNetworkKey() string {
+	return p.FNetworkKey
 }
 
 func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {

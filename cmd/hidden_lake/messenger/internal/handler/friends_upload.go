@@ -7,6 +7,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
+	"github.com/number571/go-peer/pkg/logger"
+
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 )
 
 type sUploadFile struct {
@@ -15,20 +19,24 @@ type sUploadFile struct {
 	FMessageLimit uint64
 }
 
-func FriendsUploadPage(pStateManager state.IStateManager, msgLimit uint64) http.HandlerFunc {
+func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger, msgLimit uint64) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+
 		if pR.URL.Path != "/friends/upload" {
-			NotFoundPage(pStateManager)(pW, pR)
+			NotFoundPage(pStateManager, pLogger)(pW, pR)
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
+			pLogger.PushWarn(httpLogger.Get("get_alias_name"))
 			fmt.Fprint(pW, "alias name is null")
 			return
 		}
@@ -47,6 +55,8 @@ func FriendsUploadPage(pStateManager state.IStateManager, msgLimit uint64) http.
 			FAliasName:     aliasName,
 			FMessageLimit:  msgLimit,
 		}
+
+		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 		t.Execute(pW, res)
 	}
 }

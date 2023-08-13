@@ -2,44 +2,56 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleConfigFriendsAPI(pWrapper config.IWrapper, pNode anonymity.INode) http.HandlerFunc {
+func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+
 		var vFriend pkg_settings.SFriend
 
-		switch pR.Method {
-		case http.MethodGet:
-			friends := pWrapper.GetConfig().GetFriends()
-			listFriends := make([]string, 0, len(friends))
-			for name, pubKey := range friends {
-				listFriends = append(listFriends, fmt.Sprintf("%s:%s", name, pubKey.ToString()))
-			}
-			api.Response(pW, http.StatusOK, strings.Join(listFriends, ","))
-			return
-		case http.MethodPost, http.MethodDelete:
-			// next
-		default:
+		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
+			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
+		switch pR.Method {
+		case http.MethodGet:
+			friends := pWrapper.GetConfig().GetFriends()
+
+			listFriends := make([]pkg_settings.SFriend, 0, len(friends))
+			for name, pubKey := range friends {
+				listFriends = append(listFriends, pkg_settings.SFriend{
+					FAliasName: name,
+					FPublicKey: pubKey.ToString(),
+				})
+			}
+
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			api.Response(pW, http.StatusOK, listFriends)
+			return
+		}
+
 		if err := json.NewDecoder(pR.Body).Decode(&vFriend); err != nil {
+			pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
 
 		aliasName := strings.TrimSpace(vFriend.FAliasName)
 		if aliasName == "" {
+			pLogger.PushWarn(httpLogger.Get("get_alias_name"))
 			api.Response(pW, http.StatusTeapot, "failed: load alias name")
 			return
 		}
@@ -49,39 +61,52 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pNode anonymity.INode) htt
 		switch pR.Method {
 		case http.MethodPost:
 			if _, ok := friends[aliasName]; ok {
+				pLogger.PushWarn(httpLogger.Get("get_friends"))
 				api.Response(pW, http.StatusNotAcceptable, "failed: friend already exist")
 				return
 			}
 
 			pubKey := asymmetric.LoadRSAPubKey(vFriend.FPublicKey)
 			if pubKey == nil {
+				pLogger.PushWarn(httpLogger.Get("decode_key"))
 				api.Response(pW, http.StatusBadRequest, "failed: load public key")
 				return
 			}
 
 			friends[aliasName] = pubKey
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
+				pLogger.PushWarn(httpLogger.Get("update_friends"))
 				api.Response(pW, http.StatusInternalServerError, "failed: update friends")
 				return
 			}
 
 			pNode.GetListPubKeys().AddPubKey(pubKey)
+
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update friends")
+			return
+
 		case http.MethodDelete:
 			pubKey, ok := friends[aliasName]
 			if !ok {
+				pLogger.PushWarn(httpLogger.Get("get_friends"))
 				api.Response(pW, http.StatusNotFound, "failed: friend does not exist")
 				return
 			}
 
 			delete(friends, aliasName)
+
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
+				pLogger.PushWarn(httpLogger.Get("update_friends"))
 				api.Response(pW, http.StatusInternalServerError, "failed: delete friend")
 				return
 			}
 
 			pNode.GetListPubKeys().DelPubKey(pubKey)
+
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: delete friend")
+			return
 		}
 	}
 }

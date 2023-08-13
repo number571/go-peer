@@ -17,6 +17,9 @@ type IConn interface {
 	FetchPayload(pld payload.IPayload) (payload.IPayload, error)
 	WritePayload(payload.IPayload) error
 	ReadPayload() payload.IPayload
+
+	GetNetworkKey() string
+	SetNetworkKey(string)
 }
 
 type ISettings interface {

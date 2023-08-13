@@ -17,6 +17,6 @@ build:
 	done;
 clean:
 	rm -f *.msg *.key 
-	rm -f $(BINPATH)/tencryptor $(BINPATH)/tencryptor_*
+	rm -f tencryptor $(BINPATH)/tencryptor $(BINPATH)/tencryptor_*
 genkey:
 	go run ../keygen $(N)

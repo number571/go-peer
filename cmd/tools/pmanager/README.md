@@ -4,7 +4,7 @@
 
 ```bash
 usage: 
-    ./main [service-name]
+    ./main [service-name] [login]
 stdin:
     [master-key]EOF
 ```

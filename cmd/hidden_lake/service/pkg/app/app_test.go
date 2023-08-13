@@ -40,7 +40,7 @@ func TestApp(t *testing.T) {
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
-		FNetwork: "_",
+		FNetworkKey: "_",
 		FAddress: &config.SAddress{
 			FTCP:  testutils.TgAddrs[14],
 			FHTTP: testutils.TgAddrs[15],

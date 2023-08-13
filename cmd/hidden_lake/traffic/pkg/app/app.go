@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	internal_logger "github.com/number571/go-peer/internal/logger"
+	internal_logger "github.com/number571/go-peer/internal/logger/std"
 	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
 

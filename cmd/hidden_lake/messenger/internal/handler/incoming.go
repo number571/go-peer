@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"strings"
@@ -10,37 +11,39 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/internal/api"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
+	"github.com/number571/go-peer/pkg/logger"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
+func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
+		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+
 		pW.Header().Set(hls_settings.CHeaderOffResponse, "true")
 
 		if pR.Method != http.MethodPost {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
 			api.Response(pW, http.StatusUnauthorized, "failed: client unauthorized")
 			return
 		}
 
 		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: response message")
-			return
-		}
-
-		msgBytes, err := getMessageBytesToRecv(rawMsgBytes)
-		if err != nil {
-			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
 		}
 
@@ -54,14 +57,53 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			panic("message hash is null (invalid data from HLS)!")
 		}
 
-		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
+		i := bytes.Index(rawMsgBytes, []byte(hlm_settings.CSeparator))
+		if i == -1 {
+			pLogger.PushWarn(httpLogger.Get("undefined_separator"))
+			api.Response(pW, http.StatusConflict, "failed: undefined message separator")
+			return
+		}
+
+		privKey := pStateManager.GetPrivKey()
+		if privKey == nil {
+			pLogger.PushWarn(httpLogger.Get("get_private_key"))
+			api.Response(pW, http.StatusConflict, "failed: get private key")
+			return
+		}
+
+		encSessionKey := encoding.HexDecode(string(rawMsgBytes[:i]))
+		decSessionKey := privKey.DecryptBytes(encSessionKey)
+		if decSessionKey == nil {
+			pLogger.PushWarn(httpLogger.Get("decrypt_session_key"))
+			api.Response(pW, http.StatusConflict, "failed: decrypt session key")
+			return
+		}
+
+		encMessageBytes := rawMsgBytes[i+hlm_settings.CSeparatorLen:]
+		decMessageBytes := symmetric.NewAESCipher(decSessionKey).DecryptBytes(encMessageBytes)
+		if decMessageBytes == nil {
+			pLogger.PushWarn(httpLogger.Get("decrypt_message_bytes"))
+			api.Response(pW, http.StatusConflict, "failed: decrypt message bytes")
+			return
+		}
+
+		msgBytes, err := getMessageBytesToRecv(decMessageBytes)
 		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("recv_message"))
+			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
+			return
+		}
+
+		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
+		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+			pLogger.PushWarn(httpLogger.Get("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
 		}
 
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
+			pLogger.PushErro(httpLogger.Get("get_database"))
 			api.Response(pW, http.StatusForbidden, "failed: database closed")
 			return
 		}
@@ -69,6 +111,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, doMessageProcessor(msgBytes), encoding.HexDecode(msgHash))
 		if err := db.Push(rel, dbMsg); err != nil {
+			pLogger.PushErro(httpLogger.Get("push_message"))
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
 		}
@@ -77,7 +120,9 @@ func HandleIncomigHTTP(pStateManager state.IStateManager) http.HandlerFunc {
 			FAddress:     fPubKey.GetAddress().ToString(),
 			FMessageInfo: getMessageInfo(dbMsg.GetMessage(), dbMsg.GetTimestamp()),
 		})
-		api.Response(pW, http.StatusOK, pkg_settings.CTitlePattern)
+
+		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		api.Response(pW, http.StatusOK, hlm_settings.CTitlePattern)
 	}
 }
 

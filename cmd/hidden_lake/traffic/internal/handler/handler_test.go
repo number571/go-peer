@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -99,9 +100,11 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		return nil, nil
 	}
 
-	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI())
-	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(wDB))
+	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
+
+	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
+	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(wDB, logger))
 
 	srv := &http.Server{
 		Addr:    addr,

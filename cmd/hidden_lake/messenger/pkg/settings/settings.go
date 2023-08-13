@@ -12,9 +12,18 @@ const (
 )
 
 const (
-	CPushPath        = "/push"
+	CStaticPath = "/static/"
+	CPushPath   = "/push"
+)
+
+const (
 	CIamAliasName    = "__iam__"
 	CDefaultLanguage = "ENG"
+)
+
+const (
+	CSeparator    = "==="
+	CSeparatorLen = len(CSeparator)
 )
 
 const (
@@ -25,4 +34,24 @@ const (
 const (
 	CWorkForKeys        = 20
 	CDefaultCapMessages = (2 << 10)
+)
+
+const (
+	CHandleIndexPath          = "/"
+	CHandleSignOutPath        = "/sign/out"
+	CHandleSignInPath         = "/sign/in"
+	CHandleSignUpPath         = "/sign/up"
+	CHandleAboutPath          = "/about"
+	CHandleFaviconPath        = "/favicon.ico"
+	CHandleSettingsPath       = "/settings"
+	CHandleQRPublicKeyKeyPath = "/qr/public_key"
+	CHandleFriendsPath        = "/friends"
+	CHandleFriendsChatPath    = "/friends/chat"
+	CHandleFriendsUploadPath  = "/friends/upload"
+	CHandleFriendsChatWSPath  = "/friends/chat/ws"
+)
+
+const (
+	CIsText = 0x01
+	CIsFile = 0x02
 )

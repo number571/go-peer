@@ -9,6 +9,6 @@
 7. HLM: do error pages
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
-10. HLM: append NetworkKey editor
-12. HLT: append logs into handlers
-13. HLS: append proxy connections
+10. HLS: append proxy connections
+11. HLM: handlers paths to settings
+12. HLS: addConnection -> addConnections, delConnection -> delConnections, ...
