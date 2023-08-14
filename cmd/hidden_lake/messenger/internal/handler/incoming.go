@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
@@ -47,47 +45,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			return
 		}
 
-		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
-		if fPubKey == nil {
-			panic("public key is null (invalid data from HLS)!")
-		}
-
-		msgHash := pR.Header.Get(hls_settings.CHeaderMessageHash)
-		if msgHash == "" {
-			panic("message hash is null (invalid data from HLS)!")
-		}
-
-		i := bytes.Index(rawMsgBytes, []byte(hlm_settings.CSeparator))
-		if i == -1 {
-			pLogger.PushWarn(httpLogger.Get("undefined_separator"))
-			api.Response(pW, http.StatusConflict, "failed: undefined message separator")
-			return
-		}
-
-		privKey := pStateManager.GetPrivKey()
-		if privKey == nil {
-			pLogger.PushWarn(httpLogger.Get("get_private_key"))
-			api.Response(pW, http.StatusConflict, "failed: get private key")
-			return
-		}
-
-		encSessionKey := encoding.HexDecode(string(rawMsgBytes[:i]))
-		decSessionKey := privKey.DecryptBytes(encSessionKey)
-		if decSessionKey == nil {
-			pLogger.PushWarn(httpLogger.Get("decrypt_session_key"))
-			api.Response(pW, http.StatusConflict, "failed: decrypt session key")
-			return
-		}
-
-		encMessageBytes := rawMsgBytes[i+hlm_settings.CSeparatorLen:]
-		decMessageBytes := symmetric.NewAESCipher(decSessionKey).DecryptBytes(encMessageBytes)
-		if decMessageBytes == nil {
-			pLogger.PushWarn(httpLogger.Get("decrypt_message_bytes"))
-			api.Response(pW, http.StatusConflict, "failed: decrypt message bytes")
-			return
-		}
-
-		msgBytes, err := getMessageBytesToRecv(decMessageBytes)
+		msgBytes, err := getMessageBytesToRecv(rawMsgBytes)
 		if err != nil {
 			pLogger.PushWarn(httpLogger.Get("recv_message"))
 			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
@@ -106,6 +64,16 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			pLogger.PushErro(httpLogger.Get("get_database"))
 			api.Response(pW, http.StatusForbidden, "failed: database closed")
 			return
+		}
+
+		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
+		if fPubKey == nil {
+			panic("public key is null (invalid data from HLS)!")
+		}
+
+		msgHash := pR.Header.Get(hls_settings.CHeaderMessageHash)
+		if msgHash == "" {
+			panic("message hash is null (invalid data from HLS)!")
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)

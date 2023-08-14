@@ -6,11 +6,12 @@
 
 *??? ??, ????*
 
-<!-- ... -->
-
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: append check of message size
+- Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
+
+<!-- ... -->
 
 ## v1.5.16
 

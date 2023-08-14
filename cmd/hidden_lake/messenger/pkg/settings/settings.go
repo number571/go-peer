@@ -22,11 +22,6 @@ const (
 )
 
 const (
-	CSeparator    = "==="
-	CSeparatorLen = len(CSeparator)
-)
-
-const (
 	CDefaultInterfaceAddress = "127.0.0.1:9591"
 	CDefaultIncomingAddress  = "127.0.0.1:9592"
 )

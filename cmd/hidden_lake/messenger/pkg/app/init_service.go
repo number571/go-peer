@@ -35,14 +35,7 @@ func (p *sApp) initInterfaceServiceHTTP() {
 
 	msgSize := p.fWrapper.GetConfig().GetMessageSizeBytes()
 	keySize := p.fWrapper.GetConfig().GetKeySizeBits()
-	msgLimit := pkg_client.GetMessageLimit(msgSize, keySize)
-
-	// also sent encrypted session key with asymmetric encryption into hex encode
-	overHeadBytes := (2 * (keySize / 8)) + uint64(hlm_settings.CSeparatorLen)
-	msgLimitBytes := msgLimit - overHeadBytes
-	if msgLimitBytes > msgLimit { // uint64 overflow
-		panic("overflow: msgLimitBytes > msgLimit")
-	}
+	msgLimitBytes := pkg_client.GetMessageLimit(msgSize, keySize)
 
 	// overhead base64 format: https://ru.wikipedia.org/wiki/Base64
 	msgLimitBase64 := msgLimitBytes - (msgLimitBytes / 4)

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"io"
@@ -18,8 +17,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -98,7 +95,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, 
 				return
 			}
 
-			if err := trySendMessage(client, aliasName, recvPubKey, msgBytes, msgLimit); err != nil {
+			if err := trySendMessage(client, aliasName, msgBytes, msgLimit); err != nil {
 				pLogger.PushWarn(httpLogger.Get("send_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
@@ -207,7 +204,7 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(pClient client.IClient, pAliasName string, pPubKey asymmetric.IPubKey, pMsgBytes []byte, pMsgLimit uint64) error {
+func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte, pMsgLimit uint64) error {
 	if uint64(len(pMsgBytes)) > pMsgLimit {
 		return errors.NewError("error: len message > limit")
 	}
@@ -217,21 +214,13 @@ func trySendMessage(pClient client.IClient, pAliasName string, pPubKey asymmetri
 		return nil
 	}
 
-	sessionKey := random.NewStdPRNG().GetBytes(32)
 	return pClient.BroadcastRequest(
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(map[string]string{
 				"Content-Type": "application/json",
 			}).
-			WithBody(bytes.Join(
-				[][]byte{
-					[]byte(encoding.HexEncode(pPubKey.EncryptBytes(sessionKey))),
-					[]byte(hlm_settings.CSeparator),
-					symmetric.NewAESCipher(sessionKey).EncryptBytes(pMsgBytes),
-				},
-				[]byte{},
-			)),
+			WithBody(pMsgBytes),
 	)
 }
 
