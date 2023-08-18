@@ -118,20 +118,19 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	prng := random.NewStdPRNG()
 	voidBytes := prng.GetBytes(prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1))
 
-	// send headers with length of blocks
-	if err := p.sendBlockSize(encMsgBytes); err != nil {
-		return errors.WrapError(err, "send block size (encrypted message bytes)")
-	}
-	if err := p.sendBlockSize(voidBytes); err != nil {
-		return errors.WrapError(err, "send block size (void bytes)")
-	}
-
-	// send blocks
-	if err := p.sendBytes(encMsgBytes); err != nil {
-		return errors.WrapError(err, "send encrypted message bytes")
-	}
-	if err := p.sendBytes(voidBytes); err != nil {
-		return errors.WrapError(err, "send void bytes")
+	err := p.sendBytes(bytes.Join(
+		[][]byte{
+			// send headers with length of blocks
+			p.getBlockSize(encMsgBytes),
+			p.getBlockSize(voidBytes),
+			// send data blocks
+			encMsgBytes,
+			voidBytes,
+		},
+		[]byte{},
+	))
+	if err != nil {
+		return errors.WrapError(err, "send payload bytes")
 	}
 
 	return nil
@@ -162,20 +161,9 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 	return nil
 }
 
-func (p *sConn) sendBlockSize(pBytes []byte) error {
-	p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteDeadline()))
-
+func (p *sConn) getBlockSize(pBytes []byte) []byte {
 	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
-	n, err := p.fSocket.Write(p.fCipher.EncryptBytes(blockSize[:]))
-	if err != nil {
-		return errors.WrapError(err, "write tcp block size")
-	}
-
-	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
-		return errors.NewError("invalid size of sent package")
-	}
-
-	return nil
+	return p.fCipher.EncryptBytes(blockSize[:])
 }
 
 func (p *sConn) recvBlockSize(deadline time.Duration) (uint64, error) {
