@@ -7,7 +7,7 @@ import (
 
 func TestAESEncrypt(t *testing.T) {
 	var (
-		key = []byte("it's a key!")
+		key = []byte("it is a large key with 256 bits!")
 		msg = []byte("hello, world!")
 	)
 

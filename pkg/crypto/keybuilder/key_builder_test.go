@@ -1,4 +1,4 @@
-package entropy
+package keybuilder
 
 import (
 	"bytes"
@@ -9,22 +9,22 @@ import (
 )
 
 const (
-	tcHash = "57daf58ec9ea7be6dbcb8a67aea76bdcfa32db40a7a3cae3d90bc977dc293599"
+	tcHash = "8d47725f8604cb2e8f1be5e0b49ef143ea62625dd37ea4ce5f24501a32591784"
 )
 
-func TestEntropy(t *testing.T) {
+func TestKeyBuilder(t *testing.T) {
 	var (
 		msg  = []byte("hello, world!")
 		salt = []byte("it's a salt!")
 	)
 
-	hash := NewEntropyBooster(testutils.TCWorkSize, salt).BoostEntropy(msg)
+	hash := NewKeyBuilder(testutils.TCWorkSize, salt).Build(msg)
 	if encoding.HexEncode(hash) != tcHash {
 		t.Error("hash is correct?")
 		return
 	}
 
-	if !bytes.Equal(hash, NewEntropyBooster(testutils.TCWorkSize, salt).BoostEntropy(msg)) {
+	if !bytes.Equal(hash, NewKeyBuilder(testutils.TCWorkSize, salt).Build(msg)) {
 		t.Error("hash is not determined")
 		return
 	}

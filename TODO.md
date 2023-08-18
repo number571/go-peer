@@ -10,5 +10,5 @@
 8. HLM: group chats, name of senders
 9. Fix docker build for arm macOS 
 10. HLS: append proxy connections
-11. HLM: handlers paths to settings
-12. HLS: addConnection -> addConnections, delConnection -> delConnections, ...
+11. HLS: addConnection -> addConnections, delConnection -> delConnections, ...
+12. HLS: write a threat model 

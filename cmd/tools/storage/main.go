@@ -31,10 +31,11 @@ func main() {
 	)
 
 	sett := storage.NewSettings(&storage.SSettings{
-		FPath:      storagePath,
-		FCipherKey: []byte(readLine("Password> ")),
+		FPath:     storagePath,
+		FWorkSize: cWorkSize,
+		FPassword: string(readLine("Password> ")),
 	})
-	stg, err := storage.NewCryptoStorage(sett, cWorkSize)
+	stg, err := storage.NewCryptoStorage(sett)
 	if err != nil {
 		panic(err)
 	}

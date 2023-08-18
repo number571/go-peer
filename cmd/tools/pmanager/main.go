@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 )
 
 const (
@@ -28,8 +28,8 @@ func main() {
 		login   = []byte(os.Args[2])
 	)
 
-	booster := entropy.NewEntropyBooster(workSize, login)
-	extendedKey := booster.BoostEntropy(readUntilEOF())
+	keyBuilder := keybuilder.NewKeyBuilder(workSize, login)
+	extendedKey := keyBuilder.Build(readUntilEOF())
 
 	passBytes := hashing.NewHMACSHA256Hasher(extendedKey, service).ToBytes()
 	fmt.Println(base64.StdEncoding.EncodeToString(passBytes))

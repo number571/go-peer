@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -18,6 +19,11 @@ import (
 const (
 	// IV + Hash + PayloadHead
 	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + encoding.CSizeUint64
+)
+
+const (
+	cWorkSize = 1
+	cSalt     = "_"
 )
 
 var (
@@ -41,11 +47,13 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 }
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
+	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
+	cipherKey := keyBuilder.Build([]byte(pSett.GetNetworkKey()))
 	return &sConn{
 		fSettings:   pSett,
 		fSocket:     pConn,
 		fNetworkKey: pSett.GetNetworkKey(),
-		fCipher:     symmetric.NewAESCipher([]byte(pSett.GetNetworkKey())),
+		fCipher:     symmetric.NewAESCipher(cipherKey),
 	}
 }
 
@@ -60,8 +68,9 @@ func (p *sConn) SetNetworkKey(pNetworkKey string) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fNetworkKey = pNetworkKey
-	p.fCipher = symmetric.NewAESCipher([]byte(pNetworkKey))
+	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
+	cipherKey := keyBuilder.Build([]byte(pNetworkKey))
+	p.fCipher = symmetric.NewAESCipher(cipherKey)
 }
 
 func (p *sConn) GetSettings() ISettings {

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/errors"
@@ -25,7 +25,6 @@ type sCryptoStorage struct {
 	fMutex    sync.Mutex
 	fSalt     []byte
 	fSettings ISettings
-	fWorkSize uint64
 	fCipher   symmetric.ICipher
 }
 
@@ -34,10 +33,9 @@ type storageData struct {
 }
 
 // pSettings.Hashing always = true
-func NewCryptoStorage(pSettings ISettings, pWorkSize uint64) (IKVStorage, error) {
+func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	store := &sCryptoStorage{
 		fSettings: pSettings,
-		fWorkSize: pWorkSize,
 	}
 	isExist := store.isExist()
 
@@ -50,8 +48,10 @@ func NewCryptoStorage(pSettings ISettings, pWorkSize uint64) (IKVStorage, error)
 		store.fSalt = encdata[:cSaltSize]
 	}
 
-	entropy := entropy.NewEntropyBooster(pWorkSize, store.fSalt)
-	store.fCipher = symmetric.NewAESCipher(entropy.BoostEntropy(pSettings.GetCipherKey()))
+	keyBuilder := keybuilder.NewKeyBuilder(pSettings.GetWorkSize(), store.fSalt)
+	rawPassword := []byte(pSettings.GetPassword())
+
+	store.fCipher = symmetric.NewAESCipher(keyBuilder.Build(rawPassword))
 
 	if !isExist {
 		store.Set(nil, nil)
@@ -181,8 +181,6 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 }
 
 func (p *sCryptoStorage) newCipherWithMapKey(pKey []byte) (symmetric.ICipher, string) {
-	entropy := entropy.NewEntropyBooster(p.fWorkSize, p.fSalt)
-	ekey := entropy.BoostEntropy(pKey)
-	hash := hashing.NewSHA256Hasher(ekey).ToString()
-	return symmetric.NewAESCipher(ekey), hash
+	ekey := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt).Build(pKey)
+	return symmetric.NewAESCipher(ekey), hashing.NewSHA256Hasher(ekey).ToString()
 }

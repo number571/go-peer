@@ -8,6 +8,8 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/storage"
+
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 type (
@@ -29,9 +31,10 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
-		FPath:      dbPath,
-		FHashing:   false,
-		FCipherKey: []byte("CIPHER"),
+		FPath:     dbPath,
+		FHashing:  false,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
 	}))
 	if err != nil {
 		t.Error(err)
@@ -39,7 +42,7 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	}
 	defer store.Close()
 
-	if !bytes.Equal(store.GetSettings().GetCipherKey(), []byte("CIPHER")) {
+	if store.GetSettings().GetPassword() != "CIPHER" {
 		t.Error("[testCreate] incorrect default value = cipherKey")
 		return
 	}
@@ -70,9 +73,10 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
-		FPath:      dbPath,
-		FHashing:   true,
-		FCipherKey: []byte("CIPHER1"),
+		FPath:     dbPath,
+		FHashing:  true,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER1",
 	}))
 	if err != nil {
 		t.Error("[testCipherKey]", err)
@@ -84,9 +88,10 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	store.Close() // open this database with another key
 	store, err = dbConstruct(storage.NewSettings(&storage.SSettings{
-		FPath:      dbPath,
-		FHashing:   true,
-		FCipherKey: []byte("CIPHER2"),
+		FPath:     dbPath,
+		FHashing:  true,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER2",
 	}))
 	if err != nil {
 		t.Error("[testCipherKey]", err)
@@ -105,9 +110,10 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
-		FPath:      dbPath,
-		FHashing:   true,
-		FCipherKey: []byte("CIPHER"),
+		FPath:     dbPath,
+		FHashing:  true,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
 	}))
 	if err != nil {
 		t.Error("[testBasic]", err)

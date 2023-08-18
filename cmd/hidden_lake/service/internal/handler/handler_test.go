@@ -172,9 +172,10 @@ func testRunNewNode(dbPath, addr string) anonymity.INode {
 func testNewNode(dbPath, addr string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
-			FPath:      dbPath,
-			FHashing:   true,
-			FCipherKey: []byte("CIPHER"),
+			FPath:     dbPath,
+			FHashing:  true,
+			FWorkSize: testutils.TCWorkSize,
+			FPassword: "CIPHER",
 		}),
 	)
 	if err != nil {

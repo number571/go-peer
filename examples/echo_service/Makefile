@@ -5,4 +5,3 @@ clean:
 	make -C ./secret_channel clean
 request:
 	go run ./_request/main.go
-

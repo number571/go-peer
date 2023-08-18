@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/entropy"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
@@ -117,10 +116,9 @@ func (p *sStateManager) OpenState(pHashLP []byte) error {
 		return errors.WrapError(err, "get storage state")
 	}
 
-	entropyBooster := entropy.NewEntropyBooster(hlm_settings.CWorkForKeys, []byte{5, 7, 1})
 	db, err := database.NewKeyValueDB(
 		fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
-		entropyBooster.BoostEntropy(pHashLP),
+		encoding.HexEncode(pHashLP),
 	)
 	if err != nil {
 		return errors.WrapError(err, "open KV database")

@@ -6,10 +6,16 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/crypto/entropy`: now used pbkdf2
+- Update `pkg/storage`: update test
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: append check of message size
 - Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
+- Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder
 
 <!-- ... -->
 

@@ -5,7 +5,6 @@ import (
 	"crypto/cipher"
 	"fmt"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
@@ -15,7 +14,7 @@ var (
 
 const (
 	CAESBlockSize = aes.BlockSize
-	CAESKeySize   = hashing.CSHA256Size
+	CAESKeySize   = 32
 	CAESKeyType   = "go-peer/aes"
 )
 
@@ -24,8 +23,11 @@ type sAESCipher struct {
 }
 
 func NewAESCipher(pKey []byte) ICipher {
+	if len(pKey) != CAESKeySize {
+		panic("len(pKey) != CAESKeySize")
+	}
 	return &sAESCipher{
-		fKey: hashing.NewSHA256Hasher(pKey).ToBytes(),
+		fKey: pKey,
 	}
 }
 

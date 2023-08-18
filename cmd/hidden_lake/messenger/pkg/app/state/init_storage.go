@@ -11,10 +11,11 @@ import (
 
 func initCryptoStorage(pCfg config.IConfig, pPathTo string) (storage.IKVStorage, error) {
 	sett := storage.NewSettings(&storage.SSettings{
-		FPath:      fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
-		FCipherKey: []byte(pCfg.GetStorageKey()),
+		FPath:     fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
+		FWorkSize: hlm_settings.CWorkForKeys,
+		FPassword: pCfg.GetStorageKey(),
 	})
-	stg, err := storage.NewCryptoStorage(sett, hlm_settings.CWorkForKeys)
+	stg, err := storage.NewCryptoStorage(sett)
 	if err != nil {
 		return nil, errors.WrapError(err, "new crypto storage")
 	}

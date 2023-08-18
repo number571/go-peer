@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/errors"
@@ -43,11 +44,14 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 		db.Put([]byte(cSaltKey), salt, nil)
 	}
 
+	keyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), salt)
+	rawPassword := []byte(pSett.GetPassword())
+
 	return &sKeyValueDB{
 		fSalt:     salt,
 		fDB:       db,
 		fSettings: pSett,
-		fCipher:   symmetric.NewAESCipher(pSett.GetCipherKey()),
+		fCipher:   symmetric.NewAESCipher(keyBuilder.Build(rawPassword)),
 	}, nil
 }
 
