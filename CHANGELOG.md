@@ -17,6 +17,10 @@
 - Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
 - Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder
 
+### BUG FIXES
+
+- Update `pkg/network/conn`: replace 4 conn.Write -> 1 conn.Write
+
 <!-- ... -->
 
 ## v1.5.16
