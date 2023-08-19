@@ -118,14 +118,22 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	prng := random.NewStdPRNG()
 	voidBytes := prng.GetBytes(prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1))
 
-	err := p.sendBytes(bytes.Join(
+	dataBytes := bytes.Join(
 		[][]byte{
-			// send headers with length of blocks
-			p.getBlockSize(encMsgBytes),
-			p.getBlockSize(voidBytes),
-			// send data blocks
 			encMsgBytes,
 			voidBytes,
+		},
+		[]byte{},
+	)
+
+	// send headers with length and hash of data blocks
+	// send data blocks (encMsgBytes || voidBytes)
+	err := p.sendBytes(bytes.Join(
+		[][]byte{
+			p.getBlockSize(encMsgBytes),
+			p.getBlockSize(voidBytes),
+			p.getHashBlock(dataBytes),
+			dataBytes,
 		},
 		[]byte{},
 	))
@@ -161,6 +169,11 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 	return nil
 }
 
+func (p *sConn) getHashBlock(pBytes []byte) []byte {
+	hashBlock := hashing.NewSHA256Hasher(pBytes).ToBytes()
+	return p.fCipher.EncryptBytes(hashBlock)
+}
+
 func (p *sConn) getBlockSize(pBytes []byte) []byte {
 	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
 	return p.fCipher.EncryptBytes(blockSize[:])
@@ -187,6 +200,22 @@ func (p *sConn) recvBlockSize(deadline time.Duration) (uint64, error) {
 	return encoding.BytesToUint64(arrLen), nil
 }
 
+func (p *sConn) recvHashBlock(deadline time.Duration) ([]byte, error) {
+	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
+
+	hashData := make([]byte, symmetric.CAESBlockSize+hashing.CSHA256Size)
+	n, err := p.fSocket.Read(hashData)
+	if err != nil {
+		return nil, errors.WrapError(err, "read tcp hash block")
+	}
+
+	if n != symmetric.CAESBlockSize+hashing.CSHA256Size {
+		return nil, errors.NewError("hash block is invalid")
+	}
+
+	return p.fCipher.DecryptBytes(hashData), nil
+}
+
 func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	var pld payload.IPayload
 	defer func() {
@@ -200,6 +229,11 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 
 	voidSize, err := p.recvBlockSize(p.fSettings.GetReadDeadline())
 	if err != nil || voidSize > p.fSettings.GetLimitVoidSize() {
+		return
+	}
+
+	hashBlock, err := p.recvHashBlock(p.fSettings.GetReadDeadline())
+	if err != nil || len(hashBlock) != hashing.CSHA256Size {
 		return
 	}
 
@@ -226,6 +260,11 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 		if mustLen == 0 {
 			break
 		}
+	}
+
+	gotHash := hashing.NewSHA256Hasher(dataRaw).ToBytes()
+	if !bytes.Equal(hashBlock, gotHash) {
+		return
 	}
 
 	// try unpack message from bytes

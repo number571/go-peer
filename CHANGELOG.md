@@ -8,18 +8,19 @@
 
 ### IMPROVEMENTS
 
-- Update `pkg/crypto/entropy`: now used pbkdf2
+- Update `pkg/crypto/entropy`: now used pbkdf2. {[Issue](https://github.com/number571/go-peer/issues/4)}
 - Update `pkg/storage`: update test
 
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: append check of message size
 - Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
-- Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder
+- Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder 
 
 ### BUG FIXES
 
-- Update `pkg/network/conn`: replace 4 conn.Write -> 1 conn.Write
+- Update `pkg/network/conn`: replace 4 conn.Write -> 1 conn.Write. {[Issue](https://github.com/number571/go-peer/issues/5)}
+- Update `pkg/network/conn`: append hash check for encBytes||voidBytes. {[Issue](https://github.com/number571/go-peer/issues/6)}
 
 <!-- ... -->
 
