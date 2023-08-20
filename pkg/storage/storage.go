@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	cSaltSize = symmetric.CAESKeySize
+	cSaltSize = 32
 )
 
 var (
@@ -38,6 +38,7 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	store := &sCryptoStorage{
 		fSettings: pSettings,
 	}
+
 	isExist := store.isExist()
 
 	store.fSalt = random.NewStdPRNG().GetBytes(cSaltSize)
@@ -130,8 +131,7 @@ func (p *sCryptoStorage) Del(pKey []byte) error {
 
 	// Open and decrypt private key
 	_, mapKey := p.newCipherWithMapKey(pKey)
-	_, ok := mapping.FSecrets[mapKey]
-	if !ok {
+	if _, ok := mapping.FSecrets[mapKey]; !ok {
 		return errors.NewError("key undefined")
 	}
 
@@ -181,7 +181,7 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 }
 
 func (p *sCryptoStorage) newCipherWithMapKey(pKey []byte) (symmetric.ICipher, string) {
-	mapKeyAsPassword := encoding.HexEncode(pKey)
-	cipherKey := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt).Build(mapKeyAsPassword)
+	keyBuilder := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt)
+	cipherKey := keyBuilder.Build(encoding.HexEncode(pKey)) // map key as a password
 	return symmetric.NewAESCipher(cipherKey), hashing.NewSHA256Hasher(cipherKey).ToString()
 }
