@@ -27,8 +27,9 @@ const (
 )
 
 const (
-	CWorkForKeys        = 20
-	CDefaultCapMessages = (2 << 10)
+	CMinEntropy         = 64        // bits
+	CWorkForKeys        = 20        // bits
+	CDefaultCapMessages = (2 << 10) // count
 )
 
 const (

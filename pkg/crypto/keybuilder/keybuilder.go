@@ -23,9 +23,9 @@ func NewKeyBuilder(pBits uint64, pSalt []byte) IKeyBuilder {
 	}
 }
 
-func (p *sKeyBuilder) Build(pPassword []byte) []byte {
+func (p *sKeyBuilder) Build(pPassword string) []byte {
 	return pbkdf2.Key(
-		pPassword,
+		[]byte(pPassword),
 		p.fSalt,
 		(1 << p.fBits),
 		int(symmetric.CAESKeySize),

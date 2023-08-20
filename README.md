@@ -65,7 +65,9 @@ $ go get github.com/number571/go-peer
 2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
 4. Go library (used by `cmd/hidden_lake/composite`) [fyne.io/fyne/v2](https://github.com/fyne-io/fyne "fyne/v2");
-5. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+5. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
+6. Go library (used by `cmd/hidden_lake/messenger`) [github.com/wagslane/go-password-validator](https://github.com/wagslane/go-password-validator "wagslane/go-password-validator");
+7. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -409,7 +411,7 @@ Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 <p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 8. Home page of the HLM application.</p>
 
-Next, you need to login by going to the Sign in page. Enter your `login=user` and `password=password` than the private key, friends and connections will be automatically loaded from the storage.
+Next, you need to login by going to the Sign in page. Enter your `login="username"` and `password="hello, world!"` than the private key, friends and connections will be automatically loaded from the storage.
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 

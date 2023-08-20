@@ -15,6 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
+	pvalidator "github.com/wagslane/go-password-validator"
 )
 
 func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
@@ -60,6 +61,12 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 			if password != passwordRepeat {
 				pLogger.PushWarn(httpLogger.Get("incorrect_password"))
 				fmt.Fprint(pW, "error: passwords not equals")
+				return
+			}
+
+			if err := pvalidator.Validate(password, hlm_settings.CMinEntropy); err != nil {
+				pLogger.PushWarn(httpLogger.Get("password_is_weak"))
+				fmt.Fprint(pW, "error: password is weak")
 				return
 			}
 

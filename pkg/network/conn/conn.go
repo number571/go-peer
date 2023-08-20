@@ -48,7 +48,7 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
-	cipherKey := keyBuilder.Build([]byte(pSett.GetNetworkKey()))
+	cipherKey := keyBuilder.Build(pSett.GetNetworkKey())
 	return &sConn{
 		fSettings:   pSett,
 		fSocket:     pConn,
@@ -69,7 +69,7 @@ func (p *sConn) SetNetworkKey(pNetworkKey string) {
 	defer p.fMutex.Unlock()
 
 	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
-	cipherKey := keyBuilder.Build([]byte(pNetworkKey))
+	cipherKey := keyBuilder.Build(pNetworkKey)
 	p.fCipher = symmetric.NewAESCipher(cipherKey)
 }
 

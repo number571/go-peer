@@ -10,12 +10,14 @@
 
 - Update `pkg/crypto/entropy`: now used pbkdf2. {[Issue](https://github.com/number571/go-peer/issues/4)}
 - Update `pkg/storage`: update test
+- Update `cmd/hidden_lake/messenger`: append entropy check password
 
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: append check of message size
 - Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
 - Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder 
+- Update `cmd/hidden_lake/messenger`: change login="user", password="password" => login="username", password="hello, world!"
 
 ### BUG FIXES
 

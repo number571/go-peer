@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
@@ -49,9 +50,8 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	}
 
 	keyBuilder := keybuilder.NewKeyBuilder(pSettings.GetWorkSize(), store.fSalt)
-	rawPassword := []byte(pSettings.GetPassword())
-
-	store.fCipher = symmetric.NewAESCipher(keyBuilder.Build(rawPassword))
+	cipherKey := keyBuilder.Build(pSettings.GetPassword())
+	store.fCipher = symmetric.NewAESCipher(cipherKey)
 
 	if !isExist {
 		store.Set(nil, nil)
@@ -181,6 +181,7 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 }
 
 func (p *sCryptoStorage) newCipherWithMapKey(pKey []byte) (symmetric.ICipher, string) {
-	ekey := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt).Build(pKey)
-	return symmetric.NewAESCipher(ekey), hashing.NewSHA256Hasher(ekey).ToString()
+	mapKeyAsPassword := encoding.HexEncode(pKey)
+	cipherKey := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt).Build(mapKeyAsPassword)
+	return symmetric.NewAESCipher(cipherKey), hashing.NewSHA256Hasher(cipherKey).ToString()
 }

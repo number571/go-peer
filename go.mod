@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.3.5
 	github.com/boombuler/barcode v1.0.1
 	github.com/syndtr/goleveldb v1.0.0
+	github.com/wagslane/go-password-validator v0.3.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.7.0
 )

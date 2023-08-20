@@ -45,13 +45,12 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	}
 
 	keyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), salt)
-	rawPassword := []byte(pSett.GetPassword())
-
+	cipherKey := keyBuilder.Build(pSett.GetPassword())
 	return &sKeyValueDB{
 		fSalt:     salt,
 		fDB:       db,
 		fSettings: pSett,
-		fCipher:   symmetric.NewAESCipher(keyBuilder.Build(rawPassword)),
+		fCipher:   symmetric.NewAESCipher(cipherKey),
 	}, nil
 }
 

@@ -1,5 +1,5 @@
 package keybuilder
 
 type IKeyBuilder interface {
-	Build([]byte) []byte
+	Build(string) []byte
 }

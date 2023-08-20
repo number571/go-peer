@@ -14,17 +14,17 @@ const (
 
 func TestKeyBuilder(t *testing.T) {
 	var (
-		msg  = []byte("hello, world!")
+		pasw = "hello, world!"
 		salt = []byte("it's a salt!")
 	)
 
-	hash := NewKeyBuilder(testutils.TCWorkSize, salt).Build(msg)
+	hash := NewKeyBuilder(testutils.TCWorkSize, salt).Build(pasw)
 	if encoding.HexEncode(hash) != tcHash {
 		t.Error("hash is correct?")
 		return
 	}
 
-	if !bytes.Equal(hash, NewKeyBuilder(testutils.TCWorkSize, salt).Build(msg)) {
+	if !bytes.Equal(hash, NewKeyBuilder(testutils.TCWorkSize, salt).Build(pasw)) {
 		t.Error("hash is not determined")
 		return
 	}

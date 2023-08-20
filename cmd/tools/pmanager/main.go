@@ -35,10 +35,10 @@ func main() {
 	fmt.Println(base64.StdEncoding.EncodeToString(passBytes))
 }
 
-func readUntilEOF() []byte {
+func readUntilEOF() string {
 	res, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		panic(err)
 	}
-	return res
+	return string(res)
 }
