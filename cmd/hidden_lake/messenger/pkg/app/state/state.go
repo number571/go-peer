@@ -205,10 +205,7 @@ func (p *sStateManager) AddConnection(pAddress string) error {
 	err := p.stateUpdater(
 		p.updateClientConnections,
 		func(storageValue *SStorageState) {
-			if stringtools.HasInSlice(storageValue.FConnections, pAddress) {
-				return
-			}
-			storageValue.FConnections = append(
+			storageValue.FConnections = stringtools.UniqAppendToSlice(
 				storageValue.FConnections,
 				pAddress,
 			)
