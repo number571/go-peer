@@ -68,6 +68,8 @@ func (p *sConn) SetNetworkKey(pNetworkKey string) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	p.fNetworkKey = pNetworkKey
+
 	keyBuilder := keybuilder.NewKeyBuilder(1, []byte(encryptSalt))
 	p.fCipher = symmetric.NewAESCipher(keyBuilder.Build(pNetworkKey))
 }
