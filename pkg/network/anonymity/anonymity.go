@@ -115,6 +115,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
+	// internal logger
 	if err := p.enqueuePayload(cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
 		return errors.WrapError(err, "broadcast payload")
 	}
@@ -135,6 +136,7 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
+	// internal logger
 	if err := p.enqueuePayload(cIsRequest, pRecv, newPld); err != nil {
 		return nil, errors.WrapError(err, "fetch payload")
 	}
@@ -143,34 +145,8 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 	if err != nil {
 		return nil, errors.WrapError(err, "receive response from fetch")
 	}
+
 	return resp, nil
-}
-
-func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
-	if len(p.fNetwork.GetConnections()) == 0 {
-		return errors.NewError("length of connections = 0")
-	}
-
-	var newBody []byte
-	switch pType {
-	case cIsRequest:
-		newBody = wrapRequest(pPld.GetBody())
-	case cIsResponse:
-		newBody = wrapResponse(pPld.GetBody())
-	default:
-		return errors.NewError("unknown format type")
-	}
-
-	newPld := payload.NewPayload(pPld.GetHead(), newBody)
-	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
-	if err != nil {
-		return errors.WrapError(err, "encrypt payload")
-	}
-
-	if err := p.send(msg); err != nil {
-		return errors.WrapError(err, "send message")
-	}
-	return nil
 }
 
 func (p *sNode) send(pMsg message.IMessage) error {
@@ -213,7 +189,6 @@ func (p *sNode) runQueue() error {
 			}
 
 			logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
-			logBuilder.WithSize(len(msg.ToBytes()))
 
 			// store hash and push message to network
 			if ok := p.storeHashWithBroadcast(logBuilder, msg); !ok {
@@ -237,7 +212,6 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 
 		// enrich logger
 		logBuilder.WithConn(pConn)
-		logBuilder.WithSize(len(pMsgBytes))
 
 		client := p.fQueue.GetClient()
 		settings := client.GetSettings()
@@ -283,13 +257,14 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			actionKey := newActionKey(sender, head.getAction())
 			action, ok := p.getAction(actionKey)
 			if !ok {
-				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogInfoAction))
+				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogBaseGetResponse))
 				return
 			}
 
-			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoAction))
+			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseGetResponse))
 			action <- unwrapBytes(body)
 			return
+
 		// got request from another side (need generate response)
 		case isRequest(body):
 			// get function by payload head
@@ -311,19 +286,72 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			}
 
 			// create the message and put this to the queue
-			if err := p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp)); err != nil {
-				p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogBaseEnqueueResponse))
-				return
-			}
-
-			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseEnqueueResponse))
+			// internal logger
+			_ = p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
 			return
+
 		// undefined type of message (not request/response)
 		default:
-			p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogErroMessageType))
+			p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogBaseMessageType))
 			return
 		}
 	}
+}
+
+func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+	logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
+
+	// enrich logger
+	logBuilder.WithPubKey(p.fQueue.GetClient().GetPubKey())
+
+	if len(p.fNetwork.GetConnections()) == 0 {
+		p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnNotConnection))
+		return errors.NewError("length of connections = 0")
+	}
+
+	var (
+		newBody []byte
+		logType logbuilder.ILogType
+	)
+
+	switch pType {
+	case cIsRequest:
+		newBody = wrapRequest(pPld.GetBody())
+		logType = logbuilder.CLogBaseEnqueueRequest
+	case cIsResponse:
+		newBody = wrapResponse(pPld.GetBody())
+		logType = logbuilder.CLogBaseEnqueueResponse
+	default:
+		p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogBaseMessageType))
+		return errors.NewError("unknown format type")
+	}
+
+	newPld := payload.NewPayload(pPld.GetHead(), newBody)
+	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
+	if err != nil {
+		p.fLogger.PushErro(logBuilder.Get(logbuilder.CLogErroEncryptPayload))
+		return errors.WrapError(err, "encrypt payload")
+	}
+
+	var (
+		size  = len(msg.ToBytes())
+		hash  = msg.GetBody().GetHash()
+		proof = msg.GetBody().GetProof()
+	)
+
+	// enrich logger
+	logBuilder.
+		WithHash(hash).
+		WithProof(proof).
+		WithSize(size)
+
+	if err := p.send(msg); err != nil {
+		p.fLogger.PushErro(logBuilder.Get(logType))
+		return errors.WrapError(err, "send message")
+	}
+
+	p.fLogger.PushInfo(logBuilder.Get(logType))
+	return nil
 }
 
 func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg message.IMessage) bool {
@@ -333,6 +361,7 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 	}
 
 	var (
+		size      = len(pMsg.ToBytes())
 		hash      = pMsg.GetBody().GetHash()
 		proof     = pMsg.GetBody().GetProof()
 		database  = p.fWrapperDB.Get()
@@ -340,7 +369,10 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 	)
 
 	// enrich logger
-	pLogb.WithHash(hash).WithProof(proof)
+	pLogb.
+		WithHash(hash).
+		WithProof(proof).
+		WithSize(size)
 
 	if database == nil {
 		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseGet))

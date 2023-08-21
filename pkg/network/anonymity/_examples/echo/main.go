@@ -39,8 +39,8 @@ func main() {
 	defer deleteDBs()
 
 	var (
-		service = newNode(serviceAddress, dbPath1)
-		client  = newNode("", dbPath2)
+		service = newNode(serviceAddress, "SERVICE-1", dbPath1)
+		client  = newNode("", "SERVICE-2", dbPath2)
 	)
 
 	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) ([]byte, error) {
@@ -75,12 +75,13 @@ func main() {
 	fmt.Println(string(res))
 }
 
-func newNode(serviceAddress, dbPath string) anonymity.INode {
+func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
-			FPath:      dbPath,
-			FHashing:   false,
-			FCipherKey: []byte("CIPHER"),
+			FPath:     dbPath,
+			FHashing:  false,
+			FWorkSize: 1, // not used
+			FPassword: "_",
 		}),
 	)
 	if err != nil {
@@ -88,19 +89,23 @@ func newNode(serviceAddress, dbPath string) anonymity.INode {
 	}
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   "EXAMPLE",
+			FServiceName:   name,
 			FRetryEnqueue:  0,
 			FNetworkMask:   1,
 			FFetchTimeWait: time.Minute,
 		}),
-		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
+		logger.NewLogger(logger.NewSettings(&logger.SSettings{
+			FInfo: os.Stdout,
+			FWarn: os.Stdout,
+			FErro: os.Stderr,
+		})),
 		anonymity.NewWrapperDB().Set(db),
 		network.NewNode(nodeSettings(serviceAddress)),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
 				FPoolCapacity: (1 << 4),
-				FDuration:     time.Second,
+				FDuration:     5 * time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
@@ -120,12 +125,16 @@ func nodeSettings(serviceAddress string) network.ISettings {
 		FCapacity:     (1 << 10),
 		FMaxConnects:  1,
 		FConnSettings: connSettings(),
+		FWriteTimeout: time.Minute,
 	})
 }
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
 		FMessageSizeBytes: msgSize,
+		FWaitReadDeadline: time.Hour,
+		FReadDeadline:     time.Minute,
+		FWriteDeadline:    time.Minute,
 		FFetchTimeWait:    1, // not used
 	})
 }

@@ -29,7 +29,7 @@ func main() {
 	}
 
 	fmt.Printf("Message: '%s';\nSender's public key: '%s';\n", string(pld.GetBody()), pubKey.ToString())
-	fmt.Printf("Encrypted message: '%s'\n", string(msg.ToBytes()))
+	fmt.Printf("Encrypted message: '%s'\n", msg.ToString())
 }
 
 func newClient() client.IClient {

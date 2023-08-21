@@ -18,6 +18,7 @@
 - Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
 - Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder 
 - Update `cmd/hidden_lake/messenger`: change login="user", password="password" => login="username", password="hello, world!"
+- Update `pkg/*/_examples`: update examples for client, network, anonymity packages
 
 ### BUG FIXES
 

@@ -20,23 +20,25 @@ type ILogType string
 const (
 	// Base
 	CLogBaseBroadcast       ILogType = "BRDCS"
-	CLogBaseEnqueueResponse ILogType = "ENRSP"
+	CLogBaseMessageType     ILogType = "MTYPE"
+	CLogBaseEnqueueRequest  ILogType = "ENQRQ"
+	CLogBaseEnqueueResponse ILogType = "ENQRS"
+	CLogBaseGetResponse     ILogType = "GETRS"
 
 	// INFO
 	CLogInfoExist           ILogType = "EXIST"
 	CLogInfoUndecryptable   ILogType = "UNDEC"
-	CLogInfoAction          ILogType = "ACTON"
-	CLogInfoWithoutResponse ILogType = "WHRSP"
+	CLogInfoWithoutResponse ILogType = "WTHRS"
 
 	// WARN
 	CLogWarnMessageNull       ILogType = "MNULL"
 	CLogWarnNotFriend         ILogType = "NTFRN"
+	CLogWarnNotConnection     ILogType = "NTCON"
 	CLogWarnUnknownRoute      ILogType = "UNKRT"
-	CLogWarnOldResponse       ILogType = "LDRSP"
 	CLogWarnIncorrectResponse ILogType = "ICRSP"
 
 	// ERRO
-	CLogErroMessageType ILogType = "MTYPE"
-	CLogErroDatabaseGet ILogType = "DBGET"
-	CLogErroDatabaseSet ILogType = "DBSET"
+	CLogErroDatabaseGet    ILogType = "DBGET"
+	CLogErroDatabaseSet    ILogType = "DBSET"
+	CLogErroEncryptPayload ILogType = "ENCPL"
 )

@@ -65,12 +65,16 @@ func nodeSettings(serviceAddress string) network.ISettings {
 		FCapacity:     (1 << 10),
 		FMaxConnects:  1,
 		FConnSettings: connSettings(),
+		FWriteTimeout: time.Minute,
 	})
 }
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
 		FMessageSizeBytes: (1 << 10),
+		FWaitReadDeadline: time.Hour,
+		FReadDeadline:     time.Minute,
+		FWriteDeadline:    time.Minute,
 		FFetchTimeWait:    1, // not used
 	})
 }
