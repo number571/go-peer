@@ -129,8 +129,8 @@ func (p *sClient) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) SetPrivKey(pEphPubKey asymmetric.IPubKey, pPrivKey asymmetric.IPrivKey) error {
-	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pEphPubKey, pPrivKey)); err != nil {
+func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pEphPubKey asymmetric.IPubKey) error {
+	if err := p.fRequester.SetPrivKey(p.fBuilder.SetPrivKey(pPrivKey, pEphPubKey)); err != nil {
 		return errors.WrapError(err, "set private key (client)")
 	}
 	return nil

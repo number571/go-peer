@@ -21,7 +21,7 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) SetPrivKey(pEphPubKey asymmetric.IPubKey, pPrivKey asymmetric.IPrivKey) *pkg_settings.SPrivKey {
+func (p *sBuilder) SetPrivKey(pPrivKey asymmetric.IPrivKey, pEphPubKey asymmetric.IPubKey) *pkg_settings.SPrivKey {
 	sessionKey := random.NewStdPRNG().GetBytes(32)
 	return &pkg_settings.SPrivKey{
 		FSessionKey: encoding.HexEncode(pEphPubKey.EncryptBytes(sessionKey)),

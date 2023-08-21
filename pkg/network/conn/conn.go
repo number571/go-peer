@@ -241,17 +241,16 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}
 
 	// try unpack message from bytes
-	msg := message.LoadMessage(
-		p.getCipher().DecryptBytes(dataBytes[:msgSize]),
-		p.getNetworkKey(),
-	)
+	msgBytes := p.getCipher().DecryptBytes(dataBytes[:msgSize])
+	msg := message.LoadMessage(msgBytes, p.GetNetworkKey())
 	if msg == nil {
 		return
 	}
 
+	// check hash sum of received data
 	gotHash := hashing.NewSHA256Hasher(bytes.Join(
 		[][]byte{
-			msg.ToBytes(),
+			msgBytes,
 			dataBytes[msgSize:],
 		},
 		[]byte{},
@@ -288,13 +287,6 @@ func (p *sConn) recvDataBytes(pMustLen uint64) ([]byte, error) {
 	}
 
 	return dataRaw, nil
-}
-
-func (p *sConn) getNetworkKey() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fNetworkKey
 }
 
 func (p *sConn) getCipher() symmetric.ICipher {

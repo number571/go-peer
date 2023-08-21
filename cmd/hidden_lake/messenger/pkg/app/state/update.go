@@ -47,7 +47,7 @@ func (p *sStateManager) updateClientPrivKey(pStateValue *SStorageState) error {
 		return errors.NewError("private key is null (update)")
 	}
 
-	if err := hlsClient.SetPrivKey(ephPubKey, privKey); err != nil {
+	if err := hlsClient.SetPrivKey(privKey, ephPubKey); err != nil {
 		return errors.WrapError(err, "set private key (update)")
 	}
 	return nil

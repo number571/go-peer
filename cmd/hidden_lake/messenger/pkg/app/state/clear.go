@@ -30,7 +30,7 @@ func (p *sStateManager) clearClientPrivKey() error {
 	}
 
 	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySizeBits())
-	if err := hlsClient.SetPrivKey(ephPubKey, pseudoPrivKey); err != nil {
+	if err := hlsClient.SetPrivKey(pseudoPrivKey, ephPubKey); err != nil {
 		return errors.WrapError(err, "set pseudo private key (clear)")
 	}
 	return nil
