@@ -22,8 +22,8 @@ const (
 )
 
 const (
-	cWorkSize = 1
-	cSalt     = "_"
+	// seconds digits of PI
+	encryptSalt = "5820974944_5923078164_0628620899_8628034825_3421170679"
 )
 
 var (
@@ -47,7 +47,7 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 }
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
-	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
+	keyBuilder := keybuilder.NewKeyBuilder(1, []byte(encryptSalt))
 	cipherKey := keyBuilder.Build(pSett.GetNetworkKey())
 	return &sConn{
 		fSettings:   pSett,
@@ -68,9 +68,8 @@ func (p *sConn) SetNetworkKey(pNetworkKey string) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	keyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cSalt))
-	cipherKey := keyBuilder.Build(pNetworkKey)
-	p.fCipher = symmetric.NewAESCipher(cipherKey)
+	keyBuilder := keybuilder.NewKeyBuilder(1, []byte(encryptSalt))
+	p.fCipher = symmetric.NewAESCipher(keyBuilder.Build(pNetworkKey))
 }
 
 func (p *sConn) GetSettings() ISettings {
@@ -108,23 +107,11 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	encMsgBytes := p.fCipher.EncryptBytes(
-		message.NewMessage(
-			pPld,
-			[]byte(p.fNetworkKey),
-		).ToBytes(),
-	)
+	msgBytes := message.NewMessage(pPld, p.fNetworkKey).ToBytes()
+	encMsgBytes := p.fCipher.EncryptBytes(msgBytes)
 
 	prng := random.NewStdPRNG()
 	voidBytes := prng.GetBytes(prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1))
-
-	dataBytes := bytes.Join(
-		[][]byte{
-			encMsgBytes,
-			voidBytes,
-		},
-		[]byte{},
-	)
 
 	// send headers with length and hash of data blocks
 	// send data blocks (encMsgBytes || voidBytes)
@@ -132,8 +119,20 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 		[][]byte{
 			p.getBlockSize(encMsgBytes),
 			p.getBlockSize(voidBytes),
-			p.getHashBlock(dataBytes),
-			dataBytes,
+			p.getHashBlock(bytes.Join(
+				[][]byte{
+					msgBytes,
+					voidBytes,
+				},
+				[]byte{},
+			)),
+			bytes.Join(
+				[][]byte{
+					encMsgBytes,
+					voidBytes,
+				},
+				[]byte{},
+			),
 		},
 		[]byte{},
 	))
@@ -152,8 +151,9 @@ func (p *sConn) ReadPayload() payload.IPayload {
 
 func (p *sConn) sendBytes(pBytes []byte) error {
 	bytesPtr := uint64(len(pBytes))
-	for {
+	for bytesPtr != 0 {
 		p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteDeadline()))
+
 		n, err := p.fSocket.Write(pBytes[:bytesPtr])
 		if err != nil {
 			return errors.WrapError(err, "write tcp bytes")
@@ -161,22 +161,18 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 
 		bytesPtr = bytesPtr - uint64(n)
 		pBytes = pBytes[:bytesPtr]
-
-		if bytesPtr == 0 {
-			break
-		}
 	}
 	return nil
-}
-
-func (p *sConn) getHashBlock(pBytes []byte) []byte {
-	hashBlock := hashing.NewSHA256Hasher(pBytes).ToBytes()
-	return p.fCipher.EncryptBytes(hashBlock)
 }
 
 func (p *sConn) getBlockSize(pBytes []byte) []byte {
 	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
 	return p.fCipher.EncryptBytes(blockSize[:])
+}
+
+func (p *sConn) getHashBlock(pBytes []byte) []byte {
+	hashBlock := hashing.NewSHA256Hasher(pBytes).ToBytes()
+	return p.fCipher.EncryptBytes(hashBlock)
 }
 
 func (p *sConn) recvBlockSize(deadline time.Duration) (uint64, error) {
@@ -237,15 +233,45 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 		return
 	}
 
-	mustLen := msgSize + voidSize
-	dataRaw := make([]byte, 0, mustLen)
-	for {
+	dataBytes, err := p.recvDataBytes(msgSize + voidSize)
+	if err != nil {
+		return
+	}
+
+	// try unpack message from bytes
+	msg := message.LoadMessage(
+		p.getCipher().DecryptBytes(dataBytes[:msgSize]),
+		p.getNetworkKey(),
+	)
+	if msg == nil {
+		return
+	}
+
+	gotHash := hashing.NewSHA256Hasher(bytes.Join(
+		[][]byte{
+			msg.ToBytes(),
+			dataBytes[msgSize:],
+		},
+		[]byte{},
+	)).ToBytes()
+	if !bytes.Equal(hashBlock, gotHash) {
+		return
+	}
+
+	pld = msg.GetPayload()
+}
+
+func (p *sConn) recvDataBytes(pMustLen uint64) ([]byte, error) {
+	dataRaw := make([]byte, 0, pMustLen)
+
+	mustLen := pMustLen
+	for mustLen != 0 {
 		p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadDeadline()))
 
 		buffer := make([]byte, mustLen)
 		n, err := p.fSocket.Read(buffer)
 		if err != nil {
-			return
+			return nil, err
 		}
 
 		dataRaw = bytes.Join(
@@ -257,26 +283,9 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 		)
 
 		mustLen -= uint64(n)
-		if mustLen == 0 {
-			break
-		}
 	}
 
-	gotHash := hashing.NewSHA256Hasher(dataRaw).ToBytes()
-	if !bytes.Equal(hashBlock, gotHash) {
-		return
-	}
-
-	// try unpack message from bytes
-	msg := message.LoadMessage(
-		p.getCipher().DecryptBytes(dataRaw[:msgSize]),
-		[]byte(p.getNetworkKey()),
-	)
-	if msg == nil {
-		return
-	}
-
-	pld = msg.GetPayload()
+	return dataRaw, nil
 }
 
 func (p *sConn) getNetworkKey() string {

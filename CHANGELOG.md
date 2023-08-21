@@ -23,7 +23,7 @@
 ### BUG FIXES
 
 - Update `pkg/network/conn`: replace 4 conn.Write -> 1 conn.Write. {[Issue](https://github.com/number571/go-peer/issues/5)}
-- Update `pkg/network/conn`: append hash check for encBytes||voidBytes. {[Issue](https://github.com/number571/go-peer/issues/6)}
+- Update `pkg/network/conn`: append hash check for msgBytes||voidBytes. {[Issue](https://github.com/number571/go-peer/issues/6)}
 
 <!-- ... -->
 
