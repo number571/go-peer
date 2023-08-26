@@ -19,7 +19,7 @@ import (
 /*
 	NETWORK MESSAGE FORMAT
 
-	E( LEM || LV || H(EM||V) ) || EM || V
+	E( LEM || LV || H(LEM||LV) || H(EM||V) ) || EM || V
 	where
 		LEM = L(EM)
 		LV  = L(V)
@@ -193,6 +193,13 @@ func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
 			voidBytesSize[:],
 			p.getAuthData(bytes.Join(
 				[][]byte{
+					encMsgBytesSize[:],
+					voidBytesSize[:],
+				},
+				[]byte{},
+			)),
+			p.getAuthData(bytes.Join(
+				[][]byte{
 					pEncMsgBytes,
 					pVoidBytes,
 				},
@@ -204,7 +211,16 @@ func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
 }
 
 func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, error) {
-	const recvSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + hashing.CSHA256Size
+	const (
+		recvSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
+	)
+
+	const (
+		firstSize  = encoding.CSizeUint64
+		secondSize = firstSize + encoding.CSizeUint64
+		firstHash  = secondSize + hashing.CSHA256Size
+		secondHash = firstHash + hashing.CSHA256Size
+	)
 
 	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
 
@@ -224,15 +240,28 @@ func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, e
 	}
 
 	// mustLen = Size[u64] in uint64
-	arrLen := [encoding.CSizeUint64]byte{}
+	encMsgBytesSize := [encoding.CSizeUint64]byte{}
+	copy(encMsgBytesSize[:], recvHead[:firstSize])
+	encMsgSize := encoding.BytesToUint64(encMsgBytesSize)
 
-	copy(arrLen[:], recvHead[:encoding.CSizeUint64])
-	msgSize := encoding.BytesToUint64(arrLen)
+	voidBytesSize := [encoding.CSizeUint64]byte{}
+	copy(voidBytesSize[:], recvHead[firstSize:secondSize])
+	voidSize := encoding.BytesToUint64(voidBytesSize)
 
-	copy(arrLen[:], recvHead[encoding.CSizeUint64:2*encoding.CSizeUint64])
-	voidSize := encoding.BytesToUint64(arrLen)
+	// check hash sum of received sizes
+	hashBlock := recvHead[secondSize:firstHash]
+	gotHash := p.getAuthData(bytes.Join(
+		[][]byte{
+			encMsgBytesSize[:],
+			voidBytesSize[:],
+		},
+		[]byte{},
+	))
+	if !bytes.Equal(hashBlock, gotHash) {
+		return 0, 0, nil, errors.NewError("invalid hash by sizes")
+	}
 
-	return msgSize, voidSize, recvHead[2*encoding.CSizeUint64:], nil
+	return encMsgSize, voidSize, recvHead[firstHash:secondHash], nil
 }
 
 func (p *sConn) readPayload(pChPld chan payload.IPayload) {
