@@ -279,8 +279,7 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 
 	// large wait read deadline => the connection has not sent anything yet
 	msgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
-	switch {
-	case err != nil:
+	if err != nil {
 		return
 	}
 
