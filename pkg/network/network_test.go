@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	tcIter     = 500
+	tcIter     = 100
 	tcTimeWait = time.Minute
 )
 

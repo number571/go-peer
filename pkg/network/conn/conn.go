@@ -35,6 +35,9 @@ import (
 const (
 	// IV + Hash + PayloadHead
 	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + encoding.CSizeUint64
+
+	// IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
+	cEncryptRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
 )
 
 const (
@@ -212,10 +215,6 @@ func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
 
 func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, error) {
 	const (
-		encRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
-	)
-
-	const (
 		firstSizeIndex  = encoding.CSizeUint64
 		secondSizeIndex = firstSizeIndex + encoding.CSizeUint64
 		firstHashIndex  = secondSizeIndex + hashing.CSHA256Size
@@ -224,13 +223,13 @@ func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, e
 
 	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
 
-	encRecvHead := make([]byte, encRecvHeadSize)
+	encRecvHead := make([]byte, cEncryptRecvHeadSize)
 	n, err := p.fSocket.Read(encRecvHead)
 	if err != nil {
 		return 0, 0, nil, errors.WrapError(err, "read tcp header block")
 	}
 
-	if n != encRecvHeadSize {
+	if n != cEncryptRecvHeadSize {
 		return 0, 0, nil, errors.NewError("invalid header block")
 	}
 
@@ -278,12 +277,12 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}()
 
 	// large wait read deadline => the connection has not sent anything yet
-	msgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
+	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
 	if err != nil {
 		return
 	}
 
-	dataBytes, err := p.recvDataBytes(msgSize + voidSize)
+	dataBytes, err := p.recvDataBytes(encMsgSize + voidSize)
 	if err != nil {
 		return
 	}
@@ -291,8 +290,8 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	// check hash sum of received data
 	newHash := p.getAuthData(bytes.Join(
 		[][]byte{
-			dataBytes[:msgSize],
-			dataBytes[msgSize:],
+			dataBytes[:encMsgSize],
+			dataBytes[encMsgSize:],
 		},
 		[]byte{},
 	))
@@ -301,7 +300,7 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}
 
 	// try unpack message from bytes
-	msgBytes := p.getCipher().DecryptBytes(dataBytes[:msgSize])
+	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
 	msg := message.LoadMessage(msgBytes)
 	if msg == nil {
 		return
