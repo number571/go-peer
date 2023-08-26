@@ -184,17 +184,17 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 }
 
 func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
-	encMsgBytesSize := encoding.Uint64ToBytes(uint64(len(pEncMsgBytes)))
-	voidBytesSize := encoding.Uint64ToBytes(uint64(len(pVoidBytes)))
+	encMsgSizeBytes := encoding.Uint64ToBytes(uint64(len(pEncMsgBytes)))
+	voidSizeBytes := encoding.Uint64ToBytes(uint64(len(pVoidBytes)))
 
 	return p.getCipher().EncryptBytes(bytes.Join(
 		[][]byte{
-			encMsgBytesSize[:],
-			voidBytesSize[:],
+			encMsgSizeBytes[:],
+			voidSizeBytes[:],
 			p.getAuthData(bytes.Join(
 				[][]byte{
-					encMsgBytesSize[:],
-					voidBytesSize[:],
+					encMsgSizeBytes[:],
+					voidSizeBytes[:],
 				},
 				[]byte{},
 			)),
@@ -212,56 +212,63 @@ func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
 
 func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, error) {
 	const (
-		recvSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
+		encRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
 	)
 
 	const (
-		firstSize  = encoding.CSizeUint64
-		secondSize = firstSize + encoding.CSizeUint64
-		firstHash  = secondSize + hashing.CSHA256Size
-		secondHash = firstHash + hashing.CSHA256Size
+		firstSizeIndex  = encoding.CSizeUint64
+		secondSizeIndex = firstSizeIndex + encoding.CSizeUint64
+		firstHashIndex  = secondSizeIndex + hashing.CSHA256Size
+		secondHashIndex = firstHashIndex + hashing.CSHA256Size
 	)
 
 	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
 
-	encRecvHead := make([]byte, recvSize)
+	encRecvHead := make([]byte, encRecvHeadSize)
 	n, err := p.fSocket.Read(encRecvHead)
 	if err != nil {
-		return 0, 0, nil, errors.WrapError(err, "read tcp hash block")
+		return 0, 0, nil, errors.WrapError(err, "read tcp header block")
 	}
 
-	if n != recvSize {
-		return 0, 0, nil, errors.NewError("hash block is invalid")
+	if n != encRecvHeadSize {
+		return 0, 0, nil, errors.NewError("invalid header block")
 	}
 
 	recvHead := p.getCipher().DecryptBytes(encRecvHead)
 	if recvHead == nil {
-		return 0, 0, nil, errors.NewError("decrypt head bytes")
+		return 0, 0, nil, errors.NewError("decrypt header bytes")
 	}
 
-	// mustLen = Size[u64] in uint64
-	encMsgBytesSize := [encoding.CSizeUint64]byte{}
-	copy(encMsgBytesSize[:], recvHead[:firstSize])
-	encMsgSize := encoding.BytesToUint64(encMsgBytesSize)
+	encMsgSizeBytes := [encoding.CSizeUint64]byte{}
+	copy(encMsgSizeBytes[:], recvHead[:firstSizeIndex])
 
-	voidBytesSize := [encoding.CSizeUint64]byte{}
-	copy(voidBytesSize[:], recvHead[firstSize:secondSize])
-	voidSize := encoding.BytesToUint64(voidBytesSize)
+	voidSizeBytes := [encoding.CSizeUint64]byte{}
+	copy(voidSizeBytes[:], recvHead[firstSizeIndex:secondSizeIndex])
+
+	encMsgSize := encoding.BytesToUint64(encMsgSizeBytes)
+	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadSizeOverHead) {
+		return 0, 0, nil, errors.NewError("invalid header.encMsgSize")
+	}
+
+	voidSize := encoding.BytesToUint64(voidSizeBytes)
+	if voidSize > p.fSettings.GetLimitVoidSize() {
+		return 0, 0, nil, errors.NewError("invalid header.voidSize")
+	}
 
 	// check hash sum of received sizes
-	hashBlock := recvHead[secondSize:firstHash]
-	gotHash := p.getAuthData(bytes.Join(
+	gotHash := recvHead[secondSizeIndex:firstHashIndex]
+	newHash := p.getAuthData(bytes.Join(
 		[][]byte{
-			encMsgBytesSize[:],
-			voidBytesSize[:],
+			encMsgSizeBytes[:],
+			voidSizeBytes[:],
 		},
 		[]byte{},
 	))
-	if !bytes.Equal(hashBlock, gotHash) {
-		return 0, 0, nil, errors.NewError("invalid hash by sizes")
+	if !bytes.Equal(newHash, gotHash) {
+		return 0, 0, nil, errors.NewError("invalid header.auth")
 	}
 
-	return encMsgSize, voidSize, recvHead[firstHash:secondHash], nil
+	return encMsgSize, voidSize, recvHead[firstHashIndex:secondHashIndex], nil
 }
 
 func (p *sConn) readPayload(pChPld chan payload.IPayload) {
@@ -271,13 +278,9 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}()
 
 	// large wait read deadline => the connection has not sent anything yet
-	msgSize, voidSize, hashBlock, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
+	msgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
 	switch {
 	case err != nil:
-		return
-	case voidSize > p.fSettings.GetLimitVoidSize():
-		return
-	case msgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadSizeOverHead):
 		return
 	}
 
@@ -287,14 +290,14 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 	}
 
 	// check hash sum of received data
-	gotHash := p.getAuthData(bytes.Join(
+	newHash := p.getAuthData(bytes.Join(
 		[][]byte{
 			dataBytes[:msgSize],
 			dataBytes[msgSize:],
 		},
 		[]byte{},
 	))
-	if !bytes.Equal(hashBlock, gotHash) {
+	if !bytes.Equal(newHash, gotHash) {
 		return
 	}
 
