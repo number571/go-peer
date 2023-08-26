@@ -8,6 +8,5 @@ import (
 type ICipher interface {
 	crypto.IEncrypter
 	crypto.IDecrypter
-	types.IConverter
 	types.IParameter
 }

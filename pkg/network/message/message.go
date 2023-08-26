@@ -4,13 +4,7 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/payload"
-)
-
-const (
-	// first digits of PI
-	authSalt = "1415926535_8979323846_2643383279_5028841971_6939937510"
 )
 
 var (
@@ -22,14 +16,14 @@ type sMessage struct {
 	fHashPayload []byte
 }
 
-func NewMessage(pPld payload.IPayload, pNetworkKey string) IMessage {
+func NewMessage(pPld payload.IPayload) IMessage {
 	return &sMessage{
 		fPayload:     pPld,
-		fHashPayload: getHash(pNetworkKey, pPld.ToBytes()),
+		fHashPayload: getHash(pPld.ToBytes()),
 	}
 }
 
-func LoadMessage(pData []byte, pNetworkKey string) IMessage {
+func LoadMessage(pData []byte) IMessage {
 	// check Hash[uN]
 	if len(pData) < hashing.CSHA256Size {
 		return nil
@@ -40,7 +34,7 @@ func LoadMessage(pData []byte, pNetworkKey string) IMessage {
 
 	if !bytes.Equal(
 		hashRecv,
-		getHash(pNetworkKey, pldBytes),
+		getHash(pldBytes),
 	) {
 		return nil
 	}
@@ -75,7 +69,6 @@ func (p *sMessage) ToBytes() []byte {
 	)
 }
 
-func getHash(pNetworkKey string, pBytes []byte) []byte {
-	authKey := keybuilder.NewKeyBuilder(1, []byte(authSalt)).Build(pNetworkKey)
-	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
+func getHash(pBytes []byte) []byte {
+	return hashing.NewSHA256Hasher(pBytes).ToBytes()
 }

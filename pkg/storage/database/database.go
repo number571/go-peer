@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	cSaltKey = "__SALT__"
+	cSaltKey  = "__SALT__"
+	cSaltSize = 32
 )
 
 var (
@@ -23,10 +24,10 @@ var (
 
 type sKeyValueDB struct {
 	fMutex    sync.Mutex
-	fSalt     []byte
 	fDB       *leveldb.DB
 	fSettings storage.ISettings
 	fCipher   symmetric.ICipher
+	fAuthKey  []byte
 }
 
 func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
@@ -35,22 +36,28 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 		return nil, errors.WrapError(err, "open database")
 	}
 
-	salt, err := db.Get([]byte(cSaltKey), nil)
+	saltValue, err := db.Get([]byte(cSaltKey), nil)
 	if err != nil {
 		if !errors.HasError(err, leveldb.ErrNotFound) {
 			return nil, errors.WrapError(err, "read salt")
 		}
-		salt = random.NewStdPRNG().GetBytes(symmetric.CAESKeySize)
-		db.Put([]byte(cSaltKey), salt, nil)
+		saltValue = random.NewStdPRNG().GetBytes(2 * cSaltSize)
+		db.Put([]byte(cSaltKey), saltValue, nil)
 	}
 
-	keyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), salt)
-	cipherKey := keyBuilder.Build(pSett.GetPassword())
+	cipherSalt := saltValue[:cSaltSize]
+	cipherKeyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), cipherSalt)
+	cipherKey := cipherKeyBuilder.Build(pSett.GetPassword())
+
+	authSalt := saltValue[cSaltSize:]
+	authKeyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), authSalt)
+	authKey := authKeyBuilder.Build(pSett.GetPassword())
+
 	return &sKeyValueDB{
-		fSalt:     salt,
 		fDB:       db,
 		fSettings: pSett,
 		fCipher:   symmetric.NewAESCipher(cipherKey),
+		fAuthKey:  authKey,
 	}, nil
 }
 
@@ -62,7 +69,7 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := p.fDB.Put(p.tryHash(pKey), doEncrypt(p.fCipher, pValue), nil); err != nil {
+	if err := p.fDB.Put(p.tryHash(pKey), doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
 		return errors.WrapError(err, "insert key/value to database")
 	}
 	return nil
@@ -83,6 +90,7 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 
 	return tryDecrypt(
 		p.fCipher,
+		p.fAuthKey,
 		encValue,
 	)
 }
@@ -111,5 +119,5 @@ func (p *sKeyValueDB) tryHash(pKey []byte) []byte {
 	if !p.fSettings.GetHashing() {
 		return pKey
 	}
-	return hashing.NewHMACSHA256Hasher(p.fSalt, pKey).ToBytes()
+	return hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 }

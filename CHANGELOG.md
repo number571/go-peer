@@ -11,6 +11,7 @@
 - Update `pkg/crypto/entropy`: now used pbkdf2. {[Issue](https://github.com/number571/go-peer/issues/4)}
 - Update `pkg/storage`: update test
 - Update `cmd/hidden_lake/messenger`: append entropy check password
+- Update `pkg/client,pkg/network/conn,pkg/storage`: append comments with algorithm's work
 
 ### CHANGES
 
@@ -19,6 +20,7 @@
 - Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder 
 - Update `cmd/hidden_lake/messenger`: change login="user", password="password" => login="username", password="hello, world!"
 - Update `pkg/*/_examples`: update examples for client, network, anonymity packages
+- Update `pkg/crypto/symmetric`: new cipher now create cipher.Block interface
 
 ### BUG FIXES
 

@@ -10,19 +10,18 @@ import (
 const (
 	tcHead = 12345
 	tcBody = "hello, world!"
-	tcKey  = "network-key"
 )
 
 func TestMessage(t *testing.T) {
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
-	msg := NewMessage(pld, tcKey)
+	msg := NewMessage(pld)
 
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
 		return
 	}
 
-	if !bytes.Equal(msg.GetHash(), getHash(tcKey, pld.ToBytes())) {
+	if !bytes.Equal(msg.GetHash(), getHash(pld.ToBytes())) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -32,7 +31,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg1 := LoadMessage(msg.ToBytes(), tcKey)
+	msg1 := LoadMessage(msg.ToBytes())
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
 		t.Error("load message not equal new message")
 		return

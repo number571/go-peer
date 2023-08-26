@@ -16,14 +16,35 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+/*
+	NETWORK MESSAGE FORMAT
+
+	E( LEM || LV || H(EM||V) ) || EM || V
+	where
+		LEM = L(EM)
+		LV  = L(V)
+		EM  = E(M)
+		where
+			E - encrypt (use cipher-key)
+			H - hmac (use auth-key)
+			L - length
+			M - message bytes
+			V = void bytes
+*/
+
 const (
 	// IV + Hash + PayloadHead
 	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + encoding.CSizeUint64
 )
 
 const (
+	cWorkSize = 1
+
+	// first digits of PI
+	cAuthSalt = "1415926535_8979323846_2643383279_5028841971_6939937510"
+
 	// seconds digits of PI
-	encryptSalt = "5820974944_5923078164_0628620899_8628034825_3421170679"
+	cCipherSalt = "5820974944_5923078164_0628620899_8628034825_3421170679"
 )
 
 var (
@@ -31,11 +52,15 @@ var (
 )
 
 type sConn struct {
-	fMutex      sync.Mutex
-	fSocket     net.Conn
-	fSettings   ISettings
-	fCipher     symmetric.ICipher
+	fWriteMutex  sync.Mutex
+	fNetKeyMutex sync.Mutex
+
+	fSocket   net.Conn
+	fSettings ISettings
+
 	fNetworkKey string
+	fAuthKey    []byte
+	fCipherKey  []byte
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
@@ -47,31 +72,31 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 }
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
-	keyBuilder := keybuilder.NewKeyBuilder(1, []byte(encryptSalt))
-	cipherKey := keyBuilder.Build(pSett.GetNetworkKey())
+	networkKey := pSett.GetNetworkKey()
+	cipherKey, authKey := buildKeys(networkKey)
+
 	return &sConn{
 		fSettings:   pSett,
 		fSocket:     pConn,
-		fNetworkKey: pSett.GetNetworkKey(),
-		fCipher:     symmetric.NewAESCipher(cipherKey),
+		fNetworkKey: networkKey,
+		fAuthKey:    authKey,
+		fCipherKey:  cipherKey,
 	}
 }
 
 func (p *sConn) GetNetworkKey() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fNetKeyMutex.Lock()
+	defer p.fNetKeyMutex.Unlock()
 
 	return p.fNetworkKey
 }
 
 func (p *sConn) SetNetworkKey(pNetworkKey string) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fNetKeyMutex.Lock()
+	defer p.fNetKeyMutex.Unlock()
 
 	p.fNetworkKey = pNetworkKey
-
-	keyBuilder := keybuilder.NewKeyBuilder(1, []byte(encryptSalt))
-	p.fCipher = symmetric.NewAESCipher(keyBuilder.Build(pNetworkKey))
+	p.fCipherKey, p.fAuthKey = buildKeys(pNetworkKey)
 }
 
 func (p *sConn) GetSettings() ISettings {
@@ -106,28 +131,19 @@ func (p *sConn) Close() error {
 }
 
 func (p *sConn) WritePayload(pPld payload.IPayload) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	msgBytes := message.NewMessage(pPld, p.fNetworkKey).ToBytes()
-	encMsgBytes := p.fCipher.EncryptBytes(msgBytes)
+	p.fWriteMutex.Lock()
+	defer p.fWriteMutex.Unlock()
 
 	prng := random.NewStdPRNG()
-	voidBytes := prng.GetBytes(prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1))
+	randVoidSize := prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1)
+	voidBytes := prng.GetBytes(randVoidSize)
 
-	// send headers with length and hash of data blocks
-	// send data blocks (encMsgBytes || voidBytes)
+	msgBytes := message.NewMessage(pPld).ToBytes()
+	encMsgBytes := p.getCipher().EncryptBytes(msgBytes)
+
 	err := p.sendBytes(bytes.Join(
 		[][]byte{
-			p.getBlockSize(encMsgBytes),
-			p.getBlockSize(voidBytes),
-			p.getHashBlock(bytes.Join(
-				[][]byte{
-					msgBytes,
-					voidBytes,
-				},
-				[]byte{},
-			)),
+			p.getHeadBytes(encMsgBytes, voidBytes),
 			bytes.Join(
 				[][]byte{
 					encMsgBytes,
@@ -167,51 +183,56 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 	return nil
 }
 
-func (p *sConn) getBlockSize(pBytes []byte) []byte {
-	blockSize := encoding.Uint64ToBytes(uint64(len(pBytes)))
-	return p.fCipher.EncryptBytes(blockSize[:])
+func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
+	encMsgBytesSize := encoding.Uint64ToBytes(uint64(len(pEncMsgBytes)))
+	voidBytesSize := encoding.Uint64ToBytes(uint64(len(pVoidBytes)))
+
+	return p.getCipher().EncryptBytes(bytes.Join(
+		[][]byte{
+			encMsgBytesSize[:],
+			voidBytesSize[:],
+			p.getAuthData(bytes.Join(
+				[][]byte{
+					pEncMsgBytes,
+					pVoidBytes,
+				},
+				[]byte{},
+			)),
+		},
+		[]byte{},
+	))
 }
 
-func (p *sConn) getHashBlock(pBytes []byte) []byte {
-	hashBlock := hashing.NewSHA256Hasher(pBytes).ToBytes()
-	return p.fCipher.EncryptBytes(hashBlock)
-}
+func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, error) {
+	const recvSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + hashing.CSHA256Size
 
-func (p *sConn) recvBlockSize(deadline time.Duration) (uint64, error) {
 	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
 
-	encBufLen := make([]byte, symmetric.CAESBlockSize+encoding.CSizeUint64)
-	n, err := p.fSocket.Read(encBufLen)
+	encRecvHead := make([]byte, recvSize)
+	n, err := p.fSocket.Read(encRecvHead)
 	if err != nil {
-		return 0, errors.WrapError(err, "read tcp block size")
+		return 0, 0, nil, errors.WrapError(err, "read tcp hash block")
 	}
 
-	if n != symmetric.CAESBlockSize+encoding.CSizeUint64 {
-		return 0, errors.NewError("block size is invalid")
+	if n != recvSize {
+		return 0, 0, nil, errors.NewError("hash block is invalid")
+	}
+
+	recvHead := p.getCipher().DecryptBytes(encRecvHead)
+	if recvHead == nil {
+		return 0, 0, nil, errors.NewError("decrypt head bytes")
 	}
 
 	// mustLen = Size[u64] in uint64
-	bufLen := p.fCipher.DecryptBytes(encBufLen)
 	arrLen := [encoding.CSizeUint64]byte{}
-	copy(arrLen[:], bufLen)
 
-	return encoding.BytesToUint64(arrLen), nil
-}
+	copy(arrLen[:], recvHead[:encoding.CSizeUint64])
+	msgSize := encoding.BytesToUint64(arrLen)
 
-func (p *sConn) recvHashBlock(deadline time.Duration) ([]byte, error) {
-	p.fSocket.SetReadDeadline(time.Now().Add(deadline))
+	copy(arrLen[:], recvHead[encoding.CSizeUint64:2*encoding.CSizeUint64])
+	voidSize := encoding.BytesToUint64(arrLen)
 
-	hashData := make([]byte, symmetric.CAESBlockSize+hashing.CSHA256Size)
-	n, err := p.fSocket.Read(hashData)
-	if err != nil {
-		return nil, errors.WrapError(err, "read tcp hash block")
-	}
-
-	if n != symmetric.CAESBlockSize+hashing.CSHA256Size {
-		return nil, errors.NewError("hash block is invalid")
-	}
-
-	return p.fCipher.DecryptBytes(hashData), nil
+	return msgSize, voidSize, recvHead[2*encoding.CSizeUint64:], nil
 }
 
 func (p *sConn) readPayload(pChPld chan payload.IPayload) {
@@ -220,18 +241,14 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 		pChPld <- pld
 	}()
 
-	msgSize, err := p.recvBlockSize(p.fSettings.GetWaitReadDeadline()) // the connection has not sent anything yet
-	if err != nil || msgSize > (p.fSettings.GetMessageSizeBytes()+cPayloadSizeOverHead) {
+	// large wait read deadline => the connection has not sent anything yet
+	msgSize, voidSize, hashBlock, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
+	switch {
+	case err != nil:
 		return
-	}
-
-	voidSize, err := p.recvBlockSize(p.fSettings.GetReadDeadline())
-	if err != nil || voidSize > p.fSettings.GetLimitVoidSize() {
+	case voidSize > p.fSettings.GetLimitVoidSize():
 		return
-	}
-
-	hashBlock, err := p.recvHashBlock(p.fSettings.GetReadDeadline())
-	if err != nil || len(hashBlock) != hashing.CSHA256Size {
+	case msgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadSizeOverHead):
 		return
 	}
 
@@ -240,22 +257,22 @@ func (p *sConn) readPayload(pChPld chan payload.IPayload) {
 		return
 	}
 
-	// try unpack message from bytes
-	msgBytes := p.getCipher().DecryptBytes(dataBytes[:msgSize])
-	msg := message.LoadMessage(msgBytes, p.GetNetworkKey())
-	if msg == nil {
-		return
-	}
-
 	// check hash sum of received data
-	gotHash := hashing.NewSHA256Hasher(bytes.Join(
+	gotHash := p.getAuthData(bytes.Join(
 		[][]byte{
-			msgBytes,
+			dataBytes[:msgSize],
 			dataBytes[msgSize:],
 		},
 		[]byte{},
-	)).ToBytes()
+	))
 	if !bytes.Equal(hashBlock, gotHash) {
+		return
+	}
+
+	// try unpack message from bytes
+	msgBytes := p.getCipher().DecryptBytes(dataBytes[:msgSize])
+	msg := message.LoadMessage(msgBytes)
+	if msg == nil {
 		return
 	}
 
@@ -290,8 +307,21 @@ func (p *sConn) recvDataBytes(pMustLen uint64) ([]byte, error) {
 }
 
 func (p *sConn) getCipher() symmetric.ICipher {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fNetKeyMutex.Lock()
+	defer p.fNetKeyMutex.Unlock()
 
-	return p.fCipher
+	return symmetric.NewAESCipher(p.fCipherKey)
+}
+
+func (p *sConn) getAuthData(pData []byte) []byte {
+	p.fNetKeyMutex.Lock()
+	defer p.fNetKeyMutex.Unlock()
+
+	return hashing.NewHMACSHA256Hasher(p.fAuthKey, pData).ToBytes()
+}
+
+func buildKeys(pNetworkKey string) ([]byte, []byte) {
+	cipherKeyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cCipherSalt))
+	authKeyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cAuthSalt))
+	return cipherKeyBuilder.Build(pNetworkKey), authKeyBuilder.Build(pNetworkKey)
 }
