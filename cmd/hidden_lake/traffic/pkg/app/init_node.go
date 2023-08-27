@@ -31,7 +31,6 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 				FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
 				FReadDeadline:     queueDuration,
 				FWriteDeadline:    queueDuration,
-				FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 			}),
 		}),
 	).HandleFunc(

@@ -40,7 +40,6 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
 					FReadDeadline:     queueDuration,
 					FWriteDeadline:    queueDuration,
-					FFetchTimeWait:    1, // conn.FetchPayload not used in anonymity package
 				}),
 			}),
 		),

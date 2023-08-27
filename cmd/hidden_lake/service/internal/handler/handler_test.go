@@ -222,7 +222,6 @@ func testNewNetworkNode(addr string) network.INode {
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,
-				FFetchTimeWait:    1, // not used
 			}),
 		}),
 	)

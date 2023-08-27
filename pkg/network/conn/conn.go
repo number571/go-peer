@@ -110,25 +110,6 @@ func (p *sConn) GetSocket() net.Conn {
 	return p.fSocket
 }
 
-func (p *sConn) FetchPayload(pPld payload.IPayload) (payload.IPayload, error) {
-	if err := p.WritePayload(pPld); err != nil {
-		return nil, errors.WrapError(err, "write payload")
-	}
-
-	chPld := make(chan payload.IPayload)
-	go p.readPayload(chPld)
-
-	select {
-	case rpld := <-chPld:
-		if rpld == nil {
-			return nil, errors.NewError("read payload")
-		}
-		return rpld, nil
-	case <-time.After(p.fSettings.GetFetchTimeWait()):
-		return nil, errors.NewError("read payload (timeout)")
-	}
-}
-
 func (p *sConn) Close() error {
 	return p.fSocket.Close()
 }
@@ -164,10 +145,38 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	return nil
 }
 
-func (p *sConn) ReadPayload() payload.IPayload {
-	chPld := make(chan payload.IPayload)
-	go p.readPayload(chPld)
-	return <-chPld
+func (p *sConn) ReadPayload() (payload.IPayload, error) {
+	// large wait read deadline => the connection has not sent anything yet
+	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
+	if err != nil {
+		return nil, errors.WrapError(err, "receive head bytes")
+	}
+
+	dataBytes, err := p.recvDataBytes(encMsgSize + voidSize)
+	if err != nil {
+		return nil, errors.WrapError(err, "receive data bytes")
+	}
+
+	// check hash sum of received data
+	newHash := p.getAuthData(bytes.Join(
+		[][]byte{
+			dataBytes[:encMsgSize],
+			dataBytes[encMsgSize:],
+		},
+		[]byte{},
+	))
+	if !bytes.Equal(newHash, gotHash) {
+		return nil, errors.NewError("got invalid hash")
+	}
+
+	// try unpack message from bytes
+	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
+	msg := message.LoadMessage(msgBytes)
+	if msg == nil {
+		return nil, errors.NewError("got invalid message bytes")
+	}
+
+	return msg.GetPayload(), nil
 }
 
 func (p *sConn) sendBytes(pBytes []byte) error {
@@ -268,45 +277,6 @@ func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, e
 	}
 
 	return encMsgSize, voidSize, recvHead[firstHashIndex:secondHashIndex], nil
-}
-
-func (p *sConn) readPayload(pChPld chan payload.IPayload) {
-	var pld payload.IPayload
-	defer func() {
-		pChPld <- pld
-	}()
-
-	// large wait read deadline => the connection has not sent anything yet
-	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
-	if err != nil {
-		return
-	}
-
-	dataBytes, err := p.recvDataBytes(encMsgSize + voidSize)
-	if err != nil {
-		return
-	}
-
-	// check hash sum of received data
-	newHash := p.getAuthData(bytes.Join(
-		[][]byte{
-			dataBytes[:encMsgSize],
-			dataBytes[encMsgSize:],
-		},
-		[]byte{},
-	))
-	if !bytes.Equal(newHash, gotHash) {
-		return
-	}
-
-	// try unpack message from bytes
-	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
-	msg := message.LoadMessage(msgBytes)
-	if msg == nil {
-		return
-	}
-
-	pld = msg.GetPayload()
 }
 
 func (p *sConn) recvDataBytes(pMustLen uint64) ([]byte, error) {

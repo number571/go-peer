@@ -25,7 +25,6 @@ func TestConn(t *testing.T) {
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
 			FWriteDeadline:    time.Minute,
-			FFetchTimeWait:    5 * time.Second,
 		}),
 		testutils.TgAddrs[17],
 	)
@@ -34,7 +33,12 @@ func TestConn(t *testing.T) {
 		return
 	}
 
-	pld, err := conn.FetchPayload(payload.NewPayload(tcHead, []byte(tcBody)))
+	if err := conn.WritePayload(payload.NewPayload(tcHead, []byte(tcBody))); err != nil {
+		t.Error(err)
+		return
+	}
+
+	pld, err := conn.ReadPayload()
 	if err != nil {
 		t.Error(err)
 		return
@@ -66,12 +70,11 @@ func testNewService(t *testing.T) net.Listener {
 					FWaitReadDeadline: time.Hour,
 					FReadDeadline:     time.Minute,
 					FWriteDeadline:    time.Minute,
-					FFetchTimeWait:    5 * time.Second,
 				}),
 				aconn,
 			)
-			pld := conn.ReadPayload()
-			if pld == nil {
+			pld, err := conn.ReadPayload()
+			if err != nil {
 				break
 			}
 

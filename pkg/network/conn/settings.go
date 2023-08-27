@@ -14,7 +14,6 @@ type sSettings struct {
 	FWaitReadDeadline time.Duration
 	FReadDeadline     time.Duration
 	FWriteDeadline    time.Duration
-	FFetchTimeWait    time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -25,7 +24,6 @@ func NewSettings(pSett *SSettings) ISettings {
 		FWaitReadDeadline: pSett.FWaitReadDeadline,
 		FReadDeadline:     pSett.FReadDeadline,
 		FWriteDeadline:    pSett.FWriteDeadline,
-		FFetchTimeWait:    pSett.FFetchTimeWait,
 	}).mustNotNull()
 }
 
@@ -41,9 +39,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FWriteDeadline == 0 {
 		panic(`p.FWriteDeadline == 0`)
-	}
-	if p.FFetchTimeWait == 0 {
-		panic(`p.FFetchTimeWait == 0`)
 	}
 	return p
 }
@@ -70,8 +65,4 @@ func (p *sSettings) GetReadDeadline() time.Duration {
 
 func (p *sSettings) GetWriteDeadline() time.Duration {
 	return p.FWriteDeadline
-}
-
-func (p *sSettings) GetFetchTimeWait() time.Duration {
-	return p.FFetchTimeWait
 }

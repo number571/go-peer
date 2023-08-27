@@ -108,7 +108,6 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
 				FWriteDeadline:    time.Minute,
-				FFetchTimeWait:    1, // not used
 			}),
 		})
 		nodes[i] = NewNode(sett)

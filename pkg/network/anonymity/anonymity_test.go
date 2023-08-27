@@ -176,7 +176,6 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 					FWaitReadDeadline: time.Hour,
 					FReadDeadline:     time.Minute,
 					FWriteDeadline:    time.Minute,
-					FFetchTimeWait:    1, // not used
 				}),
 			}),
 		),

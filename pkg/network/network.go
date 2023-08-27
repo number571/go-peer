@@ -225,7 +225,11 @@ func (p *sNode) DelConnection(pAddress string) error {
 func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 	defer p.DelConnection(pAddress)
 	for {
-		ok := p.handleMessage(pConn, pConn.ReadPayload())
+		pld, err := pConn.ReadPayload()
+		if err != nil {
+			break
+		}
+		ok := p.handleMessage(pConn, pld)
 		if !ok {
 			break
 		}
@@ -236,11 +240,6 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pConn conn.IConn, pPld payload.IPayload) bool {
-	// null message from connection is error
-	if pPld == nil {
-		return false
-	}
-
 	// check message in mapping by hash
 	hash := hashing.NewSHA256Hasher(pPld.ToBytes()).ToBytes()
 	if p.inMappingWithSet(hash) {
@@ -250,6 +249,7 @@ func (p *sNode) handleMessage(pConn conn.IConn, pPld payload.IPayload) bool {
 	// get function by head
 	f, ok := p.getFunction(pPld.GetHead())
 	if !ok || f == nil {
+		// function is not found = protocol error
 		return false
 	}
 

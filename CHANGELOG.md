@@ -12,6 +12,7 @@
 - Update `pkg/storage`: update test
 - Update `cmd/hidden_lake/messenger`: append entropy check password
 - Update `pkg/client,pkg/network/conn,pkg/storage`: append comments with algorithm's work
+- Update `pkg/network/conn`: readPayload now return error reason
 
 ### CHANGES
 
@@ -22,6 +23,7 @@
 - Update `pkg/*/_examples`: update examples for client, network, anonymity packages
 - Update `pkg/crypto/symmetric`: new cipher now create cipher.Block interface
 - Update `cmd/hidden_lake/messenger/README.md`: fix urls to images
+- Update `pkg/network/conn`: deleted FetchPayload method
 
 ### BUG FIXES
 

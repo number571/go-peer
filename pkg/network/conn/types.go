@@ -14,9 +14,8 @@ type IConn interface {
 	GetSettings() ISettings
 	GetSocket() net.Conn
 
-	FetchPayload(pld payload.IPayload) (payload.IPayload, error)
 	WritePayload(payload.IPayload) error
-	ReadPayload() payload.IPayload
+	ReadPayload() (payload.IPayload, error)
 
 	GetNetworkKey() string
 	SetNetworkKey(string)
@@ -26,7 +25,6 @@ type ISettings interface {
 	GetNetworkKey() string
 	GetMessageSizeBytes() uint64
 	GetLimitVoidSize() uint64
-	GetFetchTimeWait() time.Duration
 	GetWaitReadDeadline() time.Duration
 	GetReadDeadline() time.Duration
 	GetWriteDeadline() time.Duration
