@@ -140,34 +140,34 @@ $ make
 
 Sign up login/password and additional private key. If field with private key is null than private key generated.
 
-<img src="images/v2/signup.png" alt="signup.png"/>
+<img src="_images/v2/signup.png" alt="signup.png"/>
 
 ### Signin page
 
 Sign in with login/password. Authorized client identified by a private key and can push messages into database.
 
-<img src="images/v2/signin.png" alt="signin.png"/>
+<img src="_images/v2/signin.png" alt="signin.png"/>
 
 ### About page
 
 Base information about projects HLM and HLS with links to source.
 
-<img src="images/v2/about.png" alt="about.png"/>
+<img src="_images/v2/about.png" alt="about.png"/>
 
 ### Settings page
 
 Information about public key and connections. Connections can be appended and deleted.
 
-<img src="images/v2/settings.png" alt="settings.png"/>
+<img src="_images/v2/settings.png" alt="settings.png"/>
 
 ### Friends page
 
 Information about friends. Friends can be appended and deleted.
 
-<img src="images/v2/friends.png" alt="friends.png"/>
+<img src="_images/v2/friends.png" alt="friends.png"/>
 
 ### Chat page
 
 Chat with friend. The chat is based on web sockets, so it can update messages in real time. Messages can be sent.
 
-<img src="images/v2/chat.png" alt="chat.png"/>
+<img src="_images/v2/chat.png" alt="chat.png"/>

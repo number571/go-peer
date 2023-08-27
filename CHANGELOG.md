@@ -21,6 +21,7 @@
 - Update `cmd/hidden_lake/messenger`: change login="user", password="password" => login="username", password="hello, world!"
 - Update `pkg/*/_examples`: update examples for client, network, anonymity packages
 - Update `pkg/crypto/symmetric`: new cipher now create cipher.Block interface
+- Update `cmd/hidden_lake/messenger/README.md`: fix urls to images
 
 ### BUG FIXES
 
