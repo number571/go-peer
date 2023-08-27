@@ -36,10 +36,12 @@ func main() {
 		panic(err)
 	}
 
-	pld, err := conn.FetchPayload(payload.NewPayload(
-		serviceHeader,
-		[]byte("hello, world!")),
-	)
+	pld := payload.NewPayload(serviceHeader, []byte("hello, world!"))
+	if err := conn.WritePayload(pld); err != nil {
+		panic(err)
+	}
+
+	pld, err = conn.ReadPayload()
 	if err != nil {
 		panic(err)
 	}
@@ -63,6 +65,5 @@ func connSettings() conn.ISettings {
 		FWaitReadDeadline: time.Hour,
 		FReadDeadline:     time.Minute,
 		FWriteDeadline:    time.Minute,
-		FFetchTimeWait:    5 * time.Second,
 	})
 }

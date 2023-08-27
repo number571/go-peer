@@ -173,6 +173,5 @@ func connSettings() conn.ISettings {
 		FWaitReadDeadline: time.Hour,
 		FReadDeadline:     time.Minute,
 		FWriteDeadline:    time.Minute,
-		FFetchTimeWait:    1, // not used
 	})
 }
