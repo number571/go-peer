@@ -120,7 +120,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		panic(err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 	nodes[0].AddConnection(testutils.TgAddrs[0])
 	nodes[1].AddConnection(testutils.TgAddrs[1])
