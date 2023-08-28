@@ -55,15 +55,15 @@ var (
 )
 
 type sConn struct {
-	fWriteMutex  sync.Mutex
-	fNetKeyMutex sync.Mutex
+	fMutex    sync.Mutex
+	fKeyMutex sync.Mutex
 
 	fSocket   net.Conn
 	fSettings ISettings
 
 	fNetworkKey string
 	fAuthKey    []byte
-	fCipherKey  []byte
+	fCipher     symmetric.ICipher
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
@@ -76,30 +76,15 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	networkKey := pSett.GetNetworkKey()
-	cipherKey, authKey := buildKeys(networkKey)
+	cipher, authKey := buildState(networkKey)
 
 	return &sConn{
 		fSettings:   pSett,
 		fSocket:     pConn,
 		fNetworkKey: networkKey,
 		fAuthKey:    authKey,
-		fCipherKey:  cipherKey,
+		fCipher:     cipher,
 	}
-}
-
-func (p *sConn) GetNetworkKey() string {
-	p.fNetKeyMutex.Lock()
-	defer p.fNetKeyMutex.Unlock()
-
-	return p.fNetworkKey
-}
-
-func (p *sConn) SetNetworkKey(pNetworkKey string) {
-	p.fNetKeyMutex.Lock()
-	defer p.fNetKeyMutex.Unlock()
-
-	p.fNetworkKey = pNetworkKey
-	p.fCipherKey, p.fAuthKey = buildKeys(pNetworkKey)
 }
 
 func (p *sConn) GetSettings() ISettings {
@@ -115,8 +100,8 @@ func (p *sConn) Close() error {
 }
 
 func (p *sConn) WritePayload(pPld payload.IPayload) error {
-	p.fWriteMutex.Lock()
-	defer p.fWriteMutex.Unlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	prng := random.NewStdPRNG()
 	randVoidSize := prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1)
@@ -307,21 +292,32 @@ func (p *sConn) recvDataBytes(pMustLen uint64) ([]byte, error) {
 }
 
 func (p *sConn) getCipher() symmetric.ICipher {
-	p.fNetKeyMutex.Lock()
-	defer p.fNetKeyMutex.Unlock()
-
-	return symmetric.NewAESCipher(p.fCipherKey)
+	p.autoUpdateState()
+	return p.fCipher
 }
 
 func (p *sConn) getAuthData(pData []byte) []byte {
-	p.fNetKeyMutex.Lock()
-	defer p.fNetKeyMutex.Unlock()
-
+	p.autoUpdateState()
 	return hashing.NewHMACSHA256Hasher(p.fAuthKey, pData).ToBytes()
 }
 
-func buildKeys(pNetworkKey string) ([]byte, []byte) {
+func (p *sConn) autoUpdateState() {
+	p.fKeyMutex.Lock()
+	defer p.fKeyMutex.Unlock()
+
+	// networkKey can be updated from fSettings
+	networkKey := p.fSettings.GetNetworkKey()
+	if p.fNetworkKey == networkKey {
+		return
+	}
+
+	// rewrite sConn fields
+	p.fNetworkKey = networkKey
+	p.fCipher, p.fAuthKey = buildState(p.fNetworkKey)
+}
+
+func buildState(pNetworkKey string) (symmetric.ICipher, []byte) {
 	cipherKeyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cCipherSalt))
 	authKeyBuilder := keybuilder.NewKeyBuilder(cWorkSize, []byte(cAuthSalt))
-	return cipherKeyBuilder.Build(pNetworkKey), authKeyBuilder.Build(pNetworkKey)
+	return symmetric.NewAESCipher(cipherKeyBuilder.Build(pNetworkKey)), authKeyBuilder.Build(pNetworkKey)
 }

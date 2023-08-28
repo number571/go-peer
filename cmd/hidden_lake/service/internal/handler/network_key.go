@@ -25,7 +25,7 @@ func HandleNetworkKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode
 		switch pR.Method {
 		case http.MethodGet:
 			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, pNode.GetNetworkNode().GetNetworkKey())
+			api.Response(pW, http.StatusOK, pNode.GetNetworkNode().GetSettings().GetConnSettings().GetNetworkKey())
 			return
 
 		case http.MethodPost:
@@ -43,7 +43,7 @@ func HandleNetworkKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode
 				return
 			}
 
-			pNode.GetNetworkNode().SetNetworkKey(networkKey)
+			pNode.GetNetworkNode().GetSettings().GetConnSettings().SetNetworkKey(networkKey)
 
 			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: set network key")

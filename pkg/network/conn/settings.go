@@ -1,6 +1,9 @@
 package conn
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 var (
 	_ ISettings = &sSettings{}
@@ -8,6 +11,8 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
+	fMutex sync.Mutex
+
 	FNetworkKey       string
 	FMessageSizeBytes uint64
 	FLimitVoidSize    uint64
@@ -44,7 +49,17 @@ func (p *sSettings) mustNotNull() ISettings {
 }
 
 func (p *sSettings) GetNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	return p.FNetworkKey
+}
+
+func (p *sSettings) SetNetworkKey(pNetworkKey string) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	p.FNetworkKey = pNetworkKey
 }
 
 func (p *sSettings) GetMessageSizeBytes() uint64 {

@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `pkg/network`: fix update network key
+
 <!-- ... -->
 
 ## v1.5.17

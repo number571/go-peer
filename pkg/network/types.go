@@ -21,9 +21,6 @@ type INode interface {
 
 	HandleFunc(uint64, IHandlerF) INode
 	BroadcastPayload(payload.IPayload) error
-
-	GetNetworkKey() string
-	SetNetworkKey(string)
 }
 
 type ISettings interface {

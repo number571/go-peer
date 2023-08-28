@@ -16,12 +16,12 @@ type IConn interface {
 
 	WritePayload(payload.IPayload) error
 	ReadPayload() (payload.IPayload, error)
-
-	GetNetworkKey() string
-	SetNetworkKey(string)
 }
 
 type ISettings interface {
+	// for subsequent inheritance on multiple connections
+	SetNetworkKey(string)
+
 	GetNetworkKey() string
 	GetMessageSizeBytes() uint64
 	GetLimitVoidSize() uint64

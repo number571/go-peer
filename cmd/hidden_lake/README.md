@@ -39,6 +39,7 @@ $ make docker-run
                 <th>Type</th>
                 <th>Host</th>
                 <th>Port</th>
+                <th>Network key</th>
                 <th>Connections</th>
                 <th>Provider</th>
                 <th>Characteristics</th>
@@ -49,6 +50,7 @@ $ make docker-run
                 <td>HLTr/HLTs</td>
                 <td>v1989393.hosted-by-vdsina.ru</td>
                 <td>9581/9582</td>
+                <td></td>
                 <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
                 <td>1x3.4GHz, 1.0GB RAM, 30GB HDD</td>
@@ -59,6 +61,7 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>6a20015eacd8.vps.myjino.ru</td>
                 <td>49356</td>
+                <td></td>
                 <td>[1]</td>
                 <td><a href="https://jino.ru">jino.ru</a></td>
                 <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
@@ -69,10 +72,22 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>195.133.1.126</td>
                 <td>9581</td>
+                <td></td>
                 <td>[1,2]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>HLTr</td>
+                <td>193.233.18.245</td>
+                <td>9581</td>
+                <td>oi4r9NW9Le7fKF9d</td>
+                <td>[]</td>
+                <td><a href="https://4vps.su">4vps.su</a></td>
+                <td>1x2.5GHz, 1.0GB RAM, 5GB SSD</td>
+                <td>±22.08.2024</td>
             </tr>
         </table>
     </td>
