@@ -83,6 +83,7 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		fSettings: pSett,
 		fPrivKey:  pPrivKey,
 	}
+
 	encMsg := client.encryptWithParams(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte{}),
@@ -91,23 +92,20 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 	)
 
 	client.fStructSize = uint64(len(encMsg.ToBytes()))
+	if limit := client.GetMessageLimit(); limit == 0 {
+		panic("the message size is lower than struct size")
+	}
+
 	return client
 }
 
-// Create PrivateKey by size and return limit message size.
 // Message is raw bytes of body payload without payload head.
-func GetMessageLimit(msgSize, keySize uint64) uint64 {
-	privKey := asymmetric.NewRSAPrivKey(keySize)
-	sett := message.NewSettings(&message.SSettings{
-		FMessageSizeBytes: msgSize,
-		FWorkSizeBits:     1, // default value
-	})
-	client := NewClient(sett, privKey).(*sClient)
-	// (msg limit) < (void msg size) + (payload head + payload head)
-	if msgSize < client.fStructSize {
-		panic("the message size is very low")
+func (p *sClient) GetMessageLimit() uint64 {
+	maxMsgSize := p.fSettings.GetMessageSizeBytes()
+	if maxMsgSize <= p.fStructSize {
+		return 0
 	}
-	return msgSize - client.fStructSize
+	return maxMsgSize - p.fStructSize
 }
 
 // Get public key from client object.
@@ -128,19 +126,15 @@ func (p *sClient) GetSettings() message.ISettings {
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
 func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) (message.IMessage, error) {
-	if pRecv.GetSize() != p.GetPubKey().GetSize() {
-		return nil, errors.NewError("size of public keys sender and receiver not equal")
-	}
-
 	var (
-		maxMsgSize = p.fSettings.GetMessageSizeBytes()
-		resultSize = uint64(len(pPld.GetBody())) + p.fStructSize
+		msgLimitSize = p.GetMessageLimit()
+		resultSize   = uint64(len(pPld.GetBody()))
 	)
 
-	if resultSize > maxMsgSize {
+	if resultSize > msgLimitSize {
 		return nil, errors.NewError(fmt.Sprintf(
 			"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
-			maxMsgSize,
+			msgLimitSize,
 			resultSize,
 		))
 	}
@@ -149,7 +143,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 		pRecv,
 		pPld,
 		p.fSettings.GetWorkSizeBits(),
-		maxMsgSize-resultSize,
+		msgLimitSize-resultSize,
 	), nil
 }
 
@@ -191,9 +185,11 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 			FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
 		},
 		FBody: message.SBodyMessage{
-			FHash:    encoding.HexEncode(hash),
-			FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-			FProof:   encoding.HexEncode(bProof[:]),
+			FHash:  encoding.HexEncode(hash),
+			FSign:  encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
+			FProof: encoding.HexEncode(bProof[:]),
+
+			// JSON field to raw Body (no need HEX encode)
 			FPayload: cipher.EncryptBytes(doublePayload.ToBytes()),
 		},
 	}

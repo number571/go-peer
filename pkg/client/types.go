@@ -12,6 +12,8 @@ type IClient interface {
 	GetPubKey() asymmetric.IPubKey
 	GetPrivKey() asymmetric.IPrivKey
 
+	GetMessageLimit() uint64
+
 	EncryptPayload(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
 	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }

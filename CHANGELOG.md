@@ -9,6 +9,7 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: now not deleted connections from HLS config after logout
+- Update `pkg/client`: move GetMessageLimit from func to method on *sClient
 
 ### BUG FIXES
 

@@ -9,6 +9,8 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	pkg_client "github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"golang.org/x/net/websocket"
 )
@@ -35,9 +37,17 @@ func (p *sApp) initInterfaceServiceHTTP() {
 
 	msgSize := p.fWrapper.GetConfig().GetMessageSizeBytes()
 	keySize := p.fWrapper.GetConfig().GetKeySizeBits()
-	msgLimitBytes := pkg_client.GetMessageLimit(msgSize, keySize)
+
+	randClient := pkg_client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: msgSize,
+			FWorkSizeBits:     1, // does not affect the size
+		}),
+		asymmetric.NewRSAPrivKey(keySize),
+	)
 
 	// overhead base64 format: https://ru.wikipedia.org/wiki/Base64
+	msgLimitBytes := randClient.GetMessageLimit()
 	msgLimitBase64 := msgLimitBytes - (msgLimitBytes / 4)
 
 	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fStateManager, p.fLogger))                                 // GET
