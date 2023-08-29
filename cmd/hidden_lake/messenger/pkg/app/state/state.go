@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/stringtools"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -197,38 +196,6 @@ func (p *sStateManager) SetNetworkKey(pNetworkKey string) error {
 	)
 	if err != nil {
 		return errors.WrapError(err, "set network key (state updater)")
-	}
-	return nil
-}
-
-func (p *sStateManager) AddConnection(pAddress string) error {
-	err := p.stateUpdater(
-		p.updateClientConnections,
-		func(storageValue *SStorageState) {
-			storageValue.FConnections = stringtools.UniqAppendToSlice(
-				storageValue.FConnections,
-				pAddress,
-			)
-		},
-	)
-	if err != nil {
-		return errors.WrapError(err, "add connection (state updater)")
-	}
-	return nil
-}
-
-func (p *sStateManager) DelConnection(pConnect string) error {
-	err := p.stateUpdater(
-		p.updateClientConnections,
-		func(storageValue *SStorageState) {
-			storageValue.FConnections = stringtools.DeleteFromSlice(
-				storageValue.FConnections,
-				pConnect,
-			)
-		},
-	)
-	if err != nil {
-		return errors.WrapError(err, "del connection (state updater)")
 	}
 	return nil
 }

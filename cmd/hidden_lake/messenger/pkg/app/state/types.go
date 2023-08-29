@@ -14,10 +14,9 @@ type STemplateState struct {
 }
 
 type SStorageState struct {
-	FNetworkKey  string            `json:"network_key"`
-	FPrivKey     string            `json:"priv_key"`
-	FConnections []string          `json:"connections"`
-	FFriends     map[string]string `json:"friends"`
+	FNetworkKey string            `json:"network_key"`
+	FPrivKey    string            `json:"priv_key"`
+	FFriends    map[string]string `json:"friends"`
 }
 
 type IStateManager interface {
@@ -40,7 +39,4 @@ type IStateManager interface {
 
 	AddFriend(string, asymmetric.IPubKey) error
 	DelFriend(string) error
-
-	AddConnection(string) error
-	DelConnection(string) error
 }

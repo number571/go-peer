@@ -6,9 +6,14 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/messenger`: now not deleted connections from HLS config after logout
+
 ### BUG FIXES
 
 - Update `pkg/network`: fix update network key
+- Update `cmd/hidden_lake/messenger`: fix state with network key
 
 <!-- ... -->
 

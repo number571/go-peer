@@ -23,10 +23,6 @@ func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 		return errors.WrapError(err, "update client friends")
 	}
 
-	if err := p.updateClientConnections(pStateValue); err != nil {
-		return errors.WrapError(err, "update client connections")
-	}
-
 	if err := p.updateClientNetworkKey(pStateValue); err != nil {
 		return errors.WrapError(err, "update client connections")
 	}
@@ -64,22 +60,6 @@ func (p *sStateManager) updateClientFriends(pStateValue *SStorageState) error {
 		pubKey := asymmetric.LoadRSAPubKey(pubKeyString)
 		if err := client.AddFriend(aliasName, pubKey); err != nil {
 			return errors.WrapError(err, "add friend")
-		}
-	}
-
-	return nil
-}
-
-func (p *sStateManager) updateClientConnections(pStateValue *SStorageState) error {
-	client := p.GetClient()
-
-	if err := p.clearClientConnections(); err != nil {
-		return errors.WrapError(err, "clear client connections")
-	}
-
-	for _, conn := range pStateValue.FConnections {
-		if err := client.AddConnection(conn); err != nil {
-			return errors.WrapError(err, "add connections")
 		}
 	}
 

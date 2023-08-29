@@ -50,6 +50,15 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 
 		pR.ParseForm()
 
+		client := pStateManager.GetClient()
+
+		myPubKey, _, err := client.GetPubKey()
+		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+			pLogger.PushWarn(httpLogger.Get("get_public_key"))
+			fmt.Fprint(pW, "error: read public key")
+			return
+		}
+
 		switch pR.FormValue("method") {
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
@@ -101,7 +110,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 					return
 				}
 			case false:
-				if err := pStateManager.AddConnection(connect); err != nil {
+				if err := client.AddConnection(connect); err != nil {
 					pLogger.PushWarn(httpLogger.Get("add_connection"))
 					fmt.Fprint(pW, "error: add connection")
 					return
@@ -125,7 +134,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 				return
 			}
 
-			if err := pStateManager.DelConnection(connect); err != nil {
+			if err := client.DelConnection(connect); err != nil {
 				pLogger.PushWarn(httpLogger.Get("delete_connection"))
 				fmt.Fprint(pW, "error: del connection")
 				return
@@ -135,14 +144,6 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 		result := new(sSettings)
 		result.STemplateState = pStateManager.GetTemplate()
 
-		client := pStateManager.GetClient()
-
-		myPubKey, _, err := client.GetPubKey()
-		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
-			pLogger.PushWarn(httpLogger.Get("get_public_key"))
-			fmt.Fprint(pW, "error: read public key")
-			return
-		}
 		result.FPublicKey = myPubKey.ToString()
 
 		networkKey, err := client.GetNetworkKey()

@@ -12,4 +12,3 @@
 10. HLS: append proxy connections
 11. HLS: addConnection -> addConnections, delConnection -> delConnections, ...
 12. HLS: write a threat model 
-13. HLM: delete clean HLS config option 
