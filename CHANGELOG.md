@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/messenger`: now not deleted connections from HLS config after logout
 - Update `pkg/client`: move GetMessageLimit from func to method on *sClient
 - Update `cmd/hidden_lake/messenger`: change sizes of buttons, card blocks in settings.html
+- Update `README.md`: append 'Releases' chapter
 
 ### BUG FIXES
 
