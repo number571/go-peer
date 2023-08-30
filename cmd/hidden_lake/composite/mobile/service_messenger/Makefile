@@ -7,14 +7,21 @@ MOBILEPATH=./cmd/m_hlc_sm
 .PHONY: default build run install clean
 
 default: build 
-# fyne not supported "--sourceDir cmd/m_hlc_sm"
 run:
 	go run $(MOBILEPATH)
 build:
-	cd $(MOBILEPATH) && fyne package -os android -appID hidden_lake.messenger -icon icon.png
-	cp $(MOBILEPATH)/m_hlc_sm.apk $(BINPATH)/hlc_sm_arm_android.apk
+	cd $(MOBILEPATH) && fyne package --target android -appID hidden_lake.service_messenger --icon icon.png --release --name m_hlc_sm; \
+
+	for arch in amd64 arm64; \
+	do \
+		fyne package --sourceDir $(MOBILEPATH) --target android/$${arch} -appID hidden_lake.service_messenger --icon icon.png --release --name hlc_sm_$${arch}_android; \
+	done;
+	for arch in amd64 arm64; \
+	do \
+		cp $(MOBILEPATH)/hlc_sm_$${arch}_android.apk $(BINPATH)/hlc_sm_$${arch}_android.apk; \
+	done;
 install:
-	cd $(MOBILEPATH) && fyne install -os android -appID hidden_lake.messenger -icon icon.png
+	fyne install --sourceDir $(MOBILEPATH) --target android/arm64 -appID hidden_lake.service_messenger --icon icon.png --release
 clean:
-	rm -f $(MOBILEPATH)/m_hlc_sm.apk $(BINPATH)/hlc_sm_arm_android.apk
+	rm -f $(MOBILEPATH)/m_hlc_sm.apk $(BINPATH)/hlc_sm_*.apk
 	rm -rf ./hidden_lake/

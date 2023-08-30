@@ -6,12 +6,17 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/composite`: append builds for android/arm64 and android/amd64
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/messenger`: now not deleted connections from HLS config after logout
 - Update `pkg/client`: move GetMessageLimit from func to method on *sClient
 - Update `cmd/hidden_lake/messenger`: change sizes of buttons, card blocks in settings.html
 - Update `README.md`: append 'Releases' chapter
+- Update `cmd/hidden_lake/composite`: update Makefiles build/clean
 
 ### BUG FIXES
 

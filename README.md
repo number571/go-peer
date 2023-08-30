@@ -61,14 +61,16 @@ $ go get github.com/number571/go-peer
 
 ## Releases
 
-All programs are compiled for (amd64, arm64) ARCH and (windows, linux, darwin) OS as pattern = `*appname*_*arch*_*os*`. In total, one application is compiled into six versions. The entire list of releases can be found here: [github.com/number571/go-peer/releases](https://github.com/number571/go-peer/releases "releases"). 
+All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `darwin`} OS as pattern = `appname_arch_os`. In total, one application is compiled into six versions. The entire list of releases can be found here: [github.com/number571/go-peer/releases](https://github.com/number571/go-peer/releases "releases"). 
 
 Some final applications are compositions of other applications. Due to this, such applications are named in a slightly different way. Designation of abbreviations:
 
-1. hlc - Hidden Lake Composite
-2. hlc_sm - Composite of HLS (service) + HLM (messenger)
-3. hlc_st - Composite of HLS + HLT (traffic)
-4. hlc_stm - Composite of HLS + HLT + HLM
+1. `hlc` - Hidden Lake Composite
+2. `hlc_sm` - Composite of HLS (service) + HLM (messenger)
+3. `hlc_st` - Composite of HLS + HLT (traffic)
+4. `hlc_stm` - Composite of HLS + HLT + HLM
+
+Applications `hlc_sm`, `hlc_stm` also compiles for `android/arm64` and `android/amd64`.
 
 ## Dependencies
 

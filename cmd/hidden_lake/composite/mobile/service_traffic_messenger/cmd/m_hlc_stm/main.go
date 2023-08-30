@@ -20,14 +20,14 @@ var (
 )
 
 func main() {
-	a := app.NewWithID("hidden_lake.service_messenger")
+	a := app.NewWithID("hidden_lake.service_traffic_messenger")
 	gPath = a.Storage().RootURI().Path()
 
 	w := a.NewWindow("app")
 	w.SetContent(container.New(
 		layout.NewCenterLayout(),
 		container.NewVBox(
-			widget.NewLabel("Hidden Lake SM"),
+			widget.NewLabel("Hidden Lake STM"),
 			buttonActions(a),
 		),
 	))
