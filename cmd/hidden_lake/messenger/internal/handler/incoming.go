@@ -131,7 +131,6 @@ func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 			panic("message data = nil")
 		}
 		return utils.SMessageInfo{
-			FFileName:  "",
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}

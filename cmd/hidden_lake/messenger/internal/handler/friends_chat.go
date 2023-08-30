@@ -28,8 +28,8 @@ type sChatMessage struct {
 	FMessageInfo utils.SMessageInfo
 }
 type sChatAddress struct {
-	FAliasName string
-	FFriend    string
+	FAliasName  string
+	FPubKeyHash string
 }
 type sChatMessages struct {
 	*state.STemplateState
@@ -135,8 +135,8 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, 
 		res := &sChatMessages{
 			STemplateState: pStateManager.GetTemplate(),
 			FAddress: sChatAddress{
-				FAliasName: aliasName,
-				FFriend:    recvPubKey.GetAddress().ToString(),
+				FAliasName:  aliasName,
+				FPubKeyHash: recvPubKey.GetAddress().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),
 		}

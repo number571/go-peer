@@ -57,9 +57,9 @@ Babilejo
     let socket = new WebSocket(s);
 
     socket.onopen = () => {
-      console.log('Connection with {{.FAddress.FFriend}}');
+      console.log('Connection with {{.FAddress.FPubKeyHash}}');
       socket.send(JSON.stringify({
-        address: "{{.FAddress.FFriend}}"
+        address: "{{.FAddress.FPubKeyHash}}"
       }));
     };
 
