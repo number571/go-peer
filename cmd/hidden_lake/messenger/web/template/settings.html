@@ -113,40 +113,41 @@ Agordoj
             </form>
         </div>
     </div>
-    <div class="card bg-dark"></div>
-    <h5 class="card-header text-white bg-secondary p-2">
-        {{if (eq .FLanguage 0)}}
-        Network key
-        {{else if (eq .FLanguage 1)}}
-        Ключ сети
-        {{else if (eq .FLanguage 2)}}
-        Reto-ŝlosilo
-        {{end}}
-    </h5>
-    <div class="card-body">
-        <form class="mb-3" method="POST" action="/settings">
-            <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-            <input hidden name="method" value="PATCH">
-            <div class="row">
-                <div class="col-md-9 w-75">
-                    {{if (eq .FLanguage 0)}}
-                    <input type="text" name="network_key" placeholder="Network key" value="{{.FNetworkKey}}"
-                        class="text-center form-control bg-dark text-white w-100">
-                    {{else if (eq .FLanguage 1)}}
-                    <input type="text" name="network_key" placeholder="Ключ сети" value="{{.FNetworkKey}}"
-                        class="text-center form-control bg-dark text-white w-100">
-                    {{else if (eq .FLanguage 2)}}
-                    <input type="text" name="network_key" placeholder="Reto-ŝlosilo" value="{{.FNetworkKey}}"
-                        class="text-center form-control bg-dark text-white w-100">
-                    {{end}}
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Network key
+            {{else if (eq .FLanguage 1)}}
+            Ключ сети
+            {{else if (eq .FLanguage 2)}}
+            Reto-ŝlosilo
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="PATCH">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="network_key" placeholder="Network key" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="network_key" placeholder="Ключ сети" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="text" name="network_key" placeholder="Reto-ŝlosilo" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="is_backup" value="◀" class="btn btn-info w-100">
+                    </div>
                 </div>
-                <div class="col-md-3 w-25">
-                    <input type="submit" name="is_backup" value="◀" class="btn btn-info w-100">
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-    <div class="card bg-dark">
+    <div class="card mb-3 bg-dark">
         <h5 class="card-header text-white bg-secondary p-2">
             {{if (eq .FLanguage 0)}}
             Connections
@@ -157,10 +158,10 @@ Agordoj
             {{end}}
         </h5>
         <div class="card-body">
-            <form class="mb-3" method="POST" action="/settings">
+            <form method="POST" action="/settings">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST">
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-md-5 w-25">
                         {{if (eq .FLanguage 0)}}
                         <input type="text" name="host" placeholder="Host"
