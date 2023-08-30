@@ -7,7 +7,7 @@ import (
 const (
 	cKeySizeTemplate          = "database[%s].friends[%s].size"
 	cKeyMessageByEnumTemplate = "database[%s].friends[%s].messages[enum=%d]"
-	cKeyMessageByHashTemplate = "database[%s].friends[%s].messages[hash=%s]"
+	cKeyMessageByHashTemplate = "database[%s].friends[%s].messages[hash=%x]"
 )
 
 func getKeySize(pR IRelation) []byte {
@@ -27,7 +27,7 @@ func getKeyMessageByEnum(pR IRelation, pI uint64) []byte {
 	))
 }
 
-func getKeyMessageByHash(pR IRelation, pHash string) []byte {
+func getKeyMessageByHash(pR IRelation, pHash []byte) []byte {
 	return []byte(fmt.Sprintf(
 		cKeyMessageByHashTemplate,
 		pR.IAm().GetAddress().ToString(),

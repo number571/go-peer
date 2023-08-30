@@ -53,8 +53,8 @@ func (p *sMessage) IsIncoming() bool {
 	return p.fIsIncoming
 }
 
-func (p *sMessage) GetSHA256UID() string {
-	return string(p.fSHA256UID)
+func (p *sMessage) GetSHA256UID() []byte {
+	return p.fSHA256UID
 }
 
 func (p *sMessage) GetMessage() []byte {
