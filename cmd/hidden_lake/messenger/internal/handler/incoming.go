@@ -45,8 +45,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			return
 		}
 
-		msgBytes, err := getMessageBytesToRecv(rawMsgBytes)
-		if err != nil {
+		if err := isValidMsgBytes(rawMsgBytes); err != nil {
 			pLogger.PushWarn(httpLogger.Get("recv_message"))
 			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
@@ -77,7 +76,11 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, doMessageProcessor(msgBytes), encoding.HexDecode(msgHash))
+		dbMsg := database.NewMessage(
+			true,
+			doMessageProcessor(rawMsgBytes),
+			encoding.HexDecode(msgHash),
+		)
 		if err := db.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(httpLogger.Get("push_message"))
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
@@ -101,25 +104,25 @@ func doMessageProcessor(msgBytes []byte) []byte {
 	return msgBytes
 }
 
-func getMessageBytesToRecv(rawMsgBytes []byte) ([]byte, error) {
+func isValidMsgBytes(rawMsgBytes []byte) error {
 	switch {
 	case isText(rawMsgBytes):
 		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes))
 		if strMsg == "" {
-			return nil, errors.NewError("failed: message is null")
+			return errors.NewError("failed: message is null")
 		}
 		if utils.HasNotWritableCharacters(strMsg) {
-			return nil, errors.NewError("failed: message has not writable characters")
+			return errors.NewError("failed: message has not writable characters")
 		}
-		return wrapText(strMsg), nil
+		return nil
 	case isFile(rawMsgBytes):
 		filename, msgBytes := unwrapFile(rawMsgBytes)
 		if filename == "" || len(msgBytes) == 0 {
-			return nil, errors.NewError("failed: unwrap file")
+			return errors.NewError("failed: unwrap file")
 		}
-		return rawMsgBytes, nil
+		return nil
 	default:
-		return nil, errors.NewError("failed: unknown message type")
+		return errors.NewError("failed: unknown message type")
 	}
 }
 
