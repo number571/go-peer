@@ -91,9 +91,9 @@ $ make docker-run
             </tr>
             <tr>
                 <td>5</td>
-                <td>HLTr</td>
+                <td>HLTr/HLTs</td>
                 <td>62.233.46.109</td>
-                <td>9581</td>
+                <td>9581/9582</td>
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[4]</td>
                 <td><a href="https://eternalhost.net">eternalhost.net</a></td>
