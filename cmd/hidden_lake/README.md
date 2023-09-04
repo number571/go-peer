@@ -87,7 +87,18 @@ $ make docker-run
                 <td>[]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
                 <td>1x2.5GHz, 1.0GB RAM, 5GB SSD</td>
-                <td>±22.08.2024</td>
+                <td>±07.08.2027</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>HLTr</td>
+                <td>62.233.46.109</td>
+                <td>9581</td>
+                <td>oi4r9NW9Le7fKF9d</td>
+                <td>[4]</td>
+                <td><a href="https://eternalhost.net">eternalhost.net</a></td>
+                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
+                <td>*eternal*</td>
             </tr>
         </table>
     </td>
