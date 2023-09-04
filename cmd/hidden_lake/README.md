@@ -48,13 +48,13 @@ $ make docker-run
             <tr>
                 <td>1</td>
                 <td>HLTr/HLTs</td>
-                <td>v1989393.hosted-by-vdsina.ru</td>
+                <td>v2094113.hosted-by-vdsina.ru</td>
                 <td>9581/9582</td>
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
-                <td>1x3.4GHz, 1.0GB RAM, 30GB HDD</td>
-                <td>±02.08.2025</td>
+                <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
+                <td>*eternal*</td>
             </tr>
             <tr>
                 <td>2</td>
