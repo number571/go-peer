@@ -97,7 +97,7 @@ $ make docker-run
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[4]</td>
                 <td><a href="https://eternalhost.net">eternalhost.net</a></td>
-                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
+                <td>1x2.8GHz, 1.0GB RAM, 16GB SSD</td>
                 <td>*eternal*</td>
             </tr>
         </table>

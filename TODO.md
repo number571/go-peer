@@ -13,3 +13,4 @@
 11. HLS: addConnection -> addConnections, delConnection -> delConnections, ...
 12. HLS: write a threat model 
 13. Composite: change icons for mobile apps
+14. HLT Client to CMD
