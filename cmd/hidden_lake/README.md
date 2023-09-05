@@ -61,8 +61,8 @@ $ make docker-run
                 <td>HLTs</td>
                 <td>6a20015eacd8.vps.myjino.ru</td>
                 <td>49191</td>
-                <td></td> <!-- HLTs not supported network key -->
-                <td></td> <!-- HLTs not supported connections -->
+                <td>-</td> <!-- HLTs not supported network key -->
+                <td>-</td> <!-- HLTs not supported connections -->
                 <td><a href="https://jino.ru">jino.ru</a></td>
                 <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2026</td>
