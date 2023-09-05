@@ -9,12 +9,12 @@ import (
 const (
 	cMessageSizeBytes = (8 << 10)
 	cLenOtherNodes    = 20
+	cNetworkKey       = "8Jkl93Mdk93md1bz"
 )
 
 var (
 	gListOfConnects = []string{
-		"v1989393.hosted-by-vdsina.ru:9581", // 1x3.4ГГц, 1.0Гб RAM, 30Гб HDD
-		"6a20015eacd8.vps.myjino.ru:49356",  // 1x2.0ГГц, 1.5Гб RAM, 10Гб HDD
+		"v2094113.hosted-by-vdsina.ru:9581", // 1x4.0ГГц, 1.0Гб RAM, 30Гб HDD
 		"195.133.1.126:9581",                // 1x2.2ГГц, 0.5Гб RAM, 10Гб HDD
 	}
 )
@@ -62,6 +62,7 @@ func initRecvNode(pConnects string) *sNodeHLS {
 		"queue_period_ms": 5000,
 		"limit_void_size_bytes": 4096
 	},
+	"network_key": "%s",
 	"logging": ["info", "warn", "erro"],
 	"services": {
 		"hidden-echo-service": "localhost:8080"
@@ -73,6 +74,7 @@ func initRecvNode(pConnects string) *sNodeHLS {
 }
 `,
 			cMessageSizeBytes,
+			cNetworkKey,
 			pConnects,
 		),
 	}
@@ -90,6 +92,7 @@ func initSendNode(pConnects string) *sNodeHLS {
 		"queue_period_ms": 5000,
 		"limit_void_size_bytes": 4096
 	},
+	"network_key": "%s",
 	"logging": ["info", "warn", "erro"],
 	"address": {
 		"http": "localhost:7572"
@@ -101,6 +104,7 @@ func initSendNode(pConnects string) *sNodeHLS {
 }
 `,
 			cMessageSizeBytes,
+			cNetworkKey,
 			pConnects,
 		),
 	}
@@ -129,10 +133,12 @@ clean:
 		"queue_period_ms": 5000,
 		"limit_void_size_bytes": 4096
 	},
+	"network_key": "%s",
 	"connections": [%s]
 }
 `,
 			cMessageSizeBytes,
+			cNetworkKey,
 			pConnects,
 		),
 	}

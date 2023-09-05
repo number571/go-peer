@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	pldHead = 0x1
+	cPldHead = 0x1
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			"http://localhost:9582",
+			"http://"+cAddressHLT,
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
 				FWorkSizeBits:     cfg.GetWorkSizeBits(),
@@ -59,7 +59,7 @@ func main() {
 
 		msg, err := client.EncryptPayload(
 			privKey.GetPubKey(),
-			payload.NewPayload(pldHead, []byte(os.Args[2])),
+			payload.NewPayload(cPldHead, []byte(os.Args[2])),
 		)
 		if err != nil {
 			panic(err)
@@ -85,7 +85,7 @@ func main() {
 			panic(err)
 		}
 
-		if pld.GetHead() != pldHead {
+		if pld.GetHead() != cPldHead {
 			panic("payload head != constant head")
 		}
 
@@ -101,7 +101,7 @@ func main() {
 		}
 
 		for i, hash := range hashes {
-			fmt.Printf("%d. %s\n", i, hash)
+			fmt.Printf("[%d] %s\n", i+1, hash)
 		}
 	}
 }

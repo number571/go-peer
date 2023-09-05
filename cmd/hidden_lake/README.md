@@ -54,15 +54,15 @@ $ make docker-run
                 <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
-                <td>*eternal*</td>
+                <td>±eternal</td>
             </tr>
             <tr>
                 <td>2</td>
-                <td>HLTr</td>
+                <td>HLTs</td>
                 <td>6a20015eacd8.vps.myjino.ru</td>
-                <td>49356</td>
-                <td>8Jkl93Mdk93md1bz</td>
-                <td>[1]</td>
+                <td>49191</td>
+                <td>null</td> <!-- HLTs not supported network key -->
+                <td>null</td> <!-- HLTs not supported connections -->
                 <td><a href="https://jino.ru">jino.ru</a></td>
                 <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2026</td>
@@ -73,7 +73,7 @@ $ make docker-run
                 <td>195.133.1.126</td>
                 <td>9581</td>
                 <td>8Jkl93Mdk93md1bz</td>
-                <td>[1,2]</td>
+                <td>[1]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
@@ -98,7 +98,7 @@ $ make docker-run
                 <td>[4]</td>
                 <td><a href="https://eternalhost.net">eternalhost.net</a></td>
                 <td>1x2.8GHz, 1.0GB RAM, 16GB SSD</td>
-                <td>*eternal*</td>
+                <td>±eternal</td>
             </tr>
         </table>
     </td>
