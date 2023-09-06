@@ -11,7 +11,6 @@
 - Update `cmd/hidden_lake/composite`: append builds for android/arm64 and android/amd64
 - Update `cmd/hidden_lake`: append new provider - eternalhost.net
 - Update `cmd/hidden_lake`: switch provider jino.ru from HLTr to HLTs
-- Update `cmd/hidden_lake`: append new provider - eternalhost.net
 
 ### CHANGES
 
