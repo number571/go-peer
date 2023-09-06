@@ -9,6 +9,9 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/composite`: append builds for android/arm64 and android/amd64
+- Update `cmd/hidden_lake`: append new provider - eternalhost.net
+- Update `cmd/hidden_lake`: switch provider jino.ru from HLTr to HLTs
+- Update `cmd/hidden_lake`: append new provider - eternalhost.net
 
 ### CHANGES
 
@@ -17,6 +20,8 @@
 - Update `cmd/hidden_lake/messenger`: change sizes of buttons, card blocks in settings.html
 - Update `README.md`: append 'Releases' chapter
 - Update `cmd/hidden_lake/composite`: update Makefiles build/clean
+- Update `examples/echo_service`: rename with_stress_test -> prod_test
+- Update `examples/traffic_keeper`: append -tags=prod
 
 ### BUG FIXES
 
