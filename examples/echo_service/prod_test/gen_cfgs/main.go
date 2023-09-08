@@ -10,12 +10,18 @@ const (
 	cMessageSizeBytes = (8 << 10)
 	cLenOtherNodes    = 20
 	cNetworkKey       = "8Jkl93Mdk93md1bz"
+	// cNetworkKey = "oi4r9NW9Le7fKF9d"
 )
 
 var (
 	gListOfConnects = []string{
+		// network_key = "8Jkl93Mdk93md1bz"
 		"v2094113.hosted-by-vdsina.ru:9581", // 1x4.0ГГц, 1.0Гб RAM, 30Гб HDD
 		"195.133.1.126:9581",                // 1x2.2ГГц, 0.5Гб RAM, 10Гб HDD
+
+		// // network_key = "oi4r9NW9Le7fKF9d"
+		// "193.233.18.245:9581", // 1x2.5GHz, 1.0GB RAM, 5GB SSD
+		// "62.233.46.109:9581",  // 1x2.8GHz, 1.0GB RAM, 16GB SSD
 	}
 )
 
