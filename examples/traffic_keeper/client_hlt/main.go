@@ -19,6 +19,11 @@ const (
 	cPldHead = 0x1
 )
 
+const (
+	cLocalAddressHLT = "localhost:9582"
+	cProdAddressHLT  = "6a20015eacd8.vps.myjino.ru:49191" // 1x2.0ГГц, 1.5Гб RAM, 10Гб HDD
+)
+
 func main() {
 	cfg := &settings.SConfigSettings{
 		FSettings: settings.SConfigSettingsBlock{
@@ -26,18 +31,6 @@ func main() {
 			FMessageSizeBytes: (8 << 10),
 		},
 	}
-
-	hltClient := hlt_client.NewClient(
-		hlt_client.NewBuilder(),
-		hlt_client.NewRequester(
-			"http://"+cAddressHLT,
-			&http.Client{Timeout: time.Minute},
-			message.NewSettings(&message.SSettings{
-				FWorkSizeBits:     cfg.GetWorkSizeBits(),
-				FMessageSizeBytes: cfg.GetMessageSizeBytes(),
-			}),
-		),
-	)
 
 	readPrivKey, err := filesystem.OpenFile("priv.key").Read()
 	if err != nil {
@@ -51,15 +44,38 @@ func main() {
 		panic("len os.Args < 2")
 	}
 
-	switch os.Args[1] {
+	args := os.Args[1:]
+	addr := cLocalAddressHLT
+
+	if args[0] == "prod" {
+		args = os.Args[2:]
+		addr = cProdAddressHLT
+		if len(args) == 0 {
+			panic("len os.Args < 2")
+		}
+	}
+
+	hltClient := hlt_client.NewClient(
+		hlt_client.NewBuilder(),
+		hlt_client.NewRequester(
+			"http://"+addr,
+			&http.Client{Timeout: time.Minute},
+			message.NewSettings(&message.SSettings{
+				FWorkSizeBits:     cfg.GetWorkSizeBits(),
+				FMessageSizeBytes: cfg.GetMessageSizeBytes(),
+			}),
+		),
+	)
+
+	switch args[0] {
 	case "w", "write":
-		if len(os.Args) != 3 {
-			panic("len os.Args != 3")
+		if len(args) != 2 {
+			panic("len write.args != 2")
 		}
 
 		msg, err := client.EncryptPayload(
 			privKey.GetPubKey(),
-			payload.NewPayload(cPldHead, []byte(os.Args[2])),
+			payload.NewPayload(cPldHead, []byte(args[1])),
 		)
 		if err != nil {
 			panic(err)
@@ -71,11 +87,11 @@ func main() {
 
 		fmt.Printf("%x\n", msg.GetBody().GetHash())
 	case "r", "read":
-		if len(os.Args) != 3 {
-			panic("len os.Args != 3")
+		if len(args) != 2 {
+			panic("len read.args != 2")
 		}
 
-		msg, err := hltClient.GetMessage(os.Args[2])
+		msg, err := hltClient.GetMessage(args[1])
 		if err != nil {
 			panic(err)
 		}
