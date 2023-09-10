@@ -4,6 +4,7 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -11,6 +12,7 @@ import (
 
 type IClient interface {
 	GetIndex() (string, error)
+	GetSettings() (config.IConfigSettings, error)
 
 	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error
@@ -37,6 +39,7 @@ type IClient interface {
 
 type IRequester interface {
 	GetIndex() (string, error)
+	GetSettings() (config.IConfigSettings, error)
 
 	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error

@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -18,23 +18,13 @@ type IEditor interface {
 }
 
 type IConfig interface {
-	IConfigSettingsHLS
-
+	GetSettings() config.IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
 	GetNetworkKey() string
 	GetConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
 	GetService(string) (string, bool)
-}
-
-type IConfigSettingsHLS interface {
-	IsValidHLS() bool
-	settings.IConfigSettings
-
-	GetKeySizeBits() uint64
-	GetQueuePeriodMS() uint64
-	GetLimitVoidSizeBytes() uint64
 }
 
 type IAddress interface {

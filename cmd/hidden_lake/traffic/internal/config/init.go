@@ -2,7 +2,6 @@ package config
 
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 
@@ -20,13 +19,11 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
-			SConfigSettings: settings.SConfigSettings{
-				FSettings: settings.SConfigSettingsBlock{
-					FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
-					FWorkSizeBits:       hls_settings.CDefaultWorkSize,
-					FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
-					FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
-				},
+			FSettings: &SConfigSettings{
+				FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
+				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
+				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
+				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

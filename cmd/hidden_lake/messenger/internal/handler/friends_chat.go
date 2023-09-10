@@ -37,7 +37,7 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, msgLimit uint64) http.HandlerFunc {
+func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
 
@@ -88,14 +88,14 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, 
 
 		switch pR.FormValue("method") {
 		case http.MethodPost, http.MethodPut:
-			msgBytes, err := getMessageBytesToSend(pStateManager, pR)
+			msgBytes, err := getMessageBytes(pR)
 			if err != nil {
 				pLogger.PushWarn(httpLogger.Get("get_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
 				return
 			}
 
-			if err := trySendMessage(client, aliasName, msgBytes, msgLimit); err != nil {
+			if err := trySendMessage(client, aliasName, msgBytes); err != nil {
 				pLogger.PushWarn(httpLogger.Get("send_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
@@ -120,7 +120,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, 
 		start := uint64(0)
 		size := db.Size(rel)
 
-		messagesCap := pStateManager.GetConfig().GetMessagesCapacity()
+		messagesCap := pStateManager.GetConfig().GetSettings().GetMessagesCapacity()
 		if size > messagesCap {
 			start = size - messagesCap
 		}
@@ -162,7 +162,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger, 
 	}
 }
 
-func getMessageBytesToSend(pStateManager state.IStateManager, pR *http.Request) ([]byte, error) {
+func getMessageBytes(pR *http.Request) ([]byte, error) {
 	switch pR.FormValue("method") {
 	case http.MethodPost:
 		strMsg := strings.TrimSpace(pR.FormValue("input_message"))
@@ -174,7 +174,7 @@ func getMessageBytesToSend(pStateManager state.IStateManager, pR *http.Request) 
 		}
 		return wrapText(strMsg), nil
 	case http.MethodPut:
-		filename, fileBytes, err := getUploadFile(pStateManager, pR)
+		filename, fileBytes, err := getUploadFile(pR)
 		if err != nil {
 			return nil, errors.WrapError(err, "error: upload file")
 		}
@@ -184,7 +184,7 @@ func getMessageBytesToSend(pStateManager state.IStateManager, pR *http.Request) 
 	}
 }
 
-func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string, []byte, error) {
+func getUploadFile(pR *http.Request) (string, []byte, error) {
 	// Get handler for filename, size and headers
 	file, handler, err := pR.FormFile("input_file")
 	if err != nil {
@@ -204,8 +204,13 @@ func getUploadFile(pStateManager state.IStateManager, pR *http.Request) (string,
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte, pMsgLimit uint64) error {
-	if uint64(len(pMsgBytes)) > pMsgLimit {
+func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte) error {
+	msgLimit, err := getMessageLimit(pClient)
+	if err != nil {
+		return errors.WrapError(err, "error: try send message")
+	}
+
+	if uint64(len(pMsgBytes)) > msgLimit {
 		return errors.NewError("error: len message > limit")
 	}
 

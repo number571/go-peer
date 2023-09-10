@@ -20,12 +20,17 @@ func (p *sStateManager) clearClientState() error {
 func (p *sStateManager) clearClientPrivKey() error {
 	hlsClient := p.GetClient()
 
+	sett, err := hlsClient.GetSettings()
+	if err != nil {
+		return errors.WrapError(err, "get settings from node (clear)")
+	}
+
 	_, ephPubKey, err := hlsClient.GetPubKey()
 	if err != nil {
 		return errors.WrapError(err, "get public key from node (clear)")
 	}
 
-	pseudoPrivKey := asymmetric.NewRSAPrivKey(p.fConfig.GetKeySizeBits())
+	pseudoPrivKey := asymmetric.NewRSAPrivKey(sett.GetKeySizeBits())
 	if err := hlsClient.SetPrivKey(pseudoPrivKey, ephPubKey); err != nil {
 		return errors.WrapError(err, "set pseudo private key (clear)")
 	}

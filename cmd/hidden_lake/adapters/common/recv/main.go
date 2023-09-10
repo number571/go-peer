@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/common"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -139,17 +138,15 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 		return nil, fmt.Errorf("failed: incorrect response from service")
 	}
 
-	cfg := &settings.SConfigSettings{
-		FSettings: settings.SConfigSettingsBlock{
-			FWorkSizeBits:     20,
-			FMessageSizeBytes: messageSize,
-		},
-	}
+	sett := message.NewSettings(&message.SSettings{
+		FWorkSizeBits:     20,
+		FMessageSizeBytes: messageSize,
+	})
 
 	msg := message.LoadMessage(
 		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: cfg.GetMessageSizeBytes(),
-			FWorkSizeBits:     cfg.GetWorkSizeBits(),
+			FMessageSizeBytes: sett.GetMessageSizeBytes(),
+			FWorkSizeBits:     sett.GetWorkSizeBits(),
 		}),
 		bytesMsg[1:],
 	)

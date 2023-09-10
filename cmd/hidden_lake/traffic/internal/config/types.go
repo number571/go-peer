@@ -2,12 +2,11 @@ package config
 
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
+	"github.com/number571/go-peer/pkg/client/message"
 )
 
 type IConfig interface {
-	IConfigSettingsHLT
-
+	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
 	GetNetworkKey() string
@@ -15,12 +14,11 @@ type IConfig interface {
 	GetConsumers() []string
 }
 
-type IConfigSettingsHLT interface {
-	IsValidHLT() bool
-	settings.IConfigSettings
+type IConfigSettings interface {
+	message.ISettings
 
-	GetMessagesCapacity() uint64
 	GetQueuePeriodMS() uint64
+	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64
 }
 

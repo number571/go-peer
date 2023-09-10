@@ -12,12 +12,12 @@ import (
 func (p *sApp) initDatabase() error {
 	sett := database.NewSettings(&database.SSettings{
 		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
-		FCapacity:         p.fConfig.GetMessagesCapacity(),
-		FMessageSizeBytes: p.fConfig.GetMessageSizeBytes(),
-		FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),
+		FCapacity:         p.fConfig.GetSettings().GetMessagesCapacity(),
+		FMessageSizeBytes: p.fConfig.GetSettings().GetMessageSizeBytes(),
+		FWorkSizeBits:     p.fConfig.GetSettings().GetWorkSizeBits(),
 	})
 
-	if p.fConfig.GetMessagesCapacity() == 0 {
+	if p.fConfig.GetSettings().GetMessagesCapacity() == 0 {
 		p.fWrapperDB.Set(database.NewVoidKeyValueDB(sett))
 		return nil
 	}

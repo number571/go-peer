@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 )
 
 type IWrapper interface {
@@ -17,8 +16,7 @@ type IEditor interface {
 }
 
 type IConfig interface {
-	IConfigSettingsHLM
-
+	GetSettings() IConfigSettings
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() string
@@ -27,11 +25,7 @@ type IConfig interface {
 	GetLanguage() utils.ILanguage
 }
 
-type IConfigSettingsHLM interface {
-	IsValidHLM() bool
-	settings.IConfigSettings
-
-	GetKeySizeBits() uint64
+type IConfigSettings interface {
 	GetMessagesCapacity() uint64
 }
 

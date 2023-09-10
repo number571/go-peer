@@ -4,19 +4,28 @@ import (
 	"fmt"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 var (
+	_ IConfigSettings = &SConfigSettings{}
 	_ IConfig         = &SConfig{}
+	_ IAddress        = &SAddress{}
 	_ logger.ILogging = &sLogging{}
 )
 
+type SConfigSettings struct {
+	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
+	FWorkSizeBits       uint64 `json:"work_size_bits"`
+	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty"`
+	FMessagesCapacity   uint64 `json:"messages_capacity,omitempty"`
+	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+}
+
 type SConfig struct {
-	settings.SConfigSettings
+	FSettings *SConfigSettings `json:"settings"`
 
 	FLogging     []string  `json:"logging,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
@@ -74,17 +83,52 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (p *SConfig) IsValidHLT() bool {
-	return p.FSettings.FMessagesCapacity != 0 || p.FSettings.FQueuePeriodMS != 0
+func (p *SConfig) GetSettings() IConfigSettings {
+	return p.FSettings
+}
+
+func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
+	return p.FMessageSizeBytes
+}
+
+func (p *SConfigSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
+}
+
+func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
+	return p.FQueuePeriodMS
+}
+
+func (p *SConfigSettings) GetMessagesCapacity() uint64 {
+	return p.FMessagesCapacity
+}
+
+func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
+	return p.FLimitVoidSizeBytes
+}
+
+func (p *SConfig) isValid() bool {
+	return true &&
+		p.FSettings.FMessageSizeBytes != 0 &&
+		p.FSettings.FWorkSizeBits != 0 &&
+		(p.FSettings.FMessagesCapacity != 0 || p.FSettings.FQueuePeriodMS != 0)
 }
 
 func (p *SConfig) initConfig() error {
-	if !p.IsValid() || !p.IsValidHLT() {
+	if !p.isValid() {
 		return errors.NewError("load config settings")
 	}
 
 	if err := p.loadLogging(); err != nil {
 		return errors.WrapError(err, "load logging")
+	}
+
+	if p.FAddress == nil {
+		p.FAddress = new(SAddress)
+	}
+
+	if p.FSettings == nil {
+		p.FSettings = new(SConfigSettings)
 	}
 
 	return nil
@@ -121,16 +165,10 @@ func (p *SConfig) GetAddress() IAddress {
 }
 
 func (p *SAddress) GetTCP() string {
-	if p == nil {
-		return ""
-	}
 	return p.FTCP
 }
 
 func (p *SAddress) GetHTTP() string {
-	if p == nil {
-		return ""
-	}
 	return p.FHTTP
 }
 

@@ -43,13 +43,13 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 				return
 			}
 
-			if privKey.GetSize() != pWrapper.GetConfig().GetKeySizeBits() {
+			if privKey.GetSize() != pWrapper.GetConfig().GetSettings().GetKeySizeBits() {
 				pLogger.PushWarn(httpLogger.Get("key_size"))
 				api.Response(pW, http.StatusNotAcceptable, "failed: incorrect private key size")
 				return
 			}
 
-			client := pkg_settings.InitClient(pWrapper.GetConfig(), privKey)
+			client := pkg_settings.InitClient(pWrapper.GetConfig().GetSettings(), privKey)
 			pNode.GetMessageQueue().UpdateClient(client)
 
 			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))

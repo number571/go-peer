@@ -2,7 +2,6 @@ package config
 
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/filesystem"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -15,13 +14,8 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
-			SConfigSettings: settings.SConfigSettings{
-				FSettings: settings.SConfigSettingsBlock{
-					FMessageSizeBytes: hls_settings.CDefaultMessageSize,
-					FWorkSizeBits:     hls_settings.CDefaultWorkSize,
-					FKeySizeBits:      hls_settings.CDefaultKeySize,
-					FMessagesCapacity: hlm_settings.CDefaultCapMessages,
-				},
+			FSettings: &SConfigSettings{
+				FMessagesCapacity: hlm_settings.CDefaultCapMessages,
 			},
 			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FLanguage: hlm_settings.CDefaultLanguage,

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
@@ -19,7 +19,7 @@ var (
 )
 
 type SConfig struct {
-	settings.SConfigSettings
+	FSettings *config.SConfigSettings `json:"settings"`
 
 	FLogging     []string          `json:"logging,omitempty"`
 	FAddress     *SAddress         `json:"address,omitempty"`
@@ -87,12 +87,20 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (p *SConfig) IsValidHLS() bool {
-	return p.FSettings.FKeySizeBits != 0 && p.FSettings.FQueuePeriodMS != 0
+func (p *SConfig) GetSettings() config.IConfigSettings {
+	return p.FSettings
+}
+
+func (p *SConfig) isValid() bool {
+	return true &&
+		p.FSettings.FMessageSizeBytes != 0 &&
+		p.FSettings.FWorkSizeBits != 0 &&
+		p.FSettings.FKeySizeBits != 0 &&
+		p.FSettings.FQueuePeriodMS != 0
 }
 
 func (p *SConfig) initConfig() error {
-	if !p.IsValid() || !p.IsValidHLS() {
+	if !p.isValid() {
 		return errors.NewError("load config settings")
 	}
 
@@ -102,6 +110,10 @@ func (p *SConfig) initConfig() error {
 
 	if err := p.loadLogging(); err != nil {
 		return errors.WrapError(err, "load logging")
+	}
+
+	if p.FSettings == nil {
+		p.FSettings = new(config.SConfigSettings)
 	}
 
 	return nil

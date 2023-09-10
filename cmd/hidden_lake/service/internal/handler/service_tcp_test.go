@@ -11,9 +11,9 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/internal/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -82,13 +82,11 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		FServices: map[string]string{
 			tcServiceAddressInHLS: testutils.TgAddrs[5],
 		},
-		SConfigSettings: settings.SConfigSettings{
-			FSettings: settings.SConfigSettingsBlock{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWorkSizeBits:     testutils.TCWorkSize,
-				FKeySizeBits:      testutils.TcKeySize,
-				FQueuePeriodMS:    testutils.TCQueuePeriod,
-			},
+		FSettings: &pkg_config.SConfigSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FKeySizeBits:      testutils.TcKeySize,
+			FQueuePeriodMS:    testutils.TCQueuePeriod,
 		},
 	}
 

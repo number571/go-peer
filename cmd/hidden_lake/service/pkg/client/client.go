@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	"github.com/number571/go-peer/pkg/client/message"
@@ -28,6 +29,14 @@ func (p *sClient) GetIndex() (string, error) {
 	res, err := p.fRequester.GetIndex()
 	if err != nil {
 		return "", errors.WrapError(err, "get index (client)")
+	}
+	return res, nil
+}
+
+func (p *sClient) GetSettings() (config.IConfigSettings, error) {
+	res, err := p.fRequester.GetSettings()
+	if err != nil {
+		return nil, errors.WrapError(err, "get settings (client)")
 	}
 	return res, nil
 }

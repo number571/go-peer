@@ -9,11 +9,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	"github.com/number571/go-peer/internal/settings"
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
-
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 const (
@@ -32,13 +31,11 @@ func TestApp(t *testing.T) {
 
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
-		SConfigSettings: settings.SConfigSettings{
-			FSettings: settings.SConfigSettingsBlock{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWorkSizeBits:     testutils.TCWorkSize,
-				FKeySizeBits:      testutils.TcKeySize,
-				FQueuePeriodMS:    testutils.TCQueuePeriod,
-			},
+		FSettings: &pkg_config.SConfigSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FKeySizeBits:      testutils.TcKeySize,
+			FQueuePeriodMS:    testutils.TCQueuePeriod,
 		},
 		FNetworkKey: "_",
 		FAddress: &config.SAddress{

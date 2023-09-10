@@ -6,19 +6,23 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/filesystem"
 )
 
 var (
-	_ IConfig  = &SConfig{}
-	_ IAddress = &SAddress{}
+	_ IConfigSettings = &SConfigSettings{}
+	_ IConfig         = &SConfig{}
+	_ IAddress        = &SAddress{}
 )
 
+type SConfigSettings struct {
+	FMessagesCapacity uint64 `json:"messages_capacity"`
+}
+
 type SConfig struct {
-	settings.SConfigSettings
+	FSettings *SConfigSettings `json:"settings"`
 
 	FLogging           []string  `json:"logging,omitempty"`
 	FLanguage          string    `json:"language,omitempty"`
@@ -83,12 +87,21 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (p *SConfig) IsValidHLM() bool {
-	return p.FSettings.FKeySizeBits != 0 && p.FSettings.FMessagesCapacity != 0
+func (p *SConfig) GetSettings() IConfigSettings {
+	return p.FSettings
+}
+
+func (p *SConfigSettings) GetMessagesCapacity() uint64 {
+	return p.FMessagesCapacity
+}
+
+func (p *SConfig) isValid() bool {
+	return true &&
+		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {
-	if !p.IsValid() || !p.IsValidHLM() {
+	if !p.isValid() {
 		return errors.NewError("load config settings")
 	}
 	if err := p.loadLogging(); err != nil {
@@ -96,6 +109,9 @@ func (p *SConfig) initConfig() error {
 	}
 	if err := p.loadLanguage(); err != nil {
 		return errors.WrapError(err, "load language")
+	}
+	if p.FSettings == nil {
+		p.FSettings = new(SConfigSettings)
 	}
 	return nil
 }

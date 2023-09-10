@@ -14,7 +14,7 @@ import (
 )
 
 func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.INode {
-	queueDuration := time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond
+	queueDuration := time.Duration(pCfg.GetSettings().GetQueuePeriodMS()) * time.Millisecond
 	if queueDuration == 0 {
 		queueDuration = 1 // queue_period_ms in HLT can be = 0 (as only-storage mode)
 	}
@@ -26,8 +26,8 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FNetworkKey:       pCfg.GetNetworkKey(),
-				FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
-				FLimitVoidSize:    pCfg.GetLimitVoidSizeBytes(),
+				FMessageSizeBytes: pCfg.GetSettings().GetMessageSizeBytes(),
+				FLimitVoidSize:    pCfg.GetSettings().GetLimitVoidSizeBytes(),
 				FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
 				FReadDeadline:     queueDuration,
 				FWriteDeadline:    queueDuration,

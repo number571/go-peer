@@ -37,6 +37,14 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
+			client := pStateManager.GetClient()
+			sett, err := client.GetSettings()
+			if err != nil {
+				pLogger.PushWarn(httpLogger.Get("get_settings"))
+				fmt.Fprint(pW, "error: get settings from HLS")
+				return
+			}
+
 			login := strings.TrimSpace(pR.FormValue("login"))
 			if login == "" {
 				pLogger.PushWarn(httpLogger.Get("get_login"))
@@ -83,8 +91,7 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 
 			switch privateKey {
 			case "":
-				keySize := pStateManager.GetConfig().GetKeySizeBits()
-				privKey = asymmetric.NewRSAPrivKey(keySize)
+				privKey = asymmetric.NewRSAPrivKey(sett.GetKeySizeBits())
 			default:
 				privKey = asymmetric.LoadRSAPrivKey(privateKey)
 			}

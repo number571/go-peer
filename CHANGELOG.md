@@ -23,6 +23,8 @@
 - Update `examples/traffic_keeper`: append -tags=prod
 - Update `test/_data`: change 4096 bit key -> 1024 bit key
 - Update `pkg/client/queue`: change receiver of void messages -> random public key
+- Update `internal/settings`: delete internal/settings
+- Update `cmd/hidden_lake/messenger`: delete fields "message_size_bytes", "work_size_bits", "key_size_bits" from settings
 
 ### BUG FIXES
 

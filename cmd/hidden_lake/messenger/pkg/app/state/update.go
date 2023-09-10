@@ -69,14 +69,20 @@ func (p *sStateManager) updateClientTraffic(pStateValue *SStorageState) {
 }
 
 func (p *sStateManager) handleMessages(pConn string) {
+	hlsClient := p.GetClient()
+	sett, err := hlsClient.GetSettings()
+	if err != nil {
+		return
+	}
+
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", pConn),
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FWorkSizeBits:     p.fConfig.GetWorkSizeBits(),
-				FMessageSizeBytes: p.fConfig.GetMessageSizeBytes(),
+				FWorkSizeBits:     sett.GetWorkSizeBits(),
+				FMessageSizeBytes: sett.GetMessageSizeBytes(),
 			}),
 		),
 	)
@@ -86,9 +92,8 @@ func (p *sStateManager) handleMessages(pConn string) {
 		return
 	}
 
-	hlsClient := p.GetClient()
 	for i, hash := range hashes {
-		if uint64(i) >= p.fConfig.GetMessagesCapacity() {
+		if uint64(i) >= p.fConfig.GetSettings().GetMessagesCapacity() {
 			break
 		}
 		msg, err := hltClient.GetMessage(hash)

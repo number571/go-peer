@@ -15,7 +15,7 @@ import (
 )
 
 func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
-	queueDuration := time.Duration(pCfg.GetQueuePeriodMS()) * time.Millisecond
+	queueDuration := time.Duration(pCfg.GetSettings().GetQueuePeriodMS()) * time.Millisecond
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
@@ -35,8 +35,8 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FWriteTimeout: queueDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetworkKey(),
-					FMessageSizeBytes: pCfg.GetMessageSizeBytes(),
-					FLimitVoidSize:    pCfg.GetLimitVoidSizeBytes(),
+					FMessageSizeBytes: pCfg.GetSettings().GetMessageSizeBytes(),
+					FLimitVoidSize:    pCfg.GetSettings().GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
 					FReadDeadline:     queueDuration,
 					FWriteDeadline:    queueDuration,
@@ -49,7 +49,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
 				FDuration:     queueDuration,
 			}),
-			pkg_settings.InitClient(pCfg, pPrivKey),
+			pkg_settings.InitClient(pCfg.GetSettings(), pPrivKey),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

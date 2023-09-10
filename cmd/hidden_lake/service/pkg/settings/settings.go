@@ -63,6 +63,7 @@ const (
 
 const (
 	CHandleIndexPath          = "/api/index"
+	CHandleConfigSettingsPath = "/api/config/settings"
 	CHandleConfigConnectsPath = "/api/config/connects"
 	CHandleConfigFriendsPath  = "/api/config/friends"
 	CHandleNetworkOnlinePath  = "/api/network/online"
@@ -74,6 +75,7 @@ const (
 
 const (
 	CHandleIndexTemplate          = "%s" + CHandleIndexPath
+	CHandleConfigSettingsTemplate = "%s" + CHandleConfigSettingsPath
 	CHandleConfigConnectsTemplate = "%s" + CHandleConfigConnectsPath
 	CHandleConfigFriendsTemplate  = "%s" + CHandleConfigFriendsPath
 	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath

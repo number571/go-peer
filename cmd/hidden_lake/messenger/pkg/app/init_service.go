@@ -8,9 +8,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	pkg_client "github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"golang.org/x/net/websocket"
 )
@@ -35,32 +32,17 @@ func (p *sApp) initInterfaceServiceHTTP() {
 		handleFileServer(p.fStateManager, p.fLogger, http.FS(web.GetStaticPath()))),
 	)
 
-	msgSize := p.fWrapper.GetConfig().GetMessageSizeBytes()
-	keySize := p.fWrapper.GetConfig().GetKeySizeBits()
-
-	randClient := pkg_client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: msgSize,
-			FWorkSizeBits:     1, // does not affect the size
-		}),
-		asymmetric.NewRSAPrivKey(keySize),
-	)
-
-	// overhead base64 format: https://ru.wikipedia.org/wiki/Base64
-	msgLimitBytes := randClient.GetMessageLimit()
-	msgLimitBase64 := msgLimitBytes - (msgLimitBytes / 4)
-
-	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fStateManager, p.fLogger))                                 // GET
-	mux.HandleFunc(hlm_settings.CHandleSignOutPath, handler.SignOutPage(p.fStateManager, p.fLogger))                             // GET
-	mux.HandleFunc(hlm_settings.CHandleSignInPath, handler.SignInPage(p.fStateManager, p.fLogger))                               // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleSignUpPath, handler.SignUpPage(p.fStateManager, p.fLogger))                               // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fStateManager, p.fLogger))                             // GET
-	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fStateManager, p.fLogger))                                 // GET
-	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fStateManager, p.fWrapper.GetEditor(), p.fLogger))   // GET, PATCH, PUT, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleQRPublicKeyKeyPath, handler.QRPublicKeyPage(p.fStateManager, p.fLogger))                  // GET
-	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fStateManager, p.fLogger))                             // GET, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fStateManager, p.fLogger, msgLimitBase64))     // GET, POST, PUT
-	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fStateManager, p.fLogger, msgLimitBase64)) // GET
+	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fStateManager, p.fLogger))                               // GET
+	mux.HandleFunc(hlm_settings.CHandleSignOutPath, handler.SignOutPage(p.fStateManager, p.fLogger))                           // GET
+	mux.HandleFunc(hlm_settings.CHandleSignInPath, handler.SignInPage(p.fStateManager, p.fLogger))                             // GET, POST
+	mux.HandleFunc(hlm_settings.CHandleSignUpPath, handler.SignUpPage(p.fStateManager, p.fLogger))                             // GET, POST
+	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fStateManager, p.fLogger))                           // GET
+	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fStateManager, p.fLogger))                               // GET
+	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fStateManager, p.fWrapper.GetEditor(), p.fLogger)) // GET, PATCH, PUT, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleQRPublicKeyKeyPath, handler.QRPublicKeyPage(p.fStateManager, p.fLogger))                // GET
+	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fStateManager, p.fLogger))                           // GET, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fStateManager, p.fLogger))                   // GET, POST, PUT
+	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fStateManager, p.fLogger))               // GET
 
 	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS))
 

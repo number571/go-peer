@@ -8,7 +8,6 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
-	"github.com/number571/go-peer/internal/settings"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -25,12 +24,10 @@ const (
 )
 
 func main() {
-	cfg := &settings.SConfigSettings{
-		FSettings: settings.SConfigSettingsBlock{
-			FWorkSizeBits:     20,
-			FMessageSizeBytes: (8 << 10),
-		},
-	}
+	sett := message.NewSettings(&message.SSettings{
+		FWorkSizeBits:     20,
+		FMessageSizeBytes: (8 << 10),
+	})
 
 	readPrivKey, err := filesystem.OpenFile("priv.key").Read()
 	if err != nil {
@@ -38,7 +35,7 @@ func main() {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(string(readPrivKey))
-	client := hls_settings.InitClient(cfg, privKey)
+	client := hls_settings.InitClient(sett, privKey)
 
 	if len(os.Args) < 2 {
 		panic("len os.Args < 2")
@@ -61,8 +58,8 @@ func main() {
 			"http://"+addr,
 			&http.Client{Timeout: time.Minute},
 			message.NewSettings(&message.SSettings{
-				FWorkSizeBits:     cfg.GetWorkSizeBits(),
-				FMessageSizeBytes: cfg.GetMessageSizeBytes(),
+				FWorkSizeBits:     sett.GetWorkSizeBits(),
+				FMessageSizeBytes: sett.GetMessageSizeBytes(),
 			}),
 		),
 	)

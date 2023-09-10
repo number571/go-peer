@@ -85,7 +85,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	defer p.fMutex.Unlock()
 
 	for name, pubKey := range pFriends {
-		if pubKey.GetSize() == p.fConfig.GetKeySizeBits() {
+		if pubKey.GetSize() == p.fConfig.GetSettings().GetKeySizeBits() {
 			continue
 		}
 		return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))

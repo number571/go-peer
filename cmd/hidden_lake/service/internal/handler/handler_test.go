@@ -133,12 +133,13 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	keySize := wcfg.GetConfig().GetKeySizeBits()
+	keySize := wcfg.GetConfig().GetSettings().GetKeySizeBits()
 	ephPrivKey := asymmetric.NewRSAPrivKey(keySize)
 
 	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
+	mux.HandleFunc(pkg_settings.CHandleConfigSettingsPath, HandleConfigSettingsAPI(wcfg, logger))
 	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))

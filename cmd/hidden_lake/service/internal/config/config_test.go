@@ -114,27 +114,27 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetWorkSizeBits() != tcWorkSize {
+	if cfg.GetSettings().GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings work size is invalid")
 		return
 	}
 
-	if cfg.GetMessageSizeBytes() != tcMessageSize {
+	if cfg.GetSettings().GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
 		return
 	}
 
-	if cfg.GetKeySizeBits() != tcKeySize {
+	if cfg.GetSettings().GetKeySizeBits() != tcKeySize {
 		t.Error("settings key size is invalid")
 		return
 	}
 
-	if cfg.GetQueuePeriodMS() != tcQueuePeriod {
+	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
 		return
 	}
 
-	if cfg.GetLimitVoidSizeBytes() != tcLimitVoidSize {
+	if cfg.GetSettings().GetLimitVoidSizeBytes() != tcLimitVoidSize {
 		t.Error("settings limit void size is invalid")
 		return
 	}

@@ -19,7 +19,7 @@ type sUploadFile struct {
 	FMessageLimit uint64
 }
 
-func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger, msgLimit uint64) http.HandlerFunc {
+func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
 
@@ -48,6 +48,13 @@ func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger
 		)
 		if err != nil {
 			panic("can't load hmtl files")
+		}
+
+		msgLimit, err := getMessageLimit(pStateManager.GetClient())
+		if err != nil {
+			pLogger.PushWarn(httpLogger.Get("get_message_size"))
+			fmt.Fprint(pW, "get message size (limit)")
+			return
 		}
 
 		res := &sUploadFile{

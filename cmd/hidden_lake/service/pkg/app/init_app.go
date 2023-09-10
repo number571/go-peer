@@ -27,7 +27,7 @@ func InitApp(pDefaultPath string) (types.ICommand, error) {
 	var privKey asymmetric.IPrivKey
 	switch inputKey {
 	case "":
-		privKey = asymmetric.NewRSAPrivKey(cfg.GetKeySizeBits())
+		privKey = asymmetric.NewRSAPrivKey(cfg.GetSettings().GetKeySizeBits())
 	default:
 		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
 		if err != nil {

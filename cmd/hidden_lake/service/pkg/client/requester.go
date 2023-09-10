@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
@@ -43,6 +44,25 @@ func (p *sRequester) GetIndex() (string, error) {
 		return "", errors.NewError("incorrect title pattern")
 	}
 	return res, nil
+}
+
+func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+	res, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(pkg_settings.CHandleConfigSettingsTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return nil, errors.WrapError(err, "get settings (requester)")
+	}
+
+	cfgSettings := new(config.SConfigSettings)
+	if err := encoding.Deserialize([]byte(res), cfgSettings); err != nil {
+		return nil, errors.WrapError(err, "decode settings (requester)")
+	}
+
+	return cfgSettings, nil
 }
 
 func (p *sRequester) GetNetworkKey() (string, error) {

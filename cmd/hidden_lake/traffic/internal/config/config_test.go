@@ -3,8 +3,6 @@ package config
 import (
 	"os"
 	"testing"
-
-	"github.com/number571/go-peer/internal/settings"
 )
 
 const (
@@ -26,13 +24,11 @@ const (
 
 func testConfigDefaultInit(configPath string) {
 	_, _ = BuildConfig(configPath, &SConfig{
-		SConfigSettings: settings.SConfigSettings{
-			FSettings: settings.SConfigSettingsBlock{
-				FMessageSizeBytes: tcMessageSize,
-				FWorkSizeBits:     tcWorkSize,
-				FMessagesCapacity: tcCapMessages,
-				FQueuePeriodMS:    tcQueuePeriodMS,
-			},
+		FSettings: &SConfigSettings{
+			FMessageSizeBytes: tcMessageSize,
+			FWorkSizeBits:     tcWorkSize,
+			FMessagesCapacity: tcCapMessages,
+			FQueuePeriodMS:    tcQueuePeriodMS,
 		},
 		FLogging:    []string{"info", "erro"},
 		FNetworkKey: tcNetwork,
@@ -61,22 +57,22 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetWorkSizeBits() != tcWorkSize {
+	if cfg.GetSettings().GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings work size is invalid")
 		return
 	}
 
-	if cfg.GetMessageSizeBytes() != tcMessageSize {
+	if cfg.GetSettings().GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
 		return
 	}
 
-	if cfg.GetMessagesCapacity() != tcCapMessages {
+	if cfg.GetSettings().GetMessagesCapacity() != tcCapMessages {
 		t.Error("settings cap messages is invalid")
 		return
 	}
 
-	if cfg.GetQueuePeriodMS() != tcQueuePeriodMS {
+	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriodMS {
 		t.Error("settings queue period is invalid")
 		return
 	}
