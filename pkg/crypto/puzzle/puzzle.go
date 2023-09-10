@@ -9,6 +9,10 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
+const (
+	hashSizeInBits = hashing.CSHA256Size * 8
+)
+
 var (
 	_ IPuzzle = &sPoWPuzzle{}
 )
@@ -32,7 +36,7 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 		nonce   = uint64(0)
 		hash    []byte
 	)
-	target.Lsh(target, hashSizeInBits()-uint(p.fDiff))
+	target.Lsh(target, hashSizeInBits-uint(p.fDiff))
 	for nonce < math.MaxUint64 {
 		bNonce := encoding.Uint64ToBytes(nonce)
 		hash = hashing.NewSHA256Hasher(bytes.Join(
@@ -64,10 +68,6 @@ func (p *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
 		[]byte{},
 	)).ToBytes()
 	intHash.SetBytes(hash)
-	target.Lsh(target, hashSizeInBits()-uint(p.fDiff))
+	target.Lsh(target, hashSizeInBits-uint(p.fDiff))
 	return intHash.Cmp(target) == -1
-}
-
-func hashSizeInBits() uint {
-	return uint(hashing.CSHA256Size * 8)
 }
