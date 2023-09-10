@@ -22,6 +22,7 @@
 - Update `examples/echo_service`: rename with_stress_test -> prod_test
 - Update `examples/traffic_keeper`: append -tags=prod
 - Update `test/_data`: change 4096 bit key -> 1024 bit key
+- Update `pkg/client/queue`: change receiver of void messages -> random public key
 
 ### BUG FIXES
 
