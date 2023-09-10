@@ -190,7 +190,7 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
 				}),
-				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
 		),
 		asymmetric.NewListPubKeys(),

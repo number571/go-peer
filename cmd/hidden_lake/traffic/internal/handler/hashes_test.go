@@ -20,7 +20,7 @@ func TestHandleHashesAPI(t *testing.T) {
 	srv, connKeeper, wDB, hltClient := testAllRun(addr, "")
 	defer testAllFree(addr, srv, connKeeper, wDB)
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 
 	client := client.NewClient(

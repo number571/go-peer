@@ -119,7 +119,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 }
 
 func testNewClient() client.IClient {
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,

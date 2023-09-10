@@ -23,10 +23,6 @@ func (p *sStateManager) updateClientState(pStateValue *SStorageState) error {
 		return errors.WrapError(err, "update client friends")
 	}
 
-	if err := p.updateClientNetworkKey(pStateValue); err != nil {
-		return errors.WrapError(err, "update client connections")
-	}
-
 	return nil
 }
 
@@ -61,16 +57,6 @@ func (p *sStateManager) updateClientFriends(pStateValue *SStorageState) error {
 		if err := client.AddFriend(aliasName, pubKey); err != nil {
 			return errors.WrapError(err, "add friend")
 		}
-	}
-
-	return nil
-}
-
-func (p *sStateManager) updateClientNetworkKey(pStateValue *SStorageState) error {
-	client := p.GetClient()
-
-	if err := client.SetNetworkKey(pStateValue.FNetworkKey); err != nil {
-		return errors.WrapError(err, "update client network key")
 	}
 
 	return nil

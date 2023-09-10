@@ -62,7 +62,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 		switch pR.FormValue("method") {
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
-			if err := pStateManager.SetNetworkKey(networkKey); err != nil {
+			if err := client.SetNetworkKey(networkKey); err != nil {
 				pLogger.PushWarn(httpLogger.Get("set_network_key"))
 				fmt.Fprint(pW, "error: update network key")
 				return

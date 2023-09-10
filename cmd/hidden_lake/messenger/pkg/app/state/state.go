@@ -187,19 +187,6 @@ func (p *sStateManager) DelFriend(pAliasName string) error {
 	return nil
 }
 
-func (p *sStateManager) SetNetworkKey(pNetworkKey string) error {
-	err := p.stateUpdater(
-		p.updateClientNetworkKey,
-		func(storageValue *SStorageState) {
-			storageValue.FNetworkKey = pNetworkKey
-		},
-	)
-	if err != nil {
-		return errors.WrapError(err, "set network key (state updater)")
-	}
-	return nil
-}
-
 func (p *sStateManager) StateIsActive() bool {
 	return p.fHashLP != nil
 }

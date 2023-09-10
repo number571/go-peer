@@ -19,7 +19,7 @@ func TestQueue(t *testing.T) {
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
@@ -40,7 +40,7 @@ func TestQueue(t *testing.T) {
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2),
+		asymmetric.LoadRSAPrivKey(testutils.Tc2PrivKey1024),
 	)
 	queue.UpdateClient(newClient)
 

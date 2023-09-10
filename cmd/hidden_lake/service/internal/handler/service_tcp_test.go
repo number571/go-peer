@@ -86,7 +86,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
-				FKeySizeBits:      testutils.TcAKeySize,
+				FKeySizeBits:      testutils.TcKeySize,
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
@@ -109,7 +109,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 			logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		),
 	)
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().Run(); err != nil {
 		t.Error(err)
@@ -127,7 +127,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().AddConnection(testutils.TgAddrs[4]); err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func testStartClientHLS() (anonymity.INode, error) {
 			ToBytes(),
 	)
 
-	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey()
+	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
 	respBytes, err := node.FetchPayload(pubKey, pld)
 	if err != nil {
 		return node, err

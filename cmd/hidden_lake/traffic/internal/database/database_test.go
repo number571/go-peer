@@ -53,7 +53,7 @@ func TestDB(t *testing.T) {
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
 	putHashes := make([]string, 0, 3)

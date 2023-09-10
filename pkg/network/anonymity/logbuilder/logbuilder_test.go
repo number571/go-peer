@@ -11,7 +11,7 @@ import (
 const (
 	tcService = "TST"
 	tcHash    = "96cb1f0968adba001ebc216708a02c8d2817b1a77fad1206012c22716a9b130b"
-	tcFmtLog  = "service=TST type=ENQRQ hash=96CB1F09...6A9B130B addr=B6E23126...55F22714 proof=0000012345 size=1024B conn=127.0.0.1:"
+	tcFmtLog  = "service=TST type=ENQRQ hash=96CB1F09...6A9B130B addr=6245E00D...327047E9 proof=0000012345 size=1024B conn=127.0.0.1:"
 )
 
 func TestLogger(t *testing.T) {

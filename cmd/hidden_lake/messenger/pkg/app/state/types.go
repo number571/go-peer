@@ -14,9 +14,8 @@ type STemplateState struct {
 }
 
 type SStorageState struct {
-	FNetworkKey string            `json:"network_key"`
-	FPrivKey    string            `json:"priv_key"`
-	FFriends    map[string]string `json:"friends"`
+	FPrivKey string            `json:"priv_key"`
+	FFriends map[string]string `json:"friends"`
 }
 
 type IStateManager interface {
@@ -34,8 +33,6 @@ type IStateManager interface {
 	GetClient() hls_client.IClient
 	GetWrapperDB() database.IWrapperDB
 	GetTemplate() *STemplateState
-
-	SetNetworkKey(string) error
 
 	AddFriend(string, asymmetric.IPubKey) error
 	DelFriend(string) error

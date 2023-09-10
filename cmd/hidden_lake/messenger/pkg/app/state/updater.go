@@ -36,9 +36,8 @@ func (p *sStateManager) stateUpdater(
 
 func copyStorageState(pStorageValue *SStorageState) *SStorageState {
 	copyStorageValue := &SStorageState{
-		FNetworkKey: pStorageValue.FNetworkKey,
-		FPrivKey:    pStorageValue.FPrivKey,
-		FFriends:    make(map[string]string, len(pStorageValue.FFriends)),
+		FPrivKey: pStorageValue.FPrivKey,
+		FFriends: make(map[string]string, len(pStorageValue.FFriends)),
 	}
 
 	for aliasName, pubKey := range pStorageValue.FFriends {

@@ -58,7 +58,7 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 func testAddFriend(t *testing.T, client hls_client.IClient, aliasName string) {
 	err := client.AddFriend(
 		aliasName,
-		asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]),
+		asymmetric.LoadRSAPubKey(testutils.TgPubKeys[3]),
 	)
 	if err != nil {
 		t.Error(err)

@@ -36,7 +36,7 @@ func TestApp(t *testing.T) {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
-				FKeySizeBits:      testutils.TcAKeySize,
+				FKeySizeBits:      testutils.TcKeySize,
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
@@ -51,7 +51,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	app := NewApp(cfg, privKey, ".")
 	if err := app.Run(); err != nil {
 		t.Error(err)

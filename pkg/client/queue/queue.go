@@ -6,6 +6,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -24,8 +25,9 @@ type sMessageQueue struct {
 }
 
 type sPool struct {
-	fSignal chan struct{}
-	fQueue  chan message.IMessage
+	fSignal   chan struct{}
+	fQueue    chan message.IMessage
+	fReceiver asymmetric.IPubKey
 }
 
 func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
@@ -34,7 +36,8 @@ func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
 		fClient:   pClient,
 		fQueue:    make(chan message.IMessage, pSett.GetMainCapacity()),
 		fMsgPool: sPool{
-			fQueue: make(chan message.IMessage, pSett.GetPoolCapacity()),
+			fQueue:    make(chan message.IMessage, pSett.GetPoolCapacity()),
+			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
 		},
 	}
 }
@@ -145,7 +148,7 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 
 func (p *sMessageQueue) newPseudoMessage() message.IMessage {
 	msg, err := p.GetClient().EncryptPayload(
-		p.GetClient().GetPubKey(),
+		p.fMsgPool.fReceiver,
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {

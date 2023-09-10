@@ -34,7 +34,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 	)
 
 	node.GetNetworkNode().AddConnection(testutils.TgAddrs[13])
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	testGetOnlines(t, client, node)
 	testDelOnline(t, client, testutils.TgAddrs[13])
@@ -112,7 +112,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 			FSettings: settings.SConfigSettingsBlock{
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
-				FKeySizeBits:      testutils.TcAKeySize,
+				FKeySizeBits:      testutils.TcKeySize,
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
 			},
 		},
@@ -128,7 +128,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 			logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
 		),
 	)
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().Run(); err != nil {
 		return nil

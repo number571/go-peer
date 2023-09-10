@@ -14,10 +14,6 @@ func (p *sStateManager) clearClientState() error {
 		return errors.WrapError(err, "clear client friends")
 	}
 
-	if err := p.clearClientNetworkKey(); err != nil {
-		return errors.WrapError(err, "clear client network key")
-	}
-
 	return nil
 }
 
@@ -48,16 +44,6 @@ func (p *sStateManager) clearClientFriends() error {
 		if err := client.DelFriend(aliasName); err != nil {
 			return errors.WrapError(err, "del friend")
 		}
-	}
-
-	return nil
-}
-
-func (p *sStateManager) clearClientNetworkKey() error {
-	client := p.GetClient()
-
-	if err := client.SetNetworkKey(""); err != nil {
-		return errors.WrapError(err, "set void network key")
 	}
 
 	return nil

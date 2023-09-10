@@ -15,18 +15,18 @@ import (
 )
 
 func TestHandleMessageAPI(t *testing.T) {
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[25])
+	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[24])
 	defer testAllFree(node, srv)
 
 	hlsClient := hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(
-			fmt.Sprintf("http://%s", testutils.TgAddrs[25]),
+			fmt.Sprintf("http://%s", testutils.TgAddrs[24]),
 			&http.Client{Timeout: time.Minute},
 		),
 	)
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 
 	client := client.NewClient(

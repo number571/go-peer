@@ -17,7 +17,7 @@ const (
 
 var (
 	tgMsgLimit = testNewClient().GetMessageLimit()
-	tgPrivKey  = asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
+	tgPrivKey  = asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	tgMessages = []string{
 		testutils.TcBody,
 		"",
