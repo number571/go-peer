@@ -61,19 +61,19 @@ func main() {
 		panic(err)
 	}
 
-	portHLT, err := strconv.Atoi(os.Args[2])
+	portHLS, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 
-	transferTraffic(db, portService, portHLT)
+	transferTraffic(db, portService, portHLS)
 }
 
-func transferTraffic(db database.IKVDatabase, portService, portHLT int) {
+func transferTraffic(db database.IKVDatabase, portService, portHLS int) {
 	hlsClient := hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(
-			fmt.Sprintf("http://%s:%d", "localhost", portHLT),
+			fmt.Sprintf("http://%s:%d", "localhost", portHLS),
 			&http.Client{Timeout: time.Minute},
 		),
 	)
