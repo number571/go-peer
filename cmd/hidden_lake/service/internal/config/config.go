@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -13,13 +12,22 @@ import (
 )
 
 var (
+	_ IConfigSettings = &SConfigSettings{}
 	_ IConfig         = &SConfig{}
 	_ IAddress        = &SAddress{}
 	_ logger.ILogging = &sLogging{}
 )
 
+type SConfigSettings struct {
+	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
+	FWorkSizeBits       uint64 `json:"work_size_bits"`
+	FQueuePeriodMS      uint64 `json:"queue_period_ms"`
+	FKeySizeBits        uint64 `json:"key_size_bits"`
+	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+}
+
 type SConfig struct {
-	FSettings *config.SConfigSettings `json:"settings"`
+	FSettings *SConfigSettings `json:"settings"`
 
 	FLogging     []string          `json:"logging,omitempty"`
 	FAddress     *SAddress         `json:"address,omitempty"`
@@ -87,7 +95,27 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (p *SConfig) GetSettings() config.IConfigSettings {
+func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
+	return p.FMessageSizeBytes
+}
+
+func (p *SConfigSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
+}
+
+func (p *SConfigSettings) GetKeySizeBits() uint64 {
+	return p.FKeySizeBits
+}
+
+func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
+	return p.FQueuePeriodMS
+}
+
+func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
+	return p.FLimitVoidSizeBytes
+}
+
+func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
 }
 
@@ -113,7 +141,7 @@ func (p *SConfig) initConfig() error {
 	}
 
 	if p.FSettings == nil {
-		p.FSettings = new(config.SConfigSettings)
+		p.FSettings = new(SConfigSettings)
 	}
 
 	return nil

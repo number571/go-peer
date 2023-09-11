@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -31,7 +30,7 @@ func TestApp(t *testing.T) {
 
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
-		FSettings: &pkg_config.SConfigSettings{
+		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FKeySizeBits:      testutils.TcKeySize,

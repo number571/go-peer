@@ -6,7 +6,6 @@ import (
 	"github.com/number571/go-peer/pkg/filesystem"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -20,7 +19,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
-			FSettings: &config.SConfigSettings{
+			FSettings: &SConfigSettings{
 				FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
 				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
 				FKeySizeBits:        hls_settings.CDefaultKeySize,

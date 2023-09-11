@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	logger "github.com/number571/go-peer/internal/logger/std"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -17,8 +17,16 @@ type IEditor interface {
 	UpdateFriends(map[string]asymmetric.IPubKey) error
 }
 
+type IConfigSettings interface {
+	message.ISettings
+
+	GetKeySizeBits() uint64
+	GetQueuePeriodMS() uint64
+	GetLimitVoidSizeBytes() uint64
+}
+
 type IConfig interface {
-	GetSettings() config.IConfigSettings
+	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
 	GetNetworkKey() string

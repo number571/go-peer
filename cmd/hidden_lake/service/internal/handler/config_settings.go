@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -19,7 +18,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger) h
 
 		sett := pWrapper.GetConfig().GetSettings()
 		cfgBytes := encoding.Serialize(
-			&pkg_config.SConfigSettings{
+			&config.SConfigSettings{
 				FMessageSizeBytes:   sett.GetMessageSizeBytes(),
 				FWorkSizeBits:       sett.GetWorkSizeBits(),
 				FQueuePeriodMS:      sett.GetQueuePeriodMS(),
