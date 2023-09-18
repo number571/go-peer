@@ -49,7 +49,7 @@ $ make docker-run
             <tr>
                 <td>1</td>
                 <td>HLTr/HLTs</td>
-                <td>v2094113.hosted-by-vdsina.ru</td>
+                <td>94.103.91.81</td> 
                 <td>9581/9582</td>
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[]</td>
