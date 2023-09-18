@@ -42,6 +42,7 @@ $ make docker-run
                 <th>Network key</th>
                 <th>Connections</th>
                 <th>Provider</th>
+                <th>Country/City</th>
                 <th>Characteristics</th>
                 <th>Expired time</th>
             </tr>
@@ -53,6 +54,7 @@ $ make docker-run
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
+                <td>Russia/Moscow</td>
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
                 <td>±eternal</td>
             </tr>
@@ -61,9 +63,10 @@ $ make docker-run
                 <td>HLTs</td>
                 <td>6a20015eacd8.vps.myjino.ru</td>
                 <td>49191</td>
-                <td>-</td> <!-- HLTs not supported network key -->
-                <td>-</td> <!-- HLTs not supported connections -->
+                <td>-</td> <!-- HLTs: not supported network key -->
+                <td>-</td> <!-- HLTs: not supported connections -->
                 <td><a href="https://jino.ru">jino.ru</a></td>
+                <td>Russia/Irkutsk</td>
                 <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2026</td>
             </tr>
@@ -75,6 +78,7 @@ $ make docker-run
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[1]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
+                <td>Russia/Moscow</td>
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
             </tr>
@@ -86,7 +90,8 @@ $ make docker-run
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
-                <td>1x2.5GHz, 1.0GB RAM, 5GB SSD</td>
+                <td>Russia/Novosibirsk</td>
+                <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
             </tr>
             <tr>
@@ -97,8 +102,21 @@ $ make docker-run
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[4]</td>
                 <td><a href="https://eternalhost.net">eternalhost.net</a></td>
-                <td>1x2.8GHz, 1.0GB RAM, 16GB SSD</td>
+                <td>Russia/Moscow</td>
+                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
                 <td>±eternal</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>HLTr</td>
+                <td>213.109.204.142</td>
+                <td>9581</td>
+                <td>k9j4jf1Ujcm7DxfO</td>
+                <td>[]</td>
+                <td><a href="https://timeweb.cloud">timeweb.cloud</a></td>
+                <td>Russia/Saint-Petersburg</td>
+                <td>1x3.3GHz, 1.0GB RAM, 15GB NVMe</td>
+                <td>±01.07.2025</td>
             </tr>
         </table>
     </td>
