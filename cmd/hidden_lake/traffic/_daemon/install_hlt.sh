@@ -13,7 +13,7 @@ RestartSec=10
 WantedBy=multi-user.target
 " > /etc/systemd/system/hidden_lake_traffic.service
 
-cd /root && wget https://github.com/number571/go-peer/releases/download/v1.5.17/hlt_amd64_linux
+cd /root && wget https://github.com/number571/go-peer/releases/download/v1.5.18/hlt_amd64_linux
 
 chmod +x /root/hlt_amd64_linux
 systemctl daemon-reload
