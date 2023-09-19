@@ -23,7 +23,6 @@ const (
 
 const (
 	CHeaderPublicKey   = "Service-Public-Key"
-	CHeaderMessageHash = "Service-Message-Hash"
 	CHeaderOffResponse = "Service-Off-Response"
 )
 

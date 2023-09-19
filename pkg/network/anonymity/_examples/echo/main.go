@@ -43,7 +43,7 @@ func main() {
 		client  = newNode("", "SERVICE-2", dbPath2)
 	)
 
-	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, _, reqBytes []byte) ([]byte, error) {
+	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes))), nil
 	})
 

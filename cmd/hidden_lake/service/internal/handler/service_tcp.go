@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
@@ -20,12 +19,12 @@ import (
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
-	return func(_ anonymity.INode, sender asymmetric.IPubKey, msgHash, reqBytes []byte) ([]byte, error) {
+	return func(_ anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := logbuilder.NewLogBuilder(pkg_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.WithSize(len(reqBytes))
-		logBuilder.WithHash(msgHash).WithPubKey(sender)
+		logBuilder.WithPubKey(sender)
 
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
@@ -57,7 +56,6 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			pushReq.Header.Set(key, val)
 		}
 		pushReq.Header.Set(pkg_settings.CHeaderPublicKey, sender.ToString())
-		pushReq.Header.Set(pkg_settings.CHeaderMessageHash, encoding.HexEncode(msgHash))
 
 		// send request to service
 		// and receive response from service

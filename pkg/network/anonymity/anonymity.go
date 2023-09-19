@@ -275,7 +275,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			}
 
 			// response can be nil
-			resp, err := f(p, sender, msg.GetBody().GetHash(), unwrapBytes(body))
+			resp, err := f(p, sender, unwrapBytes(body))
 			if err != nil {
 				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnIncorrectResponse))
 				return

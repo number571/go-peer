@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -70,17 +69,9 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			panic("public key is null (invalid data from HLS)!")
 		}
 
-		msgHash := pR.Header.Get(hls_settings.CHeaderMessageHash)
-		if msgHash == "" {
-			panic("message hash is null (invalid data from HLS)!")
-		}
-
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(
-			true,
-			doMessageProcessor(rawMsgBytes),
-			encoding.HexDecode(msgHash),
-		)
+		dbMsg := database.NewMessage(true, doMessageProcessor(rawMsgBytes))
+
 		if err := db.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(httpLogger.Get("push_message"))
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")

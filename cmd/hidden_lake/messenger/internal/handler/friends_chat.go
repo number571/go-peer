@@ -15,8 +15,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -101,9 +99,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 				return
 			}
 
-			uid := random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes), uid)
-
+			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes))
 			if err := db.Push(rel, dbMsg); err != nil {
 				pLogger.PushWarn(httpLogger.Get("push_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: add message to database"))

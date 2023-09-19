@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/network/anonymity`: delete hash field from IHandlerF
+- Update `cmd/hidden_lake/messenger`: refactoring sMessage fields (timestamp, blockUID)
+
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/service`: fix return JSON format for '/api/config/settings'

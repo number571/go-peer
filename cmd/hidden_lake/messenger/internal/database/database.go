@@ -72,11 +72,11 @@ func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if _, err := (*p.fDB).Get(getKeyMessageByHash(pR, pMsg.GetSHA256UID())); err == nil {
+	if _, err := (*p.fDB).Get(getKeyMessageByUID(pR, pMsg.GetBlockUID())); err == nil {
 		return errors.WrapError(err, "message is already exist")
 	}
 
-	if err := (*p.fDB).Set(getKeyMessageByHash(pR, pMsg.GetSHA256UID()), []byte{1}); err != nil {
+	if err := (*p.fDB).Set(getKeyMessageByUID(pR, pMsg.GetBlockUID()), []byte{1}); err != nil {
 		return errors.WrapError(err, "set uid to database")
 	}
 
