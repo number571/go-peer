@@ -8,7 +8,7 @@ import (
 
 const (
 	cMessageSizeBytes = (8 << 10)
-	cLenOtherNodes    = 20
+	cLenOtherNodes    = 10
 	cNetworkKey       = "8Jkl93Mdk93md1bz"
 	// cNetworkKey = "oi4r9NW9Le7fKF9d"
 	// cNetworkKey = "k9j4jf1Ujcm7DxfO"
