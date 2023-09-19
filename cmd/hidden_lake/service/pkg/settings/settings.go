@@ -22,8 +22,13 @@ const (
 )
 
 const (
-	CHeaderPublicKey   = "Service-Public-Key"
-	CHeaderOffResponse = "Service-Off-Response"
+	CHeaderPublicKey    = "Hl-Service-Public-Key"
+	CHeaderResponseMode = "Hl-Service-Response-Mode"
+)
+
+const (
+	CHeaderResponseModeON  = "on" // default
+	CHeaderResponseModeOFF = "off"
 )
 
 const (
@@ -85,9 +90,11 @@ const (
 )
 
 const (
+	// BASE
+	CLogBaseResponseModeFromService logbuilder.ILogType = "RSPMD"
+
 	// INFO
-	CLogInfoOffResponseFromService logbuilder.ILogType = "OFRSP"
-	CLogInfoResponseFromService    logbuilder.ILogType = "RSPSR"
+	CLogInfoResponseFromService logbuilder.ILogType = "RSPSR"
 
 	// WARN
 	CLogWarnRequestToService logbuilder.ILogType = "RQTSR"

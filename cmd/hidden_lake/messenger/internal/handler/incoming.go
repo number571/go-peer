@@ -23,7 +23,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
 
-		pW.Header().Set(hls_settings.CHeaderOffResponse, "true")
+		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeOFF)
 
 		if pR.Method != http.MethodPost {
 			pLogger.PushInfo(httpLogger.Get(http_logger.CLogMethod))

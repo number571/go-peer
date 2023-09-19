@@ -10,6 +10,7 @@
 
 - Update `pkg/network/anonymity`: delete hash field from IHandlerF
 - Update `cmd/hidden_lake/messenger`: refactoring sMessage fields (timestamp, blockUID)
+- Update `cmd/hidden_lake/service`: rename service headerd
 
 ### BUG FIXES
 

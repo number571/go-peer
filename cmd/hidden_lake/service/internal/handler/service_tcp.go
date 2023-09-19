@@ -66,19 +66,26 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 		defer resp.Body.Close()
 
-		// the response is not required by the client side
-		if resp.Header.Get(pkg_settings.CHeaderOffResponse) != "" {
-			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoOffResponseFromService))
+		// get response mode: on/off
+		respMode := resp.Header.Get(pkg_settings.CHeaderResponseMode)
+		switch respMode {
+		case "", pkg_settings.CHeaderResponseModeON:
+			// send response to the client
+			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoResponseFromService))
+			return response.NewResponse(resp.StatusCode).
+					WithHead(getHead(resp)).
+					WithBody(getBody(resp)).
+					ToBytes(),
+				nil
+		case pkg_settings.CHeaderResponseModeOFF:
+			// response is not required by the client side
+			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogBaseResponseModeFromService))
 			return nil, nil
+		default:
+			// unknown response mode
+			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogBaseResponseModeFromService))
+			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
 		}
-
-		// send result to client
-		pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoResponseFromService))
-		return response.NewResponse(resp.StatusCode).
-				WithHead(getHead(resp)).
-				WithBody(getBody(resp)).
-				ToBytes(),
-			nil
 	}
 }
 
