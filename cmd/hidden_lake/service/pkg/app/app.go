@@ -78,6 +78,18 @@ func (p *sApp) Run() error {
 	res := make(chan error)
 
 	go func() {
+		if p.fWrapper.GetConfig().GetAddress().GetPPROF() == "" {
+			return
+		}
+
+		err := p.fServicePPROF.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			res <- err
+			return
+		}
+	}()
+
+	go func() {
 		if p.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
 			return
 		}
