@@ -37,8 +37,9 @@ type SConfig struct {
 }
 
 type SAddress struct {
-	FTCP  string `json:"tcp,omitempty"`
-	FHTTP string `json:"http,omitempty"`
+	FTCP   string `json:"tcp,omitempty"`
+	FHTTP  string `json:"http,omitempty"`
+	FPPROF string `json:"pprof,omitempty"`
 }
 
 type sLogging []bool
@@ -161,6 +162,9 @@ func (p *SConfig) GetNetworkKey() string {
 }
 
 func (p *SConfig) GetAddress() IAddress {
+	if p == nil {
+		return &SAddress{}
+	}
 	return p.FAddress
 }
 
@@ -170,6 +174,10 @@ func (p *SAddress) GetTCP() string {
 
 func (p *SAddress) GetHTTP() string {
 	return p.FHTTP
+}
+
+func (p *SAddress) GetPPROF() string {
+	return p.FPPROF
 }
 
 func (p *SConfig) GetConnections() []string {

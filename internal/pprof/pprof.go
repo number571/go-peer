@@ -1,42 +1,35 @@
 package pprof
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"os"
-	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/logger"
-
-	_ "net/http/pprof"
+	"net/http/pprof"
 )
 
-func RunPprofService(pService string) {
-	if !cPProfEnabled {
-		return
-	}
-	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{
-		FInfo: os.Stdout,
-		FWarn: os.Stdout,
-		FErro: os.Stderr,
-	}))
-	go runPprofService(logger, pService)
-	time.Sleep(cWaitTime)
-}
+func InitPprofService(pAddr string) *http.Server {
+	mux := http.NewServeMux()
 
-func runPprofService(pLogger logger.ILogger, pService string) {
-	for i := 0; i < cRetriesNum; i++ {
-		port := random.NewStdPRNG().GetUint64()%(4<<10) + 60000 // [60000;64096]
-		pLogger.PushInfo(fmt.Sprintf("%s => pprof running on %d port", pService, port))
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-		err := http.ListenAndServe(fmt.Sprintf("localhost:%d", port), nil)
-		if err != nil && errors.Is(err, http.ErrServerClosed) {
-			pLogger.PushWarn(fmt.Sprintf("%s => pprof service is closed", pService))
-			return
-		}
+	server := &http.Server{
+		Addr:    pAddr,
+		Handler: mux,
 	}
 
-	pLogger.PushErro(fmt.Sprintf("%s => pprof failed running", pService))
+	return server
 }
+
+// func runPprofService(pLogger logger.ILogger, pService, pAddr string) {
+// 	pLogger.PushInfo(fmt.Sprintf("%s => pprof running on %s", pService, pAddr))
+// 	if err := http.ListenAndServe(pAddr, nil); err != nil {
+// 		if errors.Is(err, http.ErrServerClosed) {
+// 			pLogger.PushWarn(fmt.Sprintf("%s => pprof service is closed", pService))
+// 			return
+// 		}
+// 		pLogger.PushErro(fmt.Sprintf("%s => pprof failed running", pService))
+// 	}
+// }

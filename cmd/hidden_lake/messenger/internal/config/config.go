@@ -42,6 +42,7 @@ type sLogging []bool
 type SAddress struct {
 	FInterface string `json:"interface"`
 	FIncoming  string `json:"incoming"`
+	FPPROF     string `json:"pprof,omitempty"`
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
@@ -179,6 +180,10 @@ func (p *SAddress) GetInterface() string {
 
 func (p *SAddress) GetIncoming() string {
 	return p.FIncoming
+}
+
+func (p *SAddress) GetPPROF() string {
+	return p.FPPROF
 }
 
 func (p *SConfig) GetLogging() logger.ILogging {

@@ -5,15 +5,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/number571/go-peer/internal/pprof"
-
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func main() {
-	pprof.RunPprofService(pkg_settings.CServiceName)
-
 	app, err := app.InitApp(".")
 	if err != nil {
 		panic(err)

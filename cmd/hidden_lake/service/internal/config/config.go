@@ -44,14 +44,10 @@ type SConfig struct {
 
 type sLogging []bool
 
-type STraffic struct {
-	FDownload []string `json:"download,omitempty"`
-	FUpload   []string `json:"upload,omitempty"`
-}
-
 type SAddress struct {
-	FTCP  string `json:"tcp,omitempty"`
-	FHTTP string `json:"http,omitempty"`
+	FTCP   string `json:"tcp,omitempty"`
+	FHTTP  string `json:"http,omitempty"`
+	FPPROF string `json:"pprof,omitempty"`
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
@@ -210,6 +206,9 @@ func (p *SConfig) GetLogging() logger.ILogging {
 }
 
 func (p *SConfig) GetAddress() IAddress {
+	if p == nil {
+		return &SAddress{}
+	}
 	return p.FAddress
 }
 
@@ -225,20 +224,6 @@ func (p *SConfig) GetService(name string) (string, bool) {
 	return addr, ok
 }
 
-func (p *STraffic) GetDownload() []string {
-	if p == nil {
-		return nil
-	}
-	return p.FDownload
-}
-
-func (p *STraffic) GetUpload() []string {
-	if p == nil {
-		return nil
-	}
-	return p.FUpload
-}
-
 func (p *sLogging) HasInfo() bool {
 	return (*p)[0]
 }
@@ -252,15 +237,13 @@ func (p *sLogging) HasErro() bool {
 }
 
 func (p *SAddress) GetTCP() string {
-	if p == nil {
-		return ""
-	}
 	return p.FTCP
 }
 
 func (p *SAddress) GetHTTP() string {
-	if p == nil {
-		return ""
-	}
 	return p.FHTTP
+}
+
+func (p *SAddress) GetPPROF() string {
+	return p.FPPROF
 }

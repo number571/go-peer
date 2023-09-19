@@ -32,4 +32,5 @@ type IConfigSettings interface {
 type IAddress interface {
 	GetInterface() string
 	GetIncoming() string
+	GetPPROF() string
 }

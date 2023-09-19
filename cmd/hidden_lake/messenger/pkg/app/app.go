@@ -29,11 +29,13 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fWrapper        config.IWrapper
-	fStateManager   state.IStateManager
-	fLogger         logger.ILogger
+	fWrapper      config.IWrapper
+	fStateManager state.IStateManager
+	fLogger       logger.ILogger
+
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
+	fServicePPROF   *http.Server
 }
 
 func NewApp(
@@ -58,6 +60,7 @@ func (p *sApp) Run() error {
 
 	p.initIncomingServiceHTTP()
 	p.initInterfaceServiceHTTP()
+	p.initServicePPROF()
 
 	res := make(chan error)
 
@@ -102,6 +105,7 @@ func (p *sApp) Stop() error {
 	err := types.CloseAll([]types.ICloser{
 		p.fIntServiceHTTP,
 		p.fIncServiceHTTP,
+		p.fServicePPROF,
 		p.fStateManager.GetWrapperDB(),
 	})
 	if err != nil {

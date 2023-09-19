@@ -23,7 +23,11 @@ const (
 )
 
 const (
-	CDefaultTCPAddress        = "127.0.0.1:9581"
-	CDefaultHTTPAddress       = "127.0.0.1:9582"
+	CDefaultTCPAddress   = "127.0.0.1:9581"
+	CDefaultHTTPAddress  = "127.0.0.1:9582"
+	CDefaultPPROFAddress = "127.0.0.1:9583"
+)
+
+const (
 	CDefaultConnectionAddress = "127.0.0.1:9571"
 )

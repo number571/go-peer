@@ -31,13 +31,15 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fPathTo      string
-	fConfig      config.IConfig
-	fWrapperDB   database.IWrapperDB
-	fLogger      logger.ILogger
-	fNode        network.INode
-	fConnKeeper  conn_keeper.IConnKeeper
-	fServiceHTTP *http.Server
+	fPathTo     string
+	fConfig     config.IConfig
+	fWrapperDB  database.IWrapperDB
+	fLogger     logger.ILogger
+	fNode       network.INode
+	fConnKeeper conn_keeper.IConnKeeper
+
+	fServiceHTTP  *http.Server
+	fServicePPROF *http.Server
 }
 
 func NewApp(
@@ -68,6 +70,8 @@ func (p *sApp) Run() error {
 	p.fIsRun = true
 
 	p.initServiceHTTP()
+	p.initServicePPROF()
+
 	if err := p.initDatabase(); err != nil {
 		return err
 	}
@@ -132,6 +136,7 @@ func (p *sApp) Stop() error {
 		}),
 		types.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
+			p.fServicePPROF,
 			p.fWrapperDB,
 		}),
 	)

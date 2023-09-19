@@ -20,6 +20,7 @@ const (
 	tcUploader      = "test_uploader"
 	tcAddressTCP    = "test_address_tcp"
 	tcAddressHTTP   = "test_address_http"
+	tcAddressPPROF  = "test_address_pprof"
 	tcPubKeyAlias1  = "test_alias1"
 	tcPubKeyAlias2  = "test_alias2"
 	tcServiceName1  = "test_service1"
@@ -58,7 +59,8 @@ const (
 	"logging": ["info", "erro"],
 	"address": {
 		"tcp": "%s",
-		"http": "%s"
+		"http": "%s",
+		"pprof": "%s"
 	},
 	"network_key": "%s",
 	"connections": [
@@ -86,6 +88,7 @@ func testNewConfigString() string {
 		tcLimitVoidSize,
 		tcAddressTCP,
 		tcAddressHTTP,
+		tcAddressPPROF,
 		tcNetwork,
 		tgConnects[0],
 		tgConnects[1],
@@ -166,6 +169,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetHTTP() != tcAddressHTTP {
 		t.Error("address_http is invalid")
+		return
+	}
+
+	if cfg.GetAddress().GetPPROF() != tcAddressPPROF {
+		t.Error("address_pprof is invalid")
 		return
 	}
 

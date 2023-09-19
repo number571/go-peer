@@ -12,6 +12,7 @@ const (
 	tcNetwork       = "test_network"
 	tcAddress1      = "test_address1"
 	tcAddress2      = "test_address2"
+	tcAddress3      = "test_address3"
 	tcConnection1   = "test_connection1"
 	tcConnection2   = "test_connection2"
 	tcConsumer1     = "test_consumer1"
@@ -33,8 +34,9 @@ func testConfigDefaultInit(configPath string) {
 		FLogging:    []string{"info", "erro"},
 		FNetworkKey: tcNetwork,
 		FAddress: &SAddress{
-			FTCP:  tcAddress1,
-			FHTTP: tcAddress2,
+			FTCP:   tcAddress1,
+			FHTTP:  tcAddress2,
+			FPPROF: tcAddress3,
 		},
 		FConnections: []string{
 			tcConnection1,
@@ -104,6 +106,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetHTTP() != tcAddress2 {
 		t.Error("address http is invalid")
+		return
+	}
+
+	if cfg.GetAddress().GetPPROF() != tcAddress3 {
+		t.Error("address pprof is invalid")
 		return
 	}
 

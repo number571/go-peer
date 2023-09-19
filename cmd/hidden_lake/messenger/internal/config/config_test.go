@@ -26,7 +26,8 @@ const (
 	"language": "RUS",
 	"address": {
 		"interface": "%s",
-		"incoming": "%s"
+		"incoming": "%s",
+		"pprof": "%s"
 	},
 	"connection": "%s",
 	"backup_connections": [
@@ -39,6 +40,7 @@ const (
 const (
 	tcAddressInterface  = "address_interface"
 	tcAddressIncoming   = "address_incoming"
+	tcAddressPPROF      = "address_pprof"
 	tcConnectionService = "connection_service"
 	tcConnectionBackup  = "connection_backup"
 	tcStorageKey        = "storage_key"
@@ -57,6 +59,7 @@ func testNewConfigString() string {
 		tcMessagesCapacity,
 		tcAddressInterface,
 		tcAddressIncoming,
+		tcAddressPPROF,
 		tcConnectionService,
 		tcConnectionBackup,
 		tcStorageKey,
@@ -76,21 +79,6 @@ func TestConfig(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	// if cfg.GetSettings().GetWorkSizeBits() != tcWorkSize {
-	// 	t.Error("settings work size is invalid")
-	// 	return
-	// }
-
-	// if cfg.GetSettings().GetMessageSizeBytes() != tcMessageSize {
-	// 	t.Error("settings message size is invalid")
-	// 	return
-	// }
-
-	// if cfg.GetSettings().GetKeySizeBits() != tcKeySize {
-	// 	t.Error("settings key size is invalid")
-	// 	return
-	// }
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
 		t.Error("settings key size is invalid")
@@ -124,6 +112,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetIncoming() != tcAddressIncoming {
 		t.Error("address.incoming is invalid")
+		return
+	}
+
+	if cfg.GetAddress().GetPPROF() != tcAddressPPROF {
+		t.Error("address.pprof is invalid")
 		return
 	}
 

@@ -38,4 +38,5 @@ type IConfig interface {
 type IAddress interface {
 	GetTCP() string
 	GetHTTP() string
+	GetPPROF() string
 }
