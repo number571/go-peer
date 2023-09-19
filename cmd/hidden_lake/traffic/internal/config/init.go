@@ -27,9 +27,8 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FTCP:   hlt_settings.CDefaultTCPAddress,
-				FHTTP:  hlt_settings.CDefaultHTTPAddress,
-				FPPROF: hlt_settings.CDefaultPPROFAddress,
+				FTCP:  hlt_settings.CDefaultTCPAddress,
+				FHTTP: hlt_settings.CDefaultHTTPAddress,
 			},
 			FConnections: []string{
 				hlt_settings.CDefaultConnectionAddress,

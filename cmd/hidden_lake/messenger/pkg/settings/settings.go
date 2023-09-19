@@ -24,7 +24,6 @@ const (
 const (
 	CDefaultInterfaceAddress = "127.0.0.1:9591"
 	CDefaultIncomingAddress  = "127.0.0.1:9592"
-	CDefaultPPROFAddress     = "127.0.0.1:9593"
 )
 
 const (
