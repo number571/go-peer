@@ -7,7 +7,6 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 )
 
@@ -17,17 +16,12 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger) h
 		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 
 		sett := pWrapper.GetConfig().GetSettings()
-		cfgBytes := encoding.Serialize(
-			&config.SConfigSettings{
-				FMessageSizeBytes:   sett.GetMessageSizeBytes(),
-				FWorkSizeBits:       sett.GetWorkSizeBits(),
-				FQueuePeriodMS:      sett.GetQueuePeriodMS(),
-				FKeySizeBits:        sett.GetKeySizeBits(),
-				FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
-			},
-			true,
-		)
-
-		api.Response(pW, http.StatusOK, string(cfgBytes))
+		api.Response(pW, http.StatusOK, config.SConfigSettings{
+			FMessageSizeBytes:   sett.GetMessageSizeBytes(),
+			FWorkSizeBits:       sett.GetWorkSizeBits(),
+			FQueuePeriodMS:      sett.GetQueuePeriodMS(),
+			FKeySizeBits:        sett.GetKeySizeBits(),
+			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
+		})
 	}
 }

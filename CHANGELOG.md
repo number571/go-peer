@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/service`: fix return JSON format for '/api/config/settings'
+
 ## v1.5.18
 
 *September 19, 2023*
