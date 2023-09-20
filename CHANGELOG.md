@@ -14,6 +14,7 @@
 - Update `cmd/hidden_lake`: refactoring running pprof service 
 - Update `pkg/storage`: delete getHashing setting, check FPassword setting
 - Update `pkg/storage/database`: turn on opt DisableBlockCache
+- Update `pkg/network/anonymity`: update store hash of message
 
 ### BUG FIXES
 

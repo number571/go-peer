@@ -1,8 +1,8 @@
 package anonymity
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -365,7 +365,7 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 		hash      = pMsg.GetBody().GetHash()
 		proof     = pMsg.GetBody().GetProof()
 		database  = p.fWrapperDB.Get()
-		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToString()
+		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
 	)
 
 	// enrich logger
@@ -379,19 +379,23 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 		return false
 	}
 
-	hashDB := []byte(fmt.Sprintf("_hash_%X", hash))
-	gotAddrs, err := database.Get(hashDB)
-
 	// check already received data by hash
+	allAddresses, err := database.Get(hash)
 	hashIsExist := (err == nil)
-	if hashIsExist && strings.Contains(string(gotAddrs), myAddress) {
+	if hashIsExist && bytes.Contains(allAddresses, myAddress) {
 		p.fLogger.PushInfo(pLogb.Get(logbuilder.CLogInfoExist))
 		return false
 	}
 
 	// set hash to database
-	updateAddrs := fmt.Sprintf("%s;%s", string(gotAddrs), myAddress)
-	if err := database.Set(hashDB, []byte(updateAddrs)); err != nil {
+	updateAddresses := bytes.Join(
+		[][]byte{
+			allAddresses,
+			myAddress,
+		},
+		[]byte{},
+	)
+	if err := database.Set(hash, updateAddresses); err != nil {
 		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseSet))
 		return false
 	}
