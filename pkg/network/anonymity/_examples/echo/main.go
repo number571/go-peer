@@ -79,7 +79,6 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     dbPath,
-			FHashing:  false,
 			FWorkSize: 1, // not used
 			FPassword: "_",
 		}),

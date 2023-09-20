@@ -32,7 +32,6 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
-		FHashing:  false,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
 	}))
@@ -44,11 +43,6 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	if store.GetSettings().GetPassword() != "CIPHER" {
 		t.Error("[testCreate] incorrect default value = cipherKey")
-		return
-	}
-
-	if store.GetSettings().GetHashing() != false {
-		t.Error("[testCreate] incorrect default value = hashing")
 		return
 	}
 
@@ -74,7 +68,6 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
-		FHashing:  true,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER1",
 	}))
@@ -89,7 +82,6 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	store.Close() // open this database with another key
 	store, err = dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
-		FHashing:  true,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER2",
 	}))
@@ -111,7 +103,6 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 
 	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
-		FHashing:  true,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
 	}))

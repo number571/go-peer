@@ -10,7 +10,6 @@ type IKVStorage interface {
 
 type ISettings interface {
 	GetPath() string
-	GetHashing() bool
 	GetWorkSize() uint64
 	GetPassword() string
 }

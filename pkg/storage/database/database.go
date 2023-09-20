@@ -3,7 +3,6 @@ package database
 import (
 	"sync"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -11,6 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 const (
@@ -31,7 +31,9 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
-	db, err := leveldb.OpenFile(pSett.GetPath(), nil)
+	db, err := leveldb.OpenFile(pSett.GetPath(), &opt.Options{
+		DisableBlockCache: true,
+	})
 	if err != nil {
 		return nil, errors.WrapError(err, "open database")
 	}
@@ -69,7 +71,7 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := p.fDB.Put(p.tryHash(pKey), doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
+	if err := p.fDB.Put(pKey, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
 		return errors.WrapError(err, "insert key/value to database")
 	}
 	return nil
@@ -79,7 +81,7 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	encValue, err := p.fDB.Get(p.tryHash(pKey), nil)
+	encValue, err := p.fDB.Get(pKey, nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "read value by key")
 	}
@@ -99,7 +101,7 @@ func (p *sKeyValueDB) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := p.fDB.Delete(p.tryHash(pKey), nil); err != nil {
+	if err := p.fDB.Delete(pKey, nil); err != nil {
 		return errors.WrapError(err, "delete value by key")
 	}
 	return nil
@@ -113,11 +115,4 @@ func (p *sKeyValueDB) Close() error {
 		return errors.WrapError(err, "close database")
 	}
 	return nil
-}
-
-func (p *sKeyValueDB) tryHash(pKey []byte) []byte {
-	if !p.fSettings.GetHashing() {
-		return pKey
-	}
-	return hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 }

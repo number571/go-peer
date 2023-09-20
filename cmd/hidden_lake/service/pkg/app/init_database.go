@@ -13,7 +13,6 @@ func (p *sApp) initDatabase() error {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
-			FHashing:  false,
 			FWorkSize: 1,
 			FPassword: "_",
 		}),

@@ -30,7 +30,6 @@ func initDB() database.IKVDatabase {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     databasePath,
-			FHashing:  false,
 			FWorkSize: 1,
 			FPassword: "_",
 		}),

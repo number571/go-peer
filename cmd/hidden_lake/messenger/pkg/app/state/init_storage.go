@@ -10,10 +10,14 @@ import (
 )
 
 func initCryptoStorage(pCfg config.IConfig, pPathTo string) (storage.IKVStorage, error) {
+	storageKey := pCfg.GetStorageKey()
+	if storageKey == "" {
+		return nil, errors.NewError("storage key is nil")
+	}
 	sett := storage.NewSettings(&storage.SSettings{
 		FPath:     fmt.Sprintf("%s/%s", pPathTo, hlm_settings.CPathSTG),
 		FWorkSize: hlm_settings.CWorkForKeys,
-		FPassword: pCfg.GetStorageKey(),
+		FPassword: storageKey,
 	})
 	stg, err := storage.NewCryptoStorage(sett)
 	if err != nil {

@@ -12,6 +12,8 @@
 - Update `cmd/hidden_lake/messenger`: refactoring sMessage fields (timestamp, blockUID)
 - Update `cmd/hidden_lake/service`: rename service headerd
 - Update `cmd/hidden_lake`: refactoring running pprof service 
+- Update `pkg/storage`: delete getHashing setting, check FPassword setting
+- Update `pkg/storage/database`: turn on opt DisableBlockCache
 
 ### BUG FIXES
 

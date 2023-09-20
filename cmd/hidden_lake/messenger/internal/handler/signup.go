@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/logger"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
@@ -78,14 +77,6 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 				return
 			}
 
-			hashLogin := hashing.NewSHA256Hasher([]byte(login))
-			hashPassword := hashing.NewSHA256Hasher([]byte(password))
-
-			hashLP := hashing.NewSHA256Hasher(bytes.Join(
-				[][]byte{hashLogin.ToBytes(), hashPassword.ToBytes()},
-				[]byte{},
-			)).ToBytes()
-
 			var privKey asymmetric.IPrivKey
 			privateKey := strings.TrimSpace(pR.FormValue("private_key"))
 
@@ -102,6 +93,7 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 				return
 			}
 
+			hashLP := keybuilder.NewKeyBuilder(hlm_settings.CWorkForKeys, []byte(login)).Build(password)
 			if err := pStateManager.CreateState(hashLP, privKey); err != nil {
 				pLogger.PushWarn(httpLogger.Get("create_state"))
 				fmt.Fprint(pW, "error: create account")

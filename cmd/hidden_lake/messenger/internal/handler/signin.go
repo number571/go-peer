@@ -1,14 +1,13 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strings"
 
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/logger"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
@@ -49,14 +48,7 @@ func SignInPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 				return
 			}
 
-			hashLogin := hashing.NewSHA256Hasher([]byte(login))
-			hashPassword := hashing.NewSHA256Hasher([]byte(password))
-
-			hashLP := hashing.NewSHA256Hasher(bytes.Join(
-				[][]byte{hashLogin.ToBytes(), hashPassword.ToBytes()},
-				[]byte{},
-			)).ToBytes()
-
+			hashLP := keybuilder.NewKeyBuilder(hlm_settings.CWorkForKeys, []byte(login)).Build(password)
 			if err := pStateManager.OpenState(hashLP); err != nil {
 				pLogger.PushWarn(httpLogger.Get("open_state"))
 				fmt.Fprintf(pW, "error: %s", err.Error())

@@ -108,7 +108,6 @@ type storageData struct {
 	FSecrets map[string][]byte `json:"secrets"`
 }
 
-// pSettings.Hashing always = true
 func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	store := &sCryptoStorage{
 		fSettings: pSettings,

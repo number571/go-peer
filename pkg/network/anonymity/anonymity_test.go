@@ -148,7 +148,6 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, i, typeDB),
-			FHashing:  true,
 			FWorkSize: testutils.TCWorkSize,
 			FPassword: "CIPHER",
 		}),

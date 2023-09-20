@@ -19,7 +19,6 @@ func NewKeyValueDB(pPath, pPassword string) (IKVDatabase, error) {
 	db, err := gp_database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     pPath,
-			FHashing:  true,
 			FWorkSize: settings.CWorkForKeys,
 			FPassword: pPassword,
 		}),
@@ -71,14 +70,6 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
-
-	if _, err := (*p.fDB).Get(getKeyMessageByUID(pR, pMsg.GetBlockUID())); err == nil {
-		return errors.WrapError(err, "message is already exist")
-	}
-
-	if err := (*p.fDB).Set(getKeyMessageByUID(pR, pMsg.GetBlockUID()), []byte{1}); err != nil {
-		return errors.WrapError(err, "set uid to database")
-	}
 
 	size := p.getSize(pR)
 	numBytes := encoding.Uint64ToBytes(size + 1)

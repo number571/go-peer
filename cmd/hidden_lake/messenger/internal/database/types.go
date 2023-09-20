@@ -27,7 +27,6 @@ type IRelation interface {
 
 type IMessage interface {
 	IsIncoming() bool
-	GetBlockUID() [cBlockUIDSize]byte
 	GetTimestamp() string
 	GetMessage() []byte
 	ToBytes() []byte

@@ -7,7 +7,6 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FPath     string
-	FHashing  bool
 	FWorkSize uint64
 	FPassword string
 }
@@ -15,7 +14,6 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FPath:     pSett.FPath,
-		FHashing:  pSett.FHashing,
 		FWorkSize: pSett.FWorkSize,
 		FPassword: pSett.FPassword,
 	}).mustNotNull()
@@ -28,15 +26,14 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FWorkSize == 0 {
 		panic(`p.FWorkSize == 0`)
 	}
+	if p.FPassword == "" {
+		panic(`p.FPassword == ""`)
+	}
 	return p
 }
 
 func (p *sSettings) GetPath() string {
 	return p.FPath
-}
-
-func (p *sSettings) GetHashing() bool {
-	return p.FHashing
 }
 
 func (p *sSettings) GetWorkSize() uint64 {

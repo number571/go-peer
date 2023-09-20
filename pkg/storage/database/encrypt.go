@@ -29,13 +29,13 @@ func tryDecrypt(pCipher symmetric.ICipher, pAuthKey []byte, pEncBytes []byte) ([
 
 	encDataBytes := pEncBytes[hashing.CSHA256Size:]
 
-	gotHashed := pEncBytes[:hashing.CSHA256Size]
-	newHashed := hashing.NewHMACSHA256Hasher(
+	gotHash := pEncBytes[:hashing.CSHA256Size]
+	newHash := hashing.NewHMACSHA256Hasher(
 		pAuthKey,
 		encDataBytes,
 	).ToBytes()
 
-	if !bytes.Equal(gotHashed, newHashed) {
+	if !bytes.Equal(gotHash, newHash) {
 		return nil, errors.NewError("incorrect hash of decrypted data")
 	}
 
