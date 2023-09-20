@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/messenger`: append _daemon scripts
+
 ### CHANGES
 
 - Update `pkg/network/anonymity`: delete hash field from IHandlerF
