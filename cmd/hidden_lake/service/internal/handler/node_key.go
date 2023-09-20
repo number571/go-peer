@@ -27,6 +27,16 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 		}
 
 		switch pR.Method {
+		case http.MethodGet:
+			pubKeys := []string{
+				pNode.GetMessageQueue().GetClient().GetPubKey().ToString(),
+				pEphPrivKey.GetPubKey().ToString(),
+			}
+
+			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			api.Response(pW, http.StatusOK, pubKeys)
+			return
+
 		case http.MethodPost:
 			var vPrivKey pkg_settings.SPrivKey
 
@@ -56,14 +66,6 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 			api.Response(pW, http.StatusOK, "success: update private key")
 			return
 		}
-
-		pubKeys := []string{
-			pNode.GetMessageQueue().GetClient().GetPubKey().ToString(),
-			pEphPrivKey.GetPubKey().ToString(),
-		}
-
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, pubKeys)
 	}
 }
 
