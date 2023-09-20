@@ -105,15 +105,23 @@ func (p *SConfig) initConfig() error {
 	if !p.isValid() {
 		return errors.NewError("load config settings")
 	}
+
 	if err := p.loadLogging(); err != nil {
 		return errors.WrapError(err, "load logging")
 	}
+
 	if err := p.loadLanguage(); err != nil {
 		return errors.WrapError(err, "load language")
 	}
+
+	if p.FAddress == nil {
+		p.FAddress = new(SAddress)
+	}
+
 	if p.FSettings == nil {
 		p.FSettings = new(SConfigSettings)
 	}
+
 	return nil
 }
 

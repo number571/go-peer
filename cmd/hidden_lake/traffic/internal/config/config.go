@@ -162,9 +162,6 @@ func (p *SConfig) GetNetworkKey() string {
 }
 
 func (p *SConfig) GetAddress() IAddress {
-	if p == nil {
-		return &SAddress{}
-	}
 	return p.FAddress
 }
 

@@ -136,6 +136,10 @@ func (p *SConfig) initConfig() error {
 		return errors.WrapError(err, "load logging")
 	}
 
+	if p.FAddress == nil {
+		p.FAddress = new(SAddress)
+	}
+
 	if p.FSettings == nil {
 		p.FSettings = new(SConfigSettings)
 	}
@@ -206,9 +210,6 @@ func (p *SConfig) GetLogging() logger.ILogging {
 }
 
 func (p *SConfig) GetAddress() IAddress {
-	if p == nil {
-		return &SAddress{}
-	}
 	return p.FAddress
 }
 
