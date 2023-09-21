@@ -16,11 +16,12 @@ const (
 
 func main() {
 	service := network.NewNode(nodeSettings(serviceAddress))
-	service.HandleFunc(serviceHeader, func(_ network.INode, c conn.IConn, reqBytes []byte) {
+	service.HandleFunc(serviceHeader, func(_ network.INode, c conn.IConn, reqBytes []byte) error {
 		c.WritePayload(payload.NewPayload(
 			serviceHeader,
 			[]byte(fmt.Sprintf("echo: [%s]", string(reqBytes))),
 		))
+		return nil
 	})
 
 	if err := service.Run(); err != nil {

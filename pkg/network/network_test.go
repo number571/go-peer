@@ -26,7 +26,7 @@ func TestBroadcast(t *testing.T) {
 	wg.Add(4 * tcIter)
 
 	headHandle := uint64(testutils.TcHead)
-	handleF := func(node INode, conn conn.IConn, reqBytes []byte) {
+	handleF := func(node INode, conn conn.IConn, reqBytes []byte) error {
 		defer wg.Done()
 		defer node.BroadcastPayload(payload.NewPayload(headHandle, reqBytes))
 
@@ -36,13 +36,18 @@ func TestBroadcast(t *testing.T) {
 		val := string(reqBytes)
 		flag, ok := mapp[node][val]
 		if !ok {
-			t.Errorf("incoming value '%s' undefined", val)
+			err := fmt.Errorf("incoming value '%s' undefined", val)
+			t.Error(err)
+			return err
 		}
 		if flag {
-			t.Errorf("incoming value '%s' already exists", val)
+			err := fmt.Errorf("incoming value '%s' already exists", val)
+			t.Error(err)
+			return err
 		}
 
 		mapp[node][val] = true
+		return nil
 	}
 
 	for _, node := range nodes {

@@ -4,15 +4,17 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/network"
 )
 
-func HandleMessageAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) http.HandlerFunc {
+func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		httpLogger := http_logger.NewHTTPLogger(hlt_settings.CServiceName, pR)
 
@@ -42,30 +44,20 @@ func HandleMessageAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) ht
 			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, msg.ToString())
 			return
+
 		case http.MethodPost:
-			msgBytes, err := io.ReadAll(pR.Body)
+			msgStringAsBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
 				pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
 				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
+			msgString := string(msgStringAsBytes)
 
-			msg := message.LoadMessage(
-				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     database.Settings().GetWorkSizeBits(),
-					FMessageSizeBytes: database.Settings().GetMessageSizeBytes(),
-				}),
-				string(msgBytes),
-			)
-			if msg == nil {
-				pLogger.PushWarn(httpLogger.Get("decode_message"))
-				api.Response(pW, http.StatusBadRequest, "failed: decode message")
-				return
-			}
-
-			if err := database.Push(msg); err != nil {
-				pLogger.PushErro(httpLogger.Get("push_message"))
-				api.Response(pW, http.StatusInternalServerError, "failed: push message")
+			handler := HandleServiceTCP(pCfg, pWrapperDB, pLogger)
+			if err := handler(pNode, nil, message.FromStringToBytes(msgString)); err != nil {
+				// internal logger
+				api.Response(pW, http.StatusBadRequest, "failed: handle message")
 				return
 			}
 

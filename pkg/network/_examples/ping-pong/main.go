@@ -44,12 +44,12 @@ func main() {
 }
 
 func handler(serviceName string) network.IHandlerF {
-	return func(n network.INode, _ conn.IConn, reqBytes []byte) {
+	return func(n network.INode, _ conn.IConn, reqBytes []byte) error {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 
 		num, err := strconv.Atoi(string(reqBytes))
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		val := "ping"
@@ -62,6 +62,8 @@ func handler(serviceName string) network.IHandlerF {
 			serviceHeader,
 			[]byte(fmt.Sprintf("%d", num+1)),
 		))
+
+		return nil
 	}
 }
 

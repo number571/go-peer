@@ -19,6 +19,43 @@ const (
 	tcProof = 4512
 )
 
+func TestConvert(t *testing.T) {
+	params := NewSettings(&SSettings{
+		FMessageSizeBytes: (2 << 10),
+		FWorkSizeBits:     testutils.TCWorkSize,
+	})
+
+	msgBytes, err := os.ReadFile("test_binary.msg")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	msg1 := LoadMessage(params, FromBytesToString(msgBytes))
+	if msg1 == nil {
+		t.Error("fromBytesToString result is invalid")
+		return
+	}
+	if !bytes.Equal(msg1.ToBytes(), msgBytes) {
+		t.Error("msg1 bytes not equal with original")
+		return
+	}
+
+	msgStrBytes, err := os.ReadFile("test_string.msg")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	msg2 := LoadMessage(params, FromStringToBytes(string(msgStrBytes)))
+	if msg2 == nil {
+		t.Error("fromStringToBytes result is invalid")
+		return
+	}
+	if msg2.ToString() != string(msgStrBytes) {
+		t.Error("msg2 string not equal with original")
+		return
+	}
+}
+
 func TestMessage(t *testing.T) {
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),

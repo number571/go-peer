@@ -12,7 +12,7 @@ func (p *sApp) initServiceHTTP() {
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fLogger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(p.fWrapperDB, p.fLogger))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(p.fWrapperDB, p.fLogger))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(p.fConfig, p.fWrapperDB, p.fLogger, p.fNode))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:    p.fConfig.GetAddress().GetHTTP(),

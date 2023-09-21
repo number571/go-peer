@@ -210,8 +210,7 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 		if err != nil {
 			break
 		}
-		ok := p.handleMessage(pConn, pld)
-		if !ok {
+		if ok := p.handleMessage(pConn, pld); !ok {
 			break
 		}
 	}
@@ -234,7 +233,11 @@ func (p *sNode) handleMessage(pConn conn.IConn, pPld payload.IPayload) bool {
 		return false
 	}
 
-	f(p, pConn, pPld.GetBody())
+	if err := f(p, pConn, pPld.GetBody()); err != nil {
+		// function error = protocol error
+		return false
+	}
+
 	return true
 }
 

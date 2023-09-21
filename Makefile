@@ -53,9 +53,13 @@ git-push:
 	git push 
 
 ### PPROF
-# example run: make pprof-run PPROF_NAME=hls PPROF_PORT=62109
+# make pprof-run PPROF_NAME=hls PPROF_PORT=9573
+# make pprof-run PPROF_NAME=hlt PPROF_PORT=9583
+# make pprof-run PPROF_NAME=hlm PPROF_PORT=9593
 
 pprof-run:
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/threadcreate.png http://localhost:$(PPROF_PORT)/debug/pprof/threadcreate
 	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile
 	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
 	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
+	go tool pprof -png -output $(PPROF_PATH)/$(PPROF_NAME)/allocs.png http://localhost:$(PPROF_PORT)/debug/pprof/allocs

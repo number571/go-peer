@@ -127,13 +127,13 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 	defer resp.Body.Close()
 
 	// read response from service
-	bytesMsg, err := io.ReadAll(resp.Body)
+	msgStringAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed: read body from service")
 	}
 
 	// read body of response
-	if len(bytesMsg) <= 1 || bytesMsg[0] == '!' {
+	if len(msgStringAsBytes) <= 1 || msgStringAsBytes[0] == '!' {
 		return nil, fmt.Errorf("failed: incorrect response from service")
 	}
 
@@ -142,12 +142,13 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 		FMessageSizeBytes: messageSize,
 	})
 
+	msgString := string(msgStringAsBytes[1:])
 	msg := message.LoadMessage(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: sett.GetMessageSizeBytes(),
 			FWorkSizeBits:     sett.GetWorkSizeBits(),
 		}),
-		bytesMsg[1:],
+		message.FromStringToBytes(msgString),
 	)
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")

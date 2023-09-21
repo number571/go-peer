@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -14,7 +16,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
@@ -81,18 +82,13 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		}
 	}
 
-	sett := anonymity.NewSettings(&anonymity.SSettings{
-		FServiceName:   "TEST",
-		FRetryEnqueue:  0,
-		FNetworkMask:   1,
-		FFetchTimeWait: time.Minute,
-	})
 	connKeeper := conn_keeper.NewConnKeeper(
 		conn_keeper.NewSettings(connKeeperSettings),
 		testNewNetworkNode("").HandleFunc(
-			sett.GetNetworkMask(), // default value
-			func(_ network.INode, _ conn.IConn, _ []byte) {
+			1, // default value
+			func(_ network.INode, _ conn.IConn, _ []byte) error {
 				// pass response actions
+				return nil
 			},
 		),
 	)
@@ -100,11 +96,32 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		return nil, nil
 	}
 
+	cfg := &config.SConfig{
+		FSettings: &config.SConfigSettings{
+			FMessageSizeBytes:   testutils.TCMessageSize,
+			FWorkSizeBits:       testutils.TCWorkSize,
+			FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
+			FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+		},
+	}
+
 	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
+
+	node := network.NewNode(network.NewSettings(&network.SSettings{
+		FCapacity:     testutils.TCCapacity,
+		FMaxConnects:  testutils.TCMaxConnects,
+		FWriteTimeout: time.Minute,
+		FConnSettings: conn.NewSettings(&conn.SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		}),
+	}))
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(wDB, logger))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(cfg, wDB, logger, node))
 
 	srv := &http.Server{
 		Addr:    addr,

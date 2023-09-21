@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IHandlerF func(INode, conn.IConn, []byte)
+type IHandlerF func(INode, conn.IConn, []byte) error
 
 type INode interface {
 	types.ICommand

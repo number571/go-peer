@@ -191,7 +191,7 @@ func (p *sNode) runQueue() error {
 			logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
 
 			// store hash and push message to network
-			if ok := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
 				// internal logger
 				continue
 			}
@@ -207,7 +207,7 @@ func (p *sNode) runQueue() error {
 }
 
 func (p *sNode) handleWrapper() network.IHandlerF {
-	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) {
+	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) error {
 		logBuilder := logbuilder.NewLogBuilder(p.fSettings.GetServiceName())
 
 		// enrich logger
@@ -225,16 +225,19 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		)
 
 		// try store hash of message
-		if ok := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+		if ok, err := p.storeHashWithBroadcast(logBuilder, msg); !ok {
 			// internal logger
-			return
+			if err != nil {
+				return errors.WrapError(err, "store hash with broadcast")
+			}
+			return nil
 		}
 
 		// try decrypt message
 		sender, pld, err := client.DecryptMessage(msg)
 		if err != nil {
 			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoUndecryptable))
-			return
+			return nil
 		}
 
 		// enrich logger
@@ -243,7 +246,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		// check sender in f2f list
 		if !p.fFriends.InPubKeys(sender) {
 			p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnNotFriend))
-			return
+			return nil
 		}
 
 		// get header of payload
@@ -258,12 +261,12 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			action, ok := p.getAction(actionKey)
 			if !ok {
 				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogBaseGetResponse))
-				return
+				return nil
 			}
 
 			p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseGetResponse))
 			action <- unwrapBytes(body)
-			return
+			return nil
 
 		// got request from another side (need generate response)
 		case isRequest(body):
@@ -271,29 +274,29 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			f, ok := p.getRoute(head.getRoute())
 			if !ok || f == nil {
 				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnUnknownRoute))
-				return
+				return nil
 			}
 
 			// response can be nil
 			resp, err := f(p, sender, unwrapBytes(body))
 			if err != nil {
 				p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnIncorrectResponse))
-				return
+				return nil
 			}
 			if resp == nil {
 				p.fLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoWithoutResponse))
-				return
+				return nil
 			}
 
 			// create the message and put this to the queue
 			// internal logger
 			_ = p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
-			return
+			return nil
 
 		// undefined type of message (not request/response)
 		default:
 			p.fLogger.PushWarn(logBuilder.Get(logbuilder.CLogBaseMessageType))
-			return
+			return nil
 		}
 	}
 }
@@ -354,10 +357,10 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	return nil
 }
 
-func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg message.IMessage) bool {
+func (p *sNode) storeHashWithBroadcast(pLogBuilder logbuilder.ILogBuilder, pMsg message.IMessage) (bool, error) {
 	if pMsg == nil {
-		p.fLogger.PushWarn(pLogb.Get(logbuilder.CLogWarnMessageNull))
-		return false
+		p.fLogger.PushWarn(pLogBuilder.Get(logbuilder.CLogWarnMessageNull))
+		return false, errors.NewError("message is nil")
 	}
 
 	var (
@@ -369,22 +372,22 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 	)
 
 	// enrich logger
-	pLogb.
+	pLogBuilder.
 		WithHash(hash).
 		WithProof(proof).
 		WithSize(size)
 
 	if database == nil {
-		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseGet))
-		return false
+		p.fLogger.PushErro(pLogBuilder.Get(logbuilder.CLogErroDatabaseGet))
+		return false, errors.NewError("database is nil")
 	}
 
 	// check already received data by hash
 	allAddresses, err := database.Get(hash)
 	hashIsExist := (err == nil)
 	if hashIsExist && bytes.Contains(allAddresses, myAddress) {
-		p.fLogger.PushInfo(pLogb.Get(logbuilder.CLogInfoExist))
-		return false
+		p.fLogger.PushInfo(pLogBuilder.Get(logbuilder.CLogInfoExist))
+		return false, nil
 	}
 
 	// set hash to database
@@ -396,20 +399,20 @@ func (p *sNode) storeHashWithBroadcast(pLogb logbuilder.ILogBuilder, pMsg messag
 		[]byte{},
 	)
 	if err := database.Set(hash, updateAddresses); err != nil {
-		p.fLogger.PushErro(pLogb.Get(logbuilder.CLogErroDatabaseSet))
-		return false
+		p.fLogger.PushErro(pLogBuilder.Get(logbuilder.CLogErroDatabaseSet))
+		return false, errors.WrapError(err, "database set")
 	}
 
 	// do not send data if than already received
 	if !hashIsExist {
 		// broadcast message to network
 		if err := p.networkBroadcast(pMsg); err != nil {
-			p.fLogger.PushWarn(pLogb.Get(logbuilder.CLogBaseBroadcast))
+			p.fLogger.PushWarn(pLogBuilder.Get(logbuilder.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
 	}
 
-	return true
+	return true, nil
 }
 
 func (p *sNode) networkBroadcast(pMsg message.IMessage) error {

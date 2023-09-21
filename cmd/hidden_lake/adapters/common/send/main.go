@@ -39,23 +39,23 @@ func trafficPage(portService int) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// get message from HLT
-		msgBytes, err := io.ReadAll(r.Body)
+		msgStringAsBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			api.Response(w, http.StatusConflict, "failed: read body")
 			return
 		}
 
-		ret, res := pushMessageToService(portService, msgBytes)
+		ret, res := pushMessageToService(portService, msgStringAsBytes)
 		api.Response(w, ret, res)
 	}
 }
 
-func pushMessageToService(portService int, msgBytes []byte) (int, string) {
+func pushMessageToService(portService int, msgStringAsBytes []byte) (int, string) {
 	// build request to service
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("%s:%d/push", common.HostService, portService),
-		bytes.NewBuffer(msgBytes),
+		bytes.NewBuffer(msgStringAsBytes),
 	)
 	if err != nil {
 		return http.StatusNotImplemented, "failed: build request"
