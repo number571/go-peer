@@ -39,8 +39,11 @@ func main() {
 	}
 	strConnects := strings.Join(connects, ",")
 
+	firstConnect := connects[0]
+	secondConnect := connects[len(connects)-1]
+
 	nodes := make([]*sNodeHLS, 0, 2+cLenOtherNodes) // 2 = recv+send
-	nodes = append(nodes, initRecvNode(strConnects), initSendNode(strConnects))
+	nodes = append(nodes, initRecvNode(firstConnect), initSendNode(secondConnect))
 
 	os.Mkdir("other_nodes", 0744)
 	for i := 1; i <= cLenOtherNodes; i++ {
