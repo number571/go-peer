@@ -111,8 +111,8 @@ $ make docker-run
                 <td>HLTr</td>
                 <td>213.109.204.142</td>
                 <td>9581</td>
-                <td>k9j4jf1Ujcm7DxfO</td>
-                <td>[]</td>
+                <td>oi4r9NW9Le7fKF9d</td>
+                <td>[4,5]</td>
                 <td><a href="https://timeweb.cloud">timeweb.cloud</a></td>
                 <td>Russia/Saint-Petersburg</td>
                 <td>1x3.3GHz, 1.0GB RAM, 15GB NVMe</td>
