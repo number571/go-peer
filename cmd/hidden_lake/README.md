@@ -76,7 +76,7 @@ $ make docker-run
                 <td>6a20015eacd8.vps.myjino.ru</td>
                 <td>49356</td>
                 <td>8Jkl93Mdk93md1bz</td>
-                <td>[2]</td>
+                <td>[1,2]</td>
                 <td><a href="https://jino.ru">jino.ru</a></td>
                 <td>Russia/Irkutsk</td>
                 <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
