@@ -84,9 +84,9 @@ $ make docker-run
             </tr>
             <tr>
                 <td>4</td>
-                <td>HLTr</td>
+                <td>HLS</td>
                 <td>193.233.18.245</td>
-                <td>9581</td>
+                <td>9571</td>
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
