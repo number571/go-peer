@@ -29,7 +29,7 @@ import (
 			H - hmac (use auth-key)
 			L - length
 			M - message bytes
-			V = void bytes
+			V - void bytes
 */
 
 const (
