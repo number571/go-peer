@@ -9,4 +9,3 @@
 7. Fix docker build for arm macOS 
 8. HLS: append proxy connections
 9. HLS: write a threat model (in "Hidden Lake" article)
-10. Composite: change icons for mobile apps

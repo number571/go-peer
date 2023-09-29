@@ -21,6 +21,8 @@
 - Update `pkg/storage`: delete getHashing setting, check FPassword setting
 - Update `pkg/storage/database`: turn on opt DisableBlockCache
 - Update `pkg/network/anonymity`: update store hash of message
+- Delete `cmd/hidden_lake/composite/mobile`: delete android support, delete fyne's dependency 
+- Update `go.mod`: go1.17 -> go1.16 
 
 ### BUG FIXES
 

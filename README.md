@@ -57,7 +57,7 @@ $ go get github.com/number571/go-peer
 
 ## Requirements
 
-1. Go version `>= 1.17`
+1. Go version `>= 1.16`
 
 ## Releases
 
@@ -70,17 +70,14 @@ Some final applications are compositions of other applications. Due to this, suc
 3. `hlc_st` - Composite of HLS + HLT (traffic)
 4. `hlc_stm` - Composite of HLS + HLT + HLM
 
-Applications `hlc_sm`, `hlc_stm` also compiles for `android/arm64` and `android/amd64`.
-
 ## Dependencies
 
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
 2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
-4. Go library (used by `cmd/hidden_lake/composite`) [fyne.io/fyne/v2](https://github.com/fyne-io/fyne "fyne/v2");
-5. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
-6. Go library (used by `cmd/hidden_lake/messenger`) [github.com/wagslane/go-password-validator](https://github.com/wagslane/go-password-validator "wagslane/go-password-validator");
-7. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+4. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
+5. Go library (used by `cmd/hidden_lake/messenger`) [github.com/wagslane/go-password-validator](https://github.com/wagslane/go-password-validator "wagslane/go-password-validator");
+6. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -314,10 +311,6 @@ The `Hidden Lake Messenger` is a messenger based on the core of an anonymous net
 
 HLM is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com /. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
-Running application in mobile  |  Running application in browser
-:-----------------------------:|:------------------------------:
-![hlm_mobile_1.png](cmd/hidden_lake/messenger/_images/hlm_mobile_1.png)  |  ![hlm_mobile_2.png](cmd/hidden_lake/messenger/_images/hlm_mobile_2.png)
-
 > More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
 ### How it works
@@ -396,14 +389,6 @@ $ make docker-run
 
 > [INFO] 2023/06/03 08:35:50 HLM is running...
 > ...
-```
-
-Build mobile app:
-
-```bash
-$ go install fyne.io/fyne/v2/cmd/fyne@latest # dependence
-$ cd ./cmd/hidden_lake/composite/mobile/service_messenger
-$ make build # create hlc_sm_arm_android.apk and copy to ./bin
 ```
 
 ### Example
