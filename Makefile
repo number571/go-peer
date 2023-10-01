@@ -44,11 +44,11 @@ test-coverage-view:
 
 ### GIT
 
-git-status:
+git-status: test-run 
 	git add .
 	git status 
 
-git-push: test-run 
+git-push:
 	git commit -m "update"
 	git push 
 

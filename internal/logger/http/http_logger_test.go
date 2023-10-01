@@ -7,7 +7,7 @@ import (
 
 const (
 	tcService = "TST"
-	tcFmtLog  = "service=TST method=GET path=/api/index conn= message=hello_world"
+	tcFmtLog  = "service=TST method=GET path=/api/index conn=127.0.0.1:55555 message=hello_world"
 )
 
 func TestLogger(t *testing.T) {
@@ -18,9 +18,15 @@ func TestLogger(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:55555"
 
-	logBuilder := NewLogBuilder(tcService, req)
-	logGetter := logBuilder.WithMessage("hello_world").Get()
+	logBuilder := NewLogBuilder(tcService, req).WithMessage("hello_world")
+	logFunc := GetLogFunc()
 
+	if logFunc(logBuilder) != tcFmtLog {
+		t.Error("got invalid format")
+		return
+	}
+
+	logGetter := logBuilder.Get()
 	if logGetter.GetConn() != "127.0.0.1:55555" {
 		t.Error("got conn != conn")
 		return
