@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
+	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -100,10 +101,11 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 				FErro: os.Stderr,
 			}),
 			func(arg logger.ILogArg) string {
-				logGetter, ok := arg.(anonymity.ILogGetter)
+				logBuilder, ok := arg.(anon_logger.ILogBuilder)
 				if !ok {
 					panic("got invalid log arg")
 				}
+				logGetter := logBuilder.Get()
 				return fmt.Sprintf(
 					"%s|%02xT|%XH|%dP|%dB",
 					logGetter.GetService(),
