@@ -22,14 +22,3 @@ func InitPprofService(pAddr string) *http.Server {
 
 	return server
 }
-
-// func runPprofService(pLogger logger.ILogger, pService, pAddr string) {
-// 	pLogger.PushInfo(fmt.Sprintf("%s => pprof running on %s", pService, pAddr))
-// 	if err := http.ListenAndServe(pAddr, nil); err != nil {
-// 		if errors.Is(err, http.ErrServerClosed) {
-// 			pLogger.PushWarn(fmt.Sprintf("%s => pprof service is closed", pService))
-// 			return
-// 		}
-// 		pLogger.PushErro(fmt.Sprintf("%s => pprof failed running", pService))
-// 	}
-// }
