@@ -15,7 +15,9 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	internal_logger "github.com/number571/go-peer/internal/logger/std"
+	anon_logger "github.com/number571/go-peer/internal/logger/anon"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
+	std_logger "github.com/number571/go-peer/internal/logger/std"
 	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
 
@@ -34,9 +36,12 @@ type sApp struct {
 	fPathTo     string
 	fConfig     config.IConfig
 	fWrapperDB  database.IWrapperDB
-	fLogger     logger.ILogger
 	fNode       network.INode
 	fConnKeeper conn_keeper.IConnKeeper
+
+	fAnonLogger logger.ILogger
+	fHTTPLogger logger.ILogger
+	fStdfLogger logger.ILogger
 
 	fServiceHTTP  *http.Server
 	fServicePPROF *http.Server
@@ -46,17 +51,33 @@ func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
 ) types.ICommand {
+	anonLogger := std_logger.NewStdLogger(
+		pCfg.GetLogging(),
+		anon_logger.GetLogFunc(),
+	)
+
+	httpLogger := std_logger.NewStdLogger(
+		pCfg.GetLogging(),
+		http_logger.GetLogFunc(),
+	)
+
+	stdfLogger := std_logger.NewStdLogger(
+		pCfg.GetLogging(),
+		std_logger.GetLogFunc(),
+	)
+
 	wDB := database.NewWrapperDB()
-	logger := internal_logger.StdLogger(pCfg.GetLogging())
-	node := initNode(pCfg, wDB, logger)
-	connKeeper := initConnKeeper(pCfg, node)
+	node := initNode(pCfg, wDB, anonLogger)
+
 	return &sApp{
 		fConfig:     pCfg,
 		fWrapperDB:  wDB,
-		fLogger:     logger,
 		fNode:       node,
-		fConnKeeper: connKeeper,
+		fConnKeeper: initConnKeeper(pCfg, node),
 		fPathTo:     pPathTo,
+		fAnonLogger: anonLogger,
+		fHTTPLogger: httpLogger,
+		fStdfLogger: stdfLogger,
 	}
 }
 
@@ -126,7 +147,7 @@ func (p *sApp) Run() error {
 	case err := <-res:
 		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
-		p.fLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
 }
@@ -139,7 +160,7 @@ func (p *sApp) Stop() error {
 		return pkg_errors.NewError("application already stopped or not started")
 	}
 	p.fIsRun = false
-	p.fLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	err := pkg_errors.AppendError(
 		types.StopAll([]types.ICommand{

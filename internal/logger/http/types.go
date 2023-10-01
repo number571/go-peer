@@ -1,7 +1,16 @@
-package logbuilder
+package http
 
-type IHTTPLogger interface {
-	Get(string) string
+type ILogBuilder interface {
+	Get() ILogGetter
+	WithMessage(string) ILogBuilder
+}
+
+type ILogGetter interface {
+	GetService() string
+	GetMethod() string
+	GetPath() string
+	GetConn() string
+	GetMessage() string
 }
 
 const (

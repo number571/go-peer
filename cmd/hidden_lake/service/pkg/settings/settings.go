@@ -2,8 +2,6 @@ package settings
 
 import (
 	"time"
-
-	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
 )
 
 const (
@@ -90,20 +88,4 @@ const (
 	CHandleNetworkMessageTemplate = "%s" + CHandleNetworkMessagePath
 	CHandleNetworkKeyTemplate     = "%s" + CHandleNetworkKeyPath
 	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
-)
-
-const (
-	// BASE
-	CLogBaseResponseModeFromService logbuilder.ILogType = "RSPMD"
-
-	// INFO
-	CLogInfoResponseFromService logbuilder.ILogType = "RSPSR"
-
-	// WARN
-	CLogWarnRequestToService logbuilder.ILogType = "RQTSR"
-	CLogWarnUndefinedService logbuilder.ILogType = "UNDSR"
-
-	// ERRO
-	CLogErroLoadRequestType  logbuilder.ILogType = "LDRQT"
-	CLogErroProxyRequestType logbuilder.ILogType = "PXRQT"
 )

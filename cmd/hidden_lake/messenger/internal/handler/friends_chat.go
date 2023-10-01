@@ -37,7 +37,7 @@ type sChatMessages struct {
 
 func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/friends/chat" {
 			NotFoundPage(pStateManager, pLogger)(pW, pR)
@@ -45,7 +45,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 		}
 
 		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -55,14 +55,14 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
-			pLogger.PushWarn(httpLogger.Get("get_alias_name"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
 			fmt.Fprint(pW, "alias name is null")
 			return
 		}
 
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
-			pLogger.PushErro(httpLogger.Get("get_database"))
+			pLogger.PushErro(logBuilder.WithMessage("get_database"))
 			fmt.Fprint(pW, "error: database closed")
 			return
 		}
@@ -70,14 +70,14 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 		client := pStateManager.GetClient()
 		myPubKey, _, err := client.GetPubKey()
 		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
-			pLogger.PushWarn(httpLogger.Get("get_public_key"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: read public key"))
 			return
 		}
 
 		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
 		if err != nil {
-			pLogger.PushWarn(httpLogger.Get("get_receiver"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_receiver"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: get receiver by public key"))
 			return
 		}
@@ -88,25 +88,25 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 		case http.MethodPost, http.MethodPut:
 			msgBytes, err := getMessageBytes(pR)
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("get_message"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
 				return
 			}
 
 			if err := trySendMessage(client, aliasName, msgBytes); err != nil {
-				pLogger.PushWarn(httpLogger.Get("send_message"))
+				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
 				return
 			}
 
 			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes))
 			if err := db.Push(rel, dbMsg); err != nil {
-				pLogger.PushWarn(httpLogger.Get("push_message"))
+				pLogger.PushWarn(logBuilder.WithMessage("push_message"))
 				fmt.Fprint(pW, errors.WrapError(err, "error: add message to database"))
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR,
 				fmt.Sprintf("/friends/chat?alias_name=%s", aliasName),
 				http.StatusSeeOther)
@@ -123,7 +123,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 
 		msgs, err := db.Load(rel, start, size)
 		if err != nil {
-			pLogger.PushErro(httpLogger.Get("read_database"))
+			pLogger.PushErro(logBuilder.WithMessage("read_database"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: read database"))
 			return
 		}
@@ -153,7 +153,7 @@ func FriendsChatPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 			panic(err)
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		t.Execute(pW, res)
 	}
 }

@@ -18,10 +18,10 @@ import (
 
 func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode, pEphPrivKey asymmetric.IPrivKey) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
@@ -33,7 +33,7 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 				pEphPrivKey.GetPubKey().ToString(),
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, pubKeys)
 			return
 
@@ -41,20 +41,20 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 			var vPrivKey pkg_settings.SPrivKey
 
 			if err := json.NewDecoder(pR.Body).Decode(&vPrivKey); err != nil {
-				pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+				pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
 
 			privKey := getPrivKey(pEphPrivKey, vPrivKey)
 			if privKey == nil {
-				pLogger.PushWarn(httpLogger.Get("decode_key"))
+				pLogger.PushWarn(logBuilder.WithMessage("decode_key"))
 				api.Response(pW, http.StatusBadRequest, "failed: decode private key")
 				return
 			}
 
 			if privKey.GetSize() != pWrapper.GetConfig().GetSettings().GetKeySizeBits() {
-				pLogger.PushWarn(httpLogger.Get("key_size"))
+				pLogger.PushWarn(logBuilder.WithMessage("key_size"))
 				api.Response(pW, http.StatusNotAcceptable, "failed: incorrect private key size")
 				return
 			}
@@ -62,7 +62,7 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 			client := pkg_settings.InitClient(pWrapper.GetConfig().GetSettings(), privKey)
 			pNode.GetMessageQueue().UpdateClient(client)
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update private key")
 			return
 		}

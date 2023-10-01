@@ -162,7 +162,12 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 			FNetworkMask:   1,
 			FFetchTimeWait: timeWait,
 		}),
-		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
+		logger.NewLogger(
+			logger.NewSettings(&logger.SSettings{}),
+			func(_ logger.ILogArg) string {
+				return ""
+			},
+		),
 		NewWrapperDB().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{

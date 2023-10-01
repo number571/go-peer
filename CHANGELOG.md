@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/messenger`: append _daemon scripts
 - Update `pkg/network`: append return error for IHandlerF
 - Update `cmd/hidden_lake/traffic`: now HLT redirect messages from producers to network/consumers
+- Update `pkg/network/anonymity`: replace logbuilder's string format into internal/logger/anon
 
 ### CHANGES
 

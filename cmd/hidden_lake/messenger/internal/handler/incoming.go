@@ -21,45 +21,45 @@ import (
 
 func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeOFF)
 
 		if pR.Method != http.MethodPost {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogRedirect))
 			api.Response(pW, http.StatusUnauthorized, "failed: client unauthorized")
 			return
 		}
 
 		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogDecodeBody))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: response message")
 			return
 		}
 
 		if err := isValidMsgBytes(rawMsgBytes); err != nil {
-			pLogger.PushWarn(httpLogger.Get("recv_message"))
+			pLogger.PushWarn(logBuilder.WithMessage("recv_message"))
 			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
 		}
 
 		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
 		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
-			pLogger.PushWarn(httpLogger.Get("get_public_key"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
 		}
 
 		db := pStateManager.GetWrapperDB().Get()
 		if db == nil {
-			pLogger.PushErro(httpLogger.Get("get_database"))
+			pLogger.PushErro(logBuilder.WithMessage("get_database"))
 			api.Response(pW, http.StatusForbidden, "failed: database closed")
 			return
 		}
@@ -73,7 +73,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 		dbMsg := database.NewMessage(true, doMessageProcessor(rawMsgBytes))
 
 		if err := db.Push(rel, dbMsg); err != nil {
-			pLogger.PushErro(httpLogger.Get("push_message"))
+			pLogger.PushErro(logBuilder.WithMessage("push_message"))
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
 		}
@@ -83,7 +83,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			FMessageInfo: getMessageInfo(dbMsg.GetMessage(), dbMsg.GetTimestamp()),
 		})
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, hlm_settings.CTitlePattern)
 	}
 }

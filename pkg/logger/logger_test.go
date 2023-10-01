@@ -45,11 +45,16 @@ func TestLogger(t *testing.T) {
 		return
 	}
 
-	logger := NewLogger(NewSettings(&SSettings{
-		FInfo: fileInfo,
-		FWarn: fileWarn,
-		FErro: fileErro,
-	}))
+	logger := NewLogger(
+		NewSettings(&SSettings{
+			FInfo: fileInfo,
+			FWarn: fileWarn,
+			FErro: fileErro,
+		}),
+		func(arg ILogArg) string {
+			return arg.(string)
+		},
+	)
 
 	logger.PushInfo(tcTestInfo)
 	logger.PushWarn(tcTestWarning)

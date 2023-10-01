@@ -25,18 +25,18 @@ const (
 
 func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode, pEphPrivKey asymmetric.IPrivKey) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		var vRequest pkg_settings.SRequest
 
 		if pR.Method != http.MethodPost && pR.Method != http.MethodPut {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if err := json.NewDecoder(pR.Body).Decode(&vRequest); err != nil {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
@@ -46,15 +46,15 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 		case cErrorNone:
 			// pass
 		case cErrorGetFriends:
-			pLogger.PushWarn(httpLogger.Get("get_friends"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
 			api.Response(pW, http.StatusBadRequest, "failed: load public key")
 			return
 		case cErrorDecodeData:
-			pLogger.PushWarn(httpLogger.Get("decode_data"))
+			pLogger.PushWarn(logBuilder.WithMessage("decode_data"))
 			api.Response(pW, http.StatusTeapot, "failed: decode hex format data")
 			return
 		case cErrorLoadRequest:
-			pLogger.PushWarn(httpLogger.Get("load_request"))
+			pLogger.PushWarn(logBuilder.WithMessage("load_request"))
 			api.Response(pW, http.StatusForbidden, "failed: decode request")
 			return
 		default:
@@ -69,12 +69,12 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			)
 
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("broadcast_payload"))
+				pLogger.PushWarn(logBuilder.WithMessage("broadcast_payload"))
 				api.Response(pW, http.StatusInternalServerError, "failed: broadcast message")
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: broadcast")
 			return
 
@@ -85,19 +85,19 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			)
 
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("fetch_payload"))
+				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))
 				api.Response(pW, http.StatusInternalServerError, "failed: get response bytes")
 				return
 			}
 
 			resp, err := response.LoadResponse(respBytes)
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("load_response"))
+				pLogger.PushWarn(logBuilder.WithMessage("load_response"))
 				api.Response(pW, http.StatusNotExtended, "failed: load response bytes")
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, resp)
 			return
 		}

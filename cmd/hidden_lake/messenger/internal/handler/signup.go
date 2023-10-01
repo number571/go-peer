@@ -19,7 +19,7 @@ import (
 
 func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/sign/up" {
 			NotFoundPage(pStateManager, pLogger)(pW, pR)
@@ -27,7 +27,7 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 		}
 
 		if pStateManager.StateIsActive() {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/about", http.StatusFound)
 			return
 		}
@@ -39,40 +39,40 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 			client := pStateManager.GetClient()
 			sett, err := client.GetSettings()
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("get_settings"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_settings"))
 				fmt.Fprint(pW, "error: get settings from HLS")
 				return
 			}
 
 			login := strings.TrimSpace(pR.FormValue("login"))
 			if login == "" {
-				pLogger.PushWarn(httpLogger.Get("get_login"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_login"))
 				fmt.Fprint(pW, "error: login is null")
 				return
 			}
 
 			password := strings.TrimSpace(pR.FormValue("password"))
 			if password == "" {
-				pLogger.PushWarn(httpLogger.Get("get_password"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_password"))
 				fmt.Fprint(pW, "error: password is null")
 				return
 			}
 
 			passwordRepeat := strings.TrimSpace(pR.FormValue("password_repeat"))
 			if passwordRepeat == "" {
-				pLogger.PushWarn(httpLogger.Get("get_password_repeat"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_password_repeat"))
 				fmt.Fprint(pW, "error: password_repeat is null")
 				return
 			}
 
 			if password != passwordRepeat {
-				pLogger.PushWarn(httpLogger.Get("incorrect_password"))
+				pLogger.PushWarn(logBuilder.WithMessage("incorrect_password"))
 				fmt.Fprint(pW, "error: passwords not equals")
 				return
 			}
 
 			if err := pvalidator.Validate(password, hlm_settings.CMinEntropy); err != nil {
-				pLogger.PushWarn(httpLogger.Get("password_is_weak"))
+				pLogger.PushWarn(logBuilder.WithMessage("password_is_weak"))
 				fmt.Fprint(pW, "error: password is weak")
 				return
 			}
@@ -88,19 +88,19 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 			}
 
 			if privKey == nil {
-				pLogger.PushWarn(httpLogger.Get("get_private_key"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_private_key"))
 				fmt.Fprint(pW, "error: incorrect private key")
 				return
 			}
 
 			hashLP := keybuilder.NewKeyBuilder(hlm_settings.CWorkForKeys, []byte(login)).Build(password)
 			if err := pStateManager.CreateState(hashLP, privKey); err != nil {
-				pLogger.PushWarn(httpLogger.Get("create_state"))
+				pLogger.PushWarn(logBuilder.WithMessage("create_state"))
 				fmt.Fprint(pW, "error: create account")
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
@@ -114,7 +114,7 @@ func SignUpPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.
 			panic("can't load hmtl files")
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		t.Execute(pW, pStateManager.GetTemplate())
 	}
 }

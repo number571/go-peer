@@ -1,4 +1,4 @@
-package logger
+package std
 
 type ILogging interface {
 	HasInfo() bool

@@ -11,16 +11,16 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-
-	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
+	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
 	return func(_ anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
-		logBuilder := logbuilder.NewLogBuilder(pkg_settings.CServiceName)
+		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
@@ -30,14 +30,14 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
 		if err != nil {
-			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogErroLoadRequestType))
+			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
 			return nil, err
 		}
 
 		// get service's address by hostname
 		address, ok := pCfg.GetService(loadReq.GetHost())
 		if !ok {
-			pLogger.PushWarn(logBuilder.Get(pkg_settings.CLogWarnUndefinedService))
+			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
 			return nil, fmt.Errorf("failed: address undefined")
 		}
 
@@ -48,7 +48,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			bytes.NewReader(loadReq.GetBody()),
 		)
 		if err != nil {
-			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogErroProxyRequestType))
+			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroProxyRequestType))
 			return nil, err
 		}
 
@@ -62,7 +62,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		// and receive response from service
 		resp, err := http.DefaultClient.Do(pushReq)
 		if err != nil {
-			pLogger.PushWarn(logBuilder.Get(pkg_settings.CLogWarnRequestToService))
+			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
 			return nil, err
 		}
 		defer resp.Body.Close()
@@ -72,7 +72,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		switch respMode {
 		case "", pkg_settings.CHeaderResponseModeON:
 			// send response to the client
-			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogInfoResponseFromService))
+			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoResponseFromService))
 			return response.NewResponse(resp.StatusCode).
 					WithHead(getHead(resp)).
 					WithBody(getBody(resp)).
@@ -80,11 +80,11 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 				nil
 		case pkg_settings.CHeaderResponseModeOFF:
 			// response is not required by the client side
-			pLogger.PushInfo(logBuilder.Get(pkg_settings.CLogBaseResponseModeFromService))
+			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
 			return nil, nil
 		default:
 			// unknown response mode
-			pLogger.PushErro(logBuilder.Get(pkg_settings.CLogBaseResponseModeFromService))
+			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
 			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
 		}
 	}

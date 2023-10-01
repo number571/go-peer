@@ -12,7 +12,7 @@ import (
 
 func SignOutPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/sign/out" {
 			NotFoundPage(pStateManager, pLogger)(pW, pR)
@@ -20,18 +20,18 @@ func SignOutPage(pStateManager state.IStateManager, pLogger logger.ILogger) http
 		}
 
 		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
 		if err := pStateManager.CloseState(); err != nil {
-			pLogger.PushWarn(httpLogger.Get("close_state"))
+			pLogger.PushWarn(logBuilder.WithMessage("close_state"))
 			fmt.Fprint(pW, "error: clean hls_client data")
 			return
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		http.Redirect(pW, pR, "/about", http.StatusFound)
 	}
 }

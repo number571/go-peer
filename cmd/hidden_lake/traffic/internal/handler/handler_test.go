@@ -105,7 +105,12 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		},
 	}
 
-	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
+	logger := logger.NewLogger(
+		logger.NewSettings(&logger.SSettings{}),
+		func(_ logger.ILogArg) string {
+			return ""
+		},
+	)
 
 	node := network.NewNode(network.NewSettings(&network.SSettings{
 		FCapacity:     testutils.TCCapacity,

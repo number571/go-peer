@@ -15,7 +15,7 @@ import (
 
 func QRPublicKeyPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/qr/public_key" {
 			NotFoundPage(pStateManager, pLogger)(pW, pR)
@@ -23,33 +23,33 @@ func QRPublicKeyPage(pStateManager state.IStateManager, pLogger logger.ILogger) 
 		}
 
 		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogRedirect))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
 			return
 		}
 
 		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
 		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
-			pLogger.PushInfo(httpLogger.Get("get_public_key"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			fmt.Fprint(pW, "error: read public key")
 			return
 		}
 
 		qrCode, err := qr.Encode(myPubKey.ToString(), qr.L, qr.Auto)
 		if err != nil {
-			pLogger.PushErro(httpLogger.Get("qr_encode"))
+			pLogger.PushErro(logBuilder.WithMessage("qr_encode"))
 			fmt.Fprint(pW, "error: qrcode generate")
 			return
 		}
 
 		qrCode, err = barcode.Scale(qrCode, 1024, 1024)
 		if err != nil {
-			pLogger.PushErro(httpLogger.Get("qr_scale"))
+			pLogger.PushErro(logBuilder.WithMessage("qr_scale"))
 			fmt.Fprint(pW, "error: qrcode scale")
 			return
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		png.Encode(pW, qrCode)
 	}
 }

@@ -14,17 +14,17 @@ import (
 
 func HandleNetworkMessageAPI(pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodPost {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		msgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: read message bytes")
 			return
 		}
@@ -34,14 +34,14 @@ func HandleNetworkMessageAPI(pLogger logger.ILogger, pNode anonymity.INode) http
 			string(msgBytes),
 		)
 		if msg == nil {
-			pLogger.PushWarn(httpLogger.Get("decode_message"))
+			pLogger.PushWarn(logBuilder.WithMessage("decode_message"))
 			api.Response(pW, http.StatusBadRequest, "failed: decode message")
 			return
 		}
 
 		pNode.HandleMessage(msg)
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, "success: handle message")
 	}
 }

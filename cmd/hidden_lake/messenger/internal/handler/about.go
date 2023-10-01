@@ -14,7 +14,7 @@ import (
 
 func AboutPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlm_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/about" {
 			NotFoundPage(pStateManager, pLogger)(pW, pR)
@@ -30,7 +30,7 @@ func AboutPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.H
 			panic("can't load hmtl files")
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		t.Execute(pW, pStateManager.GetTemplate())
 	}
 }

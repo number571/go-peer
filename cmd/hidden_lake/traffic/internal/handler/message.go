@@ -16,17 +16,17 @@ import (
 
 func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlt_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		database := pWrapperDB.Get()
 		if database == nil {
-			pLogger.PushErro(httpLogger.Get("get_database"))
+			pLogger.PushErro(logBuilder.WithMessage("get_database"))
 			api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
@@ -36,19 +36,19 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			query := pR.URL.Query()
 			msg, err := database.Load(query.Get("hash"))
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get("load_hash"))
+				pLogger.PushWarn(logBuilder.WithMessage("load_hash"))
 				api.Response(pW, http.StatusNotFound, "failed: load message")
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, msg.ToString())
 			return
 
 		case http.MethodPost:
 			msgStringAsBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+				pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
@@ -61,7 +61,7 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: handle message")
 			return
 		}

@@ -12,29 +12,29 @@ import (
 
 func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(hlt_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		database := pWrapperDB.Get()
 		if database == nil {
-			pLogger.PushErro(httpLogger.Get("get_database"))
+			pLogger.PushErro(logBuilder.WithMessage("get_database"))
 			api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
 		hashes, err := database.Hashes()
 		if err != nil {
-			pLogger.PushErro(httpLogger.Get("get_hashes"))
+			pLogger.PushErro(logBuilder.WithMessage("get_hashes"))
 			api.Response(pW, http.StatusInternalServerError, "failed: load size from DB")
 			return
 		}
 
-		pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, hashes)
 	}
 }

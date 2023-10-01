@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -14,7 +14,7 @@ import (
 
 func NotFoundPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		pW.WriteHeader(http.StatusNotFound)
 		t, err := template.ParseFS(
@@ -26,7 +26,7 @@ func NotFoundPage(pStateManager state.IStateManager, pLogger logger.ILogger) htt
 			panic("can't load hmtl files")
 		}
 
-		pLogger.PushWarn(httpLogger.Get(http_logger.CLogNotFound))
+		pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogNotFound))
 		t.Execute(pW, pStateManager.GetTemplate())
 	}
 }

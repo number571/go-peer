@@ -136,7 +136,12 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 	keySize := wcfg.GetConfig().GetSettings().GetKeySizeBits()
 	ephPrivKey := asymmetric.NewRSAPrivKey(keySize)
 
-	logger := logger.NewLogger(logger.NewSettings(&logger.SSettings{}))
+	logger := logger.NewLogger(
+		logger.NewSettings(&logger.SSettings{}),
+		func(_ logger.ILogArg) string {
+			return ""
+		},
+	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleConfigSettingsPath, HandleConfigSettingsAPI(wcfg, logger))
@@ -195,7 +200,12 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			FNetworkMask:   1,
 			FFetchTimeWait: time.Minute,
 		}),
-		logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
+		logger.NewLogger(
+			logger.NewSettings(&logger.SSettings{}),
+			func(_ logger.ILogArg) string {
+				return ""
+			},
+		),
 		anonymity.NewWrapperDB().Set(db),
 		testNewNetworkNode(addr),
 		queue.NewMessageQueue(

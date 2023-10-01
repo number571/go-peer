@@ -16,12 +16,12 @@ import (
 
 func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		var vFriend pkg_settings.SFriend
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
@@ -38,20 +38,20 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 				})
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, listFriends)
 			return
 		}
 
 		if err := json.NewDecoder(pR.Body).Decode(&vFriend); err != nil {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
 
 		aliasName := strings.TrimSpace(vFriend.FAliasName)
 		if aliasName == "" {
-			pLogger.PushWarn(httpLogger.Get("get_alias_name"))
+			pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
 			api.Response(pW, http.StatusTeapot, "failed: load alias name")
 			return
 		}
@@ -61,35 +61,35 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 		switch pR.Method {
 		case http.MethodPost:
 			if _, ok := friends[aliasName]; ok {
-				pLogger.PushWarn(httpLogger.Get("get_friends"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
 				api.Response(pW, http.StatusNotAcceptable, "failed: friend already exist")
 				return
 			}
 
 			pubKey := asymmetric.LoadRSAPubKey(vFriend.FPublicKey)
 			if pubKey == nil {
-				pLogger.PushWarn(httpLogger.Get("decode_key"))
+				pLogger.PushWarn(logBuilder.WithMessage("decode_key"))
 				api.Response(pW, http.StatusBadRequest, "failed: load public key")
 				return
 			}
 
 			friends[aliasName] = pubKey
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
-				pLogger.PushWarn(httpLogger.Get("update_friends"))
+				pLogger.PushWarn(logBuilder.WithMessage("update_friends"))
 				api.Response(pW, http.StatusInternalServerError, "failed: update friends")
 				return
 			}
 
 			pNode.GetListPubKeys().AddPubKey(pubKey)
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update friends")
 			return
 
 		case http.MethodDelete:
 			pubKey, ok := friends[aliasName]
 			if !ok {
-				pLogger.PushWarn(httpLogger.Get("get_friends"))
+				pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
 				api.Response(pW, http.StatusNotFound, "failed: friend does not exist")
 				return
 			}
@@ -97,14 +97,14 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 			delete(friends, aliasName)
 
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
-				pLogger.PushWarn(httpLogger.Get("update_friends"))
+				pLogger.PushWarn(logBuilder.WithMessage("update_friends"))
 				api.Response(pW, http.StatusInternalServerError, "failed: delete friend")
 				return
 			}
 
 			pNode.GetListPubKeys().DelPubKey(pubKey)
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: delete friend")
 			return
 		}

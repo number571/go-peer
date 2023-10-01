@@ -1,4 +1,4 @@
-package logger
+package std
 
 import (
 	"os"
@@ -12,8 +12,11 @@ const (
 	CLogErro = "erro"
 )
 
-func StdLogger(pLogging ILogging) logger.ILogger {
-	return logger.NewLogger(defaultSettings(pLogging))
+func NewStdLogger(pLogging ILogging, pLogFunc logger.ILogFunc) logger.ILogger {
+	return logger.NewLogger(
+		defaultSettings(pLogging),
+		pLogFunc,
+	)
 }
 
 func defaultSettings(pLogging ILogging) logger.ISettings {

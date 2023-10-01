@@ -14,38 +14,38 @@ import (
 
 func HandleNetworkKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		switch pR.Method {
 		case http.MethodGet:
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, pNode.GetNetworkNode().GetSettings().GetConnSettings().GetNetworkKey())
 			return
 
 		case http.MethodPost:
 			networkKeyBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
-				pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+				pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 				api.Response(pW, http.StatusConflict, "failed: read network key bytes")
 				return
 			}
 
 			networkKey := string(networkKeyBytes)
 			if err := pWrapper.GetEditor().UpdateNetworkKey(networkKey); err != nil {
-				pLogger.PushWarn(httpLogger.Get("update_key"))
+				pLogger.PushWarn(logBuilder.WithMessage("update_key"))
 				api.Response(pW, http.StatusInternalServerError, "failed: update network key")
 				return
 			}
 
 			pNode.GetNetworkNode().GetSettings().GetConnSettings().SetNetworkKey(networkKey)
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: set network key")
 			return
 		}

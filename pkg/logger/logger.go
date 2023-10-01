@@ -11,9 +11,11 @@ var (
 
 type sLogger struct {
 	fSettings ISettings
-	fInfoOut  *log.Logger
-	fWarnOut  *log.Logger
-	fErroOut  *log.Logger
+
+	fLogFunc ILogFunc
+	fInfoOut *log.Logger
+	fWarnOut *log.Logger
+	fErroOut *log.Logger
 }
 
 const (
@@ -23,9 +25,10 @@ const (
 	colorReset  = "\033[0m"
 )
 
-func NewLogger(pSett ISettings) ILogger {
+func NewLogger(pSett ISettings, pLogFunc ILogFunc) ILogger {
 	logger := &sLogger{
 		fSettings: pSett,
+		fLogFunc:  pLogFunc,
 	}
 
 	infoStream := pSett.GetStreamInfo()
@@ -50,23 +53,23 @@ func (p *sLogger) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sLogger) PushInfo(info string) {
+func (p *sLogger) PushInfo(info ILogArg) {
 	if p.fInfoOut == nil {
 		return
 	}
-	p.fInfoOut.Println(info)
+	p.fInfoOut.Println(p.fLogFunc(info))
 }
 
-func (p *sLogger) PushWarn(warn string) {
+func (p *sLogger) PushWarn(warn ILogArg) {
 	if p.fWarnOut == nil {
 		return
 	}
-	p.fWarnOut.Println(warn)
+	p.fWarnOut.Println(p.fLogFunc(warn))
 }
 
-func (p *sLogger) PushErro(erro string) {
+func (p *sLogger) PushErro(erro ILogArg) {
 	if p.fErroOut == nil {
 		return
 	}
-	p.fErroOut.Println(erro)
+	p.fErroOut.Println(p.fLogFunc(erro))
 }

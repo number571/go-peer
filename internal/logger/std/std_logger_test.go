@@ -1,8 +1,10 @@
-package logger
+package std
 
 import (
 	"os"
 	"testing"
+
+	"github.com/number571/go-peer/pkg/logger"
 )
 
 var (
@@ -24,7 +26,12 @@ func (l *tsLogger) HasErro() bool {
 }
 
 func TestLogger(t *testing.T) {
-	logger := StdLogger(&tsLogger{})
+	logger := NewStdLogger(
+		&tsLogger{},
+		func(_ logger.ILogArg) string {
+			return ""
+		},
+	)
 	if logger.GetSettings().GetStreamInfo().Name() != os.Stdout.Name() {
 		t.Error("info stream != stdout")
 		return

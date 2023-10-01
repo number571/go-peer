@@ -103,7 +103,12 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(
 			cfg,
-			logger.NewLogger(logger.NewSettings(&logger.SSettings{})),
+			logger.NewLogger(
+				logger.NewSettings(&logger.SSettings{}),
+				func(_ logger.ILogArg) string {
+					return ""
+				},
+			),
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())

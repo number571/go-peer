@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 
@@ -18,14 +19,13 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	"github.com/number571/go-peer/pkg/network/anonymity/logbuilder"
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
 
 	return func(pNode network.INode, pConn conn.IConn, pMsgBytes []byte) error {
-		logBuilder := logbuilder.NewLogBuilder(hlt_settings.CServiceName)
+		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
@@ -40,7 +40,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			pMsgBytes,
 		)
 		if msg == nil {
-			pLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnMessageNull))
+			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 			return errors.NewError("message is nil")
 		}
 
@@ -57,7 +57,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 
 		// check database
 		if database == nil {
-			pLogger.PushErro(logBuilder.Get(logbuilder.CLogErroDatabaseGet))
+			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
 			return errors.NewError("database is nil")
 		}
 
@@ -65,24 +65,24 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		if db := database.GetOriginal(); db != nil {
 			hashDB := bytes.Join([][]byte{[]byte("_"), hash}, []byte{})
 			if _, err := db.Get(hashDB); err == nil {
-				pLogger.PushInfo(logBuilder.Get(logbuilder.CLogInfoExist))
+				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
 				return nil
 			}
 			if err := db.Set(hashDB, []byte{1}); err != nil {
-				pLogger.PushErro(logBuilder.Get(logbuilder.CLogErroDatabaseSet))
+				pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 				return errors.WrapError(err, "put hash to database")
 			}
 		}
 
 		// push message
 		if err := database.Push(msg); err != nil {
-			pLogger.PushErro(logBuilder.Get(logbuilder.CLogErroDatabaseSet))
+			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 			return errors.WrapError(err, "put message to database")
 		}
 
 		pld := payload.NewPayload(hls_settings.CNetworkMask, pMsgBytes)
 		if err := pNode.BroadcastPayload(pld); err != nil {
-			pLogger.PushWarn(logBuilder.Get(logbuilder.CLogBaseBroadcast))
+			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
 
@@ -99,12 +99,12 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 				msgString,
 			)
 			if err != nil {
-				pLogger.PushWarn(logBuilder.Get(logbuilder.CLogWarnUnknownRoute))
+				pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
 				continue
 			}
 		}
 
-		pLogger.PushInfo(logBuilder.Get(logbuilder.CLogBaseBroadcast))
+		pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return nil
 	}
 }

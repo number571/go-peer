@@ -2,12 +2,17 @@ package logger
 
 import "os"
 
+type (
+	ILogArg  interface{}
+	ILogFunc func(ILogArg) string
+)
+
 type ILogger interface {
 	GetSettings() ISettings
 
-	PushInfo(string)
-	PushWarn(string)
-	PushErro(string)
+	PushInfo(ILogArg)
+	PushWarn(ILogArg)
+	PushErro(ILogArg)
 }
 
 type ISettings interface {

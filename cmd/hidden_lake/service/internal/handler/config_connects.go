@@ -16,31 +16,31 @@ import (
 
 func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
-		httpLogger := http_logger.NewHTTPLogger(pkg_settings.CServiceName, pR)
+		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogMethod))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		switch pR.Method {
 		case http.MethodGet:
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, pWrapper.GetConfig().GetConnections())
 			return
 		}
 
 		connectBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
-			pLogger.PushWarn(httpLogger.Get(http_logger.CLogDecodeBody))
+			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: read connect bytes")
 			return
 		}
 
 		connect := strings.TrimSpace(string(connectBytes))
 		if connect == "" {
-			pLogger.PushWarn(httpLogger.Get("read_connect"))
+			pLogger.PushWarn(logBuilder.WithMessage("read_connect"))
 			api.Response(pW, http.StatusTeapot, "failed: connect is nil")
 			return
 		}
@@ -52,32 +52,32 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				connect,
 			)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
-				pLogger.PushWarn(httpLogger.Get("update_connections"))
+				pLogger.PushWarn(logBuilder.WithMessage("update_connections"))
 				api.Response(pW, http.StatusInternalServerError, "failed: update connections")
 				return
 			}
 
 			_ = pNode.GetNetworkNode().AddConnection(connect) // connection may be refused (closed)
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update connections")
 			return
 
 		case http.MethodDelete:
 			connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetConnections(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
-				pLogger.PushWarn(httpLogger.Get("update_connections"))
+				pLogger.PushWarn(logBuilder.WithMessage("update_connections"))
 				api.Response(pW, http.StatusInternalServerError, "failed: delete connection")
 				return
 			}
 
 			if err := pNode.GetNetworkNode().DelConnection(connect); err != nil {
-				pLogger.PushWarn(httpLogger.Get("del_connections"))
+				pLogger.PushWarn(logBuilder.WithMessage("del_connections"))
 				api.Response(pW, http.StatusInternalServerError, "failed: del connection")
 				return
 			}
 
-			pLogger.PushInfo(httpLogger.Get(http_logger.CLogSuccess))
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: delete connection")
 		}
 	}

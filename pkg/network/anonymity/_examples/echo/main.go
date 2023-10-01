@@ -93,11 +93,27 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			FNetworkMask:   1,
 			FFetchTimeWait: time.Minute,
 		}),
-		logger.NewLogger(logger.NewSettings(&logger.SSettings{
-			FInfo: os.Stdout,
-			FWarn: os.Stdout,
-			FErro: os.Stderr,
-		})),
+		logger.NewLogger(
+			logger.NewSettings(&logger.SSettings{
+				FInfo: os.Stdout,
+				FWarn: os.Stdout,
+				FErro: os.Stderr,
+			}),
+			func(arg logger.ILogArg) string {
+				logGetter, ok := arg.(anonymity.ILogGetter)
+				if !ok {
+					panic("got invalid log arg")
+				}
+				return fmt.Sprintf(
+					"%s|%02xT|%XH|%dP|%dB",
+					logGetter.GetService(),
+					logGetter.GetType(),
+					logGetter.GetHash(),
+					logGetter.GetProof(),
+					logGetter.GetSize(),
+				)
+			},
+		),
 		anonymity.NewWrapperDB().Set(db),
 		network.NewNode(nodeSettings(serviceAddress)),
 		queue.NewMessageQueue(
