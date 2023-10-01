@@ -14,12 +14,12 @@ const (
 
 func NewStdLogger(pLogging ILogging, pLogFunc logger.ILogFunc) logger.ILogger {
 	return logger.NewLogger(
-		defaultSettings(pLogging),
+		stdSettings(pLogging),
 		pLogFunc,
 	)
 }
 
-func defaultSettings(pLogging ILogging) logger.ISettings {
+func stdSettings(pLogging ILogging) logger.ISettings {
 	sett := &logger.SSettings{}
 	if pLogging.HasInfo() {
 		sett.FInfo = os.Stdout

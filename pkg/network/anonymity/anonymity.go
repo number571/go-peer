@@ -348,14 +348,15 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	logBuilder.
 		WithHash(hash).
 		WithProof(proof).
-		WithSize(size)
+		WithSize(size).
+		WithType(logType)
 
 	if err := p.send(msg); err != nil {
-		p.fLogger.PushErro(logBuilder.WithType(logType))
+		p.fLogger.PushErro(logBuilder)
 		return errors.WrapError(err, "send message")
 	}
 
-	p.fLogger.PushInfo(logBuilder.WithType(logType))
+	p.fLogger.PushInfo(logBuilder)
 	return nil
 }
 

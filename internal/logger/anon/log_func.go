@@ -1,4 +1,4 @@
-package anonymity
+package anon
 
 import (
 	"fmt"

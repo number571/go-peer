@@ -1,4 +1,4 @@
-package anonymity
+package anon
 
 import anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 
