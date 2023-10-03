@@ -24,6 +24,7 @@
 - Update `pkg/network/anonymity`: update store hash of message
 - Delete `cmd/hidden_lake/composite/mobile`: delete android support, delete fyne's dependency 
 - Update `go.mod`: go1.17 -> go1.16 
+- Update `cmd/hidden_lake/[service|traffic]`: append GetConnDeadline 
 
 ### BUG FIXES
 

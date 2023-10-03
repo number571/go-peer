@@ -89,3 +89,7 @@ const (
 	CHandleNetworkKeyTemplate     = "%s" + CHandleNetworkKeyPath
 	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
 )
+
+func GetConnDeadline(pQueuePeriod time.Duration) time.Duration {
+	return pQueuePeriod / 2
+}

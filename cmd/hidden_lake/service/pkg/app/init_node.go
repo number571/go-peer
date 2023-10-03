@@ -16,6 +16,8 @@ import (
 
 func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
 	queueDuration := time.Duration(pCfg.GetSettings().GetQueuePeriodMS()) * time.Millisecond
+	connDeadline := pkg_settings.GetConnDeadline(queueDuration)
+
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
@@ -38,8 +40,8 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 					FMessageSizeBytes: pCfg.GetSettings().GetMessageSizeBytes(),
 					FLimitVoidSize:    pCfg.GetSettings().GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
-					FReadDeadline:     queueDuration,
-					FWriteDeadline:    queueDuration,
+					FReadDeadline:     connDeadline,
+					FWriteDeadline:    connDeadline,
 				}),
 			}),
 		),

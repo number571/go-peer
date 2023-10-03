@@ -49,37 +49,53 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
 	p.inMappingWithSet(hasher.ToBytes())
 
-	errList := make([]error, 0, p.fSettings.GetMaxConnects())
+	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
+
 	mutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
 
-	for _, c := range p.GetConnections() {
+	for a, c := range p.GetConnections() {
 		wg.Add(1)
 
-		err := make(chan error)
+		chErr := make(chan error)
 		go func(c conn.IConn) {
-			err <- c.WritePayload(pPld)
+			chErr <- c.WritePayload(pPld)
 		}(c)
 
-		go func(c conn.IConn) {
+		go func(a string, c conn.IConn) {
+			var resErr error
+
 			defer wg.Done()
+			defer func() {
+				if resErr == nil {
+					return
+				}
+
+				_ = p.DelConnection(a)
+
+				mutex.Lock()
+				listErr = append(listErr, resErr)
+				mutex.Unlock()
+			}()
+
 			select {
-			case e := <-err:
-				mutex.Lock()
-				errList = append(errList, e)
-				mutex.Unlock()
+			case err := <-chErr:
+				resErr = err // err can be = nil
 			case <-time.After(p.fSettings.GetWriteTimeout()):
-				mutex.Lock()
-				errMsg := fmt.Sprintf("write timeout %s", c.GetSocket().RemoteAddr().String())
-				errList = append(errList, errors.NewError(errMsg))
-				mutex.Unlock()
+				resErr = errors.NewError(
+					fmt.Sprintf(
+						"write timeout %s",
+						c.GetSocket().RemoteAddr().String(),
+					),
+				)
 			}
-		}(c)
+		}(a, c)
 	}
+
 	wg.Wait()
 
 	var resErr error
-	for _, err := range errList {
+	for _, err := range listErr {
 		resErr = errors.AppendError(resErr, err)
 	}
 	return resErr
