@@ -22,4 +22,3 @@ chmod +x /root/hls_amd64_linux
 systemctl daemon-reload
 systemctl enable hidden_lake_service.service
 systemctl restart hidden_lake_service.service
-watch -c SYSTEMD_COLORS=1 systemctl status hidden_lake_service.service
