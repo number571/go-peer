@@ -82,6 +82,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 			case err := <-chErr:
 				resErr = err // err can be = nil
 			case <-time.After(p.fSettings.GetWriteTimeout()):
+				<-chErr
 				resErr = errors.NewError(
 					fmt.Sprintf(
 						"write timeout %s",
@@ -222,12 +223,29 @@ func (p *sNode) DelConnection(pAddress string) error {
 func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 	defer p.DelConnection(pAddress)
 	for {
-		pld, err := pConn.ReadPayload()
-		if err != nil {
-			break
-		}
-		if ok := p.handleMessage(pConn, pld); !ok {
-			break
+		var (
+			readerCh = make(chan struct{})
+			returnCh = make(chan bool)
+		)
+
+		go func() {
+			pld, err := pConn.ReadPayload(readerCh)
+			if err != nil {
+				returnCh <- false
+				return
+			}
+			returnCh <- p.handleMessage(pConn, pld)
+		}()
+
+		<-readerCh
+		select {
+		case ok := <-returnCh:
+			if !ok {
+				return
+			}
+		case <-time.After(p.fSettings.GetReadTimeout()):
+			<-returnCh
+			return
 		}
 	}
 }

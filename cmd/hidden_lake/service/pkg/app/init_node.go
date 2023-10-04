@@ -34,6 +34,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FAddress:      pCfg.GetAddress().GetTCP(),
 				FCapacity:     pkg_settings.CNetworkCapacity,
 				FMaxConnects:  pkg_settings.CNetworkMaxConns,
+				FReadTimeout:  queueDuration,
 				FWriteTimeout: queueDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetworkKey(),

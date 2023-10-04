@@ -174,6 +174,7 @@ func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 				FAddress:      addr,
 				FCapacity:     testutils.TCCapacity,
 				FMaxConnects:  testutils.TCMaxConnects,
+				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,

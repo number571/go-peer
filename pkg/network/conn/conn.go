@@ -130,9 +130,9 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	return nil
 }
 
-func (p *sConn) ReadPayload() (payload.IPayload, error) {
+func (p *sConn) ReadPayload(pChRead chan struct{}) (payload.IPayload, error) {
 	// large wait read deadline => the connection has not sent anything yet
-	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(p.fSettings.GetWaitReadDeadline())
+	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
 		return nil, errors.WrapError(err, "receive head bytes")
 	}
@@ -207,7 +207,11 @@ func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
 	))
 }
 
-func (p *sConn) recvHeadBytes(deadline time.Duration) (uint64, uint64, []byte, error) {
+func (p *sConn) recvHeadBytes(pChRead chan struct{}, deadline time.Duration) (uint64, uint64, []byte, error) {
+	defer func() {
+		pChRead <- struct{}{}
+	}()
+
 	const (
 		firstSizeIndex  = encoding.CSizeUint64
 		secondSizeIndex = firstSizeIndex + encoding.CSizeUint64

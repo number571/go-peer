@@ -15,7 +15,7 @@ type IConn interface {
 	GetSocket() net.Conn
 
 	WritePayload(payload.IPayload) error
-	ReadPayload() (payload.IPayload, error)
+	ReadPayload(chan struct{}) (payload.IPayload, error)
 }
 
 type ISettings interface {

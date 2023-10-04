@@ -38,7 +38,10 @@ func TestConn(t *testing.T) {
 		return
 	}
 
-	pld, err := conn.ReadPayload()
+	readCh := make(chan struct{})
+	go func() { <-readCh }()
+
+	pld, err := conn.ReadPayload(readCh)
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,7 +76,11 @@ func testNewService(t *testing.T) net.Listener {
 				}),
 				aconn,
 			)
-			pld, err := conn.ReadPayload()
+
+			readCh := make(chan struct{})
+			go func() { <-readCh }()
+
+			pld, err := conn.ReadPayload(readCh)
 			if err != nil {
 				break
 			}

@@ -17,6 +17,7 @@ func TestConnKeeper(t *testing.T) {
 	node := network.NewNode(network.NewSettings(&network.SSettings{
 		FCapacity:     testutils.TCCapacity,
 		FMaxConnects:  testutils.TCMaxConnects,
+		FReadTimeout:  time.Minute,
 		FWriteTimeout: time.Minute,
 		FConnSettings: conn.NewSettings(&conn.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,

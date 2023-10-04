@@ -28,6 +28,7 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 			FAddress:      pCfg.GetAddress().GetTCP(),
 			FMaxConnects:  hls_settings.CNetworkMaxConns,
 			FCapacity:     hls_settings.CNetworkCapacity,
+			FReadTimeout:  queueDuration,
 			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FNetworkKey:       pCfg.GetNetworkKey(),
