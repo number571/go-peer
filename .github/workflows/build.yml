@@ -8,10 +8,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
-    - name: Run test
+    - name: Ubuntu updating
+      run: apt-get update 
+    - name: GCC installing
+      run: apt-get install -y wget gcc make
+    - name: Golang installing
+      run: >-
+        wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz && \
+        tar -C /opt -xzf go1.16.linux-amd64.tar.gz
+    - name: Environment setting
+      run: export PATH="${PATH}:/opt/go/bin"
+    - name: Go-peer test running
       run: make
