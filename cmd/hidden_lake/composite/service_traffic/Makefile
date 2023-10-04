@@ -1,6 +1,6 @@
 N=1hlc_st
 GC=go build
-ROOPATH=../../../../..
+ROOPATH=../../../..
 BINPATH=$(ROOPATH)/bin
 
 .PHONY: default configs build run clean
