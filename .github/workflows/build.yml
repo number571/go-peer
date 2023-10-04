@@ -10,15 +10,15 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - name: Ubuntu updating
+    - name: Ubuntu updating...
       run: sudo apt-get update 
-    - name: GCC installing
+    - name: Programs installing...
       run: sudo apt-get install -y wget gcc make tar
-    - name: Golang installing
-      run: >-
-        wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz && \
-        tar -C /opt -xzf go1.16.linux-amd64.tar.gz
-    - name: Environment setting
+    - name: Golang installing...
+      run: wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
+    - name: Golang unpacking...
+      run: sudo tar -C /opt -xzf go1.16.linux-amd64.tar.gz
+    - name: Environment setting...
       run: export PATH="${PATH}:/opt/go/bin"
-    - name: Go-peer test running
+    - name: Go-peer test running...
       run: make
