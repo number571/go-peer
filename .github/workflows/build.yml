@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Ubuntu updating
-      run: apt-get update 
+      run: sudo apt-get update 
     - name: GCC installing
-      run: apt-get install -y wget gcc make
+      run: sudo apt-get install -y wget gcc make
     - name: Golang installing
       run: >-
         wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz && \
