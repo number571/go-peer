@@ -40,5 +40,9 @@ func InitApp(pDefaultPath string) (types.ICommand, error) {
 		return nil, errors.NewError("private key is invalid")
 	}
 
+	if privKey.GetSize() != cfg.GetSettings().GetKeySizeBits() {
+		return nil, errors.NewError("size of private key is invalid")
+	}
+
 	return NewApp(cfg, privKey, inputPath), nil
 }

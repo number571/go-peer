@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/service`: append check on size of input private key
+
 ## v1.5.19
 
 *October 05, 2023*
