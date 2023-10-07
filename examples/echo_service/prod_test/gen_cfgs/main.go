@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
 	cMessageSizeBytes = (8 << 10)
-	cLenOtherNodes    = 10
 )
 
 type sNodeHLS struct {
@@ -18,13 +18,14 @@ type sNodeHLS struct {
 }
 
 var (
+	gNumOtherNodes  int
 	gNetworkKey     string
 	gListOfConnects []string
 )
 
 func initRun() error {
-	if len(os.Args) != 2 {
-		return fmt.Errorf("len args != 2")
+	if len(os.Args) != 3 {
+		return fmt.Errorf("len args != 3")
 	}
 
 	switch os.Args[1] {
@@ -38,6 +39,12 @@ func initRun() error {
 		return fmt.Errorf("unknown param")
 	}
 
+	numNodes, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		panic(err)
+	}
+
+	gNumOtherNodes = numNodes
 	return nil
 }
 
@@ -55,11 +62,11 @@ func main() {
 	firstConnect := connects[0]
 	secondConnect := connects[len(connects)-1]
 
-	nodes := make([]*sNodeHLS, 0, 2+cLenOtherNodes) // 2 = recv+send
+	nodes := make([]*sNodeHLS, 0, 2+gNumOtherNodes) // 2 = recv+send
 	nodes = append(nodes, initRecvNode(firstConnect), initSendNode(secondConnect))
 
 	os.Mkdir("other_nodes", 0744)
-	for i := 1; i <= cLenOtherNodes; i++ {
+	for i := 1; i <= gNumOtherNodes; i++ {
 		node := initOtherNode(i, strConnects)
 		nodes = append(nodes, node)
 		os.Mkdir(node.fPath, 0744)
