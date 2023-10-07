@@ -72,15 +72,15 @@ $ make docker-run
             </tr>
             <tr>
                 <td>3</td>
-                <td>HLTr</td>
-                <td>6a20015eacd8.vps.myjino.ru</td>
-                <td>49356</td>
-                <td>8Jkl93Mdk93md1bz</td>
-                <td>[1,2]</td>
-                <td><a href="https://jino.ru">jino.ru</a></td>
-                <td>Russia/Irkutsk</td>
-                <td>1x2.0GHz, 1.5GB RAM, 10GB HDD</td>
-                <td>±28.07.2026</td>
+                <td>HLTr/HLTs</td>
+                <td>62.233.46.109</td>
+                <td>9581/9582</td>
+                <td>oi4r9NW9Le7fKF9d</td>
+                <td>[]</td>
+                <td><a href="https://eternalhost.net">eternalhost.net</a></td>
+                <td>Russia/Moscow</td>
+                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
+                <td>±eternal</td>
             </tr>
             <tr>
                 <td>4</td>
@@ -88,35 +88,11 @@ $ make docker-run
                 <td>193.233.18.245</td>
                 <td>9581</td>
                 <td>oi4r9NW9Le7fKF9d</td>
-                <td>[]</td>
+                <td>[3]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
                 <td>Russia/Novosibirsk</td>
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>HLTr/HLTs</td>
-                <td>62.233.46.109</td>
-                <td>9581/9582</td>
-                <td>oi4r9NW9Le7fKF9d</td>
-                <td>[4]</td>
-                <td><a href="https://eternalhost.net">eternalhost.net</a></td>
-                <td>Russia/Moscow</td>
-                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
-                <td>±eternal</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>HLTr</td>
-                <td>213.109.204.142</td>
-                <td>9581</td>
-                <td>oi4r9NW9Le7fKF9d</td>
-                <td>[4,5]</td>
-                <td><a href="https://timeweb.cloud">timeweb.cloud</a></td>
-                <td>Russia/Saint-Petersburg</td>
-                <td>1x3.3GHz, 1.0GB RAM, 15GB NVMe</td>
-                <td>±01.07.2025</td>
             </tr>
         </table>
     </td>

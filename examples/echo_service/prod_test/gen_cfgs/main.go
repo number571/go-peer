@@ -16,14 +16,12 @@ const (
 var (
 	gListOfConnects = []string{
 		// 8Jkl93Mdk93md1bz
-		"94.103.91.81:9581",                // 1x4.0GHz, 1.0GB RAM, 30GB HDD
-		"195.133.1.126:9581",               // 1x2.2GHz, 0.5GB RAM, 10GB HDD
-		"6a20015eacd8.vps.myjino.ru:49356", // 1x2.0GHz, 1.5GB RAM, 10GB HDD
+		"94.103.91.81:9581",  // 1x4.0GHz, 1.0GB RAM, 30GB HDD
+		"195.133.1.126:9581", // 1x2.2GHz, 0.5GB RAM, 10GB HDD
 
 		// // oi4r9NW9Le7fKF9d
 		// "193.233.18.245:9581", // 1x2.5GHz, 1.0GB RAM, 5GB VNMe
 		// "62.233.46.109:9581",  // 1x2.8GHz, 1.0GB RAM, 16GB SSD
-		// "213.109.204.142:9581", // 1x3.3GHz, 1.0GB RAM, 15GB NVMe
 	}
 )
 
