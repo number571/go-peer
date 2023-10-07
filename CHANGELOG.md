@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
+
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/service`: append check on size of input private key

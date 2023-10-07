@@ -23,13 +23,10 @@ build: generate-configs
 		cp -r $(BINPATH)/hls ./other_nodes/other_hls$${i}/prog_other_hls$${i}; \
 	done;
 
-run:
+run: run-other-nodes
 	# MAKEFILE RUN
 	make run -C ./recv_hls
 	make run -C ./send_hls
-	for i in $$(seq 1 $(NUM_NODES)); do \
-		make run -C ./other_nodes/other_hls$${i}; \
-	done;
 
 clean:
 	# MAKEFILE CLEAN 
@@ -39,3 +36,8 @@ clean:
 		make clean -C ./other_nodes/other_hls$${i}; \
 	done;
 	rm -rf other_nodes/
+
+run-other-nodes:
+	for i in $$(seq 1 $(NUM_NODES)); do \
+		make run -C ./other_nodes/other_hls$${i}; \
+	done;

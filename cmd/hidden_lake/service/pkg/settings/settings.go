@@ -58,7 +58,7 @@ const (
 
 const (
 	CNetworkCapacity = (1 << 10) // 1024 hashes
-	CNetworkMaxConns = (1 << 6)  // 64 conns
+	CNetworkMaxConns = (1 << 8)  // 256 conns
 )
 
 const (
