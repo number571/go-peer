@@ -9,20 +9,6 @@ import (
 const (
 	cMessageSizeBytes = (8 << 10)
 	cLenOtherNodes    = 10
-	cNetworkKey       = "8Jkl93Mdk93md1bz"
-	// cNetworkKey = "oi4r9NW9Le7fKF9d"
-)
-
-var (
-	gListOfConnects = []string{
-		// 8Jkl93Mdk93md1bz
-		"94.103.91.81:9581",  // 1x4.0GHz, 1.0GB RAM, 30GB HDD
-		"195.133.1.126:9581", // 1x2.2GHz, 0.5GB RAM, 10GB HDD
-
-		// // oi4r9NW9Le7fKF9d
-		// "193.233.18.245:9581", // 1x2.5GHz, 1.0GB RAM, 5GB VNMe
-		// "62.233.46.109:9581",  // 1x2.8GHz, 1.0GB RAM, 16GB SSD
-	}
 )
 
 type sNodeHLS struct {
@@ -31,7 +17,35 @@ type sNodeHLS struct {
 	fMakefile string
 }
 
+var (
+	gNetworkKey     string
+	gListOfConnects []string
+)
+
+func initRun() error {
+	if len(os.Args) != 2 {
+		return fmt.Errorf("len args != 2")
+	}
+
+	switch os.Args[1] {
+	case "prod_1":
+		gNetworkKey = cNetworkKey_1
+		gListOfConnects = gListOfConnects_1
+	case "prod_2":
+		gNetworkKey = cNetworkKey_2
+		gListOfConnects = gListOfConnects_2
+	default:
+		return fmt.Errorf("unknown param")
+	}
+
+	return nil
+}
+
 func main() {
+	if err := initRun(); err != nil {
+		panic(err)
+	}
+
 	connects := make([]string, 0, len(gListOfConnects))
 	for _, arg := range gListOfConnects {
 		connects = append(connects, fmt.Sprintf(`"%s"`, arg))
@@ -83,7 +97,7 @@ func initRecvNode(pConnects string) *sNodeHLS {
 }
 `,
 			cMessageSizeBytes,
-			cNetworkKey,
+			gNetworkKey,
 			pConnects,
 		),
 	}
@@ -113,7 +127,7 @@ func initSendNode(pConnects string) *sNodeHLS {
 }
 `,
 			cMessageSizeBytes,
-			cNetworkKey,
+			gNetworkKey,
 			pConnects,
 		),
 	}
@@ -147,7 +161,7 @@ clean:
 }
 `,
 			cMessageSizeBytes,
-			cNetworkKey,
+			gNetworkKey,
 			pConnects,
 		),
 	}

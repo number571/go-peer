@@ -9,6 +9,8 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
+- Update `examples/echo_service/prod_test`: append switch prod_1/prod_2 in Makefile with PROD param
+- Update `cmd/hidden_lake`: delete jino, timeweb.cloud providers
 
 ### BUG FIXES
 
