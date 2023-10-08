@@ -68,6 +68,10 @@ var (
 	)
 )
 
+var (
+	tgInitPrivKey = asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
+)
+
 func testStartServerHTTP(addr string) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/echo", testEchoPage)
@@ -151,7 +155,7 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node, ephPrivKey))
 	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, HandleNetworkKeyAPI(wcfg, logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node, ephPrivKey))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node, ephPrivKey, tgInitPrivKey))
 
 	srv := &http.Server{
 		Addr:    addr,

@@ -16,11 +16,14 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 )
 
-func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode, pEphPrivKey asymmetric.IPrivKey) http.HandlerFunc {
+func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode, pEphPrivKey asymmetric.IPrivKey, pInitPrivKey asymmetric.IPrivKey) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
-		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
+		switch pR.Method {
+		case http.MethodGet, http.MethodPost, http.MethodDelete:
+			// pass
+		default:
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
@@ -64,6 +67,14 @@ func HandleNodeKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode an
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update private key")
+			return
+
+		case http.MethodDelete:
+			client := pkg_settings.InitClient(pWrapper.GetConfig().GetSettings(), pInitPrivKey)
+			pNode.GetMessageQueue().UpdateClient(client)
+
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
+			api.Response(pW, http.StatusOK, "success: reset private key")
 			return
 		}
 	}

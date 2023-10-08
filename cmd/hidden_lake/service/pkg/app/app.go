@@ -39,6 +39,7 @@ type sApp struct {
 	fWrapper    config.IWrapper
 	fNode       anonymity.INode
 	fConnKeeper conn_keeper.IConnKeeper
+	fPrivKey    asymmetric.IPrivKey
 
 	fAnonLogger logger.ILogger
 	fHTTPLogger logger.ILogger
@@ -67,6 +68,7 @@ func NewApp(
 		fWrapper:    config.NewWrapper(pCfg),
 		fNode:       node,
 		fConnKeeper: initConnKeeper(pCfg, node),
+		fPrivKey:    pPrivKey,
 		fAnonLogger: anonLogger,
 		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,

@@ -303,7 +303,7 @@ and put result to "hex_data" HLS API
 3. GET/DELETE      /api/network/online
 4. POST/PUT        /api/network/request
 5. GET/POST        /api/network/key
-6. GET/POST        /api/node/key
+6. GET/POST/DELETE /api/node/key
 ```
 
 ### 1. /api/config/connects
@@ -598,4 +598,21 @@ Date: Mon, 07 Aug 2023 00:41:09 GMT
 Content-Length: 27
 
 success: update private key
+```
+
+#### 6.3. DELETE Request
+
+```bash
+curl -i -X DELETE -H 'Accept: application/json' http://localhost:9572/api/node/key
+```
+
+#### 6.3. DELETE Response
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Date: Sun, 08 Oct 2023 07:10:24 GMT
+Content-Length: 26
+
+success: reset private key
 ```

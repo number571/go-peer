@@ -145,6 +145,13 @@ func (p *sClient) SetPrivKey(pPrivKey asymmetric.IPrivKey, pEphPubKey asymmetric
 	return nil
 }
 
+func (p *sClient) ResetPrivKey() error {
+	if err := p.fRequester.ResetPrivKey(); err != nil {
+		return errors.WrapError(err, "reset private key (client)")
+	}
+	return nil
+}
+
 func (p *sClient) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error) {
 	pubKey, ephPubKey, err := p.fRequester.GetPubKey()
 	if err != nil {

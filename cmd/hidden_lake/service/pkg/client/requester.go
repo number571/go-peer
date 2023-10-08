@@ -275,6 +275,19 @@ func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
 	return nil
 }
 
+func (p *sRequester) ResetPrivKey() error {
+	_, err := api.Request(
+		p.fClient,
+		http.MethodDelete,
+		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return errors.WrapError(err, "set private key (requester)")
+	}
+	return nil
+}
+
 func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,

@@ -22,7 +22,7 @@ func (p *sApp) initServiceHTTP() {
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(p.fWrapper, p.fHTTPLogger, p.fNode, ephPrivKey))
 	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, handler.HandleNetworkMessageAPI(p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, handler.HandleNetworkKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode, ephPrivKey))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode, ephPrivKey, p.fPrivKey))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:    p.fWrapper.GetConfig().GetAddress().GetHTTP(),

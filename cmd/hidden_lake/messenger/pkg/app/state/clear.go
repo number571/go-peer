@@ -1,7 +1,6 @@
 package state
 
 import (
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
 )
 
@@ -20,20 +19,10 @@ func (p *sStateManager) clearClientState() error {
 func (p *sStateManager) clearClientPrivKey() error {
 	hlsClient := p.GetClient()
 
-	sett, err := hlsClient.GetSettings()
-	if err != nil {
-		return errors.WrapError(err, "get settings from node (clear)")
+	if err := hlsClient.ResetPrivKey(); err != nil {
+		return errors.WrapError(err, "reset private key (clear)")
 	}
 
-	_, ephPubKey, err := hlsClient.GetPubKey()
-	if err != nil {
-		return errors.WrapError(err, "get public key from node (clear)")
-	}
-
-	pseudoPrivKey := asymmetric.NewRSAPrivKey(sett.GetKeySizeBits())
-	if err := hlsClient.SetPrivKey(pseudoPrivKey, ephPubKey); err != nil {
-		return errors.WrapError(err, "set pseudo private key (clear)")
-	}
 	return nil
 }
 

@@ -19,6 +19,7 @@ type IClient interface {
 
 	GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error)
 	SetPrivKey(asymmetric.IPrivKey, asymmetric.IPubKey) error
+	ResetPrivKey() error
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error
@@ -46,6 +47,7 @@ type IRequester interface {
 
 	GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error)
 	SetPrivKey(*pkg_settings.SPrivKey) error
+	ResetPrivKey() error
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error

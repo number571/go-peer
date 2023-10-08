@@ -50,4 +50,21 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		t.Error("public keys are equals")
 		return
 	}
+
+	if err := client.ResetPrivKey(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	gotInitPubKey, _, err := client.GetPubKey()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// tgInitPrivKey = testutils.Tc1PrivKey1024
+	if gotInitPubKey.GetAddress().ToString() != tgInitPrivKey.GetPubKey().GetAddress().ToString() {
+		t.Error("init state of private key is incorrect after reset")
+		return
+	}
 }

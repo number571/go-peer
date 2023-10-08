@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/service`: update _daemon/install_hls.sh script, append key generation
+- Update `cmd/hidden_lake/service`: append client.ResetPrivKey method
 
 ### CHANGES
 
