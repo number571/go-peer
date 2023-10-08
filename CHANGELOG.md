@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/service`: update _daemon/install_hls.sh script, append key generation
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
@@ -15,6 +19,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/service`: append check on size of input private key
+- Update `cmd/hidden_lake/service`: update _math directory
 
 ## v1.5.19
 
