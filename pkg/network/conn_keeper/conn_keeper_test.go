@@ -10,6 +10,31 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+func TestSettings(t *testing.T) {
+	for i := 0; i < 2; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FDuration: 500 * time.Millisecond,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
+		})
+	}
+}
+
 func TestConnKeeper(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)

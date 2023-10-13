@@ -7,30 +7,54 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/storage"
 
 	testutils "github.com/number571/go-peer/test/_data"
-)
-
-type (
-	tiDBConsctruct func(storage.ISettings) (IKVDatabase, error)
 )
 
 const (
 	tcPathDBTemplate = "database_test_%d.db"
 )
 
-func TestAllDBs(t *testing.T) {
-	testCreate(t, NewKeyValueDB)
-	testCipherKey(t, NewKeyValueDB)
-	testBasic(t, NewKeyValueDB)
+func TestTryDecrypt(t *testing.T) {
+	cipher := symmetric.NewAESCipher([]byte("abcdefghijklmnopqrstuvwxyz123456"))
+	if _, err := tryDecrypt(cipher, []byte{1}, []byte{2}); err == nil {
+		t.Error("invalid size of encrypt data")
+		return
+	}
+
+	authKey := []byte("auth-key")
+	encData := cipher.EncryptBytes([]byte{})
+	resData := bytes.Join(
+		[][]byte{
+			hashing.NewHMACSHA256Hasher(
+				authKey,
+				encData,
+			).ToBytes(),
+			encData,
+		},
+		[]byte{},
+	)
+
+	if _, err := tryDecrypt(cipher, authKey, resData); err != nil {
+		t.Error("got error with encrypted empty slice: []")
+		return
+	}
 }
 
-func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
+func TestAllDBs(t *testing.T) {
+	testCreate(t)
+	testCipherKey(t)
+	testBasic(t)
+}
+
+func testCreate(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
+	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -62,11 +86,11 @@ func testCreate(t *testing.T, dbConstruct tiDBConsctruct) {
 	}
 }
 
-func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
+func testCipherKey(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
+	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER1",
@@ -80,7 +104,7 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	store.Set([]byte("KEY"), []byte("VALUE"))
 
 	store.Close() // open this database with another key
-	store, err = dbConstruct(storage.NewSettings(&storage.SSettings{
+	store, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER2",
@@ -97,11 +121,11 @@ func testCipherKey(t *testing.T, dbConstruct tiDBConsctruct) {
 	}
 }
 
-func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
+func testBasic(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 
-	store, err := dbConstruct(storage.NewSettings(&storage.SSettings{
+	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -126,8 +150,7 @@ func testBasic(t *testing.T, dbConstruct tiDBConsctruct) {
 		return
 	}
 
-	err = store.Del([]byte("KEY"))
-	if err != nil {
+	if err := store.Del([]byte("KEY")); err != nil {
 		t.Error("[testBasic]", err)
 		return
 	}

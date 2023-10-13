@@ -22,6 +22,38 @@ func TestCryptoStorage(t *testing.T) {
 	testTempCryptoStorage(t, tcTmpStorageName)
 }
 
+func TestSettings(t *testing.T) {
+	for i := 0; i < 3; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FWorkSize: testutils.TCWorkSize,
+			FPassword: "CIPHER",
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FPath:     "path",
+			FPassword: "CIPHER",
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FPath:     "path",
+			FWorkSize: testutils.TCWorkSize,
+		})
+	}
+}
+
 func testCryptoStorage(t *testing.T, path string) {
 	sett := NewSettings(&SSettings{
 		FPath:     path,
@@ -32,6 +64,11 @@ func testCryptoStorage(t *testing.T, path string) {
 	store, err := NewCryptoStorage(sett)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if store.GetSettings().GetPath() != path {
+		t.Error("incorrect value from settings")
 		return
 	}
 

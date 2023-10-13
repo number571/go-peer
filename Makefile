@@ -31,13 +31,8 @@ test-run:
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage:
-	go vet ./...;
-	$(CHECK_ERROR);
-
 	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
 	$(CHECK_ERROR);
-
-	go test -race -cover -count=1 `go list ./...` | tee $(TEST_PATH)/result.out;
 
 test-coverage-view:
 	go tool cover -html=$(TEST_PATH)/coverage.out

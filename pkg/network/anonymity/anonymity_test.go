@@ -28,6 +28,41 @@ const (
 	tcIter           = 10
 )
 
+func TestSettings(t *testing.T) {
+	for i := 0; i < 3; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FRetryEnqueue:  0,
+			FNetworkMask:   1,
+			FFetchTimeWait: time.Second,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FServiceName:   "TEST",
+			FRetryEnqueue:  0,
+			FFetchTimeWait: time.Second,
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FServiceName:  "TEST",
+			FRetryEnqueue: 0,
+			FNetworkMask:  1,
+		})
+	}
+}
+
 func TestComplex(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 0))

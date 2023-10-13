@@ -16,6 +16,83 @@ const (
 	tcTimeWait = time.Minute
 )
 
+func TestSettings(t *testing.T) {
+	for i := 0; i < 5; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FAddress:      "test",
+			FMaxConnects:  testutils.TCMaxConnects,
+			FReadTimeout:  tcTimeWait,
+			FWriteTimeout: tcTimeWait,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FAddress:      "test",
+			FCapacity:     testutils.TCCapacity,
+			FReadTimeout:  tcTimeWait,
+			FWriteTimeout: tcTimeWait,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FAddress:      "test",
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FWriteTimeout: tcTimeWait,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
+		})
+	case 3:
+		_ = NewSettings(&SSettings{
+			FAddress:     "test",
+			FCapacity:    testutils.TCCapacity,
+			FMaxConnects: testutils.TCMaxConnects,
+			FReadTimeout: tcTimeWait,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
+		})
+	case 4:
+		_ = NewSettings(&SSettings{
+			FAddress:      "test",
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FReadTimeout:  tcTimeWait,
+			FWriteTimeout: tcTimeWait,
+		})
+	}
+}
+
 func TestBroadcast(t *testing.T) {
 	nodes, mapp := testNodes()
 	defer testFreeNodes(nodes[:])

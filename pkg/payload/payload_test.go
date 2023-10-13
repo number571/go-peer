@@ -25,4 +25,10 @@ func TestPayload(t *testing.T) {
 		t.Error("title not equal with decoded version of payload")
 		return
 	}
+
+	invalidPld := LoadPayload([]byte{1})
+	if invalidPld != nil {
+		t.Error("invalid payload success decoded")
+		return
+	}
 }

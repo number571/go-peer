@@ -39,10 +39,5 @@ func tryDecrypt(pCipher symmetric.ICipher, pAuthKey []byte, pEncBytes []byte) ([
 		return nil, errors.NewError("incorrect hash of decrypted data")
 	}
 
-	decBytes := pCipher.DecryptBytes(encDataBytes)
-	if decBytes == nil {
-		return nil, errors.NewError("failed decrypt message")
-	}
-
-	return decBytes, nil
+	return pCipher.DecryptBytes(encDataBytes), nil
 }

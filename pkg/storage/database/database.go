@@ -86,10 +86,6 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 		return nil, errors.WrapError(err, "read value by key")
 	}
 
-	if encValue == nil {
-		return nil, errors.NewError("undefined value")
-	}
-
 	return tryDecrypt(
 		p.fCipher,
 		p.fAuthKey,
