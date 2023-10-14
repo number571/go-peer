@@ -358,8 +358,7 @@ Default config `hlm.cfg`
 ```json
 {
 	"settings": {
-		"messages_capacity": 2048,
-		"work_size_bits": 20
+		"messages_capacity": 2048
 	},
 	"logging": [
 		"info",
@@ -367,7 +366,6 @@ Default config `hlm.cfg`
 		"erro"
 	],
 	"language": "ENG",
-	"storage_key": "_",
 	"address": {
 		"interface": "127.0.0.1:9591",
 		"incoming": "127.0.0.1:9592"

@@ -23,12 +23,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
 		panic(`p.FPath == ""`)
 	}
-	if p.FWorkSize == 0 {
-		panic(`p.FWorkSize == 0`)
-	}
-	if p.FPassword == "" {
-		panic(`p.FPassword == ""`)
-	}
 	return p
 }
 

@@ -16,9 +16,8 @@ const (
 )
 
 const (
-	CIamAliasName      = "__iam__"
-	CDefaultLanguage   = "ENG"
-	CDefaultStorageKey = "_"
+	CIamAliasName    = "__iam__"
+	CDefaultLanguage = "ENG"
 )
 
 const (
@@ -27,8 +26,7 @@ const (
 )
 
 const (
-	CDefaultWorkSizeBits = 20        // bits
-	CDefaultCapMessages  = (2 << 10) // count
+	CDefaultCapMessages = (2 << 10) // count
 )
 
 const (

@@ -118,7 +118,6 @@ func (p *SConfig) GetSettings() IConfigSettings {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FWorkSizeBits != 0 &&
 		p.FSettings.FKeySizeBits != 0 &&
 		p.FSettings.FQueuePeriodMS != 0
 }

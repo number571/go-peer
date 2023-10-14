@@ -103,8 +103,7 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 
 func (p *SConfig) isValid() bool {
 	return true &&
-		p.FSettings.FMessagesCapacity != 0 &&
-		p.FSettings.FWorkSizeBits != 0
+		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {

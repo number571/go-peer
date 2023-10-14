@@ -111,7 +111,6 @@ func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FWorkSizeBits != 0 &&
 		(p.FSettings.FMessagesCapacity != 0 || p.FSettings.FQueuePeriodMS != 0)
 }
 

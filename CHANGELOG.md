@@ -20,6 +20,7 @@
 - Update `cmd/hidden_lake/messenger`: delete auth
 - Update `cmd/hidden_lake/service`: delete SetPrivKey/ResetPrivKey
 - Update `cmd/hidden_lake/service`: generates priv key file
+- Update `cmd/hidden_lake/*`: workSize, storageKey are can be null value
 
 ### BUG FIXES
 

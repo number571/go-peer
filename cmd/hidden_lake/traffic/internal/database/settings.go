@@ -25,9 +25,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
 		panic(`p.FPath == ""`)
 	}
-	if p.FWorkSizeBits == 0 {
-		panic(`p.FWorkSizeBits == 0`)
-	}
 	if p.FMessageSizeBytes == 0 {
 		panic(`p.FMessageSizeBytes == 0`)
 	}

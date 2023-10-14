@@ -18,9 +18,6 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FWorkSizeBits == 0 {
-		panic(`p.FWorkSizeBits == 0`)
-	}
 	if p.FMessageSizeBytes == 0 {
 		panic(`p.FMessageSizeBytes == 0`)
 	}
