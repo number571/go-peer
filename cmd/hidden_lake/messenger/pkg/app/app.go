@@ -74,8 +74,6 @@ func (p *sApp) Run() error {
 	p.initInterfaceServiceHTTP()
 	p.initServicePPROF()
 
-	p.initTrafficMessages()
-
 	res := make(chan error)
 
 	go func() {
@@ -110,6 +108,7 @@ func (p *sApp) Run() error {
 	case err := <-res:
 		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
+		p.loadTrafficMessages()
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}
@@ -129,7 +128,7 @@ func (p *sApp) Stop() error {
 		p.fIntServiceHTTP,
 		p.fIncServiceHTTP,
 		p.fServicePPROF,
-		// p.fStateManager.GetWrapperDB(),
+		p.fDatabase,
 	})
 	if err != nil {
 		return pkg_errors.WrapError(err, "close/stop all")

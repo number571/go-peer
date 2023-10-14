@@ -48,7 +48,7 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 	for i := pStart; i < pEnd; i++ {
 		data, err := (*p.fDB).Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
-			return nil, errors.WrapError(err, "message undefined")
+			return nil, errors.WrapError(err, "read message")
 		}
 		msg := LoadMessage(data)
 		if msg == nil {

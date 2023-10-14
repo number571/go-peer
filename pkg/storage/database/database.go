@@ -1,8 +1,10 @@
 package database
 
 import (
+	"bytes"
 	"sync"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -15,6 +17,7 @@ import (
 
 const (
 	cSaltKey  = "__SALT__"
+	cHashKey  = "__HASH__"
 	cSaltSize = 32
 )
 
@@ -38,13 +41,17 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 		return nil, errors.WrapError(err, "open database")
 	}
 
+	isInitSalt := false
 	saltValue, err := db.Get([]byte(cSaltKey), nil)
 	if err != nil {
 		if !errors.HasError(err, leveldb.ErrNotFound) {
-			return nil, errors.WrapError(err, "read salt")
+			return nil, errors.WrapError(err, "read salt value")
 		}
+		isInitSalt = true
 		saltValue = random.NewStdPRNG().GetBytes(2 * cSaltSize)
-		db.Put([]byte(cSaltKey), saltValue, nil)
+		if err := db.Put([]byte(cSaltKey), saltValue, nil); err != nil {
+			return nil, errors.WrapError(err, "put salt value")
+		}
 	}
 
 	cipherSalt := saltValue[:cSaltSize]
@@ -54,6 +61,23 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	authSalt := saltValue[cSaltSize:]
 	authKeyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), authSalt)
 	authKey := authKeyBuilder.Build(pSett.GetPassword())
+
+	if isInitSalt {
+		saltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
+		if err := db.Put([]byte(cHashKey), saltHash, nil); err != nil {
+			return nil, errors.WrapError(err, "put salt hash")
+		}
+	}
+
+	gotSaltHash, err := db.Get([]byte(cHashKey), nil)
+	if err != nil {
+		return nil, errors.WrapError(err, "read salt hash")
+	}
+
+	newSaltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
+	if !bytes.Equal(gotSaltHash, newSaltHash) {
+		return nil, errors.WrapError(err, "incorrect salt hash")
+	}
 
 	return &sKeyValueDB{
 		fDB:       db,

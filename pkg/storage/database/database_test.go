@@ -101,22 +101,19 @@ func testCipherKey(t *testing.T) {
 	}
 	defer store.Close()
 
-	store.Set([]byte("KEY"), []byte("VALUE"))
+	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
+		t.Error(err)
+		return
+	}
 
 	store.Close() // open this database with another key
-	store, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	_, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER2",
 	}))
-	if err != nil {
-		t.Error("[testCipherKey]", err)
-		return
-	}
-	defer store.Close()
-
-	if _, err := store.Get([]byte("KEY")); err == nil {
-		t.Error("[testCipherKey] success read value by another cipher key")
+	if err == nil {
+		t.Error("[testCipherKey] success read database by another cipher key")
 		return
 	}
 }
@@ -137,7 +134,10 @@ func testBasic(t *testing.T) {
 	defer store.Close()
 
 	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
-	store.Set([]byte("KEY"), secret1)
+	if err := store.Set([]byte("KEY"), secret1); err != nil {
+		t.Error(err)
+		return
+	}
 
 	secret2, err := store.Get([]byte("KEY"))
 	if err != nil {

@@ -10,6 +10,7 @@
 
 - Update `cmd/hidden_lake/service`: update _daemon/install_hls.sh script, append key generation
 - Update `cmd/hidden_lake/service`: append client.ResetPrivKey method
+- Update `pkg/storage/database`: append check on correct input auth/encryption key
 
 ### CHANGES
 

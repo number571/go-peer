@@ -14,7 +14,7 @@ import (
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
-func (p *sApp) initTrafficMessages() {
+func (p *sApp) loadTrafficMessages() {
 	cfg := p.fConfig
 	for _, conn := range cfg.GetBackupConnections() {
 		go handleTrafficMessages(cfg, conn)

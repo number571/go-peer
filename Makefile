@@ -39,7 +39,7 @@ test-coverage-view:
 
 ### GIT
 
-git-status: test-run 
+git-status: clean test-run 
 	git add .
 	git status 
 
