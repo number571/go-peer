@@ -6,7 +6,6 @@ const (
 )
 
 const (
-	CPathSTG = "hlm.stg"
 	CPathCFG = "hlm.cfg"
 	CPathDB  = "hlm.db"
 )

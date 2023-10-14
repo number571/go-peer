@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	app, err := app.InitApp(".")
+	app, err := app.InitApp(".", "./priv.key")
 	if err != nil {
 		panic(err)
 	}

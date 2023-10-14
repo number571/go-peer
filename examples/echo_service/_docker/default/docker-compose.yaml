@@ -40,7 +40,7 @@ services:
     volumes:
       - ./_mounted_send:/mounted
     ports:
-      - "7572:9572"
+      - "7572:7572"
     networks:
       - hidden-lake
 networks:

@@ -3,7 +3,6 @@ package database
 import (
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
@@ -15,14 +14,8 @@ type sKeyValueDB struct {
 	fDB    *gp_database.IKVDatabase
 }
 
-func NewKeyValueDB(pPath, pPassword string) (IKVDatabase, error) {
-	db, err := gp_database.NewKeyValueDB(
-		storage.NewSettings(&storage.SSettings{
-			FPath:     pPath,
-			FWorkSize: settings.CWorkForKeys,
-			FPassword: pPassword,
-		}),
-	)
+func NewKeyValueDB(pSettings storage.ISettings) (IKVDatabase, error) {
+	db, err := gp_database.NewKeyValueDB(pSettings)
 	if err != nil {
 		return nil, errors.WrapError(err, "new key/value database")
 	}

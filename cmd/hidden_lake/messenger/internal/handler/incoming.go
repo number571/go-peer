@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/chat_queue"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -19,7 +19,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
+func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -28,12 +28,6 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 		if pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
-			return
-		}
-
-		if !pStateManager.StateIsActive() {
-			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogRedirect))
-			api.Response(pW, http.StatusUnauthorized, "failed: client unauthorized")
 			return
 		}
 
@@ -50,17 +44,10 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 			return
 		}
 
-		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
-		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+		myPubKey, err := getClient(pCfg).GetPubKey()
+		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
-			return
-		}
-
-		db := pStateManager.GetWrapperDB().Get()
-		if db == nil {
-			pLogger.PushErro(logBuilder.WithMessage("get_database"))
-			api.Response(pW, http.StatusForbidden, "failed: database closed")
 			return
 		}
 
@@ -72,7 +59,7 @@ func HandleIncomigHTTP(pStateManager state.IStateManager, pLogger logger.ILogger
 		rel := database.NewRelation(myPubKey, fPubKey)
 		dbMsg := database.NewMessage(true, doMessageProcessor(rawMsgBytes))
 
-		if err := db.Push(rel, dbMsg); err != nil {
+		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
 			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return

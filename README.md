@@ -76,8 +76,7 @@ Some final applications are compositions of other applications. Due to this, suc
 2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
 3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
 4. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
-5. Go library (used by `cmd/hidden_lake/messenger`) [github.com/wagslane/go-password-validator](https://github.com/wagslane/go-password-validator "wagslane/go-password-validator");
-6. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+5. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Library based applications
 
@@ -351,8 +350,8 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker), `./hlm.db` or `./_mounted/hlm.db` (docker) files and `./hlm.stg` or `./_mounted/hlm.stg` (docker).
-The file `hlm.db` stores all sent/received messages in encrypted view. The file `hlm.stg` stores all auth information (logins, passwords, private keys) in encrypted view.
+Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
+The file `hlm.db` stores all sent/received messages in encrypted view. 
 
 Default config `hlm.cfg`
 

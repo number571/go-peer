@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/pkg/logger"
@@ -12,7 +12,7 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 )
 
-func NotFoundPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
+func NotFoundPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -27,6 +27,6 @@ func NotFoundPage(pStateManager state.IStateManager, pLogger logger.ILogger) htt
 		}
 
 		pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogNotFound))
-		t.Execute(pW, pStateManager.GetTemplate())
+		t.Execute(pW, getTemplate(pCfg))
 	}
 }

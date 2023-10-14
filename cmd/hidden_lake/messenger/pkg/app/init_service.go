@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	"github.com/number571/go-peer/pkg/logger"
@@ -16,11 +16,11 @@ func (p *sApp) initIncomingServiceHTTP() {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlm_settings.CPushPath,
-		handler.HandleIncomigHTTP(p.fStateManager, p.fHTTPLogger),
+		handler.HandleIncomigHTTP(p.fHTTPLogger, p.fConfig, p.fDatabase),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
-		Addr:    p.fWrapper.GetConfig().GetAddress().GetIncoming(),
+		Addr:    p.fConfig.GetAddress().GetIncoming(),
 		Handler: mux,
 	}
 }
@@ -29,33 +29,32 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	mux := http.NewServeMux()
 	mux.Handle(hlm_settings.CStaticPath, http.StripPrefix(
 		hlm_settings.CStaticPath,
-		handleFileServer(p.fStateManager, p.fHTTPLogger, http.FS(web.GetStaticPath()))),
+		handleFileServer(p.fHTTPLogger, p.fConfig, http.FS(web.GetStaticPath()))),
 	)
 
-	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fStateManager, p.fHTTPLogger))                               // GET
-	mux.HandleFunc(hlm_settings.CHandleSignOutPath, handler.SignOutPage(p.fStateManager, p.fHTTPLogger))                           // GET
-	mux.HandleFunc(hlm_settings.CHandleSignInPath, handler.SignInPage(p.fStateManager, p.fHTTPLogger))                             // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleSignUpPath, handler.SignUpPage(p.fStateManager, p.fHTTPLogger))                             // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fStateManager, p.fHTTPLogger))                           // GET
-	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fStateManager, p.fHTTPLogger))                               // GET
-	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fStateManager, p.fWrapper.GetEditor(), p.fHTTPLogger)) // GET, PATCH, PUT, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleQRPublicKeyKeyPath, handler.QRPublicKeyPage(p.fStateManager, p.fHTTPLogger))                // GET
-	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fStateManager, p.fHTTPLogger))                           // GET, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fStateManager, p.fHTTPLogger))                   // GET, POST, PUT
-	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fStateManager, p.fHTTPLogger))               // GET
+	cfgWrapper := config.NewWrapper(p.fConfig)
+
+	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))                          // GET, POST
+	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fHTTPLogger, p.fConfig))                      // GET
+	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))                          // GET
+	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))                   // GET, PATCH, PUT, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleQRPublicKeyKeyPath, handler.QRPublicKeyPage(p.fHTTPLogger, p.fConfig))           // GET
+	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, p.fConfig))                      // GET, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fHTTPLogger, p.fConfig, p.fDatabase)) // GET, POST, PUT
+	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fHTTPLogger, p.fConfig))          // GET
 
 	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS))
 
 	p.fIntServiceHTTP = &http.Server{
-		Addr:    p.fWrapper.GetConfig().GetAddress().GetInterface(),
+		Addr:    p.fConfig.GetAddress().GetInterface(),
 		Handler: mux,
 	}
 }
 
-func handleFileServer(pStateManager state.IStateManager, pLogger logger.ILogger, pFS http.FileSystem) http.Handler {
+func handleFileServer(pLogger logger.ILogger, pCfg config.IConfig, pFS http.FileSystem) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, err := pFS.Open(r.URL.Path); os.IsNotExist(err) {
-			handler.NotFoundPage(pStateManager, pLogger)(w, r)
+			handler.NotFoundPage(pLogger, pCfg)(w, r)
 			return
 		}
 		http.FileServer(pFS).ServeHTTP(w, r)

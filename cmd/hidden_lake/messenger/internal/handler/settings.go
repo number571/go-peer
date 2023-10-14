@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -27,33 +26,29 @@ type sConnection struct {
 }
 
 type sSettings struct {
-	*state.STemplateState
+	*sTemplate
 	FPublicKey   string
 	FNetworkKey  string
 	FConnections []sConnection
 }
 
-func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLogger logger.ILogger) http.HandlerFunc {
+func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
-		if pR.URL.Path != "/settings" {
-			NotFoundPage(pStateManager, pLogger)(pW, pR)
-			return
-		}
+		cfg := pWrapper.GetConfig()
+		cfgEditor := pWrapper.GetEditor()
 
-		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
-			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
+		if pR.URL.Path != "/settings" {
+			NotFoundPage(pLogger, cfg)(pW, pR)
 			return
 		}
 
 		pR.ParseForm()
 
-		client := pStateManager.GetClient()
-
-		myPubKey, _, err := client.GetPubKey()
-		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+		client := getClient(cfg)
+		myPubKey, err := client.GetPubKey()
+		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			fmt.Fprint(pW, "error: read public key")
 			return
@@ -75,7 +70,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 				fmt.Fprint(pW, "error: load unknown language")
 				return
 			}
-			if err := pEditor.UpdateLanguage(res); err != nil {
+			if err := cfgEditor.UpdateLanguage(res); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("update_language"))
 				fmt.Fprint(pW, "error: update language")
 				return
@@ -101,10 +96,10 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 			switch isBackup {
 			case true:
 				connects := stringtools.UniqAppendToSlice(
-					pStateManager.GetConfig().GetBackupConnections(),
+					cfg.GetBackupConnections(),
 					connect,
 				)
-				if err := pEditor.UpdateBackupConnections(connects); err != nil {
+				if err := cfgEditor.UpdateBackupConnections(connects); err != nil {
 					pLogger.PushWarn(logBuilder.WithMessage("update_backup_connections"))
 					fmt.Fprint(pW, errors.WrapError(err, "error: update backup connections"))
 					return
@@ -125,10 +120,10 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 			}
 
 			connects := stringtools.DeleteFromSlice(
-				pStateManager.GetConfig().GetBackupConnections(),
+				cfg.GetBackupConnections(),
 				connect,
 			)
-			if err := pEditor.UpdateBackupConnections(connects); err != nil {
+			if err := cfgEditor.UpdateBackupConnections(connects); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("delete_backup_connection"))
 				fmt.Fprint(pW, "failed: delete backup connection")
 				return
@@ -142,7 +137,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 		}
 
 		result := new(sSettings)
-		result.STemplateState = pStateManager.GetTemplate()
+		result.sTemplate = getTemplate(cfg)
 
 		result.FPublicKey = myPubKey.ToString()
 
@@ -155,7 +150,7 @@ func SettingsPage(pStateManager state.IStateManager, pEditor config.IEditor, pLo
 		result.FNetworkKey = networkKey
 
 		// append HLS connections to backup connections
-		allConns, err := getAllConnections(pStateManager.GetConfig(), client)
+		allConns, err := getAllConnections(cfg, client)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_all_connections"))
 			fmt.Fprint(pW, errors.WrapError(err, "error: get online connections"))

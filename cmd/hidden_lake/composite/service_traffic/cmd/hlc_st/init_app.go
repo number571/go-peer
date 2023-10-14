@@ -16,8 +16,8 @@ type sApp struct {
 	fHLT types.ICommand
 }
 
-func initApp(pPath string) (types.ICommand, error) {
-	hlsApp, err := hls_app.InitApp(pPath)
+func initApp(pPath, pKey string) (types.ICommand, error) {
+	hlsApp, err := hls_app.InitApp(pPath, pKey)
 	if err != nil {
 		return nil, err
 	}

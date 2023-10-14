@@ -2,6 +2,4 @@ prog_*
 hls
 hlm 
 !*.cfg
-!*.stg 
-hlm.stg 
 hls.cfg 

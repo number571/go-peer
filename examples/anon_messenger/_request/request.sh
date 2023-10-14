@@ -1,7 +1,6 @@
 #!/bin/bash
 
-## Works only if users are logged in to the account!
-## node2[localhost:7070] -> node1[localhost:8080]
+## node2[localhost:7070](Bob) -> node1[localhost:8080](Alice)
 
 randVal=$((RANDOM % 2))
 if [ "$randVal" -eq "0" ]; then

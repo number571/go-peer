@@ -23,7 +23,7 @@ const (
 	cErrorLoadRequest
 )
 
-func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode, pEphPrivKey asymmetric.IPrivKey) http.HandlerFunc {
+func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -41,7 +41,7 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			return
 		}
 
-		pubKey, data, errCode := unwrapRequest(pWrapper.GetConfig(), pEphPrivKey, vRequest)
+		pubKey, data, errCode := unwrapRequest(pWrapper.GetConfig(), vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
@@ -104,7 +104,7 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 	}
 }
 
-func unwrapRequest(pConfig config.IConfig, pEphPrivKey asymmetric.IPrivKey, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, []byte, int) {
+func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, []byte, int) {
 	friends := pConfig.GetFriends()
 
 	pubKey, ok := friends[pRequest.FReceiver]

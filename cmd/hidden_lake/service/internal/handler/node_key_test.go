@@ -7,7 +7,6 @@ import (
 	"time"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -23,7 +22,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		),
 	)
 
-	pubKey, ephPubKey, err := client.GetPubKey()
+	pubKey, err := client.GetPubKey()
 	if err != nil {
 		t.Error(err)
 		return
@@ -31,40 +30,6 @@ func TestHandlePubKeyAPI(t *testing.T) {
 
 	if pubKey.ToString() != node.GetMessageQueue().GetClient().GetPubKey().ToString() {
 		t.Error("public keys not equals")
-		return
-	}
-
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc2PrivKey1024)
-	if err := client.SetPrivKey(privKey, ephPubKey); err != nil {
-		t.Error("failed update private key")
-		return
-	}
-
-	newPubKey, _, err := client.GetPubKey()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if pubKey.GetAddress().ToString() == newPubKey.GetAddress().ToString() {
-		t.Error("public keys are equals")
-		return
-	}
-
-	if err := client.ResetPrivKey(); err != nil {
-		t.Error(err)
-		return
-	}
-
-	gotInitPubKey, _, err := client.GetPubKey()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	// tgInitPrivKey = testutils.Tc1PrivKey1024
-	if gotInitPubKey.GetAddress().ToString() != tgInitPrivKey.GetPubKey().GetAddress().ToString() {
-		t.Error("init state of private key is incorrect after reset")
 		return
 	}
 }

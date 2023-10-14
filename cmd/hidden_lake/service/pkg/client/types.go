@@ -17,9 +17,7 @@ type IClient interface {
 	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error
 
-	GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error)
-	SetPrivKey(asymmetric.IPrivKey, asymmetric.IPubKey) error
-	ResetPrivKey() error
+	GetPubKey() (asymmetric.IPubKey, error)
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error
@@ -45,9 +43,7 @@ type IRequester interface {
 	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error
 
-	GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error)
-	SetPrivKey(*pkg_settings.SPrivKey) error
-	ResetPrivKey() error
+	GetPubKey() (asymmetric.IPubKey, error)
 
 	GetOnlines() ([]string, error)
 	DelOnline(string) error
@@ -67,7 +63,6 @@ type IRequester interface {
 }
 
 type IBuilder interface {
-	SetPrivKey(asymmetric.IPrivKey, asymmetric.IPubKey) *pkg_settings.SPrivKey
 	Request(string, request.IRequest) *pkg_settings.SRequest
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
 	Message(message.IMessage) string

@@ -10,5 +10,5 @@ COPY ./ ./
 RUN go build -o hls ./cmd/hidden_lake/service/cmd/hls
 
 ENV SERVICE_PATH="/mounted"
-ENV SERVICE_KEY=""
+ENV SERVICE_KEY="/mounted/priv.key"
 CMD ./hls -path="${SERVICE_PATH}" -key="${SERVICE_KEY}"

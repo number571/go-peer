@@ -15,29 +15,18 @@ import (
 )
 
 // initApp work with the raw data = read files, read args
-func InitApp(pDefaultPath string) (types.ICommand, error) {
+func InitApp(pDefaultPath, pDefaultKey string) (types.ICommand, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
-	inputKey := flag.GetFlagValue("key", "")
+	inputKey := flag.GetFlagValue("key", pDefaultKey)
 
 	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
 	if err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
 
-	var privKey asymmetric.IPrivKey
-	switch inputKey {
-	case "":
-		privKey = asymmetric.NewRSAPrivKey(cfg.GetSettings().GetKeySizeBits())
-	default:
-		privKeyStr, err := filesystem.OpenFile(inputKey).Read()
-		if err != nil {
-			return nil, errors.WrapError(err, "read public key")
-		}
-		privKey = asymmetric.LoadRSAPrivKey(string(privKeyStr))
-	}
-
-	if privKey == nil {
-		return nil, errors.NewError("private key is invalid")
+	privKey, err := getPrivKey(cfg, inputKey)
+	if err != nil {
+		return nil, errors.WrapError(err, "get private key")
 	}
 
 	if privKey.GetSize() != cfg.GetSettings().GetKeySizeBits() {
@@ -45,4 +34,27 @@ func InitApp(pDefaultPath string) (types.ICommand, error) {
 	}
 
 	return NewApp(cfg, privKey, inputPath), nil
+}
+
+func getPrivKey(pCfg pkg_config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
+	keyFile := filesystem.OpenFile(pKeyPath)
+
+	if keyFile.IsExist() {
+		privKeyStr, err := keyFile.Read()
+		if err != nil {
+			return nil, errors.WrapError(err, "read private key")
+		}
+		privKey := asymmetric.LoadRSAPrivKey(string(privKeyStr))
+		if privKey == nil {
+			return nil, errors.NewError("private key is invalid")
+		}
+		return privKey, nil
+	}
+
+	privKey := asymmetric.NewRSAPrivKey(pCfg.GetSettings().GetKeySizeBits())
+	if err := keyFile.Write([]byte(privKey.ToString())); err != nil {
+		return nil, errors.WrapError(err, "write private key")
+	}
+
+	return privKey, nil
 }

@@ -23,4 +23,4 @@ run:
 	./$(BINPATH)/hlc_stm
 clean:
 	rm -f $(BINPATH)/hlc_stm $(BINPATH)/hlc_stm_*
-	rm -rf hls.cfg hlt.cfg hlm.cfg hlm.stg hls.db hlm.db hlt.db
+	rm -rf hls.cfg hlt.cfg hlm.cfg hls.db hlm.db hlt.db

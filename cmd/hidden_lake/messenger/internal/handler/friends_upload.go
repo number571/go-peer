@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
@@ -14,23 +14,17 @@ import (
 )
 
 type sUploadFile struct {
-	*state.STemplateState
+	*sTemplate
 	FAliasName    string
 	FMessageLimit uint64
 }
 
-func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
+func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/friends/upload" {
-			NotFoundPage(pStateManager, pLogger)(pW, pR)
-			return
-		}
-
-		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
-			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
+			NotFoundPage(pLogger, pCfg)(pW, pR)
 			return
 		}
 
@@ -50,7 +44,7 @@ func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger
 			panic("can't load hmtl files")
 		}
 
-		msgLimit, err := getMessageLimit(pStateManager.GetClient())
+		msgLimit, err := getMessageLimit(getClient(pCfg))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_message_size"))
 			fmt.Fprint(pW, "get message size (limit)")
@@ -58,9 +52,9 @@ func FriendsUploadPage(pStateManager state.IStateManager, pLogger logger.ILogger
 		}
 
 		res := &sUploadFile{
-			STemplateState: pStateManager.GetTemplate(),
-			FAliasName:     aliasName,
-			FMessageLimit:  msgLimit,
+			sTemplate:     getTemplate(pCfg),
+			FAliasName:    aliasName,
+			FMessageLimit: msgLimit,
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))

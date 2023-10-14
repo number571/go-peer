@@ -4,6 +4,4 @@ hlm
 hlt
 web/
 !*.cfg
-!*.stg 
-hlm.stg
 hls.cfg

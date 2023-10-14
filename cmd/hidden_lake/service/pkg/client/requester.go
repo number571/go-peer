@@ -262,33 +262,7 @@ func (p *sRequester) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) SetPrivKey(pPrivKey *pkg_settings.SPrivKey) error {
-	_, err := api.Request(
-		p.fClient,
-		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
-		pPrivKey,
-	)
-	if err != nil {
-		return errors.WrapError(err, "set private key (requester)")
-	}
-	return nil
-}
-
-func (p *sRequester) ResetPrivKey() error {
-	_, err := api.Request(
-		p.fClient,
-		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
-		nil,
-	)
-	if err != nil {
-		return errors.WrapError(err, "set private key (requester)")
-	}
-	return nil
-}
-
-func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error) {
+func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -296,23 +270,13 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, asymmetric.IPubKey, error)
 		nil,
 	)
 	if err != nil {
-		return nil, nil, errors.WrapError(err, "get public key (requester)")
+		return nil, errors.WrapError(err, "get public key (requester)")
 	}
 
-	strPubKeys := make([]string, 0, 2)
-	if err := encoding.Deserialize([]byte(res), &strPubKeys); err != nil {
-		return nil, nil, errors.WrapError(err, "deserialize public keys (requeser)")
-	}
-
-	pubKey := asymmetric.LoadRSAPubKey(strPubKeys[0])
+	pubKey := asymmetric.LoadRSAPubKey(res)
 	if pubKey == nil {
-		return nil, nil, errors.NewError("got invalid public key")
+		return nil, errors.NewError("got invalid public key")
 	}
 
-	ephPubKey := asymmetric.LoadRSAPubKey(strPubKeys[1])
-	if ephPubKey == nil {
-		return nil, nil, errors.NewError("got invalid eph public key")
-	}
-
-	return pubKey, ephPubKey, nil
+	return pubKey, nil
 }

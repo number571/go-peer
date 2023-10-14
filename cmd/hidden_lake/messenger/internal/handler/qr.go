@@ -7,29 +7,23 @@ import (
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func QRPublicKeyPage(pStateManager state.IStateManager, pLogger logger.ILogger) http.HandlerFunc {
+func QRPublicKeyPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
 		if pR.URL.Path != "/qr/public_key" {
-			NotFoundPage(pStateManager, pLogger)(pW, pR)
+			NotFoundPage(pLogger, pCfg)(pW, pR)
 			return
 		}
 
-		if !pStateManager.StateIsActive() {
-			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
-			http.Redirect(pW, pR, "/sign/in", http.StatusFound)
-			return
-		}
-
-		myPubKey, _, err := pStateManager.GetClient().GetPubKey()
-		if err != nil || !pStateManager.IsMyPubKey(myPubKey) {
+		myPubKey, err := getClient(pCfg).GetPubKey()
+		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			fmt.Fprint(pW, "error: read public key")
 			return

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	app, err := initApp(".")
+	app, err := initApp(".", "./priv.key")
 	if err != nil {
 		panic(err)
 	}

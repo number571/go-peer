@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app/state"
+	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
 
@@ -30,9 +30,10 @@ type sApp struct {
 	fIsRun bool
 	fMutex sync.Mutex
 
-	fWrapper      config.IWrapper
-	fStateManager state.IStateManager
+	fConfig config.IConfig
+	fPathTo string
 
+	fDatabase       database.IKVDatabase
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
 	fServicePPROF   *http.Server
@@ -49,10 +50,10 @@ func NewApp(
 	stdfLogger := std_logger.NewStdLogger(pCfg.GetLogging(), std_logger.GetLogFunc())
 
 	return &sApp{
-		fWrapper:      config.NewWrapper(pCfg),
-		fStateManager: state.NewStateManager(pCfg, pPathTo),
-		fHTTPLogger:   httpLogger,
-		fStdfLogger:   stdfLogger,
+		fConfig:     pCfg,
+		fPathTo:     pPathTo,
+		fHTTPLogger: httpLogger,
+		fStdfLogger: stdfLogger,
 	}
 }
 
@@ -65,14 +66,20 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
+	if err := p.initDatabase(); err != nil {
+		return pkg_errors.WrapError(err, "open database")
+	}
+
 	p.initIncomingServiceHTTP()
 	p.initInterfaceServiceHTTP()
 	p.initServicePPROF()
 
+	p.initTrafficMessages()
+
 	res := make(chan error)
 
 	go func() {
-		if p.fWrapper.GetConfig().GetAddress().GetPPROF() == "" {
+		if p.fConfig.GetAddress().GetPPROF() == "" {
 			return
 		}
 
@@ -118,14 +125,11 @@ func (p *sApp) Stop() error {
 	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	// state may be already closed by HLS
-	_ = p.fStateManager.CloseState()
-
 	err := types.CloseAll([]types.ICloser{
 		p.fIntServiceHTTP,
 		p.fIncServiceHTTP,
 		p.fServicePPROF,
-		p.fStateManager.GetWrapperDB(),
+		// p.fStateManager.GetWrapperDB(),
 	})
 	if err != nil {
 		return pkg_errors.WrapError(err, "close/stop all")

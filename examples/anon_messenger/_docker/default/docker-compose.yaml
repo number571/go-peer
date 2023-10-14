@@ -18,6 +18,8 @@ services:
       SERVICE_PATH: /mounted
     volumes:
       - ./_mounted_node1:/mounted
+    ports:
+      - "8572:8572"
     networks:
       - hidden-lake
   messenger-node1:
@@ -29,7 +31,7 @@ services:
     volumes:
       - ./_mounted_node1:/mounted
     ports:
-      - "8080:9592"
+      - "8080:8080"
     networks:
       - hidden-lake
   service-node2:
@@ -40,6 +42,8 @@ services:
       SERVICE_PATH: /mounted
     volumes:
       - ./_mounted_node2:/mounted
+    ports:
+      - "7572:7572"
     networks:
       - hidden-lake
   messenger-node2:
@@ -51,7 +55,7 @@ services:
     volumes:
       - ./_mounted_node2:/mounted
     ports:
-      - "7070:9592"
+      - "7070:7070"
     networks:
       - hidden-lake
 networks:

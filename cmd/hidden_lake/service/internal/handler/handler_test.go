@@ -68,10 +68,6 @@ var (
 	)
 )
 
-var (
-	tgInitPrivKey = asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
-)
-
 func testStartServerHTTP(addr string) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/echo", testEchoPage)
@@ -137,9 +133,6 @@ func testAllFree(node anonymity.INode, srv *http.Server) {
 func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	keySize := wcfg.GetConfig().GetSettings().GetKeySizeBits()
-	ephPrivKey := asymmetric.NewRSAPrivKey(keySize)
-
 	logger := logger.NewLogger(
 		logger.NewSettings(&logger.SSettings{}),
 		func(_ logger.ILogArg) string {
@@ -152,10 +145,10 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node, ephPrivKey))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, HandleNetworkKeyAPI(wcfg, logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node, ephPrivKey, tgInitPrivKey))
+	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node))
 
 	srv := &http.Server{
 		Addr:    addr,

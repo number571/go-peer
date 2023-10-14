@@ -5,13 +5,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IWrapperDB interface {
-	types.ICloser
-
-	Get() IKVDatabase
-	Set(IKVDatabase) IWrapperDB
-}
-
 type IKVDatabase interface {
 	types.ICloser
 
