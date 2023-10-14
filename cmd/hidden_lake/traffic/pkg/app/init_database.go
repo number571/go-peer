@@ -12,7 +12,7 @@ import (
 func (p *sApp) initDatabase() error {
 	sett := database.NewSettings(&database.SSettings{
 		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
-		FCapacity:         p.fConfig.GetSettings().GetMessagesCapacity(),
+		FMessagesCapacity: p.fConfig.GetSettings().GetMessagesCapacity(),
 		FMessageSizeBytes: p.fConfig.GetSettings().GetMessageSizeBytes(),
 		FWorkSizeBits:     p.fConfig.GetSettings().GetWorkSizeBits(),
 	})

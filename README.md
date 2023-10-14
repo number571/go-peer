@@ -367,6 +367,7 @@ Default config `hlm.cfg`
 		"erro"
 	],
 	"language": "ENG",
+	"storage_key": "_",
 	"address": {
 		"interface": "127.0.0.1:9591",
 		"incoming": "127.0.0.1:9592"

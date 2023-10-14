@@ -28,7 +28,7 @@ func testHmsDefaultInit(dbPath string) error {
 		FPath:             dbPath,
 		FMessageSizeBytes: testutils.TCMessageSize,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FCapacity:         testutils.TCCapacity,
+		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {
 		return err

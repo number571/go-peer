@@ -32,7 +32,7 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWorkSizeBits:     testutils.TCWorkSize,
-			FCapacity:         testutils.TCCapacity,
+			FMessagesCapacity: testutils.TCCapacity,
 		}),
 	)
 	if err != nil {

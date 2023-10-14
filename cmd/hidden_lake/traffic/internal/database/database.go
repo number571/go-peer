@@ -20,7 +20,7 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
-	if pSett.GetCapacity() == 0 {
+	if pSett.GetMessagesCapacity() == 0 {
 		return nil, errors.NewError("capacity of messages = 0")
 	}
 
@@ -55,7 +55,7 @@ func (p *sKeyValueDB) Hashes() ([]string, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	msgsLimit := p.Settings().GetCapacity()
+	msgsLimit := p.Settings().GetMessagesCapacity()
 	res := make([]string, 0, msgsLimit)
 	for i := uint64(0); i < msgsLimit; i++ {
 		hash, err := p.fDB.Get(getKeyHash(i))
@@ -167,7 +167,7 @@ func (p *sKeyValueDB) getPointer() uint64 {
 }
 
 func (p *sKeyValueDB) incPointer() error {
-	msgsLimit := p.Settings().GetCapacity()
+	msgsLimit := p.Settings().GetMessagesCapacity()
 	res := encoding.Uint64ToBytes((p.getPointer() + 1) % msgsLimit)
 	if err := p.fDB.Set(getKeyPointer(), res[:]); err != nil {
 		return errors.WrapError(err, "set pointer into KV database")

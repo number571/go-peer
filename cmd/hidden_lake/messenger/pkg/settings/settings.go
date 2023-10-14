@@ -16,8 +16,9 @@ const (
 )
 
 const (
-	CIamAliasName    = "__iam__"
-	CDefaultLanguage = "ENG"
+	CIamAliasName      = "__iam__"
+	CDefaultLanguage   = "ENG"
+	CDefaultStorageKey = "_"
 )
 
 const (
