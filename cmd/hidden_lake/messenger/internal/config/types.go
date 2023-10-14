@@ -27,6 +27,7 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
+	GetWorkSizeBits() uint64
 }
 
 type IAddress interface {

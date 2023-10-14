@@ -23,7 +23,7 @@ func TestCryptoStorage(t *testing.T) {
 }
 
 func TestSettings(t *testing.T) {
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		testSettings(t, i)
 	}
 }
@@ -39,17 +39,10 @@ func testSettings(t *testing.T, n int) {
 	case 0:
 		_ = NewSettings(&SSettings{
 			FWorkSize: testutils.TCWorkSize,
-			FPassword: "CIPHER",
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FPath:     "path",
-			FPassword: "CIPHER",
-		})
-	case 2:
-		_ = NewSettings(&SSettings{
-			FPath:     "path",
-			FWorkSize: testutils.TCWorkSize,
+			FPath: "path",
 		})
 	}
 }

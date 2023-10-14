@@ -17,10 +17,8 @@ const (
 const (
 	tcConfigTemplate = `{
 	"settings": {
-		"message_size_bytes": %d,
-		"work_size_bits": %d,
-		"key_size_bits": %d,
-		"messages_capacity": %d
+		"messages_capacity": %d,
+		"work_size_bits": %d
 	},
 	"logging": ["info", "erro"],
 	"language": "RUS",
@@ -53,10 +51,8 @@ const (
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
-		tcMessageSize,
-		tcWorkSize,
-		tcKeySize,
 		tcMessagesCapacity,
+		tcWorkSize,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
@@ -81,6 +77,11 @@ func TestConfig(t *testing.T) {
 	}
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
+		t.Error("settings key size is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings key size is invalid")
 		return
 	}

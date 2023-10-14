@@ -19,6 +19,7 @@ var (
 
 type SConfigSettings struct {
 	FMessagesCapacity uint64 `json:"messages_capacity"`
+	FWorkSizeBits     uint64 `json:"work_size_bits"`
 }
 
 type SConfig struct {
@@ -96,9 +97,14 @@ func (p *SConfigSettings) GetMessagesCapacity() uint64 {
 	return p.FMessagesCapacity
 }
 
+func (p *SConfigSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
-		p.FSettings.FMessagesCapacity != 0
+		p.FSettings.FMessagesCapacity != 0 &&
+		p.FSettings.FWorkSizeBits != 0
 }
 
 func (p *SConfig) initConfig() error {

@@ -358,7 +358,8 @@ Default config `hlm.cfg`
 ```json
 {
 	"settings": {
-		"messages_capacity": 2048
+		"messages_capacity": 2048,
+		"work_size_bits": 20
 	},
 	"logging": [
 		"info",

@@ -16,9 +16,8 @@ const (
 )
 
 const (
-	CIamAliasName      = "__iam__"
-	CDefaultLanguage   = "ENG"
-	CDefaultStorageKey = "_"
+	CIamAliasName    = "__iam__"
+	CDefaultLanguage = "ENG"
 )
 
 const (
@@ -27,16 +26,12 @@ const (
 )
 
 const (
-	CMinEntropy         = 64        // bits
-	CWorkForKeys        = 20        // bits
-	CDefaultCapMessages = (2 << 10) // count
+	CDefaultWorkSizeBits = 20        // bits
+	CDefaultCapMessages  = (2 << 10) // count
 )
 
 const (
 	CHandleIndexPath          = "/"
-	CHandleSignOutPath        = "/sign/out"
-	CHandleSignInPath         = "/sign/in"
-	CHandleSignUpPath         = "/sign/up"
 	CHandleAboutPath          = "/about"
 	CHandleFaviconPath        = "/favicon.ico"
 	CHandleSettingsPath       = "/settings"

@@ -11,14 +11,10 @@ import (
 )
 
 func (p *sApp) initDatabase() error {
-	storageKey := p.fConfig.GetStorageKey()
-	if storageKey == "" {
-		return errors.NewError("storage key is nil")
-	}
 	sett := storage.NewSettings(&storage.SSettings{
 		FPath:     fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
-		FWorkSize: hlm_settings.CWorkForKeys,
-		FPassword: storageKey,
+		FWorkSize: p.fConfig.GetSettings().GetWorkSizeBits(),
+		FPassword: p.fConfig.GetStorageKey(),
 	})
 	db, err := database.NewKeyValueDB(sett)
 	if err != nil {

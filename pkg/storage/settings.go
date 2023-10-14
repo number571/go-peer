@@ -26,9 +26,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FWorkSize == 0 {
 		panic(`p.FWorkSize == 0`)
 	}
-	if p.FPassword == "" {
-		panic(`p.FPassword == ""`)
-	}
 	return p
 }
 
