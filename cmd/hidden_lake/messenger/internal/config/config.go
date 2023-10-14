@@ -107,6 +107,14 @@ func (p *SConfig) isValid() bool {
 }
 
 func (p *SConfig) initConfig() error {
+	if p.FSettings == nil {
+		p.FSettings = new(SConfigSettings)
+	}
+
+	if p.FAddress == nil {
+		p.FAddress = new(SAddress)
+	}
+
 	if !p.isValid() {
 		return errors.NewError("load config settings")
 	}
@@ -117,14 +125,6 @@ func (p *SConfig) initConfig() error {
 
 	if err := p.loadLanguage(); err != nil {
 		return errors.WrapError(err, "load language")
-	}
-
-	if p.FAddress == nil {
-		p.FAddress = new(SAddress)
-	}
-
-	if p.FSettings == nil {
-		p.FSettings = new(SConfigSettings)
 	}
 
 	return nil

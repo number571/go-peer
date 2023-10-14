@@ -115,20 +115,20 @@ func (p *SConfig) isValid() bool {
 }
 
 func (p *SConfig) initConfig() error {
-	if !p.isValid() {
-		return errors.NewError("load config settings")
-	}
-
-	if err := p.loadLogging(); err != nil {
-		return errors.WrapError(err, "load logging")
+	if p.FSettings == nil {
+		p.FSettings = new(SConfigSettings)
 	}
 
 	if p.FAddress == nil {
 		p.FAddress = new(SAddress)
 	}
 
-	if p.FSettings == nil {
-		p.FSettings = new(SConfigSettings)
+	if !p.isValid() {
+		return errors.NewError("load config settings")
+	}
+
+	if err := p.loadLogging(); err != nil {
+		return errors.WrapError(err, "load logging")
 	}
 
 	return nil
