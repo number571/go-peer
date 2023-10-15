@@ -11,3 +11,4 @@
 9. HLS: write a threat model (in "Hidden Lake" article)
 10. HLF: Hidden Lake Forum
 11. HLM: grouped chats
+12. HLM: update readme

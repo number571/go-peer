@@ -37,7 +37,6 @@ func getMessageLimit(pHlsClient client.IClient) (uint64, error) {
 	randClient := pkg_client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: msgSize,
-			FWorkSizeBits:     1, // does not affect the size
 		}),
 		asymmetric.NewRSAPrivKey(keySize),
 	)

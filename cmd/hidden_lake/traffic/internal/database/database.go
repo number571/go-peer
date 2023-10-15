@@ -26,9 +26,7 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 
 	kvDB, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
-			FPath:     pSett.GetPath(),
-			FWorkSize: 1,
-			FPassword: "_",
+			FPath: pSett.GetPath(),
 		}),
 	)
 	if err != nil {

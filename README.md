@@ -406,8 +406,6 @@ Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 <p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 8. Home page of the HLM application.</p>
 
-Next, you need to login by going to the Sign in page. Enter your `login="username"` and `password="hello, world!"` than the private key, friends and connections will be automatically loaded from the storage.
-
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
 Also you can run example with docker-compose. In this example, all nodes have logging enabled

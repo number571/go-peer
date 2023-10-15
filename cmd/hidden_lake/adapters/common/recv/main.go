@@ -29,9 +29,7 @@ func initDB() database.IKVDatabase {
 	var err error
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
-			FPath:     databasePath,
-			FWorkSize: 1,
-			FPassword: "_",
+			FPath: databasePath,
 		}),
 	)
 	if err != nil {

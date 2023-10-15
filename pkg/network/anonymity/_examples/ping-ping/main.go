@@ -117,9 +117,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
-			FPath:     dbPath,
-			FWorkSize: 1, // not used
-			FPassword: "CIPHER",
+			FPath: dbPath,
 		}),
 	)
 	if err != nil {
