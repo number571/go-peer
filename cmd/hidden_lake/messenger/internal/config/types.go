@@ -11,7 +11,6 @@ type IWrapper interface {
 }
 
 type IEditor interface {
-	UpdateBackupConnections([]string) error
 	UpdateLanguage(utils.ILanguage) error
 }
 
@@ -21,7 +20,6 @@ type IConfig interface {
 	GetLogging() logger.ILogging
 	GetConnection() string
 	GetStorageKey() string
-	GetBackupConnections() []string
 	GetLanguage() utils.ILanguage
 }
 

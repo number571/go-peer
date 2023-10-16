@@ -116,23 +116,23 @@ func (p *sClient) DelOnline(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) GetConnections() ([]string, error) {
-	res, err := p.fRequester.GetConnections()
+func (p *sClient) GetConnections(pIsBackup bool) ([]string, error) {
+	res, err := p.fRequester.GetConnections(pIsBackup)
 	if err != nil {
 		return nil, errors.WrapError(err, "get connections (client)")
 	}
 	return res, nil
 }
 
-func (p *sClient) AddConnection(pConnect string) error {
-	if err := p.fRequester.AddConnection(pConnect); err != nil {
+func (p *sClient) AddConnection(pIsBackup bool, pConnect string) error {
+	if err := p.fRequester.AddConnection(pIsBackup, pConnect); err != nil {
 		return errors.WrapError(err, "add connection (client)")
 	}
 	return nil
 }
 
-func (p *sClient) DelConnection(pConnect string) error {
-	if err := p.fRequester.DelConnection(pConnect); err != nil {
+func (p *sClient) DelConnection(pIsBackup bool, pConnect string) error {
+	if err := p.fRequester.DelConnection(pIsBackup, pConnect); err != nil {
 		return errors.WrapError(err, "del connection (client)")
 	}
 	return nil

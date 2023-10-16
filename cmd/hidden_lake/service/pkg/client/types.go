@@ -26,9 +26,9 @@ type IClient interface {
 	AddFriend(string, asymmetric.IPubKey) error
 	DelFriend(string) error
 
-	GetConnections() ([]string, error)
-	AddConnection(string) error
-	DelConnection(string) error
+	GetConnections(bool) ([]string, error)
+	AddConnection(bool, string) error
+	DelConnection(bool, string) error
 
 	HandleMessage(message.IMessage) error
 
@@ -52,9 +52,9 @@ type IRequester interface {
 	AddFriend(*pkg_settings.SFriend) error
 	DelFriend(*pkg_settings.SFriend) error
 
-	GetConnections() ([]string, error)
-	AddConnection(string) error
-	DelConnection(string) error
+	GetConnections(bool) ([]string, error)
+	AddConnection(bool, string) error
+	DelConnection(bool, string) error
 
 	HandleMessage(string) error
 

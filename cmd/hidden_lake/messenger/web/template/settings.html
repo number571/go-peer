@@ -134,7 +134,7 @@ Agordoj
                         {{end}}
                     </div>
                     <div class="col-md-4 w-25">
-                        <input type="submit" name="is_backup" value="◀" class="btn btn-info w-100">
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
                     </div>
                 </div>
             </form>
@@ -196,12 +196,15 @@ Agordoj
                         <input hidden type="text" name="address" value="{{.FAddress}}"
                             class="text-center form-control w-100">
                         {{if .FOnline}}
+                        <input hidden name="is_node" value="true">
                         <button disabled type="button" class="btn btn-info w-100"
                             style="overflow: hidden;">{{.FAddress}}</button>
                         {{else if .FIsBackup}}
+                        <input hidden name="is_backup" value="true">
                         <button disabled type="button" class="btn btn-primary w-100"
                             style="overflow: hidden;">{{.FAddress}}</button>
                         {{else}}
+                        <input hidden name="is_node" value="true">
                         <button disabled type="button" class="btn btn-secondary w-100"
                             style="overflow: hidden;">{{.FAddress}}</button>
                         {{end}}

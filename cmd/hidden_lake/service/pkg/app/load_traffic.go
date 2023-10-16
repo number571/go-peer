@@ -6,35 +6,23 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/network/anonymity"
 
-	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 func (p *sApp) loadTrafficMessages() {
-	cfg := p.fConfig
+	cfg := p.fWrapper.GetConfig()
 	for _, conn := range cfg.GetBackupConnections() {
-		go handleTrafficMessages(cfg, conn)
+		go handleTrafficMessages(cfg, p.fNode, conn)
 	}
 }
 
-func handleTrafficMessages(pCfg config.IConfig, pConn string) {
-	hlsClient := hls_client.NewClient(
-		hls_client.NewBuilder(),
-		hls_client.NewRequester(
-			fmt.Sprintf("http://%s", pCfg.GetConnection()),
-			&http.Client{Timeout: time.Minute},
-		),
-	)
-
-	sett, err := hlsClient.GetSettings()
-	if err != nil {
-		return
-	}
-
+func handleTrafficMessages(pCfg config.IConfig, pNode anonymity.INode, pConn string) {
+	sett := pCfg.GetSettings()
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -64,7 +52,7 @@ func handleTrafficMessages(pCfg config.IConfig, pConn string) {
 		if !bytes.Equal(msg.GetBody().GetHash(), bytesHash) {
 			break
 		}
-		if err := hlsClient.HandleMessage(msg); err != nil {
+		if err := pNode.HandleMessage(msg); err != nil {
 			continue
 		}
 	}

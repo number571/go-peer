@@ -311,7 +311,7 @@ and put result to "hex_data" HLS API
 #### 1.1. GET Request
 
 ```bash
-curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/config/connects
+curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/config/connects?is_backup=false
 ```
 
 #### 1.1. GET Response
@@ -330,7 +330,7 @@ Content-Length: 35
 #### 1.2. POST Request
 
 ```bash
-curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/config/connects --data 'localhost:8888'
+curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/config/connects?is_backup=false --data 'localhost:8888'
 ```
 
 #### 1.2. POST Response
@@ -347,7 +347,7 @@ success: update connections
 #### 1.3. DELETE Request
 
 ```bash
-curl -i -X DELETE -H 'Accept: application/json' http://localhost:9572/api/config/connects --data 'localhost:8888'
+curl -i -X DELETE -H 'Accept: application/json' http://localhost:9572/api/config/connects?is_backup=false --data 'localhost:8888'
 ```
 
 #### 1.3. DELETE Response

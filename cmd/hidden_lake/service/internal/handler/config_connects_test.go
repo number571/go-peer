@@ -30,7 +30,7 @@ func TestHandleConnectsAPI(t *testing.T) {
 }
 
 func testGetConnects(t *testing.T, client hls_client.IClient, cfg config.IConfig) {
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -50,13 +50,13 @@ func testGetConnects(t *testing.T, client hls_client.IClient, cfg config.IConfig
 }
 
 func testAddConnect(t *testing.T, client hls_client.IClient, connect string) {
-	err := client.AddConnection(connect)
+	err := client.AddConnection(false, connect)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(false)
 	if err != nil {
 		t.Error(err)
 		return
@@ -71,13 +71,13 @@ func testAddConnect(t *testing.T, client hls_client.IClient, connect string) {
 }
 
 func testDelConnect(t *testing.T, client hls_client.IClient, connect string) {
-	err := client.DelConnection(connect)
+	err := client.DelConnection(false, connect)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(false)
 	if err != nil {
 		t.Error(err)
 		return

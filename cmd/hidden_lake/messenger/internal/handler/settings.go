@@ -14,7 +14,6 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/stringtools"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
@@ -76,6 +75,8 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 		case http.MethodPost:
+			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
+
 			host := strings.TrimSpace(pR.FormValue("host"))
 			port := strings.TrimSpace(pR.FormValue("port"))
 
@@ -91,27 +92,14 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
-			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
-
-			switch isBackup {
-			case true:
-				connects := stringtools.UniqAppendToSlice(
-					cfg.GetBackupConnections(),
-					connect,
-				)
-				if err := cfgEditor.UpdateBackupConnections(connects); err != nil {
-					pLogger.PushWarn(logBuilder.WithMessage("update_backup_connections"))
-					fmt.Fprint(pW, errors.WrapError(err, "error: update backup connections"))
-					return
-				}
-			case false:
-				if err := client.AddConnection(connect); err != nil {
-					pLogger.PushWarn(logBuilder.WithMessage("add_connection"))
-					fmt.Fprint(pW, "error: add connection")
-					return
-				}
+			if err := client.AddConnection(isBackup, connect); err != nil {
+				pLogger.PushWarn(logBuilder.WithMessage("add_connection"))
+				fmt.Fprint(pW, "error: add connection")
+				return
 			}
 		case http.MethodDelete:
+			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
+
 			connect := strings.TrimSpace(pR.FormValue("address"))
 			if connect == "" {
 				pLogger.PushWarn(logBuilder.WithMessage("get_connection"))
@@ -119,18 +107,8 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 
-			connects := stringtools.DeleteFromSlice(
-				cfg.GetBackupConnections(),
-				connect,
-			)
-			if err := cfgEditor.UpdateBackupConnections(connects); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("delete_backup_connection"))
-				fmt.Fprint(pW, "failed: delete backup connection")
-				return
-			}
-
-			if err := client.DelConnection(connect); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("get_ndelete_connectionetwork_key"))
+			if err := client.DelConnection(isBackup, connect); err != nil {
+				pLogger.PushWarn(logBuilder.WithMessage("del_connection"))
 				fmt.Fprint(pW, "error: del connection")
 				return
 			}
@@ -175,9 +153,14 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sConnection, error) {
 	var connections []sConnection
 
-	conns, err := pClient.GetConnections()
+	conns, err := pClient.GetConnections(false)
 	if err != nil {
 		return nil, fmt.Errorf("error: read connections")
+	}
+
+	backupConns, err := pClient.GetConnections(true)
+	if err != nil {
+		return nil, fmt.Errorf("error: read backup connections")
 	}
 
 	onlines, err := pClient.GetOnlines()
@@ -195,7 +178,7 @@ func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sC
 		)
 	}
 
-	for _, c := range pConfig.GetBackupConnections() {
+	for _, c := range backupConns {
 		connections = append(
 			connections,
 			sConnection{

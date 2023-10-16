@@ -24,17 +24,19 @@ type SConfigSettings struct {
 	FQueuePeriodMS      uint64 `json:"queue_period_ms"`
 	FKeySizeBits        uint64 `json:"key_size_bits"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+	FMessagesCapacity   uint64 `json:"messages_capacity,omitempty"`
 }
 
 type SConfig struct {
 	FSettings *SConfigSettings `json:"settings"`
 
-	FLogging     []string          `json:"logging,omitempty"`
-	FAddress     *SAddress         `json:"address,omitempty"`
-	FNetworkKey  string            `json:"network_key,omitempty"`
-	FConnections []string          `json:"connections,omitempty"`
-	FServices    map[string]string `json:"services,omitempty"`
-	FFriends     map[string]string `json:"friends,omitempty"`
+	FLogging           []string          `json:"logging,omitempty"`
+	FAddress           *SAddress         `json:"address,omitempty"`
+	FNetworkKey        string            `json:"network_key,omitempty"`
+	FConnections       []string          `json:"connections,omitempty"`
+	FBackupConnections []string          `json:"backup_connections,omitempty"`
+	FServices          map[string]string `json:"services,omitempty"`
+	FFriends           map[string]string `json:"friends,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -109,6 +111,10 @@ func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 
 func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 	return p.FLimitVoidSizeBytes
+}
+
+func (p *SConfigSettings) GetMessagesCapacity() uint64 {
+	return p.FMessagesCapacity
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {
@@ -190,6 +196,9 @@ func (p *SConfig) loadPubKeys() error {
 }
 
 func (p *SConfig) GetNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	return p.FNetworkKey
 }
 
@@ -213,7 +222,17 @@ func (p *SConfig) GetAddress() IAddress {
 }
 
 func (p *SConfig) GetConnections() []string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	return p.FConnections
+}
+
+func (p *SConfig) GetBackupConnections() []string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.FBackupConnections
 }
 
 func (p *SConfig) GetService(name string) (string, bool) {

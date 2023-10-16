@@ -9,6 +9,6 @@
 7. Fix docker build for arm macOS 
 8. HLS: append proxy connections
 9. HLS: write a threat model (in "Hidden Lake" article)
-10. HLF: Hidden Lake Forum
-11. HLM: grouped chats
-12. HLM: update readme
+10. HLM: grouped chats
+11. HLM: update readme
+12. HLF: Hidden Lake Forum

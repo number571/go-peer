@@ -84,12 +84,12 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	p.initServiceHTTP()
-	p.initServicePPROF()
-
 	if err := p.initDatabase(); err != nil {
 		return pkg_errors.WrapError(err, "init database")
 	}
+
+	p.initServiceHTTP()
+	p.initServicePPROF()
 
 	res := make(chan error)
 
@@ -155,6 +155,7 @@ func (p *sApp) Run() error {
 	case err := <-res:
 		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
 	case <-time.After(cInitStart):
+		p.loadTrafficMessages()
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
 	}

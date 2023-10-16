@@ -58,7 +58,7 @@ func testGetOnlines(t *testing.T, client hls_client.IClient, node anonymity.INod
 }
 
 func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
-	err := client.DelConnection(addr)
+	err := client.DelConnection(false, addr)
 	if err != nil {
 		t.Error(err)
 		return

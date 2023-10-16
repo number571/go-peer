@@ -217,11 +217,11 @@ func (p *sRequester) DelOnline(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) GetConnections() ([]string, error) {
+func (p *sRequester) GetConnections(pIsBackup bool) ([]string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
 		nil,
 	)
 	if err != nil {
@@ -236,11 +236,11 @@ func (p *sRequester) GetConnections() ([]string, error) {
 	return connects, nil
 }
 
-func (p *sRequester) AddConnection(pConnect string) error {
+func (p *sRequester) AddConnection(pIsBackup bool, pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
 		pConnect,
 	)
 	if err != nil {
@@ -249,11 +249,11 @@ func (p *sRequester) AddConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) DelConnection(pConnect string) error {
+func (p *sRequester) DelConnection(pIsBackup bool, pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
 		pConnect,
 	)
 	if err != nil {
@@ -279,4 +279,11 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	}
 
 	return pubKey, nil
+}
+
+func isBackup(pIsBackup bool) string {
+	if pIsBackup {
+		return "true"
+	}
+	return "false"
 }

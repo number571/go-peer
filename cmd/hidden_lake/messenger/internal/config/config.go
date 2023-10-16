@@ -25,12 +25,11 @@ type SConfigSettings struct {
 type SConfig struct {
 	FSettings *SConfigSettings `json:"settings"`
 
-	FLogging           []string  `json:"logging,omitempty"`
-	FLanguage          string    `json:"language,omitempty"`
-	FAddress           *SAddress `json:"address"`
-	FConnection        string    `json:"connection"`
-	FStorageKey        string    `json:"storage_key,omitempty"`
-	FBackupConnections []string  `json:"backup_connections,omitempty"`
+	FLogging    []string  `json:"logging,omitempty"`
+	FLanguage   string    `json:"language,omitempty"`
+	FAddress    *SAddress `json:"address"`
+	FConnection string    `json:"connection"`
+	FStorageKey string    `json:"storage_key,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -166,13 +165,6 @@ func (p *SConfig) GetLanguage() utils.ILanguage {
 	defer p.fMutex.Unlock()
 
 	return p.fLanguage
-}
-
-func (p *SConfig) GetBackupConnections() []string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.FBackupConnections
 }
 
 func (p *SConfig) GetAddress() IAddress {

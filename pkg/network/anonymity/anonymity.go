@@ -100,12 +100,9 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 	return p.fFriends
 }
 
-func (p *sNode) HandleMessage(pMsg message.IMessage) {
-	p.handleWrapper()(
-		p.fNetwork,
-		nil,
-		pMsg.ToBytes(),
-	)
+func (p *sNode) HandleMessage(pMsg message.IMessage) error {
+	handler := p.handleWrapper()
+	return handler(p.fNetwork, nil, pMsg.ToBytes())
 }
 
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {

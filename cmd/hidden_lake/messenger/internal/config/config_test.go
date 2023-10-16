@@ -126,16 +126,6 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if len(cfg.GetBackupConnections()) != 1 {
-		t.Error("length of connections.backup is invalid")
-		return
-	}
-
-	if cfg.GetBackupConnections()[0] != tcConnectionBackup {
-		t.Error("connections[0].backup is invalid")
-		return
-	}
-
 	if cfg.GetStorageKey() != tcStorageKey {
 		t.Error("storage_key is invalid")
 		return

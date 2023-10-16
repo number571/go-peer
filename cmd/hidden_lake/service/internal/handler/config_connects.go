@@ -24,9 +24,25 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			return
 		}
 
+		isBackupParam := pR.URL.Query().Get("is_backup")
+		switch isBackupParam {
+		case "false", "true":
+			// pass
+		default:
+			pLogger.PushWarn(logBuilder.WithMessage("incorrect_param"))
+			api.Response(pW, http.StatusNotAcceptable, "failed: incorrect param")
+			return
+		}
+
+		isBackup := isBackupParam == "true"
+
 		switch pR.Method {
 		case http.MethodGet:
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
+			if isBackup {
+				api.Response(pW, http.StatusOK, pWrapper.GetConfig().GetBackupConnections())
+				return
+			}
 			api.Response(pW, http.StatusOK, pWrapper.GetConfig().GetConnections())
 			return
 		}
@@ -47,6 +63,22 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 
 		switch pR.Method {
 		case http.MethodPost:
+			if isBackup {
+				connects := stringtools.UniqAppendToSlice(
+					pWrapper.GetConfig().GetBackupConnections(),
+					connect,
+				)
+				if err := pWrapper.GetEditor().UpdateBackupConnections(connects); err != nil {
+					pLogger.PushWarn(logBuilder.WithMessage("update_backup_connections"))
+					api.Response(pW, http.StatusInternalServerError, "failed: update backup connections")
+					return
+				}
+
+				pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
+				api.Response(pW, http.StatusOK, "success: update backup connections")
+				return
+			}
+
 			connects := stringtools.UniqAppendToSlice(
 				pWrapper.GetConfig().GetConnections(),
 				connect,
@@ -64,6 +96,19 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			return
 
 		case http.MethodDelete:
+			if isBackup {
+				connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetBackupConnections(), connect)
+				if err := pWrapper.GetEditor().UpdateBackupConnections(connects); err != nil {
+					pLogger.PushWarn(logBuilder.WithMessage("delete_backup_connections"))
+					api.Response(pW, http.StatusInternalServerError, "failed: delete backup connection")
+					return
+				}
+
+				pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
+				api.Response(pW, http.StatusOK, "success: delete backup connection")
+				return
+			}
+
 			connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetConnections(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("update_connections"))

@@ -14,6 +14,7 @@ type IWrapper interface {
 type IEditor interface {
 	UpdateNetworkKey(string) error
 	UpdateConnections([]string) error
+	UpdateBackupConnections([]string) error
 	UpdateFriends(map[string]asymmetric.IPubKey) error
 }
 
@@ -23,6 +24,7 @@ type IConfigSettings interface {
 	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64
+	GetMessagesCapacity() uint64
 }
 
 type IConfig interface {
@@ -31,6 +33,7 @@ type IConfig interface {
 	GetAddress() IAddress
 	GetNetworkKey() string
 	GetConnections() []string
+	GetBackupConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
 	GetService(string) (string, bool)
 }

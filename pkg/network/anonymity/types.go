@@ -28,7 +28,7 @@ type INode interface {
 	GetLogger() logger.ILogger
 
 	HandleFunc(uint32, IHandlerF) INode
-	HandleMessage(message.IMessage) // in runtime
+	HandleMessage(message.IMessage) error // in runtime
 
 	BroadcastPayload(asymmetric.IPubKey, adapters.IPayload) error
 	FetchPayload(asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
