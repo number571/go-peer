@@ -14,22 +14,23 @@ const (
 )
 
 const (
-	tcLogging       = true
-	tcNetwork       = "test_network_key"
-	tcDownloader    = "test_downloader"
-	tcUploader      = "test_uploader"
-	tcAddressTCP    = "test_address_tcp"
-	tcAddressHTTP   = "test_address_http"
-	tcAddressPPROF  = "test_address_pprof"
-	tcPubKeyAlias1  = "test_alias1"
-	tcPubKeyAlias2  = "test_alias2"
-	tcServiceName1  = "test_service1"
-	tcServiceName2  = "test_service2"
-	tcMessageSize   = (1 << 20)
-	tcWorkSize      = 20
-	tcKeySize       = 4096
-	tcQueuePeriod   = 1000
-	tcLimitVoidSize = (1 << 20)
+	tcLogging          = true
+	tcNetwork          = "test_network_key"
+	tcDownloader       = "test_downloader"
+	tcUploader         = "test_uploader"
+	tcAddressTCP       = "test_address_tcp"
+	tcAddressHTTP      = "test_address_http"
+	tcAddressPPROF     = "test_address_pprof"
+	tcPubKeyAlias1     = "test_alias1"
+	tcPubKeyAlias2     = "test_alias2"
+	tcServiceName1     = "test_service1"
+	tcServiceName2     = "test_service2"
+	tcMessageSize      = (1 << 20)
+	tcWorkSize         = 20
+	tcKeySize          = 4096
+	tcQueuePeriod      = 1000
+	tcLimitVoidSize    = (1 << 20)
+	tcMessagesCapacity = 2048
 )
 
 var (
@@ -54,7 +55,8 @@ const (
 		"work_size_bits": %d,
 		"key_size_bits": %d,
 		"queue_period_ms": %d,
-		"limit_void_size_bytes": %d
+		"limit_void_size_bytes": %d,
+		"messages_capacity": %d
 	},
 	"logging": ["info", "erro"],
 	"address": {
@@ -86,6 +88,7 @@ func testNewConfigString() string {
 		tcKeySize,
 		tcQueuePeriod,
 		tcLimitVoidSize,
+		tcMessagesCapacity,
 		tcAddressTCP,
 		tcAddressHTTP,
 		tcAddressPPROF,
@@ -134,6 +137,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
+		t.Error("settings messages capacity is invalid")
 		return
 	}
 

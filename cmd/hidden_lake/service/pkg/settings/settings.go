@@ -35,11 +35,12 @@ const (
 )
 
 const (
-	CDefaultMessageSize   = (8 << 10) // 8KiB
-	CDefaultWorkSize      = 20        // bits
-	CDefaultKeySize       = 4096      // bits
-	CDefaultQueuePeriod   = 5000      // 5seconds
-	CDefaultLimitVoidSize = (4 << 10) // 4KiB
+	CDefaultMessageSize      = (8 << 10) // 8KiB
+	CDefaultWorkSize         = 20        // bits
+	CDefaultKeySize          = 4096      // bits
+	CDefaultQueuePeriod      = 5000      // 5seconds
+	CDefaultLimitVoidSize    = (4 << 10) // 4KiB
+	CDefaultMessagesCapacity = 2048      // messages
 )
 
 const (

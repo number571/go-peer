@@ -8,11 +8,12 @@ The `Hidden Lake Service` is the core of an anonymous network with theoretically
 
 Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networks (1^stage)
 :-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
-Theoretical provability  |  +  |  +  |  +
-Ease of software implementation  |  +  |  -  |  -
-Polymorphism of information  |  -  |  +  |  +
-Static communication delay  |  +  |  -  |  +
-Network scales easily  |  -  |  -  |  -
+Theoretical provability  |  +  |  +  |  + |
+Ease of software implementation  |  +  |  -  |  - |
+Polymorphism of information  |  -  |  +  |  + |
+Static communication delay  |  +  |  -  |  + |
+Sending parallel messages  |  -  |  +  |  - |
+Network scales easily  |  -  |  -  |  - |
 
 A feature of HLS (compared to many other anonymous networks) is its easy adaptation to a hostile centralized environment. Anonymity can be restored literally from one node in the network, even if it is the only point of failure.
 
@@ -87,7 +88,8 @@ Default config `hls.cfg`
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096
+		"limit_void_size_bytes": 4096,
+		"messages_capacity": 2048
 	},
 	"logging": [
 		"info",
@@ -240,7 +242,8 @@ $ make
 		"work_size_bits": 20,
 		"key_size_bits": 4096,
 		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096
+		"limit_void_size_bytes": 4096,
+		"messages_capacity": 2048
 	},
 	"logging": ["info", "warn", "erro"],
 	"address": {

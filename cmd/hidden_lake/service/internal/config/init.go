@@ -25,6 +25,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FKeySizeBits:        hls_settings.CDefaultKeySize,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+				FMessagesCapacity:   hls_settings.CDefaultMessagesCapacity,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
