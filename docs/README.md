@@ -9,6 +9,8 @@
 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 4. [Decentralized key exchange protocol](https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf "DKEP")
 
+Also, the composition of these works can be found in the book [The general theory of anonymous communications](https://ridero.ru/books/obshaya_teoriya_anonimnykh_kommunikacii/). This book can be purchased in a tangible form on the [Ozon](https://www.ozon.ru/product/obshchaya-teoriya-anonimnyh-kommunikatsiy-vtoroe-izdanie-kovalenko-a-g-1193224608/) and [Wildberries](https://www.wildberries.ru/catalog/177390621/detail.aspx) marketplaces. You can download the book in digital form for free [here](https://github.com/number571/go-peer/blob/master/docs/general_theory_of_anonymous_communications.pdf).
+
 ### 2. Habr
 
 1. [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
@@ -17,7 +19,7 @@
 4. [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
 5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
-7. [Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
+7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
 
 ## Default applications ports
 
