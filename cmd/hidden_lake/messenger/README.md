@@ -12,21 +12,12 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 ## How it works
 
-Most of the code is a call to API functions from the HLS kernel. However, there are additional features aimed at the security of the HLM application itself.
+Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
 
 <p align="center"><img src="_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 1. Example of chat room in HLM.</p>
 
-Firstly, there is registration and authorization, which does not exist in the HLS core. Registration performs the role of creating / depositing a private key `PrivKey` in order to save it through encryption. 
-
-The encryption of the private key is carried out on the basis of the entered `login (L) / password (P)`, where the login acts as a cryptographic salt. The concatenation of the login and password `L||P` is hashed `2^20` times `K = H(L||H(...L||(H(L||P)...))` to increase the password security by about `20 bits` of entropy and turn it into an encryption key `K`. The resulting `K` is additionally hashed by `H(K)` and stored together with the encrypted version of the private key `Q = E(K, PrivKey)`.
-
-<p align="center"><img src="_images/hlm_auth.jpg" alt="hlm_auth.jpg"/></p>
-<p align="center">Figure 2. Data encryption with different types of input parameters.</p>
-
-Authorization is performed by entering a `login/password`, their subsequent conversion to `K' and H(K')`, subsequent comparison with the stored hash `H(K) = H(K')?` and subsequent decryption of the private key `D(K, Q) = D(K, E(K, PrivKey)) = PrivKey`.
-
-Secondly, the received key K is also used to encrypt all incoming and outgoing messages `C = E(K, M)`. All personal encrypted messages `C` are stored in the local database of each individual network participant.
+However, there are additional features aimed at the security of the HLM application itself. All messages are stored in a local database in encrypted form with a key formed from `storage_key` param.
 
 ## Supported platforms
 
@@ -68,10 +59,7 @@ Default config `hlm.cfg`
 		"interface": "127.0.0.1:9591",
 		"incoming": "127.0.0.1:9592"
 	},
-	"connection": "127.0.0.1:9572",
-	"backup_connections": [
-		"127.0.0.1:9582"
-	]
+	"connection": "127.0.0.1:9572"
 }
 ```
 

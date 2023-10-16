@@ -49,6 +49,7 @@ const (
 )
 
 const (
+	CDefaultServiceHLTAddress = "127.0.0.1:9582"
 	CDefaultServiceHLMAddress = "127.0.0.1:9592"
 )
 

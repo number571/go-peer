@@ -10,5 +10,4 @@
 8. HLS: append proxy connections
 9. HLS: write a threat model (in "Hidden Lake" article)
 10. HLM: grouped chats
-11. HLM: update readme
-12. HLF: Hidden Lake Forum
+11. HLF: Hidden Lake Forum

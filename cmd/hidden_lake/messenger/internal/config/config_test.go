@@ -28,9 +28,6 @@ const (
 		"pprof": "%s"
 	},
 	"connection": "%s",
-	"backup_connections": [
-		"%s"
-	],
 	"storage_key": "%s"
 }`
 )
@@ -40,7 +37,6 @@ const (
 	tcAddressIncoming   = "address_incoming"
 	tcAddressPPROF      = "address_pprof"
 	tcConnectionService = "connection_service"
-	tcConnectionBackup  = "connection_backup"
 	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
 	tcWorkSize          = 20
@@ -57,7 +53,6 @@ func testNewConfigString() string {
 		tcAddressIncoming,
 		tcAddressPPROF,
 		tcConnectionService,
-		tcConnectionBackup,
 		tcStorageKey,
 	)
 }
