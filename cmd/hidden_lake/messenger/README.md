@@ -78,7 +78,7 @@ $ make docker-run
 
 ## Example
 
-The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services, as it was depicted in `Figure 3` (HLS).
+The example will involve (as well as in HLS) three nodes `middle_hls, node1_hlm and node2_hlm`. The first one is only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services (as it was depicted in `Figure 3` HLS readme).
 
 Build and run nodes
 ```bash
@@ -90,7 +90,7 @@ The output of the `middle_hls` node is similar to `Figure 4` (HLS).
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
 <p align="center"><img src="_images/hlm_about.png" alt="hlm_about.png"/></p>
-<p align="center">Figure 3. Home page of the HLM application.</p>
+<p align="center">Figure 2. Home page of the HLM application.</p>
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
@@ -101,7 +101,7 @@ $ make
 ```
 
 <p align="center"><img src="_images/hlm_logger.png" alt="hlm_logger.png"/></p>
-<p align="center">Figure 4. Log of the three nodes with request/response actions.</p>
+<p align="center">Figure 3. Log of the three nodes with request/response actions.</p>
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hlm/_images "Path to HLM images")
 

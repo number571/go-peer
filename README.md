@@ -394,7 +394,7 @@ The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
 <p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
-<p align="center">Figure 8. Home page of the HLM application.</p>
+<p align="center">Figure 7. Home page of the HLM application.</p>
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
 
@@ -405,7 +405,7 @@ $ make
 ```
 
 <p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
-<p align="center">Figure 9. Log of the three nodes with request/response actions.</p>
+<p align="center">Figure 8. Log of the three nodes with request/response actions.</p>
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/_images "Path to HLM images")
 
@@ -424,7 +424,7 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
 <p align="center"><img src="cmd/hidden_lake/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
-<p align="center">Figure 10. Example of running HLT client.</p>
+<p align="center">Figure 9. Example of running HLT client.</p>
 
 ### Supported platforms
 
@@ -526,7 +526,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
-<p align="center">Figure 11. Architecture of HLA.</p>
+<p align="center">Figure 10. Architecture of HLA.</p>
 
 ### Example 
 
@@ -558,7 +558,7 @@ Request took 8 seconds
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 12. Example of running HLA client.</p>
+<p align="center">Figure 11. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 
