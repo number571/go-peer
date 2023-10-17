@@ -8,6 +8,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/storage"
 
@@ -42,15 +43,84 @@ func TestTryDecrypt(t *testing.T) {
 		t.Error("got error with encrypted empty slice: []")
 		return
 	}
+
+	resData[0] ^= 1
+	if _, err := tryDecrypt(cipher, authKey, resData); err == nil {
+		t.Error("succes decrypt with corrupted data")
+		return
+	}
 }
 
-func TestAllDBs(t *testing.T) {
-	testCreate(t)
-	testCipherKey(t)
-	testBasic(t)
+func TestInvalidCreateDB(t *testing.T) {
+	prng := random.NewStdPRNG()
+	dbPath := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
+	defer os.RemoveAll(dbPath)
+
+	_, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+		FPath:     dbPath,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
+	}))
+	if err == nil {
+		t.Error("success create database with incorrect path")
+		return
+	}
 }
 
-func testCreate(t *testing.T) {
+func TestInvalidInitDB(t *testing.T) {
+	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
+	defer os.RemoveAll(dbPath)
+
+	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+		FPath:     dbPath,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := store.Set([]byte(cSaltKey), []byte{1}); err == nil {
+		t.Error("success rewrite cSaltKey")
+		return
+	}
+
+	if err := store.Set([]byte(cHashKey), []byte{1}); err == nil {
+		t.Error("success rewrite cHashKey")
+		return
+	}
+
+	if err := store.Del([]byte(cSaltKey)); err == nil {
+		t.Error("success delete cSaltKey")
+		return
+	}
+
+	if err := store.Del([]byte(cHashKey)); err == nil {
+		t.Error("success delete cHashKey")
+		return
+	}
+
+	db := store.(*sKeyValueDB)
+	if err := db.fDB.Delete([]byte(cHashKey), nil); err != nil {
+		t.Error(err)
+		return
+	}
+
+	store.Close()
+
+	_, errx := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+		FPath:     dbPath,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
+	}))
+	if errx == nil {
+		t.Error("success open database with incorrect hash param")
+		return
+	}
+}
+
+func TestCreateDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
@@ -86,7 +156,7 @@ func testCreate(t *testing.T) {
 	}
 }
 
-func testCipherKey(t *testing.T) {
+func TestCipherKey(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
@@ -118,7 +188,7 @@ func testCipherKey(t *testing.T) {
 	}
 }
 
-func testBasic(t *testing.T) {
+func TestBasicDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 
@@ -152,6 +222,11 @@ func testBasic(t *testing.T) {
 
 	if err := store.Del([]byte("KEY")); err != nil {
 		t.Error("[testBasic]", err)
+		return
+	}
+
+	if err := store.Del([]byte("KEY")); err == nil {
+		t.Error("success delete already deleted value")
 		return
 	}
 

@@ -119,7 +119,10 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	if isExist {
 		encdata, err := filesystem.OpenFile(pSettings.GetPath()).Read()
 		if err != nil {
-			return nil, err
+			return nil, errors.WrapError(err, "read storage")
+		}
+		if len(encdata) < cSaltSize {
+			return nil, errors.NewError("size of storage < salt size")
 		}
 		store.fSalt = encdata[:cSaltSize]
 	}
@@ -129,7 +132,9 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 	store.fCipher = symmetric.NewAESCipher(cipherKey)
 
 	if !isExist {
-		store.Set(nil, nil)
+		if err := store.Set(nil, nil); err != nil {
+			return nil, errors.WrapError(err, "set init storage")
+		}
 	}
 
 	return store, nil

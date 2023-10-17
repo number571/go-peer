@@ -172,7 +172,7 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service
+$ cd examples/echo_service/default
 $ make
 ```
 
@@ -183,7 +183,10 @@ Logs from `middle_hls` node. When sending requests and receiving responses, `mid
 
 Send request
 ```bash
-$ ./request.sh
+$ cd examples/echo_service
+$ make request # go run ./_request/main.go
+# OR
+$ ./_request/request.sh
 ```
 
 Get response

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -34,6 +35,29 @@ func TestMessage(t *testing.T) {
 	msg1 := LoadMessage(msg.ToBytes())
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
 		t.Error("load message not equal new message")
+		return
+	}
+
+	if msg := LoadMessage([]byte{1}); msg != nil {
+		t.Error("success load incorrect message")
+		return
+	}
+
+	prng := random.NewStdPRNG()
+	if msg := LoadMessage(prng.GetBytes(64)); msg != nil {
+		t.Error("success load incorrect message")
+		return
+	}
+
+	msgBytes := bytes.Join(
+		[][]byte{
+			{}, // pass payload
+			getHash([]byte{}),
+		},
+		[]byte{},
+	)
+	if msg := LoadMessage(msgBytes); msg != nil {
+		t.Error("success load incorrect payload")
 		return
 	}
 }

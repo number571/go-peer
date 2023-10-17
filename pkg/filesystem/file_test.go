@@ -3,6 +3,8 @@ package filesystem
 import (
 	"os"
 	"testing"
+
+	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
 const (
@@ -59,5 +61,12 @@ func TestWriteFile(t *testing.T) {
 
 	if string(res) != tcFileData {
 		t.Errorf("invalid read text from '%s'", tcRandFile3)
+	}
+
+	prng := random.NewStdPRNG()
+	randInvalidPath := prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
+	if err := OpenFile(randInvalidPath).Write([]byte("hello, world!")); err == nil {
+		t.Error("success write bytes to invalid path")
+		return
 	}
 }

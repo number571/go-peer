@@ -95,6 +95,10 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
+		return errors.NewError("key is reserved")
+	}
+
 	if err := p.fDB.Put(pKey, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
 		return errors.WrapError(err, "insert key/value to database")
 	}
@@ -121,9 +125,18 @@ func (p *sKeyValueDB) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
+		return errors.NewError("key is reserved")
+	}
+
+	if _, err := p.fDB.Get(pKey, nil); err != nil {
+		return errors.WrapError(err, "read value by key")
+	}
+
 	if err := p.fDB.Delete(pKey, nil); err != nil {
 		return errors.WrapError(err, "delete value by key")
 	}
+
 	return nil
 }
 

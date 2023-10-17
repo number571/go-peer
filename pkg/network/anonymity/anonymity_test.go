@@ -179,6 +179,18 @@ func testNewNodes(t *testing.T, timeWait time.Duration, typeDB int) [5]INode {
 	return nodes
 }
 
+func TestWrapper(t *testing.T) {
+	wrapper := NewWrapperDB()
+	if db := wrapper.Get(); db != nil {
+		t.Error("db is not null")
+		return
+	}
+	if err := wrapper.Close(); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
 func testNewNode(i int, timeWait time.Duration, addr string, typeDB int) INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{

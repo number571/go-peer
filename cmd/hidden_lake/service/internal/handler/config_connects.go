@@ -116,11 +116,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			if err := pNode.GetNetworkNode().DelConnection(connect); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("del_connections"))
-				api.Response(pW, http.StatusInternalServerError, "failed: del connection")
-				return
-			}
+			_ = pNode.GetNetworkNode().DelConnection(connect) // connection may be refused (closed)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: delete connection")

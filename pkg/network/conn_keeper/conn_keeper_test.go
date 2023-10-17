@@ -35,29 +35,21 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
+func TestConnKeeperSettings(t *testing.T) {
+	duration := time.Second / 2
+	connKeeper := newTestConnKeeper(duration)
+
+	if connKeeper.GetSettings().GetDuration() != duration {
+		t.Error("got invalid settings param")
+		return
+	}
+}
+
 func TestConnKeeper(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)
 
-	node := network.NewNode(network.NewSettings(&network.SSettings{
-		FCapacity:     testutils.TCCapacity,
-		FMaxConnects:  testutils.TCMaxConnects,
-		FReadTimeout:  time.Minute,
-		FWriteTimeout: time.Minute,
-		FConnSettings: conn.NewSettings(&conn.SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
-		}),
-	}))
-	connKeeper := NewConnKeeper(
-		NewSettings(&SSettings{
-			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
-			FDuration:    500 * time.Millisecond,
-		}),
-		node,
-	)
+	connKeeper := newTestConnKeeper(time.Second / 2)
 
 	if node := connKeeper.GetNetworkNode(); node == nil {
 		t.Error("network node is nil")
@@ -75,7 +67,7 @@ func TestConnKeeper(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
-	if len(node.GetConnections()) != 1 {
+	if len(connKeeper.GetNetworkNode().GetConnections()) != 1 {
 		t.Error("length of connections != 1")
 		return
 	}
@@ -89,6 +81,27 @@ func TestConnKeeper(t *testing.T) {
 		t.Error("error is nil with already closed connKeeper")
 		return
 	}
+}
+
+func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
+	return NewConnKeeper(
+		NewSettings(&SSettings{
+			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
+			FDuration:    pDuration,
+		}),
+		network.NewNode(network.NewSettings(&network.SSettings{
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FReadTimeout:  time.Minute,
+			FWriteTimeout: time.Minute,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
+		})),
+	)
 }
 
 func testNewService(t *testing.T) net.Listener {

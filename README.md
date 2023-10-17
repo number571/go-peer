@@ -271,7 +271,9 @@ Logs from `middle_hls` node. When sending requests and receiving responses, `mid
 Send request
 ```bash
 $ cd examples/echo_service
-$ ./request.sh
+$ make request # go run ./_request/main.go
+# OR
+$ ./_request/request.sh
 ```
 
 Get response

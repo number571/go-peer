@@ -3,6 +3,7 @@ package conn
 import (
 	"bytes"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,8 +16,66 @@ const (
 	tcBody = "hello, world!"
 )
 
-func TestConn(t *testing.T) {
-	listener := testNewService(t)
+func TestSettingsNetworkKey(t *testing.T) {
+	for i := 0; i < 4; i++ {
+		testSettings(t, i)
+	}
+}
+
+func TestSettings(t *testing.T) {
+	sett := NewSettings(&SSettings{
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWaitReadDeadline: time.Hour,
+		FReadDeadline:     time.Minute,
+		FWriteDeadline:    time.Minute,
+	})
+
+	networkKey := "hello, world!"
+	sett.SetNetworkKey(networkKey)
+
+	if sett.GetNetworkKey() != networkKey {
+		t.Error("got invalid network key")
+		return
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FWriteDeadline:    time.Minute,
+		})
+	case 3:
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+		})
+	}
+}
+
+func TestClosedConn(t *testing.T) {
+	listener := testNewService(t, testutils.TgAddrs[30], "")
 	defer testFreeService(listener)
 
 	conn, err := NewConn(
@@ -26,12 +85,98 @@ func TestConn(t *testing.T) {
 			FReadDeadline:     time.Minute,
 			FWriteDeadline:    time.Minute,
 		}),
-		testutils.TgAddrs[17],
+		testutils.TgAddrs[30],
 	)
 	if err != nil {
 		t.Error(err)
 		return
 	}
+
+	if err := conn.Close(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := conn.WritePayload(payload.NewPayload(1, []byte("aaa"))); err == nil {
+		t.Error("success write payload to closed connection")
+		return
+	}
+
+	readCh := make(chan struct{})
+	go func() { <-readCh }()
+
+	if _, err := conn.ReadPayload(readCh); err == nil {
+		t.Error("success read payload from closed connection")
+		return
+	}
+
+	sconn := conn.(*sConn)
+	if err := sconn.sendBytes([]byte("hello, world!")); err == nil {
+		t.Error("success send bytes to closed connection")
+		return
+	}
+
+	if _, err := sconn.recvDataBytes(128); err == nil {
+		t.Error("success recv data bytes from closed connection")
+		return
+	}
+
+	readCh2 := make(chan struct{})
+	go func() { <-readCh2 }()
+
+	if _, _, _, err := sconn.recvHeadBytes(readCh2, time.Minute); err == nil {
+		t.Error("success recv head bytes from closed connection")
+		return
+	}
+}
+
+func TestInvalidConn(t *testing.T) {
+	_, err := NewConn(
+		NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		}),
+		"INVALID_ADDRESS",
+	)
+	if err == nil {
+		t.Error("success connect to invalid address")
+		return
+	}
+}
+
+func TestConnWithNetworkKey(t *testing.T) {
+	testConn(t, testutils.TgAddrs[17], "")
+	testConn(t, testutils.TgAddrs[29], "hello, world!")
+}
+
+func testConn(t *testing.T, pAddr, pNetworkKey string) {
+	listener := testNewService(t, pAddr, pNetworkKey)
+	defer testFreeService(listener)
+
+	conn, err := NewConn(
+		NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		}),
+		pAddr,
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	socket := conn.GetSocket()
+	remoteAddr := strings.ReplaceAll(pAddr, "localhost", "127.0.0.1")
+	if socket.RemoteAddr().String() != remoteAddr {
+		t.Error("got incorrect remote address")
+		return
+	}
+
+	conn.GetSettings().SetNetworkKey(pNetworkKey)
 
 	if err := conn.WritePayload(payload.NewPayload(tcHead, []byte(tcBody))); err != nil {
 		t.Error(err)
@@ -53,8 +198,8 @@ func TestConn(t *testing.T) {
 	}
 }
 
-func testNewService(t *testing.T) net.Listener {
-	listener, err := net.Listen("tcp", testutils.TgAddrs[17])
+func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
+	listener, err := net.Listen("tcp", pAddr)
 	if err != nil {
 		t.Error(err)
 		return nil
@@ -76,6 +221,8 @@ func testNewService(t *testing.T) net.Listener {
 				}),
 				aconn,
 			)
+
+			conn.GetSettings().SetNetworkKey(pNetworkKey)
 
 			readCh := make(chan struct{})
 			go func() { <-readCh }()

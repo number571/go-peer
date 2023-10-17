@@ -67,11 +67,9 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 
 			defer wg.Done()
 			defer func() {
-				if resErr == nil {
-					return
+				if resErr != nil {
+					_ = p.DelConnection(a)
 				}
-
-				_ = p.DelConnection(a)
 
 				mutex.Lock()
 				listErr = append(listErr, resErr)
@@ -186,6 +184,7 @@ func (p *sNode) AddConnection(pAddress string) error {
 	if p.hasMaxConnSize() {
 		return errors.NewError("has max connections size")
 	}
+
 	if _, ok := p.getConnection(pAddress); ok {
 		return errors.NewError("connection already exist")
 	}
@@ -209,13 +208,15 @@ func (p *sNode) DelConnection(pAddress string) error {
 
 	conn, ok := p.fConnections[pAddress]
 	if !ok {
-		return nil
+		return errors.NewError("unknown connect")
 	}
 
 	delete(p.fConnections, pAddress)
+
 	if err := conn.Close(); err != nil {
-		return errors.WrapError(err, "del connect")
+		return errors.WrapError(err, "connect close")
 	}
+
 	return nil
 }
 
@@ -281,7 +282,7 @@ func (p *sNode) hasMaxConnSize() bool {
 	defer p.fMutex.Unlock()
 
 	maxConns := p.fSettings.GetMaxConnects()
-	return uint64(len(p.fConnections)) > maxConns
+	return uint64(len(p.fConnections)) >= maxConns
 }
 
 // Checks the hash of the message for existence in the hash store.

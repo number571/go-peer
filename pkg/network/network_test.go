@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -94,7 +95,11 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestBroadcast(t *testing.T) {
-	nodes, mapp := testNodes()
+	nodes, mapp, err := testNodes()
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	defer testFreeNodes(nodes[:])
 
 	// four receivers, sender not receive his messages
@@ -175,32 +180,122 @@ func TestBroadcast(t *testing.T) {
 	}
 }
 
-func testNodes() ([5]INode, map[INode]map[string]bool) {
+func TestNodeConnection(t *testing.T) {
+	var (
+		node1 = newTestNode("", 2).(*sNode)
+		node2 = newTestNode(testutils.TgAddrs[27], 1)
+		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects)
+	)
+
+	if err := node2.Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	defer node2.Stop()
+
+	if err := node2.Run(); err == nil {
+		t.Error("success second run node")
+		return
+	}
+
+	if err := node3.Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	defer node3.Stop()
+
+	if err := node1.AddConnection("unknown_connection_address"); err == nil {
+		t.Error("success add incorrect connection address")
+		return
+	}
+
+	if err := node1.AddConnection(testutils.TgAddrs[27]); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := node1.AddConnection(testutils.TgAddrs[27]); err == nil {
+		t.Error("success add already exist connection")
+		return
+	}
+
+	if err := node1.AddConnection(testutils.TgAddrs[28]); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := node1.AddConnection(testutils.TgAddrs[28]); err == nil {
+		t.Error("success add second connection with limit = 1")
+		return
+	}
+
+	if err := node3.AddConnection(testutils.TgAddrs[27]); err != nil {
+		t.Error(err)
+		return
+	}
+
+	time.Sleep(200 * time.Millisecond)
+	if len(node3.GetConnections()) != 1 {
+		t.Error("has more than 1 connections (node2 should be auto disconnects by max conns param)")
+		return
+	}
+
+	for _, c := range node1.GetConnections() {
+		c.Close()
+	}
+
+	if err := node1.DelConnection(testutils.TgAddrs[27]); err == nil {
+		t.Error("success delete already closed connection")
+		return
+	}
+}
+
+func TestHandleMessage(t *testing.T) {
+	node := newTestNode("", testutils.TCMaxConnects).(*sNode)
+
+	node.HandleFunc(1, nil)
+	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{1})); ok {
+		t.Error("success handle message with nil function")
+		return
+	}
+
+	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b []byte) error {
+		return errors.New("some error")
+	})
+	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{2})); ok {
+		t.Error("success handle message with got error from function")
+		return
+	}
+
+	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b []byte) error {
+		return nil
+	})
+	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{3})); !ok {
+		t.Error("failed handle message with correct function")
+		return
+	}
+}
+
+func TestNodeSettings(t *testing.T) {
+	gotSett := newTestNode("", testutils.TCMaxConnects).GetSettings()
+	if gotSett.GetMaxConnects() != testutils.TCMaxConnects {
+		t.Error("invalid setting's value")
+	}
+}
+
+func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	nodes := [5]INode{}
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
 	for i := 0; i < 5; i++ {
-		sett := NewSettings(&SSettings{
-			FAddress:      addrs[i],
-			FCapacity:     testutils.TCCapacity,
-			FMaxConnects:  testutils.TCMaxConnects,
-			FReadTimeout:  tcTimeWait,
-			FWriteTimeout: tcTimeWait,
-			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
-			}),
-		})
-		nodes[i] = NewNode(sett)
+		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects)
 	}
 
 	if err := nodes[2].Run(); err != nil {
-		panic(err)
+		return nodes, nil, err
 	}
 	if err := nodes[4].Run(); err != nil {
-		panic(err)
+		return nodes, nil, err
 	}
 
 	time.Sleep(500 * time.Millisecond)
@@ -223,7 +318,24 @@ func testNodes() ([5]INode, map[INode]map[string]bool) {
 		}
 	}
 
-	return nodes, mapp
+	return nodes, mapp, nil
+}
+
+func newTestNode(pAddr string, pMaxConns uint64) INode {
+	sett := NewSettings(&SSettings{
+		FAddress:      pAddr,
+		FCapacity:     testutils.TCCapacity,
+		FMaxConnects:  pMaxConns,
+		FReadTimeout:  time.Minute,
+		FWriteTimeout: time.Minute,
+		FConnSettings: conn.NewSettings(&conn.SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		}),
+	})
+	return NewNode(sett)
 }
 
 func testFreeNodes(nodes []INode) {
