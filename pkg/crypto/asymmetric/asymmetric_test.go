@@ -15,6 +15,27 @@ const (
 	tcAddr    = "Address(go-peer/rsa){82BD6FDAB3F4141BBD11FEC786C7D3CC68B557FC1C96022791D3D34AE038EA1E}"
 )
 
+func TestLoadRSAKeyUnknownType(t *testing.T) {
+	for i := 0; i < 2; i++ {
+		testLoadKeyUnknownType(t, i)
+	}
+}
+
+func testLoadKeyUnknownType(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = LoadRSAPrivKey(struct{}{})
+	case 1:
+		_ = LoadRSAPubKey(struct{}{})
+	}
+}
+
 func TestLoadRSAKey(t *testing.T) {
 	priv := LoadRSAPrivKey(tcPrivKey)
 	if priv == nil {
@@ -22,9 +43,53 @@ func TestLoadRSAKey(t *testing.T) {
 		return
 	}
 
+	if priv := LoadRSAPrivKey([]byte{123}); priv != nil {
+		t.Error("success load invalid private key (bytes)")
+		return
+	}
+
+	str := string("123")
+	if priv := LoadRSAPrivKey(str); priv != nil {
+		t.Error("success load invalid private key (string)")
+		return
+	}
+
+	prefix := fmt.Sprintf(cPrivKeyPrefixTemplate, CRSAKeyType)
+	if priv := LoadRSAPrivKey(prefix + str); priv != nil {
+		t.Error("success load invalid private key (string+prefix)")
+		return
+	}
+
+	suffix := cKeySuffix
+	if priv := LoadRSAPrivKey(prefix + str + suffix); priv != nil {
+		t.Error("success load invalid private key (string+prefix+suffix)")
+		return
+	}
+
 	pub := LoadRSAPubKey(tcPubKey)
 	if pub == nil {
 		t.Error("failed load public key")
+		return
+	}
+
+	if pub := LoadRSAPubKey([]byte{123}); pub != nil {
+		t.Error("success load invalid public key (bytes)")
+		return
+	}
+
+	if pub := LoadRSAPubKey(str); pub != nil {
+		t.Error("success load invalid public key (string)")
+		return
+	}
+
+	prefixPub := fmt.Sprintf(cPubKeyPrefixTemplate, CRSAKeyType)
+	if pub := LoadRSAPubKey(prefixPub + str); pub != nil {
+		t.Error("success load invalid public key (string+prefix)")
+		return
+	}
+
+	if pub := LoadRSAPubKey(prefixPub + str + suffix); pub != nil {
+		t.Error("success load invalid public key (string+prefix+suffix)")
 		return
 	}
 
@@ -95,6 +160,11 @@ func TestRSAEncrypt(t *testing.T) {
 
 	if !bytes.Equal(msg, priv.DecryptBytes(emsg)) {
 		t.Error("decrypted message is invalid")
+		return
+	}
+
+	if dec := priv.DecryptBytes([]byte{123}); dec != nil {
+		t.Error("success decrypt invalid message")
 		return
 	}
 }

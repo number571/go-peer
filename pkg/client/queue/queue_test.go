@@ -13,6 +13,97 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+func TestSettings(t *testing.T) {
+	for i := 0; i < 3; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FPoolCapacity: testutils.TCQueueCapacity,
+			FDuration:     500 * time.Millisecond,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FMainCapacity: testutils.TCQueueCapacity,
+			FDuration:     500 * time.Millisecond,
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FMainCapacity: testutils.TCQueueCapacity,
+			FPoolCapacity: testutils.TCQueueCapacity,
+		})
+	}
+}
+
+func TestRunStopQueue(t *testing.T) {
+	client := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+	)
+	queue := NewMessageQueue(
+		NewSettings(&SSettings{
+			FMainCapacity: testutils.TCQueueCapacity,
+			FPoolCapacity: 1,
+			FDuration:     100 * time.Millisecond,
+		}),
+		client,
+	)
+
+	if err := queue.Run(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := queue.Run(); err == nil {
+		t.Error("success run already running queue")
+		return
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	msg, err := client.EncryptPayload(
+		client.GetPubKey(),
+		payload.NewPayload(0, []byte(testutils.TcBody)),
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	for i := 0; i < testutils.TCQueueCapacity; i++ {
+		if err := queue.EnqueueMessage(msg); err != nil {
+			t.Error(err)
+			return
+		}
+	}
+
+	if err := queue.EnqueueMessage(msg); err == nil {
+		t.Error("success enqueue message with max capacity")
+		return
+	}
+
+	if err := queue.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+	if err := queue.Stop(); err == nil {
+		t.Error("success stop already stopped queue")
+		return
+	}
+}
+
 func TestQueue(t *testing.T) {
 	oldClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
@@ -25,10 +116,16 @@ func TestQueue(t *testing.T) {
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FPoolCapacity: testutils.TCQueueCapacity,
-			FDuration:     500 * time.Millisecond,
+			FDuration:     100 * time.Millisecond,
 		}),
 		oldClient,
 	)
+
+	sett := queue.GetSettings()
+	if sett.GetMainCapacity() != testutils.TCQueueCapacity {
+		t.Error("sett.GetMainCapacity() != testutils.TCQueueCapacity")
+		return
+	}
 
 	if err := testQueue(queue); err != nil {
 		t.Error(err)

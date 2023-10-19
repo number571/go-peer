@@ -22,3 +22,14 @@ func TestStdPRNG(t *testing.T) {
 		t.Error("numbers in random equals")
 	}
 }
+
+func TestStdPRNGBool(t *testing.T) {
+	r := NewStdPRNG()
+	for i := 0; i < 1000; i++ {
+		t1 := r.GetBool()
+		t2 := r.GetBool()
+		if t1 != t2 {
+			break
+		}
+	}
+}

@@ -3,7 +3,6 @@ package message
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -52,11 +51,12 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 		recvMsg = x
 	case string:
 		recvMsg = []byte(x)
+	default:
+		return nil
 	}
 
 	i := bytes.Index(recvMsg, []byte(cSeparator))
 	if i == -1 {
-		fmt.Println("bbb")
 		return nil
 	}
 
@@ -73,6 +73,8 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 		if msg.FBody.FPayload == nil {
 			return nil
 		}
+	default:
+		panic("got unknown type")
 	}
 
 	if !msg.IsValid(psett) {
@@ -112,7 +114,6 @@ func (p *SMessage) ToString() string {
 
 func (p *SMessage) IsValid(psett ISettings) bool {
 	if uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes() {
-		fmt.Println(uint64(len(p.ToBytes())), psett.GetMessageSizeBytes())
 		return false
 	}
 	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {

@@ -237,7 +237,11 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt main data of message by session key.
-	doublePayloadBytes := cipher.DecryptBytes(pMsg.GetBody().GetPayload().ToBytes())
+	firstPayload := pMsg.GetBody().GetPayload()
+	if firstPayload == nil {
+		return nil, nil, errors.NewError("failed decode payload")
+	}
+	doublePayloadBytes := cipher.DecryptBytes(firstPayload.ToBytes())
 	if doublePayloadBytes == nil {
 		return nil, nil, errors.NewError("failed decrypt double payload")
 	}

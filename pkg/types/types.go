@@ -1,7 +1,15 @@
 package types
 
 type ICommand interface {
+	IRunner
+	IStopper
+}
+
+type IRunner interface {
 	Run() error
+}
+
+type IStopper interface {
 	Stop() error
 }
 

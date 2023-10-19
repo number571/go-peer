@@ -55,7 +55,7 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 		}
 		nonce++
 	}
-	return nonce
+	return 0
 }
 
 // Verifies the work of the proof of work function.

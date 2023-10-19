@@ -426,6 +426,7 @@ func (p *sNode) networkBroadcast(pMsg message.IMessage) error {
 	if err != nil {
 		return errors.WrapError(err, "network broadcast payload")
 	}
+
 	return nil
 }
 
@@ -468,6 +469,5 @@ func (p *sNode) delAction(pActionKey string) {
 
 func newActionKey(pPubKey asymmetric.IPubKey, pHead uint32) string {
 	pubKeyAddr := pPubKey.GetAddress().ToString()
-	headString := fmt.Sprintf("%d", pHead)
-	return fmt.Sprintf("%s-%s", pubKeyAddr, headString)
+	return fmt.Sprintf("%s-%d", pubKeyAddr, pHead)
 }

@@ -10,7 +10,29 @@ const (
 )
 
 var (
-	TgAddrs = [40]string{
+	TgAddrs = [60]string{
+		"localhost:8040",
+		"localhost:8041",
+		"localhost:8042",
+		"localhost:8043",
+		"localhost:8044",
+		"localhost:8045",
+		"localhost:8046",
+		"localhost:8047",
+		"localhost:8048",
+		"localhost:8049",
+
+		"localhost:8050",
+		"localhost:8051",
+		"localhost:8052",
+		"localhost:8053",
+		"localhost:8054",
+		"localhost:8055",
+		"localhost:8056",
+		"localhost:8057",
+		"localhost:8058",
+		"localhost:8059",
+
 		"localhost:8060",
 		"localhost:8061",
 		"localhost:8062",
@@ -54,6 +76,8 @@ var (
 		"localhost:8097",
 		"localhost:8098",
 		"localhost:8099",
+
+		"localhost:8100",
 	}
 )
 

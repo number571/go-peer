@@ -13,6 +13,7 @@ type sWrapper struct {
 	fValue *interface{}
 }
 
+// Used to set values at the time of execution.
 func NewWrapper() IWrapper {
 	return &sWrapper{fValue: new(interface{})}
 }

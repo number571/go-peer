@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/service`: update _daemon/install_hls.sh script, append key generation
 - Update `cmd/hidden_lake/service`: append client.ResetPrivKey method
 - Update `pkg/storage/database`: append check on correct input auth/encryption key
+- Update `pkg`: update tests (coverage > 90%)
 
 ### CHANGES
 
@@ -27,6 +28,8 @@
 
 - Update `cmd/hidden_lake/service`: append check on size of input private key
 - Update `cmd/hidden_lake/service`: update _math directory
+- Update `pkg/client`: append payload check decode
+- Update `pkg/client/message`: append check on unknown type
 
 ## v1.5.19
 

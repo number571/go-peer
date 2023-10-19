@@ -7,11 +7,11 @@ PPROF_NAME=_
 PPROF_PORT=_
 
 .PHONY: default clean \
-	test-run test-race test-coverage test-benchmark \
+	test-run test-coverage test-coverage-view \
 	pprof-run \
 	git-status git-push 
 
-default: clean test-run
+default: test-run
 
 clean:
 	make -C ./cmd clean 
@@ -21,7 +21,7 @@ clean:
 # example run: make test-run N=10
 # for i in {1..100}; do echo $i; go test -count=1 ./...; done;
 
-test-run:
+test-run: clean
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
@@ -30,7 +30,7 @@ test-run:
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
-test-coverage:
+test-coverage: clean
 	go test -coverprofile=$(TEST_PATH)/coverage.out `go list ./...`
 	$(CHECK_ERROR);
 
@@ -39,7 +39,7 @@ test-coverage-view:
 
 ### GIT
 
-git-status: clean test-run 
+git-status: test-run 
 	git add .
 	git status 
 

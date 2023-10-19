@@ -16,6 +16,18 @@ func TestSHA256(t *testing.T) {
 		t.Error("bit didn't change the result ")
 		return
 	}
+
+	hasher := NewSHA256Hasher(msg)
+
+	if hasher.GetSize() != CSHA256Size {
+		t.Error("got incorrect size")
+		return
+	}
+
+	if hasher.GetType() != CSHA256KeyType {
+		t.Error("got incorrect type")
+		return
+	}
 }
 
 func TestHMACSHA256(t *testing.T) {
@@ -30,7 +42,19 @@ func TestHMACSHA256(t *testing.T) {
 
 	msg[3] = msg[3] ^ 8
 	if hash == NewHMACSHA256Hasher(key, msg).ToString() {
-		t.Error("bit didn't change the result ")
+		t.Error("bit didn't change the result")
+		return
+	}
+
+	hasher := NewHMACSHA256Hasher(key, msg)
+
+	if hasher.GetSize() != CSHA256Size {
+		t.Error("got incorrect size")
+		return
+	}
+
+	if hasher.GetType() != CHMACSHA256KeyType {
+		t.Error("got incorrect type")
 		return
 	}
 }

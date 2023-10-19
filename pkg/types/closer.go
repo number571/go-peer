@@ -2,7 +2,7 @@ package types
 
 import "github.com/number571/go-peer/pkg/errors"
 
-// returns last error from slice
+// Close all elements in a slice.
 func CloseAll(pClosers []ICloser) error {
 	var err error
 	for _, c := range pClosers {

@@ -2,7 +2,7 @@ package types
 
 import "github.com/number571/go-peer/pkg/errors"
 
-// returns last error from slice
+// Stop all elements in a slice.
 func StopAll(pCommands []ICommand) error {
 	var err error
 	for _, c := range pCommands {

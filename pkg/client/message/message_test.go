@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -17,7 +18,44 @@ const (
 	tcSign  = "fb3ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9cca8"
 	tcHash  = "e1cc8da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6baffe"
 	tcProof = 4512
+
+	// -1 byte from hash
+	tcInvalidPrefix = `{"head":{"salt":"2823c693930a2d230415368221c36f5c1c77accd82c949e5de13bbe8ef00275b72d182d79759b1aef582649c99afd409","session":"21273151593d606632e0015107c1f204af68dd1a4977a6e7717260936dc4043e1f57410914f0dcffe372d4fc948ce0b12e9449e9e35556416d6e0f4f1d6c08807b0e98588aeea85c3f4a62512d82d159734d80ea16af0380a0d77f57c5444eaaf4cd9eed67f13fbc4699c608736286cba3e962fdc1642beac195ec59dd2d926a","sender":"bc2ebe882b76fd7ab77ec19416328902f685dfedec57285d60ac154d7fa67a9d735bd3f22ba4f7394fead3c35bbcc30b8f67dccd15c8a663f4014785124eaf098ed83027870949ed4bc0a0516a9ac901f185b71d7765e14b00edf2743cd02b266695977c8730f891d76c9a69795806edb61426b8bc2f3d32de0a074995844eed93a5648532ff0ba8ee5b1ebd6bd3b33620b7d938852776b8b99276fa"},"body":{"sign":"fb3ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9cca8","hash":"cc8da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6baffe","proof":"00000000000011a0"}}===`
 )
+
+func TestSettings(t *testing.T) {
+	for i := 0; i < 1; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{})
+	}
+}
+
+func TestInvalidConvert(t *testing.T) {
+	if res := FromBytesToString([]byte{123}); res != "" {
+		t.Error("success convert invalid bytes to string")
+		return
+	}
+	if res := FromStringToBytes("123"); res != nil {
+		t.Error("success convert invalid string to bytes (split)")
+		return
+	}
+	if res := FromStringToBytes("123" + cSeparator + "!@#"); res != nil {
+		t.Error("success convert invalid string to bytes (hex decode)")
+		return
+	}
+}
 
 func TestConvert(t *testing.T) {
 	params := NewSettings(&SSettings{
@@ -52,6 +90,44 @@ func TestConvert(t *testing.T) {
 	}
 	if msg2.ToString() != string(msgStrBytes) {
 		t.Error("msg2 string not equal with original")
+		return
+	}
+}
+
+func TestInvalidMessage(t *testing.T) {
+	params := NewSettings(&SSettings{
+		FMessageSizeBytes: (2 << 10),
+		FWorkSizeBits:     testutils.TCWorkSize,
+	})
+
+	if msg := LoadMessage(params, struct{}{}); msg != nil {
+		t.Error("success load message with unknown type")
+		return
+	}
+
+	if msg := LoadMessage(params, []byte{123}); msg != nil {
+		t.Error("success load invalid message")
+		return
+	}
+
+	if msg := LoadMessage(params, []byte(cSeparator)); msg != nil {
+		t.Error("success unmarshal invalid message")
+		return
+	}
+
+	if msg := LoadMessage(params, tcInvalidPrefix+"!@#"); msg != nil {
+		t.Error("success decode body in invalid message")
+		return
+	}
+
+	if msg := LoadMessage(params, []byte(tcInvalidPrefix+"12")); msg != nil {
+		t.Error("success decode body with invalid message size")
+		return
+	}
+
+	prng := random.NewStdPRNG()
+	if msg := LoadMessage(params, []byte(tcInvalidPrefix+"12"+prng.GetString(928))); msg != nil {
+		t.Error("success decode body with invalid message size")
 		return
 	}
 }
@@ -118,5 +194,21 @@ func testMessage(t *testing.T, msg IMessage) {
 		return
 	}
 
-	// pass payload -> message is encrypted
+	if msg.GetBody().GetPayload() == nil {
+		t.Error("failed get encrypted payload")
+		return
+	}
+
+	msg1 := msg.(*SMessage)
+	msg1.FBody.FProof = "111"
+	if msg.GetBody().GetProof() != 0 {
+		t.Error("got not null value with incorrect proof")
+		return
+	}
+
+	msg1.FBody.FPayload = []byte{123}
+	if msg.GetBody().GetPayload() != nil {
+		t.Error("success got incorrect payload")
+		return
+	}
 }

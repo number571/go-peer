@@ -20,6 +20,28 @@ const (
 	tcTestError   = "test_error_text"
 )
 
+func TestLoggerSettings(t *testing.T) {
+	logger := NewLogger(
+		NewSettings(&SSettings{}),
+		func(arg ILogArg) string {
+			return arg.(string)
+		},
+	)
+	_ = logger.GetSettings()
+}
+
+func TestNullLogger(t *testing.T) {
+	logger := NewLogger(
+		NewSettings(&SSettings{}),
+		func(arg ILogArg) string {
+			return arg.(string)
+		},
+	)
+	logger.PushErro("1") // do nothing
+	logger.PushWarn("1") // do nothing
+	logger.PushInfo("1") // do nothing
+}
+
 func TestLogger(t *testing.T) {
 	defer func() {
 		os.Remove(tcPathInfo)

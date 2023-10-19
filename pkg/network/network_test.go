@@ -180,12 +180,60 @@ func TestBroadcast(t *testing.T) {
 	}
 }
 
+// func newListener(t *testing.T, addr string) net.Listener {
+// 	listener, err := net.Listen("tcp", addr)
+// 	if err != nil {
+// 		t.Error(err)
+// 		return nil
+// 	}
+// 	go func() {
+// 		for {
+// 			conn, err := listener.Accept()
+// 			if err != nil {
+// 				return
+// 			}
+// 			_ = conn.Close()
+// 		}
+// 	}()
+// 	return listener
+// }
+
+// func TestClosedConnection(t *testing.T) {
+// 	var (
+// 		node1    = newTestNode("", 1, time.Minute).(*sNode)
+// 		listener = newListener(t, testutils.TgAddrs[37])
+// 	)
+// 	defer testFreeNodes([]INode{node1})
+
+// 	defer func() {
+// 		if listener == nil {
+// 			return
+// 		}
+// 		listener.Close()
+// 	}()
+
+// 	if err := node1.AddConnection(testutils.TgAddrs[37]); err != nil {
+// 		t.Error(err)
+// 		return
+// 	}
+
+// 	headHandle := uint64(testutils.TcHead)
+// 	reqBytes := []byte("hello, world!")
+
+// 	pld := payload.NewPayload(headHandle, reqBytes)
+// 	if err := node1.BroadcastPayload(pld); err == nil {
+// 		t.Error("success broadcast payload with non listening server")
+// 		return
+// 	}
+// }
+
 func TestNodeConnection(t *testing.T) {
 	var (
-		node1 = newTestNode("", 2).(*sNode)
-		node2 = newTestNode(testutils.TgAddrs[27], 1)
-		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects)
+		node1 = newTestNode("", 2, time.Minute).(*sNode)
+		node2 = newTestNode(testutils.TgAddrs[27], 1, time.Minute)
+		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects, time.Minute)
 	)
+	defer testFreeNodes([]INode{node1, node2, node3})
 
 	if err := node2.Run(); err != nil {
 		t.Error(err)
@@ -235,6 +283,7 @@ func TestNodeConnection(t *testing.T) {
 	}
 
 	time.Sleep(200 * time.Millisecond)
+
 	if len(node3.GetConnections()) != 1 {
 		t.Error("has more than 1 connections (node2 should be auto disconnects by max conns param)")
 		return
@@ -248,10 +297,21 @@ func TestNodeConnection(t *testing.T) {
 		t.Error("success delete already closed connection")
 		return
 	}
+
+	if err := node2.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := node2.Stop(); err == nil {
+		t.Error("success stop already stopped process")
+		return
+	}
 }
 
 func TestHandleMessage(t *testing.T) {
-	node := newTestNode("", testutils.TCMaxConnects).(*sNode)
+	node := newTestNode("", testutils.TCMaxConnects, time.Minute).(*sNode)
+	defer testFreeNodes([]INode{node})
 
 	node.HandleFunc(1, nil)
 	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{1})); ok {
@@ -277,7 +337,7 @@ func TestHandleMessage(t *testing.T) {
 }
 
 func TestNodeSettings(t *testing.T) {
-	gotSett := newTestNode("", testutils.TCMaxConnects).GetSettings()
+	gotSett := newTestNode("", testutils.TCMaxConnects, time.Minute).GetSettings()
 	if gotSett.GetMaxConnects() != testutils.TCMaxConnects {
 		t.Error("invalid setting's value")
 	}
@@ -288,7 +348,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects)
+		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects, time.Minute)
 	}
 
 	if err := nodes[2].Run(); err != nil {
@@ -321,18 +381,18 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	return nodes, mapp, nil
 }
 
-func newTestNode(pAddr string, pMaxConns uint64) INode {
+func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 	sett := NewSettings(&SSettings{
 		FAddress:      pAddr,
 		FCapacity:     testutils.TCCapacity,
 		FMaxConnects:  pMaxConns,
-		FReadTimeout:  time.Minute,
-		FWriteTimeout: time.Minute,
+		FReadTimeout:  timeout,
+		FWriteTimeout: timeout,
 		FConnSettings: conn.NewSettings(&conn.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FReadDeadline:     timeout,
+			FWriteDeadline:    timeout,
 		}),
 	})
 	return NewNode(sett)

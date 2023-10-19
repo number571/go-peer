@@ -7,6 +7,16 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+func TestPuzzleDiffSize(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	_ = NewPoWPuzzle(5000)
+}
+
 func TestPuzzle(t *testing.T) {
 	var (
 		puzzle = NewPoWPuzzle(testutils.TCWorkSize)

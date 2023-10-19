@@ -47,7 +47,7 @@ func (p *sNode) GetSettings() ISettings {
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
-	p.inMappingWithSet(hasher.ToBytes())
+	_ = p.inMappingWithSet(hasher.ToBytes()) // node can redirect received message
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 
