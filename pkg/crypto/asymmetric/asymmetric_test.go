@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
 const (
@@ -156,6 +157,12 @@ func TestRSAEncrypt(t *testing.T) {
 	)
 
 	pub := priv.GetPubKey()
+
+	if enc := pub.EncryptBytes(random.NewStdPRNG().GetBytes(1 << 10)); enc != nil {
+		t.Error("success encrypt message with size > key size")
+		return
+	}
+
 	emsg := pub.EncryptBytes(msg)
 
 	if !bytes.Equal(msg, priv.DecryptBytes(emsg)) {
