@@ -19,6 +19,9 @@
 		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
+		<a href="https://github.com/number571/go-peer/tree/master/test/result/badge.svg">
+        	<img src="test/result/badge.svg" alt="Coverage" />
+		</a>
 		<a href="https://github.com/number571/go-peer/releases">
         	<img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
 		</a>

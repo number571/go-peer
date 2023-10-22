@@ -10,6 +10,8 @@ import (
 )
 
 func TestHandleIndexAPI(t *testing.T) {
+	t.Parallel()
+
 	addr := testutils.TgAddrs[21]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 

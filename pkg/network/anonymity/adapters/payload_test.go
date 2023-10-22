@@ -11,6 +11,8 @@ const (
 )
 
 func TestPayload(t *testing.T) {
+	t.Parallel()
+
 	pld := NewPayload(tcHead, []byte(tcBody))
 
 	if pld.GetHead() != tcHead {

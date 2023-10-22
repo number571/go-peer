@@ -20,6 +20,8 @@ const (
 )
 
 func TestTryDecrypt(t *testing.T) {
+	t.Parallel()
+
 	cipher := symmetric.NewAESCipher([]byte("abcdefghijklmnopqrstuvwxyz123456"))
 	if _, err := tryDecrypt(cipher, []byte{1}, []byte{2}); err == nil {
 		t.Error("invalid size of encrypt data")
@@ -52,6 +54,8 @@ func TestTryDecrypt(t *testing.T) {
 }
 
 func TestInvalidCreateDB(t *testing.T) {
+	t.Parallel()
+
 	prng := random.NewStdPRNG()
 	dbPath := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 	defer os.RemoveAll(dbPath)
@@ -68,6 +72,8 @@ func TestInvalidCreateDB(t *testing.T) {
 }
 
 func TestInvalidInitDB(t *testing.T) {
+	t.Parallel()
+
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
 	defer os.RemoveAll(dbPath)
 
@@ -121,6 +127,8 @@ func TestInvalidInitDB(t *testing.T) {
 }
 
 func TestCreateDB(t *testing.T) {
+	t.Parallel()
+
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
@@ -157,6 +165,8 @@ func TestCreateDB(t *testing.T) {
 }
 
 func TestCipherKey(t *testing.T) {
+	t.Parallel()
+
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
@@ -189,6 +199,8 @@ func TestCipherKey(t *testing.T) {
 }
 
 func TestBasicDB(t *testing.T) {
+	t.Parallel()
+
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 

@@ -13,6 +13,8 @@ const (
 )
 
 func TestKeyBuilder(t *testing.T) {
+	t.Parallel()
+
 	var (
 		pasw = "hello, world!"
 		salt = []byte("it's a salt!")

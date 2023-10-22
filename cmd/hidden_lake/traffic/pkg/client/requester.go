@@ -40,10 +40,13 @@ func (p *sRequester) GetIndex() (string, error) {
 	if err != nil {
 		return "", errors.WrapError(err, "get index (requester)")
 	}
-	if resp != pkg_settings.CTitlePattern {
+
+	result := string(resp)
+	if result != pkg_settings.CTitlePattern {
 		return "", errors.NewError("incorrect title pattern")
 	}
-	return resp, nil
+
+	return result, nil
 }
 
 func (p *sRequester) GetHashes() ([]string, error) {

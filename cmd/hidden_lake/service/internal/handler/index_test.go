@@ -12,10 +12,14 @@ import (
 )
 
 func TestHandleIndexAPI(t *testing.T) {
-	addr := testutils.TgAddrs[22]
+	t.Parallel()
 
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, addr)
-	defer testAllFree(node, srv)
+	addr := testutils.TgAddrs[22]
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 3)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 3)
+
+	_, node, srv := testAllCreate(pathCfg, pathDB, addr)
+	defer testAllFree(node, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),

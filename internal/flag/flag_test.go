@@ -2,7 +2,24 @@ package flag
 
 import "testing"
 
+func TestPanicFlagValue(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	argsSlice := []string{
+		"--key",
+	}
+	_ = getFlagValueBySlice(argsSlice, "key", "_")
+}
+
 func TestFlagValue(t *testing.T) {
+	t.Parallel()
+
 	argsSlice := []string{
 		"--key", "123",
 		"-name", "number",

@@ -11,10 +11,14 @@ import (
 )
 
 func TestHandleConfigSettingsAPI(t *testing.T) {
-	addr := testutils.TgAddrs[26]
+	t.Parallel()
 
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, addr)
-	defer testAllFree(node, srv)
+	addr := testutils.TgAddrs[26]
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 2)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 2)
+
+	_, node, srv := testAllCreate(pathCfg, pathDB, addr)
+	defer testAllFree(node, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),

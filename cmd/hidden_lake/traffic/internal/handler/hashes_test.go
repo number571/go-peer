@@ -14,6 +14,8 @@ import (
 )
 
 func TestHandleHashesAPI(t *testing.T) {
+	t.Parallel()
+
 	addr := testutils.TgAddrs[19]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 

@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 )
 
-func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (string, error) {
+func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]byte, error) {
 	var (
 		contentType = ""
 		reqBytes    []byte
@@ -34,33 +34,34 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) (str
 		bytes.NewBuffer(reqBytes),
 	)
 	if err != nil {
-		return "", errors.WrapError(err, "new request")
+		return nil, errors.WrapError(err, "new request")
 	}
 
 	req.Header.Set("Content-Type", contentType)
 	resp, err := pClient.Do(req)
 	if err != nil {
-		return "", errors.WrapError(err, "do request")
+		return nil, errors.WrapError(err, "do request")
 	}
+
 	defer resp.Body.Close()
 
 	result, err := loadResponse(resp.StatusCode, resp.Body)
 	if err != nil {
-		return "", errors.WrapError(err, "load response")
+		return nil, errors.WrapError(err, "load response")
 	}
+
 	return result, nil
 }
 
-func loadResponse(pStatusCode int, pReader io.ReadCloser) (string, error) {
+func loadResponse(pStatusCode int, pReader io.ReadCloser) ([]byte, error) {
 	resp, err := io.ReadAll(pReader)
 	if err != nil {
-		return "", errors.WrapError(err, "read response")
+		return nil, errors.WrapError(err, "read response")
 	}
 
-	result := string(resp)
 	if pStatusCode != http.StatusOK {
-		return "", errors.NewError(fmt.Sprintf("error code = %d (%s)", pStatusCode, result))
+		return nil, errors.NewError(fmt.Sprintf("error code = %d (%x)", pStatusCode, resp))
 	}
 
-	return result, nil
+	return resp, nil
 }

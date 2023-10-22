@@ -17,12 +17,16 @@ const (
 )
 
 func TestSettingsNetworkKey(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 4; i++ {
 		testSettings(t, i)
 	}
 }
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	sett := NewSettings(&SSettings{
 		FMessageSizeBytes: testutils.TCMessageSize,
 		FWaitReadDeadline: time.Hour,
@@ -75,6 +79,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestClosedConn(t *testing.T) {
+	t.Parallel()
+
 	listener := testNewService(t, testutils.TgAddrs[30], "")
 	defer testFreeService(listener)
 
@@ -131,6 +137,8 @@ func TestClosedConn(t *testing.T) {
 }
 
 func TestInvalidConn(t *testing.T) {
+	t.Parallel()
+
 	_, err := NewConn(
 		NewSettings(&SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
@@ -147,6 +155,8 @@ func TestInvalidConn(t *testing.T) {
 }
 
 func TestConnWithNetworkKey(t *testing.T) {
+	t.Parallel()
+
 	testConn(t, testutils.TgAddrs[17], "")
 	testConn(t, testutils.TgAddrs[29], "hello, world!")
 }

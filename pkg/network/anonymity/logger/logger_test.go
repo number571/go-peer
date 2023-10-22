@@ -17,6 +17,8 @@ const (
 )
 
 func TestLogger(t *testing.T) {
+	t.Parallel()
+
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 	builder := NewLogBuilder(tcService).
 		WithConn(nil).

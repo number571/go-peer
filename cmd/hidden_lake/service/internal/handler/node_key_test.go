@@ -11,8 +11,13 @@ import (
 )
 
 func TestHandlePubKeyAPI(t *testing.T) {
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[8])
-	defer testAllFree(node, srv)
+	t.Parallel()
+
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 8)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 8)
+
+	_, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[8])
+	defer testAllFree(node, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),

@@ -31,7 +31,11 @@ const (
 )
 
 func TestNodeSettings(t *testing.T) {
-	node := testNewNode(time.Minute, "", 3, 0)
+	t.Parallel()
+
+	node := testNewNode(time.Minute, "", 9, 0)
+	defer testFreeNodes([]INode{node}, 9)
+
 	sett := node.GetSettings()
 	if sett.GetFetchTimeWait() != time.Minute {
 		t.Error("sett.GetFetchTimeWait() != time.Minute")
@@ -41,6 +45,8 @@ func TestNodeSettings(t *testing.T) {
 }
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
@@ -76,9 +82,7 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestComplexFetchPayload(t *testing.T) {
-	for i := 0; i < 5; i++ {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 0))
-	}
+	t.Parallel()
 
 	addresses := [2]string{testutils.TgAddrs[2], testutils.TgAddrs[3]}
 	nodes := testNewNodes(t, time.Minute, addresses, 0)
@@ -117,9 +121,7 @@ func TestComplexFetchPayload(t *testing.T) {
 }
 
 func TestF2FWithoutFriends(t *testing.T) {
-	for i := 0; i < 5; i++ {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i, 1))
-	}
+	t.Parallel()
 
 	// 3 seconds for wait
 	addresses := [2]string{testutils.TgAddrs[31], testutils.TgAddrs[32]}
@@ -146,6 +148,8 @@ func TestF2FWithoutFriends(t *testing.T) {
 }
 
 func TestDataType(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -164,6 +168,8 @@ func TestDataType(t *testing.T) {
 }
 
 func TestWrapper(t *testing.T) {
+	t.Parallel()
+
 	wrapper := NewWrapperDB()
 	if db := wrapper.Get(); db != nil {
 		t.Error("db is not null")
@@ -176,6 +182,8 @@ func TestWrapper(t *testing.T) {
 }
 
 func TestFetchPayload(t *testing.T) {
+	t.Parallel()
+
 	addresses := [2]string{testutils.TgAddrs[35], testutils.TgAddrs[36]}
 	nodes := testNewNodes(t, time.Minute, addresses, 4)
 	if nodes[0] == nil {
@@ -222,6 +230,8 @@ func TestFetchPayload(t *testing.T) {
 }
 
 func TestBroadcastPayload(t *testing.T) {
+	t.Parallel()
+
 	addresses := [2]string{testutils.TgAddrs[33], testutils.TgAddrs[34]}
 	nodes := testNewNodes(t, time.Minute, addresses, 3)
 	if nodes[0] == nil {
@@ -278,6 +288,8 @@ func TestBroadcastPayload(t *testing.T) {
 }
 
 func TestEnqueuePayload(t *testing.T) {
+	t.Parallel()
+
 	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
 	nodes := testNewNodes(t, time.Minute, addresses, 8)
 	if nodes[0] == nil {
@@ -330,6 +342,8 @@ func TestEnqueuePayload(t *testing.T) {
 }
 
 func TestHandleMessage(t *testing.T) {
+	t.Parallel()
+
 	node := testNewNode(time.Minute, "", 2, 0)
 	defer testFreeNodes([]INode{node}, 2)
 
@@ -393,6 +407,8 @@ func TestHandleMessage(t *testing.T) {
 }
 
 func TestHandleWrapper(t *testing.T) {
+	t.Parallel()
+
 	node := testNewNode(time.Minute, "", 7, 0).(*sNode)
 	defer testFreeNodes([]INode{node}, 7)
 
@@ -490,6 +506,8 @@ func TestHandleWrapper(t *testing.T) {
 }
 
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
+	t.Parallel()
+
 	node := testNewNode(time.Minute, "", 6, 0).(*sNode)
 	defer testFreeNodes([]INode{node}, 6)
 
@@ -540,6 +558,8 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 }
 
 func TestRecvSendMessage(t *testing.T) {
+	t.Parallel()
+
 	node := testNewNode(time.Minute, "", 5, 0).(*sNode)
 	defer testFreeNodes([]INode{node}, 5)
 
@@ -603,7 +623,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	for i := 0; i < 5; i++ {
 		nodes[i] = testNewNode(timeWait, addrs[i], typeDB, i)
 		if nodes[i] == nil {
-			t.Errorf("node (%d) is not running", i)
+			t.Errorf("node (%d) is not running %d", i, typeDB)
 			return [5]INode{}
 		}
 	}
@@ -722,6 +742,10 @@ func testFreeNodes(nodes []INode, typeDB int) {
 		node.GetWrapperDB().Close()
 		types.StopAll([]types.ICommand{node, node.GetNetworkNode()})
 	}
+	testDeleteDB(typeDB)
+}
+
+func testDeleteDB(typeDB int) {
 	for i := 0; i < 5; i++ {
 		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, typeDB, i))
 	}

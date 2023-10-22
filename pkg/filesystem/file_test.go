@@ -21,6 +21,8 @@ for filesystem package
 )
 
 func TestFileIsExist(t *testing.T) {
+	t.Parallel()
+
 	if OpenFile(tcRandFile1).IsExist() {
 		t.Errorf("file with name '%s' exists?", tcRandFile1)
 	}
@@ -31,6 +33,8 @@ func TestFileIsExist(t *testing.T) {
 }
 
 func TestReadFile(t *testing.T) {
+	t.Parallel()
+
 	_, err := OpenFile(tcRandFile2).Read()
 	if err == nil {
 		t.Errorf("success read random file '%s'?", tcRandFile2)
@@ -47,6 +51,8 @@ func TestReadFile(t *testing.T) {
 }
 
 func TestWriteFile(t *testing.T) {
+	t.Parallel()
+
 	defer os.Remove(tcRandFile3)
 
 	err := OpenFile(tcRandFile3).Write([]byte(tcFileData))

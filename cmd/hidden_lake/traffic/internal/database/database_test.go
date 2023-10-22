@@ -37,6 +37,8 @@ func testHmsDefaultInit(dbPath string) error {
 }
 
 func TestDB(t *testing.T) {
+	t.Parallel()
+
 	err := testHmsDefaultInit(tcPathDB)
 	if err != nil {
 		t.Error(err)

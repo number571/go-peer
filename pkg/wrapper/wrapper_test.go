@@ -3,6 +3,8 @@ package wrapper
 import "testing"
 
 func TestWrapper(t *testing.T) {
+	t.Parallel()
+
 	wr := NewWrapper()
 	val := "test_1"
 

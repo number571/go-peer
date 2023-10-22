@@ -19,11 +19,16 @@ import (
 )
 
 func TestHandleRequestAPI(t *testing.T) {
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[9])
-	defer testAllFree(node, srv)
+	t.Parallel()
 
-	pushNode, pushSrv := testAllPushCreate()
-	defer testAllPushFree(pushNode, pushSrv)
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 7)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 7)
+
+	_, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[9])
+	defer testAllFree(node, srv, pathCfg, pathDB)
+
+	pushNode, pushSrv := testAllPushCreate(pathCfg, pathDB)
+	defer testAllPushFree(pushNode, pushSrv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
@@ -76,11 +81,11 @@ func testFetch(t *testing.T, client hls_client.IClient) {
 	}
 }
 
-func testAllPushCreate() (anonymity.INode, *http.Server) {
-	os.RemoveAll(tcPathConfig + "_push1")
-	os.RemoveAll(tcPathDB + "_push1")
+func testAllPushCreate(pathCfg, pathDB string) (anonymity.INode, *http.Server) {
+	os.RemoveAll(pathCfg + "_push1")
+	os.RemoveAll(pathDB + "_push1")
 
-	pushNode := testNewPushNode(tcPathConfig+"_push1", tcPathDB+"_push1")
+	pushNode := testNewPushNode(pathCfg+"_push1", pathDB+"_push1")
 	if pushNode == nil {
 		return nil, nil
 	}
@@ -90,10 +95,10 @@ func testAllPushCreate() (anonymity.INode, *http.Server) {
 	return pushNode, pushSrv
 }
 
-func testAllPushFree(node anonymity.INode, srv *http.Server) {
+func testAllPushFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string) {
 	defer func() {
-		os.RemoveAll(tcPathConfig + "_push1")
-		os.RemoveAll(tcPathDB + "_push1")
+		os.RemoveAll(pathCfg + "_push1")
+		os.RemoveAll(pathDB + "_push1")
 	}()
 	types.StopAll([]types.ICommand{
 		node,

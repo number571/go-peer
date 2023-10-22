@@ -21,6 +21,8 @@ const (
 )
 
 func TestLoggerSettings(t *testing.T) {
+	t.Parallel()
+
 	logger := NewLogger(
 		NewSettings(&SSettings{}),
 		func(arg ILogArg) string {
@@ -31,6 +33,8 @@ func TestLoggerSettings(t *testing.T) {
 }
 
 func TestNullLogger(t *testing.T) {
+	t.Parallel()
+
 	logger := NewLogger(
 		NewSettings(&SSettings{}),
 		func(arg ILogArg) string {
@@ -43,6 +47,8 @@ func TestNullLogger(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		os.Remove(tcPathInfo)
 		os.Remove(tcPathWarning)

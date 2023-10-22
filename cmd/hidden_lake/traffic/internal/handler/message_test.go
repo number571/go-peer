@@ -11,6 +11,8 @@ import (
 )
 
 func TestHandleMessageAPI(t *testing.T) {
+	t.Parallel()
+
 	addr := testutils.TgAddrs[20]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 

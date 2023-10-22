@@ -1,7 +1,8 @@
 package api
 
 import (
-	"fmt"
+	"bytes"
+	"io"
 	"net/http"
 
 	"github.com/number571/go-peer/pkg/encoding"
@@ -10,22 +11,22 @@ import (
 func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 	var (
 		contentType = ""
-		respStr     = ""
+		respBytes   []byte
 	)
 
 	switch x := pRes.(type) {
 	case []byte:
 		contentType = cTextPlain
-		respStr = encoding.HexEncode(x)
+		respBytes = x
 	case string:
 		contentType = cTextPlain
-		respStr = x
+		respBytes = []byte(x)
 	default:
 		contentType = cApplicationJSON
-		respStr = string(encoding.Serialize(x, false))
+		respBytes = encoding.Serialize(x, false)
 	}
 
 	pW.Header().Set("Content-Type", contentType)
 	pW.WriteHeader(pRet)
-	fmt.Fprint(pW, respStr)
+	io.Copy(pW, bytes.NewBuffer(respBytes))
 }

@@ -8,6 +8,8 @@ import (
 )
 
 func TestPuzzleDiffSize(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -18,6 +20,8 @@ func TestPuzzleDiffSize(t *testing.T) {
 }
 
 func TestPuzzle(t *testing.T) {
+	t.Parallel()
+
 	var (
 		puzzle = NewPoWPuzzle(testutils.TCWorkSize)
 		msg    = []byte("hello, world!")

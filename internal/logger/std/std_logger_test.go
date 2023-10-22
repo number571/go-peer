@@ -25,7 +25,26 @@ func (l *tsLogger) HasErro() bool {
 	return false
 }
 
+func TestGetLogFunc(t *testing.T) {
+	t.Parallel()
+
+	f := GetLogFunc()
+	if f("string") != "string" {
+		t.Error("incorrect logger work")
+		return
+	}
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	_ = f(struct{}{})
+}
+
 func TestLogger(t *testing.T) {
+	t.Parallel()
+
 	logger := NewStdLogger(
 		&tsLogger{},
 		func(_ logger.ILogArg) string {

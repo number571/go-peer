@@ -6,6 +6,8 @@ import (
 )
 
 func TestStdPRNG(t *testing.T) {
+	t.Parallel()
+
 	r := NewStdPRNG()
 
 	if bytes.Equal(r.GetBytes(8), r.GetBytes(8)) {
@@ -24,6 +26,8 @@ func TestStdPRNG(t *testing.T) {
 }
 
 func TestStdPRNGBool(t *testing.T) {
+	t.Parallel()
+
 	r := NewStdPRNG()
 	for i := 0; i < 1000; i++ {
 		t1 := r.GetBool()

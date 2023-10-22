@@ -26,8 +26,8 @@ import (
 
 const (
 	tcServiceAddressInHLS = "hidden-echo-service"
-	tcPathDB              = "database_test.db"
-	tcPathConfig          = "config_test.cfg"
+	tcPathDBTemplate      = "database_test_%d.db"
+	tcPathConfigTemplate  = "config_test_%d.cfg"
 )
 
 var (
@@ -115,10 +115,10 @@ func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.
 	return wcfg, node, srvc
 }
 
-func testAllFree(node anonymity.INode, srv *http.Server) {
+func testAllFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string) {
 	defer func() {
-		os.RemoveAll(tcPathDB)
-		os.RemoveAll(tcPathConfig)
+		os.RemoveAll(pathDB)
+		os.RemoveAll(pathCfg)
 	}()
 	types.StopAll([]types.ICommand{
 		node,

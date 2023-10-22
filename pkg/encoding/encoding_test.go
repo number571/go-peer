@@ -28,6 +28,8 @@ var (
 )
 
 func TestHex(t *testing.T) {
+	t.Parallel()
+
 	data := HexEncode(tgNumInBytes)
 	if !bytes.Equal(tgNumInBytes, HexDecode(data)) {
 		t.Error("bytes not equals")
@@ -40,6 +42,8 @@ func TestHex(t *testing.T) {
 }
 
 func TestBytes(t *testing.T) {
+	t.Parallel()
+
 	bnum := Uint64ToBytes(tgBytesInNum)
 	if tgBytesInNum != BytesToUint64(bnum) {
 		t.Error("numbers not equals")
@@ -48,6 +52,8 @@ func TestBytes(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
+	t.Parallel()
+
 	if string(Serialize(tgMessage, true)) != tcIndentJSON {
 		t.Error("serialize string is invalid (indent)")
 		return

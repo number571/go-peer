@@ -18,11 +18,16 @@ import (
 )
 
 func TestHandleOnlineAPI(t *testing.T) {
-	_, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[12])
-	defer testAllFree(node, srv)
+	t.Parallel()
 
-	pushNode := testAllOnlineCreate()
-	defer testAllOnlineFree(pushNode)
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 6)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 6)
+
+	_, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[12])
+	defer testAllFree(node, srv, pathCfg, pathDB)
+
+	pushNode := testAllOnlineCreate(pathCfg, pathDB)
+	defer testAllOnlineFree(pushNode, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
@@ -76,11 +81,11 @@ func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
 	}
 }
 
-func testAllOnlineCreate() anonymity.INode {
-	os.RemoveAll(tcPathConfig + "_push2")
-	os.RemoveAll(tcPathDB + "_push2")
+func testAllOnlineCreate(pathCfg, pathDB string) anonymity.INode {
+	os.RemoveAll(pathCfg + "_push2")
+	os.RemoveAll(pathDB + "_push2")
 
-	pushNode := testOnlinePushNode(tcPathConfig+"_push2", tcPathDB+"_push2")
+	pushNode := testOnlinePushNode(pathCfg+"_push2", pathDB+"_push2")
 	if pushNode == nil {
 		return nil
 	}
@@ -89,10 +94,10 @@ func testAllOnlineCreate() anonymity.INode {
 	return pushNode
 }
 
-func testAllOnlineFree(node anonymity.INode) {
+func testAllOnlineFree(node anonymity.INode, pathCfg, pathDB string) {
 	defer func() {
-		os.RemoveAll(tcPathConfig + "_push2")
-		os.RemoveAll(tcPathDB + "_push2")
+		os.RemoveAll(pathCfg + "_push2")
+		os.RemoveAll(pathDB + "_push2")
 	}()
 	types.StopAll([]types.ICommand{
 		node,

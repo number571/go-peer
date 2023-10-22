@@ -14,6 +14,8 @@ const (
 )
 
 func TestMessage(t *testing.T) {
+	t.Parallel()
+
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
 	msg := NewMessage(pld)
 

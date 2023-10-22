@@ -51,6 +51,8 @@ var (
 )
 
 func TestClientWithMessageSize(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -67,6 +69,8 @@ func TestClientWithMessageSize(t *testing.T) {
 }
 
 func TestEncrypt(t *testing.T) {
+	t.Parallel()
+
 	client1 := testNewClient()
 	client2 := testNewClient()
 
@@ -96,6 +100,8 @@ func TestEncrypt(t *testing.T) {
 }
 
 func TestDecrypt(t *testing.T) {
+	t.Parallel()
+
 	client1 := testNewClient()
 
 	pl := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
@@ -191,6 +197,8 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestMessageSize(t *testing.T) {
+	t.Parallel()
+
 	client1 := testNewClient()
 	sizes := make([]int, 0, len(tgMessages))
 
@@ -217,6 +225,8 @@ func TestMessageSize(t *testing.T) {
 }
 
 func TestGetMessageLimit(t *testing.T) {
+	t.Parallel()
+
 	client1 := testNewClient()
 
 	msg1 := random.NewStdPRNG().GetBytes(tgMsgLimit)

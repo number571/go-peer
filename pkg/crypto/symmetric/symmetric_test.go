@@ -10,6 +10,8 @@ var (
 )
 
 func TestAESKeySize(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -20,6 +22,8 @@ func TestAESKeySize(t *testing.T) {
 }
 
 func TestAESGetters(t *testing.T) {
+	t.Parallel()
+
 	cipher := NewAESCipher(tgKey)
 
 	if cipher.GetSize() != CAESKeySize {
@@ -34,6 +38,8 @@ func TestAESGetters(t *testing.T) {
 }
 
 func TestAESEncrypt(t *testing.T) {
+	t.Parallel()
+
 	var (
 		msg = []byte("hello, world!")
 	)

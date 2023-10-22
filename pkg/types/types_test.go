@@ -11,6 +11,8 @@ type tsCloser struct {
 }
 
 func TestStopper(t *testing.T) {
+	t.Parallel()
+
 	err := CloseAll([]ICloser{
 		testNewCloser(false),
 		testNewCloser(false),
@@ -28,6 +30,8 @@ func TestStopper(t *testing.T) {
 }
 
 func TestCommand(t *testing.T) {
+	t.Parallel()
+
 	err := StopAll([]ICommand{
 		testNewCommand(false),
 		testNewCommand(false),

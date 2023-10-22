@@ -26,6 +26,8 @@ func testDeleteFiles() {
 }
 
 func TestApp(t *testing.T) {
+	t.Parallel()
+
 	testDeleteFiles()
 	defer testDeleteFiles()
 

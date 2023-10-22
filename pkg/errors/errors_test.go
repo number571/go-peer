@@ -30,6 +30,8 @@ func (p *tsErrType4) Error() string {
 }
 
 func TestWrapError(t *testing.T) {
+	t.Parallel()
+
 	err := WrapError(WrapError(NewError("test_1"), "test_2"), "test_3")
 	if err.Error() != tcErrorResult {
 		t.Error("result .Error() is invalid")
@@ -41,6 +43,8 @@ func TestWrapError(t *testing.T) {
 }
 
 func TestHasError(t *testing.T) {
+	t.Parallel()
+
 	if HasError(nil, &tsErrType1{}) {
 		t.Error("has error with nil")
 	}
@@ -50,6 +54,8 @@ func TestHasError(t *testing.T) {
 }
 
 func TestAppendError(t *testing.T) {
+	t.Parallel()
+
 	err1 := AppendError(AppendError(&tsErrType1{}, &tsErrType2{}), &tsErrType3{})
 	if !HasError(err1, &tsErrType1{}) || !HasError(err1, &tsErrType2{}) || !HasError(err1, &tsErrType3{}) {
 		t.Error("has not error (1, 2 or 3)")

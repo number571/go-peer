@@ -24,6 +24,8 @@ const (
 )
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 1; i++ {
 		testSettings(t, i)
 	}
@@ -43,6 +45,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestInvalidConvert(t *testing.T) {
+	t.Parallel()
+
 	if res := FromBytesToString([]byte{123}); res != "" {
 		t.Error("success convert invalid bytes to string")
 		return
@@ -58,6 +62,8 @@ func TestInvalidConvert(t *testing.T) {
 }
 
 func TestConvert(t *testing.T) {
+	t.Parallel()
+
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
 		FWorkSizeBits:     testutils.TCWorkSize,
@@ -95,6 +101,8 @@ func TestConvert(t *testing.T) {
 }
 
 func TestInvalidMessage(t *testing.T) {
+	t.Parallel()
+
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
 		FWorkSizeBits:     testutils.TCWorkSize,
@@ -133,6 +141,8 @@ func TestInvalidMessage(t *testing.T) {
 }
 
 func TestMessage(t *testing.T) {
+	t.Parallel()
+
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
 		FWorkSizeBits:     testutils.TCWorkSize,

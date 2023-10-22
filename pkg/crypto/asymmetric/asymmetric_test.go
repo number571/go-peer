@@ -17,6 +17,8 @@ const (
 )
 
 func TestLoadRSAKeyUnknownType(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 2; i++ {
 		testLoadKeyUnknownType(t, i)
 	}
@@ -38,6 +40,8 @@ func testLoadKeyUnknownType(t *testing.T, n int) {
 }
 
 func TestLoadRSAKey(t *testing.T) {
+	t.Parallel()
+
 	priv := LoadRSAPrivKey(tcPrivKey)
 	if priv == nil {
 		t.Error("failed load private key")
@@ -136,6 +140,8 @@ func testRSAConverter(priv IPrivKey, pub IPubKey) error {
 }
 
 func TestRSASign(t *testing.T) {
+	t.Parallel()
+
 	var (
 		priv = NewRSAPrivKey(1024)
 		msg  = []byte("hello, world!")
@@ -151,6 +157,8 @@ func TestRSASign(t *testing.T) {
 }
 
 func TestRSAEncrypt(t *testing.T) {
+	t.Parallel()
+
 	var (
 		priv = NewRSAPrivKey(1024)
 		msg  = []byte("hello, world!")

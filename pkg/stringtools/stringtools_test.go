@@ -3,6 +3,8 @@ package stringtools
 import "testing"
 
 func TestDeleteFromSlice(t *testing.T) {
+	t.Parallel()
+
 	slice := []string{"a", "b", "c", "d"}
 	elem := "c"
 	result := DeleteFromSlice(slice, elem)
@@ -15,6 +17,8 @@ func TestDeleteFromSlice(t *testing.T) {
 }
 
 func TestUniqAppendToSlice(t *testing.T) {
+	t.Parallel()
+
 	slice := []string{"a", "b", "c", "d"}
 	elem1 := "c"
 	elem2 := "e"

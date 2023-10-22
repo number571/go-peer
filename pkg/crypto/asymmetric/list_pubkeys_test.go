@@ -15,6 +15,8 @@ var (
 )
 
 func TestFriends(t *testing.T) {
+	t.Parallel()
+
 	list := NewListPubKeys()
 
 	list.AddPubKey(tgPubKeys[0])

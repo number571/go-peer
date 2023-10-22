@@ -50,6 +50,8 @@ func testConfigDefaultInit(configPath string) {
 }
 
 func TestConfig(t *testing.T) {
+	t.Parallel()
+
 	testConfigDefaultInit(tcConfigFile)
 	defer os.Remove(tcConfigFile)
 

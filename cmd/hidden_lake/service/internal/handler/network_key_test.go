@@ -12,8 +12,13 @@ import (
 )
 
 func TestHandleNetworkKeyAPI(t *testing.T) {
-	wcfg, node, srv := testAllCreate(tcPathConfig, tcPathDB, testutils.TgAddrs[25])
-	defer testAllFree(node, srv)
+	t.Parallel()
+
+	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 4)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
+
+	wcfg, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[25])
+	defer testAllFree(node, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),

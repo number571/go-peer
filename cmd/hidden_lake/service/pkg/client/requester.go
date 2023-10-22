@@ -40,10 +40,12 @@ func (p *sRequester) GetIndex() (string, error) {
 		return "", errors.WrapError(err, "get index (requester)")
 	}
 
-	if res != pkg_settings.CTitlePattern {
+	result := string(res)
+	if result != pkg_settings.CTitlePattern {
 		return "", errors.NewError("incorrect title pattern")
 	}
-	return res, nil
+
+	return result, nil
 }
 
 func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
@@ -72,10 +74,13 @@ func (p *sRequester) GetNetworkKey() (string, error) {
 		fmt.Sprintf(pkg_settings.CHandleNetworkKeyTemplate, p.fHost),
 		nil,
 	)
+
+	result := string(res)
 	if err != nil {
 		return "", errors.WrapError(err, "get network key (requester)")
 	}
-	return res, nil
+
+	return result, nil
 }
 
 func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
@@ -273,7 +278,7 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 		return nil, errors.WrapError(err, "get public key (requester)")
 	}
 
-	pubKey := asymmetric.LoadRSAPubKey(res)
+	pubKey := asymmetric.LoadRSAPubKey(string(res))
 	if pubKey == nil {
 		return nil, errors.NewError("got invalid public key")
 	}

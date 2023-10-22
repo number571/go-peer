@@ -3,6 +3,8 @@ package hashing
 import "testing"
 
 func TestSHA256(t *testing.T) {
+	t.Parallel()
+
 	msg := []byte("hello, world!")
 
 	hash := NewSHA256Hasher(msg).ToString()
@@ -31,6 +33,8 @@ func TestSHA256(t *testing.T) {
 }
 
 func TestHMACSHA256(t *testing.T) {
+	t.Parallel()
+
 	key := []byte("secret key")
 	msg := []byte("hello, world!")
 

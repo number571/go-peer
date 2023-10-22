@@ -20,20 +20,18 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-const (
-	tcPathDBTemplate = "database_test_tcp_%d.db"
-)
-
 func testCleanHLS() {
-	os.RemoveAll(tcPathConfig + "_tcp")
+	os.RemoveAll(fmt.Sprintf(tcPathConfigTemplate, 9))
 	for i := 0; i < 2; i++ {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, i))
+		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, 9+i))
 	}
 }
 
 // client -> HLS -> server --\
 // client <- HLS <- server <-/
 func TestHLS(t *testing.T) {
+	t.Parallel()
+
 	testCleanHLS()
 	defer testCleanHLS()
 
@@ -89,12 +87,12 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 		},
 	}
 
-	cfg, err := config.BuildConfig(tcPathConfig+"_tcp", rawCFG)
+	cfg, err := config.BuildConfig(fmt.Sprintf(tcPathConfigTemplate, 9), rawCFG)
 	if err != nil {
 		return nil, err
 	}
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 0), testutils.TgAddrs[4])
+	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}
@@ -125,7 +123,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 func testStartClientHLS() (anonymity.INode, error) {
 	time.Sleep(time.Second)
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 1), "")
+	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
 	if node == nil {
 		return nil, fmt.Errorf("node is not running")
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	tcConfigFile = "config_test.txt"
+	tcConfigFileTemplate = "config_test_%d.txt"
 )
 
 const (
@@ -111,10 +111,14 @@ func testConfigDefaultInit(configPath string) {
 }
 
 func TestConfig(t *testing.T) {
-	testConfigDefaultInit(tcConfigFile)
-	defer os.Remove(tcConfigFile)
+	t.Parallel()
 
-	cfg, err := LoadConfig(tcConfigFile)
+	configFile := fmt.Sprintf(tcConfigFileTemplate, 0)
+
+	testConfigDefaultInit(configFile)
+	defer os.Remove(configFile)
+
+	cfg, err := LoadConfig(configFile)
 	if err != nil {
 		t.Error(err)
 		return
@@ -219,10 +223,14 @@ func TestConfig(t *testing.T) {
 }
 
 func TestWrapper(t *testing.T) {
-	testConfigDefaultInit(tcConfigFile)
-	defer os.Remove(tcConfigFile)
+	t.Parallel()
 
-	cfg, err := LoadConfig(tcConfigFile)
+	configFile := fmt.Sprintf(tcConfigFileTemplate, 1)
+
+	testConfigDefaultInit(configFile)
+	defer os.Remove(configFile)
+
+	cfg, err := LoadConfig(configFile)
 	if err != nil {
 		t.Error(err)
 		return
@@ -241,7 +249,7 @@ func TestWrapper(t *testing.T) {
 		return
 	}
 
-	cfg, err = LoadConfig(tcConfigFile)
+	cfg, err = LoadConfig(configFile)
 	if err != nil {
 		t.Error(err)
 		return

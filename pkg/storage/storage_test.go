@@ -21,6 +21,8 @@ const (
 )
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 1; i++ {
 		testSettings(t, i)
 	}
@@ -40,6 +42,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	path := tcStorageName
 
 	sett := NewSettings(&SSettings{
@@ -72,6 +76,8 @@ func TestCryptoStorage(t *testing.T) {
 }
 
 func TestTempCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	path := fmt.Sprintf(tcStorageNameTemplate, 1)
 
 	os.Remove(path)
@@ -137,6 +143,8 @@ func TestTempCryptoStorage(t *testing.T) {
 }
 
 func TestInvalidCreateCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	prng := random.NewStdPRNG()
 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 
@@ -157,6 +165,8 @@ func TestInvalidCreateCryptoStorage(t *testing.T) {
 }
 
 func TestInvalidSizeCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	path := fmt.Sprintf(tcStorageNameTemplate, 2)
 
 	os.Remove(path)
@@ -182,6 +192,8 @@ func TestInvalidSizeCryptoStorage(t *testing.T) {
 }
 
 func TestInvalidSetCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	path := fmt.Sprintf(tcStorageNameTemplate, 3)
 
 	os.Remove(path)
@@ -220,6 +232,8 @@ func TestInvalidSetCryptoStorage(t *testing.T) {
 }
 
 func TestInvalidDelCryptoStorage(t *testing.T) {
+	t.Parallel()
+
 	path := fmt.Sprintf(tcStorageNameTemplate, 4)
 
 	os.Remove(path)

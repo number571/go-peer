@@ -11,6 +11,8 @@ import (
 )
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 2; i++ {
 		testSettings(t, i)
 	}
@@ -36,6 +38,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestConnKeeperSettings(t *testing.T) {
+	t.Parallel()
+
 	duration := time.Second / 2
 	connKeeper := newTestConnKeeper(duration)
 
@@ -46,6 +50,8 @@ func TestConnKeeperSettings(t *testing.T) {
 }
 
 func TestConnKeeper(t *testing.T) {
+	t.Parallel()
+
 	listener := testNewService(t)
 	defer testFreeService(listener)
 

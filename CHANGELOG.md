@@ -12,6 +12,8 @@
 - Update `cmd/hidden_lake/service`: append client.ResetPrivKey method
 - Update `pkg/storage/database`: append check on correct input auth/encryption key
 - Update `pkg`: update tests (coverage > 90%)
+- Update `*_test`: change all tests to parallel actions
+- Update `README.md`: append new badge - coverage
 
 ### CHANGES
 

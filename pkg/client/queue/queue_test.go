@@ -14,6 +14,8 @@ import (
 )
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
@@ -46,6 +48,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestRunStopQueue(t *testing.T) {
+	t.Parallel()
+
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,
@@ -105,6 +109,8 @@ func TestRunStopQueue(t *testing.T) {
 }
 
 func TestQueue(t *testing.T) {
+	t.Parallel()
+
 	oldClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,

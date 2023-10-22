@@ -18,6 +18,8 @@ const (
 )
 
 func TestSettings(t *testing.T) {
+	t.Parallel()
+
 	for i := 0; i < 5; i++ {
 		testSettings(t, i)
 	}
@@ -95,6 +97,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestBroadcast(t *testing.T) {
+	t.Parallel()
+
 	nodes, mapp, err := testNodes()
 	if err != nil {
 		t.Error(err)
@@ -228,6 +232,8 @@ func TestBroadcast(t *testing.T) {
 // }
 
 func TestNodeConnection(t *testing.T) {
+	t.Parallel()
+
 	var (
 		node1 = newTestNode("", 2, time.Minute).(*sNode)
 		node2 = newTestNode(testutils.TgAddrs[27], 1, time.Minute)
@@ -310,6 +316,8 @@ func TestNodeConnection(t *testing.T) {
 }
 
 func TestHandleMessage(t *testing.T) {
+	t.Parallel()
+
 	node := newTestNode("", testutils.TCMaxConnects, time.Minute).(*sNode)
 	defer testFreeNodes([]INode{node})
 
@@ -337,6 +345,8 @@ func TestHandleMessage(t *testing.T) {
 }
 
 func TestNodeSettings(t *testing.T) {
+	t.Parallel()
+
 	gotSett := newTestNode("", testutils.TCMaxConnects, time.Minute).GetSettings()
 	if gotSett.GetMaxConnects() != testutils.TCMaxConnects {
 		t.Error("invalid setting's value")
