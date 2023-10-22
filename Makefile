@@ -11,6 +11,7 @@ _TEST_RESULT_PATH=./test/result
 _TEST_PPROF_PATH=./test/pprof
 
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
+_GO_TEST_LIST=go list ./... | grep -v /examples/
 
 .PHONY: default clean \
 	test-run test-coverage test-coverage-view \
@@ -31,13 +32,13 @@ test-run: clean
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -cover -count=1 `go list ./...`; \
+		go test -cover -count=1 `$(_GO_TEST_LIST)`; \
 		$(_CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage: clean
-	go test -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `go list ./...`
+	go test -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
 	$(_CHECK_ERROR);
 
 test-coverage-view:
@@ -46,7 +47,7 @@ test-coverage-view:
 test-coverage-badge: 
 	$(eval _COVERAGE_RAW=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -Eo '[0-9]+\.[0-9]+')
 	$(eval _COVERAGE_VAR := $(shell echo "`${_COVERAGE_RAW}`/1" | bc))
-	if [ $(_COVERAGE_VAR) -lt 50 ]; then \
+	if [ $(_COVERAGE_VAR) -lt 60 ]; then \
 		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-red" > $(_TEST_RESULT_PATH)/badge.svg; \
 	elif [ $(_COVERAGE_VAR) -gt 80 ]; then \
 		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
