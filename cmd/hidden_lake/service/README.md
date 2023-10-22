@@ -55,7 +55,7 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 ## Minimum system requirements
 
-1. Processor: `1x2.2GHz` (more than two cores per processor are recommended)
+1. Processor: `1x2.2GHz` (limit of communication = ~10-15 nodes)
 2. Memory: `0.5GB RAM` (~250MB of memory is consumed)
 3. Storage: `5Gib available space` (the size of hashes per year from one node)
 

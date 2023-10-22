@@ -81,6 +81,15 @@ Some final applications are compositions of other applications. Due to this, suc
 4. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
 5. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
+## Theoretical works
+
+1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
+2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
+3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
+4. [Decentralized key exchange protocol](https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf "DKEP")
+
+Also, the composition of these works can be found in the book [The general theory of anonymous communications](https://ridero.ru/books/obshaya_teoriya_anonimnykh_kommunikacii/). This book can be purchased in a tangible form on the [Ozon](https://www.ozon.ru/product/obshchaya-teoriya-anonimnyh-kommunikatsiy-vtoroe-izdanie-kovalenko-a-g-1193224608/) and [Wildberries](https://www.wildberries.ru/catalog/177390621/detail.aspx) marketplaces. You can download the book in digital form for free [here](https://github.com/number571/go-peer/blob/master/docs/general_theory_of_anonymous_communications.pdf).
+
 ## Library based applications
 
 1. [Hidden Lake Service](#1-hidden-lake-service) 
@@ -130,13 +139,6 @@ Data exchange between network participants is carried out using application serv
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
 
-###  More details in the works 
-
-1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
-2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
-3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
-4. [Decentralized key exchange protocol](https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf "DKEP")
-
 ### Supported platforms
 
 - Windows (x86_64, arm64)
@@ -145,7 +147,7 @@ As shown in the figure above, HLS acts as an anonymizer and handlers of incoming
 
 ### Minimum system requirements
 
-1. Processor: `1x2.2GHz` (limit of communication = ~4 nodes)
+1. Processor: `1x2.2GHz` (limit of communication = ~10-15 nodes)
 2. Memory: `0.5GB RAM` (~250MB of memory is consumed)
 3. Storage: `5Gib available space` (the size of hashes per year from one node)
 
