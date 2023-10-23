@@ -32,6 +32,7 @@
 - Update `cmd/hidden_lake/service`: update _math directory
 - Update `pkg/client`: append payload check decode
 - Update `pkg/client/message`: append check on unknown type
+- Update `cmd/hidden_lake/service`: fix check duplicate public key in config actions
 
 ## v1.5.19
 

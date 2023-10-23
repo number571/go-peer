@@ -58,14 +58,15 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
 	}
 
-	if err := configFile.Write(encoding.Serialize(pCfg, true)); err != nil {
-		return nil, errors.WrapError(err, "write config")
-	}
-
 	pCfg.fFilepath = pFilepath
 	if err := pCfg.initConfig(); err != nil {
 		return nil, errors.WrapError(err, "init config")
 	}
+
+	if err := configFile.Write(encoding.Serialize(pCfg, true)); err != nil {
+		return nil, errors.WrapError(err, "write config")
+	}
+
 	return pCfg, nil
 }
 
@@ -177,15 +178,18 @@ func (p *SConfig) loadLogging() error {
 func (p *SConfig) loadPubKeys() error {
 	p.fFriends = make(map[string]asymmetric.IPubKey)
 
-	mapping := make(map[string]interface{})
+	mapping := make(map[string]struct{})
 	for name, val := range p.FFriends {
 		if _, ok := mapping[val]; ok {
 			return fmt.Errorf("found public key duplicate '%s'", val)
 		}
+		mapping[val] = struct{}{}
+
 		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
 			return errors.NewError(fmt.Sprintf("public key is nil for '%s'", name))
 		}
+
 		p.fFriends[name] = pubKey
 		if pubKey.GetSize() != p.FSettings.FKeySizeBits {
 			return errors.NewError(fmt.Sprintf("not supported key size for '%s'", name))

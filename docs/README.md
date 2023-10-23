@@ -213,3 +213,19 @@ func (p *sObject) DoSomething() {
     _ = p.GetValue() // correct
 }
 ```
+
+### 6. Args/Returns interfaces
+
+It is not allowed to use global structures in function arguments or when returning. Interfaces should be used instead of structures.
+
+The following is allowed.
+```go
+func doObject(_ IObject) {}
+func newObject() IObject {}
+```
+
+The following is not allowed.
+```go
+func doObject(_ *SObject) {}
+func newObject() *SObject {}
+```
