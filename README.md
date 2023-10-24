@@ -13,14 +13,8 @@
 		<a href="https://github.com/topics/golang">
         	<img src="https://img.shields.io/github/go-mod/go-version/number571/go-peer" alt="Go" />
 		</a>
-		<a href="https://github.com/number571/go-peer/actions">
-        	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Tests" />
-		</a>
 		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
-		</a>
-		<a href="https://github.com/number571/go-peer/tree/master/test/result/badge.svg">
-        	<img src="test/result/badge.svg" alt="Coverage" />
 		</a>
 		<a href="https://github.com/number571/go-peer/releases">
         	<img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
@@ -30,6 +24,17 @@
 		</a>
 		<a href="https://github.com/number571/go-peer/commits/master">
         	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
+		</a>
+	</p>
+	<p align="center">
+		<a href="https://github.com/number571/go-peer/actions">
+        	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Tests" />
+		</a>
+		<a href="https://goreportcard.com/report/github.com/number571/go-peer">
+        	<img src="https://goreportcard.com/badge/github.com/number571/go-peer" alt="GoReportCard" />
+		</a>
+		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
+        	<img src="https://github.com/number571/go-peer/blob/master/test/result/badge.svg" alt="Coverage" />
 		</a>
 	</p>
 	<p align="center">
