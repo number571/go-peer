@@ -1,7 +1,7 @@
 package stringtools
 
 func UniqAppendToSlice(pSlice []string, pStr string) []string {
-	if hasInSlice(pSlice, pStr) {
+	if HasInSlice(pSlice, pStr) {
 		return pSlice
 	}
 	return append(pSlice, pStr)
@@ -18,7 +18,7 @@ func DeleteFromSlice(pSlice []string, pStr string) []string {
 	return result
 }
 
-func hasInSlice(pSlice []string, pStr string) bool {
+func HasInSlice(pSlice []string, pStr string) bool {
 	for _, s := range pSlice {
 		if pStr == s {
 			return true

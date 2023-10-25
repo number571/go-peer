@@ -10,6 +10,20 @@ const (
 	tcFmtLog  = "service=TST method=GET path=/api/index conn=127.0.0.1:55555 message=hello_world"
 )
 
+func TestPanicLogger(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	logFunc := GetLogFunc()
+	_ = logFunc("_")
+}
+
 func TestLogger(t *testing.T) {
 	t.Parallel()
 

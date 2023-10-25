@@ -21,11 +21,11 @@ type sEditor struct {
 
 func newEditor(pCfg IConfig) IEditor {
 	if pCfg == nil {
-		return nil
+		panic("cfg = nil")
 	}
 	v, ok := pCfg.(*SConfig)
 	if !ok {
-		return nil
+		panic("cfg is invalid")
 	}
 	return &sEditor{
 		fConfig: v,
@@ -121,8 +121,12 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 		return errors.WrapError(err, "load config (update friends)")
 	}
 
+	if hasDuplicatePubKeys(pFriends) {
+		return errors.NewError("has duplicates public keys")
+	}
+
 	cfg := icfg.(*SConfig)
-	cfg.fFriends = deleteDuplicatePubKeys(pFriends)
+	cfg.fFriends = pFriends
 	cfg.FFriends = pubKeysToStrings(pFriends)
 	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
@@ -145,18 +149,16 @@ func pubKeysToStrings(pPubKeys map[string]asymmetric.IPubKey) map[string]string 
 	return result
 }
 
-func deleteDuplicatePubKeys(pPubKeys map[string]asymmetric.IPubKey) map[string]asymmetric.IPubKey {
-	result := make(map[string]asymmetric.IPubKey, len(pPubKeys))
+func hasDuplicatePubKeys(pPubKeys map[string]asymmetric.IPubKey) bool {
 	mapping := make(map[string]struct{})
-	for name, pubKey := range pPubKeys {
+	for _, pubKey := range pPubKeys {
 		pubStr := pubKey.GetAddress().ToString()
 		if _, ok := mapping[pubStr]; ok {
-			continue
+			return true
 		}
 		mapping[pubStr] = struct{}{}
-		result[name] = pubKey
 	}
-	return result
+	return false
 }
 
 func deleteDuplicateStrings(pStrs []string) []string {

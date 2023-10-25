@@ -22,7 +22,7 @@ func (l *tsLogger) HasWarn() bool {
 }
 
 func (l *tsLogger) HasErro() bool {
-	return false
+	return true
 }
 
 func TestGetLogFunc(t *testing.T) {
@@ -59,8 +59,8 @@ func TestLogger(t *testing.T) {
 		t.Error("warn stream != stdout")
 		return
 	}
-	if logger.GetSettings().GetStreamErro() != nil {
-		t.Error("erro stream != nil")
+	if logger.GetSettings().GetStreamErro().Name() != os.Stderr.Name() {
+		t.Error("erro stream != stderr")
 		return
 	}
 }
