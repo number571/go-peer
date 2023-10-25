@@ -34,7 +34,7 @@
         	<img src="https://goreportcard.com/badge/github.com/number571/go-peer" alt="GoReportCard" />
 		</a>
 		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
-        	<img src="https://github.com/number571/go-peer/blob/master/test/result/badge.svg" alt="Coverage" />
+        	<img src="test/result/badge.svg" alt="Coverage" />
 		</a>
 	</p>
 	<p align="center">
