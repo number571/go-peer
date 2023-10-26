@@ -36,6 +36,9 @@
 		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
         	<img src="test/result/badge.svg" alt="Coverage" />
 		</a>
+		<a href="https://godoc.org/github.com/number571/go-peer">
+        	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
+		</a>
 	</p>
 	<p align="center">
 		<a href="https://vk.me/join/6Px6b0Qh/uZIK4ixUYWQm4Krepzq5xbYjYw=">
@@ -579,3 +582,7 @@ Similarly, you can use a more complex composition, as shown in the example `exam
 * Hidden Lake (can be used as HLS+HLM+HLT+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
 * Hidden Email Service (HLT can be used as HES): [github.com/number571/hes](https://github.com/number571/hes "HES");
 * Hidden Lake Service (new release = HLS): [github.com/number571/hls](https://github.com/number571/hls "HLS");
+
+## License
+
+Licensed under the MIT License. See [LICENSE](LICENSE) for the full license text.

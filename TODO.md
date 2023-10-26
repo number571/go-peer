@@ -11,3 +11,4 @@
 9. HLS: write a threat model (in "Hidden Lake" article)
 10. HLM: grouped chats
 11. HLF: Hidden Lake Forum
+12. Append example of use functions (godoc)
