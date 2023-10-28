@@ -54,7 +54,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 2. The `client` module for encrypting and decrypting information with the attached data integrity (hash), authentication (signature) and confirmation (work). It is a basic part of the `anonymity` module.
 3. The `client/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client` module.
 4. The `network` module is a decentralized communication between network nodes. It does not represent any protection of information and anonymity of participants.
-5. The `network/anonymity` module to ensure anonymity based on the fifth stage. Presents the main functions for working with the network on top of the `network` and `queue` modules.
+5. The `network/anonymity` module to ensure anonymity based on the fifth^ stage. Presents the main functions for working with the network on top of the `network` and `queue` modules.
 6. The `storage` module includes `crypto` type storage. This type of storage can be used for secure storage of passwords and private keys.
 7. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing inherited from the `storage` module.
 
