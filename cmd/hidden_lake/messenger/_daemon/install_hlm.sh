@@ -16,7 +16,7 @@ WantedBy=multi-user.target
 
 cd /root && \
     rm -f hlm_amd64_linux && \
-    wget https://github.com/number571/go-peer/releases/download/v1.5.19/hlm_amd64_linux && \
+    wget https://github.com/number571/go-peer/releases/download/v1.5.20/hlm_amd64_linux && \
     chmod +x hlm_amd64_linux
 
 systemctl daemon-reload
