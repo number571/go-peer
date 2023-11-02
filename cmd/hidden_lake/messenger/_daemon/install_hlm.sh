@@ -1,5 +1,6 @@
-# root mode
+#!/bin/bash
 
+# root mode
 echo "
 [Unit]
 Description=HiddenLakeMessenger

@@ -12,3 +12,5 @@
 10. HLM: grouped chats
 11. HLF: Hidden Lake Forum
 12. Append example of use functions (godoc)
+13. Append NetworkKey to EncryptPayload, DecryptMessage
+14. Rename INode, IMessage, GetNetwork, ...
