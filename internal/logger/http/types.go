@@ -1,8 +1,13 @@
 package http
 
 type ILogBuilder interface {
-	Get() ILogGetter
+	ILogGetterFactory
+
 	WithMessage(string) ILogBuilder
+}
+
+type ILogGetterFactory interface {
+	Get() ILogGetter
 }
 
 type ILogGetter interface {

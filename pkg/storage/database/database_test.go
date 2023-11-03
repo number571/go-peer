@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -18,6 +19,67 @@ import (
 const (
 	tcPathDBTemplate = "database_test_%d.db"
 )
+
+func TestTryRecover(t *testing.T) {
+	t.Parallel()
+
+	dbPath := fmt.Sprintf(tcPathDBTemplate, 5)
+	defer os.RemoveAll(dbPath)
+
+	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+		FPath:     dbPath,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
+		t.Error(err)
+		return
+	}
+
+	store.Close()
+
+	entries, err := os.ReadDir(dbPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	for _, e := range entries {
+		name := e.Name()
+		if !strings.HasPrefix(name, "MANIFEST-") {
+			continue
+		}
+		os.Remove(dbPath + "/" + name)
+	}
+
+	store, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+		FPath:     dbPath,
+		FWorkSize: testutils.TCWorkSize,
+		FPassword: "CIPHER",
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	value, err := store.Get([]byte("KEY"))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !bytes.Equal(value, []byte("VALUE")) {
+		t.Error("invalid equal values")
+		return
+	}
+
+	store.Close()
+}
 
 func TestTryDecrypt(t *testing.T) {
 	t.Parallel()

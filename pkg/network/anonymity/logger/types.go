@@ -39,6 +39,21 @@ const (
 	CLogErroEncryptPayload
 )
 
+type ILogBuilder interface {
+	ILogGetterFactory
+
+	WithType(ILogType) ILogBuilder
+	WithSize(int) ILogBuilder
+	WithProof(uint64) ILogBuilder
+	WithHash([]byte) ILogBuilder
+	WithConn(conn.IConn) ILogBuilder
+	WithPubKey(asymmetric.IPubKey) ILogBuilder
+}
+
+type ILogGetterFactory interface {
+	Get() ILogGetter
+}
+
 type ILogGetter interface {
 	GetService() string
 	GetType() ILogType
@@ -47,15 +62,4 @@ type ILogGetter interface {
 	GetHash() []byte
 	GetConn() conn.IConn
 	GetPubKey() asymmetric.IPubKey
-}
-
-type ILogBuilder interface {
-	Get() ILogGetter
-
-	WithType(ILogType) ILogBuilder
-	WithSize(int) ILogBuilder
-	WithProof(uint64) ILogBuilder
-	WithHash([]byte) ILogBuilder
-	WithConn(conn.IConn) ILogBuilder
-	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }

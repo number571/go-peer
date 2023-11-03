@@ -12,12 +12,12 @@ const (
 
 func GetLogFunc() logger.ILogFunc {
 	return func(pLogArg logger.ILogArg) string {
-		logBuilder, ok := pLogArg.(ILogBuilder)
+		logFactory, ok := pLogArg.(ILogGetterFactory)
 		if !ok {
 			panic("got invalid log arg")
 		}
 
-		logGetter := logBuilder.Get()
+		logGetter := logFactory.Get()
 		return fmt.Sprintf(
 			cLogTemplate,
 			logGetter.GetService(),

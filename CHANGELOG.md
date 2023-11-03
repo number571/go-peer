@@ -6,6 +6,14 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/storage/database`: append tryRecover function to NewKeyValueDB
+
+### CHANGES
+
+- Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
+
 <!-- ... -->
 
 ## v1.5.20

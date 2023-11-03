@@ -34,11 +34,19 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
-	db, err := leveldb.OpenFile(pSett.GetPath(), &opt.Options{
+	path := pSett.GetPath()
+	opt := &opt.Options{
 		DisableBlockCache: true,
-	})
+		Strict:            opt.StrictAll,
+	}
+
+	db, err := leveldb.OpenFile(path, opt)
 	if err != nil {
-		return nil, errors.WrapError(err, "open database")
+		openErr := errors.WrapError(err, "open database")
+		db, err = tryRecover(path, opt)
+		if err != nil {
+			return nil, errors.AppendError(openErr, err)
+		}
 	}
 
 	isInitSalt := false
@@ -148,4 +156,12 @@ func (p *sKeyValueDB) Close() error {
 		return errors.WrapError(err, "close database")
 	}
 	return nil
+}
+
+func tryRecover(path string, opt *opt.Options) (*leveldb.DB, error) {
+	db, err := leveldb.RecoverFile(path, opt)
+	if err != nil {
+		return nil, errors.WrapError(err, "recover database")
+	}
+	return db, nil
 }

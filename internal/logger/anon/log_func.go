@@ -15,12 +15,12 @@ const (
 
 func GetLogFunc() logger.ILogFunc {
 	return func(pLogArg logger.ILogArg) string {
-		logBuilder, ok := pLogArg.(anon_logger.ILogBuilder)
+		logFactory, ok := pLogArg.(anon_logger.ILogGetterFactory)
 		if !ok {
 			panic("got invalid log arg")
 		}
 
-		logGetter := logBuilder.Get()
+		logGetter := logFactory.Get()
 		logType := logGetter.GetType()
 		if logType == 0 {
 			panic("got invalid log type")
