@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
+	"github.com/number571/go-peer/internal/slices"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/stringtools"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -123,7 +123,7 @@ func TestEditor(t *testing.T) {
 	}
 	hasNewConn := false
 	for _, ac := range afterConnections {
-		if !stringtools.HasInSlice(beforeConnections, ac) {
+		if !slices.HasInSlice(beforeConnections, ac) {
 			hasNewConn = true
 			break
 		}
@@ -133,7 +133,7 @@ func TestEditor(t *testing.T) {
 		return
 	}
 	for _, nc := range tgNewConnections {
-		if !stringtools.HasInSlice(afterConnections, nc) {
+		if !slices.HasInSlice(afterConnections, nc) {
 			t.Error("afterConnections != tgNewConnections")
 			return
 		}
@@ -150,7 +150,7 @@ func TestEditor(t *testing.T) {
 	}
 	hasNewBackupConn := false
 	for _, ac := range afterBackupConnections {
-		if !stringtools.HasInSlice(beforeBackupConnections, ac) {
+		if !slices.HasInSlice(beforeBackupConnections, ac) {
 			hasNewBackupConn = true
 			break
 		}
@@ -160,7 +160,7 @@ func TestEditor(t *testing.T) {
 		return
 	}
 	for _, nc := range tgNewBackupConnections {
-		if !stringtools.HasInSlice(afterBackupConnections, nc) {
+		if !slices.HasInSlice(afterBackupConnections, nc) {
 			t.Error("afterBackupConnections != tgNewBackupConnections")
 			return
 		}

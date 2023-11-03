@@ -9,9 +9,9 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
+	"github.com/number571/go-peer/internal/slices"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/stringtools"
 )
 
 func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
@@ -64,7 +64,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 		switch pR.Method {
 		case http.MethodPost:
 			if isBackup {
-				connects := stringtools.UniqAppendToSlice(
+				connects := slices.UniqAppendToSlice(
 					pWrapper.GetConfig().GetBackupConnections(),
 					connect,
 				)
@@ -79,7 +79,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			connects := stringtools.UniqAppendToSlice(
+			connects := slices.UniqAppendToSlice(
 				pWrapper.GetConfig().GetConnections(),
 				connect,
 			)
@@ -97,7 +97,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 
 		case http.MethodDelete:
 			if isBackup {
-				connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetBackupConnections(), connect)
+				connects := slices.DeleteFromSlice(pWrapper.GetConfig().GetBackupConnections(), connect)
 				if err := pWrapper.GetEditor().UpdateBackupConnections(connects); err != nil {
 					pLogger.PushWarn(logBuilder.WithMessage("delete_backup_connections"))
 					api.Response(pW, http.StatusInternalServerError, "failed: delete backup connection")
@@ -109,7 +109,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			connects := stringtools.DeleteFromSlice(pWrapper.GetConfig().GetConnections(), connect)
+			connects := slices.DeleteFromSlice(pWrapper.GetConfig().GetConnections(), connect)
 			if err := pWrapper.GetEditor().UpdateConnections(connects); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("update_connections"))
 				api.Response(pW, http.StatusInternalServerError, "failed: delete connection")

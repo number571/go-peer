@@ -1,4 +1,4 @@
-package stringtools
+package slices
 
 import "testing"
 

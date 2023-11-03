@@ -12,7 +12,7 @@
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
+- Update `pkg/stringtools`: rename -> slices, replace from pkg/ to internal/
 
 <!-- ... -->
 

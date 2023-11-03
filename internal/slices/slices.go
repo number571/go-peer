@@ -1,4 +1,4 @@
-package stringtools
+package slices
 
 func UniqAppendToSlice(pSlice []string, pStr string) []string {
 	if HasInSlice(pSlice, pStr) {
