@@ -137,20 +137,6 @@ func TestQueue(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	newClient := client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
-			FMessageSizeBytes: testutils.TCMessageSize,
-		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc2PrivKey1024),
-	)
-	queue.UpdateClient(newClient)
-
-	if err := testQueue(queue); err != nil {
-		t.Error(err)
-		return
-	}
 }
 
 func testQueue(queue IMessageQueue) error {

@@ -46,14 +46,6 @@ func (p *sMessageQueue) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sMessageQueue) UpdateClient(pClient client.IClient) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fClient = pClient
-	p.fQueue = make(chan message.IMessage, p.fSettings.GetMainCapacity())
-}
-
 func (p *sMessageQueue) GetClient() client.IClient {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

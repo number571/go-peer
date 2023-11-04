@@ -14,8 +14,6 @@ type IMessageQueue interface {
 	GetSettings() ISettings
 	GetClient() client.IClient
 
-	UpdateClient(client.IClient)
-
 	EnqueueMessage(message.IMessage) error
 	DequeueMessage() <-chan message.IMessage
 }

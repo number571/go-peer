@@ -13,6 +13,7 @@
 ### CHANGES
 
 - Update `pkg/stringtools`: rename -> slices, replace from pkg/ to internal/
+- Update `pkg/client/queue`: delete UpdateClient method
 
 <!-- ... -->
 
