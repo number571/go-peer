@@ -14,6 +14,7 @@
 
 - Update `pkg/stringtools`: rename -> slices, replace from pkg/ to internal/
 - Update `pkg/client/queue`: delete UpdateClient method
+- Update `cmd/tools/pmanager`: EOF -> EOL
 
 <!-- ... -->
 

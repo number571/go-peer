@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -29,14 +29,15 @@ func main() {
 	)
 
 	keyBuilder := keybuilder.NewKeyBuilder(workSize, login)
-	extendedKey := keyBuilder.Build(readUntilEOF())
+	extendedKey := keyBuilder.Build(readUntilEOF("> "))
 
 	passBytes := hashing.NewHMACSHA256Hasher(extendedKey, service).ToBytes()
 	fmt.Println(base64.StdEncoding.EncodeToString(passBytes))
 }
 
-func readUntilEOF() string {
-	res, err := io.ReadAll(os.Stdin)
+func readUntilEOF(prefix string) string {
+	fmt.Print(prefix)
+	res, _, err := bufio.NewReader(os.Stdin).ReadLine()
 	if err != nil {
 		panic(err)
 	}

@@ -9,11 +9,17 @@ stdin:
     [master-key]EOF
 ```
 
-EOF - End of File (Ctrl+D)
+EOL - End of Line (Enter)
 
 ## Example
 
 ```bash
+$ go run . service-name login
+> master-key
+62ZD5+xzT+eQkqFjNJqLryOsLSxSUzfCMEHlt6Y4dEo=
+```
+
+```bash
 $ echo "master-key" | go run . service-name login
-fsJ5+QUz5nv/JK3VdqYWqzqQoMy0pg7FqQQtQKq2cnw=
+> 62ZD5+xzT+eQkqFjNJqLryOsLSxSUzfCMEHlt6Y4dEo=
 ```
