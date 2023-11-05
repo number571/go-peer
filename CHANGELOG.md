@@ -15,6 +15,8 @@
 - Update `pkg/stringtools`: rename -> slices, replace from pkg/ to internal/
 - Update `pkg/client/queue`: delete UpdateClient method
 - Update `cmd/tools/pmanager`: EOF -> EOL
+- Update `pkg/client/message`: replace Payload field from SBody to SMessage 
+- Update `pkg/client`: replace init check of message from custom to msg.IsValid
 
 <!-- ... -->
 

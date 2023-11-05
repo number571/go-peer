@@ -154,14 +154,14 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	sMsg6 := *sMsg
-	sMsg6.FBody.FPayload = []byte{111}
+	sMsg6.FPayload = []byte{111}
 	if _, _, err := client1.DecryptMessage(&sMsg6); err == nil {
 		t.Error("success decrypt message with incorrect payload (iv block)")
 		return
 	}
 
 	sMsg7 := *sMsg
-	sMsg7.FBody.FPayload = []byte("11111111111111111111111111111111")
+	sMsg7.FPayload = []byte("11111111111111111111111111111111")
 	if _, _, err := client1.DecryptMessage(&sMsg7); err == nil {
 		t.Error("success decrypt message with incorrect payload (payload is nil)")
 		return

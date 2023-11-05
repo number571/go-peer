@@ -188,30 +188,18 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 			FHash:  encoding.HexEncode(hash),
 			FSign:  encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
 			FProof: encoding.HexEncode(bProof[:]),
-
-			// JSON field to raw Body (no need HEX encode)
-			FPayload: cipher.EncryptBytes(doublePayload.ToBytes()),
 		},
+		// JSON field to raw Body (no need HEX encode)
+		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()),
 	}
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
-	if pMsg == nil {
-		return nil, nil, errors.NewError("msg is nil")
-	}
-
 	// Initial check.
-	if len(pMsg.GetBody().GetHash()) != hashing.CSHA256Size {
-		return nil, nil, errors.NewError("msg hash != sha256 size")
-	}
-
-	// Proof of work. Prevent spam.
-	diff := p.fSettings.GetWorkSizeBits()
-	puzzle := puzzle.NewPoWPuzzle(diff)
-	if !puzzle.VerifyBytes(pMsg.GetBody().GetHash(), pMsg.GetBody().GetProof()) {
-		return nil, nil, errors.NewError("invalid proof of msg")
+	if pMsg == nil || !pMsg.IsValid(p.fSettings) {
+		return nil, nil, errors.NewError("got invalid message")
 	}
 
 	// Decrypt session key by private key of receiver.
@@ -237,7 +225,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt main data of message by session key.
-	firstPayload := pMsg.GetBody().GetPayload()
+	firstPayload := pMsg.GetPayload()
 	if firstPayload == nil {
 		return nil, nil, errors.NewError("failed decode payload")
 	}

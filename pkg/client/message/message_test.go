@@ -204,7 +204,7 @@ func testMessage(t *testing.T, msg IMessage) {
 		return
 	}
 
-	if msg.GetBody().GetPayload() == nil {
+	if msg.GetPayload() == nil {
 		t.Error("failed get encrypted payload")
 		return
 	}
@@ -216,8 +216,8 @@ func testMessage(t *testing.T, msg IMessage) {
 		return
 	}
 
-	msg1.FBody.FPayload = []byte{123}
-	if msg.GetBody().GetPayload() != nil {
+	msg1.FPayload = []byte{123}
+	if msg.GetPayload() != nil {
 		t.Error("success got incorrect payload")
 		return
 	}

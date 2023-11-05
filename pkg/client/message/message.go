@@ -24,8 +24,9 @@ var (
 
 // Basic structure of transport package.
 type SMessage struct {
-	FHead SHeadMessage `json:"head"`
-	FBody SBodyMessage `json:"body"`
+	FHead    SHeadMessage `json:"head"`
+	FBody    SBodyMessage `json:"body"`
+	FPayload []byte       `json:"-"`
 }
 
 type SHeadMessage struct {
@@ -35,10 +36,9 @@ type SHeadMessage struct {
 }
 
 type SBodyMessage struct {
-	FSign    string `json:"sign"`
-	FHash    string `json:"hash"`
-	FProof   string `json:"proof"`
-	FPayload []byte `json:"-"`
+	FSign  string `json:"sign"`
+	FHash  string `json:"hash"`
+	FProof string `json:"proof"`
 }
 
 // Message can be created only with client module.
@@ -66,11 +66,11 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 
 	switch x := pMsg.(type) {
 	case []byte:
-		msg.FBody.FPayload = x[i+cSeparatorLen:]
+		msg.FPayload = x[i+cSeparatorLen:]
 	case string:
 		encStr := strings.TrimSpace(x[i+cSeparatorLen:])
-		msg.FBody.FPayload = encoding.HexDecode(encStr)
-		if msg.FBody.FPayload == nil {
+		msg.FPayload = encoding.HexDecode(encStr)
+		if msg.FPayload == nil {
 			return nil
 		}
 	default:
@@ -96,7 +96,7 @@ func (p *SMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			encoding.Serialize(p, false),
-			p.FBody.FPayload,
+			p.FPayload,
 		},
 		[]byte(cSeparator),
 	)
@@ -106,7 +106,7 @@ func (p *SMessage) ToString() string {
 	return strings.Join(
 		[]string{
 			string(encoding.Serialize(p, false)),
-			encoding.HexEncode(p.FBody.FPayload),
+			encoding.HexEncode(p.FPayload),
 		},
 		cSeparator,
 	)
@@ -121,6 +121,10 @@ func (p *SMessage) IsValid(psett ISettings) bool {
 	}
 	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSizeBits())
 	return puzzle.VerifyBytes(p.GetBody().GetHash(), p.GetBody().GetProof())
+}
+
+func (p *SMessage) GetPayload() payload.IPayload {
+	return payload.LoadPayload(p.FPayload)
 }
 
 // IHead
@@ -138,10 +142,6 @@ func (p SHeadMessage) GetSalt() []byte {
 }
 
 // IBody
-
-func (p SBodyMessage) GetPayload() payload.IPayload {
-	return payload.LoadPayload(p.FPayload)
-}
 
 func (p SBodyMessage) GetHash() []byte {
 	return encoding.HexDecode(p.FHash)

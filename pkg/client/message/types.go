@@ -11,6 +11,7 @@ type IMessage interface {
 
 	GetHead() IHead
 	GetBody() IBody
+	GetPayload() payload.IPayload
 }
 
 type ISettings interface {
@@ -25,7 +26,6 @@ type IHead interface {
 }
 
 type IBody interface {
-	GetPayload() payload.IPayload
 	GetHash() []byte
 	GetSign() []byte
 	GetProof() uint64
