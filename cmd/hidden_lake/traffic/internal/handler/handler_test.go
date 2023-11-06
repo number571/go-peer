@@ -18,6 +18,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -86,7 +87,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		conn_keeper.NewSettings(connKeeperSettings),
 		testNewNetworkNode("").HandleFunc(
 			1, // default value
-			func(_ network.INode, _ conn.IConn, _ []byte) error {
+			func(_ network.INode, _ conn.IConn, _ net_message.IMessage) error {
 				// pass response actions
 				return nil
 			},
@@ -112,18 +113,20 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		},
 	)
 
-	node := network.NewNode(network.NewSettings(&network.SSettings{
-		FCapacity:     testutils.TCCapacity,
-		FMaxConnects:  testutils.TCMaxConnects,
-		FReadTimeout:  time.Minute,
-		FWriteTimeout: time.Minute,
-		FConnSettings: conn.NewSettings(&conn.SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+	node := network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FCapacity:     testutils.TCCapacity,
+			FMaxConnects:  testutils.TCMaxConnects,
+			FReadTimeout:  time.Minute,
+			FWriteTimeout: time.Minute,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     time.Minute,
+				FWriteDeadline:    time.Minute,
+			}),
 		}),
-	}))
+	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))

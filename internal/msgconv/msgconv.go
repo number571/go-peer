@@ -1,15 +1,16 @@
-package message
+package msgconv
 
 import (
 	"bytes"
 	"strings"
 	"unicode"
 
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 func FromStringToBytes(pMsg string) []byte {
-	splited := strings.Split(pMsg, cSeparator)
+	splited := strings.Split(pMsg, message.CSeparator)
 	if len(splited) != 2 {
 		return nil
 	}
@@ -22,22 +23,22 @@ func FromStringToBytes(pMsg string) []byte {
 			[]byte(removeInvisibleChars(splited[0])),
 			decBytes,
 		},
-		[]byte(cSeparator),
+		[]byte(message.CSeparator),
 	)
 }
 
 func FromBytesToString(pMsg []byte) string {
-	splited := bytes.Split(pMsg, []byte(cSeparator))
+	splited := bytes.Split(pMsg, []byte(message.CSeparator))
 	if len(splited) < 2 {
 		return ""
 	}
-	encBytes := encoding.HexEncode(bytes.Join(splited[1:], []byte(cSeparator)))
+	encBytes := encoding.HexEncode(bytes.Join(splited[1:], []byte(message.CSeparator)))
 	return strings.Join(
 		[]string{
 			removeInvisibleChars(string(splited[0])),
 			encBytes,
 		},
-		cSeparator,
+		message.CSeparator,
 	)
 }
 

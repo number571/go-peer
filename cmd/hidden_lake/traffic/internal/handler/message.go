@@ -9,9 +9,11 @@ import (
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/internal/msgconv"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
@@ -52,10 +54,15 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 				api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
+
 			msgString := string(msgStringAsBytes)
+			netMsg := net_message.NewMessage(
+				pNode.GetSettings().GetConnSettings(),
+				payload.NewPayload(0, msgconv.FromStringToBytes(msgString)),
+			)
 
 			handler := HandleServiceTCP(pCfg, pWrapperDB, pLogger)
-			if err := handler(pNode, nil, message.FromStringToBytes(msgString)); err != nil {
+			if err := handler(pNode, nil, netMsg); err != nil {
 				// internal logger
 				api.Response(pW, http.StatusBadRequest, "failed: handle message")
 				return

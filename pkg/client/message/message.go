@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	cSeparator    = "==="
-	cSeparatorLen = len(cSeparator)
+	CSeparator    = "==="
+	cSeparatorLen = len(CSeparator)
 )
 
 var (
@@ -55,7 +55,7 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 		return nil
 	}
 
-	i := bytes.Index(recvMsg, []byte(cSeparator))
+	i := bytes.Index(recvMsg, []byte(CSeparator))
 	if i == -1 {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (p *SMessage) ToBytes() []byte {
 			encoding.Serialize(p, false),
 			p.FPayload,
 		},
-		[]byte(cSeparator),
+		[]byte(CSeparator),
 	)
 }
 
@@ -108,7 +108,7 @@ func (p *SMessage) ToString() string {
 			string(encoding.Serialize(p, false)),
 			encoding.HexEncode(p.FPayload),
 		},
-		cSeparator,
+		CSeparator,
 	)
 }
 

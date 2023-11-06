@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/common"
+	"github.com/number571/go-peer/internal/msgconv"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -141,13 +142,7 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 	})
 
 	msgString := string(msgStringAsBytes[1:])
-	msg := message.LoadMessage(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: sett.GetMessageSizeBytes(),
-			FWorkSizeBits:     sett.GetWorkSizeBits(),
-		}),
-		message.FromStringToBytes(msgString),
-	)
+	msg := message.LoadMessage(sett, msgconv.FromStringToBytes(msgString))
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")
 	}

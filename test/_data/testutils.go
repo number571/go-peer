@@ -1,5 +1,9 @@
 package testutils
 
+import (
+	_ "embed"
+)
+
 const (
 	TCMessageSize   = (100 << 10)
 	TCWorkSize      = 10
@@ -7,6 +11,14 @@ const (
 	TCMaxConnects   = (1 << 6)
 	TCQueueCapacity = (1 << 4)
 	TCQueuePeriod   = 1000 // milliseconds
+)
+
+var (
+	//go:embed test_binary.msg
+	TCBinaryMessage []byte
+
+	//go:embed test_string.msg
+	TCStringMessage string
 )
 
 var (

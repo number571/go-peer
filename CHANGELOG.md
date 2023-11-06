@@ -9,6 +9,8 @@
 ### IMPROVEMENTS
 
 - Update `pkg/storage/database`: append tryRecover function to NewKeyValueDB
+- Update `pkg/network/message`: append Proof field to IMessage interface
+- Update `pkg/network`: BroadcastPayload -> BroadcastMessage, (WritePayload, ReadPayload) -> (WriteMessage, ReadMessage)
 
 ### CHANGES
 
@@ -17,6 +19,8 @@
 - Update `cmd/tools/pmanager`: EOF -> EOL
 - Update `pkg/client/message`: replace Payload field from SBody to SMessage 
 - Update `pkg/client`: replace init check of message from custom to msg.IsValid
+- Update `pkg/client/message`: move convert functions to internal/msgconv
+- Update `pkg`: _examples/ -> examples/
 
 <!-- ... -->
 

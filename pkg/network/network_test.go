@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -112,20 +113,21 @@ func TestBroadcast(t *testing.T) {
 	wg.Add(4 * tcIter)
 
 	headHandle := uint64(testutils.TcHead)
-	handleF := func(node INode, conn conn.IConn, reqBytes []byte) error {
+	handleF := func(node INode, conn conn.IConn, pMsg message.IMessage) error {
 		defer wg.Done()
-		defer node.BroadcastPayload(payload.NewPayload(headHandle, reqBytes))
+		defer node.BroadcastMessage(pMsg)
 
 		tcMutex.Lock()
 		defer tcMutex.Unlock()
 
-		val := string(reqBytes)
+		val := string(pMsg.GetPayload().GetBody())
 		flag, ok := mapp[node][val]
 		if !ok {
 			err := fmt.Errorf("incoming value '%s' undefined", val)
 			t.Error(err)
 			return err
 		}
+
 		if flag {
 			err := fmt.Errorf("incoming value '%s' already exists", val)
 			t.Error(err)
@@ -147,7 +149,8 @@ func TestBroadcast(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
-			nodes[0].BroadcastPayload(pld)
+			sett := nodes[0].GetSettings().GetConnSettings()
+			nodes[0].BroadcastMessage(message.NewMessage(sett, pld))
 		}(i)
 	}
 
@@ -321,24 +324,29 @@ func TestHandleMessage(t *testing.T) {
 	node := newTestNode("", testutils.TCMaxConnects, time.Minute).(*sNode)
 	defer testFreeNodes([]INode{node})
 
+	sett := node.GetSettings().GetConnSettings()
+
 	node.HandleFunc(1, nil)
-	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{1})); ok {
+	msg1 := message.NewMessage(sett, payload.NewPayload(1, []byte{1}))
+	if ok := node.handleMessage(nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
 	}
 
-	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b []byte) error {
+	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return errors.New("some error")
 	})
-	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{2})); ok {
+	msg2 := message.NewMessage(sett, payload.NewPayload(1, []byte{2}))
+	if ok := node.handleMessage(nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
 	}
 
-	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b []byte) error {
+	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return nil
 	})
-	if ok := node.handleMessage(nil, payload.NewPayload(1, []byte{3})); !ok {
+	msg3 := message.NewMessage(sett, payload.NewPayload(1, []byte{3}))
+	if ok := node.handleMessage(nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return
 	}

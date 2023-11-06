@@ -4,7 +4,29 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
+	"github.com/number571/go-peer/pkg/crypto/puzzle"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+)
+
+/*
+	MESSAGE FORMAT
+
+	P(HM) || HM || M
+	where
+		HM = H(M)
+		where
+			P - proof of work
+			H - hmac (auth-key)
+			M - message bytes
+*/
+
+const (
+	cWorkSize = 1
+
+	// third digits of PI
+	cAuthSalt = "8214808651_3282306647_0938446095_5058223172_5359408128"
 )
 
 var (
@@ -12,30 +34,42 @@ var (
 )
 
 type sMessage struct {
-	fPayload     payload.IPayload
-	fHashPayload []byte
+	fProof   []byte
+	fHash    []byte
+	fPayload payload.IPayload
 }
 
-func NewMessage(pPld payload.IPayload) IMessage {
+func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
+	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)
+	proofBytes := encoding.Uint64ToBytes(proof)
+
 	return &sMessage{
-		fPayload:     pPld,
-		fHashPayload: getHash(pPld.ToBytes()),
+		fProof:   proofBytes[:],
+		fHash:    hash,
+		fPayload: pPld,
 	}
 }
 
-func LoadMessage(pData []byte) IMessage {
-	// check Hash[uN]
-	if len(pData) < hashing.CSHA256Size {
+func LoadMessage(pSett ISettings, pData []byte) IMessage {
+	if len(pData) < encoding.CSizeUint64+hashing.CSHA256Size {
 		return nil
 	}
 
-	hashRecv := pData[:hashing.CSHA256Size]
-	pldBytes := pData[hashing.CSHA256Size:]
+	proofBytes := pData[:encoding.CSizeUint64]
+	gotHash := pData[encoding.CSizeUint64 : encoding.CSizeUint64+hashing.CSHA256Size]
+	pldBytes := pData[encoding.CSizeUint64+hashing.CSHA256Size:]
 
-	if !bytes.Equal(
-		hashRecv,
-		getHash(pldBytes),
-	) {
+	proofArray := [encoding.CSizeUint64]byte{}
+	copy(proofArray[:], proofBytes[:])
+
+	proof := encoding.BytesToUint64(proofArray)
+	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
+	if !puzzle.VerifyBytes(gotHash, proof) {
+		return nil
+	}
+
+	if !bytes.Equal(gotHash, getHash(pSett.GetNetworkKey(), pldBytes)) {
 		return nil
 	}
 
@@ -46,13 +80,20 @@ func LoadMessage(pData []byte) IMessage {
 	}
 
 	return &sMessage{
-		fPayload:     pld,
-		fHashPayload: hashRecv,
+		fProof:   proofArray[:],
+		fHash:    gotHash,
+		fPayload: pld,
 	}
 }
 
+func (p *sMessage) GetProof() uint64 {
+	proofArray := [encoding.CSizeUint64]byte{}
+	copy(proofArray[:], p.fProof[:])
+	return encoding.BytesToUint64(proofArray)
+}
+
 func (p *sMessage) GetHash() []byte {
-	return p.fHashPayload
+	return p.fHash
 }
 
 func (p *sMessage) GetPayload() payload.IPayload {
@@ -62,13 +103,18 @@ func (p *sMessage) GetPayload() payload.IPayload {
 func (p *sMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
-			p.fHashPayload,
+			p.fProof,
+			p.fHash,
 			p.fPayload.ToBytes(),
 		},
 		[]byte{},
 	)
 }
 
-func getHash(pBytes []byte) []byte {
-	return hashing.NewSHA256Hasher(pBytes).ToBytes()
+func getHash(networkKey string, pBytes []byte) []byte {
+	authKey := keybuilder.NewKeyBuilder(
+		cWorkSize,
+		[]byte(cAuthSalt),
+	).Build(networkKey)
+	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
 }

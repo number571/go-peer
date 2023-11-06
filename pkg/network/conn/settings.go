@@ -14,6 +14,7 @@ type sSettings struct {
 	fMutex sync.Mutex
 
 	FNetworkKey       string
+	FWorkSizeBits     uint64
 	FMessageSizeBytes uint64
 	FLimitVoidSize    uint64
 	FWaitReadDeadline time.Duration
@@ -24,6 +25,7 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FNetworkKey:       pSett.FNetworkKey,
+		FWorkSizeBits:     pSett.FWorkSizeBits,
 		FMessageSizeBytes: pSett.FMessageSizeBytes,
 		FLimitVoidSize:    pSett.FLimitVoidSize,
 		FWaitReadDeadline: pSett.FWaitReadDeadline,
@@ -60,6 +62,10 @@ func (p *sSettings) SetNetworkKey(pNetworkKey string) {
 	defer p.fMutex.Unlock()
 
 	p.FNetworkKey = pNetworkKey
+}
+
+func (p *sSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
 }
 
 func (p *sSettings) GetMessageSizeBytes() uint64 {

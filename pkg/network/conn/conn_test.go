@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -103,7 +104,9 @@ func TestClosedConn(t *testing.T) {
 		return
 	}
 
-	if err := conn.WritePayload(payload.NewPayload(1, []byte("aaa"))); err == nil {
+	pld := payload.NewPayload(1, []byte("aaa"))
+	msg := message.NewMessage(conn.GetSettings(), pld)
+	if err := conn.WriteMessage(msg); err == nil {
 		t.Error("success write payload to closed connection")
 		return
 	}
@@ -111,7 +114,7 @@ func TestClosedConn(t *testing.T) {
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
-	if _, err := conn.ReadPayload(readCh); err == nil {
+	if _, err := conn.ReadMessage(readCh); err == nil {
 		t.Error("success read payload from closed connection")
 		return
 	}
@@ -188,7 +191,9 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 
 	conn.GetSettings().SetNetworkKey(pNetworkKey)
 
-	if err := conn.WritePayload(payload.NewPayload(tcHead, []byte(tcBody))); err != nil {
+	pld := payload.NewPayload(tcHead, []byte(tcBody))
+	msg := message.NewMessage(conn.GetSettings(), pld)
+	if err := conn.WriteMessage(msg); err != nil {
 		t.Error(err)
 		return
 	}
@@ -196,13 +201,13 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
-	pld, err := conn.ReadPayload(readCh)
+	msgRecv, err := conn.ReadMessage(readCh)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if !bytes.Equal(pld.GetBody(), []byte(tcBody)) {
+	if !bytes.Equal(msgRecv.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("load payload not equal new payload")
 		return
 	}
@@ -237,14 +242,14 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 			readCh := make(chan struct{})
 			go func() { <-readCh }()
 
-			pld, err := conn.ReadPayload(readCh)
+			msg, err := conn.ReadMessage(readCh)
 			if err != nil {
 				break
 			}
 
 			ok := func() bool {
 				defer conn.Close()
-				return conn.WritePayload(pld) == nil
+				return conn.WriteMessage(msg) == nil
 			}()
 
 			if !ok {

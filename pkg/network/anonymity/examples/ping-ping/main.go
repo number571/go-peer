@@ -158,7 +158,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
 				FPoolCapacity: (1 << 4),
-				FDuration:     5 * time.Second,
+				FDuration:     time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
@@ -179,6 +179,7 @@ func nodeSettings(serviceAddress string) network.ISettings {
 		FMaxConnects:  1,
 		FConnSettings: connSettings(),
 		FWriteTimeout: time.Minute,
+		FReadTimeout:  time.Minute,
 	})
 }
 

@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -14,15 +14,16 @@ type IConn interface {
 	GetSettings() ISettings
 	GetSocket() net.Conn
 
-	WritePayload(payload.IPayload) error
-	ReadPayload(chan struct{}) (payload.IPayload, error)
+	WriteMessage(message.IMessage) error
+	ReadMessage(chan struct{}) (message.IMessage, error)
 }
 
 type ISettings interface {
+	message.ISettings
+
 	// for subsequent inheritance on multiple connections
 	SetNetworkKey(string)
 
-	GetNetworkKey() string
 	GetMessageSizeBytes() uint64
 	GetLimitVoidSize() uint64
 	GetWaitReadDeadline() time.Duration

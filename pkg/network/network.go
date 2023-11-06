@@ -6,11 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -45,9 +44,8 @@ func (p *sNode) GetSettings() ISettings {
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
-func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
-	hasher := hashing.NewSHA256Hasher(pPld.ToBytes())
-	_ = p.inMappingWithSet(hasher.ToBytes()) // node can redirect received message
+func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
+	_ = p.inMappingWithSet(pMsg.GetHash()) // node can redirect received message
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 
@@ -59,7 +57,7 @@ func (p *sNode) BroadcastPayload(pPld payload.IPayload) error {
 
 		chErr := make(chan error)
 		go func(c conn.IConn) {
-			chErr <- c.WritePayload(pPld)
+			chErr <- c.WriteMessage(pMsg)
 		}(c)
 
 		go func(a string, c conn.IConn) {
@@ -230,12 +228,12 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 		)
 
 		go func() {
-			pld, err := pConn.ReadPayload(readerCh)
+			msg, err := pConn.ReadMessage(readerCh)
 			if err != nil {
 				returnCh <- false
 				return
 			}
-			returnCh <- p.handleMessage(pConn, pld)
+			returnCh <- p.handleMessage(pConn, msg)
 		}()
 
 		<-readerCh
@@ -254,21 +252,21 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // Processes the message for correctness and redirects it to the handler function.
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
-func (p *sNode) handleMessage(pConn conn.IConn, pPld payload.IPayload) bool {
+func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
 	// check message in mapping by hash
-	hash := hashing.NewSHA256Hasher(pPld.ToBytes()).ToBytes()
-	if p.inMappingWithSet(hash) {
+	if p.inMappingWithSet(pMsg.GetHash()) {
 		return true
 	}
 
 	// get function by head
-	f, ok := p.getFunction(pPld.GetHead())
+	pld := pMsg.GetPayload()
+	f, ok := p.getFunction(pld.GetHead())
 	if !ok || f == nil {
 		// function is not found = protocol error
 		return false
 	}
 
-	if err := f(p, pConn, pPld.GetBody()); err != nil {
+	if err := f(p, pConn, pMsg); err != nil {
 		// function error = protocol error
 		return false
 	}

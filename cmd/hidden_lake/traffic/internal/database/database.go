@@ -129,13 +129,7 @@ func (p *sKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
 		return nil, errors.NewError("message undefined")
 	}
 
-	msg := message.LoadMessage(
-		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     p.Settings().GetWorkSizeBits(),
-			FMessageSizeBytes: p.Settings().GetMessageSizeBytes(),
-		}),
-		data,
-	)
+	msg := message.LoadMessage(p.Settings(), data)
 	if msg == nil {
 		panic("message is nil")
 	}

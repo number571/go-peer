@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IHandlerF func(INode, conn.IConn, []byte) error
+type IHandlerF func(INode, conn.IConn, message.IMessage) error
 
 type INode interface {
 	types.ICommand
@@ -20,7 +20,7 @@ type INode interface {
 	DelConnection(string) error
 
 	HandleFunc(uint64, IHandlerF) INode
-	BroadcastPayload(payload.IPayload) error
+	BroadcastMessage(message.IMessage) error
 }
 
 type ISettings interface {

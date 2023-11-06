@@ -2,7 +2,6 @@ package message
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -44,62 +43,6 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
-func TestInvalidConvert(t *testing.T) {
-	t.Parallel()
-
-	if res := FromBytesToString([]byte{123}); res != "" {
-		t.Error("success convert invalid bytes to string")
-		return
-	}
-	if res := FromStringToBytes("123"); res != nil {
-		t.Error("success convert invalid string to bytes (split)")
-		return
-	}
-	if res := FromStringToBytes("123" + cSeparator + "!@#"); res != nil {
-		t.Error("success convert invalid string to bytes (hex decode)")
-		return
-	}
-}
-
-func TestConvert(t *testing.T) {
-	t.Parallel()
-
-	params := NewSettings(&SSettings{
-		FMessageSizeBytes: (2 << 10),
-		FWorkSizeBits:     testutils.TCWorkSize,
-	})
-
-	msgBytes, err := os.ReadFile("test_binary.msg")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	msg1 := LoadMessage(params, FromBytesToString(msgBytes))
-	if msg1 == nil {
-		t.Error("fromBytesToString result is invalid")
-		return
-	}
-	if !bytes.Equal(msg1.ToBytes(), msgBytes) {
-		t.Error("msg1 bytes not equal with original")
-		return
-	}
-
-	msgStrBytes, err := os.ReadFile("test_string.msg")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	msg2 := LoadMessage(params, FromStringToBytes(string(msgStrBytes)))
-	if msg2 == nil {
-		t.Error("fromStringToBytes result is invalid")
-		return
-	}
-	if msg2.ToString() != string(msgStrBytes) {
-		t.Error("msg2 string not equal with original")
-		return
-	}
-}
-
 func TestInvalidMessage(t *testing.T) {
 	t.Parallel()
 
@@ -118,7 +61,7 @@ func TestInvalidMessage(t *testing.T) {
 		return
 	}
 
-	if msg := LoadMessage(params, []byte(cSeparator)); msg != nil {
+	if msg := LoadMessage(params, []byte(CSeparator)); msg != nil {
 		t.Error("success unmarshal invalid message")
 		return
 	}
@@ -148,24 +91,14 @@ func TestMessage(t *testing.T) {
 		FWorkSizeBits:     testutils.TCWorkSize,
 	})
 
-	msgBytes, err := os.ReadFile("test_binary.msg")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	msg1 := LoadMessage(params, msgBytes)
+	msg1 := LoadMessage(params, testutils.TCBinaryMessage)
 	if msg1 == nil {
 		t.Error("failed load message")
 		return
 	}
 	testMessage(t, msg1)
 
-	msgStrBytes, err := os.ReadFile("test_string.msg")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	msg2 := LoadMessage(params, string(msgStrBytes))
+	msg2 := LoadMessage(params, testutils.TCStringMessage)
 	if msg2 == nil {
 		t.Error("failed load message")
 		return

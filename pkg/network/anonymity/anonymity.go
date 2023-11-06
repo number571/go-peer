@@ -18,6 +18,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -102,7 +103,8 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 
 func (p *sNode) HandleMessage(pMsg message.IMessage) error {
 	handler := p.handleWrapper()
-	return handler(p.fNetwork, nil, pMsg.ToBytes())
+	netMsg := p.newNetworkMessage(pMsg)
+	return handler(p.fNetwork, nil, netMsg)
 }
 
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
@@ -173,6 +175,16 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	}
 }
 
+func (p *sNode) newNetworkMessage(pMsg message.IMessage) net_message.IMessage {
+	return net_message.NewMessage(
+		p.fNetwork.GetSettings().GetConnSettings(),
+		payload.NewPayload(
+			p.fSettings.GetNetworkMask(),
+			pMsg.ToBytes(),
+		),
+	)
+}
+
 func (p *sNode) runQueue() error {
 	if err := p.fQueue.Run(); err != nil {
 		return errors.WrapError(err, "run queue")
@@ -188,7 +200,8 @@ func (p *sNode) runQueue() error {
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 			// store hash and push message to network
-			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+			netMsg := p.newNetworkMessage(msg)
+			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok {
 				// internal logger
 				continue
 			}
@@ -206,25 +219,20 @@ func (p *sNode) runQueue() error {
 }
 
 func (p *sNode) handleWrapper() network.IHandlerF {
-	return func(_ network.INode, pConn conn.IConn, pMsgBytes []byte) error {
+	return func(_ network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 		// enrich logger
 		logBuilder.WithConn(pConn)
 
 		client := p.fQueue.GetClient()
-		settings := client.GetSettings()
-
 		msg := message.LoadMessage(
-			message.NewSettings(&message.SSettings{
-				FWorkSizeBits:     settings.GetWorkSizeBits(),
-				FMessageSizeBytes: settings.GetMessageSizeBytes(),
-			}),
-			pMsgBytes,
+			client.GetSettings(),
+			pMsg.GetPayload().GetBody(),
 		)
 
 		// try store hash of message
-		if ok, err := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+		if ok, err := p.storeHashWithBroadcast(logBuilder, msg, pMsg); !ok {
 			// internal logger
 			if err != nil {
 				return errors.WrapError(err, "store hash with broadcast")
@@ -357,7 +365,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	return nil
 }
 
-func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg message.IMessage) (bool, error) {
+func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg message.IMessage, pNetMsg net_message.IMessage) (bool, error) {
 	if pMsg == nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnMessageNull))
 		return false, errors.NewError("message is nil")
@@ -406,7 +414,7 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 	// do not send data if than already received
 	if !hashIsExist {
 		// broadcast message to network
-		if err := p.networkBroadcast(pMsg); err != nil {
+		if err := p.networkBroadcast(pNetMsg); err != nil {
 			p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
@@ -415,18 +423,11 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 	return true, nil
 }
 
-func (p *sNode) networkBroadcast(pMsg message.IMessage) error {
+func (p *sNode) networkBroadcast(pMsg net_message.IMessage) error {
 	// redirect message to another nodes
-	err := p.fNetwork.BroadcastPayload(
-		payload.NewPayload(
-			p.fSettings.GetNetworkMask(),
-			pMsg.ToBytes(),
-		),
-	)
-	if err != nil {
+	if err := p.fNetwork.BroadcastMessage(pMsg); err != nil {
 		return errors.WrapError(err, "network broadcast payload")
 	}
-
 	return nil
 }
 

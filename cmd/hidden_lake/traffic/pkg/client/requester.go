@@ -84,13 +84,7 @@ func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
 		return nil, errors.WrapError(err, "get message (requester)")
 	}
 
-	msg := message.LoadMessage(
-		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     p.fParams.GetWorkSizeBits(),
-			FMessageSizeBytes: p.fParams.GetMessageSizeBytes(),
-		}),
-		string(resp),
-	)
+	msg := message.LoadMessage(p.fParams, string(resp))
 	if msg == nil {
 		return nil, errors.NewError("load message")
 	}

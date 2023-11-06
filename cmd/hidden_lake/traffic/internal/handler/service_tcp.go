@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/internal/msgconv"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/payload"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -24,20 +24,17 @@ import (
 func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
 
-	return func(pNode network.INode, pConn conn.IConn, pMsgBytes []byte) error {
+	return func(pNode network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
 			WithConn(pConn).
-			WithSize(len(pMsgBytes))
+			WithSize(len(pMsg.ToBytes()))
 
 		msg := message.LoadMessage(
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: pCfg.GetSettings().GetMessageSizeBytes(),
-				FWorkSizeBits:     pCfg.GetSettings().GetWorkSizeBits(),
-			}),
-			pMsgBytes,
+			pCfg.GetSettings(),
+			pMsg.GetPayload().GetBody(),
 		)
 		if msg == nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
@@ -80,13 +77,12 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			return errors.WrapError(err, "put message to database")
 		}
 
-		pld := payload.NewPayload(hls_settings.CNetworkMask, pMsgBytes)
-		if err := pNode.BroadcastPayload(pld); err != nil {
+		if err := pNode.BroadcastMessage(pMsg); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
 
-		msgString := message.FromBytesToString(pMsgBytes)
+		msgString := msgconv.FromBytesToString(msg.ToBytes())
 		if msgString == "" {
 			panic("got invalid result (func=FromBytesToString)")
 		}

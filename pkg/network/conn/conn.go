@@ -13,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 /*
@@ -25,16 +24,16 @@ import (
 		LV  = L(V)
 		EM  = E(M)
 		where
-			E - encrypt (use cipher-key)
-			H - hmac (use auth-key)
+			E - encrypt (cipher-key)
+			H - hmac (auth-key)
 			L - length
 			M - message bytes
 			V - void bytes
 */
 
 const (
-	// IV + Hash + PayloadHead
-	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + encoding.CSizeUint64
+	// IV + Hash + PayloadHead + Proof
+	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
 
 	// IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
 	cEncryptRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
@@ -99,16 +98,15 @@ func (p *sConn) Close() error {
 	return p.fSocket.Close()
 }
 
-func (p *sConn) WritePayload(pPld payload.IPayload) error {
+func (p *sConn) WriteMessage(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
 	prng := random.NewStdPRNG()
 	randVoidSize := prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1)
-	voidBytes := prng.GetBytes(randVoidSize)
 
-	msgBytes := message.NewMessage(pPld).ToBytes()
-	encMsgBytes := p.getCipher().EncryptBytes(msgBytes)
+	voidBytes := prng.GetBytes(randVoidSize)
+	encMsgBytes := p.getCipher().EncryptBytes(pMsg.ToBytes())
 
 	err := p.sendBytes(bytes.Join(
 		[][]byte{
@@ -130,7 +128,7 @@ func (p *sConn) WritePayload(pPld payload.IPayload) error {
 	return nil
 }
 
-func (p *sConn) ReadPayload(pChRead chan struct{}) (payload.IPayload, error) {
+func (p *sConn) ReadMessage(pChRead chan struct{}) (message.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
 	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
@@ -156,12 +154,12 @@ func (p *sConn) ReadPayload(pChRead chan struct{}) (payload.IPayload, error) {
 
 	// try unpack message from bytes
 	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
-	msg := message.LoadMessage(msgBytes)
+	msg := message.LoadMessage(p.fSettings, msgBytes)
 	if msg == nil {
 		return nil, errors.NewError("got invalid message bytes")
 	}
 
-	return msg.GetPayload(), nil
+	return msg, nil
 }
 
 func (p *sConn) sendBytes(pBytes []byte) error {

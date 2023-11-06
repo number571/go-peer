@@ -6,25 +6,31 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/payload"
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
-	tcHead = 12345
-	tcBody = "hello, world!"
+	tcHead       = 12345
+	tcBody       = "hello, world!"
+	tcNetworkKey = "network_key"
 )
 
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
-	msg := NewMessage(pld)
+	sett := NewSettings(&SSettings{
+		FWorkSizeBits: testutils.TCWorkSize,
+		FNetworkKey:   tcNetworkKey,
+	})
+	msg := NewMessage(sett, pld)
 
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
 		return
 	}
 
-	if !bytes.Equal(msg.GetHash(), getHash(pld.ToBytes())) {
+	if !bytes.Equal(msg.GetHash(), getHash(tcNetworkKey, pld.ToBytes())) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -34,19 +40,19 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg1 := LoadMessage(msg.ToBytes())
+	msg1 := LoadMessage(sett, msg.ToBytes())
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
 		t.Error("load message not equal new message")
 		return
 	}
 
-	if msg := LoadMessage([]byte{1}); msg != nil {
+	if msg := LoadMessage(sett, []byte{1}); msg != nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
 	prng := random.NewStdPRNG()
-	if msg := LoadMessage(prng.GetBytes(64)); msg != nil {
+	if msg := LoadMessage(sett, prng.GetBytes(64)); msg != nil {
 		t.Error("success load incorrect message")
 		return
 	}
@@ -54,11 +60,11 @@ func TestMessage(t *testing.T) {
 	msgBytes := bytes.Join(
 		[][]byte{
 			{}, // pass payload
-			getHash([]byte{}),
+			getHash("_", []byte{}),
 		},
 		[]byte{},
 	)
-	if msg := LoadMessage(msgBytes); msg != nil {
+	if msg := LoadMessage(sett, msgBytes); msg != nil {
 		t.Error("success load incorrect payload")
 		return
 	}

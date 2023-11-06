@@ -431,18 +431,14 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	if err := handler(nil, nil, msg.ToBytes()); err != nil {
+	netMsg := node.newNetworkMessage(msg)
+	if err := handler(nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := handler(nil, nil, msg.ToBytes()); err != nil {
+	if err := handler(nil, nil, netMsg); err != nil {
 		t.Error("repeated message:", err.Error())
-		return
-	}
-
-	if err := handler(nil, nil, nil); err == nil {
-		t.Error("success handle null message")
 		return
 	}
 
@@ -465,7 +461,8 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	if err := handler(nil, nil, msg2.ToBytes()); err != nil {
+	netMsg2 := node.newNetworkMessage(msg2)
+	if err := handler(nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -482,7 +479,8 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	if err := handler(nil, nil, msg3.ToBytes()); err != nil {
+	netMsg3 := node.newNetworkMessage(msg3)
+	if err := handler(nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -499,7 +497,8 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	if err := handler(nil, nil, msg4.ToBytes()); err != nil {
+	netMsg4 := node.newNetworkMessage(msg4)
+	if err := handler(nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -526,19 +525,20 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
+	netMsg := node.newNetworkMessage(msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, nil); ok || err == nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, nil, nil); ok || err == nil {
 		t.Error("success use store function with null message")
 		return
 	}
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg); !ok || err != nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
 	}
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg); ok || err != nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); ok || err != nil {
 		switch {
 		case ok:
 			t.Error("success store one message again")
@@ -549,7 +549,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	node.GetWrapperDB().Set(nil)
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg); ok || err == nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); ok || err == nil {
 		t.Error("success use store function with null database")
 		return
 	}
