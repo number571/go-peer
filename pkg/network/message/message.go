@@ -10,18 +10,6 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
-/*
-	MESSAGE FORMAT
-
-	P(HM) || HM || M
-	where
-		HM = H(M)
-		where
-			P - proof of work
-			H - hmac (auth-key)
-			M - message bytes
-*/
-
 const (
 	cWorkSize = 1
 

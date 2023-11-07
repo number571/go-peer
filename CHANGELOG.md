@@ -11,6 +11,7 @@
 - Update `pkg/storage/database`: append tryRecover function to NewKeyValueDB
 - Update `pkg/network/message`: append Proof field to IMessage interface
 - Update `pkg/network`: BroadcastPayload -> BroadcastMessage, (WritePayload, ReadPayload) -> (WriteMessage, ReadMessage)
+- Update `pkg`: append doc.go files to all packages 
 
 ### CHANGES
 

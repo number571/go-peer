@@ -15,22 +15,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/message"
 )
 
-/*
-	NETWORK MESSAGE FORMAT
-
-	E( LEM || LV || H(LEM||LV) || H(EM||V) ) || EM || V
-	where
-		LEM = L(EM)
-		LV  = L(V)
-		EM  = E(M)
-		where
-			E - encrypt (cipher-key)
-			H - hmac (auth-key)
-			L - length
-			M - message bytes
-			V - void bytes
-*/
-
 const (
 	// IV + Hash + PayloadHead + Proof
 	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
