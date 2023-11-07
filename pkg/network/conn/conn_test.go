@@ -29,6 +29,7 @@ func TestSettings(t *testing.T) {
 	t.Parallel()
 
 	sett := NewSettings(&SSettings{
+		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessageSizeBytes: testutils.TCMessageSize,
 		FWaitReadDeadline: time.Hour,
 		FReadDeadline:     time.Minute,
@@ -87,6 +88,7 @@ func TestClosedConn(t *testing.T) {
 
 	conn, err := NewConn(
 		NewSettings(&SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
@@ -144,6 +146,7 @@ func TestInvalidConn(t *testing.T) {
 
 	_, err := NewConn(
 		NewSettings(&SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
@@ -170,6 +173,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 
 	conn, err := NewConn(
 		NewSettings(&SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     time.Minute,
@@ -229,6 +233,7 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 
 			conn := LoadConn(
 				NewSettings(&SSettings{
+					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
 					FWaitReadDeadline: time.Hour,
 					FReadDeadline:     time.Minute,

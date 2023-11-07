@@ -407,6 +407,7 @@ func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 		FReadTimeout:  timeout,
 		FWriteTimeout: timeout,
 		FConnSettings: conn.NewSettings(&conn.SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadDeadline: time.Hour,
 			FReadDeadline:     timeout,

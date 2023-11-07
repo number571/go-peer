@@ -21,8 +21,3 @@ type IConverter interface {
 	ToString() string
 	ToBytes() []byte
 }
-
-type IParameter interface {
-	GetType() string
-	GetSize() uint64
-}

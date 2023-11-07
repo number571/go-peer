@@ -17,7 +17,6 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
-	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
@@ -708,6 +707,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
 					FWaitReadDeadline: time.Hour,
 					FReadDeadline:     time.Minute,
@@ -740,7 +740,8 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 func testFreeNodes(nodes []INode, typeDB int) {
 	for _, node := range nodes {
 		node.GetWrapperDB().Close()
-		types.StopAll([]types.ICommand{node, node.GetNetworkNode()})
+		node.Stop()
+		node.GetNetworkNode().Stop()
 	}
 	testDeleteDB(typeDB)
 }

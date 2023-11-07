@@ -21,6 +21,7 @@
 - Update `pkg/client`: replace init check of message from custom to msg.IsValid
 - Update `pkg/client/message`: move convert functions to internal/msgconv
 - Update `pkg`: _examples/ -> examples/
+- Update `pkg/types`: move CloseAll, StopAll functions to internal/interrupt
 
 <!-- ... -->
 

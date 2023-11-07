@@ -9,6 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
@@ -120,11 +121,11 @@ func testAllFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string)
 		os.RemoveAll(pathDB)
 		os.RemoveAll(pathCfg)
 	}()
-	types.StopAll([]types.ICommand{
+	interrupt.StopAll([]types.ICommand{
 		node,
 		node.GetNetworkNode(),
 	})
-	types.CloseAll([]types.ICloser{
+	interrupt.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
 	})
@@ -233,6 +234,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,

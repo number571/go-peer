@@ -147,6 +147,7 @@ func nodeSettings(serviceAddress string) network.ISettings {
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
+		FWorkSizeBits:     10,
 		FMessageSizeBytes: msgSize,
 		FWaitReadDeadline: time.Hour,
 		FReadDeadline:     time.Minute,

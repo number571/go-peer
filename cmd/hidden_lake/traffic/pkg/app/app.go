@@ -15,6 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -163,11 +164,11 @@ func (p *sApp) Stop() error {
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	err := pkg_errors.AppendError(
-		types.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.ICommand{
 			p.fConnKeeper,
 			p.fConnKeeper.GetNetworkNode(),
 		}),
-		types.CloseAll([]types.ICloser{
+		interrupt.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
 			p.fWrapperDB,

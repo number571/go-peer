@@ -10,9 +10,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/types"
 )
 
 const (
@@ -30,7 +30,7 @@ func main() {
 
 	var (
 		mod     = strings.ToUpper(os.Args[1])
-		param   types.IParameter
+		param   crypto.IParameter
 		pubKey  asymmetric.IPubKey
 		privKey asymmetric.IPrivKey
 	)
@@ -87,7 +87,7 @@ func readUntilEOF() []byte {
 	return res
 }
 
-func getMessageSize(param types.IParameter, dataValue []byte) uint64 {
+func getMessageSize(param crypto.IParameter, dataValue []byte) uint64 {
 	defaultSize := param.GetSize() << 1                // init size by key size
 	return (defaultSize + uint64(len(dataValue))) << 1 // size with hex encode
 }

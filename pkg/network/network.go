@@ -10,7 +10,6 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/types"
 )
 
 var (
@@ -138,18 +137,18 @@ func (p *sNode) Stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	toClose := make([]types.ICloser, 0, len(p.fConnections)+1)
+	var err error
 	if p.fListener != nil {
-		toClose = append(toClose, p.fListener)
+		err = errors.AppendError(err, p.fListener.Close())
 	}
 
 	for id, conn := range p.fConnections {
-		toClose = append(toClose, conn)
 		delete(p.fConnections, id)
+		err = errors.AppendError(err, conn.Close())
 	}
 
-	if err := types.CloseAll(toClose); err != nil {
-		return errors.WrapError(err, "stop node")
+	if err != nil {
+		return errors.WrapError(err, "stop network node")
 	}
 	return nil
 }

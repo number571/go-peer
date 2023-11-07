@@ -17,6 +17,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -173,12 +174,12 @@ func (p *sApp) Stop() error {
 
 	p.fNode.HandleFunc(pkg_settings.CServiceMask, nil)
 	err := pkg_errors.AppendError(
-		types.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.ICommand{
 			p.fNode,
 			p.fConnKeeper,
 			p.fNode.GetNetworkNode(),
 		}),
-		types.CloseAll([]types.ICloser{
+		interrupt.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
 			p.fNode.GetWrapperDB(),

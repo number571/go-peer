@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -63,8 +64,8 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	types.StopAll([]types.ICommand{connKeeper})
-	types.CloseAll([]types.ICloser{srv, wDB})
+	interrupt.StopAll([]types.ICommand{connKeeper})
+	interrupt.CloseAll([]types.ICloser{srv, wDB})
 }
 
 func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
@@ -120,6 +121,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,
@@ -164,6 +166,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,

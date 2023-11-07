@@ -3,6 +3,7 @@ package anonymity
 import (
 	"sync"
 
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/wrapper"
 )
@@ -44,5 +45,10 @@ func (p *sWrapperDB) Close() error {
 	if !ok {
 		return nil
 	}
-	return db.Close()
+
+	p.fWrapper.Set(nil)
+	if err := db.Close(); err != nil {
+		return errors.WrapError(err, "close wrapped database")
+	}
+	return nil
 }

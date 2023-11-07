@@ -1,2 +1,2 @@
-!_default_cfg/*
-!_default_cfg/docker/*
+!_configs/*
+!_configs/docker/*

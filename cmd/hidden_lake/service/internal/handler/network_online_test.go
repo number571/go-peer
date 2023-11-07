@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -99,11 +100,11 @@ func testAllOnlineFree(node anonymity.INode, pathCfg, pathDB string) {
 		os.RemoveAll(pathCfg + "_push2")
 		os.RemoveAll(pathDB + "_push2")
 	}()
-	types.StopAll([]types.ICommand{
+	interrupt.StopAll([]types.ICommand{
 		node,
 		node.GetNetworkNode(),
 	})
-	types.CloseAll([]types.ICloser{
+	interrupt.CloseAll([]types.ICloser{
 		node.GetWrapperDB(),
 	})
 }

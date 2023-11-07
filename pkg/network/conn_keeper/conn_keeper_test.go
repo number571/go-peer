@@ -101,6 +101,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
 				FReadDeadline:     time.Minute,

@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 	pkg_errors "github.com/number571/go-peer/pkg/errors"
@@ -123,7 +124,7 @@ func (p *sApp) Stop() error {
 	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	err := types.CloseAll([]types.ICloser{
+	err := interrupt.CloseAll([]types.ICloser{
 		p.fIntServiceHTTP,
 		p.fIncServiceHTTP,
 		p.fServicePPROF,

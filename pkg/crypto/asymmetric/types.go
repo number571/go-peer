@@ -7,7 +7,7 @@ import (
 
 type IAddress interface {
 	types.IConverter
-	types.IParameter
+	crypto.IParameter
 }
 
 type IListPubKeys interface {
@@ -20,7 +20,7 @@ type IListPubKeys interface {
 type IPubKey interface {
 	crypto.IEncrypter
 	types.IConverter
-	types.IParameter
+	crypto.IParameter
 
 	GetAddress() IAddress
 	VerifyBytes([]byte, []byte) bool
@@ -29,7 +29,7 @@ type IPubKey interface {
 type IPrivKey interface {
 	crypto.IDecrypter
 	types.IConverter
-	types.IParameter
+	crypto.IParameter
 
 	SignBytes([]byte) []byte
 	GetPubKey() IPubKey

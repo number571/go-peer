@@ -19,7 +19,7 @@ docker-default: docker-build docker-run
 docker-build: docker-configs
 	docker-compose build
 docker-configs:
-	cp ./_default_cfg/docker/* ./_mounted
+	cp ./_configs/docker/* ./_mounted
 docker-run: 
 	docker-compose up
 docker-clean:
