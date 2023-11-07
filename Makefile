@@ -11,7 +11,7 @@ _TEST_RESULT_PATH=./test/result
 _TEST_PPROF_PATH=./test/pprof
 
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
-_GO_TEST_LIST=go list ./... | grep -v /examples/
+_GO_LIST=go list ./...
 
 .PHONY: default clean \
 	test-run test-coverage test-coverage-view \
@@ -29,16 +29,19 @@ clean:
 # for i in {1..100}; do echo $i; go test -count=1 ./...; done;
 
 test-run: clean
+	go vet `$(_GO_LIST)`;
+	$(_CHECK_ERROR);
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -cover -count=1 `$(_GO_TEST_LIST)`; \
+		go test -race -cover -count=1 `$(_GO_LIST)`; \
 		$(_CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage: clean
-	go test -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
+	go fmt `$(_GO_LIST)`;
+	go test -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_LIST)`
 	$(_CHECK_ERROR);
 
 test-coverage-view:
