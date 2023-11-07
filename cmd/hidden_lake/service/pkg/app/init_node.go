@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -12,10 +13,13 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/client"
 )
 
 func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
-	queueDuration := time.Duration(pCfg.GetSettings().GetQueuePeriodMS()) * time.Millisecond
+	cfgSettings := pCfg.GetSettings()
+
+	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
 	connDeadline := pkg_settings.GetConnDeadline(queueDuration)
 
 	return anonymity.NewNode(
@@ -38,8 +42,9 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FWriteTimeout: queueDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       pCfg.GetNetworkKey(),
-					FMessageSizeBytes: pCfg.GetSettings().GetMessageSizeBytes(),
-					FLimitVoidSize:    pCfg.GetSettings().GetLimitVoidSizeBytes(),
+					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
+					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
+					FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
 					FReadDeadline:     connDeadline,
 					FWriteDeadline:    connDeadline,
@@ -52,7 +57,13 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
 				FDuration:     queueDuration,
 			}),
-			pkg_settings.InitClient(pCfg.GetSettings(), pPrivKey),
+			client.NewClient(
+				message.NewSettings(&message.SSettings{
+					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
+					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
+				}),
+				pPrivKey,
+			),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

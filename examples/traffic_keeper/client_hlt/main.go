@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/filesystem"
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(string(readPrivKey))
-	client := hls_settings.InitClient(sett, privKey)
+	client := client.NewClient(sett, privKey)
 
 	if len(os.Args) < 2 {
 		panic("len os.Args < 2")
