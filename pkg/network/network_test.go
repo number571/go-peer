@@ -50,7 +50,7 @@ func testSettings(t *testing.T, n int) {
 	case 1:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -63,7 +63,7 @@ func testSettings(t *testing.T, n int) {
 	case 2:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -76,7 +76,7 @@ func testSettings(t *testing.T, n int) {
 	case 3:
 		_ = NewSettings(&SSettings{
 			FAddress:     "test",
-			FCapacity:    testutils.TCCapacity,
+			FQueueSize:   testutils.TCCapacity,
 			FMaxConnects: testutils.TCMaxConnects,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -89,7 +89,7 @@ func testSettings(t *testing.T, n int) {
 	case 4:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
@@ -402,7 +402,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 	sett := NewSettings(&SSettings{
 		FAddress:      pAddr,
-		FCapacity:     testutils.TCCapacity,
+		FQueueSize:    testutils.TCCapacity,
 		FMaxConnects:  pMaxConns,
 		FReadTimeout:  timeout,
 		FWriteTimeout: timeout,

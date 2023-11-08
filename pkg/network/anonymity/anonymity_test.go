@@ -710,7 +710,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      addr,
-				FCapacity:     testutils.TCCapacity,
+				FQueueSize:    testutils.TCCapacity,
 				FMaxConnects:  testutils.TCMaxConnects,
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,

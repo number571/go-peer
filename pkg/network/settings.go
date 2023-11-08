@@ -13,7 +13,7 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FAddress      string
-	FCapacity     uint64
+	FQueueSize    uint64
 	FMaxConnects  uint64
 	FReadTimeout  time.Duration
 	FWriteTimeout time.Duration
@@ -23,7 +23,7 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FAddress:      pSett.FAddress,
-		FCapacity:     pSett.FCapacity,
+		FQueueSize:    pSett.FQueueSize,
 		FMaxConnects:  pSett.FMaxConnects,
 		FReadTimeout:  pSett.FReadTimeout,
 		FWriteTimeout: pSett.FWriteTimeout,
@@ -32,8 +32,8 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FCapacity == 0 {
-		panic(`p.FCapacity == 0`)
+	if p.FQueueSize == 0 {
+		panic(`p.FQueueSize == 0`)
 	}
 	if p.FMaxConnects == 0 {
 		panic(`p.FMaxConnects == 0`)
@@ -54,8 +54,8 @@ func (p *sSettings) GetAddress() string {
 	return p.FAddress
 }
 
-func (p *sSettings) GetCapacity() uint64 {
-	return p.FCapacity
+func (p *sSettings) GetQueueSize() uint64 {
+	return p.FQueueSize
 }
 
 func (p *sSettings) GetMaxConnects() uint64 {

@@ -24,6 +24,10 @@
 - Update `pkg`: _examples/ -> examples/
 - Update `pkg/types`: move CloseAll, StopAll functions to internal/interrupt
 
+### BUG FIXES
+
+- Update `pkg/network`: rewrite inMapWithSet -> inQueueWithSet
+
 <!-- ... -->
 
 ## v1.5.20

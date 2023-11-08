@@ -96,7 +96,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 			FDuration:    pDuration,
 		}),
 		network.NewNode(network.NewSettings(&network.SSettings{
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,

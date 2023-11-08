@@ -116,7 +116,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 
 	node := network.NewNode(
 		network.NewSettings(&network.SSettings{
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
@@ -161,7 +161,7 @@ func testNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      addr,
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,

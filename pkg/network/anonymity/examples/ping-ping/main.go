@@ -175,7 +175,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 func nodeSettings(serviceAddress string) network.ISettings {
 	return network.NewSettings(&network.SSettings{
 		FAddress:      serviceAddress,
-		FCapacity:     (1 << 10),
+		FQueueSize:    (1 << 10),
 		FMaxConnects:  1,
 		FConnSettings: connSettings(),
 		FWriteTimeout: time.Minute,

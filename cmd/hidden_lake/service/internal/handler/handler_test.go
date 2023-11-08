@@ -229,7 +229,7 @@ func testNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      addr,
-			FCapacity:     testutils.TCCapacity,
+			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,

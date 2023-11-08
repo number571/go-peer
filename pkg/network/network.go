@@ -20,9 +20,16 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
-	fHashMapping  map[string]struct{}
+	fQueueMap     *sQueueMap
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
+}
+
+type sQueueMap struct {
+	fMutex sync.Mutex
+	fMap   map[string]struct{}
+	fQueue []string
+	fIndex int
 }
 
 // Creating a node object managed by connections with multiple nodes.
@@ -31,9 +38,16 @@ type sNode struct {
 func NewNode(pSett ISettings) INode {
 	return &sNode{
 		fSettings:     pSett,
-		fHashMapping:  make(map[string]struct{}, pSett.GetCapacity()),
-		fConnections:  make(map[string]conn.IConn),
-		fHandleRoutes: make(map[uint64]IHandlerF),
+		fQueueMap:     newQueueMap(pSett.GetQueueSize()),
+		fConnections:  make(map[string]conn.IConn, pSett.GetMaxConnects()),
+		fHandleRoutes: make(map[uint64]IHandlerF, 128),
+	}
+}
+
+func newQueueMap(pSize uint64) *sQueueMap {
+	return &sQueueMap{
+		fQueue: make([]string, pSize),
+		fMap:   make(map[string]struct{}, pSize),
 	}
 }
 
@@ -44,7 +58,7 @@ func (p *sNode) GetSettings() ISettings {
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
-	_ = p.inMappingWithSet(pMsg.GetHash()) // node can redirect received message
+	_ = p.inQueueWithSet(pMsg.GetHash()) // node can redirect received message
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 
@@ -253,7 +267,7 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
 	// check message in mapping by hash
-	if p.inMappingWithSet(pMsg.GetHash()) {
+	if p.inQueueWithSet(pMsg.GetHash()) {
 		return true
 	}
 
@@ -284,19 +298,25 @@ func (p *sNode) hasMaxConnSize() bool {
 
 // Checks the hash of the message for existence in the hash store.
 // Returns true if the hash already existed, otherwise false.
-func (p *sNode) inMappingWithSet(pHash []byte) bool {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sNode) inQueueWithSet(pHash []byte) bool {
+	p.fQueueMap.fMutex.Lock()
+	defer p.fQueueMap.fMutex.Unlock()
 
+	// hash already exists in queue
 	sHash := encoding.HexEncode(pHash)
-
-	// skey already exists
-	if _, ok := p.fHashMapping[sHash]; ok {
+	if _, ok := p.fQueueMap.fMap[sHash]; ok {
 		return true
 	}
 
-	// push skey to mapping
-	p.fHashMapping[sHash] = struct{}{}
+	// delete old value in queue
+	delete(p.fQueueMap.fMap, p.fQueueMap.fQueue[p.fQueueMap.fIndex])
+
+	// push hash to queue
+	p.fQueueMap.fQueue[p.fQueueMap.fIndex] = sHash
+	p.fQueueMap.fMap[sHash] = struct{}{}
+
+	// increment queue index
+	p.fQueueMap.fIndex = (p.fQueueMap.fIndex + 1) % len(p.fQueueMap.fQueue)
 	return false
 }
 
