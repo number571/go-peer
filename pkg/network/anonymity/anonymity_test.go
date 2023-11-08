@@ -334,10 +334,18 @@ func TestEnqueuePayload(t *testing.T) {
 		}
 	}
 
-	if err := node.enqueuePayload(cIsRequest, pubKey, pld); err == nil {
-		t.Error("success enqueue payload over queue capacity")
-		return
+	for i := 0; i < 5; i++ {
+		if err := node.enqueuePayload(cIsRequest, pubKey, pld); err != nil {
+			return
+		}
+		for j := 0; j < testutils.TCQueueCapacity; j++ {
+			if err := node.send(msg); err != nil {
+				break // fill queue on limit
+			}
+		}
 	}
+
+	t.Error("success enqueue payload over queue capacity")
 }
 
 func TestHandleMessage(t *testing.T) {

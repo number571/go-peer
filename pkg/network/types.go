@@ -8,7 +8,9 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IHandlerF func(INode, conn.IConn, message.IMessage) error
+type (
+	IHandlerF func(INode, conn.IConn, message.IMessage) error
+)
 
 type INode interface {
 	types.ICommand
