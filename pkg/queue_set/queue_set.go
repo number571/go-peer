@@ -1,4 +1,4 @@
-package queue_pusher
+package queue_set
 
 import (
 	"sync"
@@ -6,21 +6,21 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
-type sQueuePusher struct {
+type sQueueSet struct {
 	fMutex sync.Mutex
-	fMap   map[string]struct{}
+	fMap   map[string][]byte
 	fQueue []string
 	fIndex int
 }
 
-func NewQueuePusher(pSettings ISettings) IQueuePusher {
-	return &sQueuePusher{
+func NewQueueSet(pSettings ISettings) IQueueSet {
+	return &sQueueSet{
 		fQueue: make([]string, pSettings.GetCapacity()),
-		fMap:   make(map[string]struct{}, pSettings.GetCapacity()),
+		fMap:   make(map[string][]byte, pSettings.GetCapacity()),
 	}
 }
 
-func (p *sQueuePusher) Push(pKey []byte) bool {
+func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -35,9 +35,17 @@ func (p *sQueuePusher) Push(pKey []byte) bool {
 
 	// push hash to queue
 	p.fQueue[p.fIndex] = sHash
-	p.fMap[sHash] = struct{}{}
+	p.fMap[sHash] = pValue
 
 	// increment queue index
 	p.fIndex = (p.fIndex + 1) % len(p.fQueue)
 	return true
+}
+
+func (p *sQueueSet) Load(pKey []byte) ([]byte, bool) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	val, ok := p.fMap[encoding.HexEncode(pKey)]
+	return val, ok
 }

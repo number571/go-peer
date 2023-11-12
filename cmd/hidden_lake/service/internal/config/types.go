@@ -23,7 +23,6 @@ type IConfigSettings interface {
 	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64
-	GetMessagesCapacity() uint64
 }
 
 type IConfig interface {

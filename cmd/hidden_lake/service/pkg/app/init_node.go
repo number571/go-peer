@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
+	"github.com/number571/go-peer/pkg/queue_set"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
@@ -50,8 +50,8 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 					FWriteDeadline:    connDeadline,
 				}),
 			}),
-			queue_pusher.NewQueuePusher(
-				queue_pusher.NewSettings(&queue_pusher.SSettings{
+			queue_set.NewQueueSet(
+				queue_set.NewSettings(&queue_set.SSettings{
 					FCapacity: pkg_settings.CNetworkQueueSize,
 				}),
 			),

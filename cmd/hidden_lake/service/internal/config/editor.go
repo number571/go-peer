@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -44,7 +44,7 @@ func (p *sEditor) UpdateNetworkKey(pNetworkKey string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FNetworkKey = pNetworkKey
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
+	err = file_system.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update connections)")
 	}
@@ -68,7 +68,7 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(pConns)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
+	err = file_system.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update connections)")
 	}
@@ -104,7 +104,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	cfg := icfg.(*SConfig)
 	cfg.fFriends = pFriends
 	cfg.FFriends = pubKeysToStrings(pFriends)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
+	err = file_system.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update friends)")
 	}

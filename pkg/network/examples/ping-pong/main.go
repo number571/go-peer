@@ -8,8 +8,8 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/queue_set"
 )
 
 const (
@@ -85,8 +85,8 @@ func newNode(serviceAddress string) network.INode {
 			FWriteTimeout: time.Minute,
 			FReadTimeout:  time.Minute,
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: (1 << 10),
 			}),
 		),

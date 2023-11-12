@@ -1,4 +1,4 @@
-package queue_pusher
+package queue_set
 
 import "testing"
 

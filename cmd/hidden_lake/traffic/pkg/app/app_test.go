@@ -38,6 +38,7 @@ func TestApp(t *testing.T) {
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
+				FMessagesCapacity: testutils.TCCapacity,
 			},
 			FNetworkKey: "_",
 			FAddress: &config.SAddress{

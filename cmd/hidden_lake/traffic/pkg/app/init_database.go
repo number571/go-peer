@@ -17,7 +17,7 @@ func (p *sApp) initDatabase() error {
 		FWorkSizeBits:     p.fConfig.GetSettings().GetWorkSizeBits(),
 	})
 
-	if p.fConfig.GetSettings().GetMessagesCapacity() == 0 {
+	if !p.fConfig.GetIsStorage() {
 		p.fWrapperDB.Set(database.NewVoidKeyValueDB(sett))
 		return nil
 	}

@@ -20,7 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
+	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -121,8 +121,8 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),
@@ -177,8 +177,8 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),

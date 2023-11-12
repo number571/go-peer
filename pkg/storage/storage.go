@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 const (
@@ -42,7 +42,7 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 
 	store.fSalt = random.NewStdPRNG().GetBytes(cSaltSize)
 	if isExist {
-		encdata, err := filesystem.OpenFile(pSettings.GetPath()).Read()
+		encdata, err := file_system.OpenFile(pSettings.GetPath()).Read()
 		if err != nil {
 			return nil, errors.WrapError(err, "read storage")
 		}
@@ -144,7 +144,7 @@ func (p *sCryptoStorage) Del(pKey []byte) error {
 }
 
 func (p *sCryptoStorage) isExist() bool {
-	return filesystem.OpenFile(p.fSettings.GetPath()).IsExist()
+	return file_system.OpenFile(p.fSettings.GetPath()).IsExist()
 }
 
 func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
@@ -154,7 +154,7 @@ func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 		return errors.WrapError(err, "marshal decrypted map")
 	}
 
-	err = filesystem.OpenFile(p.fSettings.GetPath()).Write(
+	err = file_system.OpenFile(p.fSettings.GetPath()).Write(
 		bytes.Join(
 			[][]byte{p.fSalt, p.fCipher.EncryptBytes(data)},
 			[]byte{},
@@ -170,7 +170,7 @@ func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 func (p *sCryptoStorage) decrypt() (*storageData, error) {
 	var mapping storageData
 
-	encdata, err := filesystem.OpenFile(p.fSettings.GetPath()).Read()
+	encdata, err := file_system.OpenFile(p.fSettings.GetPath()).Read()
 	if err != nil {
 		return nil, errors.WrapError(err, "open encrypted storage")
 	}

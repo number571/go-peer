@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 func TestInit(t *testing.T) {
@@ -28,7 +28,7 @@ func TestInit(t *testing.T) {
 
 	os.Remove(configFile)
 
-	if err := filesystem.OpenFile(configFile).Write([]byte("abc")); err != nil {
+	if err := file_system.OpenFile(configFile).Write([]byte("abc")); err != nil {
 		t.Error(err)
 		return
 	}

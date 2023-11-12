@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -173,7 +173,7 @@ func TestInvalidSizeCryptoStorage(t *testing.T) {
 	defer os.Remove(path)
 
 	randBytes := random.NewStdPRNG().GetBytes(1)
-	if err := filesystem.OpenFile(path).Write(randBytes); err != nil {
+	if err := file_system.OpenFile(path).Write(randBytes); err != nil {
 		t.Error(err)
 		return
 	}
@@ -200,7 +200,7 @@ func TestInvalidSetCryptoStorage(t *testing.T) {
 	defer os.Remove(path)
 
 	randBytes := random.NewStdPRNG().GetBytes(128)
-	if err := filesystem.OpenFile(path).Write(randBytes); err != nil {
+	if err := file_system.OpenFile(path).Write(randBytes); err != nil {
 		t.Error(err)
 		return
 	}
@@ -258,7 +258,7 @@ func TestInvalidDelCryptoStorage(t *testing.T) {
 
 	os.Remove(path)
 
-	filesystem.OpenFile(path).Write(random.NewStdPRNG().GetBytes(128))
+	file_system.OpenFile(path).Write(random.NewStdPRNG().GetBytes(128))
 
 	if _, err := store.Get([]byte("KEY1")); err == nil {
 		t.Error("success get value in corrupted storage")

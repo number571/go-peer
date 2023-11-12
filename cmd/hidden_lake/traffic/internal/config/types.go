@@ -9,6 +9,7 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
+	GetIsStorage() bool
 	GetNetworkKey() string
 	GetConnections() []string
 	GetConsumers() []string

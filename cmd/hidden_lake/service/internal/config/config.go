@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -24,7 +24,6 @@ type SConfigSettings struct {
 	FQueuePeriodMS      uint64 `json:"queue_period_ms"`
 	FKeySizeBits        uint64 `json:"key_size_bits"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
-	FMessagesCapacity   uint64 `json:"messages_capacity,omitempty"`
 }
 
 type SConfig struct {
@@ -52,7 +51,7 @@ type SAddress struct {
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 	if configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
 	}
@@ -70,7 +69,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 }
 
 func LoadConfig(pFilepath string) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' does not exist", pFilepath))
@@ -111,10 +110,6 @@ func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 
 func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 	return p.FLimitVoidSizeBytes
-}
-
-func (p *SConfigSettings) GetMessagesCapacity() uint64 {
-	return p.FMessagesCapacity
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {

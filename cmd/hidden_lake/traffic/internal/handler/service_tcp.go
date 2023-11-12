@@ -14,9 +14,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
 
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -24,12 +22,6 @@ import (
 
 func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
-
-	queuePusher := queue_pusher.NewQueuePusher(
-		queue_pusher.NewSettings(&queue_pusher.SSettings{
-			FCapacity: hls_settings.CNetworkQueueSize,
-		}),
-	)
 
 	return func(pNode network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
@@ -63,12 +55,6 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		if hltDB == nil {
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
 			return errors.NewError("database is nil")
-		}
-
-		// check message from in memory queue
-		if ok := queuePusher.Push(hash); !ok {
-			pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
-			return nil
 		}
 
 		// check message from in database queue

@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
+	"github.com/number571/go-peer/pkg/queue_set"
 )
 
 var (
@@ -20,7 +20,7 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
-	fQueuePusher  queue_pusher.IQueuePusher
+	fQueuePusher  queue_set.IQueuePusher
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
 }
@@ -28,7 +28,7 @@ type sNode struct {
 // Creating a node object managed by connections with multiple nodes.
 // Saves hashes of received messages to a buffer to prevent network cycling.
 // Redirects messages to handle routers by keys.
-func NewNode(pSett ISettings, pQueuePusher queue_pusher.IQueuePusher) INode {
+func NewNode(pSett ISettings, pQueuePusher queue_set.IQueuePusher) INode {
 	return &sNode{
 		fSettings:     pSett,
 		fQueuePusher:  pQueuePusher,
@@ -45,7 +45,7 @@ func (p *sNode) GetSettings() ISettings {
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 	// node can redirect received message
-	_ = p.fQueuePusher.Push(pMsg.GetHash())
+	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 
@@ -254,7 +254,7 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
 	// hash of message already in queue
-	if !p.fQueuePusher.Push(pMsg.GetHash()) {
+	if !p.fQueuePusher.Push(pMsg.GetHash(), []byte{}) {
 		return true
 	}
 

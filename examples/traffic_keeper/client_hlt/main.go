@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -29,7 +29,7 @@ func main() {
 		FMessageSizeBytes: (8 << 10),
 	})
 
-	readPrivKey, err := filesystem.OpenFile("priv.key").Read()
+	readPrivKey, err := file_system.OpenFile("priv.key").Read()
 	if err != nil {
 		panic(err)
 	}

@@ -3,14 +3,14 @@ package config
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
 func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
-	if filesystem.OpenFile(cfgPath).IsExist() {
+	if file_system.OpenFile(cfgPath).IsExist() {
 		cfg, err := LoadConfig(cfgPath)
 		if err != nil {
 			return nil, errors.WrapError(err, "load config")
@@ -24,6 +24,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+				FMessagesCapacity:   hlt_settings.CDefaultMessagesCapacity,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

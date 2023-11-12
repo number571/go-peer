@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 const (
@@ -88,7 +88,7 @@ func TestLogger(t *testing.T) {
 	logger.PushWarn(tcTestWarning)
 	logger.PushErro(tcTestError)
 
-	res, err := filesystem.OpenFile(tcPathInfo).Read()
+	res, err := file_system.OpenFile(tcPathInfo).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -96,7 +96,7 @@ func TestLogger(t *testing.T) {
 		t.Error("info does not contains tcTestInfo")
 	}
 
-	res, err = filesystem.OpenFile(tcPathWarning).Read()
+	res, err = file_system.OpenFile(tcPathWarning).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -104,7 +104,7 @@ func TestLogger(t *testing.T) {
 		t.Error("warning does not contains tcTestWarning")
 	}
 
-	res, err = filesystem.OpenFile(tcPathError).Read()
+	res, err = file_system.OpenFile(tcPathError).Read()
 	if err != nil {
 		t.Error(err.Error())
 	}

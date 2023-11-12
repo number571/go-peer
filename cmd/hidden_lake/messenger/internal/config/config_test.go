@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 const (
@@ -17,8 +17,7 @@ const (
 const (
 	tcConfigTemplate = `{
 	"settings": {
-		"messages_capacity": %d,
-		"work_size_bits": %d
+		"messages_capacity": %d
 	},
 	"logging": ["info", "erro"],
 	"language": "RUS",
@@ -39,7 +38,6 @@ const (
 	tcConnectionService = "connection_service"
 	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
-	tcWorkSize          = 20
 	tcKeySize           = 1024
 	tcMessagesCapacity  = 1000
 )
@@ -48,7 +46,6 @@ func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
 		tcMessagesCapacity,
-		tcWorkSize,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
@@ -58,7 +55,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	filesystem.OpenFile(configPath).Write([]byte(testNewConfigString()))
+	file_system.OpenFile(configPath).Write([]byte(testNewConfigString()))
 }
 
 func TestConfig(t *testing.T) {
@@ -72,11 +69,6 @@ func TestConfig(t *testing.T) {
 	}
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
-		t.Error("settings key size is invalid")
-		return
-	}
-
-	if cfg.GetSettings().GetWorkSizeBits() != tcWorkSize {
 		t.Error("settings key size is invalid")
 		return
 	}

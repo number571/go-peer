@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 func main() {
@@ -31,6 +31,6 @@ func main() {
 		panic("generate key error")
 	}
 
-	filesystem.OpenFile("priv.key").Write([]byte(priv.ToString()))
-	filesystem.OpenFile("pub.key").Write([]byte(priv.GetPubKey().ToString()))
+	file_system.OpenFile("priv.key").Write([]byte(priv.ToString()))
+	file_system.OpenFile("pub.key").Write([]byte(priv.GetPubKey().ToString()))
 }

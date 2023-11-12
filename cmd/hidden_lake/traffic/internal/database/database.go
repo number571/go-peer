@@ -121,7 +121,7 @@ func (p *sKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
 
 	data, err := p.fDB.Get(getKeyMessage(hash))
 	if err != nil {
-		return nil, errors.NewError("message undefined")
+		return nil, errors.OrigError(&SIsNotExistError{})
 	}
 
 	msg := message.LoadMessage(p.Settings(), data)

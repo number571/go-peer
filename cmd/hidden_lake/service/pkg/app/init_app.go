@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 	"github.com/number571/go-peer/pkg/types"
 
 	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -37,7 +37,7 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.ICommand, error) {
 }
 
 func getPrivKey(pCfg pkg_config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
-	keyFile := filesystem.OpenFile(pKeyPath)
+	keyFile := file_system.OpenFile(pKeyPath)
 
 	if keyFile.IsExist() {
 		privKeyStr, err := keyFile.Read()

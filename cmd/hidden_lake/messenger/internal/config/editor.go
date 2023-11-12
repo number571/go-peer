@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -43,7 +43,7 @@ func (p *sEditor) UpdateLanguage(pLang utils.ILanguage) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FLanguage = utils.FromILanguage(pLang)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
+	err = file_system.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
 	if err != nil {
 		return errors.WrapError(err, "write config (update language)")
 	}

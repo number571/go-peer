@@ -6,7 +6,7 @@ import (
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -19,8 +19,8 @@ var (
 type SConfigSettings struct {
 	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
 	FWorkSizeBits       uint64 `json:"work_size_bits"`
+	FMessagesCapacity   uint64 `json:"messages_capacity"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty"`
-	FMessagesCapacity   uint64 `json:"messages_capacity,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
 }
 
@@ -29,6 +29,7 @@ type SConfig struct {
 
 	FLogging     []string  `json:"logging,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
+	FIsStorage   bool      `json:"is_storage,omitempty"`
 	FNetworkKey  string    `json:"network_key,omitempty"`
 	FConnections []string  `json:"connections,omitempty"`
 	FConsumers   []string  `json:"consumers,omitempty"`
@@ -45,7 +46,7 @@ type SAddress struct {
 type sLogging []bool
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 
 	if configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
@@ -62,7 +63,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 }
 
 func LoadConfig(pFilepath string) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' does not exist", pFilepath))
@@ -88,6 +89,10 @@ func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
 }
 
+func (p *SConfig) GetIsStorage() bool {
+	return p.FIsStorage
+}
+
 func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
 	return p.FMessageSizeBytes
 }
@@ -111,7 +116,7 @@ func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		(p.FSettings.FMessagesCapacity != 0 || p.FSettings.FQueuePeriodMS != 0)
+		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {

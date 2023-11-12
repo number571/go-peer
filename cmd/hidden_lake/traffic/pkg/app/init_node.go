@@ -9,7 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
+	"github.com/number571/go-peer/pkg/queue_set"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -42,8 +42,8 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 				FWriteDeadline:    connDeadline,
 			}),
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: hls_settings.CNetworkQueueSize,
 			}),
 		),

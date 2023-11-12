@@ -8,7 +8,7 @@ import (
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -46,7 +46,7 @@ type SAddress struct {
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 
 	if configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' already exist", pFilepath))
@@ -64,7 +64,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 }
 
 func LoadConfig(pFilepath string) (IConfig, error) {
-	configFile := filesystem.OpenFile(pFilepath)
+	configFile := file_system.OpenFile(pFilepath)
 
 	if !configFile.IsExist() {
 		return nil, errors.NewError(fmt.Sprintf("config file '%s' does not exist", pFilepath))

@@ -1,4 +1,4 @@
-package filesystem
+package file_system
 
 type IFile interface {
 	Read() ([]byte, error)

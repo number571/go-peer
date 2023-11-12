@@ -14,12 +14,12 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
+	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
@@ -164,7 +164,7 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 }
 
 func testNewWrapper(cfgPath string) config.IWrapper {
-	filesystem.OpenFile(cfgPath).Write([]byte(tcConfig))
+	file_system.OpenFile(cfgPath).Write([]byte(tcConfig))
 	cfg, err := config.LoadConfig(cfgPath)
 	if err != nil {
 		panic(err)
@@ -240,8 +240,8 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),

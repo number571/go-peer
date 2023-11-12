@@ -15,6 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -23,7 +24,6 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
 )
 
 const (
@@ -660,8 +660,8 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 					FWriteDeadline:    time.Minute,
 				}),
 			}),
-			queue_pusher.NewQueuePusher(
-				queue_pusher.NewSettings(&queue_pusher.SSettings{
+			queue_set.NewQueueSet(
+				queue_set.NewSettings(&queue_set.SSettings{
 					FCapacity: testutils.TCCapacity,
 				}),
 			),

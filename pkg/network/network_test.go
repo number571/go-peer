@@ -9,8 +9,8 @@ import (
 
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/queue_set"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -398,8 +398,8 @@ func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 				FWriteDeadline:    timeout,
 			}),
 		}),
-		queue_pusher.NewQueuePusher(
-			queue_pusher.NewSettings(&queue_pusher.SSettings{
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),

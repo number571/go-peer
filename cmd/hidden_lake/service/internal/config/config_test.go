@@ -8,7 +8,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/filesystem"
+	"github.com/number571/go-peer/pkg/file_system"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -17,23 +17,22 @@ const (
 )
 
 const (
-	tcLogging          = true
-	tcNetwork          = "test_network_key"
-	tcDownloader       = "test_downloader"
-	tcUploader         = "test_uploader"
-	tcAddressTCP       = "test_address_tcp"
-	tcAddressHTTP      = "test_address_http"
-	tcAddressPPROF     = "test_address_pprof"
-	tcPubKeyAlias1     = "test_alias1"
-	tcPubKeyAlias2     = "test_alias2"
-	tcServiceName1     = "test_service1"
-	tcServiceName2     = "test_service2"
-	tcMessageSize      = (1 << 20)
-	tcWorkSize         = 20
-	tcKeySize          = 1024
-	tcQueuePeriod      = 1000
-	tcLimitVoidSize    = (1 << 20)
-	tcMessagesCapacity = 2048
+	tcLogging       = true
+	tcNetwork       = "test_network_key"
+	tcDownloader    = "test_downloader"
+	tcUploader      = "test_uploader"
+	tcAddressTCP    = "test_address_tcp"
+	tcAddressHTTP   = "test_address_http"
+	tcAddressPPROF  = "test_address_pprof"
+	tcPubKeyAlias1  = "test_alias1"
+	tcPubKeyAlias2  = "test_alias2"
+	tcServiceName1  = "test_service1"
+	tcServiceName2  = "test_service2"
+	tcMessageSize   = (1 << 20)
+	tcWorkSize      = 20
+	tcKeySize       = 1024
+	tcQueuePeriod   = 1000
+	tcLimitVoidSize = (1 << 20)
 )
 
 var (
@@ -58,8 +57,7 @@ const (
 		"work_size_bits": %d,
 		"key_size_bits": %d,
 		"queue_period_ms": %d,
-		"limit_void_size_bytes": %d,
-		"messages_capacity": %d
+		"limit_void_size_bytes": %d
 	},
 	"logging": ["info", "erro"],
 	"address": {
@@ -91,7 +89,6 @@ func testNewConfigString() string {
 		tcKeySize,
 		tcQueuePeriod,
 		tcLimitVoidSize,
-		tcMessagesCapacity,
 		tcAddressTCP,
 		tcAddressHTTP,
 		tcAddressPPROF,
@@ -110,7 +107,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	filesystem.OpenFile(configPath).Write([]byte(testNewConfigString()))
+	file_system.OpenFile(configPath).Write([]byte(testNewConfigString()))
 }
 
 func TestBuildConfig(t *testing.T) {
@@ -150,7 +147,7 @@ func testIncorrectConfig(configFile string) error {
 		return errors.NewError("success load config on non exist file")
 	}
 
-	if err := filesystem.OpenFile(configFile).Write([]byte("abc")); err != nil {
+	if err := file_system.OpenFile(configFile).Write([]byte("abc")); err != nil {
 		return err
 	}
 
@@ -159,7 +156,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg1Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "settings", "settings_v2"))
-	if err := filesystem.OpenFile(configFile).Write(cfg1Bytes); err != nil {
+	if err := file_system.OpenFile(configFile).Write(cfg1Bytes); err != nil {
 		return err
 	}
 
@@ -168,7 +165,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg2Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "PubKey", "PubKey_v2"))
-	if err := filesystem.OpenFile(configFile).Write(cfg2Bytes); err != nil {
+	if err := file_system.OpenFile(configFile).Write(cfg2Bytes); err != nil {
 		return err
 	}
 
@@ -177,7 +174,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg3Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "erro", "erro_v2"))
-	if err := filesystem.OpenFile(configFile).Write(cfg3Bytes); err != nil {
+	if err := file_system.OpenFile(configFile).Write(cfg3Bytes); err != nil {
 		return err
 	}
 
@@ -189,7 +186,7 @@ func testIncorrectConfig(configFile string) error {
 	pubKey2 := tgPubKeys[tcPubKeyAlias2]
 
 	cfg4Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, pubKey2))
-	if err := filesystem.OpenFile(configFile).Write(cfg4Bytes); err != nil {
+	if err := file_system.OpenFile(configFile).Write(cfg4Bytes); err != nil {
 		return err
 	}
 
@@ -199,7 +196,7 @@ func testIncorrectConfig(configFile string) error {
 
 	newPubKey := asymmetric.NewRSAPrivKey(512).GetPubKey().ToString()
 	cfg5Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, newPubKey))
-	if err := filesystem.OpenFile(configFile).Write(cfg5Bytes); err != nil {
+	if err := file_system.OpenFile(configFile).Write(cfg5Bytes); err != nil {
 		return err
 	}
 
@@ -245,11 +242,6 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
-		return
-	}
-
-	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
-		t.Error("settings messages capacity is invalid")
 		return
 	}
 
