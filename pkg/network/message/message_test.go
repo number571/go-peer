@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -13,6 +15,7 @@ const (
 	tcHead       = 12345
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key"
+	tcProof      = 1096
 )
 
 func TestMessage(t *testing.T) {
@@ -40,6 +43,11 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
+	if msg.GetProof() != tcProof {
+		t.Error("got invalid proof")
+		return
+	}
+
 	msg1 := LoadMessage(sett, msg.ToBytes())
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
 		t.Error("load message not equal new message")
@@ -47,6 +55,12 @@ func TestMessage(t *testing.T) {
 	}
 
 	if msg := LoadMessage(sett, []byte{1}); msg != nil {
+		t.Error("success load incorrect message")
+		return
+	}
+
+	randBytes := random.NewStdPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
+	if msg := LoadMessage(sett, randBytes); msg != nil {
 		t.Error("success load incorrect message")
 		return
 	}
