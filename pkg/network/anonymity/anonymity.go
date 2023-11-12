@@ -103,7 +103,10 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 
 func (p *sNode) HandleMessage(pMsg message.IMessage) error {
 	handler := p.handleWrapper()
-	netMsg := p.newNetworkMessage(pMsg)
+	netMsg := p.newNetworkMessage(
+		net_message.NewSettings(&net_message.SSettings{}), // pass network check
+		pMsg,
+	)
 	return handler(p.fNetwork, nil, netMsg)
 }
 
@@ -175,9 +178,9 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	}
 }
 
-func (p *sNode) newNetworkMessage(pMsg message.IMessage) net_message.IMessage {
+func (p *sNode) newNetworkMessage(pSett net_message.ISettings, pMsg message.IMessage) net_message.IMessage {
 	return net_message.NewMessage(
-		p.fNetwork.GetSettings().GetConnSettings(),
+		pSett,
 		payload.NewPayload(
 			p.fSettings.GetNetworkMask(),
 			pMsg.ToBytes(),
@@ -200,7 +203,7 @@ func (p *sNode) runQueue() error {
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 			// store hash and push message to network
-			netMsg := p.newNetworkMessage(msg)
+			netMsg := p.newNetworkMessage(p.fNetwork.GetSettings().GetConnSettings(), msg)
 			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok {
 				// internal logger
 				continue

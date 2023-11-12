@@ -22,6 +22,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 const (
@@ -438,7 +439,8 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg := node.newNetworkMessage(msg)
+	sett := net_message.NewSettings(&net_message.SSettings{})
+	netMsg := node.newNetworkMessage(sett, msg)
 	if err := handler(nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
@@ -468,7 +470,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg2 := node.newNetworkMessage(msg2)
+	netMsg2 := node.newNetworkMessage(sett, msg2)
 	if err := handler(nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -486,7 +488,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg3 := node.newNetworkMessage(msg3)
+	netMsg3 := node.newNetworkMessage(sett, msg3)
 	if err := handler(nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -504,7 +506,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg4 := node.newNetworkMessage(msg4)
+	netMsg4 := node.newNetworkMessage(sett, msg4)
 	if err := handler(nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -532,7 +534,8 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
-	netMsg := node.newNetworkMessage(msg)
+	sett := net_message.NewSettings(&net_message.SSettings{})
+	netMsg := node.newNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
 	if ok, err := node.storeHashWithBroadcast(logBuilder, nil, nil); ok || err == nil {
