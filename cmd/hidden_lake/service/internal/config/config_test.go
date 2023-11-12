@@ -41,10 +41,6 @@ var (
 		"test_connect1",
 		"test_connect2",
 	}
-	tgBackupConnects = []string{
-		"test_backup_connect1",
-		"test_backup_connect2",
-	}
 	tgPubKeys = map[string]string{
 		tcPubKeyAlias1: testutils.TgPubKeys[0],
 		tcPubKeyAlias2: testutils.TgPubKeys[1],
@@ -76,10 +72,6 @@ const (
 		"%s",
 		"%s"
 	],
-	"backup_connections": [
-		"%s",
-		"%s"
-	],
 	"friends": {
 		"%s": "%s",
 		"%s": "%s"
@@ -106,8 +98,6 @@ func testNewConfigString() string {
 		tcNetwork,
 		tgConnects[0],
 		tgConnects[1],
-		tgBackupConnects[0],
-		tgBackupConnects[1],
 		tcPubKeyAlias1,
 		tgPubKeys[tcPubKeyAlias1],
 		tcPubKeyAlias2,
@@ -310,17 +300,6 @@ func TestComplexConfig(t *testing.T) {
 	for i, v := range cfg.GetConnections() {
 		if v != tgConnects[i] {
 			t.Errorf("connection '%d' is invalid", i)
-			return
-		}
-	}
-
-	if len(cfg.GetBackupConnections()) != 2 {
-		t.Error("len backup connections != 2")
-		return
-	}
-	for i, v := range cfg.GetBackupConnections() {
-		if v != tgBackupConnects[i] {
-			t.Errorf("backup connection '%d' is invalid", i)
 			return
 		}
 	}

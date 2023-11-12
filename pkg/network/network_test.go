@@ -9,6 +9,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -21,7 +22,7 @@ const (
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 4; i++ {
 		testSettings(t, i)
 	}
 }
@@ -37,7 +38,6 @@ func testSettings(t *testing.T, n int) {
 	case 0:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -50,8 +50,7 @@ func testSettings(t *testing.T, n int) {
 	case 1:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FQueueSize:    testutils.TCCapacity,
-			FReadTimeout:  tcTimeWait,
+			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
@@ -62,21 +61,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
-			FAddress:      "test",
-			FQueueSize:    testutils.TCCapacity,
-			FMaxConnects:  testutils.TCMaxConnects,
-			FWriteTimeout: tcTimeWait,
-			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
-			}),
-		})
-	case 3:
-		_ = NewSettings(&SSettings{
 			FAddress:     "test",
-			FQueueSize:   testutils.TCCapacity,
 			FMaxConnects: testutils.TCMaxConnects,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -86,10 +71,9 @@ func testSettings(t *testing.T, n int) {
 				FWriteDeadline:    time.Minute,
 			}),
 		})
-	case 4:
+	case 3:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
@@ -400,21 +384,26 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 }
 
 func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
-	sett := NewSettings(&SSettings{
-		FAddress:      pAddr,
-		FQueueSize:    testutils.TCCapacity,
-		FMaxConnects:  pMaxConns,
-		FReadTimeout:  timeout,
-		FWriteTimeout: timeout,
-		FConnSettings: conn.NewSettings(&conn.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     timeout,
-			FWriteDeadline:    timeout,
+	return NewNode(
+		NewSettings(&SSettings{
+			FAddress:      pAddr,
+			FMaxConnects:  pMaxConns,
+			FReadTimeout:  timeout,
+			FWriteTimeout: timeout,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FWorkSizeBits:     testutils.TCWorkSize,
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadDeadline: time.Hour,
+				FReadDeadline:     timeout,
+				FWriteDeadline:    timeout,
+			}),
 		}),
-	})
-	return NewNode(sett)
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: testutils.TCCapacity,
+			}),
+		),
+	)
 }
 
 func testFreeNodes(nodes []INode) {

@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -18,8 +19,8 @@ const (
 
 func main() {
 	var (
-		service1 = network.NewNode(nodeSettings(serviceAddress))
-		service2 = network.NewNode(nodeSettings(""))
+		service1 = newNode(serviceAddress)
+		service2 = newNode("")
 	)
 
 	service1.HandleFunc(serviceHeader, handler("#1"))
@@ -75,15 +76,21 @@ func handler(serviceName string) network.IHandlerF {
 	}
 }
 
-func nodeSettings(serviceAddress string) network.ISettings {
-	return network.NewSettings(&network.SSettings{
-		FAddress:      serviceAddress,
-		FQueueSize:    (1 << 10),
-		FMaxConnects:  1,
-		FConnSettings: connSettings(),
-		FWriteTimeout: time.Minute,
-		FReadTimeout:  time.Minute,
-	})
+func newNode(serviceAddress string) network.INode {
+	return network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FAddress:      serviceAddress,
+			FMaxConnects:  2,
+			FConnSettings: connSettings(),
+			FWriteTimeout: time.Minute,
+			FReadTimeout:  time.Minute,
+		}),
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: (1 << 10),
+			}),
+		),
+	)
 }
 
 func connSettings() conn.ISettings {

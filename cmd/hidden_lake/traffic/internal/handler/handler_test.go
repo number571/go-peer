@@ -20,6 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -107,16 +108,8 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		},
 	}
 
-	logger := logger.NewLogger(
-		logger.NewSettings(&logger.SSettings{}),
-		func(_ logger.ILogArg) string {
-			return ""
-		},
-	)
-
 	node := network.NewNode(
 		network.NewSettings(&network.SSettings{
-			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
@@ -128,11 +121,23 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: testutils.TCCapacity,
+			}),
+		),
+	)
+
+	logger := logger.NewLogger(
+		logger.NewSettings(&logger.SSettings{}),
+		func(_ logger.ILogArg) string {
+			return ""
+		},
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(cfg, wDB, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(cfg, wDB, logger, logger, node))
 
 	srv := &http.Server{
 		Addr:    addr,
@@ -161,7 +166,6 @@ func testNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      addr,
-			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
@@ -173,5 +177,10 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: testutils.TCCapacity,
+			}),
+		),
 	)
 }

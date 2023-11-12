@@ -96,19 +96,6 @@ func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 	return nil
 }
 
-func (p *sRequester) HandleMessage(pMsg string) error {
-	_, err := api.Request(
-		p.fClient,
-		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNetworkMessageTemplate, p.fHost),
-		pMsg,
-	)
-	if err != nil {
-		return errors.WrapError(err, "handle message (requester)")
-	}
-	return nil
-}
-
 func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) (response.IResponse, error) {
 	res, err := api.Request(
 		p.fClient,
@@ -222,11 +209,11 @@ func (p *sRequester) DelOnline(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) GetConnections(pIsBackup bool) ([]string, error) {
+func (p *sRequester) GetConnections() ([]string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -241,11 +228,11 @@ func (p *sRequester) GetConnections(pIsBackup bool) ([]string, error) {
 	return connects, nil
 }
 
-func (p *sRequester) AddConnection(pIsBackup bool, pConnect string) error {
+func (p *sRequester) AddConnection(pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
 		pConnect,
 	)
 	if err != nil {
@@ -254,11 +241,11 @@ func (p *sRequester) AddConnection(pIsBackup bool, pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) DelConnection(pIsBackup bool, pConnect string) error {
+func (p *sRequester) DelConnection(pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate+"?is_backup=%s", p.fHost, isBackup(pIsBackup)),
+		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
 		pConnect,
 	)
 	if err != nil {
@@ -284,11 +271,4 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	}
 
 	return pubKey, nil
-}
-
-func isBackup(pIsBackup bool) string {
-	if pIsBackup {
-		return "true"
-	}
-	return "false"
 }

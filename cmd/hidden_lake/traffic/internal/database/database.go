@@ -41,10 +41,6 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	return db, nil
 }
 
-func (p *sKeyValueDB) GetOriginal() database.IKVDatabase {
-	return p.fDB
-}
-
 func (p *sKeyValueDB) Settings() ISettings {
 	return p.fSettings
 }
@@ -73,11 +69,6 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	hash := pMsg.GetBody().GetHash()
-	if _, err := p.fDB.Get(getKeyMessage(hash)); err == nil {
-		return nil
-	}
-
 	params := message.NewSettings(&message.SSettings{
 		FWorkSizeBits:     p.Settings().GetWorkSizeBits(),
 		FMessageSizeBytes: p.Settings().GetMessageSizeBytes(),
@@ -86,7 +77,12 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 		return errors.NewError("invalid push message")
 	}
 
-	// delete old message
+	hash := pMsg.GetBody().GetHash()
+	if _, err := p.fDB.Get(getKeyMessage(hash)); err == nil {
+		return errors.OrigError(&SIsExistError{})
+	}
+
+	// delete old message by pointer
 	keyHash := getKeyHash(p.getPointer())
 	if hash, err := p.fDB.Get(keyHash); err == nil {
 		keyMsg := getKeyMessage(hash)
@@ -96,13 +92,12 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	}
 
 	// rewrite hash's field
-	newHash := pMsg.GetBody().GetHash()
-	if err := p.fDB.Set(keyHash, newHash); err != nil {
+	if err := p.fDB.Set(keyHash, hash); err != nil {
 		return errors.WrapError(err, "rewrite key hash")
 	}
 
 	// write message
-	keyMsg := getKeyMessage(newHash)
+	keyMsg := getKeyMessage(hash)
 	if err := p.fDB.Set(keyMsg, pMsg.ToBytes()); err != nil {
 		return errors.WrapError(err, "write message")
 	}

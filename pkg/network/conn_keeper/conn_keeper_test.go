@@ -7,6 +7,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -95,19 +96,25 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
 			FDuration:    pDuration,
 		}),
-		network.NewNode(network.NewSettings(&network.SSettings{
-			FQueueSize:    testutils.TCCapacity,
-			FMaxConnects:  testutils.TCMaxConnects,
-			FReadTimeout:  time.Minute,
-			FWriteTimeout: time.Minute,
-			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:     testutils.TCWorkSize,
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
+		network.NewNode(
+			network.NewSettings(&network.SSettings{
+				FMaxConnects:  testutils.TCMaxConnects,
+				FReadTimeout:  time.Minute,
+				FWriteTimeout: time.Minute,
+				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FWorkSizeBits:     testutils.TCWorkSize,
+					FMessageSizeBytes: testutils.TCMessageSize,
+					FWaitReadDeadline: time.Hour,
+					FReadDeadline:     time.Minute,
+					FWriteDeadline:    time.Minute,
+				}),
 			}),
-		})),
+			queue_pusher.NewQueuePusher(
+				queue_pusher.NewSettings(&queue_pusher.SSettings{
+					FCapacity: testutils.TCCapacity,
+				}),
+			),
+		),
 	)
 }
 

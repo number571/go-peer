@@ -20,8 +20,9 @@ const (
 )
 
 var (
-	mtx sync.Mutex
-	db  database.IKVDatabase
+	mtx       sync.Mutex
+	db        database.IKVDatabase
+	hasLogger bool
 )
 
 func initDB() database.IKVDatabase {
@@ -47,14 +48,21 @@ func main() {
 	db := initDB()
 	defer db.Close()
 
-	if len(os.Args) != 2 {
-		panic("./service [port]")
+	if len(os.Args) != 3 {
+		panic("./service [port] [logger]")
 	}
 
 	port, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		panic(err)
 	}
+
+	logger, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		panic(err)
+	}
+
+	hasLogger = (logger == 1)
 
 	http.HandleFunc("/size", sizePage)
 	http.HandleFunc("/push", pushPage)
@@ -64,7 +72,9 @@ func main() {
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	if hasLogger {
+		log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	}
 
 	if r.Method != http.MethodPost {
 		fmt.Fprint(w, "!incorrect method")
@@ -86,7 +96,9 @@ func pushPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func sizePage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	if hasLogger {
+		log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	}
 
 	if r.Method != http.MethodGet {
 		fmt.Fprint(w, "!incorrect method")
@@ -103,7 +115,9 @@ func sizePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func loadPage(w http.ResponseWriter, r *http.Request) {
-	log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	if hasLogger {
+		log.Printf("PATH: %s; METHOD: %s;\n", r.URL.Path, r.Method)
+	}
 
 	if r.Method != http.MethodGet {
 		fmt.Fprint(w, "!incorrect method")

@@ -4,7 +4,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/errors"
 )
@@ -53,13 +52,6 @@ func (p *sClient) SetNetworkKey(pNetworkKey string) error {
 	err := p.fRequester.SetNetworkKey(pNetworkKey)
 	if err != nil {
 		return errors.WrapError(err, "set network key (client)")
-	}
-	return nil
-}
-
-func (p *sClient) HandleMessage(pMsg message.IMessage) error {
-	if err := p.fRequester.HandleMessage(p.fBuilder.Message(pMsg)); err != nil {
-		return errors.WrapError(err, "handle message (client)")
 	}
 	return nil
 }
@@ -116,23 +108,23 @@ func (p *sClient) DelOnline(pConnect string) error {
 	return nil
 }
 
-func (p *sClient) GetConnections(pIsBackup bool) ([]string, error) {
-	res, err := p.fRequester.GetConnections(pIsBackup)
+func (p *sClient) GetConnections() ([]string, error) {
+	res, err := p.fRequester.GetConnections()
 	if err != nil {
 		return nil, errors.WrapError(err, "get connections (client)")
 	}
 	return res, nil
 }
 
-func (p *sClient) AddConnection(pIsBackup bool, pConnect string) error {
-	if err := p.fRequester.AddConnection(pIsBackup, pConnect); err != nil {
+func (p *sClient) AddConnection(pConnect string) error {
+	if err := p.fRequester.AddConnection(pConnect); err != nil {
 		return errors.WrapError(err, "add connection (client)")
 	}
 	return nil
 }
 
-func (p *sClient) DelConnection(pIsBackup bool, pConnect string) error {
-	if err := p.fRequester.DelConnection(pIsBackup, pConnect); err != nil {
+func (p *sClient) DelConnection(pConnect string) error {
+	if err := p.fRequester.DelConnection(pConnect); err != nil {
 		return errors.WrapError(err, "del connection (client)")
 	}
 	return nil

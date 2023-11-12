@@ -23,10 +23,12 @@
 - Update `pkg/client/message`: move convert functions to internal/msgconv
 - Update `pkg`: _examples/ -> examples/
 - Update `pkg/types`: move CloseAll, StopAll functions to internal/interrupt
+- Update `cmd/hidden_lake/service`: delete HandleMessage API
 
 ### BUG FIXES
 
 - Update `pkg/network`: rewrite inMapWithSet -> inQueueWithSet
+- Update `cmd/hidden_lake/traffic`: fix HandleMessage API
 
 <!-- ... -->
 

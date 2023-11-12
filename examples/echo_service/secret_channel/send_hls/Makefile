@@ -5,7 +5,7 @@ run:
 	./prog_hls2 --key priv.key &
 	./prog_hlt2 &
 	./prog_send2 7072 6060 &
-	./prog_recv2 6060 7572 &
+	./prog_recv2 6060 7582 1 &
 clean:
 	pkill -15 prog_hls2 || true
 	pkill -15 prog_hlt2 || true

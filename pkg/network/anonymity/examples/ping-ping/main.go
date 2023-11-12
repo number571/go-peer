@@ -18,6 +18,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -153,7 +154,14 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			},
 		),
 		anonymity.NewWrapperDB().Set(db),
-		network.NewNode(nodeSettings(serviceAddress)),
+		network.NewNode(
+			nodeSettings(serviceAddress),
+			queue_pusher.NewQueuePusher(
+				queue_pusher.NewSettings(&queue_pusher.SSettings{
+					FCapacity: (1 << 10),
+				}),
+			),
+		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
@@ -175,7 +183,6 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 func nodeSettings(serviceAddress string) network.ISettings {
 	return network.NewSettings(&network.SSettings{
 		FAddress:      serviceAddress,
-		FQueueSize:    (1 << 10),
 		FMaxConnects:  1,
 		FConnSettings: connSettings(),
 		FWriteTimeout: time.Minute,

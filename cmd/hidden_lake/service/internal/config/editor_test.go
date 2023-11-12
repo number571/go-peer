@@ -17,9 +17,8 @@ const (
 )
 
 var (
-	tgNewConnections       = []string{"a", "b", "c", "b"}
-	tgNewBackupConnections = []string{"x", "y", "z", "y"}
-	tgNewFriends           = map[string]asymmetric.IPubKey{
+	tgNewConnections = []string{"a", "b", "c", "b"}
+	tgNewFriends     = map[string]asymmetric.IPubKey{
 		"a": asymmetric.LoadRSAPubKey(testutils.TgPubKeys[2]),
 		"b": asymmetric.LoadRSAPubKey(testutils.TgPubKeys[3]),
 	}
@@ -48,7 +47,6 @@ func (p *tsConfig) GetLogging() logger.ILogging               { return nil }
 func (p *tsConfig) GetAddress() IAddress                      { return nil }
 func (p *tsConfig) GetNetworkKey() string                     { return "" }
 func (p *tsConfig) GetConnections() []string                  { return nil }
-func (p *tsConfig) GetBackupConnections() []string            { return nil }
 func (p *tsConfig) GetFriends() map[string]asymmetric.IPubKey { return nil }
 func (p *tsConfig) GetService(_ string) (string, bool)        { return "", false }
 
@@ -95,7 +93,6 @@ func TestEditor(t *testing.T) {
 
 	beforeNetworkKey := config.GetNetworkKey()
 	beforeConnections := config.GetConnections()
-	beforeBackupConnections := config.GetBackupConnections()
 	beforeFriends := config.GetFriends()
 
 	if err := editor.UpdateNetworkKey(tcNewNetworkKey); err != nil {
@@ -135,33 +132,6 @@ func TestEditor(t *testing.T) {
 	for _, nc := range tgNewConnections {
 		if !slices.HasInSlice(afterConnections, nc) {
 			t.Error("afterConnections != tgNewConnections")
-			return
-		}
-	}
-
-	if err := editor.UpdateBackupConnections(tgNewBackupConnections); err != nil {
-		t.Error(err)
-		return
-	}
-	afterBackupConnections := config.GetBackupConnections()
-	if len(afterBackupConnections) != 3 {
-		t.Error("failed deduplicate strings (backup connections)")
-		return
-	}
-	hasNewBackupConn := false
-	for _, ac := range afterBackupConnections {
-		if !slices.HasInSlice(beforeBackupConnections, ac) {
-			hasNewBackupConn = true
-			break
-		}
-	}
-	if !hasNewBackupConn {
-		t.Error("beforeBackupConnections == afterBackupConnections")
-		return
-	}
-	for _, nc := range tgNewBackupConnections {
-		if !slices.HasInSlice(afterBackupConnections, nc) {
-			t.Error("afterBackupConnections != tgNewBackupConnections")
 			return
 		}
 	}
@@ -221,11 +191,6 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 
 	if err := editor.UpdateConnections(tgNewConnections); err == nil {
 		t.Error("success update connections with incorrect filepath")
-		return
-	}
-
-	if err := editor.UpdateBackupConnections(tgNewBackupConnections); err == nil {
-		t.Error("success update backup connections with incorrect filepath")
 		return
 	}
 

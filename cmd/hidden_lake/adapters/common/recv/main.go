@@ -14,10 +14,11 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 
-	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 )
 
 const (
+	workSize    = 20
 	messageSize = (8 << 10)
 )
 
@@ -49,8 +50,8 @@ func main() {
 	db := initDB()
 	defer db.Close()
 
-	if len(os.Args) != 3 {
-		panic("./receiver [service-port] [hls-port]")
+	if len(os.Args) != 4 {
+		panic("./receiver [service-port] [hls-port] [logger]")
 	}
 
 	portService, err := strconv.Atoi(os.Args[1])
@@ -58,20 +59,33 @@ func main() {
 		panic(err)
 	}
 
-	portHLS, err := strconv.Atoi(os.Args[2])
+	portHLT, err := strconv.Atoi(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 
-	transferTraffic(db, portService, portHLS)
+	logger, err := strconv.Atoi(os.Args[3])
+	if err != nil {
+		panic(err)
+	}
+
+	transferTraffic(db, portService, portHLT, logger == 1)
 }
 
-func transferTraffic(db database.IKVDatabase, portService, portHLS int) {
-	hlsClient := hls_client.NewClient(
-		hls_client.NewBuilder(),
-		hls_client.NewRequester(
-			fmt.Sprintf("http://%s:%d", "localhost", portHLS),
+func printLog(hasLog bool, msg error) {
+	if hasLog {
+		return
+	}
+	fmt.Println(msg)
+}
+
+func transferTraffic(db database.IKVDatabase, portService, portHLT int, hasLog bool) {
+	hltClient := hlt_client.NewClient(
+		hlt_client.NewBuilder(),
+		hlt_client.NewRequester(
+			fmt.Sprintf("http://%s:%d", "localhost", portHLT),
 			&http.Client{Timeout: time.Minute},
+			getMessageSettings(),
 		),
 	)
 
@@ -80,13 +94,13 @@ func transferTraffic(db database.IKVDatabase, portService, portHLS int) {
 
 		countService, err := loadCountFromService(portService)
 		if err != nil {
-			fmt.Println(err)
+			printLog(hasLog, err)
 			continue
 		}
 
 		countDB, err := loadCountFromDB(db)
 		if err != nil {
-			fmt.Println(err)
+			printLog(hasLog, err)
 			continue
 		}
 
@@ -95,12 +109,12 @@ func transferTraffic(db database.IKVDatabase, portService, portHLS int) {
 
 			msg, err := loadMessageFromService(portService, i)
 			if err != nil {
-				fmt.Println(err)
+				printLog(hasLog, err)
 				continue
 			}
 
-			if err := hlsClient.HandleMessage(msg); err != nil {
-				fmt.Println(err)
+			if err := hltClient.PutMessage(msg); err != nil {
+				printLog(hasLog, err)
 				continue
 			}
 		}
@@ -136,13 +150,8 @@ func loadMessageFromService(portService int, id uint64) (message.IMessage, error
 		return nil, fmt.Errorf("failed: incorrect response from service")
 	}
 
-	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits:     20,
-		FMessageSizeBytes: messageSize,
-	})
-
 	msgString := string(msgStringAsBytes[1:])
-	msg := message.LoadMessage(sett, msgconv.FromStringToBytes(msgString))
+	msg := message.LoadMessage(getMessageSettings(), msgconv.FromStringToBytes(msgString))
 	if msg == nil {
 		return nil, fmt.Errorf("message is nil")
 	}
@@ -213,4 +222,11 @@ func incrementCountInDB(db database.IKVDatabase) error {
 	}
 
 	return nil
+}
+
+func getMessageSettings() message.ISettings {
+	return message.NewSettings(&message.SSettings{
+		FWorkSizeBits:     workSize,
+		FMessageSizeBytes: messageSize,
+	})
 }

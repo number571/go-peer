@@ -27,7 +27,6 @@ type INode interface {
 
 type ISettings interface {
 	GetAddress() string
-	GetQueueSize() uint64
 	GetMaxConnects() uint64
 	GetReadTimeout() time.Duration
 	GetWriteTimeout() time.Duration

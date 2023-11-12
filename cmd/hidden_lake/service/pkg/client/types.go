@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
@@ -26,11 +25,9 @@ type IClient interface {
 	AddFriend(string, asymmetric.IPubKey) error
 	DelFriend(string) error
 
-	GetConnections(bool) ([]string, error)
-	AddConnection(bool, string) error
-	DelConnection(bool, string) error
-
-	HandleMessage(message.IMessage) error
+	GetConnections() ([]string, error)
+	AddConnection(string) error
+	DelConnection(string) error
 
 	BroadcastRequest(string, request.IRequest) error
 	FetchRequest(string, request.IRequest) (response.IResponse, error)
@@ -52,11 +49,9 @@ type IRequester interface {
 	AddFriend(*pkg_settings.SFriend) error
 	DelFriend(*pkg_settings.SFriend) error
 
-	GetConnections(bool) ([]string, error)
-	AddConnection(bool, string) error
-	DelConnection(bool, string) error
-
-	HandleMessage(string) error
+	GetConnections() ([]string, error)
+	AddConnection(string) error
+	DelConnection(string) error
 
 	BroadcastRequest(*pkg_settings.SRequest) error
 	FetchRequest(*pkg_settings.SRequest) (response.IResponse, error)
@@ -65,5 +60,4 @@ type IRequester interface {
 type IBuilder interface {
 	Request(string, request.IRequest) *pkg_settings.SRequest
 	Friend(string, asymmetric.IPubKey) *pkg_settings.SFriend
-	Message(message.IMessage) string
 }

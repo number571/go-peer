@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -29,7 +30,6 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 		network.NewSettings(&network.SSettings{
 			FAddress:      pCfg.GetAddress().GetTCP(),
 			FMaxConnects:  hls_settings.CNetworkMaxConns,
-			FQueueSize:    hls_settings.CNetworkQueueSize,
 			FReadTimeout:  queueDuration,
 			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -42,6 +42,11 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 				FWriteDeadline:    connDeadline,
 			}),
 		}),
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: hls_settings.CNetworkQueueSize,
+			}),
+		),
 	).HandleFunc(
 		hls_settings.CNetworkMask,
 		handler.HandleServiceTCP(pCfg, pWrapperDB, pLogger),

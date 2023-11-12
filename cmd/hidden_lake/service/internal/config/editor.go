@@ -80,30 +80,6 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 	return nil
 }
 
-func (p *sEditor) UpdateBackupConnections(pBackupConns []string) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	filepath := p.fConfig.fFilepath
-	icfg, err := LoadConfig(filepath)
-	if err != nil {
-		return errors.WrapError(err, "load config (update backup connections)")
-	}
-
-	cfg := icfg.(*SConfig)
-	cfg.FBackupConnections = deleteDuplicateStrings(pBackupConns)
-	err = filesystem.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
-	if err != nil {
-		return errors.WrapError(err, "write config (update backup connections)")
-	}
-
-	p.fConfig.fMutex.Lock()
-	defer p.fConfig.fMutex.Unlock()
-
-	p.fConfig.FBackupConnections = cfg.FBackupConnections
-	return nil
-}
-
 func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

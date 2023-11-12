@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 )
 
 var (
@@ -20,34 +20,20 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
-	fQueueMap     *sQueueMap
+	fQueuePusher  queue_pusher.IQueuePusher
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
-}
-
-type sQueueMap struct {
-	fMutex sync.Mutex
-	fMap   map[string]struct{}
-	fQueue []string
-	fIndex int
 }
 
 // Creating a node object managed by connections with multiple nodes.
 // Saves hashes of received messages to a buffer to prevent network cycling.
 // Redirects messages to handle routers by keys.
-func NewNode(pSett ISettings) INode {
+func NewNode(pSett ISettings, pQueuePusher queue_pusher.IQueuePusher) INode {
 	return &sNode{
 		fSettings:     pSett,
-		fQueueMap:     newQueueMap(pSett.GetQueueSize()),
+		fQueuePusher:  pQueuePusher,
 		fConnections:  make(map[string]conn.IConn, pSett.GetMaxConnects()),
 		fHandleRoutes: make(map[uint64]IHandlerF, 128),
-	}
-}
-
-func newQueueMap(pSize uint64) *sQueueMap {
-	return &sQueueMap{
-		fQueue: make([]string, pSize),
-		fMap:   make(map[string]struct{}, pSize),
 	}
 }
 
@@ -58,7 +44,8 @@ func (p *sNode) GetSettings() ISettings {
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
-	_ = p.inQueueWithSet(pMsg.GetHash()) // node can redirect received message
+	// node can redirect received message
+	_ = p.fQueuePusher.Push(pMsg.GetHash())
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 
@@ -266,8 +253,8 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
-	// check message in mapping by hash
-	if p.inQueueWithSet(pMsg.GetHash()) {
+	// hash of message already in queue
+	if !p.fQueuePusher.Push(pMsg.GetHash()) {
 		return true
 	}
 
@@ -294,30 +281,6 @@ func (p *sNode) hasMaxConnSize() bool {
 
 	maxConns := p.fSettings.GetMaxConnects()
 	return uint64(len(p.fConnections)) >= maxConns
-}
-
-// Checks the hash of the message for existence in the hash store.
-// Returns true if the hash already existed, otherwise false.
-func (p *sNode) inQueueWithSet(pHash []byte) bool {
-	p.fQueueMap.fMutex.Lock()
-	defer p.fQueueMap.fMutex.Unlock()
-
-	// hash already exists in queue
-	sHash := encoding.HexEncode(pHash)
-	if _, ok := p.fQueueMap.fMap[sHash]; ok {
-		return true
-	}
-
-	// delete old value in queue
-	delete(p.fQueueMap.fMap, p.fQueueMap.fQueue[p.fQueueMap.fIndex])
-
-	// push hash to queue
-	p.fQueueMap.fQueue[p.fQueueMap.fIndex] = sHash
-	p.fQueueMap.fMap[sHash] = struct{}{}
-
-	// increment queue index
-	p.fQueueMap.fIndex = (p.fQueueMap.fIndex + 1) % len(p.fQueueMap.fQueue)
-	return false
 }
 
 // Saves the connection to the map.

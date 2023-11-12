@@ -3,7 +3,6 @@ package client
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -35,8 +34,4 @@ func (p *sBuilder) Request(pReceiver string, pReq request.IRequest) *pkg_setting
 		FReceiver: pReceiver,
 		FReqData:  pReq.ToString(),
 	}
-}
-
-func (p *sBuilder) Message(pMsg message.IMessage) string {
-	return pMsg.ToString()
 }

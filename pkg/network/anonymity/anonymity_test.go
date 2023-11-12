@@ -23,6 +23,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 )
 
 const (
@@ -349,71 +350,6 @@ func TestEnqueuePayload(t *testing.T) {
 	t.Error("success enqueue payload over queue capacity")
 }
 
-func TestHandleMessage(t *testing.T) {
-	t.Parallel()
-
-	node := testNewNode(time.Minute, "", 2, 0)
-	defer testFreeNodes([]INode{node}, 2)
-
-	if err := node.Run(); err == nil {
-		t.Error("success double running")
-		return
-	}
-
-	if err := node.Stop(); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := node.Stop(); err == nil {
-		t.Error("success dobule stopping")
-		return
-	}
-
-	chResult := make(chan string)
-	node.HandleFunc(
-		testutils.TcHead,
-		func(_ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
-			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
-			go func() { chResult <- res }()
-			return nil, nil
-		},
-	)
-
-	client := node.GetMessageQueue().GetClient()
-	node.GetListPubKeys().AddPubKey(client.GetPubKey())
-
-	// self encrypted message
-	msgBody := "hello, world!"
-	msg, err := client.EncryptPayload(
-		client.GetPubKey(),
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
-		).ToOrigin(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if err := node.HandleMessage(msg); err != nil {
-		t.Error(err)
-		return
-	}
-
-	select {
-	case x := <-chResult:
-		if x != fmt.Sprintf("echo: '%s'", msgBody) {
-			t.Error("got invalid message body")
-			return
-		}
-		// success
-	case <-time.After(5 * time.Second):
-		t.Error("error: time after 5 seconds")
-		return
-	}
-}
-
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()
 
@@ -713,7 +649,6 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      addr,
-				FQueueSize:    testutils.TCCapacity,
 				FMaxConnects:  testutils.TCMaxConnects,
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
@@ -725,6 +660,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 					FWriteDeadline:    time.Minute,
 				}),
 			}),
+			queue_pusher.NewQueuePusher(
+				queue_pusher.NewSettings(&queue_pusher.SSettings{
+					FCapacity: testutils.TCCapacity,
+				}),
+			),
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{

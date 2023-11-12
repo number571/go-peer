@@ -19,6 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/queue_pusher"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
@@ -147,7 +148,6 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleNetworkMessageAPI(logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, HandleNetworkKeyAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node))
 
@@ -229,7 +229,6 @@ func testNewNetworkNode(addr string) network.INode {
 	return network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      addr,
-			FQueueSize:    testutils.TCCapacity,
 			FMaxConnects:  testutils.TCMaxConnects,
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
@@ -241,5 +240,10 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
+		queue_pusher.NewQueuePusher(
+			queue_pusher.NewSettings(&queue_pusher.SSettings{
+				FCapacity: testutils.TCCapacity,
+			}),
+		),
 	)
 }

@@ -101,15 +101,6 @@ func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 	return p.fFriends
 }
 
-func (p *sNode) HandleMessage(pMsg message.IMessage) error {
-	handler := p.handleWrapper()
-	netMsg := p.newNetworkMessage(
-		net_message.NewSettings(&net_message.SSettings{}), // pass network check
-		pMsg,
-	)
-	return handler(p.fNetwork, nil, netMsg)
-}
-
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 	p.setRoute(pHead, pHandle)
 	return p
@@ -203,7 +194,14 @@ func (p *sNode) runQueue() error {
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 			// store hash and push message to network
-			netMsg := p.newNetworkMessage(p.fNetwork.GetSettings().GetConnSettings(), msg)
+			netMsg := net_message.NewMessage(
+				p.fNetwork.GetSettings().GetConnSettings(),
+				payload.NewPayload(
+					p.fSettings.GetNetworkMask(),
+					msg.ToBytes(),
+				),
+			)
+
 			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok {
 				// internal logger
 				continue

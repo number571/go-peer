@@ -75,8 +75,6 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 		case http.MethodPost:
-			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
-
 			host := strings.TrimSpace(pR.FormValue("host"))
 			port := strings.TrimSpace(pR.FormValue("port"))
 
@@ -92,14 +90,12 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
-			if err := client.AddConnection(isBackup, connect); err != nil {
+			if err := client.AddConnection(connect); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("add_connection"))
 				fmt.Fprint(pW, "error: add connection")
 				return
 			}
 		case http.MethodDelete:
-			isBackup := strings.TrimSpace(pR.FormValue("is_backup")) != ""
-
 			connect := strings.TrimSpace(pR.FormValue("address"))
 			if connect == "" {
 				pLogger.PushWarn(logBuilder.WithMessage("get_connection"))
@@ -107,7 +103,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 
-			if err := client.DelConnection(isBackup, connect); err != nil {
+			if err := client.DelConnection(connect); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("del_connection"))
 				fmt.Fprint(pW, "error: del connection")
 				return
@@ -153,14 +149,9 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sConnection, error) {
 	var connections []sConnection
 
-	conns, err := pClient.GetConnections(false)
+	conns, err := pClient.GetConnections()
 	if err != nil {
 		return nil, fmt.Errorf("error: read connections")
-	}
-
-	backupConns, err := pClient.GetConnections(true)
-	if err != nil {
-		return nil, fmt.Errorf("error: read backup connections")
 	}
 
 	onlines, err := pClient.GetOnlines()
@@ -174,16 +165,6 @@ func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sC
 			sConnection{
 				FAddress: c,
 				FOnline:  getOnline(onlines, c),
-			},
-		)
-	}
-
-	for _, c := range backupConns {
-		connections = append(
-			connections,
-			sConnection{
-				FAddress:  c,
-				FIsBackup: true,
 			},
 		)
 	}

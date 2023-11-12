@@ -26,6 +26,10 @@ func NewError(pMsg string) error {
 	return WrapError(nil, pMsg)
 }
 
+func OrigError(pErr error) error {
+	return AppendError(pErr, nil)
+}
+
 func WrapError(pErr error, pMsg string) error {
 	return AppendError(pErr, std_errors.New(pMsg))
 }

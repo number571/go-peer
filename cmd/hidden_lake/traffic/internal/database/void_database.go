@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 type sVoidKeyValueDB struct {
@@ -14,10 +13,6 @@ func NewVoidKeyValueDB(pSett ISettings) IKVDatabase {
 	return &sVoidKeyValueDB{
 		fSettings: pSett,
 	}
-}
-
-func (p *sVoidKeyValueDB) GetOriginal() database.IKVDatabase {
-	return nil
 }
 
 func (p *sVoidKeyValueDB) Settings() ISettings {
