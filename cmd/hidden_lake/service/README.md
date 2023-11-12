@@ -304,11 +304,11 @@ and put result to "hex_data" HLS API
 ```
 1. GET/POST/DELETE /api/config/connects
 2. GET/POST/DELETE /api/config/friends
-3. GET/DELETE      /api/network/online
-4. POST/PUT        /api/network/request
-5. GET/POST        /api/network/key
-6. GET             /api/node/key
-7. GET             /api/config/settings [TODO]
+3. GET             /api/config/settings
+4. GET/DELETE      /api/network/online
+5. POST/PUT        /api/network/request
+6. GET/POST        /api/network/key
+7. GET             /api/node/key
 ```
 
 ### 1. /api/config/connects
@@ -421,15 +421,36 @@ Content-Length: 22
 success: delete friend
 ```
 
-### 3. /api/network/online
+### 3. /api/config/settings
 
 #### 3.1. GET Request
+
+```bash
+curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/config/settings
+```
+
+#### 3.1. GET Response
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Sun, 12 Nov 2023 19:01:38 GMT
+Content-Length: 120
+```
+
+```json
+{"message_size_bytes":8192,"work_size_bits":20,"queue_period_ms":5000,"key_size_bits":4096,"limit_void_size_bytes":4096}
+```
+
+### 4. /api/network/online
+
+#### 4.1. GET Request
 
 ```bash
 curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/network/online
 ```
 
-#### 3.1. GET Response
+#### 4.1. GET Response
 
 ```
 HTTP/1.1 200 OK
@@ -442,13 +463,13 @@ Content-Length: 18
 ["localhost:9581"]
 ```
 
-#### 3.2. DELETE Request
+#### 4.2. DELETE Request
 
 ```bash
 curl -i -X DELETE -H 'Accept: application/json' http://localhost:9572/api/network/online --data 'localhost:9581'
 ```
 
-#### 3.2. DELETE Response
+#### 4.2. DELETE Response
 
 ```
 HTTP/1.1 200 OK
@@ -459,7 +480,7 @@ Content-Length: 33
 success: delete online connection
 ```
 
-### 4. /api/network/request
+### 5. /api/network/request
 
 #### Prefix script
 
@@ -495,13 +516,13 @@ PUSH_FORMAT='{
 }';
 ```
 
-#### 4.1. POST Request
+#### 5.1. POST Request
 
 ```bash
 curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/network/request --data "${PUSH_FORMAT}"
 ```
 
-#### 4.1. POST Response
+#### 5.1. POST Response
 
 ```
 HTTP/1.1 200 OK
@@ -514,13 +535,13 @@ Content-Length: 113
 {"code":200,"head":{"Content-Type":"application/json"},"body":"eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K"}
 ```
 
-#### 4.2. PUT Request
+#### 5.2. PUT Request
 
 ```bash
 curl -i -X PUT -H 'Accept: application/json' http://localhost:9572/api/network/request --data "${PUSH_FORMAT}"
 ```
 
-#### 4.2. PUT Response
+#### 5.2. PUT Response
 
 ```
 HTTP/1.1 200 OK
@@ -531,15 +552,15 @@ Content-Type: text/plain; charset=utf-8
 success: broadcast
 ```
 
-### 5. /api/network/key
+### 6. /api/network/key
 
-#### 5.1. GET Request
+#### 6.1. GET Request
 
 ```bash
 curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/network/key
 ```
 
-#### 5.1. GET Response
+#### 6.1. GET Response
 
 ```
 HTTP/1.1 200 OK
@@ -550,13 +571,13 @@ Content-Type: text/plain; charset=utf-8
 used_network_key
 ```
 
-#### 5.2. POST Request
+#### 6.2. POST Request
 
 ```bash
 curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/network/key --data "used_network_key"'
 ```
 
-#### 5.2. POST Response
+#### 6.2. POST Response
 
 ```
 HTTP/1.1 200 OK
@@ -567,15 +588,15 @@ Content-Type: text/plain; charset=utf-8
 success: set network key
 ```
 
-### 6. /api/node/key
+### 7. /api/node/key
 
-#### 6.1. GET Request
+#### 7.1. GET Request
 
 ```bash
 curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/node/key
 ```
 
-#### 6.1. GET Response
+#### 7.1. GET Response
 
 ```
 HTTP/1.1 200 OK

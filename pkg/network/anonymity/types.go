@@ -25,6 +25,7 @@ type INode interface {
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
 	GetLogger() logger.ILogger
+
 	HandleFunc(uint32, IHandlerF) INode
 
 	BroadcastPayload(asymmetric.IPubKey, adapters.IPayload) error
