@@ -11,6 +11,10 @@ import (
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
+var (
+	_ IKVDatabase = &sKeyValueDB{}
+)
+
 type sKeyValueDB struct {
 	fMutex   sync.Mutex
 	fPointer uint64

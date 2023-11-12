@@ -6,7 +6,13 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
+var (
+	_ IQueueSet = &sQueueSet{}
+)
+
 type sQueueSet struct {
+	fSettings ISettings
+
 	fMutex sync.Mutex
 	fMap   map[string][]byte
 	fQueue []string
@@ -15,9 +21,14 @@ type sQueueSet struct {
 
 func NewQueueSet(pSettings ISettings) IQueueSet {
 	return &sQueueSet{
-		fQueue: make([]string, pSettings.GetCapacity()),
-		fMap:   make(map[string][]byte, pSettings.GetCapacity()),
+		fSettings: pSettings,
+		fQueue:    make([]string, pSettings.GetCapacity()),
+		fMap:      make(map[string][]byte, pSettings.GetCapacity()),
 	}
+}
+
+func (p *sQueueSet) GetSettings() ISettings {
+	return p.fSettings
 }
 
 func (p *sQueueSet) Push(pKey, pValue []byte) bool {

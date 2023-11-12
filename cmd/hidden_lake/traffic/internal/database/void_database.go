@@ -8,6 +8,10 @@ import (
 	"github.com/number571/go-peer/pkg/queue_set"
 )
 
+var (
+	_ IKVDatabase = &sVoidKeyValueDB{}
+)
+
 type sVoidKeyValueDB struct {
 	fSettings ISettings
 	fQueueSet queue_set.IQueueSet

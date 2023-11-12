@@ -1,6 +1,8 @@
 package queue_set
 
 type IQueueSet interface {
+	GetSettings() ISettings
+
 	IQueuePusher
 	IQueueLoader
 }

@@ -15,14 +15,14 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
+var (
+	_ IKVDatabase = &sKeyValueDB{}
+)
+
 const (
 	cSaltKey  = "__SALT__"
 	cHashKey  = "__HASH__"
 	cSaltSize = 32
-)
-
-var (
-	_ IKVDatabase = &sKeyValueDB{}
 )
 
 type sKeyValueDB struct {

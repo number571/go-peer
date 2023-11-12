@@ -5,6 +5,10 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
+var (
+	_ ILogGetter = &sLogGetter{}
+)
+
 type sLogGetter struct {
 	fLogBuilder *sLogBuilder
 }

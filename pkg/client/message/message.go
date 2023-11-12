@@ -11,6 +11,10 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+var (
+	_ IMessage = &SMessage{}
+)
+
 const (
 	CSeparator    = "==="
 	cSeparatorLen = len(CSeparator)
