@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -115,7 +114,7 @@ func TestDatabaseLoadPanic(t *testing.T) {
 		return
 	}
 
-	_, _ = kvDB.Load(encoding.HexEncode(hash)) // panic
+	_, _ = kvDB.Load(hash) // panic
 }
 
 func TestDatabaseHashesPanic(t *testing.T) {
@@ -179,15 +178,13 @@ func TestDatabaseLoad(t *testing.T) {
 		os.RemoveAll(pathDB)
 	}()
 
-	if _, err := kvDB.Load("abc"); err == nil {
+	if _, err := kvDB.Load([]byte("abc")); err == nil {
 		t.Error("success load not exist message (incorrect)")
 		return
 	}
 
 	hash := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
-	hashStr := encoding.HexEncode(hash)
-
-	_, errLoad := kvDB.Load(hashStr)
+	_, errLoad := kvDB.Load(hash)
 	if errLoad == nil {
 		t.Error("success load not exist message (hash)")
 		return
@@ -312,7 +309,7 @@ func TestDatabase(t *testing.T) {
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
-	putHashes := make([]string, 0, 3)
+	putHashes := make([][]byte, 0, 3)
 	for i := 0; i < 3; i++ {
 		msg, err := newMessage(cl)
 		if err != nil {
@@ -324,7 +321,7 @@ func TestDatabase(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		putHashes = append(putHashes, encoding.HexEncode(msg.GetBody().GetHash()))
+		putHashes = append(putHashes, msg.GetBody().GetHash())
 	}
 
 	getHashes, err := kvDB.Hashes()
@@ -339,7 +336,7 @@ func TestDatabase(t *testing.T) {
 	}
 
 	for i := range getHashes {
-		if getHashes[i] != putHashes[i] {
+		if !bytes.Equal(getHashes[i], putHashes[i]) {
 			t.Errorf("getHashes[%d] != putHashes[%d]", i, i)
 			return
 		}
@@ -352,8 +349,8 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
-		msgHash := encoding.HexEncode(loadMsg.GetBody().GetHash())
-		if getHash != msgHash {
+		msgHash := loadMsg.GetBody().GetHash()
+		if !bytes.Equal(getHash, msgHash) {
 			t.Errorf("getHash[%s] != msgHash[%s]", getHash, msgHash)
 			return
 		}

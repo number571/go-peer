@@ -45,12 +45,12 @@ func (p *sKeyValueDB) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sKeyValueDB) Hashes() ([]string, error) {
+func (p *sKeyValueDB) Hashes() ([][]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
 	msgsLimit := p.Settings().GetMessagesCapacity()
-	res := make([]string, 0, msgsLimit)
+	res := make([][]byte, 0, msgsLimit)
 	for i := uint64(0); i < msgsLimit; i++ {
 		hash, err := p.fDB.Get(getKeyHash(i))
 		if err != nil {
@@ -59,7 +59,7 @@ func (p *sKeyValueDB) Hashes() ([]string, error) {
 		if len(hash) != hashing.CSHA256Size {
 			panic("incorrect hash size")
 		}
-		res = append(res, encoding.HexEncode(hash))
+		res = append(res, hash)
 	}
 
 	return res, nil
@@ -107,16 +107,15 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
+func (p *sKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	hash := encoding.HexDecode(pStrHash)
-	if len(hash) != hashing.CSHA256Size {
+	if len(pHash) != hashing.CSHA256Size {
 		return nil, errors.NewError("key size invalid")
 	}
 
-	data, err := p.fDB.Get(getKeyMessage(hash))
+	data, err := p.fDB.Get(getKeyMessage(pHash))
 	if err != nil {
 		return nil, errors.OrigError(&SIsNotExistError{})
 	}

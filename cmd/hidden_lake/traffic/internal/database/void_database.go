@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/queue_set"
 )
@@ -32,7 +31,7 @@ func (p *sVoidKeyValueDB) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sVoidKeyValueDB) Hashes() ([]string, error) {
+func (p *sVoidKeyValueDB) Hashes() ([][]byte, error) {
 	return nil, nil
 }
 
@@ -43,13 +42,12 @@ func (p *sVoidKeyValueDB) Push(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sVoidKeyValueDB) Load(pStrHash string) (message.IMessage, error) {
-	hash := encoding.HexDecode(pStrHash)
-	if len(hash) != hashing.CSHA256Size {
+func (p *sVoidKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
+	if len(pHash) != hashing.CSHA256Size {
 		return nil, errors.NewError("key size invalid")
 	}
 
-	msgBytes, ok := p.fQueueSet.Load(hash)
+	msgBytes, ok := p.fQueueSet.Load(pHash)
 	if !ok {
 		return nil, errors.OrigError(&SIsNotExistError{})
 	}

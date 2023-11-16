@@ -7,6 +7,7 @@ import (
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 )
 
@@ -34,7 +35,12 @@ func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) htt
 			return
 		}
 
+		strHashes := make([]string, 0, len(hashes))
+		for _, h := range hashes {
+			strHashes = append(strHashes, encoding.HexEncode(h))
+		}
+
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, hashes)
+		api.Response(pW, http.StatusOK, strHashes)
 	}
 }

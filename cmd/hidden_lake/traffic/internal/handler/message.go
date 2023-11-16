@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/internal/msgconv"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -39,7 +40,15 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTP
 		switch pR.Method {
 		case http.MethodGet:
 			query := pR.URL.Query()
-			msg, err := database.Load(query.Get("hash"))
+
+			hash := encoding.HexDecode(query.Get("hash"))
+			if hash == nil {
+				pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
+				api.Response(pW, http.StatusNotFound, "failed: decode message")
+				return
+			}
+
+			msg, err := database.Load(hash)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("load_hash"))
 				api.Response(pW, http.StatusNotFound, "failed: load message")

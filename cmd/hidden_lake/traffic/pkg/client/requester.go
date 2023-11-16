@@ -49,7 +49,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) GetHashes() ([]string, error) {
+func (p *sRequester) GetHashes() ([][]byte, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -60,9 +60,18 @@ func (p *sRequester) GetHashes() ([]string, error) {
 		return nil, errors.WrapError(err, "get hashes (requester)")
 	}
 
-	var hashes []string
-	if err := encoding.Deserialize([]byte(resp), &hashes); err != nil {
+	var strHashes []string
+	if err := encoding.Deserialize([]byte(resp), &strHashes); err != nil {
 		return nil, errors.WrapError(err, "deserialize hashes (requeser)")
+	}
+
+	hashes := make([][]byte, 0, len(strHashes))
+	for _, s := range strHashes {
+		h := encoding.HexDecode(s)
+		if h == nil {
+			return nil, errors.NewError("got invalid hash")
+		}
+		hashes = append(hashes, h)
 	}
 
 	return hashes, nil

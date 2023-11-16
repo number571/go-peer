@@ -9,8 +9,8 @@ type IKVDatabase interface {
 	types.ICloser
 
 	Push(message.IMessage) error
-	Load(string) (message.IMessage, error)
-	Hashes() ([]string, error)
+	Load([]byte) (message.IMessage, error)
+	Hashes() ([][]byte, error)
 
 	Settings() ISettings
 }
