@@ -15,11 +15,14 @@ type sError struct {
 }
 
 func (p *sError) Error() string {
-	s := ""
+	s := strings.Builder{}
+	s.Grow(len(p.fErrStack))
+
 	for i := len(p.fErrStack) - 1; i >= 0; i-- {
-		s += fmt.Sprintf("%s; ", p.fErrStack[i].Error())
+		s.WriteString(fmt.Sprintf("%s; ", p.fErrStack[i].Error()))
 	}
-	return strings.TrimSpace(s)
+
+	return strings.TrimSpace(s.String())
 }
 
 func NewError(pMsg string) error {

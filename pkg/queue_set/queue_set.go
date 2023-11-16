@@ -12,11 +12,10 @@ var (
 
 type sQueueSet struct {
 	fSettings ISettings
-
-	fMutex sync.Mutex
-	fMap   map[string][]byte
-	fQueue []string
-	fIndex int
+	fMutex    sync.Mutex
+	fMap      map[string][]byte
+	fQueue    []string
+	fIndex    int
 }
 
 func NewQueueSet(pSettings ISettings) IQueueSet {

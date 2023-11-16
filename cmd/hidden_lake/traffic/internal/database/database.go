@@ -24,10 +24,6 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
-	if pSett.GetMessagesCapacity() == 0 {
-		return nil, errors.NewError("capacity of messages = 0")
-	}
-
 	kvDB, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath: pSett.GetPath(),
@@ -61,7 +57,7 @@ func (p *sKeyValueDB) Hashes() ([]string, error) {
 			break
 		}
 		if len(hash) != hashing.CSHA256Size {
-			return nil, errors.NewError("incorrect hash size")
+			panic("incorrect hash size")
 		}
 		res = append(res, encoding.HexEncode(hash))
 	}
@@ -73,21 +69,18 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	params := message.NewSettings(&message.SSettings{
-		FWorkSizeBits:     p.Settings().GetWorkSizeBits(),
-		FMessageSizeBytes: p.Settings().GetMessageSizeBytes(),
-	})
-	if !pMsg.IsValid(params) {
+	if !pMsg.IsValid(p.Settings()) {
 		return errors.NewError("invalid push message")
 	}
 
-	hash := pMsg.GetBody().GetHash()
-	if _, err := p.fDB.Get(getKeyMessage(hash)); err == nil {
+	msgHash := pMsg.GetBody().GetHash()
+	if _, err := p.fDB.Get(getKeyMessage(msgHash)); err == nil {
 		return errors.OrigError(&SIsExistError{})
 	}
 
-	// delete old message by pointer
 	keyHash := getKeyHash(p.getPointer())
+
+	// delete old message by pointer
 	if hash, err := p.fDB.Get(keyHash); err == nil {
 		keyMsg := getKeyMessage(hash)
 		if err := p.fDB.Del(keyMsg); err != nil {
@@ -96,12 +89,12 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	}
 
 	// rewrite hash's field
-	if err := p.fDB.Set(keyHash, hash); err != nil {
+	if err := p.fDB.Set(keyHash, msgHash); err != nil {
 		return errors.WrapError(err, "rewrite key hash")
 	}
 
 	// write message
-	keyMsg := getKeyMessage(hash)
+	keyMsg := getKeyMessage(msgHash)
 	if err := p.fDB.Set(keyMsg, pMsg.ToBytes()); err != nil {
 		return errors.WrapError(err, "write message")
 	}

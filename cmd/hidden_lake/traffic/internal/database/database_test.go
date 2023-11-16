@@ -2,52 +2,306 @@ package database
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
-	tcPathDB = "test.db"
+	tcPathDBTemplate = "test_database_%d.db"
 )
 
-var (
-	tgDB IKVDatabase
-)
+func TestSettings(t *testing.T) {
+	t.Parallel()
 
-func testHmsDefaultInit(dbPath string) error {
-	os.RemoveAll(dbPath)
-	var err error
-	tgDB, err = NewKeyValueDB(NewSettings(&SSettings{
-		FPath:             dbPath,
+	for i := 0; i < 3; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	dbPath := "test_settings.db"
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessagesCapacity: testutils.TCCapacity,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FPath:             dbPath,
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessagesCapacity: testutils.TCCapacity,
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FPath:             dbPath,
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWorkSizeBits:     testutils.TCWorkSize,
+		})
+	}
+}
+
+func TestIInitDatabase(t *testing.T) {
+	t.Parallel()
+
+	prng := random.NewStdPRNG()
+	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
+
+	_, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             path,
 		FMessageSizeBytes: testutils.TCMessageSize,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
-	if err != nil {
-		return err
+	if err == nil {
+		t.Error("success init database with invalid path")
+		return
 	}
-	return nil
 }
 
-func TestDB(t *testing.T) {
+func TestDatabaseLoadPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
 	t.Parallel()
 
-	err := testHmsDefaultInit(tcPathDB)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: testutils.TCCapacity,
+	}))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	defer func() {
-		tgDB.Close()
-		os.RemoveAll(tcPathDB)
+		kvDB.Close()
+		os.RemoveAll(pathDB)
+	}()
+
+	ptrDB := kvDB.(*sKeyValueDB)
+
+	hash := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
+	if err := ptrDB.fDB.Set(getKeyMessage(hash), []byte{123}); err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, _ = kvDB.Load(encoding.HexEncode(hash)) // panic
+}
+
+func TestDatabaseHashesPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	t.Parallel()
+
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 3)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: testutils.TCCapacity,
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		kvDB.Close()
+		os.RemoveAll(pathDB)
+	}()
+
+	ptrDB := kvDB.(*sKeyValueDB)
+
+	if err := ptrDB.fDB.Set(getKeyHash(0), []byte{123}); err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, _ = kvDB.Hashes() // panic
+}
+
+func TestDatabaseLoad(t *testing.T) {
+	t.Parallel()
+
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 2)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: testutils.TCCapacity,
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		kvDB.Close()
+		os.RemoveAll(pathDB)
+	}()
+
+	if _, err := kvDB.Load("abc"); err == nil {
+		t.Error("success load not exist message (incorrect)")
+		return
+	}
+
+	hash := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
+	hashStr := encoding.HexEncode(hash)
+
+	_, errLoad := kvDB.Load(hashStr)
+	if errLoad == nil {
+		t.Error("success load not exist message (hash)")
+		return
+	}
+
+	if !errors.HasError(errLoad, &SIsNotExistError{}) {
+		t.Error("got incorrect error type (load)")
+		return
+	}
+}
+
+func TestDatabasePush(t *testing.T) {
+	t.Parallel()
+
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 1)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: 1,
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		kvDB.Close()
+		os.RemoveAll(pathDB)
+	}()
+
+	clTest := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FWorkSizeBits:     1,
+			FMessageSizeBytes: (10 << 10),
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+	)
+
+	msgTest, err := newMessage(clTest)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := kvDB.Push(msgTest); err == nil {
+		t.Error("success push message with difference setting")
+		return
+	}
+
+	cl := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+	)
+
+	msg1, err := newMessage(cl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := kvDB.Push(msg1); err != nil {
+		t.Error(err)
+		return
+	}
+
+	errPush := kvDB.Push(msg1)
+	if errPush == nil {
+		t.Error("success push duplicate")
+		return
+	}
+
+	if !errors.HasError(errPush, &SIsExistError{}) {
+		t.Error("got incorrect error type (push)")
+		return
+	}
+
+	msg2, err := newMessage(cl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := kvDB.Push(msg2); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func TestDatabase(t *testing.T) {
+	t.Parallel()
+
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 0)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FMessageSizeBytes: testutils.TCMessageSize,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: testutils.TCCapacity,
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		kvDB.Close()
+		os.RemoveAll(pathDB)
 	}()
 
 	cl := client.NewClient(
@@ -59,25 +313,21 @@ func TestDB(t *testing.T) {
 	)
 
 	putHashes := make([]string, 0, 3)
-
 	for i := 0; i < 3; i++ {
-		msg, err := cl.EncryptPayload(
-			cl.GetPubKey(),
-			payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
-		)
+		msg, err := newMessage(cl)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		if err := tgDB.Push(msg); err != nil {
+		if err := kvDB.Push(msg); err != nil {
 			t.Error(err)
 			return
 		}
 		putHashes = append(putHashes, encoding.HexEncode(msg.GetBody().GetHash()))
 	}
 
-	getHashes, err := tgDB.Hashes()
+	getHashes, err := kvDB.Hashes()
 	if err != nil {
 		t.Error(err)
 		return
@@ -96,7 +346,7 @@ func TestDB(t *testing.T) {
 	}
 
 	for _, getHash := range getHashes {
-		loadMsg, err := tgDB.Load(getHash)
+		loadMsg, err := kvDB.Load(getHash)
 		if err != nil {
 			t.Error(err)
 			return
@@ -130,8 +380,19 @@ func TestDB(t *testing.T) {
 		}
 	}
 
-	if err := tgDB.Close(); err != nil {
+	if err := kvDB.Close(); err != nil {
 		t.Error(err)
 		return
 	}
+}
+
+func newMessage(cl client.IClient) (message.IMessage, error) {
+	msg, err := cl.EncryptPayload(
+		cl.GetPubKey(),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return msg, nil
 }

@@ -29,6 +29,7 @@
 
 - Update `pkg/network`: rewrite inMapWithSet -> inQueueWithSet
 - Update `cmd/hidden_lake/traffic`: fix HandleMessage API
+- Update `cmd/hidden_lake/service`: delete field 'messages_capacity' from config
 
 <!-- ... -->
 

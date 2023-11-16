@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	cWorkSize = 1
+	cWorkSizeKey = 1
 
 	// third digits of PI
 	cAuthSalt = "8214808651_3282306647_0938446095_5058223172_5359408128"
@@ -101,7 +101,7 @@ func (p *sMessage) ToBytes() []byte {
 
 func getHash(networkKey string, pBytes []byte) []byte {
 	authKey := keybuilder.NewKeyBuilder(
-		cWorkSize,
+		cWorkSizeKey,
 		[]byte(cAuthSalt),
 	).Build(networkKey)
 	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()

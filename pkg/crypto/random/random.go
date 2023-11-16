@@ -2,9 +2,21 @@ package random
 
 import (
 	"crypto/rand"
+	"strings"
 
 	"github.com/number571/go-peer/pkg/encoding"
 )
+
+const (
+	charListSize = (1 << 6) // 2^n is a important condition
+	charList     = `abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+=-<>?/\,.;:{}[]~`
+)
+
+func init() {
+	if len(charList) != charListSize {
+		panic("len(charList) != charListSize")
+	}
+}
 
 var (
 	_ IPRNG = &sStdPRNG{}
@@ -30,13 +42,21 @@ func (p *sStdPRNG) GetBytes(n uint64) []byte {
 
 // Generates a cryptographically strong pseudo-random string.
 func (p *sStdPRNG) GetString(n uint64) string {
-	return encoding.HexEncode(p.GetBytes(n))[:n]
+	result := strings.Builder{}
+	result.Grow(int(n))
+
+	randBytes := p.GetBytes(n)
+	for _, b := range randBytes {
+		result.WriteByte(charList[b%charListSize])
+	}
+
+	return result.String()
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.
 func (p *sStdPRNG) GetUint64() uint64 {
 	res := [encoding.CSizeUint64]byte{}
-	copy(res[:], p.GetBytes(8))
+	copy(res[:], p.GetBytes(encoding.CSizeUint64))
 	return encoding.BytesToUint64(res)
 }
 

@@ -25,10 +25,12 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
 		panic(`p.FPath == ""`)
 	}
+	if p.FMessagesCapacity == 0 {
+		panic("p.FMessagesCapacity == 0")
+	}
 	if p.FMessageSizeBytes == 0 {
 		panic(`p.FMessageSizeBytes == 0`)
 	}
-	// if capacity=0 -> then storage=false
 	return p
 }
 

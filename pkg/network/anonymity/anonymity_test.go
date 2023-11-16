@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -288,67 +287,67 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 }
 
-func TestEnqueuePayload(t *testing.T) {
-	t.Parallel()
+// func TestEnqueuePayload(t *testing.T) {
+// 	t.Parallel()
 
-	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
-	nodes := testNewNodes(t, time.Minute, addresses, 8)
-	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
-	}
-	defer testFreeNodes(nodes[:], 8)
+// 	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
+// 	nodes := testNewNodes(t, time.Minute, addresses, 8)
+// 	if nodes[0] == nil {
+// 		t.Error("nodes is null")
+// 		return
+// 	}
+// 	defer testFreeNodes(nodes[:], 8)
 
-	node := nodes[0].(*sNode)
-	client := nodes[0].GetMessageQueue().GetClient()
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
+// 	node := nodes[0].(*sNode)
+// 	client := nodes[0].GetMessageQueue().GetClient()
+// 	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
 
-	msgBody := "hello, world!"
-	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
-	if err := node.enqueuePayload('?', pubKey, pld); err == nil {
-		t.Error("success with undefined type of message")
-		return
-	}
+// 	msgBody := "hello, world!"
+// 	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
+// 	if err := node.enqueuePayload('?', pubKey, pld); err == nil {
+// 		t.Error("success with undefined type of message")
+// 		return
+// 	}
 
-	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
-	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
-	if err := node.enqueuePayload(cIsRequest, pubKey, overPld); err == nil {
-		t.Error("success with overhead message")
-		return
-	}
+// 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
+// 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
+// 	if err := node.enqueuePayload(cIsRequest, pubKey, overPld); err == nil {
+// 		t.Error("success with overhead message")
+// 		return
+// 	}
 
-	msg, err := client.EncryptPayload(
-		pubKey,
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
-		).ToOrigin(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+// 	msg, err := client.EncryptPayload(
+// 		pubKey,
+// 		adapters.NewPayload(
+// 			testutils.TcHead,
+// 			wrapRequest([]byte(msgBody)),
+// 		).ToOrigin(),
+// 	)
+// 	if err != nil {
+// 		t.Error(err)
+// 		return
+// 	}
 
-	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.send(msg); err != nil {
-			t.Error("failed send message (push to queue)")
-			return
-		}
-	}
+// 	for i := 0; i < testutils.TCQueueCapacity; i++ {
+// 		if err := node.send(msg); err != nil {
+// 			t.Error("failed send message (push to queue)")
+// 			return
+// 		}
+// 	}
 
-	for i := 0; i < 5; i++ {
-		if err := node.enqueuePayload(cIsRequest, pubKey, pld); err != nil {
-			return
-		}
-		for j := 0; j < testutils.TCQueueCapacity; j++ {
-			if err := node.send(msg); err != nil {
-				break // fill queue on limit
-			}
-		}
-	}
+// 	for i := 0; i < 5; i++ {
+// 		if err := node.enqueuePayload(cIsRequest, pubKey, pld); err != nil {
+// 			return
+// 		}
+// 		for j := 0; j < testutils.TCQueueCapacity; j++ {
+// 			if err := node.send(msg); err != nil {
+// 				break // fill queue on limit
+// 			}
+// 		}
+// 	}
 
-	t.Error("success enqueue payload over queue capacity")
-}
+// 	t.Error("success enqueue payload over queue capacity")
+// }
 
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()

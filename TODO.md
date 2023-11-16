@@ -14,3 +14,4 @@
 12. Append example of use functions (godoc)
 13. Rename INode, IMessage, GetNetwork, ...
 14. Append errors (as traffic/database) for all interface methods
+15. HLT: database hashes: string -> []byte format
