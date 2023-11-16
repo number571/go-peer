@@ -9,7 +9,7 @@ import (
 
 const (
 	charListSize = (1 << 6) // 2^n is a important condition
-	charList     = `abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+=-<>?/\,.;:{}[]~`
+	charList     = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-`
 )
 
 func init() {
