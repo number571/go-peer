@@ -1,2 +1,3 @@
 !_configs/*
 !_configs/docker/*
+_mounted/priv.key

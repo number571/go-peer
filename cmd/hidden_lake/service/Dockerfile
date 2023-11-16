@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM --platform=linux/amd64 ubuntu:20.04
 
 RUN apt-get update && apt-get install -y wget gcc
 RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz && \ 

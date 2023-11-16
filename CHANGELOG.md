@@ -24,6 +24,8 @@
 - Update `pkg`: _examples/ -> examples/
 - Update `pkg/types`: move CloseAll, StopAll functions to internal/interrupt
 - Update `cmd/hidden_lake/service`: delete HandleMessage API
+- Update `cmd/hidden_lake/traffic`: database (GetHashes, Load): string arg -> []byte arg
+- Update `Dockerfile*`: append modifier '--platform linux/amd64' to section FROM 
 
 ### BUG FIXES
 
