@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/errors"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -23,7 +24,7 @@ const (
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		testSettings(t, i)
 	}
 }
@@ -40,21 +41,11 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessagesCapacity: testutils.TCCapacity,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FPath:             dbPath,
-			FWorkSizeBits:     testutils.TCWorkSize,
-			FMessagesCapacity: testutils.TCCapacity,
-		})
-	case 2:
-		_ = NewSettings(&SSettings{
-			FPath:             dbPath,
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FWorkSizeBits:     testutils.TCWorkSize,
+			FPath: dbPath,
 		})
 	}
 }
@@ -65,9 +56,9 @@ func TestIInitDatabase(t *testing.T) {
 	prng := random.NewStdPRNG()
 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 
-	_, err := NewKeyValueDB(NewSettings(&SSettings{
+	_, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             path,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
@@ -90,9 +81,9 @@ func TestDatabaseLoadPanic(t *testing.T) {
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             pathDB,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
@@ -106,7 +97,7 @@ func TestDatabaseLoadPanic(t *testing.T) {
 		os.RemoveAll(pathDB)
 	}()
 
-	ptrDB := kvDB.(*sKeyValueDB)
+	ptrDB := kvDB.(*sDatabase)
 
 	hash := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
 	if err := ptrDB.fDB.Set(getKeyMessage(hash), []byte{123}); err != nil {
@@ -130,9 +121,9 @@ func TestDatabaseHashesPanic(t *testing.T) {
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 3)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             pathDB,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
@@ -146,7 +137,7 @@ func TestDatabaseHashesPanic(t *testing.T) {
 		os.RemoveAll(pathDB)
 	}()
 
-	ptrDB := kvDB.(*sKeyValueDB)
+	ptrDB := kvDB.(*sDatabase)
 
 	if err := ptrDB.fDB.Set(getKeyHash(0), []byte{123}); err != nil {
 		t.Error(err)
@@ -162,9 +153,9 @@ func TestDatabaseLoad(t *testing.T) {
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 2)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             pathDB,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
@@ -202,9 +193,9 @@ func TestDatabasePush(t *testing.T) {
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 1)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             pathDB,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: 1,
 	}))
@@ -226,7 +217,7 @@ func TestDatabasePush(t *testing.T) {
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
-	msgTest, err := newMessage(clTest)
+	msgTest, err := newNetworkMessage(clTest, "some-another-key")
 	if err != nil {
 		t.Error(err)
 		return
@@ -245,7 +236,7 @@ func TestDatabasePush(t *testing.T) {
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
-	msg1, err := newMessage(cl)
+	msg1, err := newNetworkMessage(cl, testutils.TCNetworkKey)
 	if err != nil {
 		t.Error(err)
 		return
@@ -267,7 +258,7 @@ func TestDatabasePush(t *testing.T) {
 		return
 	}
 
-	msg2, err := newMessage(cl)
+	msg2, err := newNetworkMessage(cl, testutils.TCNetworkKey)
 	if err != nil {
 		t.Error(err)
 		return
@@ -285,9 +276,9 @@ func TestDatabase(t *testing.T) {
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 0)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewKeyValueDB(NewSettings(&SSettings{
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
 		FPath:             pathDB,
-		FMessageSizeBytes: testutils.TCMessageSize,
+		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
@@ -311,7 +302,7 @@ func TestDatabase(t *testing.T) {
 
 	putHashes := make([][]byte, 0, 3)
 	for i := 0; i < 3; i++ {
-		msg, err := newMessage(cl)
+		msg, err := newNetworkMessage(cl, testutils.TCNetworkKey)
 		if err != nil {
 			t.Error(err)
 			return
@@ -321,7 +312,7 @@ func TestDatabase(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		putHashes = append(putHashes, msg.GetBody().GetHash())
+		putHashes = append(putHashes, msg.GetHash())
 	}
 
 	getHashes, err := kvDB.Hashes()
@@ -343,15 +334,21 @@ func TestDatabase(t *testing.T) {
 	}
 
 	for _, getHash := range getHashes {
-		loadMsg, err := kvDB.Load(getHash)
+		loadNetMsg, err := kvDB.Load(getHash)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		msgHash := loadMsg.GetBody().GetHash()
+		msgHash := loadNetMsg.GetHash()
 		if !bytes.Equal(getHash, msgHash) {
 			t.Errorf("getHash[%s] != msgHash[%s]", getHash, msgHash)
+			return
+		}
+
+		loadMsg := message.LoadMessage(cl.GetSettings(), loadNetMsg.GetPayload().GetBody())
+		if loadMsg == nil {
+			t.Error("got invalid message from load")
 			return
 		}
 
@@ -383,7 +380,7 @@ func TestDatabase(t *testing.T) {
 	}
 }
 
-func newMessage(cl client.IClient) (message.IMessage, error) {
+func newNetworkMessage(cl client.IClient, networkKey string) (net_message.IMessage, error) {
 	msg, err := cl.EncryptPayload(
 		cl.GetPubKey(),
 		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
@@ -391,5 +388,12 @@ func newMessage(cl client.IClient) (message.IMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	return msg, nil
+	netMsg := net_message.NewMessage(
+		net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   networkKey,
+			FWorkSizeBits: testutils.TCWorkSize,
+		}),
+		payload.NewPayload(0, msg.ToBytes()),
+	)
+	return netMsg, nil
 }

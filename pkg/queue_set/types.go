@@ -2,6 +2,7 @@ package queue_set
 
 type IQueueSet interface {
 	GetSettings() ISettings
+	GetQueueKeys() [][]byte
 
 	IQueuePusher
 	IQueueLoader

@@ -20,11 +20,11 @@ func NewWrapperDB() IWrapperDB {
 	return &sWrapperDB{fWrapper: wrapper.NewWrapper()}
 }
 
-func (p *sWrapperDB) Get() IKVDatabase {
+func (p *sWrapperDB) Get() IDatabase {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	db, ok := p.fWrapper.Get().(IKVDatabase)
+	db, ok := p.fWrapper.Get().(IDatabase)
 	if !ok {
 		return nil
 	}
@@ -32,7 +32,7 @@ func (p *sWrapperDB) Get() IKVDatabase {
 	return db
 }
 
-func (p *sWrapperDB) Set(pDB IKVDatabase) IWrapperDB {
+func (p *sWrapperDB) Set(pDB IDatabase) IWrapperDB {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -44,7 +44,7 @@ func (p *sWrapperDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	db, ok := p.fWrapper.Get().(IKVDatabase)
+	db, ok := p.fWrapper.Get().(IDatabase)
 	if !ok {
 		return nil
 	}

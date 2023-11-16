@@ -6,11 +6,13 @@ import (
 	"os"
 	"time"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/file_system"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -20,13 +22,18 @@ const (
 
 const (
 	cLocalAddressHLT = "localhost:9582"
-	cProdAddressHLT  = "6a20015eacd8.vps.myjino.ru:49191" // 1x2.0ГГц, 1.5Гб RAM, 10Гб HDD
+	cProdAddressHLT  = "-" // nothing
 )
 
 func main() {
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits:     20,
 		FMessageSizeBytes: (8 << 10),
+	})
+
+	netSett := net_message.NewSettings(&net_message.SSettings{
+		FWorkSizeBits: 20,
+		FNetworkKey:   "some-network-key",
 	})
 
 	readPrivKey, err := file_system.OpenFile("priv.key").Read()
@@ -57,10 +64,7 @@ func main() {
 		hlt_client.NewRequester(
 			"http://"+addr,
 			&http.Client{Timeout: time.Minute},
-			message.NewSettings(&message.SSettings{
-				FWorkSizeBits:     sett.GetWorkSizeBits(),
-				FMessageSizeBytes: sett.GetMessageSizeBytes(),
-			}),
+			netSett,
 		),
 	)
 
@@ -78,19 +82,29 @@ func main() {
 			panic(err)
 		}
 
-		if err := hltClient.PutMessage(msg); err != nil {
+		netMsg := net_message.NewMessage(
+			netSett,
+			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+		)
+
+		if err := hltClient.PutMessage(netMsg); err != nil {
 			panic(err)
 		}
 
-		fmt.Printf("%x\n", msg.GetBody().GetHash())
+		fmt.Printf("%x\n", netMsg.GetHash())
 	case "r", "read":
 		if len(args) != 2 {
 			panic("len read.args != 2")
 		}
 
-		msg, err := hltClient.GetMessage(args[1])
+		netMsg, err := hltClient.GetMessage(args[1])
 		if err != nil {
 			panic(err)
+		}
+
+		msg := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
+		if msg == nil {
+			panic("load message is nil")
 		}
 
 		pubKey, pld, err := client.DecryptMessage(msg)

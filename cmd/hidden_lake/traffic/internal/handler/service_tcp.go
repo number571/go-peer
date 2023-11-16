@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/internal/msgconv"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
@@ -23,17 +22,17 @@ import (
 func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
 
-	return func(pNode network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
+	return func(pNode network.INode, pConn conn.IConn, pNetMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
 			WithConn(pConn).
-			WithSize(len(pMsg.ToBytes()))
+			WithSize(len(pNetMsg.ToBytes()))
 
 		msg := message.LoadMessage(
 			pCfg.GetSettings(),
-			pMsg.GetPayload().GetBody(),
+			pNetMsg.GetPayload().GetBody(),
 		)
 		if msg == nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
@@ -58,7 +57,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		}
 
 		// check message from in database queue
-		if err := hltDB.Push(msg); err != nil {
+		if err := hltDB.Push(pNetMsg); err != nil {
 			if errors.HasError(err, &database.SIsExistError{}) {
 				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
 				return nil
@@ -67,22 +66,22 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			return errors.WrapError(err, "put message to database")
 		}
 
-		if err := pNode.BroadcastMessage(pMsg); err != nil {
+		if err := pNode.BroadcastMessage(pNetMsg); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
 
-		msgString := msgconv.FromBytesToString(msg.ToBytes())
-		if msgString == "" {
-			panic("got invalid result (func=FromBytesToString)")
-		}
+		// msgString := msgconv.FromBytesToString(msg.ToBytes())
+		// if msgString == "" {
+		// 	panic("got invalid result (func=FromBytesToString)")
+		// }
 
 		for _, cHost := range pCfg.GetConsumers() {
 			_, err := api.Request(
 				httpClient,
 				http.MethodPost,
 				fmt.Sprintf("http://%s", cHost),
-				msgString,
+				pNetMsg.ToString(),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
-	"github.com/number571/go-peer/pkg/client/message"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -68,9 +68,9 @@ func TestApp(t *testing.T) {
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
 			&http.Client{Timeout: time.Minute},
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWorkSizeBits:     testutils.TCWorkSize,
+			net_message.NewSettings(&net_message.SSettings{
+				FNetworkKey:   testutils.TCNetworkKey,
+				FWorkSizeBits: testutils.TCWorkSize,
 			}),
 		),
 	)

@@ -3,19 +3,19 @@ package database
 import (
 	"sync"
 
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 var (
-	_ IKVDatabase = &sKeyValueDB{}
+	_ IDatabase = &sDatabase{}
 )
 
-type sKeyValueDB struct {
+type sDatabase struct {
 	fMutex   sync.Mutex
 	fPointer uint64
 
@@ -23,7 +23,7 @@ type sKeyValueDB struct {
 	fDB       database.IKVDatabase
 }
 
-func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
+func NewDatabase(pSett ISettings) (IDatabase, error) {
 	kvDB, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
 			FPath: pSett.GetPath(),
@@ -33,7 +33,7 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 		return nil, errors.WrapError(err, "new key/value database")
 	}
 
-	db := &sKeyValueDB{
+	db := &sDatabase{
 		fSettings: pSett,
 		fDB:       kvDB,
 	}
@@ -41,11 +41,11 @@ func NewKeyValueDB(pSett ISettings) (IKVDatabase, error) {
 	return db, nil
 }
 
-func (p *sKeyValueDB) Settings() ISettings {
+func (p *sDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sKeyValueDB) Hashes() ([][]byte, error) {
+func (p *sDatabase) Hashes() ([][]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -65,15 +65,15 @@ func (p *sKeyValueDB) Hashes() ([][]byte, error) {
 	return res, nil
 }
 
-func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
+func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if !pMsg.IsValid(p.Settings()) {
-		return errors.NewError("invalid push message")
+	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
+		return errors.NewError("got message with diff settings")
 	}
 
-	msgHash := pMsg.GetBody().GetHash()
+	msgHash := pMsg.GetHash()
 	if _, err := p.fDB.Get(getKeyMessage(msgHash)); err == nil {
 		return errors.OrigError(&SIsExistError{})
 	}
@@ -107,7 +107,7 @@ func (p *sKeyValueDB) Push(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
+func (p *sDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -120,7 +120,7 @@ func (p *sKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
 		return nil, errors.OrigError(&SIsNotExistError{})
 	}
 
-	msg := message.LoadMessage(p.Settings(), data)
+	msg := net_message.LoadMessage(p.Settings(), data)
 	if msg == nil {
 		panic("message is nil")
 	}
@@ -128,7 +128,7 @@ func (p *sKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
 	return msg, nil
 }
 
-func (p *sKeyValueDB) Close() error {
+func (p *sDatabase) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -138,7 +138,7 @@ func (p *sKeyValueDB) Close() error {
 	return nil
 }
 
-func (p *sKeyValueDB) getPointer() uint64 {
+func (p *sDatabase) getPointer() uint64 {
 	data, err := p.fDB.Get(getKeyPointer())
 	if err != nil {
 		return 0
@@ -149,7 +149,7 @@ func (p *sKeyValueDB) getPointer() uint64 {
 	return encoding.BytesToUint64(res)
 }
 
-func (p *sKeyValueDB) incPointer() error {
+func (p *sDatabase) incPointer() error {
 	msgsLimit := p.Settings().GetMessagesCapacity()
 	res := encoding.Uint64ToBytes((p.getPointer() + 1) % msgsLimit)
 	if err := p.fDB.Set(getKeyPointer(), res[:]); err != nil {

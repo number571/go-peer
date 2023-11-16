@@ -29,11 +29,18 @@ const (
 	databaseTemplate = "database_test_%s.db"
 )
 
+func testNetworkMessageSettings() net_message.ISettings {
+	return net_message.NewSettings(&net_message.SSettings{
+		FNetworkKey:   testutils.TCNetworkKey,
+		FWorkSizeBits: testutils.TCWorkSize,
+	})
+}
+
 func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IWrapperDB, hlt_client.IClient) {
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
-			FMessageSizeBytes: testutils.TCMessageSize,
+			FNetworkKey:       testutils.TCNetworkKey,
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessagesCapacity: testutils.TCCapacity,
 		}),
@@ -50,10 +57,7 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 		hlt_client.NewRequester(
 			fmt.Sprintf("http://%s", addr),
 			&http.Client{Timeout: time.Minute},
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWorkSizeBits:     testutils.TCWorkSize,
-			}),
+			testNetworkMessageSettings(),
 		),
 	)
 
@@ -114,6 +118,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FNetworkKey:       testutils.TCNetworkKey,
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,
@@ -170,6 +175,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FNetworkKey:       testutils.TCNetworkKey,
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadDeadline: time.Hour,

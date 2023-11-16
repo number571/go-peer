@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/number571/go-peer/pkg/client/message"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IClient interface {
@@ -9,12 +9,12 @@ type IClient interface {
 
 	GetHashes() ([]string, error)
 
-	GetMessage(string) (message.IMessage, error)
-	PutMessage(message.IMessage) error
+	GetMessage(string) (net_message.IMessage, error)
+	PutMessage(net_message.IMessage) error
 }
 
 type IBuilder interface {
-	PutMessage(message.IMessage) string
+	PutMessage(net_message.IMessage) string
 }
 
 type IRequester interface {
@@ -22,6 +22,6 @@ type IRequester interface {
 
 	GetHashes() ([]string, error)
 
-	GetMessage(string) (message.IMessage, error)
+	GetMessage(string) (net_message.IMessage, error)
 	PutMessage(string) error
 }

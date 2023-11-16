@@ -26,6 +26,7 @@
 - Update `cmd/hidden_lake/service`: delete HandleMessage API
 - Update `cmd/hidden_lake/traffic`: database (GetHashes, Load): string arg -> []byte arg
 - Update `Dockerfile*`: append modifier '--platform linux/amd64' to section FROM 
+- Update `cmd/hidden_lake/traffic`: interfaces with message (pkg/client/message) -> message (pkg/network/message)
 
 ### BUG FIXES
 

@@ -6,10 +6,12 @@ import (
 	"os"
 	"testing"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -43,7 +45,11 @@ func TestHandleHashesAPI(t *testing.T) {
 		return
 	}
 
-	if err := hltClient.PutMessage(msg); err != nil {
+	netMsg := net_message.NewMessage(
+		testNetworkMessageSettings(),
+		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+	)
+	if err := hltClient.PutMessage(netMsg); err != nil {
 		t.Error(err)
 		return
 	}
@@ -59,7 +65,7 @@ func TestHandleHashesAPI(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(encoding.HexDecode(hashes[0]), msg.GetBody().GetHash()) {
+	if !bytes.Equal(encoding.HexDecode(hashes[0]), netMsg.GetHash()) {
 		t.Error("hashes not equals")
 		return
 	}

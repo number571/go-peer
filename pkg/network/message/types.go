@@ -1,9 +1,12 @@
 package message
 
-import "github.com/number571/go-peer/pkg/payload"
+import (
+	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/types"
+)
 
 type IMessage interface {
-	ToBytes() []byte
+	types.IConverter
 
 	GetProof() uint64
 	GetHash() []byte

@@ -7,7 +7,7 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FPath             string
-	FMessageSizeBytes uint64
+	FNetworkKey       string
 	FWorkSizeBits     uint64
 	FMessagesCapacity uint64
 }
@@ -15,8 +15,8 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FPath:             pSett.FPath,
+		FNetworkKey:       pSett.FNetworkKey,
 		FWorkSizeBits:     pSett.FWorkSizeBits,
-		FMessageSizeBytes: pSett.FMessageSizeBytes,
 		FMessagesCapacity: pSett.FMessagesCapacity,
 	}).mustNotNull()
 }
@@ -27,9 +27,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FMessagesCapacity == 0 {
 		panic("p.FMessagesCapacity == 0")
-	}
-	if p.FMessageSizeBytes == 0 {
-		panic(`p.FMessageSizeBytes == 0`)
 	}
 	return p
 }
@@ -42,8 +39,8 @@ func (s *sSettings) GetMessagesCapacity() uint64 {
 	return s.FMessagesCapacity
 }
 
-func (p *sSettings) GetMessageSizeBytes() uint64 {
-	return p.FMessageSizeBytes
+func (s *sSettings) GetNetworkKey() string {
+	return s.FNetworkKey
 }
 
 func (p *sSettings) GetWorkSizeBits() uint64 {

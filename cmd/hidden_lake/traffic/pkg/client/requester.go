@@ -7,9 +7,9 @@ import (
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/errors"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -19,10 +19,10 @@ var (
 type sRequester struct {
 	fHost   string
 	fClient *http.Client
-	fParams message.ISettings
+	fParams net_message.ISettings
 }
 
-func NewRequester(pHost string, pClient *http.Client, pParams message.ISettings) IRequester {
+func NewRequester(pHost string, pClient *http.Client, pParams net_message.ISettings) IRequester {
 	return &sRequester{
 		fHost:   pHost,
 		fClient: pClient,
@@ -68,7 +68,7 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	return hashes, nil
 }
 
-func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
+func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -79,12 +79,12 @@ func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
 		return nil, errors.WrapError(err, "get message (requester)")
 	}
 
-	msg := message.LoadMessage(p.fParams, string(resp))
+	msg := net_message.LoadMessage(p.fParams, string(resp))
 	if msg == nil {
 		return nil, errors.NewError("load message")
 	}
 
-	if !bytes.Equal(msg.GetBody().GetHash(), encoding.HexDecode(pHash)) {
+	if !bytes.Equal(msg.GetHash(), encoding.HexDecode(pHash)) {
 		return nil, errors.NewError("got invalid hash")
 	}
 	return msg, nil

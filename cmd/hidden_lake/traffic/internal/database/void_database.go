@@ -1,23 +1,23 @@
 package database
 
 import (
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/errors"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/queue_set"
 )
 
 var (
-	_ IKVDatabase = &sVoidKeyValueDB{}
+	_ IDatabase = &sVoidDatabase{}
 )
 
-type sVoidKeyValueDB struct {
+type sVoidDatabase struct {
 	fSettings ISettings
 	fQueueSet queue_set.IQueueSet
 }
 
-func NewVoidKeyValueDB(pSett ISettings) IKVDatabase {
-	return &sVoidKeyValueDB{
+func NewVoidDatabase(pSett ISettings) IDatabase {
+	return &sVoidDatabase{
 		fSettings: pSett,
 		fQueueSet: queue_set.NewQueueSet(
 			queue_set.NewSettings(&queue_set.SSettings{
@@ -27,22 +27,27 @@ func NewVoidKeyValueDB(pSett ISettings) IKVDatabase {
 	}
 }
 
-func (p *sVoidKeyValueDB) Settings() ISettings {
+func (p *sVoidDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sVoidKeyValueDB) Hashes() ([][]byte, error) {
-	return nil, nil
+func (p *sVoidDatabase) Hashes() ([][]byte, error) {
+	return p.fQueueSet.GetQueueKeys(), nil
 }
 
-func (p *sVoidKeyValueDB) Push(pMsg message.IMessage) error {
-	if ok := p.fQueueSet.Push(pMsg.GetBody().GetHash(), pMsg.ToBytes()); !ok {
+func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
+	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
+		return errors.NewError("got message with diff settings")
+	}
+
+	if ok := p.fQueueSet.Push(pMsg.GetHash(), pMsg.ToBytes()); !ok {
 		return errors.OrigError(&SIsExistError{})
 	}
+
 	return nil
 }
 
-func (p *sVoidKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
+func (p *sVoidDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	if len(pHash) != hashing.CSHA256Size {
 		return nil, errors.NewError("key size invalid")
 	}
@@ -52,7 +57,7 @@ func (p *sVoidKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
 		return nil, errors.OrigError(&SIsNotExistError{})
 	}
 
-	msg := message.LoadMessage(p.fSettings, msgBytes)
+	msg := net_message.LoadMessage(p.fSettings, msgBytes)
 	if msg == nil {
 		panic("message is nil")
 	}
@@ -60,6 +65,6 @@ func (p *sVoidKeyValueDB) Load(pHash []byte) (message.IMessage, error) {
 	return msg, nil
 }
 
-func (p *sVoidKeyValueDB) Close() error {
+func (p *sVoidDatabase) Close() error {
 	return nil
 }

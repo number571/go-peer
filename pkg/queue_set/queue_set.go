@@ -30,6 +30,23 @@ func (p *sQueueSet) GetSettings() ISettings {
 	return p.fSettings
 }
 
+func (p *sQueueSet) GetQueueKeys() [][]byte {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	queueSlice := p.fQueue[:p.fIndex]
+	keys := make([][]byte, 0, len(queueSlice))
+	for _, v := range queueSlice {
+		h := encoding.HexDecode(v)
+		if h == nil {
+			panic("decode hex key param")
+		}
+		keys = append(keys, h)
+	}
+
+	return keys
+}
+
 func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

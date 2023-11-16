@@ -39,14 +39,25 @@ func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	}
 }
 
-func LoadMessage(pSett ISettings, pData []byte) IMessage {
-	if len(pData) < encoding.CSizeUint64+hashing.CSHA256Size {
+func LoadMessage(pSett ISettings, pData interface{}) IMessage {
+	var msgBytes []byte
+
+	switch x := pData.(type) {
+	case []byte:
+		msgBytes = x
+	case string:
+		return LoadMessage(pSett, encoding.HexDecode(x))
+	default:
 		return nil
 	}
 
-	proofBytes := pData[:encoding.CSizeUint64]
-	gotHash := pData[encoding.CSizeUint64 : encoding.CSizeUint64+hashing.CSHA256Size]
-	pldBytes := pData[encoding.CSizeUint64+hashing.CSHA256Size:]
+	if len(msgBytes) < encoding.CSizeUint64+hashing.CSHA256Size {
+		return nil
+	}
+
+	proofBytes := msgBytes[:encoding.CSizeUint64]
+	gotHash := msgBytes[encoding.CSizeUint64 : encoding.CSizeUint64+hashing.CSHA256Size]
+	pldBytes := msgBytes[encoding.CSizeUint64+hashing.CSHA256Size:]
 
 	proofArray := [encoding.CSizeUint64]byte{}
 	copy(proofArray[:], proofBytes[:])
@@ -97,6 +108,10 @@ func (p *sMessage) ToBytes() []byte {
 		},
 		[]byte{},
 	)
+}
+
+func (p *sMessage) ToString() string {
+	return encoding.HexEncode(p.ToBytes())
 }
 
 func getHash(networkKey string, pBytes []byte) []byte {

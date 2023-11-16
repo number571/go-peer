@@ -10,12 +10,10 @@ import (
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/internal/msgconv"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
@@ -67,14 +65,21 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTP
 				return
 			}
 
-			msgString := string(msgStringAsBytes)
-			netMsg := net_message.NewMessage(
+			netMsg := net_message.LoadMessage(
 				pNode.GetSettings().GetConnSettings(),
-				payload.NewPayload(
-					hls_settings.CNetworkMask,
-					msgconv.FromStringToBytes(msgString),
-				),
+				string(msgStringAsBytes),
 			)
+			if netMsg == nil {
+				pHTTPLogger.PushWarn(logBuilder.WithMessage("decode_message"))
+				api.Response(pW, http.StatusTeapot, "failed: decode message")
+				return
+			}
+
+			if netMsg.GetPayload().GetHead() != hls_settings.CNetworkMask {
+				pHTTPLogger.PushWarn(logBuilder.WithMessage("network_mask"))
+				api.Response(pW, http.StatusTeapot, "failed: network mask")
+				return
+			}
 
 			if err := tcpHandler(pNode, nil, netMsg); err != nil {
 				// internal logger

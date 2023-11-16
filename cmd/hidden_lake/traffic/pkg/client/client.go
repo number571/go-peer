@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/errors"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -37,7 +37,7 @@ func (p *sClient) GetHashes() ([]string, error) {
 	return res, nil
 }
 
-func (p *sClient) GetMessage(pHash string) (message.IMessage, error) {
+func (p *sClient) GetMessage(pHash string) (net_message.IMessage, error) {
 	msg, err := p.fRequester.GetMessage(pHash)
 	if err != nil {
 		return nil, errors.WrapError(err, "get message (client)")
@@ -45,7 +45,7 @@ func (p *sClient) GetMessage(pHash string) (message.IMessage, error) {
 	return msg, nil
 }
 
-func (p *sClient) PutMessage(pMsg message.IMessage) error {
+func (p *sClient) PutMessage(pMsg net_message.IMessage) error {
 	if err := p.fRequester.PutMessage(p.fBuilder.PutMessage(pMsg)); err != nil {
 		return errors.WrapError(err, "put message (client)")
 	}

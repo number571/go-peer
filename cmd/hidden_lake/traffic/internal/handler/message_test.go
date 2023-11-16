@@ -5,7 +5,10 @@ import (
 	"os"
 	"testing"
 
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -29,15 +32,28 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	if err := hltClient.PutMessage(msg); err != nil {
+	netMsg := net_message.NewMessage(
+		testNetworkMessageSettings(),
+		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+	)
+	if err := hltClient.PutMessage(netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
-	strHash := encoding.HexEncode(msg.GetBody().GetHash())
-	gotEncMsg, err := hltClient.GetMessage(strHash)
+	strHash := encoding.HexEncode(netMsg.GetHash())
+	gotNetMsg, err := hltClient.GetMessage(strHash)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	gotEncMsg := message.LoadMessage(
+		client.GetSettings(),
+		gotNetMsg.GetPayload().GetBody(),
+	)
+	if gotEncMsg == nil {
+		t.Error("failed to load encrypted message")
 		return
 	}
 

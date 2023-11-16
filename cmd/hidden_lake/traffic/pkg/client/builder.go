@@ -1,8 +1,6 @@
 package client
 
-import (
-	"github.com/number571/go-peer/pkg/client/message"
-)
+import net_message "github.com/number571/go-peer/pkg/network/message"
 
 var (
 	_ IBuilder = &sBuilder{}
@@ -15,6 +13,6 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) PutMessage(pMsg message.IMessage) string {
+func (p *sBuilder) PutMessage(pMsg net_message.IMessage) string {
 	return pMsg.ToString()
 }
