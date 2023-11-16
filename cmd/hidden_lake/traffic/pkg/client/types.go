@@ -7,7 +7,7 @@ import (
 type IClient interface {
 	GetIndex() (string, error)
 
-	GetHashes() ([][]byte, error)
+	GetHashes() ([]string, error)
 
 	GetMessage(string) (message.IMessage, error)
 	PutMessage(message.IMessage) error
@@ -20,7 +20,7 @@ type IBuilder interface {
 type IRequester interface {
 	GetIndex() (string, error)
 
-	GetHashes() ([][]byte, error)
+	GetHashes() ([]string, error)
 
 	GetMessage(string) (message.IMessage, error)
 	PutMessage(string) error

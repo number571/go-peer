@@ -29,7 +29,7 @@ func (p *sClient) GetIndex() (string, error) {
 	return res, nil
 }
 
-func (p *sClient) GetHashes() ([][]byte, error) {
+func (p *sClient) GetHashes() ([]string, error) {
 	res, err := p.fRequester.GetHashes()
 	if err != nil {
 		return nil, errors.WrapError(err, "get hashes (client)")

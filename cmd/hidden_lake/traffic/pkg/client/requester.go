@@ -49,7 +49,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) GetHashes() ([][]byte, error) {
+func (p *sRequester) GetHashes() ([]string, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -60,29 +60,15 @@ func (p *sRequester) GetHashes() ([][]byte, error) {
 		return nil, errors.WrapError(err, "get hashes (requester)")
 	}
 
-	var strHashes []string
-	if err := encoding.Deserialize([]byte(resp), &strHashes); err != nil {
+	var hashes []string
+	if err := encoding.Deserialize([]byte(resp), &hashes); err != nil {
 		return nil, errors.WrapError(err, "deserialize hashes (requeser)")
-	}
-
-	hashes := make([][]byte, 0, len(strHashes))
-	for _, s := range strHashes {
-		h := encoding.HexDecode(s)
-		if h == nil {
-			return nil, errors.NewError("got invalid hash")
-		}
-		hashes = append(hashes, h)
 	}
 
 	return hashes, nil
 }
 
 func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
-	hashBytes := encoding.HexDecode(pHash)
-	if hashBytes == nil {
-		return nil, errors.NewError("input hex-hash is invalid")
-	}
-
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
@@ -98,7 +84,7 @@ func (p *sRequester) GetMessage(pHash string) (message.IMessage, error) {
 		return nil, errors.NewError("load message")
 	}
 
-	if !bytes.Equal(msg.GetBody().GetHash(), hashBytes) {
+	if !bytes.Equal(msg.GetBody().GetHash(), encoding.HexDecode(pHash)) {
 		return nil, errors.NewError("got invalid hash")
 	}
 	return msg, nil

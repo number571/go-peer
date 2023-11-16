@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -58,7 +59,7 @@ func TestHandleHashesAPI(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(hashes[0], msg.GetBody().GetHash()) {
+	if !bytes.Equal(encoding.HexDecode(hashes[0]), msg.GetBody().GetHash()) {
 		t.Error("hashes not equals")
 		return
 	}
