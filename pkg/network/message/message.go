@@ -22,7 +22,7 @@ var (
 )
 
 type sMessage struct {
-	fProof   []byte
+	fProof   uint64
 	fHash    []byte
 	fPayload payload.IPayload
 }
@@ -30,10 +30,9 @@ type sMessage struct {
 func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)
-	proofBytes := encoding.Uint64ToBytes(proof)
 
 	return &sMessage{
-		fProof:   proofBytes[:],
+		fProof:   proof,
 		fHash:    hash,
 		fPayload: pPld,
 	}
@@ -79,16 +78,14 @@ func LoadMessage(pSett ISettings, pData interface{}) IMessage {
 	}
 
 	return &sMessage{
-		fProof:   proofArray[:],
+		fProof:   proof,
 		fHash:    gotHash,
 		fPayload: pld,
 	}
 }
 
 func (p *sMessage) GetProof() uint64 {
-	proofArray := [encoding.CSizeUint64]byte{}
-	copy(proofArray[:], p.fProof[:])
-	return encoding.BytesToUint64(proofArray)
+	return p.fProof
 }
 
 func (p *sMessage) GetHash() []byte {
@@ -100,9 +97,10 @@ func (p *sMessage) GetPayload() payload.IPayload {
 }
 
 func (p *sMessage) ToBytes() []byte {
+	proofBytes := encoding.Uint64ToBytes(p.fProof)
 	return bytes.Join(
 		[][]byte{
-			p.fProof,
+			proofBytes[:],
 			p.fHash,
 			p.fPayload.ToBytes(),
 		},
