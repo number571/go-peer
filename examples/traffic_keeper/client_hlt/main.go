@@ -27,7 +27,6 @@ const (
 
 func main() {
 	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits:     20,
 		FMessageSizeBytes: (8 << 10),
 	})
 
@@ -102,8 +101,8 @@ func main() {
 			panic(err)
 		}
 
-		msg := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
-		if msg == nil {
+		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
+		if err != nil {
 			panic("load message is nil")
 		}
 

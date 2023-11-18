@@ -211,7 +211,6 @@ func TestDatabasePush(t *testing.T) {
 
 	clTest := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     1,
 			FMessageSizeBytes: (10 << 10),
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -230,7 +229,6 @@ func TestDatabasePush(t *testing.T) {
 
 	cl := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -294,7 +292,6 @@ func TestDatabase(t *testing.T) {
 
 	cl := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -346,9 +343,9 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
-		loadMsg := message.LoadMessage(cl.GetSettings(), loadNetMsg.GetPayload().GetBody())
-		if loadMsg == nil {
-			t.Error("got invalid message from load")
+		loadMsg, err := message.LoadMessage(cl.GetSettings(), loadNetMsg.GetPayload().GetBody())
+		if err != nil {
+			t.Error(err)
 			return
 		}
 

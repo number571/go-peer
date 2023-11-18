@@ -15,10 +15,6 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
-const (
-	cWorkSize = 20 // bits
-)
-
 func main() {
 	if len(os.Args) != 3 {
 		panic(fmt.Sprintf(
@@ -57,7 +53,6 @@ func main() {
 
 	dataValue := readUntilEOF()
 	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits:     cWorkSize,
 		FMessageSizeBytes: getMessageSize(param, dataValue),
 	})
 
@@ -71,7 +66,11 @@ func main() {
 		fmt.Println(string(msg.ToBytes()))
 	case "D":
 		c := client.NewClient(sett, privKey)
-		_, pld, err := c.DecryptMessage(message.LoadMessage(sett, dataValue))
+		msg, err := message.LoadMessage(sett, dataValue)
+		if err != nil {
+			panic(err)
+		}
+		_, pld, err := c.DecryptMessage(msg)
 		if err != nil {
 			panic(err)
 		}

@@ -14,6 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -375,7 +376,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.newNetworkMessage(sett, msg)
+	netMsg := node.testNewNetworkMessage(sett, msg)
 	if err := handler(nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
@@ -405,7 +406,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg2 := node.newNetworkMessage(sett, msg2)
+	netMsg2 := node.testNewNetworkMessage(sett, msg2)
 	if err := handler(nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -423,7 +424,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg3 := node.newNetworkMessage(sett, msg3)
+	netMsg3 := node.testNewNetworkMessage(sett, msg3)
 	if err := handler(nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -441,7 +442,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg4 := node.newNetworkMessage(sett, msg4)
+	netMsg4 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -470,7 +471,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.newNetworkMessage(sett, msg)
+	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
 	if ok, err := node.storeHashWithBroadcast(logBuilder, nil, nil); ok || err == nil {
@@ -673,7 +674,6 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -700,4 +700,14 @@ func testDeleteDB(typeDB int) {
 	for i := 0; i < 5; i++ {
 		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, typeDB, i))
 	}
+}
+
+func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsg message.IMessage) net_message.IMessage {
+	return net_message.NewMessage(
+		pSett,
+		payload.NewPayload(
+			p.fSettings.GetNetworkMask(),
+			pMsg.ToBytes(),
+		),
+	)
 }

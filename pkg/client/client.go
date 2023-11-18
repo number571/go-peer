@@ -7,7 +7,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -37,7 +36,6 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 	encMsg := client.encryptWithParams(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte{}),
-		0,
 		0,
 	)
 
@@ -92,12 +90,11 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	return p.encryptWithParams(
 		pRecv,
 		pPld,
-		p.fSettings.GetWorkSizeBits(),
 		msgLimitSize-resultSize,
 	), nil
 }
 
-func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pWorkSize, pPadd uint64) message.IMessage {
+func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pPadd uint64) message.IMessage {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
@@ -126,21 +123,13 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 	)).ToBytes()
 
 	cipher := symmetric.NewAESCipher(session)
-	bProof := encoding.Uint64ToBytes(puzzle.NewPoWPuzzle(pWorkSize).ProofBytes(hash))
-
 	return &message.SMessage{
-		FHead: message.SHeadMessage{
-			FSender:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-			FSession: encoding.HexEncode(pRecv.EncryptBytes(session)),
-			FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
-		},
-		FBody: message.SBodyMessage{
-			FHash:  encoding.HexEncode(hash),
-			FSign:  encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-			FProof: encoding.HexEncode(bProof[:]),
-		},
-		// JSON field to raw Body (no need HEX encode)
-		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()),
+		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
+		FEncKey:  encoding.HexEncode(pRecv.EncryptBytes(session)),
+		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
+		FHash:    encoding.HexEncode(hash),
+		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
+		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
 	}
 }
 
@@ -153,14 +142,14 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.fPrivKey.DecryptBytes(pMsg.GetHead().GetSession())
+	session := p.fPrivKey.DecryptBytes(pMsg.GetEncKey())
 	if session == nil {
 		return nil, nil, errors.NewError("failed decrypt session key")
 	}
 
 	// Decrypt public key of sender by decrypted session key.
 	cipher := symmetric.NewAESCipher(session)
-	publicBytes := cipher.DecryptBytes(pMsg.GetHead().GetSender())
+	publicBytes := cipher.DecryptBytes(pMsg.GetPubKey())
 	if publicBytes == nil {
 		return nil, nil, errors.NewError("failed decrypt public key")
 	}
@@ -189,7 +178,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt salt.
-	salt := cipher.DecryptBytes(pMsg.GetHead().GetSalt())
+	salt := cipher.DecryptBytes(pMsg.GetSalt())
 	if salt == nil {
 		return nil, nil, errors.NewError("failed decrypt salt")
 	}
@@ -203,17 +192,17 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		},
 		[]byte{},
 	)).ToBytes()
-	if !bytes.Equal(check, pMsg.GetBody().GetHash()) {
+	if !bytes.Equal(check, pMsg.GetHash()) {
 		return nil, nil, errors.NewError("invalid msg hash")
 	}
 
 	// Decrypt sign of message and verify this
 	// by public key of sender and hash of message.
-	sign := cipher.DecryptBytes(pMsg.GetBody().GetSign())
+	sign := cipher.DecryptBytes(pMsg.GetSign())
 	if sign == nil {
 		return nil, nil, errors.NewError("failed decrypt sign")
 	}
-	if !pubKey.VerifyBytes(pMsg.GetBody().GetHash(), sign) {
+	if !pubKey.VerifyBytes(pMsg.GetHash(), sign) {
 		return nil, nil, errors.NewError("invalid msg sign")
 	}
 

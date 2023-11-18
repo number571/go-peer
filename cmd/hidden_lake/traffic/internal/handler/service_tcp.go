@@ -30,18 +30,18 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			WithConn(pConn).
 			WithSize(len(pNetMsg.ToBytes()))
 
-		msg := message.LoadMessage(
+		_, err := message.LoadMessage(
 			pCfg.GetSettings(),
 			pNetMsg.GetPayload().GetBody(),
 		)
-		if msg == nil {
+		if err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return errors.NewError("message is nil")
+			return errors.WrapError(err, "load message")
 		}
 
 		var (
-			hash  = msg.GetBody().GetHash()
-			proof = msg.GetBody().GetProof()
+			hash  = pNetMsg.GetHash()
+			proof = pNetMsg.GetProof()
 			hltDB = pWrapperDB.Get()
 		)
 

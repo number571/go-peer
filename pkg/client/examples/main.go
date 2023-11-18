@@ -36,7 +36,6 @@ func newClient() client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: (1 << 12),
-			FWorkSizeBits:     10,
 		}),
 		asymmetric.NewRSAPrivKey(1024),
 	)

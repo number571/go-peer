@@ -170,7 +170,6 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     10,
 					FMessageSizeBytes: msgSize,
 				}),
 				asymmetric.NewRSAPrivKey(1024),

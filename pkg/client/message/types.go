@@ -5,28 +5,17 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
+type ISettings interface {
+	GetMessageSizeBytes() uint64
+}
+
 type IMessage interface {
 	types.IConverter
 	IsValid(ISettings) bool
-
-	GetHead() IHead
-	GetBody() IBody
-	GetPayload() payload.IPayload
-}
-
-type ISettings interface {
-	GetMessageSizeBytes() uint64
-	GetWorkSizeBits() uint64
-}
-
-type IHead interface {
-	GetSender() []byte
-	GetSession() []byte
-	GetSalt() []byte
-}
-
-type IBody interface {
-	GetHash() []byte
-	GetSign() []byte
-	GetProof() uint64
+	GetPubKey() []byte            // Public key of the sender.
+	GetEncKey() []byte            // One-time key of encryption data.
+	GetSalt() []byte              // Random bytes for hide data of the hash.
+	GetHash() []byte              // Hash of the (sender + receiver + payload).
+	GetSign() []byte              // Sign of the hash.
+	GetPayload() payload.IPayload // Main data.
 }

@@ -43,7 +43,8 @@ $ make docker-run
                 <th>Network key</th>
                 <th>Connections</th>
                 <th>Provider</th>
-                <th>Country/City</th>
+                <th>Country</th>
+                <th>City</th>
                 <th>Characteristics</th>
                 <th>Expired time</th>
             </tr>
@@ -56,7 +57,8 @@ $ make docker-run
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
-                <td>Russia/Moscow</td>
+                <td>Russia</td>
+                <td>Moscow</td>
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
                 <td>±eternal</td>
             </tr>
@@ -69,7 +71,8 @@ $ make docker-run
                 <td>8Jkl93Mdk93md1bz</td>
                 <td>[1]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
-                <td>Russia/Moscow</td>
+                <td>Russia</td>
+                <td>Moscow</td>
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
             </tr>
@@ -82,7 +85,8 @@ $ make docker-run
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[]</td>
                 <td><a href="https://eternalhost.net">eternalhost.net</a></td>
-                <td>Russia/Moscow</td>
+                <td>Russia</td>
+                <td>Moscow</td>
                 <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
                 <td>±eternal</td>
             </tr>
@@ -95,7 +99,8 @@ $ make docker-run
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[3]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
-                <td>Russia/Novosibirsk</td>
+                <td>Russia</td>
+                <td>Novosibirsk</td>
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
             </tr>

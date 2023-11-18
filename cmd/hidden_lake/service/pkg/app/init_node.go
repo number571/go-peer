@@ -64,7 +64,6 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
-					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 				}),
 				pPrivKey,

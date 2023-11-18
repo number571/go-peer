@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/client/message`: delete proof of work
+
 <!-- ... -->
 
 ## v1.5.21

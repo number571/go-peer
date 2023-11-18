@@ -48,12 +48,12 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	gotEncMsg := message.LoadMessage(
+	gotEncMsg, err := message.LoadMessage(
 		client.GetSettings(),
 		gotNetMsg.GetPayload().GetBody(),
 	)
-	if gotEncMsg == nil {
-		t.Error("failed to load encrypted message")
+	if err != nil {
+		t.Error(err)
 		return
 	}
 

@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/number571/go-peer/pkg/network/message"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -14,12 +14,12 @@ type IConn interface {
 	GetSettings() ISettings
 	GetSocket() net.Conn
 
-	WriteMessage(message.IMessage) error
-	ReadMessage(chan struct{}) (message.IMessage, error)
+	WriteMessage(net_message.IMessage) error
+	ReadMessage(chan struct{}) (net_message.IMessage, error)
 }
 
 type ISettings interface {
-	message.ISettings
+	net_message.ISettings
 
 	// for subsequent inheritance on multiple connections
 	SetNetworkKey(string)

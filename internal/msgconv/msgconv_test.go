@@ -30,12 +30,11 @@ func TestConvert(t *testing.T) {
 
 	params := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: (2 << 10),
-		FWorkSizeBits:     testutils.TCWorkSize,
 	})
 
-	msg1 := message.LoadMessage(params, FromBytesToString(testutils.TCBinaryMessage))
-	if msg1 == nil {
-		t.Error("fromBytesToString result is invalid")
+	msg1, err := message.LoadMessage(params, FromBytesToString(testutils.TCBinaryMessage))
+	if err != nil {
+		t.Error(err)
 		return
 	}
 	if !bytes.Equal(msg1.ToBytes(), testutils.TCBinaryMessage) {
@@ -43,9 +42,9 @@ func TestConvert(t *testing.T) {
 		return
 	}
 
-	msg2 := message.LoadMessage(params, FromStringToBytes(testutils.TCStringMessage))
-	if msg2 == nil {
-		t.Error("fromStringToBytes result is invalid")
+	msg2, err := message.LoadMessage(params, FromStringToBytes(testutils.TCStringMessage))
+	if err != nil {
+		t.Error(err)
 		return
 	}
 	if msg2.ToString() != testutils.TCStringMessage {

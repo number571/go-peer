@@ -18,6 +18,7 @@ type IConfig interface {
 type IConfigSettings interface {
 	message.ISettings
 
+	GetWorkSizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64

@@ -20,6 +20,7 @@ type IEditor interface {
 type IConfigSettings interface {
 	message.ISettings
 
+	GetWorkSizeBits() uint64
 	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64

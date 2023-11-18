@@ -161,7 +161,6 @@ func testNewClient() client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWorkSizeBits:     testutils.TCWorkSize,
 		}),
 		privKey,
 	)

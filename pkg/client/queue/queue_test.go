@@ -52,7 +52,6 @@ func TestRunStopQueue(t *testing.T) {
 
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -113,7 +112,6 @@ func TestQueue(t *testing.T) {
 
 	oldClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
@@ -151,7 +149,7 @@ func testQueue(queue IMessageQueue) error {
 
 	for i := 0; i < len(msgs)-1; i++ {
 		for j := i + 1; j < len(msgs); j++ {
-			if bytes.Equal(msgs[i].GetBody().GetHash(), msgs[j].GetBody().GetHash()) {
+			if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
 				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
 			}
 		}
@@ -166,13 +164,13 @@ func testQueue(queue IMessageQueue) error {
 		return err
 	}
 
-	hash := msg.GetBody().GetHash()
+	hash := msg.GetHash()
 	for i := 0; i < 3; i++ {
 		queue.EnqueueMessage(msg)
 	}
 	for i := 0; i < 3; i++ {
 		msg := <-queue.DequeueMessage()
-		if !bytes.Equal(msg.GetBody().GetHash(), hash) {
+		if !bytes.Equal(msg.GetHash(), hash) {
 			return fmt.Errorf("hash of messages not equals (%d)", i)
 		}
 	}

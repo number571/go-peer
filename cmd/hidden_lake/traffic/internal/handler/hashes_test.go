@@ -31,7 +31,6 @@ func TestHandleHashesAPI(t *testing.T) {
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWorkSizeBits:     testutils.TCWorkSize,
 		}),
 		privKey,
 	)

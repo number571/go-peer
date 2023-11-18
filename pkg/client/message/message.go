@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -16,37 +16,26 @@ var (
 )
 
 const (
-	CSeparator    = "==="
+	CSeparator    = "@"
 	cSeparatorLen = len(CSeparator)
 )
 
 var (
 	_ IMessage = &SMessage{}
-	_ IHead    = SHeadMessage{}
-	_ IBody    = SBodyMessage{}
 )
 
 // Basic structure of transport package.
 type SMessage struct {
-	FHead    SHeadMessage `json:"head"`
-	FBody    SBodyMessage `json:"body"`
-	FPayload []byte       `json:"-"`
-}
-
-type SHeadMessage struct {
+	FPubKey  string `json:"pubk"`
+	FEncKey  string `json:"enck"`
 	FSalt    string `json:"salt"`
-	FSession string `json:"session"`
-	FSender  string `json:"sender"`
-}
-
-type SBodyMessage struct {
-	FSign  string `json:"sign"`
-	FHash  string `json:"hash"`
-	FProof string `json:"proof"`
+	FHash    string `json:"hash"`
+	FSign    string `json:"sign"`
+	FPayload []byte `json:"-"`
 }
 
 // Message can be created only with client module.
-func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
+func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	msg := new(SMessage)
 
 	var recvMsg []byte
@@ -56,16 +45,16 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 	case string:
 		recvMsg = []byte(x)
 	default:
-		return nil
+		return nil, errors.NewError("unknown type of message")
 	}
 
 	i := bytes.Index(recvMsg, []byte(CSeparator))
 	if i == -1 {
-		return nil
+		return nil, errors.NewError("undefined separator")
 	}
 
 	if err := json.Unmarshal(recvMsg[:i], msg); err != nil {
-		return nil
+		return nil, errors.NewError("unmarshal message")
 	}
 
 	switch x := pMsg.(type) {
@@ -75,25 +64,41 @@ func LoadMessage(psett ISettings, pMsg interface{}) IMessage {
 		encStr := strings.TrimSpace(x[i+cSeparatorLen:])
 		msg.FPayload = encoding.HexDecode(encStr)
 		if msg.FPayload == nil {
-			return nil
+			return nil, errors.NewError("hex decode payload")
 		}
 	default:
 		panic("got unknown type")
 	}
 
 	if !msg.IsValid(psett) {
-		return nil
+		return nil, errors.NewError("message is invalid")
 	}
 
-	return msg
+	return msg, nil
 }
 
-func (p *SMessage) GetHead() IHead {
-	return p.FHead
+func (p *SMessage) GetPubKey() []byte {
+	return encoding.HexDecode(p.FPubKey)
 }
 
-func (p *SMessage) GetBody() IBody {
-	return p.FBody
+func (p *SMessage) GetEncKey() []byte {
+	return encoding.HexDecode(p.FEncKey)
+}
+
+func (p *SMessage) GetSalt() []byte {
+	return encoding.HexDecode(p.FSalt)
+}
+
+func (p *SMessage) GetHash() []byte {
+	return encoding.HexDecode(p.FHash)
+}
+
+func (p *SMessage) GetSign() []byte {
+	return encoding.HexDecode(p.FSign)
+}
+
+func (p *SMessage) GetPayload() payload.IPayload {
+	return payload.LoadPayload(p.FPayload)
 }
 
 func (p *SMessage) ToBytes() []byte {
@@ -117,50 +122,12 @@ func (p *SMessage) ToString() string {
 }
 
 func (p *SMessage) IsValid(psett ISettings) bool {
-	if uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes() {
+	switch {
+	case uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes():
+		fallthrough
+	case len(p.GetHash()) != hashing.CSHA256Size:
 		return false
+	default:
+		return true
 	}
-	if len(p.GetBody().GetHash()) != hashing.CSHA256Size {
-		return false
-	}
-	puzzle := puzzle.NewPoWPuzzle(psett.GetWorkSizeBits())
-	return puzzle.VerifyBytes(p.GetBody().GetHash(), p.GetBody().GetProof())
-}
-
-func (p *SMessage) GetPayload() payload.IPayload {
-	return payload.LoadPayload(p.FPayload)
-}
-
-// IHead
-
-func (p SHeadMessage) GetSender() []byte {
-	return encoding.HexDecode(p.FSender)
-}
-
-func (p SHeadMessage) GetSession() []byte {
-	return encoding.HexDecode(p.FSession)
-}
-
-func (p SHeadMessage) GetSalt() []byte {
-	return encoding.HexDecode(p.FSalt)
-}
-
-// IBody
-
-func (p SBodyMessage) GetHash() []byte {
-	return encoding.HexDecode(p.FHash)
-}
-
-func (p SBodyMessage) GetSign() []byte {
-	return encoding.HexDecode(p.FSign)
-}
-
-func (p SBodyMessage) GetProof() uint64 {
-	bProof := encoding.HexDecode(p.FProof)
-	if len(bProof) != encoding.CSizeUint64 {
-		return 0
-	}
-	res := [encoding.CSizeUint64]byte{}
-	copy(res[:], bProof)
-	return encoding.BytesToUint64(res)
 }

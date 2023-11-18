@@ -169,16 +169,6 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	}
 }
 
-func (p *sNode) newNetworkMessage(pSett net_message.ISettings, pMsg message.IMessage) net_message.IMessage {
-	return net_message.NewMessage(
-		pSett,
-		payload.NewPayload(
-			p.fSettings.GetNetworkMask(),
-			pMsg.ToBytes(),
-		),
-	)
-}
-
 func (p *sNode) runQueue() error {
 	if err := p.fQueue.Run(); err != nil {
 		return errors.WrapError(err, "run queue")
@@ -227,10 +217,13 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		logBuilder.WithConn(pConn)
 
 		client := p.fQueue.GetClient()
-		msg := message.LoadMessage(
+		msg, err := message.LoadMessage(
 			client.GetSettings(),
 			pMsg.GetPayload().GetBody(),
 		)
+		if err != nil {
+			return errors.WrapError(err, "load message")
+		}
 
 		// try store hash of message
 		if ok, err := p.storeHashWithBroadcast(logBuilder, msg, pMsg); !ok {
@@ -345,15 +338,13 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	}
 
 	var (
-		size  = len(msg.ToBytes())
-		hash  = msg.GetBody().GetHash()
-		proof = msg.GetBody().GetProof()
+		size = len(msg.ToBytes())
+		hash = msg.GetHash()
 	)
 
 	// enrich logger
 	logBuilder.
 		WithHash(hash).
-		WithProof(proof).
 		WithSize(size).
 		WithType(logType)
 
@@ -374,8 +365,8 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 
 	var (
 		size      = len(pMsg.ToBytes())
-		hash      = pMsg.GetBody().GetHash()
-		proof     = pMsg.GetBody().GetProof()
+		hash      = pNetMsg.GetHash()
+		proof     = pNetMsg.GetProof()
 		database  = p.fWrapperDB.Get()
 		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
 	)

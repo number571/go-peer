@@ -61,7 +61,6 @@ func TestClientWithMessageSize(t *testing.T) {
 	}()
 	_ = NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: 1024,
 		}),
 		tgPrivKey,
@@ -119,35 +118,28 @@ func TestDecrypt(t *testing.T) {
 	sMsg := msg.(*message.SMessage)
 
 	sMsg1 := *sMsg
-	sMsg1.FBody.FHash = "0"
+	sMsg1.FHash = "0"
 	if _, _, err := client1.DecryptMessage(&sMsg1); err == nil {
 		t.Error("success decrypt message with incorrect hash")
 		return
 	}
 
-	sMsg2 := *sMsg
-	sMsg2.FBody.FProof = "0"
-	if _, _, err := client1.DecryptMessage(&sMsg2); err == nil {
-		t.Error("success decrypt message with incorrect proof")
-		return
-	}
-
 	sMsg3 := *sMsg
-	sMsg3.FHead.FSession = "0"
+	sMsg3.FEncKey = "0"
 	if _, _, err := client1.DecryptMessage(&sMsg3); err == nil {
 		t.Error("success decrypt message with incorrect session key")
 		return
 	}
 
 	sMsg4 := *sMsg
-	sMsg4.FHead.FSender = "0"
+	sMsg4.FPubKey = "0"
 	if _, _, err := client1.DecryptMessage(&sMsg4); err == nil {
 		t.Error("success decrypt message with incorrect sender key (iv block)")
 		return
 	}
 
 	sMsg5 := *sMsg
-	sMsg5.FHead.FSender = "11111111111111111111111111111111"
+	sMsg5.FPubKey = "11111111111111111111111111111111"
 	if _, _, err := client1.DecryptMessage(&sMsg5); err == nil {
 		t.Error("success decrypt message with incorrect sender key (public key is nil)")
 		return
@@ -168,28 +160,28 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	sMsg8 := *sMsg
-	sMsg8.FHead.FSalt = "0"
+	sMsg8.FSalt = "0"
 	if _, _, err := client1.DecryptMessage(&sMsg8); err == nil {
 		t.Error("success decrypt message with incorrect salt")
 		return
 	}
 
 	sMsg9 := *sMsg
-	sMsg9.FBody.FHash = "111da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6ba111"
+	sMsg9.FHash = "111da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6ba111"
 	if _, _, err := client1.DecryptMessage(&sMsg9); err == nil {
 		t.Error("success decrypt message with incorrect hash check")
 		return
 	}
 
 	sMsg10 := *sMsg
-	sMsg10.FBody.FSign = "0"
+	sMsg10.FSign = "0"
 	if _, _, err := client1.DecryptMessage(&sMsg10); err == nil {
 		t.Error("success decrypt message with incorrect sign")
 		return
 	}
 
 	sMsg11 := *sMsg
-	sMsg11.FBody.FSign = "111ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9c111"
+	sMsg11.FSign = "111ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9c111"
 	if _, _, err := client1.DecryptMessage(&sMsg11); err == nil {
 		t.Error("success decrypt message with incorrect sign check")
 		return
@@ -247,7 +239,6 @@ func TestGetMessageLimit(t *testing.T) {
 func testNewClient() IClient {
 	return NewClient(
 		message.NewSettings(&message.SSettings{
-			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: tcMessageSize,
 		}),
 		tgPrivKey,

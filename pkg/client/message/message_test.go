@@ -10,16 +10,15 @@ import (
 )
 
 const (
-	tcSalt    = "2823c693930a2d230415368221c36f5c1c77accd82c949e5de13bbe8ef00275b72d182d79759b1aef582649c99afd409"
-	tcSession = "21273151593d606632e0015107c1f204af68dd1a4977a6e7717260936dc4043e1f57410914f0dcffe372d4fc948ce0b12e9449e9e35556416d6e0f4f1d6c08807b0e98588aeea85c3f4a62512d82d159734d80ea16af0380a0d77f57c5444eaaf4cd9eed67f13fbc4699c608736286cba3e962fdc1642beac195ec59dd2d926a"
-	tcSender  = "bc2ebe882b76fd7ab77ec19416328902f685dfedec57285d60ac154d7fa67a9d735bd3f22ba4f7394fead3c35bbcc30b8f67dccd15c8a663f4014785124eaf098ed83027870949ed4bc0a0516a9ac901f185b71d7765e14b00edf2743cd02b266695977c8730f891d76c9a69795806edb61426b8bc2f3d32de0a074995844eed93a5648532ff0ba8ee5b1ebd6bd3b33620b7d938852776b8b99276fa"
+	tcSalt    = "327d3d5fa3e8df5012ca12a8d65d0644669861797f659ac13adf15c2508bec5bd43538ba6c5c6871992c35ebafdaf019"
+	tcSession = "58e578980580a793c01765b6d8709784d41dbcb53f3fe87e7e4e4d4b33c4f93295bac351966d6cd70f5e352cae1d290bec3b8234d4048807e5aa4d3bb983ab0d668be1f2843b77aea181ea8b92ffbf641aa5f8e25e12243ade696cbace216c5148cb68d0ae93342da9712561b1ca806dd992ce6d14b1cb0d6211780faae7ca15"
+	tcSender  = "ac2a318e0e0f4548f07b5444d293304b52bde3e22e23da82147d03a4b6721b98dc43a53adbc1ff33a3819f0c3899b3e2dc9b7cb18b0da96ad6c4ff93123764b68ec660314ee13167c7ece3bb73c72258e05c273155b2bb13860820aebf9c9400158f38b3208826e176ef5b90ea209c5fc302e8162f75ae8fa2bf4c50f5c16256d5d413e6bf69592ed90ae9f91af590c06faf71b5e87ba3dc4a4f96b3"
 
-	tcSign  = "fb3ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9cca8"
-	tcHash  = "e1cc8da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6baffe"
-	tcProof = 4512
+	tcSign = "cd18d99ec9af3dabd548a5e2b8e4f34add2605671c733342968159eb9fc23484ca14b7b6e465fa3527bcc03a50aa6203240077c5118e18f28d48939df5bfab4fa3d59ed3b23a0bc6a8ba08275256a6c3577bcb887ed7657578e7de711eac7af88de9f75f0fce0428134aa24fe5c9655256c7753d54b49a5504c8d1a2a1d242c8d4459431474ebe9f5e4bd005d7a94681"
+	tcHash = "3d90d389b7454bd3f1a84c4509c0afdc2a92d6acafdd387a541590ed6caf34e0"
 
 	// -1 byte from hash
-	tcInvalidPrefix = `{"head":{"salt":"2823c693930a2d230415368221c36f5c1c77accd82c949e5de13bbe8ef00275b72d182d79759b1aef582649c99afd409","session":"21273151593d606632e0015107c1f204af68dd1a4977a6e7717260936dc4043e1f57410914f0dcffe372d4fc948ce0b12e9449e9e35556416d6e0f4f1d6c08807b0e98588aeea85c3f4a62512d82d159734d80ea16af0380a0d77f57c5444eaaf4cd9eed67f13fbc4699c608736286cba3e962fdc1642beac195ec59dd2d926a","sender":"bc2ebe882b76fd7ab77ec19416328902f685dfedec57285d60ac154d7fa67a9d735bd3f22ba4f7394fead3c35bbcc30b8f67dccd15c8a663f4014785124eaf098ed83027870949ed4bc0a0516a9ac901f185b71d7765e14b00edf2743cd02b266695977c8730f891d76c9a69795806edb61426b8bc2f3d32de0a074995844eed93a5648532ff0ba8ee5b1ebd6bd3b33620b7d938852776b8b99276fa"},"body":{"sign":"fb3ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9cca8","hash":"cc8da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6baffe","proof":"00000000000011a0"}}===`
+	tcInvalidPrefix = `{"pubk":"ac2a318e0e0f4548f07b5444d293304b52bde3e22e23da82147d03a4b6721b98dc43a53adbc1ff33a3819f0c3899b3e2dc9b7cb18b0da96ad6c4ff93123764b68ec660314ee13167c7ece3bb73c72258e05c273155b2bb13860820aebf9c9400158f38b3208826e176ef5b90ea209c5fc302e8162f75ae8fa2bf4c50f5c16256d5d413e6bf69592ed90ae9f91af590c06faf71b5e87ba3dc4a4f96b3","enck":"58e578980580a793c01765b6d8709784d41dbcb53f3fe87e7e4e4d4b33c4f93295bac351966d6cd70f5e352cae1d290bec3b8234d4048807e5aa4d3bb983ab0d668be1f2843b77aea181ea8b92ffbf641aa5f8e25e12243ade696cbace216c5148cb68d0ae93342da9712561b1ca806dd992ce6d14b1cb0d6211780faae7ca15","salt":"327d3d5fa3e8df5012ca12a8d65d0644669861797f659ac13adf15c2508bec5bd43538ba6c5c6871992c35ebafdaf019","hash":"3dd389b7454bd3f1a84c4509c0afdc2a92d6acafdd387a541590ed6caf34e0","sign":"cd18d99ec9af3dabd548a5e2b8e4f34add2605671c733342968159eb9fc23484ca14b7b6e465fa3527bcc03a50aa6203240077c5118e18f28d48939df5bfab4fa3d59ed3b23a0bc6a8ba08275256a6c3577bcb887ed7657578e7de711eac7af88de9f75f0fce0428134aa24fe5c9655256c7753d54b49a5504c8d1a2a1d242c8d4459431474ebe9f5e4bd005d7a94681"}@`
 )
 
 func TestSettings(t *testing.T) {
@@ -48,36 +47,35 @@ func TestInvalidMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
-		FWorkSizeBits:     testutils.TCWorkSize,
 	})
 
-	if msg := LoadMessage(params, struct{}{}); msg != nil {
+	if _, err := LoadMessage(params, struct{}{}); err == nil {
 		t.Error("success load message with unknown type")
 		return
 	}
 
-	if msg := LoadMessage(params, []byte{123}); msg != nil {
+	if _, err := LoadMessage(params, []byte{123}); err == nil {
 		t.Error("success load invalid message")
 		return
 	}
 
-	if msg := LoadMessage(params, []byte(CSeparator)); msg != nil {
+	if _, err := LoadMessage(params, []byte(CSeparator)); err == nil {
 		t.Error("success unmarshal invalid message")
 		return
 	}
 
-	if msg := LoadMessage(params, tcInvalidPrefix+"!@#"); msg != nil {
+	if _, err := LoadMessage(params, tcInvalidPrefix+"!@#"); err == nil {
 		t.Error("success decode body in invalid message")
 		return
 	}
 
-	if msg := LoadMessage(params, []byte(tcInvalidPrefix+"12")); msg != nil {
+	if _, err := LoadMessage(params, []byte(tcInvalidPrefix+"12")); err == nil {
 		t.Error("success decode body with invalid message size")
 		return
 	}
 
 	prng := random.NewStdPRNG()
-	if msg := LoadMessage(params, []byte(tcInvalidPrefix+"12"+prng.GetString(928))); msg != nil {
+	if _, err := LoadMessage(params, []byte(tcInvalidPrefix+"12"+prng.GetString(928))); err == nil {
 		t.Error("success decode body with invalid message size")
 		return
 	}
@@ -88,52 +86,46 @@ func TestMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
-		FWorkSizeBits:     testutils.TCWorkSize,
 	})
 
-	msg1 := LoadMessage(params, testutils.TCBinaryMessage)
-	if msg1 == nil {
-		t.Error("failed load message")
+	msg1, err := LoadMessage(params, testutils.TCBinaryMessage)
+	if err != nil {
+		t.Error(err)
 		return
 	}
 	testMessage(t, msg1)
 
-	msg2 := LoadMessage(params, testutils.TCStringMessage)
-	if msg2 == nil {
-		t.Error("failed load message")
+	msg2, err := LoadMessage(params, testutils.TCStringMessage)
+	if err != nil {
+		t.Error(err)
 		return
 	}
 	testMessage(t, msg2)
 }
 
 func testMessage(t *testing.T, msg IMessage) {
-	if !bytes.Equal(msg.GetHead().GetSalt(), encoding.HexDecode(tcSalt)) {
+	if !bytes.Equal(msg.GetSalt(), encoding.HexDecode(tcSalt)) {
 		t.Error("incorrect salt value")
 		return
 	}
 
-	if !bytes.Equal(msg.GetHead().GetSession(), encoding.HexDecode(tcSession)) {
+	if !bytes.Equal(msg.GetEncKey(), encoding.HexDecode(tcSession)) {
 		t.Error("incorrect session value")
 		return
 	}
 
-	if !bytes.Equal(msg.GetHead().GetSender(), encoding.HexDecode(tcSender)) {
+	if !bytes.Equal(msg.GetPubKey(), encoding.HexDecode(tcSender)) {
 		t.Error("incorrect sender value")
 		return
 	}
 
-	if !bytes.Equal(msg.GetBody().GetSign(), encoding.HexDecode(tcSign)) {
+	if !bytes.Equal(msg.GetSign(), encoding.HexDecode(tcSign)) {
 		t.Error("incorrect sign value")
 		return
 	}
 
-	if !bytes.Equal(msg.GetBody().GetHash(), encoding.HexDecode(tcHash)) {
+	if !bytes.Equal(msg.GetHash(), encoding.HexDecode(tcHash)) {
 		t.Error("incorrect hash value")
-		return
-	}
-
-	if msg.GetBody().GetProof() != tcProof {
-		t.Error("incorrect proof value")
 		return
 	}
 
@@ -143,12 +135,6 @@ func testMessage(t *testing.T, msg IMessage) {
 	}
 
 	msg1 := msg.(*SMessage)
-	msg1.FBody.FProof = "111"
-	if msg.GetBody().GetProof() != 0 {
-		t.Error("got not null value with incorrect proof")
-		return
-	}
-
 	msg1.FPayload = []byte{123}
 	if msg.GetPayload() != nil {
 		t.Error("success got incorrect payload")
