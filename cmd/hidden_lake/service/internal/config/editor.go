@@ -43,15 +43,15 @@ func (p *sEditor) UpdateNetworkKey(pNetworkKey string) error {
 	}
 
 	cfg := icfg.(*SConfig)
-	cfg.FNetworkKey = pNetworkKey
+	cfg.FSettings.FNetworkKey = pNetworkKey
 	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
 		return fmt.Errorf("write config (update connections): %w", err)
 	}
 
-	p.fConfig.fMutex.Lock()
-	defer p.fConfig.fMutex.Unlock()
+	p.fConfig.FSettings.fMutex.Lock()
+	defer p.fConfig.FSettings.fMutex.Unlock()
 
-	p.fConfig.FNetworkKey = cfg.FNetworkKey
+	p.fConfig.FSettings.FNetworkKey = cfg.FSettings.FNetworkKey
 	return nil
 }
 

@@ -20,6 +20,7 @@ type IEditor interface {
 type IConfigSettings interface {
 	message.ISettings
 
+	GetNetworkKey() string
 	GetWorkSizeBits() uint64
 	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
@@ -30,7 +31,6 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
-	GetNetworkKey() string
 	GetConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
 	GetService(string) (string, bool)

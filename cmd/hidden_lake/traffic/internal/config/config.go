@@ -22,6 +22,7 @@ type SConfigSettings struct {
 	FMessagesCapacity   uint64 `json:"messages_capacity"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+	FNetworkKey         string `json:"network_key,omitempty"`
 }
 
 type SConfig struct {
@@ -30,7 +31,6 @@ type SConfig struct {
 	FLogging     []string  `json:"logging,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
 	FIsStorage   bool      `json:"is_storage,omitempty"`
-	FNetworkKey  string    `json:"network_key,omitempty"`
 	FConnections []string  `json:"connections,omitempty"`
 	FConsumers   []string  `json:"consumers,omitempty"`
 
@@ -110,6 +110,10 @@ func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 	return p.FLimitVoidSizeBytes
 }
 
+func (p *SConfigSettings) GetNetworkKey() string {
+	return p.FNetworkKey
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
@@ -156,10 +160,6 @@ func (p *SConfig) loadLogging() error {
 
 	p.fLogging = &logging
 	return nil
-}
-
-func (p *SConfig) GetNetworkKey() string {
-	return p.FNetworkKey
 }
 
 func (p *SConfig) GetAddress() IAddress {

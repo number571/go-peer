@@ -30,9 +30,9 @@ func testConfigDefaultInit(configPath string) {
 			FWorkSizeBits:     tcWorkSize,
 			FMessagesCapacity: tcCapMessages,
 			FQueuePeriodMS:    tcQueuePeriodMS,
+			FNetworkKey:       tcNetwork,
 		},
-		FLogging:    []string{"info", "erro"},
-		FNetworkKey: tcNetwork,
+		FLogging: []string{"info", "erro"},
 		FAddress: &SAddress{
 			FTCP:   tcAddress1,
 			FHTTP:  tcAddress2,
@@ -96,7 +96,7 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetNetworkKey() != tcNetwork {
+	if cfg.GetSettings().GetNetworkKey() != tcNetwork {
 		t.Error("network is invalid")
 		return
 	}

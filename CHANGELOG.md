@@ -6,11 +6,16 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake`: append HLL (Hidden Lake Loader)
+
 ### CHANGES
 
 - Update `pkg/client/message`: delete proof of work
 - Delete `pkg/errors`: delete package errors -> replace standard "errors" package
 - Delete `pkg/file_system`: delete package file_system -> replace standard "os" package
+- Delete `cmd/hidden_lake`: move network_key param from config main block to settings block
 
 <!-- ... -->
 

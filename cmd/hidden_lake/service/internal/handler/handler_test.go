@@ -39,13 +39,13 @@ var (
 				"work_size_bits": 20,
 				"key_size_bits": %d,
 				"queue_period_ms": 1000,
-				"limit_void_size_bytes": 4096
+				"limit_void_size_bytes": 4096,
+				"network_key": "test"
 			},
 			"address": {
 				"tcp": "test_address_tcp",
 				"http": "test_address_http"
 			},
-			"network_key": "test",
 			"connections": [
 				"test_connect1",
 				"test_connect2",

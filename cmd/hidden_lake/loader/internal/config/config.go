@@ -4,53 +4,38 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
-	_ IConfigSettings = &SConfigSettings{}
-	_ IConfig         = &SConfig{}
-	_ IAddress        = &SAddress{}
+	_ IConfig = &SConfig{}
 )
 
 type SConfigSettings struct {
-	FMessagesCapacity uint64 `json:"messages_capacity"`
+	FNetworkKey       string `json:"network_key,omitempty"`
 	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty"`
+	FMessagesCapacity uint64 `json:"messages_capacity"`
 }
 
 type SConfig struct {
 	FSettings *SConfigSettings `json:"settings"`
 
-	FLogging    []string  `json:"logging,omitempty"`
-	FLanguage   string    `json:"language,omitempty"`
-	FAddress    *SAddress `json:"address"`
-	FConnection string    `json:"connection"`
-	FStorageKey string    `json:"storage_key,omitempty"`
+	FLogging   []string `json:"logging,omitempty"`
+	FProducers []string `json:"producers"`
+	FConsumers []string `json:"consumers"`
 
-	fFilepath string
-	fMutex    sync.Mutex
-	fLanguage utils.ILanguage
-	fLogging  *sLogging
+	fLogging *sLogging
 }
 
 type sLogging []bool
-
-type SAddress struct {
-	FInterface string `json:"interface"`
-	FIncoming  string `json:"incoming"`
-	FPPROF     string `json:"pprof,omitempty"`
-}
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); !os.IsNotExist(err) {
 		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
 	}
 
-	pCfg.fFilepath = pFilepath
 	if err := pCfg.initConfig(); err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
@@ -77,7 +62,6 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 		return nil, fmt.Errorf("deserialize config: %w", err)
 	}
 
-	cfg.fFilepath = pFilepath
 	if err := cfg.initConfig(); err != nil {
 		return nil, fmt.Errorf("internal init config: %w", err)
 	}
@@ -85,32 +69,14 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	return cfg, nil
 }
 
-func (p *SConfig) GetSettings() IConfigSettings {
-	return p.FSettings
-}
-
-func (p *SConfigSettings) GetMessagesCapacity() uint64 {
-	return p.FMessagesCapacity
-}
-
-func (p *SConfigSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
-}
-
 func (p *SConfig) isValid() bool {
 	return true &&
+		len(p.FConsumers) != 0 &&
+		len(p.FProducers) != 0 &&
 		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {
-	if p.FSettings == nil {
-		p.FSettings = new(SConfigSettings)
-	}
-
-	if p.FAddress == nil {
-		p.FAddress = new(SAddress)
-	}
-
 	if !p.isValid() {
 		return errors.New("load config settings")
 	}
@@ -119,19 +85,6 @@ func (p *SConfig) initConfig() error {
 		return fmt.Errorf("load logging: %w", err)
 	}
 
-	if err := p.loadLanguage(); err != nil {
-		return fmt.Errorf("load language: %w", err)
-	}
-
-	return nil
-}
-
-func (p *SConfig) loadLanguage() error {
-	res, err := utils.ToILanguage(p.FLanguage)
-	if err != nil {
-		return err
-	}
-	p.fLanguage = res
 	return nil
 }
 
@@ -157,35 +110,28 @@ func (p *SConfig) loadLogging() error {
 	return nil
 }
 
-func (p *SConfig) GetLanguage() utils.ILanguage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fLanguage
+func (p *SConfig) GetSettings() IConfigSettings {
+	return p.FSettings
 }
 
-func (p *SConfig) GetAddress() IAddress {
-	return p.FAddress
+func (p *SConfigSettings) GetNetworkKey() string {
+	return p.FNetworkKey
 }
 
-func (p *SConfig) GetConnection() string {
-	return p.FConnection
+func (p *SConfigSettings) GetWorkSizeBits() uint64 {
+	return p.FWorkSizeBits
 }
 
-func (p *SConfig) GetStorageKey() string {
-	return p.FStorageKey
+func (p *SConfigSettings) GetMessagesCapacity() uint64 {
+	return p.FMessagesCapacity
 }
 
-func (p *SAddress) GetInterface() string {
-	return p.FInterface
+func (p *SConfig) GetProducers() []string {
+	return p.FProducers
 }
 
-func (p *SAddress) GetIncoming() string {
-	return p.FIncoming
-}
-
-func (p *SAddress) GetPPROF() string {
-	return p.FPPROF
+func (p *SConfig) GetConsumers() []string {
+	return p.FConsumers
 }
 
 func (p *SConfig) GetLogging() logger.ILogging {

@@ -91,7 +91,7 @@ func TestEditor(t *testing.T) {
 	config := wrapper.GetConfig()
 	editor := wrapper.GetEditor()
 
-	beforeNetworkKey := config.GetNetworkKey()
+	beforeNetworkKey := config.GetSettings().GetNetworkKey()
 	beforeConnections := config.GetConnections()
 	beforeFriends := config.GetFriends()
 
@@ -99,7 +99,7 @@ func TestEditor(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	afterNetworkKey := config.GetNetworkKey()
+	afterNetworkKey := config.GetSettings().GetNetworkKey()
 	if beforeNetworkKey == afterNetworkKey {
 		t.Error("beforeNetworkKey == afterNetworkKey")
 		return

@@ -117,7 +117,8 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 		"messages_capacity": 2048,
 		"queue_period_ms": 5000,
 		"limit_void_size_bytes": 4096,
-		"messages_capacity": 2048
+		"messages_capacity": 2048,
+		"network_key": "hlt-network-key"
 	},
 	"logging": [
 		"info",
@@ -128,7 +129,6 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 		"tcp": "127.0.0.1:9581",
 		"http": "127.0.0.1:9582"
 	},
-	"network_key": "hlt-network-key",
 	"connections": [
 		"service:9571"
 	],

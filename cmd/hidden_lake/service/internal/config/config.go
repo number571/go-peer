@@ -19,11 +19,13 @@ var (
 )
 
 type SConfigSettings struct {
+	fMutex              sync.Mutex
 	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
 	FWorkSizeBits       uint64 `json:"work_size_bits"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms"`
 	FKeySizeBits        uint64 `json:"key_size_bits"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
+	FNetworkKey         string `json:"network_key,omitempty"`
 }
 
 type SConfig struct {
@@ -31,7 +33,6 @@ type SConfig struct {
 
 	FLogging     []string          `json:"logging,omitempty"`
 	FAddress     *SAddress         `json:"address,omitempty"`
-	FNetworkKey  string            `json:"network_key,omitempty"`
 	FConnections []string          `json:"connections,omitempty"`
 	FServices    map[string]string `json:"services,omitempty"`
 	FFriends     map[string]string `json:"friends,omitempty"`
@@ -108,6 +109,13 @@ func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 
 func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 	return p.FLimitVoidSizeBytes
+}
+
+func (p *SConfigSettings) GetNetworkKey() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.FNetworkKey
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {
@@ -189,13 +197,6 @@ func (p *SConfig) loadPubKeys() error {
 	}
 
 	return nil
-}
-
-func (p *SConfig) GetNetworkKey() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.FNetworkKey
 }
 
 func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {

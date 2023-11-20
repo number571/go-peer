@@ -9,11 +9,12 @@ import (
 )
 
 func (p *sApp) initDatabase() error {
+	cfgSettings := p.fConfig.GetSettings()
 	sett := database.NewSettings(&database.SSettings{
 		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
-		FNetworkKey:       p.fConfig.GetNetworkKey(),
-		FMessagesCapacity: p.fConfig.GetSettings().GetMessagesCapacity(),
-		FWorkSizeBits:     p.fConfig.GetSettings().GetWorkSizeBits(),
+		FNetworkKey:       cfgSettings.GetNetworkKey(),
+		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
+		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 	})
 
 	if !p.fConfig.GetIsStorage() {

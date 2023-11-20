@@ -56,7 +56,8 @@ const (
 		"work_size_bits": %d,
 		"key_size_bits": %d,
 		"queue_period_ms": %d,
-		"limit_void_size_bytes": %d
+		"limit_void_size_bytes": %d,
+		"network_key": "%s"
 	},
 	"logging": ["info", "erro"],
 	"address": {
@@ -64,7 +65,6 @@ const (
 		"http": "%s",
 		"pprof": "%s"
 	},
-	"network_key": "%s",
 	"connections": [
 		"%s",
 		"%s"
@@ -88,10 +88,10 @@ func testNewConfigString() string {
 		tcKeySize,
 		tcQueuePeriod,
 		tcLimitVoidSize,
+		tcNetwork,
 		tcAddressTCP,
 		tcAddressHTTP,
 		tcAddressPPROF,
-		tcNetwork,
 		tgConnects[0],
 		tgConnects[1],
 		tcPubKeyAlias1,
@@ -264,7 +264,7 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetNetworkKey() != tcNetwork {
+	if cfg.GetSettings().GetNetworkKey() != tcNetwork {
 		t.Error("network is invalid")
 		return
 	}

@@ -33,7 +33,7 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 			FReadTimeout:  queueDuration,
 			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FNetworkKey:       pCfg.GetNetworkKey(),
+				FNetworkKey:       cfgSettings.GetNetworkKey(),
 				FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 				FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 				FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
