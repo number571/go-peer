@@ -1,10 +1,11 @@
 package database
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
 	gp_database "github.com/number571/go-peer/pkg/storage/database"
 )
@@ -17,7 +18,7 @@ type sKeyValueDB struct {
 func NewKeyValueDB(pSettings storage.ISettings) (IKVDatabase, error) {
 	db, err := gp_database.NewKeyValueDB(pSettings)
 	if err != nil {
-		return nil, errors.WrapError(err, "new key/value database")
+		return nil, fmt.Errorf("new key/value database: %w", err)
 	}
 	return &sKeyValueDB{
 		fDB: &db,
@@ -36,23 +37,23 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 	defer p.fMutex.Unlock()
 
 	if pStart > pEnd {
-		return nil, errors.NewError("start > end")
+		return nil, errors.New("start > end")
 	}
 
 	size := p.getSize(pR)
 	if pEnd > size {
-		return nil, errors.NewError("end > size")
+		return nil, errors.New("end > size")
 	}
 
 	res := make([]IMessage, 0, pEnd-pStart)
 	for i := pStart; i < pEnd; i++ {
 		data, err := (*p.fDB).Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
-			return nil, errors.WrapError(err, "read message")
+			return nil, fmt.Errorf("read message: %w", err)
 		}
 		msg := LoadMessage(data)
 		if msg == nil {
-			return nil, errors.NewError("message is null")
+			return nil, errors.New("message is null")
 		}
 		res = append(res, msg)
 	}
@@ -67,11 +68,11 @@ func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 	size := p.getSize(pR)
 	numBytes := encoding.Uint64ToBytes(size + 1)
 	if err := (*p.fDB).Set(getKeySize(pR), numBytes[:]); err != nil {
-		return errors.WrapError(err, "set size of message to database")
+		return fmt.Errorf("set size of message to database: %w", err)
 	}
 
 	if err := (*p.fDB).Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes()); err != nil {
-		return errors.WrapError(err, "set message to database")
+		return fmt.Errorf("set message to database: %w", err)
 	}
 
 	return nil
@@ -82,7 +83,7 @@ func (p *sKeyValueDB) Close() error {
 	defer p.fMutex.Unlock()
 
 	if err := (*p.fDB).Close(); err != nil {
-		return errors.WrapError(err, "close KV database")
+		return fmt.Errorf("close KV database: %w", err)
 	}
 	return nil
 }

@@ -27,6 +27,7 @@ type sMessage struct {
 	fPayload payload.IPayload
 }
 
+// TODO: return error
 func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)

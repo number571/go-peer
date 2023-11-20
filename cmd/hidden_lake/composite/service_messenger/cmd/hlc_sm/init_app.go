@@ -3,8 +3,8 @@ package main
 import (
 	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -41,6 +41,5 @@ func (p *sApp) Run() error {
 }
 
 func (p *sApp) Stop() error {
-	err := p.fHLM.Stop()
-	return errors.AppendError(p.fHLS.Stop(), err)
+	return utils.MergeErrors(p.fHLM.Stop(), p.fHLS.Stop())
 }

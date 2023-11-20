@@ -2,13 +2,14 @@ package database
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/storage"
 
 	"github.com/syndtr/goleveldb/leveldb"
@@ -42,23 +43,23 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 
 	db, err := leveldb.OpenFile(path, opt)
 	if err != nil {
-		openErr := errors.WrapError(err, "open database")
+		openErr := fmt.Errorf("open database: %w", err)
 		db, err = tryRecover(path, opt)
 		if err != nil {
-			return nil, errors.AppendError(openErr, err)
+			return nil, fmt.Errorf("%w: %w", openErr, err)
 		}
 	}
 
 	isInitSalt := false
 	saltValue, err := db.Get([]byte(cSaltKey), nil)
 	if err != nil {
-		if !errors.HasError(err, leveldb.ErrNotFound) {
-			return nil, errors.WrapError(err, "read salt value")
+		if !errors.Is(err, leveldb.ErrNotFound) {
+			return nil, fmt.Errorf("read salt value: %w", err)
 		}
 		isInitSalt = true
 		saltValue = random.NewStdPRNG().GetBytes(2 * cSaltSize)
 		if err := db.Put([]byte(cSaltKey), saltValue, nil); err != nil {
-			return nil, errors.WrapError(err, "put salt value")
+			return nil, fmt.Errorf("put salt value: %w", err)
 		}
 	}
 
@@ -73,18 +74,18 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	if isInitSalt {
 		saltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
 		if err := db.Put([]byte(cHashKey), saltHash, nil); err != nil {
-			return nil, errors.WrapError(err, "put salt hash")
+			return nil, fmt.Errorf("put salt hash: %w", err)
 		}
 	}
 
 	gotSaltHash, err := db.Get([]byte(cHashKey), nil)
 	if err != nil {
-		return nil, errors.WrapError(err, "read salt hash")
+		return nil, fmt.Errorf("read salt hash: %w", err)
 	}
 
 	newSaltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
 	if !bytes.Equal(gotSaltHash, newSaltHash) {
-		return nil, errors.WrapError(err, "incorrect salt hash")
+		return nil, fmt.Errorf("incorrect salt hash: %w", err)
 	}
 
 	return &sKeyValueDB{
@@ -104,11 +105,11 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	defer p.fMutex.Unlock()
 
 	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
-		return errors.NewError("key is reserved")
+		return errors.New("key is reserved")
 	}
 
 	if err := p.fDB.Put(pKey, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
-		return errors.WrapError(err, "insert key/value to database")
+		return fmt.Errorf("insert key/value to database: %w", err)
 	}
 	return nil
 }
@@ -119,7 +120,7 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 
 	encValue, err := p.fDB.Get(pKey, nil)
 	if err != nil {
-		return nil, errors.WrapError(err, "read value by key")
+		return nil, fmt.Errorf("read value by key: %w", err)
 	}
 
 	return tryDecrypt(
@@ -134,15 +135,15 @@ func (p *sKeyValueDB) Del(pKey []byte) error {
 	defer p.fMutex.Unlock()
 
 	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
-		return errors.NewError("key is reserved")
+		return errors.New("key is reserved")
 	}
 
 	if _, err := p.fDB.Get(pKey, nil); err != nil {
-		return errors.WrapError(err, "read value by key")
+		return fmt.Errorf("read value by key for delete: %w", err)
 	}
 
 	if err := p.fDB.Delete(pKey, nil); err != nil {
-		return errors.WrapError(err, "delete value by key")
+		return fmt.Errorf("delete value by key: %w", err)
 	}
 
 	return nil
@@ -153,7 +154,7 @@ func (p *sKeyValueDB) Close() error {
 	defer p.fMutex.Unlock()
 
 	if err := p.fDB.Close(); err != nil {
-		return errors.WrapError(err, "close database")
+		return fmt.Errorf("close database: %w", err)
 	}
 	return nil
 }
@@ -161,7 +162,7 @@ func (p *sKeyValueDB) Close() error {
 func tryRecover(path string, opt *opt.Options) (*leveldb.DB, error) {
 	db, err := leveldb.RecoverFile(path, opt)
 	if err != nil {
-		return nil, errors.WrapError(err, "recover database")
+		return nil, fmt.Errorf("recover database: %w", err)
 	}
 	return db, nil
 }

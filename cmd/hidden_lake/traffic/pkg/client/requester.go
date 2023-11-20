@@ -2,13 +2,13 @@ package client
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -38,12 +38,12 @@ func (p *sRequester) GetIndex() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", errors.WrapError(err, "get index (requester)")
+		return "", fmt.Errorf("get index (requester): %w", err)
 	}
 
 	result := string(resp)
 	if result != pkg_settings.CTitlePattern {
-		return "", errors.NewError("incorrect title pattern")
+		return "", errors.New("incorrect title pattern")
 	}
 
 	return result, nil
@@ -57,12 +57,12 @@ func (p *sRequester) GetHashes() ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "get hashes (requester)")
+		return nil, fmt.Errorf("get hashes (requester): %w", err)
 	}
 
 	var hashes []string
 	if err := encoding.Deserialize([]byte(resp), &hashes); err != nil {
-		return nil, errors.WrapError(err, "deserialize hashes (requeser)")
+		return nil, fmt.Errorf("deserialize hashes (requeser): %w", err)
 	}
 
 	return hashes, nil
@@ -76,16 +76,16 @@ func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "get message (requester)")
+		return nil, fmt.Errorf("get message (requester): %w", err)
 	}
 
 	msg := net_message.LoadMessage(p.fParams, string(resp))
 	if msg == nil {
-		return nil, errors.NewError("load message")
+		return nil, errors.New("load message")
 	}
 
 	if !bytes.Equal(msg.GetHash(), encoding.HexDecode(pHash)) {
-		return nil, errors.NewError("got invalid hash")
+		return nil, errors.New("got invalid hash")
 	}
 	return msg, nil
 }
@@ -98,7 +98,7 @@ func (p *sRequester) PutMessage(pRequest string) error {
 		pRequest,
 	)
 	if err != nil {
-		return errors.WrapError(err, "put message (requester)")
+		return fmt.Errorf("put message (requester): %w", err)
 	}
 	return nil
 }

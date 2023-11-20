@@ -1,9 +1,9 @@
 package database
 
 import (
+	"fmt"
 	"sync"
 
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/wrapper"
 )
 
@@ -51,7 +51,7 @@ func (p *sWrapperDB) Close() error {
 
 	p.fWrapper.Set(nil)
 	if err := db.Close(); err != nil {
-		return errors.WrapError(err, "close wrapped database")
+		return fmt.Errorf("close wrapped database: %w", err)
 	}
 	return nil
 }

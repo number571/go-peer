@@ -1,6 +1,7 @@
 package anonymity
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -11,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/payload"
@@ -390,7 +390,7 @@ func TestHandleWrapper(t *testing.T) {
 	node.HandleFunc(
 		111,
 		func(_ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
-			return nil, errors.NewError("some error")
+			return nil, errors.New("some error")
 		},
 	)
 

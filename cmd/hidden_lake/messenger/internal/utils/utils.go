@@ -3,11 +3,11 @@ package utils
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"strings"
 	"unicode"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
-	"github.com/number571/go-peer/pkg/errors"
 )
 
 type sEmojis struct {
@@ -53,7 +53,7 @@ func ToILanguage(s string) (ILanguage, error) {
 	case "ESP":
 		return CLangESP, nil
 	default:
-		return 0, errors.NewError("unknown language")
+		return 0, errors.New("unknown language")
 	}
 }
 

@@ -9,6 +9,8 @@
 ### CHANGES
 
 - Update `pkg/client/message`: delete proof of work
+- Delete `pkg/errors`: delete package errors -> replace standard "errors" package
+- Delete `pkg/file_system`: delete package file_system -> replace standard "os" package
 
 <!-- ... -->
 

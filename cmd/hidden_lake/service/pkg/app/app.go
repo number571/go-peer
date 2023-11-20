@@ -14,6 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -21,7 +22,6 @@ import (
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
-	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
 
 const (
@@ -81,12 +81,12 @@ func (p *sApp) Run() error {
 	defer p.fMutex.Unlock()
 
 	if p.fIsRun {
-		return pkg_errors.NewError("application already running")
+		return errors.New("application already running")
 	}
 	p.fIsRun = true
 
 	if err := p.initDatabase(); err != nil {
-		return pkg_errors.WrapError(err, "init database")
+		return fmt.Errorf("init database: %w", err)
 	}
 
 	p.initServiceHTTP()
@@ -146,7 +146,7 @@ func (p *sApp) Run() error {
 
 		// run node in server mode
 		err := p.fNode.GetNetworkNode().Run()
-		if err != nil && !pkg_errors.HasError(err, net.ErrClosed) {
+		if err != nil && !errors.Is(err, net.ErrClosed) {
 			res <- err
 			return
 		}
@@ -154,7 +154,8 @@ func (p *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
+		resErr := fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(resErr, p.Stop())
 	case <-time.After(cInitStart):
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
@@ -166,13 +167,13 @@ func (p *sApp) Stop() error {
 	defer p.fMutex.Unlock()
 
 	if !p.fIsRun {
-		return pkg_errors.NewError("application already stopped or not started")
+		return errors.New("application already stopped or not started")
 	}
 	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	p.fNode.HandleFunc(pkg_settings.CServiceMask, nil)
-	err := pkg_errors.AppendError(
+	err := utils.MergeErrors(
 		interrupt.StopAll([]types.ICommand{
 			p.fNode,
 			p.fConnKeeper,
@@ -185,7 +186,7 @@ func (p *sApp) Stop() error {
 		}),
 	)
 	if err != nil {
-		return pkg_errors.WrapError(err, "close/stop all")
+		return fmt.Errorf("close/stop all: %w", err)
 	}
 	return nil
 }

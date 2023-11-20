@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -36,7 +36,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return errors.WrapError(err, "load message")
+			return fmt.Errorf("load message: %w", err)
 		}
 
 		var (
@@ -53,17 +53,17 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		// check database
 		if hltDB == nil {
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-			return errors.NewError("database is nil")
+			return errors.New("database is nil")
 		}
 
 		// check message from in database queue
 		if err := hltDB.Push(pNetMsg); err != nil {
-			if errors.HasError(err, &database.SIsExistError{}) {
+			if errors.Is(err, database.GErrMessageIsExist) {
 				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
 				return nil
 			}
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-			return errors.WrapError(err, "put message to database")
+			return fmt.Errorf("put message to database: %w", err)
 		}
 
 		if err := pNode.BroadcastMessage(pNetMsg); err != nil {

@@ -1,14 +1,13 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/file_system"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
@@ -107,7 +106,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	file_system.OpenFile(configPath).Write([]byte(testNewConfigString()))
+	os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
 }
 
 func TestBuildConfig(t *testing.T) {
@@ -144,64 +143,64 @@ func TestBuildConfig(t *testing.T) {
 
 func testIncorrectConfig(configFile string) error {
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config on non exist file")
+		return errors.New("success load config on non exist file")
 	}
 
-	if err := file_system.OpenFile(configFile).Write([]byte("abc")); err != nil {
+	if err := os.WriteFile(configFile, []byte("abc"), 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with invalid structure")
+		return errors.New("success load config with invalid structure")
 	}
 
 	cfg1Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "settings", "settings_v2"))
-	if err := file_system.OpenFile(configFile).Write(cfg1Bytes); err != nil {
+	if err := os.WriteFile(configFile, cfg1Bytes, 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with required fields (settings)")
+		return errors.New("success load config with required fields (settings)")
 	}
 
 	cfg2Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "PubKey", "PubKey_v2"))
-	if err := file_system.OpenFile(configFile).Write(cfg2Bytes); err != nil {
+	if err := os.WriteFile(configFile, cfg2Bytes, 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with invalid fields (friends)")
+		return errors.New("success load config with invalid fields (friends)")
 	}
 
 	cfg3Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "erro", "erro_v2"))
-	if err := file_system.OpenFile(configFile).Write(cfg3Bytes); err != nil {
+	if err := os.WriteFile(configFile, cfg3Bytes, 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with invalid fields (logging)")
+		return errors.New("success load config with invalid fields (logging)")
 	}
 
 	pubKey1 := tgPubKeys[tcPubKeyAlias1]
 	pubKey2 := tgPubKeys[tcPubKeyAlias2]
 
 	cfg4Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, pubKey2))
-	if err := file_system.OpenFile(configFile).Write(cfg4Bytes); err != nil {
+	if err := os.WriteFile(configFile, cfg4Bytes, 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with invalid fields (duplicate publc keys)")
+		return errors.New("success load config with invalid fields (duplicate publc keys)")
 	}
 
 	newPubKey := asymmetric.NewRSAPrivKey(512).GetPubKey().ToString()
 	cfg5Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, newPubKey))
-	if err := file_system.OpenFile(configFile).Write(cfg5Bytes); err != nil {
+	if err := os.WriteFile(configFile, cfg5Bytes, 0o644); err != nil {
 		return err
 	}
 
 	if _, err := LoadConfig(configFile); err == nil {
-		return errors.NewError("success load config with invalid fields (diff key sizes)")
+		return errors.New("success load config with invalid fields (diff key sizes)")
 	}
 
 	return nil

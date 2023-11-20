@@ -2,6 +2,7 @@ package database
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -11,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/errors"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -181,7 +181,7 @@ func TestDatabaseLoad(t *testing.T) {
 		return
 	}
 
-	if !errors.HasError(errLoad, &SIsNotExistError{}) {
+	if !errors.Is(errLoad, GErrMessageIsNotExist) {
 		t.Error("got incorrect error type (load)")
 		return
 	}
@@ -251,7 +251,7 @@ func TestDatabasePush(t *testing.T) {
 		return
 	}
 
-	if !errors.HasError(errPush, &SIsExistError{}) {
+	if !errors.Is(errPush, GErrMessageIsExist) {
 		t.Error("got incorrect error type (push)")
 		return
 	}

@@ -1,11 +1,12 @@
 package database
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -30,7 +31,7 @@ func NewDatabase(pSett ISettings) (IDatabase, error) {
 		}),
 	)
 	if err != nil {
-		return nil, errors.WrapError(err, "new key/value database")
+		return nil, fmt.Errorf("new key/value database: %w", err)
 	}
 
 	db := &sDatabase{
@@ -70,12 +71,12 @@ func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 	defer p.fMutex.Unlock()
 
 	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
-		return errors.NewError("got message with diff settings")
+		return errors.New("got message with diff settings")
 	}
 
 	msgHash := pMsg.GetHash()
 	if _, err := p.fDB.Get(getKeyMessage(msgHash)); err == nil {
-		return errors.OrigError(&SIsExistError{})
+		return GErrMessageIsExist
 	}
 
 	keyHash := getKeyHash(p.getPointer())
@@ -84,24 +85,24 @@ func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 	if hash, err := p.fDB.Get(keyHash); err == nil {
 		keyMsg := getKeyMessage(hash)
 		if err := p.fDB.Del(keyMsg); err != nil {
-			return errors.WrapError(err, "delete old key")
+			return fmt.Errorf("delete old key: %w", err)
 		}
 	}
 
 	// rewrite hash's field
 	if err := p.fDB.Set(keyHash, msgHash); err != nil {
-		return errors.WrapError(err, "rewrite key hash")
+		return fmt.Errorf("rewrite key hash: %w", err)
 	}
 
 	// write message
 	keyMsg := getKeyMessage(msgHash)
 	if err := p.fDB.Set(keyMsg, pMsg.ToBytes()); err != nil {
-		return errors.WrapError(err, "write message")
+		return fmt.Errorf("write message: %w", err)
 	}
 
 	// update pointer
 	if err := p.incPointer(); err != nil {
-		return errors.WrapError(err, "increment pointer")
+		return fmt.Errorf("increment pointer: %w", err)
 	}
 
 	return nil
@@ -112,12 +113,12 @@ func (p *sDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	defer p.fMutex.Unlock()
 
 	if len(pHash) != hashing.CSHA256Size {
-		return nil, errors.NewError("key size invalid")
+		return nil, errors.New("key size invalid")
 	}
 
 	data, err := p.fDB.Get(getKeyMessage(pHash))
 	if err != nil {
-		return nil, errors.OrigError(&SIsNotExistError{})
+		return nil, GErrMessageIsNotExist
 	}
 
 	msg := net_message.LoadMessage(p.Settings(), data)
@@ -133,7 +134,7 @@ func (p *sDatabase) Close() error {
 	defer p.fMutex.Unlock()
 
 	if err := p.fDB.Close(); err != nil {
-		return errors.WrapError(err, "close KV database")
+		return fmt.Errorf("close KV database: %w", err)
 	}
 	return nil
 }
@@ -153,7 +154,7 @@ func (p *sDatabase) incPointer() error {
 	msgsLimit := p.Settings().GetMessagesCapacity()
 	res := encoding.Uint64ToBytes((p.getPointer() + 1) % msgsLimit)
 	if err := p.fDB.Set(getKeyPointer(), res[:]); err != nil {
-		return errors.WrapError(err, "set pointer into KV database")
+		return fmt.Errorf("set pointer into KV database: %w", err)
 	}
 	return nil
 }

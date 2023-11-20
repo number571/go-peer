@@ -1,8 +1,9 @@
 package database
 
 import (
+	"errors"
+
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/errors"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/queue_set"
 )
@@ -37,11 +38,11 @@ func (p *sVoidDatabase) Hashes() ([][]byte, error) {
 
 func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
 	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
-		return errors.NewError("got message with diff settings")
+		return errors.New("got message with diff settings")
 	}
 
 	if ok := p.fQueueSet.Push(pMsg.GetHash(), pMsg.ToBytes()); !ok {
-		return errors.OrigError(&SIsExistError{})
+		return GErrMessageIsExist
 	}
 
 	return nil
@@ -49,12 +50,12 @@ func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
 
 func (p *sVoidDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	if len(pHash) != hashing.CSHA256Size {
-		return nil, errors.NewError("key size invalid")
+		return nil, errors.New("key size invalid")
 	}
 
 	msgBytes, ok := p.fQueueSet.Load(pHash)
 	if !ok {
-		return nil, errors.OrigError(&SIsNotExistError{})
+		return nil, GErrMessageIsNotExist
 	}
 
 	msg := net_message.LoadMessage(p.fSettings, msgBytes)

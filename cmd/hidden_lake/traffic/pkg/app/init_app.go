@@ -8,7 +8,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/flag"
 
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -17,7 +16,7 @@ func InitApp(pDefaultPath string) (types.ICommand, error) {
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
 	if err != nil {
-		return nil, errors.WrapError(err, "init config")
+		return nil, fmt.Errorf("init config: %w", err)
 	}
 
 	return NewApp(cfg, inputPath), nil

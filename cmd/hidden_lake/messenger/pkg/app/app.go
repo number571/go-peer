@@ -11,12 +11,12 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/internal/interrupt"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
-	pkg_errors "github.com/number571/go-peer/pkg/errors"
 )
 
 const (
@@ -63,12 +63,12 @@ func (p *sApp) Run() error {
 	defer p.fMutex.Unlock()
 
 	if p.fIsRun {
-		return pkg_errors.NewError("application already running")
+		return errors.New("application already running")
 	}
 	p.fIsRun = true
 
 	if err := p.initDatabase(); err != nil {
-		return pkg_errors.WrapError(err, "open database")
+		return fmt.Errorf("open database: %w", err)
 	}
 
 	p.initIncomingServiceHTTP()
@@ -107,7 +107,8 @@ func (p *sApp) Run() error {
 
 	select {
 	case err := <-res:
-		return pkg_errors.AppendError(pkg_errors.WrapError(err, "got run error"), p.Stop())
+		resErr := fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(resErr, p.Stop())
 	case <-time.After(cInitStart):
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
@@ -119,7 +120,7 @@ func (p *sApp) Stop() error {
 	defer p.fMutex.Unlock()
 
 	if !p.fIsRun {
-		return pkg_errors.NewError("application already stopped or not started")
+		return errors.New("application already stopped or not started")
 	}
 	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
@@ -131,7 +132,7 @@ func (p *sApp) Stop() error {
 		p.fDatabase,
 	})
 	if err != nil {
-		return pkg_errors.WrapError(err, "close/stop all")
+		return fmt.Errorf("close/stop all: %w", err)
 	}
 	return nil
 }

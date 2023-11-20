@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
 
 	pkg_client "github.com/number571/go-peer/pkg/client"
 )
@@ -24,7 +24,7 @@ func getMessageLimit(pHlsClient client.IClient) (uint64, error) {
 
 	sett, err := pHlsClient.GetSettings()
 	if err != nil {
-		return 0, errors.WrapError(err, "get settings from HLS (message size)")
+		return 0, fmt.Errorf("get settings from HLS (message size): %w", err)
 	}
 
 	msgSize := sett.GetMessageSizeBytes()

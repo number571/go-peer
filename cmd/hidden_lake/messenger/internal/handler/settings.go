@@ -12,7 +12,6 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/web"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -127,7 +126,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		allConns, err := getAllConnections(cfg, client)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_all_connections"))
-			fmt.Fprint(pW, errors.WrapError(err, "error: get online connections"))
+			fmt.Fprint(pW, fmt.Errorf("error: get online connections: %w", err))
 			return
 		}
 

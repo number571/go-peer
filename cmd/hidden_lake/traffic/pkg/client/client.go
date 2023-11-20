@@ -1,7 +1,8 @@
 package client
 
 import (
-	"github.com/number571/go-peer/pkg/errors"
+	"fmt"
+
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -24,7 +25,7 @@ func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 func (p *sClient) GetIndex() (string, error) {
 	res, err := p.fRequester.GetIndex()
 	if err != nil {
-		return "", errors.WrapError(err, "get index (client)")
+		return "", fmt.Errorf("get index (client): %w", err)
 	}
 	return res, nil
 }
@@ -32,7 +33,7 @@ func (p *sClient) GetIndex() (string, error) {
 func (p *sClient) GetHashes() ([]string, error) {
 	res, err := p.fRequester.GetHashes()
 	if err != nil {
-		return nil, errors.WrapError(err, "get hashes (client)")
+		return nil, fmt.Errorf("get hashes (client): %w", err)
 	}
 	return res, nil
 }
@@ -40,14 +41,14 @@ func (p *sClient) GetHashes() ([]string, error) {
 func (p *sClient) GetMessage(pHash string) (net_message.IMessage, error) {
 	msg, err := p.fRequester.GetMessage(pHash)
 	if err != nil {
-		return nil, errors.WrapError(err, "get message (client)")
+		return nil, fmt.Errorf("get message (client): %w", err)
 	}
 	return msg, nil
 }
 
 func (p *sClient) PutMessage(pMsg net_message.IMessage) error {
 	if err := p.fRequester.PutMessage(p.fBuilder.PutMessage(pMsg)); err != nil {
-		return errors.WrapError(err, "put message (client)")
+		return fmt.Errorf("put message (client): %w", err)
 	}
 	return nil
 }

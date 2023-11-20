@@ -2,6 +2,8 @@ package conn
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -11,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -52,7 +53,7 @@ type sConn struct {
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 	conn, err := net.Dial("tcp", pAddr)
 	if err != nil {
-		return nil, errors.WrapError(err, "tcp connect")
+		return nil, fmt.Errorf("tcp connect: %w", err)
 	}
 	return LoadConn(pSett, conn), nil
 }
@@ -106,7 +107,7 @@ func (p *sConn) WriteMessage(pMsg message.IMessage) error {
 		[]byte{},
 	))
 	if err != nil {
-		return errors.WrapError(err, "send payload bytes")
+		return fmt.Errorf("send payload bytes: %w", err)
 	}
 
 	return nil
@@ -116,12 +117,12 @@ func (p *sConn) ReadMessage(pChRead chan struct{}) (message.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
 	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
-		return nil, errors.WrapError(err, "receive head bytes")
+		return nil, fmt.Errorf("receive head bytes: %w", err)
 	}
 
 	dataBytes, err := p.recvDataBytes(encMsgSize + voidSize)
 	if err != nil {
-		return nil, errors.WrapError(err, "receive data bytes")
+		return nil, fmt.Errorf("receive data bytes: %w", err)
 	}
 
 	// check hash sum of received data
@@ -133,14 +134,14 @@ func (p *sConn) ReadMessage(pChRead chan struct{}) (message.IMessage, error) {
 		[]byte{},
 	))
 	if !bytes.Equal(newHash, gotHash) {
-		return nil, errors.NewError("got invalid hash")
+		return nil, errors.New("got invalid hash")
 	}
 
 	// try unpack message from bytes
 	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
 	msg := message.LoadMessage(p.fSettings, msgBytes)
 	if msg == nil {
-		return nil, errors.NewError("got invalid message bytes")
+		return nil, errors.New("got invalid message bytes")
 	}
 
 	return msg, nil
@@ -153,7 +154,7 @@ func (p *sConn) sendBytes(pBytes []byte) error {
 
 		n, err := p.fSocket.Write(pBytes[:bytesPtr])
 		if err != nil {
-			return errors.WrapError(err, "write tcp bytes")
+			return fmt.Errorf("write tcp bytes: %w", err)
 		}
 
 		bytesPtr = bytesPtr - uint64(n)
@@ -206,16 +207,16 @@ func (p *sConn) recvHeadBytes(pChRead chan struct{}, deadline time.Duration) (ui
 	encRecvHead := make([]byte, cEncryptRecvHeadSize)
 	n, err := p.fSocket.Read(encRecvHead)
 	if err != nil {
-		return 0, 0, nil, errors.WrapError(err, "read tcp header block")
+		return 0, 0, nil, fmt.Errorf("read tcp header block: %w", err)
 	}
 
 	if n != cEncryptRecvHeadSize {
-		return 0, 0, nil, errors.NewError("invalid header block")
+		return 0, 0, nil, errors.New("invalid header block")
 	}
 
 	recvHead := p.getCipher().DecryptBytes(encRecvHead)
 	if recvHead == nil {
-		return 0, 0, nil, errors.NewError("decrypt header bytes")
+		return 0, 0, nil, errors.New("decrypt header bytes")
 	}
 
 	encMsgSizeBytes := [encoding.CSizeUint64]byte{}
@@ -226,12 +227,12 @@ func (p *sConn) recvHeadBytes(pChRead chan struct{}, deadline time.Duration) (ui
 
 	encMsgSize := encoding.BytesToUint64(encMsgSizeBytes)
 	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadSizeOverHead) {
-		return 0, 0, nil, errors.NewError("invalid header.encMsgSize")
+		return 0, 0, nil, errors.New("invalid header.encMsgSize")
 	}
 
 	voidSize := encoding.BytesToUint64(voidSizeBytes)
 	if voidSize > p.fSettings.GetLimitVoidSize() {
-		return 0, 0, nil, errors.NewError("invalid header.voidSize")
+		return 0, 0, nil, errors.New("invalid header.voidSize")
 	}
 
 	// check hash sum of received sizes
@@ -244,7 +245,7 @@ func (p *sConn) recvHeadBytes(pChRead chan struct{}, deadline time.Duration) (ui
 		[]byte{},
 	))
 	if !bytes.Equal(newHash, gotHash) {
-		return 0, 0, nil, errors.NewError("invalid header.auth")
+		return 0, 0, nil, errors.New("invalid header.auth")
 	}
 
 	return encMsgSize, voidSize, recvHead[firstHashIndex:secondHashIndex], nil

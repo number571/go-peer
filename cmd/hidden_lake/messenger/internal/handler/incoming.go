@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -87,20 +87,20 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	case isText(rawMsgBytes):
 		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes))
 		if strMsg == "" {
-			return errors.NewError("failed: message is null")
+			return errors.New("failed: message is null")
 		}
 		if utils.HasNotWritableCharacters(strMsg) {
-			return errors.NewError("failed: message has not writable characters")
+			return errors.New("failed: message has not writable characters")
 		}
 		return nil
 	case isFile(rawMsgBytes):
 		filename, msgBytes := unwrapFile(rawMsgBytes)
 		if filename == "" || len(msgBytes) == 0 {
-			return errors.NewError("failed: unwrap file")
+			return errors.New("failed: unwrap file")
 		}
 		return nil
 	default:
-		return errors.NewError("failed: unknown message type")
+		return errors.New("failed: unknown message type")
 	}
 }
 

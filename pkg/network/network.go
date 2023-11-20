@@ -1,12 +1,12 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/queue_set"
@@ -79,12 +79,7 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 				resErr = err // err can be = nil
 			case <-time.After(p.fSettings.GetWriteTimeout()):
 				<-chErr
-				resErr = errors.NewError(
-					fmt.Sprintf(
-						"write timeout %s",
-						c.GetSocket().RemoteAddr().String(),
-					),
-				)
+				resErr = fmt.Errorf("write timeout %s", c.GetSocket().RemoteAddr().String())
 			}
 		}(a, c)
 	}
@@ -93,7 +88,14 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 
 	var resErr error
 	for _, err := range listErr {
-		resErr = errors.AppendError(resErr, err)
+		if err == nil {
+			continue
+		}
+		if resErr == nil {
+			resErr = err
+			continue
+		}
+		resErr = fmt.Errorf("%w, %w", err, resErr)
 	}
 	return resErr
 }
@@ -104,7 +106,7 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 func (p *sNode) Run() error {
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
-		return errors.WrapError(err, "run node")
+		return fmt.Errorf("run node: %w", err)
 	}
 
 	go func(pListener net.Listener) {
@@ -138,18 +140,22 @@ func (p *sNode) Stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	var err error
+	var resErr error
 	if p.fListener != nil {
-		err = errors.AppendError(err, p.fListener.Close())
+		if err := p.fListener.Close(); err != nil {
+			resErr = err
+		}
 	}
 
 	for id, conn := range p.fConnections {
 		delete(p.fConnections, id)
-		err = errors.AppendError(err, conn.Close())
+		if err := conn.Close(); err != nil {
+			resErr = fmt.Errorf("%w, %w", err, resErr)
+		}
 	}
 
-	if err != nil {
-		return errors.WrapError(err, "stop network node")
+	if resErr != nil {
+		return fmt.Errorf("stop network node: %w", resErr)
 	}
 	return nil
 }
@@ -180,17 +186,17 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 // Checks the number of connections.
 func (p *sNode) AddConnection(pAddress string) error {
 	if p.hasMaxConnSize() {
-		return errors.NewError("has max connections size")
+		return errors.New("has max connections size")
 	}
 
 	if _, ok := p.getConnection(pAddress); ok {
-		return errors.NewError("connection already exist")
+		return errors.New("connection already exist")
 	}
 
 	sett := p.fSettings.GetConnSettings()
 	conn, err := conn.NewConn(sett, pAddress)
 	if err != nil {
-		return errors.WrapError(err, "add connect")
+		return fmt.Errorf("add connect: %w", err)
 	}
 
 	p.setConnection(pAddress, conn)
@@ -206,13 +212,13 @@ func (p *sNode) DelConnection(pAddress string) error {
 
 	conn, ok := p.fConnections[pAddress]
 	if !ok {
-		return errors.NewError("unknown connect")
+		return errors.New("unknown connect")
 	}
 
 	delete(p.fConnections, pAddress)
 
 	if err := conn.Close(); err != nil {
-		return errors.WrapError(err, "connect close")
+		return fmt.Errorf("connect close: %w", err)
 	}
 
 	return nil

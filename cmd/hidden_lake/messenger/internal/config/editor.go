@@ -1,12 +1,12 @@
 package config
 
 import (
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/file_system"
 )
 
 var (
@@ -38,14 +38,13 @@ func (p *sEditor) UpdateLanguage(pLang utils.ILanguage) error {
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return errors.WrapError(err, "load config (update language)")
+		return fmt.Errorf("load config (update language): %w", err)
 	}
 
 	cfg := icfg.(*SConfig)
 	cfg.FLanguage = utils.FromILanguage(pLang)
-	err = file_system.OpenFile(filepath).Write(encoding.Serialize(cfg, true))
-	if err != nil {
-		return errors.WrapError(err, "write config (update language)")
+	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
+		return fmt.Errorf("write config (update language): %w", err)
 	}
 
 	p.fConfig.fMutex.Lock()

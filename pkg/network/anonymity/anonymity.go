@@ -2,6 +2,7 @@ package anonymity
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -59,7 +59,7 @@ func NewNode(
 
 func (p *sNode) Run() error {
 	if err := p.runQueue(); err != nil {
-		return errors.WrapError(err, "run node")
+		return fmt.Errorf("run node: %w", err)
 	}
 	p.fNetwork.HandleFunc(
 		p.fSettings.GetNetworkMask(),
@@ -71,7 +71,7 @@ func (p *sNode) Run() error {
 func (p *sNode) Stop() error {
 	p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
 	if err := p.fQueue.Stop(); err != nil {
-		return errors.WrapError(err, "stop node")
+		return fmt.Errorf("stop node: %w", err)
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
 	// internal logger
 	if err := p.enqueuePayload(cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
-		return errors.WrapError(err, "broadcast payload")
+		return fmt.Errorf("broadcast payload: %w", err)
 	}
 	return nil
 }
@@ -131,12 +131,12 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 
 	// internal logger
 	if err := p.enqueuePayload(cIsRequest, pRecv, newPld); err != nil {
-		return nil, errors.WrapError(err, "fetch payload")
+		return nil, fmt.Errorf("fetch payload: %w", err)
 	}
 
 	resp, err := p.recv(actionKey)
 	if err != nil {
-		return nil, errors.WrapError(err, "receive response from fetch")
+		return nil, fmt.Errorf("receive response from fetch: %w", err)
 	}
 
 	return resp, nil
@@ -150,28 +150,28 @@ func (p *sNode) send(pMsg message.IMessage) error {
 		}
 		return nil
 	}
-	return errors.NewError("enqueue message as send")
+	return errors.New("enqueue message as send")
 }
 
 func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	action, ok := p.getAction(pActionKey)
 	if !ok {
-		return nil, errors.NewError("action undefined")
+		return nil, errors.New("action undefined")
 	}
 	select {
 	case result, opened := <-action:
 		if !opened {
-			return nil, errors.NewError("chan is closed")
+			return nil, errors.New("chan is closed")
 		}
 		return result, nil
 	case <-time.After(p.fSettings.GetFetchTimeWait()):
-		return nil, errors.NewError("recv time is over")
+		return nil, errors.New("recv time is over")
 	}
 }
 
 func (p *sNode) runQueue() error {
 	if err := p.fQueue.Run(); err != nil {
-		return errors.WrapError(err, "run queue")
+		return fmt.Errorf("run queue: %w", err)
 	}
 
 	go func() {
@@ -222,14 +222,14 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			pMsg.GetPayload().GetBody(),
 		)
 		if err != nil {
-			return errors.WrapError(err, "load message")
+			return fmt.Errorf("load message: %w", err)
 		}
 
 		// try store hash of message
 		if ok, err := p.storeHashWithBroadcast(logBuilder, msg, pMsg); !ok {
 			// internal logger
 			if err != nil {
-				return errors.WrapError(err, "store hash with broadcast")
+				return fmt.Errorf("store hash with broadcast: %w", err)
 			}
 			return nil
 		}
@@ -310,7 +310,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 
 	if len(p.fNetwork.GetConnections()) == 0 {
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotConnection))
-		return errors.NewError("length of connections = 0")
+		return errors.New("length of connections = 0")
 	}
 
 	var (
@@ -327,14 +327,14 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 		logType = anon_logger.CLogBaseEnqueueResponse
 	default:
 		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogBaseMessageType))
-		return errors.NewError("unknown format type")
+		return errors.New("unknown format type")
 	}
 
 	newPld := payload.NewPayload(pPld.GetHead(), newBody)
 	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
 	if err != nil {
 		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroEncryptPayload))
-		return errors.WrapError(err, "encrypt payload")
+		return fmt.Errorf("encrypt payload: %w", err)
 	}
 
 	var (
@@ -350,7 +350,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 
 	if err := p.send(msg); err != nil {
 		p.fLogger.PushErro(logBuilder)
-		return errors.WrapError(err, "send message")
+		return fmt.Errorf("send message: %w", err)
 	}
 
 	p.fLogger.PushInfo(logBuilder)
@@ -360,7 +360,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg message.IMessage, pNetMsg net_message.IMessage) (bool, error) {
 	if pMsg == nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnMessageNull))
-		return false, errors.NewError("message is nil")
+		return false, errors.New("message is nil")
 	}
 
 	var (
@@ -379,7 +379,7 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 
 	if database == nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-		return false, errors.NewError("database is nil")
+		return false, errors.New("database is nil")
 	}
 
 	// check already received data by hash
@@ -400,7 +400,7 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 	)
 	if err := database.Set(hash, updateAddresses); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-		return false, errors.WrapError(err, "database set")
+		return false, fmt.Errorf("database set: %w", err)
 	}
 
 	// do not send data if than already received
@@ -418,7 +418,7 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg
 func (p *sNode) networkBroadcast(pMsg net_message.IMessage) error {
 	// redirect message to another nodes
 	if err := p.fNetwork.BroadcastMessage(pMsg); err != nil {
-		return errors.WrapError(err, "network broadcast payload")
+		return fmt.Errorf("network broadcast message: %w", err)
 	}
 	return nil
 }

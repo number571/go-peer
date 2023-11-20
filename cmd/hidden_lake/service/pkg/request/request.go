@@ -1,8 +1,9 @@
 package request
 
 import (
+	"fmt"
+
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/errors"
 )
 
 var (
@@ -30,7 +31,7 @@ func LoadRequest(pData interface{}) (IRequest, error) {
 	switch x := pData.(type) {
 	case []byte:
 		if err := encoding.Deserialize(x, request); err != nil {
-			return nil, errors.WrapError(err, "load request")
+			return nil, fmt.Errorf("load request: %w", err)
 		}
 		return request, nil
 	case string:

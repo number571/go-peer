@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/file_system"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -35,7 +34,7 @@ func main() {
 		FNetworkKey:   "some-network-key",
 	})
 
-	readPrivKey, err := file_system.OpenFile("priv.key").Read()
+	readPrivKey, err := os.ReadFile("priv.key")
 	if err != nil {
 		panic(err)
 	}

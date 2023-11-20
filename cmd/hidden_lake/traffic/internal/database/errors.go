@@ -1,12 +1,8 @@
 package database
 
-type SIsExistError struct{}
-type SIsNotExistError struct{}
+import "github.com/syndtr/goleveldb/leveldb/errors"
 
-func (p *SIsExistError) Error() string {
-	return "message is already exist"
-}
-
-func (p *SIsNotExistError) Error() string {
-	return "message is not exist"
-}
+var (
+	GErrMessageIsExist    = errors.New("message is exist")
+	GErrMessageIsNotExist = errors.New("message is not exist")
+)

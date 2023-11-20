@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
-	"github.com/number571/go-peer/pkg/errors"
 
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
@@ -24,7 +23,7 @@ func (p *sApp) initDatabase() error {
 
 	db, err := database.NewDatabase(sett)
 	if err != nil {
-		return errors.WrapError(err, "init database")
+		return fmt.Errorf("init database: %w", err)
 	}
 
 	p.fWrapperDB.Set(db)

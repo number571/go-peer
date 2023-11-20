@@ -1,19 +1,19 @@
 package config
 
 import (
-	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/errors"
-	"github.com/number571/go-peer/pkg/file_system"
+	"fmt"
+	"os"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	logger "github.com/number571/go-peer/internal/logger/std"
 )
 
 func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
-	if file_system.OpenFile(cfgPath).IsExist() {
+	if _, err := os.Stat(cfgPath); !os.IsNotExist(err) {
 		cfg, err := LoadConfig(cfgPath)
 		if err != nil {
-			return nil, errors.WrapError(err, "load config by cfgPath")
+			return nil, fmt.Errorf("load config: %w", err)
 		}
 		return cfg, nil
 	}
@@ -38,7 +38,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	cfg, err := BuildConfig(cfgPath, initCfg)
 	if err != nil {
-		return nil, errors.WrapError(err, "build config by cfgPath")
+		return nil, fmt.Errorf("build config: %w", err)
 	}
 	return cfg, nil
 }

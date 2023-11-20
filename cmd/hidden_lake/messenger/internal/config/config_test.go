@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/utils"
-	"github.com/number571/go-peer/pkg/file_system"
 )
 
 const (
@@ -55,7 +54,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	file_system.OpenFile(configPath).Write([]byte(testNewConfigString()))
+	os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
 }
 
 func TestConfig(t *testing.T) {

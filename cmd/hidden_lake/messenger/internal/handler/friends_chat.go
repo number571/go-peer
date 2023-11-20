@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -15,7 +16,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -58,14 +58,14 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
-			fmt.Fprint(pW, errors.WrapError(err, "error: read public key"))
+			fmt.Fprint(pW, fmt.Errorf("error: read public key: %w", err))
 			return
 		}
 
 		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_receiver"))
-			fmt.Fprint(pW, errors.WrapError(err, "error: get receiver by public key"))
+			fmt.Fprint(pW, fmt.Errorf("error: get receiver by public key: %w", err))
 			return
 		}
 
@@ -76,20 +76,20 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			msgBytes, err := getMessageBytes(pR)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("get_message"))
-				fmt.Fprint(pW, errors.WrapError(err, "error: get message bytes"))
+				fmt.Fprint(pW, fmt.Errorf("error: get message bytes: %w", err))
 				return
 			}
 
 			if err := trySendMessage(client, aliasName, msgBytes); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
-				fmt.Fprint(pW, errors.WrapError(err, "error: push message to network"))
+				fmt.Fprint(pW, fmt.Errorf("error: push message to network: %w", err))
 				return
 			}
 
 			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes))
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("push_message"))
-				fmt.Fprint(pW, errors.WrapError(err, "error: add message to database"))
+				fmt.Fprint(pW, fmt.Errorf("error: add message to database: %w", err))
 				return
 			}
 
@@ -111,7 +111,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		msgs, err := pDB.Load(rel, start, size)
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("read_database"))
-			fmt.Fprint(pW, errors.WrapError(err, "error: read database"))
+			fmt.Fprint(pW, fmt.Errorf("error: read database: %w", err))
 			return
 		}
 
@@ -150,16 +150,16 @@ func getMessageBytes(pR *http.Request) ([]byte, error) {
 	case http.MethodPost:
 		strMsg := strings.TrimSpace(pR.FormValue("input_message"))
 		if strMsg == "" {
-			return nil, errors.NewError("error: message is null")
+			return nil, errors.New("error: message is null")
 		}
 		if utils.HasNotWritableCharacters(strMsg) {
-			return nil, errors.NewError("error: message has not writable characters")
+			return nil, errors.New("error: message has not writable characters")
 		}
 		return wrapText(strMsg), nil
 	case http.MethodPut:
 		filename, fileBytes, err := getUploadFile(pR)
 		if err != nil {
-			return nil, errors.WrapError(err, "error: upload file")
+			return nil, fmt.Errorf("error: upload file: %w", err)
 		}
 		return wrapFile(filename, fileBytes), nil
 	default:
@@ -171,17 +171,17 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	// Get handler for filename, size and headers
 	file, handler, err := pR.FormFile("input_file")
 	if err != nil {
-		return "", nil, errors.WrapError(err, "error: receive file")
+		return "", nil, fmt.Errorf("error: receive file: %w", err)
 	}
 	defer file.Close()
 
 	if handler.Size == 0 {
-		return "", nil, errors.NewError("error: file size is nil")
+		return "", nil, errors.New("error: file size is nil")
 	}
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		return "", nil, errors.WrapError(err, "error: read file bytes")
+		return "", nil, fmt.Errorf("error: read file bytes: %w", err)
 	}
 
 	return handler.Filename, fileBytes, nil
@@ -190,11 +190,11 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte) error {
 	msgLimit, err := getMessageLimit(pClient)
 	if err != nil {
-		return errors.WrapError(err, "error: try send message")
+		return fmt.Errorf("error: try send message: %w", err)
 	}
 
 	if uint64(len(pMsgBytes)) > msgLimit {
-		return errors.NewError("error: len message > limit")
+		return fmt.Errorf("error: len message > limit: %w", err)
 	}
 
 	// if the sender = receiver then there is no need to send a message to the network
@@ -219,12 +219,12 @@ func getReceiverPubKey(client client.IClient, myPubKey asymmetric.IPubKey, alias
 
 	friends, err := client.GetFriends()
 	if err != nil {
-		return nil, errors.WrapError(err, "error: read friends")
+		return nil, fmt.Errorf("error: read friends: %w", err)
 	}
 
 	friendPubKey, ok := friends[aliasName]
 	if !ok {
-		return nil, errors.NewError("undefined public key by alias name")
+		return nil, errors.New("undefined public key by alias name")
 	}
 
 	return friendPubKey, nil

@@ -14,7 +14,6 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/file_system"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -164,7 +163,7 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 }
 
 func testNewWrapper(cfgPath string) config.IWrapper {
-	file_system.OpenFile(cfgPath).Write([]byte(tcConfig))
+	os.WriteFile(cfgPath, []byte(tcConfig), 0o644)
 	cfg, err := config.LoadConfig(cfgPath)
 	if err != nil {
 		panic(err)

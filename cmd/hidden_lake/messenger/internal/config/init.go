@@ -1,15 +1,16 @@
 package config
 
 import (
+	"os"
+
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/file_system"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
-	if file_system.OpenFile(cfgPath).IsExist() {
+	if _, err := os.Stat(cfgPath); !os.IsNotExist(err) {
 		return LoadConfig(cfgPath)
 	}
 	if initCfg == nil {

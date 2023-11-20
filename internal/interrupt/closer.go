@@ -1,15 +1,17 @@
 package interrupt
 
 import (
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 // Close all elements in a slice.
 func CloseAll(pClosers []types.ICloser) error {
-	var err error
+	errList := make([]error, 0, len(pClosers))
 	for _, c := range pClosers {
-		err = errors.AppendError(err, c.Close())
+		if err := c.Close(); err != nil {
+			errList = append(errList, err)
+		}
 	}
-	return err
+	return utils.MergeErrors(errList...)
 }

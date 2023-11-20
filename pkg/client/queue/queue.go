@@ -1,13 +1,13 @@
 package queue
 
 import (
+	"errors"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/errors"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -58,7 +58,7 @@ func (p *sMessageQueue) Run() error {
 	defer p.fMutex.Unlock()
 
 	if p.fIsRun {
-		return errors.NewError("queue already running")
+		return errors.New("queue already running")
 	}
 	p.fIsRun = true
 
@@ -86,7 +86,7 @@ func (p *sMessageQueue) Stop() error {
 	defer p.fMutex.Unlock()
 
 	if !p.fIsRun {
-		return errors.NewError("queue already closed or not started")
+		return errors.New("queue already closed or not started")
 	}
 	p.fIsRun = false
 
@@ -99,7 +99,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	defer p.fMutex.Unlock()
 
 	if uint64(len(p.fQueue)) >= p.fSettings.GetMainCapacity() {
-		return errors.NewError("queue already full, need wait and retry")
+		return errors.New("queue already full, need wait and retry")
 	}
 
 	p.fQueue <- pMsg
