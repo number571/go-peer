@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	_ IConfig = &SConfig{}
+	_ IConfig  = &SConfig{}
+	_ IAddress = &SAddress{}
 )
 
 type SConfigSettings struct {
@@ -22,11 +23,17 @@ type SConfigSettings struct {
 type SConfig struct {
 	FSettings *SConfigSettings `json:"settings"`
 
-	FLogging   []string `json:"logging,omitempty"`
-	FProducers []string `json:"producers"`
-	FConsumers []string `json:"consumers"`
+	FLogging   []string  `json:"logging,omitempty"`
+	FAddress   *SAddress `json:"address"`
+	FProducers []string  `json:"producers"`
+	FConsumers []string  `json:"consumers"`
 
 	fLogging *sLogging
+}
+
+type SAddress struct {
+	FHTTP  string `json:"http"`
+	FPPROF string `json:"pprof,omitempty"`
 }
 
 type sLogging []bool
@@ -73,10 +80,19 @@ func (p *SConfig) isValid() bool {
 	return true &&
 		len(p.FConsumers) != 0 &&
 		len(p.FProducers) != 0 &&
-		p.FSettings.FMessagesCapacity != 0
+		p.FSettings.FMessagesCapacity != 0 &&
+		p.FAddress.FHTTP != ""
 }
 
 func (p *SConfig) initConfig() error {
+	if p.FSettings == nil {
+		p.FSettings = new(SConfigSettings)
+	}
+
+	if p.FAddress == nil {
+		p.FAddress = new(SAddress)
+	}
+
 	if !p.isValid() {
 		return errors.New("load config settings")
 	}
@@ -112,6 +128,18 @@ func (p *SConfig) loadLogging() error {
 
 func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
+}
+
+func (p *SConfig) GetAddress() IAddress {
+	return p.FAddress
+}
+
+func (p *SAddress) GetHTTP() string {
+	return p.FHTTP
+}
+
+func (p *SAddress) GetPPROF() string {
+	return p.FPPROF
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {

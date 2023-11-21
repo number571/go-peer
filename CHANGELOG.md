@@ -8,7 +8,7 @@
 
 ### IMPROVEMENTS
 
-- Update `cmd/hidden_lake`: append HLL (Hidden Lake Loader)
+- Update `cmd/hidden_lake`: append HLL service (Hidden Lake Loader)
 
 ### CHANGES
 

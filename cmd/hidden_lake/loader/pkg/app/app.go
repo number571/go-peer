@@ -1,16 +1,24 @@
 package app
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/loader/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/settings"
+	"github.com/number571/go-peer/internal/interrupt"
+	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
+)
+
+const (
+	cInitStart = 3 * time.Second
 )
 
 var (
@@ -18,24 +26,31 @@ var (
 )
 
 type sApp struct {
-	fIsRun      bool
-	fMutex      sync.Mutex
+	fIsRun bool
+	fMutex sync.Mutex
+
+	fConfig config.IConfig
+
+	fHTTPLogger logger.ILogger
 	fStdfLogger logger.ILogger
-	fCancel     context.CancelFunc
-	fConfig     config.IConfig
+
+	fServiceHTTP *http.Server
 }
 
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
 ) types.ICommand {
-	stdfLogger := std_logger.NewStdLogger(
-		pCfg.GetLogging(),
-		std_logger.GetLogFunc(),
+	logging := pCfg.GetLogging()
+
+	var (
+		httpLogger = std_logger.NewStdLogger(logging, http_logger.GetLogFunc())
+		stdfLogger = std_logger.NewStdLogger(logging, std_logger.GetLogFunc())
 	)
 
 	return &sApp{
 		fConfig:     pCfg,
+		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,
 	}
 }
@@ -49,14 +64,30 @@ func (p *sApp) Run() error {
 	}
 	p.fIsRun = true
 
-	ctx := context.Background()
-	ctxWithCancel, cancelFunction := context.WithCancel(ctx)
+	p.initServiceHTTP()
 
-	p.fCancel = cancelFunction
-	p.transferMessages(ctxWithCancel)
+	res := make(chan error)
 
-	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
-	return nil
+	go func() {
+		if p.fConfig.GetAddress().GetHTTP() == "" {
+			return
+		}
+
+		err := p.fServiceHTTP.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			res <- err
+			return
+		}
+	}()
+
+	select {
+	case err := <-res:
+		resErr := fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(resErr, p.Stop())
+	case <-time.After(cInitStart):
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
+		return nil
+	}
 }
 
 func (p *sApp) Stop() error {
@@ -67,8 +98,14 @@ func (p *sApp) Stop() error {
 		return errors.New("application already stopped or not started")
 	}
 	p.fIsRun = false
-	p.fCancel()
-
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
+
+	err := interrupt.CloseAll([]types.ICloser{
+		p.fServiceHTTP,
+	})
+	if err != nil {
+		return fmt.Errorf("close/stop all: %w", err)
+	}
+
 	return nil
 }

@@ -11,7 +11,7 @@ const (
 )
 
 const (
-	CDefaultMessagesCapacity = (1 << 10)
+	CDefaultMessagesCapacity = (2 << 10)
 )
 
 const (

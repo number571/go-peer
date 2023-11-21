@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/queue_set"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -86,18 +87,7 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 
 	wg.Wait()
 
-	var resErr error
-	for _, err := range listErr {
-		if err == nil {
-			continue
-		}
-		if resErr == nil {
-			resErr = err
-			continue
-		}
-		resErr = fmt.Errorf("%w, %w", err, resErr)
-	}
-	return resErr
+	return utils.MergeErrors(listErr...)
 }
 
 // Opens a tcp connection to receive data from outside.
