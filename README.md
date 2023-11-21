@@ -103,7 +103,8 @@ Also, the composition of these works can be found in the book `The general theor
 1. [Hidden Lake Service](#1-hidden-lake-service) 
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
 3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
-4. [Hidden Lake Adapters](#4-hidden-lake-adapters) 
+4. [Hidden Lake Loader](#4-hidden-lake-loader) 
+5. [Hidden Lake Adapters](#4-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
@@ -111,7 +112,7 @@ Also, the composition of these works can be found in the book `The general theor
 
 <img src="cmd/hidden_lake/service/_images/hls_logo.png" alt="hls_logo.png"/>
 
-The `Hidden Lake Service` is the core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
+The `Hidden Lake Service` is a core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
 
 Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networks (1^stage)
 :-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
@@ -524,7 +525,19 @@ $ go run ./main.go h
 $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
 ```
 
-## 4. Hidden Lake Adapters
+## 4. Hidden Lake Loader
+
+> [github.com/number571/go-peer/cmd/hidden_lake/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/loader "HLL")
+
+<img src="cmd/hidden_lake/loader/_images/hll_logo.png" alt="hll_logo.png"/>
+
+The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applications. It is used to redirect traffic from HLT producers (storages) to HLT consumers.
+
+### How it works
+
+HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
+
+## 5. Hidden Lake Adapters
 
 > [github.com/number571/go-peer/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 

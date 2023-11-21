@@ -15,9 +15,9 @@ var (
 )
 
 type SConfigSettings struct {
-	FNetworkKey       string `json:"network_key,omitempty"`
-	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty"`
 	FMessagesCapacity uint64 `json:"messages_capacity"`
+	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty"`
+	FNetworkKey       string `json:"network_key,omitempty"`
 }
 
 type SConfig struct {
@@ -25,8 +25,8 @@ type SConfig struct {
 
 	FLogging   []string  `json:"logging,omitempty"`
 	FAddress   *SAddress `json:"address"`
-	FProducers []string  `json:"producers"`
-	FConsumers []string  `json:"consumers"`
+	FProducers []string  `json:"producers,omitempty"`
+	FConsumers []string  `json:"consumers,omitempty"`
 
 	fLogging *sLogging
 }
@@ -78,8 +78,6 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 
 func (p *SConfig) isValid() bool {
 	return true &&
-		len(p.FConsumers) != 0 &&
-		len(p.FProducers) != 0 &&
 		p.FSettings.FMessagesCapacity != 0 &&
 		p.FAddress.FHTTP != ""
 }

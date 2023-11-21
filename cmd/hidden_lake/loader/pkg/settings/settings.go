@@ -14,11 +14,6 @@ const (
 )
 
 const (
-	CDefaultConsumerAddress = "127.0.0.1:9582"
-	CDefaultProducerAddress = "127.0.0.2:9582"
-)
-
-const (
 	CHandleIndexPath    = "/api/index"
 	CHandleTransferPath = "/api/transfer"
 )

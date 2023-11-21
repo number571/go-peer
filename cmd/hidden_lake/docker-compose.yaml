@@ -39,6 +39,18 @@ services:
       - "9592:9592"
     networks:
       - hidden-lake
+  loader:
+    build:
+      context: ./../../
+      dockerfile: cmd/hidden_lake/loader/Dockerfile
+    environment:
+      SERVICE_PATH: /mounted
+    volumes:
+      - ./_mounted:/mounted
+    ports:
+      - "9561:9561"
+    networks:
+      - hidden-lake
 networks:
   hidden-lake:
     driver: bridge
