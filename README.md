@@ -537,6 +537,9 @@ The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applic
 
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
 
+<p align="center"><img src="cmd/hidden_lake/adapters/_images/hll_arch.jpg" alt="hll_arch.jpg"/></p>
+<p align="center">Figure 10. Architecture of HLL.</p>
+
 ## 5. Hidden Lake Adapters
 
 > [github.com/number571/go-peer/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
@@ -553,7 +556,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
-<p align="center">Figure 10. Architecture of HLA.</p>
+<p align="center">Figure 11. Architecture of HLA.</p>
 
 ### Example 
 
@@ -585,7 +588,7 @@ Request took 8 seconds
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 11. Example of running HLA client.</p>
+<p align="center">Figure 12. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 
