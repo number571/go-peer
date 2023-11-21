@@ -537,7 +537,7 @@ The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applic
 
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
 
-<p align="center"><img src="cmd/hidden_lake/loader/_images/hll_arch.jpg" alt="hll_arch.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/loader/_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 10. Architecture of HLL.</p>
 
 ## 5. Hidden Lake Adapters
