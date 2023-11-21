@@ -104,7 +104,7 @@ Also, the composition of these works can be found in the book `The general theor
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
 3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
 4. [Hidden Lake Loader](#4-hidden-lake-loader) 
-5. [Hidden Lake Adapters](#4-hidden-lake-adapters) 
+5. [Hidden Lake Adapters](#5-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
