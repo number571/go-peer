@@ -2,6 +2,8 @@
 
 > Hidden Lake Loader
 
+<img src="_images/hll_logo.png" alt="hll_logo.png"/>
+
 The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applications. It is used to redirect traffic from HLT producers (storages) to HLT consumers. Previously, it was used as a component of HLM, and then HLS applications.
 
 ### How it works
