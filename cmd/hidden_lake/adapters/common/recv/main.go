@@ -149,11 +149,11 @@ func loadMessageFromService(portService int, id uint64) (net_message.IMessage, e
 		return nil, fmt.Errorf("failed: incorrect response from service")
 	}
 
-	msg := net_message.LoadMessage(
+	msg, err := net_message.LoadMessage(
 		getMessageSettings(),
 		string(msgStringAsBytes[1:]),
 	)
-	if msg == nil {
+	if err != nil {
 		return nil, fmt.Errorf("message is nil")
 	}
 

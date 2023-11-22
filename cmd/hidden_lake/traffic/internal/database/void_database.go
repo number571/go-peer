@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -37,7 +38,7 @@ func (p *sVoidDatabase) Hashes() ([][]byte, error) {
 }
 
 func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
-	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
+	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
 		return errors.New("got message with diff settings")
 	}
 
@@ -58,9 +59,9 @@ func (p *sVoidDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 		return nil, GErrMessageIsNotExist
 	}
 
-	msg := net_message.LoadMessage(p.fSettings, msgBytes)
-	if msg == nil {
-		panic("message is nil")
+	msg, err := net_message.LoadMessage(p.fSettings, msgBytes)
+	if err != nil {
+		return nil, fmt.Errorf("load message: %w", err)
 	}
 
 	return msg, nil

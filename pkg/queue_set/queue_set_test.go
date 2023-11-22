@@ -70,6 +70,15 @@ func TestQueueSet(t *testing.T) {
 		}
 	}
 
+	keys := queueSet.GetQueueKeys()
+	for i, k := range keys {
+		key := encoding.Uint64ToBytes(uint64(i))
+		if !bytes.Equal(k, key[:]) {
+			t.Error("got incorrect key")
+			return
+		}
+	}
+
 	key1 := encoding.Uint64ToBytes(1)
 	if ok := queueSet.Push(key1[:], []byte(fmt.Sprintf("_%d_", 1))); ok {
 		t.Error("success push already exist value")

@@ -79,8 +79,8 @@ func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 		return nil, fmt.Errorf("get message (requester): %w", err)
 	}
 
-	msg := net_message.LoadMessage(p.fParams, string(resp))
-	if msg == nil {
+	msg, err := net_message.LoadMessage(p.fParams, string(resp))
+	if err != nil {
 		return nil, errors.New("load message")
 	}
 

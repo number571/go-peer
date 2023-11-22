@@ -139,9 +139,9 @@ func (p *sConn) ReadMessage(pChRead chan struct{}) (message.IMessage, error) {
 
 	// try unpack message from bytes
 	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
-	msg := message.LoadMessage(p.fSettings, msgBytes)
-	if msg == nil {
-		return nil, errors.New("got invalid message bytes")
+	msg, err := message.LoadMessage(p.fSettings, msgBytes)
+	if err != nil {
+		return nil, fmt.Errorf("got invalid message bytes: %w", err)
 	}
 
 	return msg, nil

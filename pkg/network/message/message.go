@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"errors"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
@@ -27,7 +28,6 @@ type sMessage struct {
 	fPayload payload.IPayload
 }
 
-// TODO: return error
 func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)
@@ -39,7 +39,7 @@ func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	}
 }
 
-func LoadMessage(pSett ISettings, pData interface{}) IMessage {
+func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	var msgBytes []byte
 
 	switch x := pData.(type) {
@@ -48,11 +48,11 @@ func LoadMessage(pSett ISettings, pData interface{}) IMessage {
 	case string:
 		return LoadMessage(pSett, encoding.HexDecode(x))
 	default:
-		return nil
+		return nil, errors.New("unknown type of message")
 	}
 
 	if len(msgBytes) < encoding.CSizeUint64+hashing.CSHA256Size {
-		return nil
+		return nil, errors.New("length of message bytes < size of header")
 	}
 
 	proofBytes := msgBytes[:encoding.CSizeUint64]
@@ -65,24 +65,24 @@ func LoadMessage(pSett ISettings, pData interface{}) IMessage {
 	proof := encoding.BytesToUint64(proofArray)
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(gotHash, proof) {
-		return nil
+		return nil, errors.New("got invalid proof of work")
 	}
 
 	if !bytes.Equal(gotHash, getHash(pSett.GetNetworkKey(), pldBytes)) {
-		return nil
+		return nil, errors.New("got invalid auth hash")
 	}
 
 	// check Head[u64]
 	pld := payload.LoadPayload(pldBytes)
 	if pld == nil {
-		return nil
+		return nil, errors.New("failed to load payload")
 	}
 
 	return &sMessage{
 		fProof:   proof,
 		fHash:    gotHash,
 		fPayload: pld,
-	}
+	}, nil
 }
 
 func (p *sMessage) GetProof() uint64 {

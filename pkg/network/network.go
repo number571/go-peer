@@ -48,11 +48,10 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 	// node can redirect received message
 	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
-	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
-
 	mutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
 
+	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 	for a, c := range p.GetConnections() {
 		wg.Add(1)
 
@@ -86,7 +85,6 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 	}
 
 	wg.Wait()
-
 	return utils.MergeErrors(listErr...)
 }
 
@@ -130,24 +128,17 @@ func (p *sNode) Stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	var resErr error
+	listErr := make([]error, 0, len(p.fConnections)+1)
 	if p.fListener != nil {
-		if err := p.fListener.Close(); err != nil {
-			resErr = err
-		}
+		listErr = append(listErr, p.fListener.Close())
 	}
 
 	for id, conn := range p.fConnections {
 		delete(p.fConnections, id)
-		if err := conn.Close(); err != nil {
-			resErr = fmt.Errorf("%w, %w", err, resErr)
-		}
+		listErr = append(listErr, conn.Close())
 	}
 
-	if resErr != nil {
-		return fmt.Errorf("stop network node: %w", resErr)
-	}
-	return nil
+	return utils.MergeErrors(listErr...)
 }
 
 // Saves the function to the map by key for subsequent redirection.

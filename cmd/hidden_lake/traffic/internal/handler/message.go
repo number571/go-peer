@@ -65,11 +65,11 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTP
 				return
 			}
 
-			netMsg := net_message.LoadMessage(
+			netMsg, err := net_message.LoadMessage(
 				pNode.GetSettings().GetConnSettings(),
 				string(msgStringAsBytes),
 			)
-			if netMsg == nil {
+			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("decode_message"))
 				api.Response(pW, http.StatusTeapot, "failed: decode message")
 				return

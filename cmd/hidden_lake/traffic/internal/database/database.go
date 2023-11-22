@@ -70,7 +70,7 @@ func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if gotMsg := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); gotMsg == nil {
+	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
 		return errors.New("got message with diff settings")
 	}
 
@@ -121,9 +121,9 @@ func (p *sDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 		return nil, GErrMessageIsNotExist
 	}
 
-	msg := net_message.LoadMessage(p.Settings(), data)
-	if msg == nil {
-		panic("message is nil")
+	msg, err := net_message.LoadMessage(p.Settings(), data)
+	if err != nil {
+		return nil, fmt.Errorf("load message: %w", err)
 	}
 
 	return msg, nil

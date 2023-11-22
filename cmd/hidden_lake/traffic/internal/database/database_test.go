@@ -68,46 +68,6 @@ func TestIInitDatabase(t *testing.T) {
 	}
 }
 
-func TestDatabaseLoadPanic(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	t.Parallel()
-
-	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
-	os.RemoveAll(pathDB)
-
-	kvDB, err := NewDatabase(NewSettings(&SSettings{
-		FPath:             pathDB,
-		FNetworkKey:       testutils.TCNetworkKey,
-		FWorkSizeBits:     testutils.TCWorkSize,
-		FMessagesCapacity: testutils.TCCapacity,
-	}))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	defer func() {
-		kvDB.Close()
-		os.RemoveAll(pathDB)
-	}()
-
-	ptrDB := kvDB.(*sDatabase)
-
-	hash := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
-	if err := ptrDB.fDB.Set(getKeyMessage(hash), []byte{123}); err != nil {
-		t.Error(err)
-		return
-	}
-
-	_, _ = kvDB.Load(hash) // panic
-}
-
 func TestDatabaseHashesPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
@@ -183,6 +143,19 @@ func TestDatabaseLoad(t *testing.T) {
 
 	if !errors.Is(errLoad, GErrMessageIsNotExist) {
 		t.Error("got incorrect error type (load)")
+		return
+	}
+
+	ptrDB := kvDB.(*sDatabase)
+
+	hash2 := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
+	if err := ptrDB.fDB.Set(getKeyMessage(hash2), []byte{123}); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if _, err := kvDB.Load(hash2); err == nil {
+		t.Error("success load with incorrect hash")
 		return
 	}
 }
