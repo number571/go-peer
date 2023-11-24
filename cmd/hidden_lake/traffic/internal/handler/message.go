@@ -77,7 +77,7 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTP
 
 			if netMsg.GetPayload().GetHead() != hls_settings.CNetworkMask {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("network_mask"))
-				api.Response(pW, http.StatusTeapot, "failed: network mask")
+				api.Response(pW, http.StatusLocked, "failed: network mask")
 				return
 			}
 

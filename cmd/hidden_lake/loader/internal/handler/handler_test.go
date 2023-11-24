@@ -17,6 +17,12 @@ func testRunService(addr string) *http.Server {
 			FMessagesCapacity: testutils.TCCapacity,
 			FWorkSizeBits:     testutils.TCWorkSize,
 		},
+		FProducers: []string{
+			testutils.TgAddrs[42],
+		},
+		FConsumers: []string{
+			testutils.TgAddrs[43],
+		},
 	}
 
 	logger := logger.NewLogger(
