@@ -6,7 +6,7 @@ import (
 )
 
 // Stop all elements in a slice.
-func StopAll(pCommands []types.ICommand) error {
+func StopAll(pCommands []types.IApp) error {
 	errList := make([]error, 0, len(pCommands))
 	for _, c := range pCommands {
 		if err := c.Stop(); err != nil {

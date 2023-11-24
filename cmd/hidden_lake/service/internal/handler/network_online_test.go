@@ -100,7 +100,7 @@ func testAllOnlineFree(node anonymity.INode, pathCfg, pathDB string) {
 		os.RemoveAll(pathCfg + "_push2")
 		os.RemoveAll(pathDB + "_push2")
 	}()
-	interrupt.StopAll([]types.ICommand{
+	interrupt.StopAll([]types.IApp{
 		node,
 		node.GetNetworkNode(),
 	})
@@ -130,9 +130,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 			cfg,
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
-				func(_ logger.ILogArg) string {
-					return ""
-				},
+				func(_ logger.ILogArg) string { return "" },
 			),
 		),
 	)

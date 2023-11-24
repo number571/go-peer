@@ -121,7 +121,7 @@ func testAllFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string)
 		os.RemoveAll(pathDB)
 		os.RemoveAll(pathCfg)
 	}()
-	interrupt.StopAll([]types.ICommand{
+	interrupt.StopAll([]types.IApp{
 		node,
 		node.GetNetworkNode(),
 	})
@@ -136,9 +136,7 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 
 	logger := logger.NewLogger(
 		logger.NewSettings(&logger.SSettings{}),
-		func(_ logger.ILogArg) string {
-			return ""
-		},
+		func(_ logger.ILogArg) string { return "" },
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
@@ -199,9 +197,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
-			func(_ logger.ILogArg) string {
-				return ""
-			},
+			func(_ logger.ILogArg) string { return "" },
 		),
 		anonymity.NewWrapperDB().Set(db),
 		testNewNetworkNode(addr),

@@ -101,7 +101,7 @@ func testAllPushFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB str
 		os.RemoveAll(pathCfg + "_push1")
 		os.RemoveAll(pathDB + "_push1")
 	}()
-	interrupt.StopAll([]types.ICommand{
+	interrupt.StopAll([]types.IApp{
 		node,
 		node.GetNetworkNode(),
 	})
@@ -136,9 +136,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 			cfg,
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
-				func(_ logger.ILogArg) string {
-					return ""
-				},
+				func(_ logger.ILogArg) string { return "" },
 			),
 		),
 	)

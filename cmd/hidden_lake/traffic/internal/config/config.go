@@ -117,7 +117,8 @@ func (p *SConfigSettings) GetNetworkKey() string {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FMessagesCapacity != 0
+		p.FSettings.FMessagesCapacity != 0 &&
+		(p.FSettings.FQueuePeriodMS != 0 || p.FIsStorage)
 }
 
 func (p *SConfig) initConfig() error {

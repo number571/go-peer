@@ -13,7 +13,7 @@ type (
 )
 
 type INode interface {
-	types.ICommand
+	types.IApp
 
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn

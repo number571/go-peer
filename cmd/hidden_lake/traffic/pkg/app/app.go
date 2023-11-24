@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	_ types.ICommand = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
@@ -51,7 +51,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
-) types.ICommand {
+) types.IApp {
 	anonLogger := std_logger.NewStdLogger(
 		pCfg.GetLogging(),
 		anon_logger.GetLogFunc(),
@@ -165,7 +165,7 @@ func (p *sApp) Stop() error {
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
 	err := utils.MergeErrors(
-		interrupt.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.IApp{
 			p.fConnKeeper,
 			p.fConnKeeper.GetNetworkNode(),
 		}),

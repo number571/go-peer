@@ -7,7 +7,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -15,6 +15,17 @@ import (
 
 var (
 	_ IRequester = &sRequester{}
+)
+
+const (
+	cHandleIndexTemplate          = "%s" + hls_settings.CHandleIndexPath
+	cHandleConfigSettingsTemplate = "%s" + hls_settings.CHandleConfigSettingsPath
+	cHandleConfigConnectsTemplate = "%s" + hls_settings.CHandleConfigConnectsPath
+	cHandleConfigFriendsTemplate  = "%s" + hls_settings.CHandleConfigFriendsPath
+	cHandleNetworkOnlineTemplate  = "%s" + hls_settings.CHandleNetworkOnlinePath
+	cHandleNetworkRequestTemplate = "%s" + hls_settings.CHandleNetworkRequestPath
+	cHandleNetworkKeyTemplate     = "%s" + hls_settings.CHandleNetworkKeyPath
+	cHandleNodeKeyTemplate        = "%s" + hls_settings.CHandleNodeKeyPath
 )
 
 type sRequester struct {
@@ -33,7 +44,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, p.fHost),
+		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -41,7 +52,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	}
 
 	result := string(res)
-	if result != pkg_settings.CTitlePattern {
+	if result != hls_settings.CTitlePattern {
 		return "", errors.New("incorrect title pattern")
 	}
 
@@ -52,7 +63,7 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigSettingsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -71,7 +82,7 @@ func (p *sRequester) GetNetworkKey() (string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleNetworkKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkKeyTemplate, p.fHost),
 		nil,
 	)
 
@@ -87,7 +98,7 @@ func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNetworkKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkKeyTemplate, p.fHost),
 		pNetworkKey,
 	)
 	if err != nil {
@@ -96,11 +107,11 @@ func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 	return nil
 }
 
-func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) (response.IResponse, error) {
+func (p *sRequester) FetchRequest(pRequest *hls_settings.SRequest) (response.IResponse, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkRequestTemplate, p.fHost),
 		pRequest,
 	)
 	if err != nil {
@@ -114,11 +125,11 @@ func (p *sRequester) FetchRequest(pRequest *pkg_settings.SRequest) (response.IRe
 	return resp, nil
 }
 
-func (p *sRequester) BroadcastRequest(pRequest *pkg_settings.SRequest) error {
+func (p *sRequester) BroadcastRequest(pRequest *hls_settings.SRequest) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPut,
-		fmt.Sprintf(pkg_settings.CHandleNetworkRequestTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkRequestTemplate, p.fHost),
 		pRequest,
 	)
 	if err != nil {
@@ -131,14 +142,14 @@ func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("get friends (requester): %w", err)
 	}
 
-	var vFriends []pkg_settings.SFriend
+	var vFriends []hls_settings.SFriend
 	if err := encoding.Deserialize([]byte(res), &vFriends); err != nil {
 		return nil, fmt.Errorf("deserialize friends (requeser): %w", err)
 	}
@@ -151,11 +162,11 @@ func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	return result, nil
 }
 
-func (p *sRequester) AddFriend(pFriend *pkg_settings.SFriend) error {
+func (p *sRequester) AddFriend(pFriend *hls_settings.SFriend) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
 		pFriend,
 	)
 	if err != nil {
@@ -164,11 +175,11 @@ func (p *sRequester) AddFriend(pFriend *pkg_settings.SFriend) error {
 	return nil
 }
 
-func (p *sRequester) DelFriend(pFriend *pkg_settings.SFriend) error {
+func (p *sRequester) DelFriend(pFriend *hls_settings.SFriend) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigFriendsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
 		pFriend,
 	)
 	if err != nil {
@@ -181,7 +192,7 @@ func (p *sRequester) GetOnlines() ([]string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkOnlineTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -200,7 +211,7 @@ func (p *sRequester) DelOnline(pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleNetworkOnlineTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkOnlineTemplate, p.fHost),
 		pConnect,
 	)
 	if err != nil {
@@ -213,7 +224,7 @@ func (p *sRequester) GetConnections() ([]string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -232,7 +243,7 @@ func (p *sRequester) AddConnection(pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
 		pConnect,
 	)
 	if err != nil {
@@ -245,7 +256,7 @@ func (p *sRequester) DelConnection(pConnect string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(pkg_settings.CHandleConfigConnectsTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
 		pConnect,
 	)
 	if err != nil {
@@ -258,7 +269,7 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleNodeKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleNodeKeyTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {

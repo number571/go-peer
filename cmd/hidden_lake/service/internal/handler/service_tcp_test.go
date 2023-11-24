@@ -47,7 +47,7 @@ func TestHLS(t *testing.T) {
 		return
 	}
 	defer func() {
-		interrupt.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.IApp{
 			nodeService,
 			nodeService.GetNetworkNode(),
 		})
@@ -63,7 +63,7 @@ func TestHLS(t *testing.T) {
 		return
 	}
 	defer func() {
-		interrupt.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.IApp{
 			nodeClient,
 			nodeClient.GetNetworkNode(),
 		})
@@ -104,9 +104,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 			cfg,
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
-				func(_ logger.ILogArg) string {
-					return ""
-				},
+				func(_ logger.ILogArg) string { return "" },
 			),
 		),
 	)

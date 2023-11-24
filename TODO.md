@@ -12,3 +12,5 @@
 10. Append errors (as traffic/database) for all interface methods
 11. Update readme for HLL
 12. HLL append tests, examples
+13. Remove CHandleIndexTemplate from settings (move to client package)
+14. Check length of public keys in message

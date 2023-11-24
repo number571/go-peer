@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	_ types.ICommand = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
-	fHLS types.ICommand
-	fHLM types.ICommand
+	fHLS types.IApp
+	fHLM types.IApp
 }
 
-func initApp(pPath, pKey string) (types.ICommand, error) {
+func initApp(pPath, pKey string) (types.IApp, error) {
 	hlsApp, err := hls_app.InitApp(pPath, pKey)
 	if err != nil {
 		return nil, err

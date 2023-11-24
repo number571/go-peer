@@ -34,7 +34,7 @@ func TestCloser(t *testing.T) {
 func TestStopper(t *testing.T) {
 	t.Parallel()
 
-	err := StopAll([]types.ICommand{
+	err := StopAll([]types.IApp{
 		testNewCommand(false),
 		testNewCommand(false),
 		testNewCommand(false),
@@ -44,7 +44,7 @@ func TestStopper(t *testing.T) {
 		return
 	}
 
-	if err := StopAll([]types.ICommand{testNewCommand(true)}); err == nil {
+	if err := StopAll([]types.IApp{testNewCommand(true)}); err == nil {
 		t.Error("nothing error?")
 		return
 	}
@@ -61,7 +61,7 @@ func (c *tsCloser) Close() error {
 	return nil
 }
 
-func testNewCommand(flag bool) types.ICommand {
+func testNewCommand(flag bool) types.IApp {
 	return &tsCommand{flag}
 }
 

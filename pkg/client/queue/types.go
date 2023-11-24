@@ -9,7 +9,7 @@ import (
 )
 
 type IMessageQueue interface {
-	types.ICommand
+	types.IApp
 
 	GetSettings() ISettings
 	GetClient() client.IClient

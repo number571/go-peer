@@ -641,9 +641,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
-			func(_ logger.ILogArg) string {
-				return ""
-			},
+			func(_ logger.ILogArg) string { return "" },
 		),
 		NewWrapperDB().Set(db),
 		network.NewNode(

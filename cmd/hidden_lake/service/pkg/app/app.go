@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	_ types.ICommand = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
@@ -54,7 +54,7 @@ func NewApp(
 	pCfg config.IConfig,
 	pPrivKey asymmetric.IPrivKey,
 	pPathTo string,
-) types.ICommand {
+) types.IApp {
 	logging := pCfg.GetLogging()
 
 	var (
@@ -174,7 +174,7 @@ func (p *sApp) Stop() error {
 
 	p.fNode.HandleFunc(pkg_settings.CServiceMask, nil)
 	err := utils.MergeErrors(
-		interrupt.StopAll([]types.ICommand{
+		interrupt.StopAll([]types.IApp{
 			p.fNode,
 			p.fConnKeeper,
 			p.fNode.GetNetworkNode(),

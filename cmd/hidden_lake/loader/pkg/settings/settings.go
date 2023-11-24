@@ -17,8 +17,3 @@ const (
 	CHandleIndexPath    = "/api/index"
 	CHandleTransferPath = "/api/transfer"
 )
-
-const (
-	CHandleIndexTemplate    = "%s" + CHandleIndexPath
-	CHandleTransferTemplate = "%s" + CHandleTransferPath
-)

@@ -69,7 +69,7 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	interrupt.StopAll([]types.ICommand{connKeeper})
+	interrupt.StopAll([]types.IApp{connKeeper})
 	interrupt.CloseAll([]types.ICloser{srv, wDB})
 }
 
@@ -135,9 +135,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 
 	logger := logger.NewLogger(
 		logger.NewSettings(&logger.SSettings{}),
-		func(_ logger.ILogArg) string {
-			return ""
-		},
+		func(_ logger.ILogArg) string { return "" },
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))

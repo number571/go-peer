@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
+	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -14,6 +14,12 @@ import (
 
 var (
 	_ IRequester = &sRequester{}
+)
+
+const (
+	cHandleIndexTemplate   = "%s" + hlt_settings.CHandleIndexPath
+	cHandleHashesTemplate  = "%s" + hlt_settings.CHandleHashesPath
+	cHandleMessageTemplate = "%s" + hlt_settings.CHandleMessagePath
 )
 
 type sRequester struct {
@@ -34,7 +40,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleIndexTemplate, p.fHost),
+		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -42,7 +48,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	}
 
 	result := string(resp)
-	if result != pkg_settings.CTitlePattern {
+	if result != hlt_settings.CTitlePattern {
 		return "", errors.New("incorrect title pattern")
 	}
 
@@ -53,7 +59,7 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleHashesTemplate, p.fHost),
+		fmt.Sprintf(cHandleHashesTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -72,7 +78,7 @@ func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate+"?hash=%s", p.fHost, pHash),
+		fmt.Sprintf(cHandleMessageTemplate+"?hash=%s", p.fHost, pHash),
 		nil,
 	)
 	if err != nil {
@@ -94,7 +100,7 @@ func (p *sRequester) PutMessage(pRequest string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(pkg_settings.CHandleMessageTemplate, p.fHost),
+		fmt.Sprintf(cHandleMessageTemplate, p.fHost),
 		pRequest,
 	)
 	if err != nil {

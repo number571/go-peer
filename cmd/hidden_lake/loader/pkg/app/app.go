@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	_ types.ICommand = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
@@ -40,7 +40,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
-) types.ICommand {
+) types.IApp {
 	logging := pCfg.GetLogging()
 
 	var (

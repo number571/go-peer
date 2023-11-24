@@ -8,7 +8,7 @@ import (
 )
 
 type IConnKeeper interface {
-	types.ICommand
+	types.IApp
 
 	GetSettings() ISettings
 	GetNetworkNode() network.INode

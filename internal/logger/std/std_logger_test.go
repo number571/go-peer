@@ -47,9 +47,7 @@ func TestLogger(t *testing.T) {
 
 	logger := NewStdLogger(
 		&tsLogger{},
-		func(_ logger.ILogArg) string {
-			return ""
-		},
+		func(_ logger.ILogArg) string { return "" },
 	)
 	if logger.GetSettings().GetStreamInfo().Name() != os.Stdout.Name() {
 		t.Error("info stream != stdout")

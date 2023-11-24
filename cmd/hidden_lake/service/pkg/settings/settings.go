@@ -78,17 +78,6 @@ const (
 	CHandleNodeKeyPath        = "/api/node/key"
 )
 
-const (
-	CHandleIndexTemplate          = "%s" + CHandleIndexPath
-	CHandleConfigSettingsTemplate = "%s" + CHandleConfigSettingsPath
-	CHandleConfigConnectsTemplate = "%s" + CHandleConfigConnectsPath
-	CHandleConfigFriendsTemplate  = "%s" + CHandleConfigFriendsPath
-	CHandleNetworkOnlineTemplate  = "%s" + CHandleNetworkOnlinePath
-	CHandleNetworkRequestTemplate = "%s" + CHandleNetworkRequestPath
-	CHandleNetworkKeyTemplate     = "%s" + CHandleNetworkKeyPath
-	CHandleNodeKeyTemplate        = "%s" + CHandleNodeKeyPath
-)
-
 func GetConnDeadline(pQueuePeriod time.Duration) time.Duration {
 	return pQueuePeriod / 2
 }

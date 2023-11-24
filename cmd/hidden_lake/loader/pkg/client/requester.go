@@ -9,6 +9,11 @@ import (
 	"github.com/number571/go-peer/internal/api"
 )
 
+const (
+	cHandleIndexTemplate    = "%s" + hll_settings.CHandleIndexPath
+	cHandleTransferTemplate = "%s" + hll_settings.CHandleTransferPath
+)
+
 var (
 	_ IRequester = &sRequester{}
 )
@@ -29,7 +34,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(hll_settings.CHandleIndexTemplate, p.fHost),
+		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -48,7 +53,7 @@ func (p *sRequester) RunTransfer() error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(hll_settings.CHandleTransferTemplate, p.fHost),
+		fmt.Sprintf(cHandleTransferTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -61,7 +66,7 @@ func (p *sRequester) StopTransfer() error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodDelete,
-		fmt.Sprintf(hll_settings.CHandleTransferTemplate, p.fHost),
+		fmt.Sprintf(cHandleTransferTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {

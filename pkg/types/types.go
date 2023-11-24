@@ -1,6 +1,6 @@
 package types
 
-type ICommand interface {
+type IApp interface {
 	Run() error
 	Stop() error
 }

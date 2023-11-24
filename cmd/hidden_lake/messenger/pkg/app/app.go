@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	_ types.ICommand = &sApp{}
+	_ types.IApp = &sApp{}
 )
 
 type sApp struct {
@@ -46,7 +46,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
-) types.ICommand {
+) types.IApp {
 	httpLogger := std_logger.NewStdLogger(pCfg.GetLogging(), http_logger.GetLogFunc())
 	stdfLogger := std_logger.NewStdLogger(pCfg.GetLogging(), std_logger.GetLogFunc())
 
