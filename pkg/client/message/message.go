@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 var (
@@ -97,8 +97,8 @@ func (p *SMessage) GetSign() []byte {
 	return encoding.HexDecode(p.FSign)
 }
 
-func (p *SMessage) GetPayload() payload.IPayload {
-	return payload.LoadPayload(p.FPayload)
+func (p *SMessage) GetPayload() []byte {
+	return p.FPayload
 }
 
 func (p *SMessage) ToBytes() []byte {
@@ -123,9 +123,14 @@ func (p *SMessage) ToString() string {
 
 func (p *SMessage) IsValid(psett ISettings) bool {
 	switch {
-	case uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes():
-		fallthrough
-	case len(p.GetHash()) != hashing.CSHA256Size:
+	case
+		uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes(),
+		len(p.GetHash()) != hashing.CSHA256Size,
+		len(p.GetSalt()) != symmetric.CAESBlockSize+symmetric.CAESKeySize,
+		len(p.GetEncKey()) < symmetric.CAESBlockSize,
+		len(p.GetPubKey()) < symmetric.CAESBlockSize,
+		len(p.GetSign()) < symmetric.CAESBlockSize,
+		len(p.GetPayload()) < symmetric.CAESBlockSize:
 		return false
 	default:
 		return true

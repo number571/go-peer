@@ -13,12 +13,14 @@
 ### CHANGES
 
 - Update `pkg/client/message`: delete proof of work
+- Update `pkg/client/message`: change structure of message
 - Delete `pkg/errors`: delete package errors -> replace standard "errors" package
 - Delete `pkg/file_system`: delete package file_system -> replace standard "os" package
 - Update `cmd/hidden_lake`: move network_key param from config main block to settings block
 - Update `pkg/network/message`: LoadMessage not return error
 - Update `cmd/hidden_lake/*/pkg/settings`: move CHandle*name*Template to cmd/hidden_lake/*/pkg/client
 - Update `pkg/types`: rename ICommand -> IApp
+- Update `pkg/client/message`: append new checks into IsValid method
 
 <!-- ... -->
 

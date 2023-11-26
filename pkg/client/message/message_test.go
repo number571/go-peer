@@ -136,7 +136,7 @@ func testMessage(t *testing.T, msg IMessage) {
 
 	msg1 := msg.(*SMessage)
 	msg1.FPayload = []byte{123}
-	if msg.GetPayload() != nil {
+	if !bytes.Equal(msg.GetPayload(), []byte{123}) {
 		t.Error("success got incorrect payload")
 		return
 	}

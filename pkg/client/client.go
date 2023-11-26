@@ -80,11 +80,11 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	)
 
 	if resultSize > msgLimitSize {
-		return nil, errors.New(fmt.Sprintf(
+		return nil, fmt.Errorf(
 			"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
 			msgLimitSize,
 			resultSize,
-		))
+		)
 	}
 
 	return p.encryptWithParams(
@@ -168,7 +168,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	if firstPayload == nil {
 		return nil, nil, errors.New("failed decode payload")
 	}
-	doublePayloadBytes := cipher.DecryptBytes(firstPayload.ToBytes())
+	doublePayloadBytes := cipher.DecryptBytes(firstPayload)
 	if doublePayloadBytes == nil {
 		return nil, nil, errors.New("failed decrypt double payload")
 	}

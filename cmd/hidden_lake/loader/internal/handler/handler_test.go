@@ -9,6 +9,12 @@ import (
 	testutils "github.com/number571/go-peer/test/_data"
 )
 
+var (
+	tgProducer = testutils.TgAddrs[42]
+	tgConsumer = testutils.TgAddrs[43]
+	tgTService = testutils.TgAddrs[44]
+)
+
 func testRunService(addr string) *http.Server {
 	mux := http.NewServeMux()
 
@@ -17,12 +23,8 @@ func testRunService(addr string) *http.Server {
 			FMessagesCapacity: testutils.TCCapacity,
 			FWorkSizeBits:     testutils.TCWorkSize,
 		},
-		FProducers: []string{
-			testutils.TgAddrs[42],
-		},
-		FConsumers: []string{
-			testutils.TgAddrs[43],
-		},
+		FProducers: []string{tgProducer},
+		FConsumers: []string{tgConsumer},
 	}
 
 	logger := logger.NewLogger(

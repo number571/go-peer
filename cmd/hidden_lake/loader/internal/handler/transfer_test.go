@@ -79,27 +79,27 @@ func TestHandleTransferAPI(t *testing.T) {
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
 
-	hltApp1, hltClient1, err := testCreateHLS(netMsgSettings, tcNameHLT1, testutils.TgAddrs[42])
+	hltApp1, hltClient1, err := testCreateHLS(netMsgSettings, tcNameHLT1, tgProducer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer hltApp1.Stop()
 
-	hltApp2, hltClient2, err := testCreateHLS(netMsgSettings, tcNameHLT2, testutils.TgAddrs[43])
+	hltApp2, hltClient2, err := testCreateHLS(netMsgSettings, tcNameHLT2, tgConsumer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer hltApp2.Stop()
 
-	service := testRunService(testutils.TgAddrs[44])
+	service := testRunService(tgTService)
 	defer service.Close()
 
 	time.Sleep(100 * time.Millisecond)
 	hllClient := hll_client.NewClient(
 		hll_client.NewRequester(
-			"http://"+testutils.TgAddrs[44],
+			"http://"+tgTService,
 			&http.Client{Timeout: time.Second / 2},
 		),
 	)
