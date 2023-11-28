@@ -20,31 +20,25 @@
 			H - hash function,
 			P - plaintext,
 			PubKX - public key of X participant.
-	3. 	CP = [ E( PubKB, K ), E( K, PubKA ), E( K, R ), E( K, P ), HP, E( K, S( PrivKA, HP ) ), W( C, HP ) ],
+	3. 	CP = [ E( PubKB, K ), E( K, PubKA ), E( K, R ), E( K, P ), E( K, HP ), E( K, S( PrivKA, HP ) ) ],
 		where
 			CP - encrypted message,
 			E - encryption function,
 			S - sign function,
-			W - work confirmation function,
-			C - the complexity of the work,
 			PrivKX - private key of X participant.
 
 	Steps of participant B:
-	4. 	W( C, HP ) = PW( C, W( C, HP ) ),
-		where
-			PW - function of work checking.
-		IF ≠, than protocol is interrupted.
-	5. 	K = D( PrivKB, E( PubKB, K ) ),
+	4. 	K = D( PrivKB, E( PubKB, K ) ),
 		where
 			D - decryption function.
 		IF ≠, than protocol is interrupted.
-	6. 	PubKA = D( K, E( K, PubKA ) ).
+	5. 	PubKA = D( K, E( K, PubKA ) ).
 		IF ≠, than protocol is interrupted.
-	7. 	HP = V( PubKA, D( K, E( K, S( PrivKA, HP ) ) ) ),
+	6. 	HP = V( PubKA, D( K, E( K, S( PrivKA, D( K, E( K, HP) ) ) ) ) ),
 		where
 			V - signature verification function.
 		IF ≠, than protocol is interrupted.
-	8. 	HP = H( D( K, E( K, R ) ) || D( K, E( K, P ) ) || PubKA || PubKB ),
+	7. 	HP = H( D( K, E( K, R ) ) || D( K, E( K, P ) ) || PubKA || PubKB ),
 		IF ≠, than protocol is interrupted.
 
 	More information in article: https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf
