@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake`: append HLL service (Hidden Lake Loader)
+- Update `pkg/client`: hash of message now encrypted
 
 ### CHANGES
 

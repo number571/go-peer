@@ -125,7 +125,7 @@ func (p *SMessage) IsValid(psett ISettings) bool {
 	switch {
 	case
 		uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes(),
-		len(p.GetHash()) != hashing.CSHA256Size,
+		len(p.GetHash()) != symmetric.CAESBlockSize+hashing.CSHA256Size,
 		len(p.GetSalt()) != symmetric.CAESBlockSize+symmetric.CAESKeySize,
 		len(p.GetEncKey()) < symmetric.CAESBlockSize,
 		len(p.GetPubKey()) < symmetric.CAESBlockSize,

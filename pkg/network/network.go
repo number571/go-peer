@@ -13,6 +13,10 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
+const (
+	cHandleRoutesSize = 128
+)
+
 var (
 	_ INode = &sNode{}
 )
@@ -34,7 +38,7 @@ func NewNode(pSett ISettings, pQueuePusher queue_set.IQueuePusher) INode {
 		fSettings:     pSett,
 		fQueuePusher:  pQueuePusher,
 		fConnections:  make(map[string]conn.IConn, pSett.GetMaxConnects()),
-		fHandleRoutes: make(map[uint64]IHandlerF, 128),
+		fHandleRoutes: make(map[uint64]IHandlerF, cHandleRoutesSize),
 	}
 }
 

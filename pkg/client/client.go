@@ -127,7 +127,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
 		FEncKey:  encoding.HexEncode(pRecv.EncryptBytes(session)),
 		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
-		FHash:    encoding.HexEncode(hash),
+		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
 		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
 		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
 	}
@@ -183,6 +183,11 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		return nil, nil, errors.New("failed decrypt salt")
 	}
 
+	hash := cipher.DecryptBytes(pMsg.GetHash())
+	if hash == nil {
+		return nil, nil, errors.New("failed decrypt hash")
+	}
+
 	// Check received hash and generated hash.
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
@@ -192,7 +197,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		},
 		[]byte{},
 	)).ToBytes()
-	if !bytes.Equal(check, pMsg.GetHash()) {
+	if !bytes.Equal(check, hash) {
 		return nil, nil, errors.New("invalid msg hash")
 	}
 
@@ -202,7 +207,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	if sign == nil {
 		return nil, nil, errors.New("failed decrypt sign")
 	}
-	if !pubKey.VerifyBytes(pMsg.GetHash(), sign) {
+	if !pubKey.VerifyBytes(hash, sign) {
 		return nil, nil, errors.New("invalid msg sign")
 	}
 
