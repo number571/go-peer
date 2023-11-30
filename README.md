@@ -98,6 +98,13 @@ Some final applications are compositions of other applications. Due to this, suc
 
 Also, the composition of these works can be found in the book `The general theory of anonymous communications` ([Ridero](https://ridero.ru/books/obshaya_teoriya_anonimnykh_kommunikacii/)). This book can be purchased in a tangible form on the [Ozon](https://www.ozon.ru/product/obshchaya-teoriya-anonimnyh-kommunikatsiy-vtoroe-izdanie-kovalenko-a-g-1193224608/) and [Wildberries](https://www.wildberries.ru/catalog/177390621/detail.aspx) marketplaces. You can download the book in digital form for free [here](https://github.com/number571/go-peer/blob/master/docs/general_theory_of_anonymous_communications.pdf).
 
+## How can you help the project
+
+1. Find bugs, vulnerabilities, and errors in the code
+2. Suggest improvements, ask questions, create issues
+3. Create anonymizing nodes (HLS) in the Hidden Lake network
+4. Create new relay nodes (HLT) in the Hidden Lake network
+
 ## Library based applications
 
 1. [Hidden Lake Service](#1-hidden-lake-service) 
