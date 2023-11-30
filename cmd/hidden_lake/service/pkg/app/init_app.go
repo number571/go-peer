@@ -37,22 +37,21 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IApp, error) {
 }
 
 func getPrivKey(pCfg pkg_config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
-	if _, err := os.Stat(pKeyPath); !os.IsNotExist(err) {
-		privKeyStr, err := os.ReadFile(pKeyPath)
-		if err != nil {
-			return nil, fmt.Errorf("read private key: %w", err)
-		}
-		privKey := asymmetric.LoadRSAPrivKey(string(privKeyStr))
-		if privKey == nil {
-			return nil, errors.New("private key is invalid")
+	if _, err := os.Stat(pKeyPath); os.IsNotExist(err) {
+		privKey := asymmetric.NewRSAPrivKey(pCfg.GetSettings().GetKeySizeBits())
+		if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o600); err != nil {
+			return nil, fmt.Errorf("write private key: %w", err)
 		}
 		return privKey, nil
 	}
 
-	privKey := asymmetric.NewRSAPrivKey(pCfg.GetSettings().GetKeySizeBits())
-	if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o644); err != nil {
-		return nil, fmt.Errorf("write private key: %w", err)
+	privKeyStr, err := os.ReadFile(pKeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("read private key: %w", err)
 	}
-
+	privKey := asymmetric.LoadRSAPrivKey(string(privKeyStr))
+	if privKey == nil {
+		return nil, errors.New("private key is invalid")
+	}
 	return privKey, nil
 }

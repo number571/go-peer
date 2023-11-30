@@ -10,6 +10,7 @@
 
 - Update `cmd/hidden_lake`: append HLL service (Hidden Lake Loader)
 - Update `pkg/client`: hash of message now encrypted
+- Update `cmd/hidden_lake/service`: file of private key permissions: 0644 -> 0600
 
 ### CHANGES
 
