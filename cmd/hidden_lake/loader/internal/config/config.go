@@ -92,10 +92,12 @@ func (p *SConfig) initConfig() error {
 	}
 
 	if !p.isValid() {
+		fmt.Println("aaa")
 		return errors.New("load config settings")
 	}
 
 	if err := p.loadLogging(); err != nil {
+		fmt.Println("bbb")
 		return fmt.Errorf("load logging: %w", err)
 	}
 

@@ -30,7 +30,7 @@ type SConfig struct {
 
 	FLogging     []string  `json:"logging,omitempty"`
 	FAddress     *SAddress `json:"address,omitempty"`
-	FIsStorage   bool      `json:"is_storage,omitempty"`
+	FStorage     bool      `json:"storage,omitempty"`
 	FConnections []string  `json:"connections,omitempty"`
 	FConsumers   []string  `json:"consumers,omitempty"`
 
@@ -51,7 +51,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	}
 
 	if err := pCfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("load logging: %w", err)
+		return nil, fmt.Errorf("init config: %w", err)
 	}
 
 	if err := os.WriteFile(pFilepath, encoding.Serialize(pCfg, true), 0o644); err != nil {
@@ -77,7 +77,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	if err := cfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("load logging: %w", err)
+		return nil, fmt.Errorf("init config: %w", err)
 	}
 	return cfg, nil
 }
@@ -86,8 +86,8 @@ func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
 }
 
-func (p *SConfig) GetIsStorage() bool {
-	return p.FIsStorage
+func (p *SConfig) GetStorage() bool {
+	return p.FStorage
 }
 
 func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
@@ -117,8 +117,7 @@ func (p *SConfigSettings) GetNetworkKey() string {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FMessagesCapacity != 0 &&
-		(p.FSettings.FQueuePeriodMS != 0 || p.FIsStorage)
+		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {

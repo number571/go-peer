@@ -17,8 +17,8 @@ func (p *sApp) initDatabase() error {
 		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 	})
 
-	if !p.fConfig.GetIsStorage() {
-		p.fWrapperDB.Set(database.NewVoidDatabase(sett))
+	if !p.fConfig.GetStorage() {
+		p.fWrapperDB.Set(database.NewInMemoryDatabase(sett))
 		return nil
 	}
 

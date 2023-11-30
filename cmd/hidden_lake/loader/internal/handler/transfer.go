@@ -99,8 +99,8 @@ func (p *sTransfer) stop() error {
 func (p *sTransfer) transferMessages(pCtx context.Context) {
 	cfg := p.fConfig
 
-	producerClients := make([]hlt_client.IClient, 0, len(cfg.GetConsumers()))
-	for _, producer := range cfg.GetConsumers() {
+	producerClients := make([]hlt_client.IClient, 0, len(cfg.GetProducers()))
+	for _, producer := range cfg.GetProducers() {
 		producerClients = append(producerClients, makeHLTClient(cfg, producer))
 	}
 

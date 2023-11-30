@@ -9,7 +9,7 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
-	GetIsStorage() bool
+	GetStorage() bool
 	GetConnections() []string
 	GetConsumers() []string
 }

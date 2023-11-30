@@ -8,7 +8,7 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/traffic
-	# COPY HLS
+	# COPY HLT
 	cp -r $(BINPATH)/hlt ./service_hlt/prog_hlt
 run: 
 	# MAKEFILE RUN

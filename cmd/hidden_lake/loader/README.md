@@ -13,6 +13,30 @@ HLL uses the HLT service interface to download and upload messages. This propert
 <p align="center"><img src="_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 1. Architecture of HLL.</p>
 
+### Example 
+
+In the example, two HLT services are created, where one is a message producer, the other a consumer. First, messages are entered into the manufacturer, then the HLL (message transportation) function is turned on, and at the end, the delivery of all previously entered messages is checked, but already on the consumer's side.
+
+<p align="center"><img src="_images/hll_logger.png" alt="hll_logger.png"/></p>
+<p align="center">Figure 2. Example of running HLL service.</p>
+
+Build and run HLT services
+```bash
+$ cd examples/echo_service/traffic_loader
+$ make
+```
+
+Run transfer
+```bash
+$ cd examples/echo_service/traffic_loader/client_hll
+$ go run ./main.go
+```
+
+Get valid response
+```
+messages have been successfully transported
+```
+
 ## Supported platforms
 
 - Windows (x86_64, arm64)

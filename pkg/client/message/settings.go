@@ -11,6 +11,7 @@ type sSettings struct {
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
+		// TODO: FKeySize
 		FMessageSizeBytes: pSett.FMessageSizeBytes,
 	}).mustNotNull()
 }

@@ -10,16 +10,16 @@ import (
 )
 
 var (
-	_ IDatabase = &sVoidDatabase{}
+	_ IDatabase = &sInMemoryDatabase{}
 )
 
-type sVoidDatabase struct {
+type sInMemoryDatabase struct {
 	fSettings ISettings
 	fQueueSet queue_set.IQueueSet
 }
 
-func NewVoidDatabase(pSett ISettings) IDatabase {
-	return &sVoidDatabase{
+func NewInMemoryDatabase(pSett ISettings) IDatabase {
+	return &sInMemoryDatabase{
 		fSettings: pSett,
 		fQueueSet: queue_set.NewQueueSet(
 			queue_set.NewSettings(&queue_set.SSettings{
@@ -29,15 +29,15 @@ func NewVoidDatabase(pSett ISettings) IDatabase {
 	}
 }
 
-func (p *sVoidDatabase) Settings() ISettings {
+func (p *sInMemoryDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sVoidDatabase) Hashes() ([][]byte, error) {
+func (p *sInMemoryDatabase) Hashes() ([][]byte, error) {
 	return p.fQueueSet.GetQueueKeys(), nil
 }
 
-func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
+func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
 	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
 		return errors.New("got message with diff settings")
 	}
@@ -49,7 +49,7 @@ func (p *sVoidDatabase) Push(pMsg net_message.IMessage) error {
 	return nil
 }
 
-func (p *sVoidDatabase) Load(pHash []byte) (net_message.IMessage, error) {
+func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	if len(pHash) != hashing.CSHA256Size {
 		return nil, errors.New("key size invalid")
 	}
@@ -67,6 +67,6 @@ func (p *sVoidDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	return msg, nil
 }
 
-func (p *sVoidDatabase) Close() error {
+func (p *sInMemoryDatabase) Close() error {
 	return nil
 }
