@@ -336,7 +336,6 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return fmt.Errorf("encrypt payload: %w", err)
 	}
-
 	var (
 		size = len(msg.ToBytes())
 		hash = msg.GetHash()

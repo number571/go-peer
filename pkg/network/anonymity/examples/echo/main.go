@@ -102,11 +102,11 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 				FErro: os.Stderr,
 			}),
 			func(arg logger.ILogArg) string {
-				logBuilder, ok := arg.(anon_logger.ILogBuilder)
+				logGetterFactory, ok := arg.(anon_logger.ILogGetterFactory)
 				if !ok {
 					panic("got invalid log arg")
 				}
-				logGetter := logBuilder.Get()
+				logGetter := logGetterFactory.Get()
 				return fmt.Sprintf(
 					"%s|%02xT|%XH|%dP|%dB",
 					logGetter.GetService(),
@@ -130,7 +130,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
 				FPoolCapacity: (1 << 4),
-				FDuration:     time.Second,
+				FDuration:     5 * time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
