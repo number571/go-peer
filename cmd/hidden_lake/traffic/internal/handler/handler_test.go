@@ -109,6 +109,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 			FWorkSizeBits:       testutils.TCWorkSize,
 			FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 			FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+			FKeySizeBits:        testutils.TcKeySize,
 		},
 	}
 
@@ -159,6 +160,7 @@ func testNewClient() client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		privKey,
 	)

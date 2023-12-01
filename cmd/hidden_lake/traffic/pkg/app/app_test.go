@@ -40,6 +40,7 @@ func TestApp(t *testing.T) {
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
 				FMessagesCapacity: testutils.TCCapacity,
 				FNetworkKey:       "_",
+				FKeySizeBits:      testutils.TcKeySize,
 			},
 			FAddress: &config.SAddress{
 				FHTTP: testutils.TgAddrs[23],

@@ -9,6 +9,10 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 )
 
+const (
+	keySize = 1024
+)
+
 func main() {
 	var (
 		client1 = newClient()
@@ -36,7 +40,8 @@ func newClient() client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: (1 << 12),
+			FKeySizeBits:      keySize,
 		}),
-		asymmetric.NewRSAPrivKey(1024),
+		asymmetric.NewRSAPrivKey(keySize),
 	)
 }

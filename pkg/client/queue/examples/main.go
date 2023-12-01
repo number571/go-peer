@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	keySize     = 1024
 	payloadHead = 0x1
 )
 
@@ -25,6 +26,7 @@ func main() {
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
 				FMessageSizeBytes: (1 << 12),
+				FKeySizeBits:      keySize,
 			}),
 			asymmetric.NewRSAPrivKey(1024),
 		),

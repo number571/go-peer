@@ -37,7 +37,6 @@ const (
 	tcConnectionService = "connection_service"
 	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
-	tcKeySize           = 1024
 	tcMessagesCapacity  = 1000
 )
 

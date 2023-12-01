@@ -185,6 +185,7 @@ func TestDatabasePush(t *testing.T) {
 	clTest := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: (10 << 10),
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
@@ -203,6 +204,7 @@ func TestDatabasePush(t *testing.T) {
 	cl := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
@@ -266,6 +268,7 @@ func TestDatabase(t *testing.T) {
 	cl := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)

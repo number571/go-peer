@@ -27,6 +27,7 @@ const (
 func main() {
 	sett := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: (8 << 10),
+		FKeySizeBits:      4096,
 	})
 
 	netSett := net_message.NewSettings(&net_message.SSettings{

@@ -13,6 +13,7 @@ import (
 
 const (
 	tcMessageSize = (2 << 10)
+	tcKeySizeBits = 1024
 )
 
 var (
@@ -62,6 +63,7 @@ func TestClientWithMessageSize(t *testing.T) {
 	_ = NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: 1024,
+			FKeySizeBits:      tcKeySizeBits,
 		}),
 		tgPrivKey,
 	)
@@ -240,6 +242,7 @@ func testNewClient() IClient {
 	return NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: tcMessageSize,
+			FKeySizeBits:      tcKeySizeBits,
 		}),
 		tgPrivKey,
 	)

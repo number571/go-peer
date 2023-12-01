@@ -28,6 +28,10 @@ type sClient struct {
 // Create client by private key as identification.
 // Handle function is used when the network exists.
 func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
+	if pSett.GetKeySizeBits() != pPrivKey.GetSize() {
+		panic("settings key size != got key size")
+	}
+
 	client := &sClient{
 		fSettings: pSett,
 		fPrivKey:  pPrivKey,

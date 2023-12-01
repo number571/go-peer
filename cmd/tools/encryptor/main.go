@@ -54,6 +54,7 @@ func main() {
 	dataValue := readUntilEOF()
 	sett := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: getMessageSize(param, dataValue),
+		FKeySizeBits:      privKey.GetSize(),
 	})
 
 	switch mod {

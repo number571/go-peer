@@ -122,14 +122,16 @@ func (p *SMessage) ToString() string {
 }
 
 func (p *SMessage) IsValid(psett ISettings) bool {
+	msgSizeBytes := psett.GetMessageSizeBytes()
+	keySizeBytes := psett.GetKeySizeBits() / 8
 	switch {
 	case
-		uint64(len(p.ToBytes())) != psett.GetMessageSizeBytes(),
+		uint64(len(p.ToBytes())) != msgSizeBytes,
+		uint64(len(p.GetEncKey())) != keySizeBytes,
+		uint64(len(p.GetSign())) != symmetric.CAESBlockSize+keySizeBytes,
+		uint64(len(p.GetPubKey())) < symmetric.CAESBlockSize+keySizeBytes,
 		len(p.GetHash()) != symmetric.CAESBlockSize+hashing.CSHA256Size,
 		len(p.GetSalt()) != symmetric.CAESBlockSize+symmetric.CAESKeySize,
-		len(p.GetEncKey()) < symmetric.CAESBlockSize,
-		len(p.GetPubKey()) < symmetric.CAESBlockSize,
-		len(p.GetSign()) < symmetric.CAESBlockSize,
 		len(p.GetPayload()) < symmetric.CAESBlockSize:
 		return false
 	default:

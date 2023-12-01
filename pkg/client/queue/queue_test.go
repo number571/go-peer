@@ -53,6 +53,7 @@ func TestRunStopQueue(t *testing.T) {
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
@@ -113,6 +114,7 @@ func TestQueue(t *testing.T) {
 	oldClient := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)

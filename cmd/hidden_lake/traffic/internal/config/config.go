@@ -19,6 +19,7 @@ var (
 type SConfigSettings struct {
 	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
 	FWorkSizeBits       uint64 `json:"work_size_bits"`
+	FKeySizeBits        uint64 `json:"key_size_bits"`
 	FMessagesCapacity   uint64 `json:"messages_capacity"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
@@ -114,10 +115,15 @@ func (p *SConfigSettings) GetNetworkKey() string {
 	return p.FNetworkKey
 }
 
+func (p *SConfigSettings) GetKeySizeBits() uint64 {
+	return p.FKeySizeBits
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FMessagesCapacity != 0
+		p.FSettings.FMessagesCapacity != 0 &&
+		p.FSettings.FKeySizeBits != 0
 }
 
 func (p *SConfig) initConfig() error {

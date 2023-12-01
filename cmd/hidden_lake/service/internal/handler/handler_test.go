@@ -210,6 +210,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
+					FKeySizeBits:      testutils.TcKeySize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),

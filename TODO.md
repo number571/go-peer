@@ -10,5 +10,3 @@
 8. HLF: Hidden Lake Forum
 9. Append example of use functions (godoc)
 10. Append errors (as traffic/database) for all interface methods
-11. Update readme for HLL
-12. HLL append tests, examples

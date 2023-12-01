@@ -29,7 +29,6 @@ const (
 	tcServiceName2  = "test_service2"
 	tcMessageSize   = (1 << 20)
 	tcWorkSize      = 20
-	tcKeySize       = 1024
 	tcQueuePeriod   = 1000
 	tcLimitVoidSize = (1 << 20)
 )
@@ -85,7 +84,7 @@ func testNewConfigString() string {
 		tcConfigTemplate,
 		tcMessageSize,
 		tcWorkSize,
-		tcKeySize,
+		testutils.TcKeySize,
 		tcQueuePeriod,
 		tcLimitVoidSize,
 		tcNetwork,
@@ -234,7 +233,7 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetSettings().GetKeySizeBits() != tcKeySize {
+	if cfg.GetSettings().GetKeySizeBits() != testutils.TcKeySize {
 		t.Error("settings key size is invalid")
 		return
 	}

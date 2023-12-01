@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"testing"
+
+	testutils "github.com/number571/go-peer/test/_data"
 )
 
 const (
@@ -31,6 +33,7 @@ func testConfigDefaultInit(configPath string) {
 			FMessagesCapacity: tcCapMessages,
 			FQueuePeriodMS:    tcQueuePeriodMS,
 			FNetworkKey:       tcNetwork,
+			FKeySizeBits:      testutils.TcKeySize,
 		},
 		FLogging: []string{"info", "erro"},
 		FAddress: &SAddress{

@@ -23,6 +23,7 @@
 - Update `cmd/hidden_lake/*/pkg/settings`: move CHandle*name*Template to cmd/hidden_lake/*/pkg/client
 - Update `pkg/types`: rename ICommand -> IApp
 - Update `pkg/client/message`: append new checks into IsValid method
+- Update `cmd/hidden_lake/traffic`: append to config settings "key_size_bits" param
 
 <!-- ... -->
 

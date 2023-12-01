@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	keySize        = 1024
 	msgSize        = (100 << 10)
 	serviceHeader  = 0xDEADBEAF
 	serviceAddress = ":8080"
@@ -133,8 +134,9 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: msgSize,
+					FKeySizeBits:      keySize,
 				}),
-				asymmetric.NewRSAPrivKey(1024),
+				asymmetric.NewRSAPrivKey(keySize),
 			),
 		),
 		asymmetric.NewListPubKeys(),

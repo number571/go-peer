@@ -109,6 +109,7 @@ func TestHandleTransferAPI(t *testing.T) {
 	msgSettings := message.NewSettings(
 		&message.SSettings{
 			FMessageSizeBytes: tcMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
 		},
 	)
 	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)

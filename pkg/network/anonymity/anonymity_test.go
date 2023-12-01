@@ -673,6 +673,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
+					FKeySizeBits:      testutils.TcKeySize,
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),

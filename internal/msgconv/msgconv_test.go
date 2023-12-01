@@ -30,6 +30,7 @@ func TestConvert(t *testing.T) {
 
 	params := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: (2 << 10),
+		FKeySizeBits:      testutils.TcKeySize,
 	})
 
 	msg1, err := message.LoadMessage(params, FromBytesToString(testutils.TCBinaryMessage))

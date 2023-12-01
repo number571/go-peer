@@ -50,6 +50,7 @@ Default config `hlt.cfg`
 {
 	"settings": {
 		"message_size_bytes": 8192,
+		"key_size_bits": 4096,
 		"work_size_bits": 20,
 		"queue_period_ms": 5000,
 		"limit_void_size_bytes": 4096,
@@ -113,6 +114,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 {
 	"settings": {
 		"message_size_bytes": 8192,
+		"key_size_bits": 4096,
 		"work_size_bits": 20,
 		"messages_capacity": 2048,
 		"queue_period_ms": 5000,

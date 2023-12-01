@@ -28,6 +28,7 @@ const (
 	messageSize = (8 << 10) // 8KiB
 	networkKey  = "some-network-key"
 	workSize    = 10
+	keySize     = 1024
 )
 
 const (
@@ -55,6 +56,7 @@ func main() {
 
 	msgSettings := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: messageSize,
+		FKeySizeBits:      keySize,
 	})
 
 	if err := pushMessages(netMsgSettings, msgSettings); err != nil {

@@ -23,7 +23,7 @@ const (
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 2; i++ {
 		testSettings(t, i)
 	}
 }
@@ -37,7 +37,13 @@ func testSettings(t *testing.T, n int) {
 	}()
 	switch n {
 	case 0:
-		_ = NewSettings(&SSettings{})
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: 1024,
+		})
+	case 1:
+		_ = NewSettings(&SSettings{
+			FKeySizeBits: testutils.TcKeySize,
+		})
 	}
 }
 
@@ -46,6 +52,7 @@ func TestInvalidMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
+		FKeySizeBits:      testutils.TcKeySize,
 	})
 
 	if _, err := LoadMessage(params, struct{}{}); err == nil {
@@ -85,6 +92,7 @@ func TestMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
+		FKeySizeBits:      testutils.TcKeySize,
 	})
 
 	msg1, err := LoadMessage(params, testutils.TCBinaryMessage)
