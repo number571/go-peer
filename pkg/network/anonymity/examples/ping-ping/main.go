@@ -24,8 +24,9 @@ import (
 )
 
 const (
+	workSize       = 10
 	keySize        = 1024
-	msgSize        = (100 << 10)
+	msgSize        = (8 << 10)
 	serviceHeader  = 0xDEADBEAF
 	serviceAddress = ":8080"
 )
@@ -193,7 +194,7 @@ func nodeSettings(serviceAddress string) network.ISettings {
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:     10,
+		FWorkSizeBits:     workSize,
 		FMessageSizeBytes: msgSize,
 		FWaitReadDeadline: time.Hour,
 		FReadDeadline:     time.Minute,
