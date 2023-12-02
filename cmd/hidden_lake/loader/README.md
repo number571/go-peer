@@ -13,6 +13,12 @@ HLL uses the HLT service interface to download and upload messages. This propert
 <p align="center"><img src="_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 1. Architecture of HLL.</p>
 
+## Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
 ## Build and run
 
 Default build and run
@@ -76,53 +82,6 @@ $ go run ./main.go
 Get valid response
 ```
 messages have been successfully transported
-```
-
-## Supported platforms
-
-- Windows (x86_64, arm64)
-- Linux (x86_64, arm64)
-- MacOS (x86_64, arm64)
-
-## Build and run
-
-Default build and run
-
-```bash 
-$ cd ./cmd/hidden_lake/loader
-$ make build # create hll, hll_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
-$ make run # run ./bin/hll
-
-> [INFO] 2023/06/03 15:39:13 HLL is running...
-> ...
-```
-
-Open port `9561` (HTTP).
-Creates `./hll.yml` or `./_mounted/hll.yml` (docker) files.
-
-Default config `hll.yml`
-
-```yaml
-settings:
-  messages_capacity: 2048
-  work_size_bits: 20
-logging:
-  - info
-  - warn
-  - erro
-address:
-  http: 127.0.0.1:9561
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/loader
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:44:14 HLL is running...
-> ...
 ```
 
 ## Config structure
