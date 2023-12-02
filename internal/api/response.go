@@ -23,7 +23,7 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 		respBytes = []byte(x)
 	default:
 		contentType = cApplicationJSON
-		respBytes = encoding.SerializeJSON(x, false)
+		respBytes = encoding.SerializeJSON(x)
 	}
 
 	pW.Header().Set("Content-Type", contentType)

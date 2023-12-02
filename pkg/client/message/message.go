@@ -2,7 +2,6 @@ package message
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"strings"
 
@@ -53,7 +52,7 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 		return nil, errors.New("undefined separator")
 	}
 
-	if err := json.Unmarshal(recvMsg[:i], msg); err != nil {
+	if err := encoding.DeserializeJSON(recvMsg[:i], msg); err != nil {
 		return nil, errors.New("unmarshal message")
 	}
 
@@ -104,7 +103,7 @@ func (p *SMessage) GetPayload() []byte {
 func (p *SMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
-			encoding.SerializeJSON(p, false),
+			encoding.SerializeJSON(p),
 			p.FPayload,
 		},
 		[]byte(CSeparator),
@@ -114,7 +113,7 @@ func (p *SMessage) ToBytes() []byte {
 func (p *SMessage) ToString() string {
 	return strings.Join(
 		[]string{
-			string(encoding.SerializeJSON(p, false)),
+			string(encoding.SerializeJSON(p)),
 			encoding.HexEncode(p.FPayload),
 		},
 		CSeparator,

@@ -31,11 +31,11 @@ func LoadResponse(pBytes []byte) (IResponse, error) {
 }
 
 func (p *sResponse) ToBytes() []byte {
-	return encoding.SerializeJSON(p, false)
+	return encoding.SerializeJSON(p)
 }
 
 func (p *sResponse) ToString() string {
-	return string(encoding.SerializeJSON(p, true))
+	return string(p.ToBytes())
 }
 
 func (p *sResponse) WithHead(pHead map[string]string) IResponse {

@@ -42,11 +42,11 @@ func LoadRequest(pData interface{}) (IRequest, error) {
 }
 
 func (p *sRequest) ToBytes() []byte {
-	return encoding.SerializeJSON(p, false)
+	return encoding.SerializeJSON(p)
 }
 
 func (p *sRequest) ToString() string {
-	return string(encoding.SerializeJSON(p, true))
+	return string(p.ToBytes())
 }
 
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {

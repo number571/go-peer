@@ -89,10 +89,6 @@ $ make docker-run
 > ...
 ```
 
-## Example 
-
-TODO
-
 ## Config structure
 
 ```

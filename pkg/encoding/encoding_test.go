@@ -15,13 +15,6 @@ const (
 	tcJSON       = `{"result":"hello","return":5}`
 )
 
-const (
-	tcIndentJSON = `{
-	"result": "hello",
-	"return": 5
-}`
-)
-
 var (
 	tgNumInBytes = []byte{0, 1, 2, 3, 4, 5, 6, 7, 255, 254, 253, 252, 251, 250, 128, 127, 126, 125}
 	tgMessage    = tsMessage{"hello", 5}
@@ -54,12 +47,7 @@ func TestBytes(t *testing.T) {
 func TestSerialize(t *testing.T) {
 	t.Parallel()
 
-	if string(SerializeJSON(tgMessage, true)) != tcIndentJSON {
-		t.Error("serialize string is invalid (indent)")
-		return
-	}
-
-	if string(SerializeJSON(tgMessage, false)) != tcJSON {
+	if string(SerializeJSON(tgMessage)) != tcJSON {
 		t.Error("serialize string is invalid (non indent)")
 		return
 	}
