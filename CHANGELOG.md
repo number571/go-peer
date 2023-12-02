@@ -26,6 +26,7 @@
 - Update `pkg/client/message`: append new checks into IsValid method
 - Update `cmd/hidden_lake/traffic`: append to config settings "key_size_bits" param
 - Update `pkg/encoding`: delete pretty serialize json
+- Update `vendor`: append vendor path
 
 <!-- ... -->
 
