@@ -34,7 +34,8 @@ type sApp struct {
 	fHTTPLogger logger.ILogger
 	fStdfLogger logger.ILogger
 
-	fServiceHTTP *http.Server
+	fServiceHTTP  *http.Server
+	fServicePPROF *http.Server
 }
 
 func NewApp(
@@ -65,8 +66,21 @@ func (p *sApp) Run() error {
 	p.fIsRun = true
 
 	p.initServiceHTTP()
+	p.initServicePPROF()
 
 	res := make(chan error)
+
+	go func() {
+		if p.fConfig.GetAddress().GetPPROF() == "" {
+			return
+		}
+
+		err := p.fServicePPROF.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			res <- err
+			return
+		}
+	}()
 
 	go func() {
 		if p.fConfig.GetAddress().GetHTTP() == "" {
