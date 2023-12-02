@@ -40,7 +40,7 @@ Data exchange between network participants is carried out using application serv
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
 
-###  More details in the works 
+##  More details in the works 
 
 1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
@@ -98,8 +98,6 @@ address:
 services:
   go-peer/hidden-lake-messenger: 127.0.0.1:9592
 ```
-
-If service works not in docker's environment than need rewrite connection host in `hls.yml` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker
 

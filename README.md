@@ -208,8 +208,6 @@ services:
   go-peer/hidden-lake-messenger: 127.0.0.1:9592
 ```
 
-If service works not in docker's environment than need rewrite connection host in `hls.yml` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
-
 Build and run with docker
 
 ```bash 
@@ -379,8 +377,6 @@ address:
 connection: 127.0.0.1:9572
 ```
 
-If messenger works not in docker's environment than need rewrite connection hosts in `hlm.yml` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
-
 Build and run with docker
 
 ```bash 
@@ -487,8 +483,6 @@ connections:
   - 127.0.0.1:9571
 ```
 
-If traffic works not in docker's environment than need rewrite connection host in `hlt.yml` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
-
 Build and run with docker
 
 ```bash 
@@ -530,6 +524,47 @@ HLL uses the HLT service interface to download and upload messages. This propert
 
 <p align="center"><img src="cmd/hidden_lake/loader/_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 10. Architecture of HLL.</p>
+
+### Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/loader
+$ make build # create hll, hll_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hll
+
+> [INFO] 2023/12/03 02:12:51 HLL is running...
+> ...
+```
+
+Open ports `9561` (HTTP).
+Creates `./hll.yml` or `./_mounted/hll.yml` (docker) file.
+
+Default config `hll.yml`
+
+```yaml
+settings:
+  messages_capacity: 2048
+  work_size_bits: 20
+logging:
+- info
+- warn
+- erro
+address:
+  http: 127.0.0.1:9561
+```
+
+Build and run with docker
+
+```bash 
+$ cd ./cmd/hidden_lake/loader
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/12/02 19:15:44 HLL is running...
+> ...
+```
 
 ### Example 
 

@@ -21,7 +21,7 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 - Linux (x86_64, arm64)
 - MacOS (x86_64, arm64)
 
-### Minimum system requirements
+## Minimum system requirements
 
 1. Processor: `1x2.2GHz` (characteristic for relayer mode)
 2. Memory: `0.5GB RAM` (~200MB of memory is consumed in relayer mode)
@@ -64,8 +64,6 @@ address:
 connections:
   - 127.0.0.1:9571
 ```
-
-If traffic works not in docker's environment than need rewrite connection host in `hlt.yml` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
 Build and run with docker
 

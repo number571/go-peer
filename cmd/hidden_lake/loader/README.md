@@ -6,14 +6,55 @@
 
 The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applications. It is used to redirect traffic from HLT producers (storages) to HLT consumers. Previously, it was used as a component of HLM, and then HLS applications.
 
-### How it works
+## How it works
 
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
 
 <p align="center"><img src="_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 1. Architecture of HLL.</p>
 
-### Example 
+## Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/loader
+$ make build # create hll, hll_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hll
+
+> [INFO] 2023/12/03 02:12:51 HLL is running...
+> ...
+```
+
+Open ports `9561` (HTTP).
+Creates `./hll.yml` or `./_mounted/hll.yml` (docker) file.
+
+Default config `hll.yml`
+
+```yaml
+settings:
+  messages_capacity: 2048
+  work_size_bits: 20
+logging:
+- info
+- warn
+- erro
+address:
+  http: 127.0.0.1:9561
+```
+
+Build and run with docker
+
+```bash 
+$ cd ./cmd/hidden_lake/loader
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/12/02 19:15:44 HLL is running...
+> ...
+```
+
+## Example 
 
 In the example, two HLT services are created, where one is a message producer, the other a consumer. First, messages are entered into the manufacturer, then the HLL (message transportation) function is turned on, and at the end, the delivery of all previously entered messages is checked, but already on the consumer's side.
 
