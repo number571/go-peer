@@ -25,7 +25,7 @@ docker-configs:
 docker-run: 
 	docker-compose up
 docker-clean:
-	rm -rf ./_mounted/hls.* ./_mounted/hlt.* ./_mounted/hlm.* ./_mounted/hll.*
+	rm -rf ./_mounted/*.cfg ./_mounted/*.db ./_mounted/*.key
 	docker-compose down 
 	docker-compose rm -f
 
