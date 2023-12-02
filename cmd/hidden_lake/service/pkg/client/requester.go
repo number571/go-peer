@@ -71,7 +71,7 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 	}
 
 	cfgSettings := new(config.SConfigSettings)
-	if err := encoding.Deserialize([]byte(res), cfgSettings); err != nil {
+	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
 		return nil, fmt.Errorf("decode settings (requester): %w", err)
 	}
 
@@ -150,7 +150,7 @@ func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	}
 
 	var vFriends []hls_settings.SFriend
-	if err := encoding.Deserialize([]byte(res), &vFriends); err != nil {
+	if err := encoding.DeserializeJSON([]byte(res), &vFriends); err != nil {
 		return nil, fmt.Errorf("deserialize friends (requeser): %w", err)
 	}
 
@@ -200,7 +200,7 @@ func (p *sRequester) GetOnlines() ([]string, error) {
 	}
 
 	var onlines []string
-	if err := encoding.Deserialize([]byte(res), &onlines); err != nil {
+	if err := encoding.DeserializeJSON([]byte(res), &onlines); err != nil {
 		return nil, fmt.Errorf("deserialize onlines (requester): %w", err)
 	}
 
@@ -232,7 +232,7 @@ func (p *sRequester) GetConnections() ([]string, error) {
 	}
 
 	var connects []string
-	if err := encoding.Deserialize([]byte(res), &connects); err != nil {
+	if err := encoding.DeserializeJSON([]byte(res), &connects); err != nil {
 		return nil, fmt.Errorf("deserialize connections (requeser): %w", err)
 	}
 

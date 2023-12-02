@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	CPathCFG = "hls.cfg"
+	CPathYML = "hls.yml"
 	CPathDB  = "hls.db"
 )
 

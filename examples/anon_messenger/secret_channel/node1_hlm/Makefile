@@ -2,7 +2,7 @@ GC=go build
 .PHONY: default run clean 
 default: clean run 
 run:
-	cp hls_copy.cfg hls.cfg 
+	cp hls_copy.yml hls.yml 
 	./prog_hls1 &
 	./prog_hlt1 &
 	./prog_hlm1 &
@@ -14,7 +14,7 @@ clean:
 	pkill -15 prog_hlt1 || true
 	pkill -15 prog_send1 || true 
 	pkill -15 prog_recv1 || true 
-	rm -rf prog_hls1 hls.db hls.cfg 
+	rm -rf prog_hls1 hls.db hls.yml 
 	rm -rf prog_hlt1 hlt.db
 	rm -rf prog_hlm1 hlm.db
 	rm -rf prog_send1 

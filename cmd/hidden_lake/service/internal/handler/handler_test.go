@@ -28,40 +28,33 @@ import (
 const (
 	tcServiceAddressInHLS = "hidden-echo-service"
 	tcPathDBTemplate      = "database_test_%d.db"
-	tcPathConfigTemplate  = "config_test_%d.cfg"
+	tcPathConfigTemplate  = "config_test_%d.yml"
 )
 
 var (
-	tcConfig = fmt.Sprintf(
-		`{
-			"settings": {
-				"message_size_bytes": 8192,
-				"work_size_bits": 20,
-				"key_size_bits": %d,
-				"queue_period_ms": 1000,
-				"limit_void_size_bytes": 4096,
-				"network_key": "test"
-			},
-			"address": {
-				"tcp": "test_address_tcp",
-				"http": "test_address_http"
-			},
-			"connections": [
-				"test_connect1",
-				"test_connect2",
-				"test_connect3"
-			],
-			"friends": {
-				"test_recvr": "%s",
-				"test_name1": "%s",
-				"test_name2": "%s"
-			},
-			"services": {
-				"test_service1": "test_address1",
-				"test_service2": "test_address2",
-				"test_service3": "test_address3"
-			}
-		}`,
+	tcConfig = fmt.Sprintf(`settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: %d
+  queue_period_ms: 1000
+  limit_void_size_bytes: 4096
+  network_key: test
+address:
+  tcp: test_address_tcp
+  http: test_address_http
+connections:
+  - test_connect1
+  - test_connect2
+  - test_connect3
+friends:
+  test_recvr: %s
+  test_name1: %s
+  test_name2: %s
+services:
+  test_service1: test_address1
+  test_service2: test_address2
+  test_service3: test_address3
+`,
 		testutils.TcKeySize,
 		testutils.TgPubKeys[0],
 		testutils.TgPubKeys[1],

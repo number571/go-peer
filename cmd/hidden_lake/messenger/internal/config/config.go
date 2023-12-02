@@ -18,18 +18,18 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessagesCapacity uint64 `json:"messages_capacity"`
-	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty"`
+	FMessagesCapacity uint64 `yaml:"messages_capacity"`
+	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `json:"settings"`
+	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging    []string  `json:"logging,omitempty"`
-	FLanguage   string    `json:"language,omitempty"`
-	FAddress    *SAddress `json:"address"`
-	FConnection string    `json:"connection"`
-	FStorageKey string    `json:"storage_key,omitempty"`
+	FLogging    []string  `yaml:"logging,omitempty"`
+	FLanguage   string    `yaml:"language,omitempty"`
+	FAddress    *SAddress `yaml:"address"`
+	FConnection string    `yaml:"connection"`
+	FStorageKey string    `yaml:"storage_key,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -40,9 +40,9 @@ type SConfig struct {
 type sLogging []bool
 
 type SAddress struct {
-	FInterface string `json:"interface"`
-	FIncoming  string `json:"incoming"`
-	FPPROF     string `json:"pprof,omitempty"`
+	FInterface string `yaml:"interface"`
+	FIncoming  string `yaml:"incoming"`
+	FPPROF     string `yaml:"pprof,omitempty"`
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
@@ -55,7 +55,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	if err := os.WriteFile(pFilepath, encoding.Serialize(pCfg, true), 0o644); err != nil {
+	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
 		return nil, fmt.Errorf("write config: %w", err)
 	}
 
@@ -73,7 +73,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	cfg := new(SConfig)
-	if err := encoding.Deserialize(bytes, cfg); err != nil {
+	if err := encoding.DeserializeYAML(bytes, cfg); err != nil {
 		return nil, fmt.Errorf("deserialize config: %w", err)
 	}
 

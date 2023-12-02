@@ -24,7 +24,7 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]b
 		reqBytes = []byte(x)
 	default:
 		contentType = cApplicationJSON
-		reqBytes = encoding.Serialize(x, false)
+		reqBytes = encoding.SerializeJSON(x, false)
 	}
 
 	req, err := http.NewRequest(

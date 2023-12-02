@@ -43,7 +43,7 @@ func (p *sEditor) UpdateLanguage(pLang utils.ILanguage) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FLanguage = utils.FromILanguage(pLang)
-	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}
 

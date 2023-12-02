@@ -41,37 +41,31 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581`, `9582` (TCP, HTTP).
-Creates `./hlt.cfg` or `./_mounted/hlt.cfg` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
+Creates `./hlt.yml` or `./_mounted/hlt.yml` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
-Default config `hlt.cfg`
+Default config `hlt.yml`
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"key_size_bits": 4096,
-		"work_size_bits": 20,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096,
-		"messages_capacity": 2048
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"tcp": "127.0.0.1:9581",
-		"http": "127.0.0.1:9582"
-	},
-	"connections": [
-		"127.0.0.1:9571"
-	]
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  key_size_bits: 4096
+  work_size_bits: 20
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+  messages_capacity: 2048
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: 127.0.0.1:9581
+  http: 127.0.0.1:9582
+connections:
+  - 127.0.0.1:9571
 ```
 
-If traffic works not in docker's environment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
+If traffic works not in docker's environment than need rewrite connection host in `hlt.yml` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
 Build and run with docker
 
@@ -88,7 +82,7 @@ $ make docker-run
 
 Build and run service
 ```bash
-$ cd examples/traffic_keeper
+$ cd examples/traffic_actions/keeper
 $ make
 ```
 
@@ -110,34 +104,26 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 "consumers"    HTTP consumers of raw messages
 ```
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"key_size_bits": 4096,
-		"work_size_bits": 20,
-		"messages_capacity": 2048,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096,
-		"messages_capacity": 2048,
-		"network_key": "hlt-network-key"
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"tcp": "127.0.0.1:9581",
-		"http": "127.0.0.1:9582"
-	},
-	"connections": [
-		"service:9571"
-	],
-	"consumers": [
-		"localhost:8082/traffic"
-	]
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  key_size_bits: 4096
+  work_size_bits: 20
+  messages_capacity: 2048
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+  network_key: hlt-network-key
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: 127.0.0.1:9581
+  http: 127.0.0.1:9582
+connections:
+  - service:9571
+consumers:
+  - localhost:8082/traffic
 ```
 
 ## Response structure from HLT API

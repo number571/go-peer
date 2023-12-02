@@ -67,7 +67,7 @@ func (p *sRequester) GetHashes() ([]string, error) {
 	}
 
 	var hashes []string
-	if err := encoding.Deserialize([]byte(resp), &hashes); err != nil {
+	if err := encoding.DeserializeJSON([]byte(resp), &hashes); err != nil {
 		return nil, fmt.Errorf("deserialize hashes (requeser): %w", err)
 	}
 

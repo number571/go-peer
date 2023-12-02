@@ -15,25 +15,25 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessagesCapacity uint64 `json:"messages_capacity"`
-	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty"`
-	FNetworkKey       string `json:"network_key,omitempty"`
+	FMessagesCapacity uint64 `yaml:"messages_capacity"`
+	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
+	FNetworkKey       string `yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `json:"settings"`
+	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging   []string  `json:"logging,omitempty"`
-	FAddress   *SAddress `json:"address"`
-	FProducers []string  `json:"producers,omitempty"`
-	FConsumers []string  `json:"consumers,omitempty"`
+	FLogging   []string  `yaml:"logging,omitempty"`
+	FAddress   *SAddress `yaml:"address"`
+	FProducers []string  `yaml:"producers,omitempty"`
+	FConsumers []string  `yaml:"consumers,omitempty"`
 
 	fLogging *sLogging
 }
 
 type SAddress struct {
-	FHTTP  string `json:"http"`
-	FPPROF string `json:"pprof,omitempty"`
+	FHTTP  string `yaml:"http"`
+	FPPROF string `yaml:"pprof,omitempty"`
 }
 
 type sLogging []bool
@@ -47,7 +47,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	if err := os.WriteFile(pFilepath, encoding.Serialize(pCfg, true), 0o644); err != nil {
+	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
 		return nil, fmt.Errorf("write config: %w", err)
 	}
 
@@ -65,7 +65,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	cfg := new(SConfig)
-	if err := encoding.Deserialize(bytes, cfg); err != nil {
+	if err := encoding.DeserializeYAML(bytes, cfg); err != nil {
 		return nil, fmt.Errorf("deserialize config: %w", err)
 	}
 

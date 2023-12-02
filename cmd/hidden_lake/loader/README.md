@@ -22,13 +22,13 @@ In the example, two HLT services are created, where one is a message producer, t
 
 Build and run HLT services
 ```bash
-$ cd examples/echo_service/traffic_loader
+$ cd examples/traffic_actions/loader
 $ make
 ```
 
 Run transfer
 ```bash
-$ cd examples/echo_service/traffic_loader/client_hll
+$ cd examples/traffic_actions/loader/client_hll
 $ go run ./main.go
 ```
 
@@ -57,9 +57,9 @@ $ make run # run ./bin/hll
 ```
 
 Open port `9561` (HTTP).
-Creates `./hll.cfg` or `./_mounted/hll.cfg` (docker) files.
+Creates `./hll.yml` or `./_mounted/hll.yml` (docker) files.
 
-Default config `hll.cfg`
+Default config `hll.yml`
 
 ```json
 {

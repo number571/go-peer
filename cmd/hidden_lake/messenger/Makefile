@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../_configs/hlm.cfg .
+	cp ../_configs/hlm.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hlm ./cmd/hlm
 	
@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hlm $(BINPATH)/hlm_*
-	rm -rf hlm.cfg hlm.db 
+	rm -rf hlm.yml hlm.db 
 
 docker-default: docker-build docker-run
 docker-build:

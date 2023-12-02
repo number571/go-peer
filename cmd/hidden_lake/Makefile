@@ -25,7 +25,7 @@ docker-configs:
 docker-run: 
 	docker-compose up
 docker-clean:
-	rm -rf ./_mounted/*.cfg ./_mounted/*.db ./_mounted/*.key
+	rm -rf ./_mounted/*.yml ./_mounted/*.db ./_mounted/*.key
 	docker-compose down 
 	docker-compose rm -f
 

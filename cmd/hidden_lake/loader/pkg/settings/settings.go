@@ -6,7 +6,7 @@ const (
 )
 
 const (
-	CPathCFG = "hll.cfg"
+	CPathYML = "hll.yml"
 )
 
 const (

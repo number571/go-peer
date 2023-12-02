@@ -49,34 +49,30 @@ var (
 )
 
 const (
-	tcConfigTemplate = `{
-	"settings": {
-		"message_size_bytes": %d,
-		"work_size_bits": %d,
-		"key_size_bits": %d,
-		"queue_period_ms": %d,
-		"limit_void_size_bytes": %d,
-		"network_key": "%s"
-	},
-	"logging": ["info", "erro"],
-	"address": {
-		"tcp": "%s",
-		"http": "%s",
-		"pprof": "%s"
-	},
-	"connections": [
-		"%s",
-		"%s"
-	],
-	"friends": {
-		"%s": "%s",
-		"%s": "%s"
-	},
-	"services": {
-		"%s": "%s",
-		"%s": "%s"
-	}
-}`
+	tcConfigTemplate = `settings:
+  message_size_bytes: %d
+  work_size_bits: %d
+  key_size_bits: %d
+  queue_period_ms: %d
+  limit_void_size_bytes: %d
+  network_key: %s
+logging:
+  - info
+  - erro
+address:
+  tcp: %s
+  http: %s
+  pprof: %s
+connections:
+  - %s
+  - %s
+friends:
+  %s: %s
+  %s: %s
+services:
+  %s: %s
+  %s: %s
+`
 )
 
 func testNewConfigString() string {

@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake`: append HLL service (Hidden Lake Loader)
 - Update `pkg/client`: hash of message now encrypted
 - Update `cmd/hidden_lake/service`: file of private key permissions: 0644 -> 0600
+- Update `cmd/hidden_lake`: change format of configs from JSON to YAML
 
 ### CHANGES
 
@@ -241,7 +242,7 @@
 - Change `hidden_lake/composite`: changed the order stop apps
 - Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
 - Delete `hidden_lake/messenger`: delete config field "traffic"
-- Update `*.cfg`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
+- Update `*.yml`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
 - Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
 - Update `pkg/anonymity/logbuilder`: append size of messages
 - Update `hidden_lake/service`: change receiver ID from PubKey to AliasName

@@ -1,7 +1,7 @@
 hlm 
-hlm.cfg
+hlm.yml
 hlm.db/
 prog_hls
-hls.cfg
+hls.yml
 hls.db/ 
 !cmd/hlm 

@@ -76,36 +76,30 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
+Creates `./hls.yml` or `./_mounted/hls.yml` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
-Default config `hls.cfg`
+Default config `hls.yml`
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"work_size_bits": 20,
-		"key_size_bits": 4096,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"tcp": "127.0.0.1:9571",
-		"http": "127.0.0.1:9572"
-	},
-	"services": {
-		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"
-	}
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: 4096
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: 127.0.0.1:9571
+  http: 127.0.0.1:9572
+services:
+  go-peer/hidden-lake-messenger: 127.0.0.1:9592
 ```
 
-If service works not in docker's environment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
+If service works not in docker's environment than need rewrite connection host in `hls.yml` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker
 
@@ -237,31 +231,28 @@ $ make
 "friends"      Friend addresses for send or receive messages over network
 ```
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"work_size_bits": 20,
-		"key_size_bits": 4096,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096,
-		"network_key": "hls-network-key"
-	},
-	"logging": ["info", "warn", "erro"],
-	"address": {
-		"tcp": "localhost:9571",
-		"http": "localhost:9572"
-	},
-	"services": {
-		"hidden-default-service": "localhost:8080"
-	},
-	"connections": [
-		"localhost:8571"
-	],
-	"friends": {
-		"alias-name": "PubKey(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}"
-	}
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: 4096
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+  network_key: hls-network-key
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: localhost:9571
+  http: localhost:9572
+services:
+  hidden-default-service: localhost:8080
+connections:
+  - localhost:8571
+friends:
+  alias-name: >-
+    PubKey(go-peer/rsa){30818902818100C709DA63096CEDBA0DD6B5DD9465B412268C00509757A8EBD9096E17BEEC17C25A3A8F246E1591554CD214F4B27254EFA811F8BE441A03B37B3C8B390484C74C2294A4C895AA925D723E0065A877D4502CC010996863821E7348348E4E96CDD4CB7A852B2E2853C8FDEE556C4F89F6C3295EAC00DAEE86DD94E25F9703F368C70203010001}
 ```
 
 ## Request structure in HLS for internal services

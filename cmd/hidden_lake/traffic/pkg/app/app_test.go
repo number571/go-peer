@@ -17,7 +17,7 @@ import (
 
 const (
 	tcPathDB     = hlt_settings.CPathDB
-	tcPathConfig = hlt_settings.CPathCFG
+	tcPathConfig = hlt_settings.CPathYML
 )
 
 func testDeleteFiles() {

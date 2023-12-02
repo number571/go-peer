@@ -1,0 +1,14 @@
+settings:
+  messages_capacity: 2048
+  work_size_bits: 10
+  network_key: some-network-key
+logging:
+  - info
+  - warn
+  - erro
+address:
+  http: 127.0.0.1:6561
+producers:
+  - localhost:7582
+consumers:
+  - localhost:8582

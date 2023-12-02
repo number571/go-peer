@@ -71,7 +71,7 @@ func TestRequestResponseAPI(t *testing.T) {
 	}
 
 	x := new(tsResponse)
-	if err := encoding.Deserialize(respGET, x); err != nil {
+	if err := encoding.DeserializeJSON(respGET, x); err != nil {
 		t.Error(err)
 		return
 	}

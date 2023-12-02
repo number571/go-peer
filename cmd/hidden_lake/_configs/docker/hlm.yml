@@ -1,0 +1,11 @@
+settings:
+  messages_capacity: 2048
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: :9591
+  incoming: :9592
+connection: service:9572

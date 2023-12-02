@@ -104,7 +104,7 @@ func (p *SMessage) GetPayload() []byte {
 func (p *SMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
-			encoding.Serialize(p, false),
+			encoding.SerializeJSON(p, false),
 			p.FPayload,
 		},
 		[]byte(CSeparator),
@@ -114,7 +114,7 @@ func (p *SMessage) ToBytes() []byte {
 func (p *SMessage) ToString() string {
 	return strings.Join(
 		[]string{
-			string(encoding.Serialize(p, false)),
+			string(encoding.SerializeJSON(p, false)),
 			encoding.HexEncode(p.FPayload),
 		},
 		CSeparator,

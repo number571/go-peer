@@ -188,12 +188,12 @@ func TestHandleTransferAPI(t *testing.T) {
 }
 
 func copyWithPaste(pathTo, addr string) error {
-	cfgDataFmt, err := os.ReadFile(tcTestData + "/hlt_copy.cfg")
+	cfgDataFmt, err := os.ReadFile(tcTestData + "/hlt_copy.yml")
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(
-		pathTo+"/hlt.cfg",
+		pathTo+"/hlt.yml",
 		[]byte(fmt.Sprintf(string(cfgDataFmt), testutils.TCWorkSize, addr)),
 		0o644,
 	)

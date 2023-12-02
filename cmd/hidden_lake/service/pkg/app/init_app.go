@@ -19,7 +19,7 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IApp, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", pDefaultKey)
 
-	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathCFG), nil)
+	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}

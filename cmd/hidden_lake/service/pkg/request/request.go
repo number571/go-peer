@@ -30,7 +30,7 @@ func LoadRequest(pData interface{}) (IRequest, error) {
 	request := new(sRequest)
 	switch x := pData.(type) {
 	case []byte:
-		if err := encoding.Deserialize(x, request); err != nil {
+		if err := encoding.DeserializeJSON(x, request); err != nil {
 			return nil, fmt.Errorf("load request: %w", err)
 		}
 		return request, nil
@@ -42,11 +42,11 @@ func LoadRequest(pData interface{}) (IRequest, error) {
 }
 
 func (p *sRequest) ToBytes() []byte {
-	return encoding.Serialize(p, false)
+	return encoding.SerializeJSON(p, false)
 }
 
 func (p *sRequest) ToString() string {
-	return string(encoding.Serialize(p, true))
+	return string(encoding.SerializeJSON(p, true))
 }
 
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {

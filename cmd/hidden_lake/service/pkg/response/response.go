@@ -24,18 +24,18 @@ func NewResponse(pCode int) IResponse {
 
 func LoadResponse(pBytes []byte) (IResponse, error) {
 	response := new(sResponse)
-	if err := encoding.Deserialize(pBytes, response); err != nil {
+	if err := encoding.DeserializeJSON(pBytes, response); err != nil {
 		return nil, fmt.Errorf("load response: %w", err)
 	}
 	return response, nil
 }
 
 func (p *sResponse) ToBytes() []byte {
-	return encoding.Serialize(p, false)
+	return encoding.SerializeJSON(p, false)
 }
 
 func (p *sResponse) ToString() string {
-	return string(encoding.Serialize(p, true))
+	return string(encoding.SerializeJSON(p, true))
 }
 
 func (p *sResponse) WithHead(pHead map[string]string) IResponse {

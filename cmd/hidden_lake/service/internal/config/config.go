@@ -20,22 +20,22 @@ var (
 
 type SConfigSettings struct {
 	fMutex              sync.Mutex
-	FMessageSizeBytes   uint64 `json:"message_size_bytes"`
-	FWorkSizeBits       uint64 `json:"work_size_bits"`
-	FQueuePeriodMS      uint64 `json:"queue_period_ms"`
-	FKeySizeBits        uint64 `json:"key_size_bits"`
-	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty"`
-	FNetworkKey         string `json:"network_key,omitempty"`
+	FMessageSizeBytes   uint64 `yaml:"message_size_bytes"`
+	FWorkSizeBits       uint64 `yaml:"work_size_bits"`
+	FQueuePeriodMS      uint64 `yaml:"queue_period_ms"`
+	FKeySizeBits        uint64 `yaml:"key_size_bits"`
+	FLimitVoidSizeBytes uint64 `yaml:"limit_void_size_bytes,omitempty"`
+	FNetworkKey         string `yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `json:"settings"`
+	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging     []string          `json:"logging,omitempty"`
-	FAddress     *SAddress         `json:"address,omitempty"`
-	FConnections []string          `json:"connections,omitempty"`
-	FServices    map[string]string `json:"services,omitempty"`
-	FFriends     map[string]string `json:"friends,omitempty"`
+	FLogging     []string          `yaml:"logging,omitempty"`
+	FAddress     *SAddress         `yaml:"address,omitempty"`
+	FConnections []string          `yaml:"connections,omitempty"`
+	FServices    map[string]string `yaml:"services,omitempty"`
+	FFriends     map[string]string `yaml:"friends,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -46,9 +46,9 @@ type SConfig struct {
 type sLogging []bool
 
 type SAddress struct {
-	FTCP   string `json:"tcp,omitempty"`
-	FHTTP  string `json:"http,omitempty"`
-	FPPROF string `json:"pprof,omitempty"`
+	FTCP   string `yaml:"tcp,omitempty"`
+	FHTTP  string `yaml:"http,omitempty"`
+	FPPROF string `yaml:"pprof,omitempty"`
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
@@ -61,7 +61,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	if err := os.WriteFile(pFilepath, encoding.Serialize(pCfg, true), 0o644); err != nil {
+	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
 		return nil, fmt.Errorf("write config: %w", err)
 	}
 
@@ -79,7 +79,7 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	cfg := new(SConfig)
-	if err := encoding.Deserialize(bytes, cfg); err != nil {
+	if err := encoding.DeserializeYAML(bytes, cfg); err != nil {
 		return nil, fmt.Errorf("deserialize config: %w", err)
 	}
 

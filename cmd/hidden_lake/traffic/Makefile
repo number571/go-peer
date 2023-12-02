@@ -8,9 +8,9 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../_configs/hlt.cfg .
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/hlt.yml .
 build: default-config
-	$(GC) -o $(BINPATH)/hlt ./cmd/hlt
+	$(GC) -o $(BINPATH)/hlt ./cmd/hlt # main 
 
 	for arch in amd64 arm64; \
 	do \
@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hlt $(BINPATH)/hlt_*
-	rm -rf hlt.cfg hlt.db
+	rm -rf hlt.yml hlt.db
 
 docker-default: docker-build docker-run
 docker-build:

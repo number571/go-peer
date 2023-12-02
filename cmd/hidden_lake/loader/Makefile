@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../_configs/hll.cfg .
+	cp ../_configs/hll.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hll ./cmd/hll
 
@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hll $(BINPATH)/hll_*
-	rm -rf hll.cfg
+	rm -rf hll.yml
 
 docker-default: docker-build docker-run
 docker-build:

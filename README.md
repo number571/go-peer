@@ -185,36 +185,30 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.cfg` or `./_mounted/hls.cfg` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
+Creates `./hls.yml` or `./_mounted/hls.yml` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
 The file `hls.db` stores hashes of sent/received messages.
 
-Default config `hls.cfg`
+Default config `hls.yml`
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"work_size_bits": 20,
-		"key_size_bits": 4096,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"tcp": "127.0.0.1:9571",
-		"http": "127.0.0.1:9572"
-	},
-	"services": {
-		"go-peer/hidden-lake-messenger": "127.0.0.1:9592"
-	}
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: 4096
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: 127.0.0.1:9571
+  http: 127.0.0.1:9572
+services:
+  go-peer/hidden-lake-messenger: 127.0.0.1:9592
 ```
 
-If service works not in docker's environment than need rewrite connection host in `hls.cfg` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
+If service works not in docker's environment than need rewrite connection host in `hls.yml` file from `messenger`to IP address (example: `127.0.0.1:9592` for local network).
 
 Build and run with docker
 
@@ -366,10 +360,10 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
+Creates `./hlm.yml` or `./_mounted/hlm.yml` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
 The file `hlm.db` stores all sent/received messages in encrypted view. 
 
-Default config `hlm.cfg`
+Default config `hlm.yml`
 
 ```json
 {
@@ -390,7 +384,7 @@ Default config `hlm.cfg`
 }
 ```
 
-If messenger works not in docker's environment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
+If messenger works not in docker's environment than need rewrite connection hosts in `hlm.yml` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
 Build and run with docker
 
@@ -475,36 +469,30 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581` (HTTP, interface).
-Creates `./hlt.cfg` or `./_mounted/hlt.cfg` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
+Creates `./hlt.yml` or `./_mounted/hlt.yml` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
-Default config `hlt.cfg`
+Default config `hlt.yml`
 
-```json
-{
-	"settings": {
-		"message_size_bytes": 8192,
-		"work_size_bits": 20,
-		"messages_capacity": 2048,
-		"queue_period_ms": 5000,
-		"limit_void_size_bytes": 4096
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"tcp": "127.0.0.1:9581",
-		"http": "127.0.0.1:9582"
-	},
-	"connections": [
-		"127.0.0.1:9571"
-	]
-}
+```yaml
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  messages_capacity: 2048
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+logging:
+  - info
+  - warn
+  - erro
+address:
+  tcp: 127.0.0.1:9581
+  http: 127.0.0.1:9582
+connections:
+  - 127.0.0.1:9571
 ```
 
-If traffic works not in docker's environment than need rewrite connection host in `hlt.cfg` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
+If traffic works not in docker's environment than need rewrite connection host in `hlt.yml` file from `service` to IP address (example: `127.0.0.1:9571` for local network).
 
 Build and run with docker
 
@@ -521,7 +509,7 @@ $ make docker-run
 
 Build and run service
 ```bash
-$ cd examples/traffic_keeper
+$ cd examples/traffic_actions/keeper
 $ make
 ```
 
@@ -557,13 +545,13 @@ In the example, two HLT services are created, where one is a message producer, t
 
 Build and run HLT services
 ```bash
-$ cd examples/echo_service/traffic_loader
+$ cd examples/traffic_actions/loader
 $ make
 ```
 
 Run transfer
 ```bash
-$ cd examples/echo_service/traffic_loader/client_hll
+$ cd examples/traffic_actions/loader/client_hll
 $ go run ./main.go
 ```
 

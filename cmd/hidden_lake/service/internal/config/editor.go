@@ -44,7 +44,7 @@ func (p *sEditor) UpdateNetworkKey(pNetworkKey string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FSettings.FNetworkKey = pNetworkKey
-	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update connections): %w", err)
 	}
 
@@ -67,7 +67,7 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(pConns)
-	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update connections): %w", err)
 	}
 
@@ -102,7 +102,7 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	cfg := icfg.(*SConfig)
 	cfg.fFriends = pFriends
 	cfg.FFriends = pubKeysToStrings(pFriends)
-	if err := os.WriteFile(filepath, encoding.Serialize(cfg, true), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update friends): %w", err)
 	}
 

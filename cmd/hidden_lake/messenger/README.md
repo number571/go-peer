@@ -39,10 +39,10 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.cfg` or `./_mounted/hlm.cfg` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
+Creates `./hlm.yml` or `./_mounted/hlm.yml` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
 The file `hlm.db` stores all sent/received messages in encrypted view. 
 
-Default config `hlm.cfg`
+Default config `hlm.yml`
 
 ```json
 {
@@ -63,7 +63,7 @@ Default config `hlm.cfg`
 }
 ```
 
-If messenger works not in docker's environment than need rewrite connection hosts in `hlm.cfg` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
+If messenger works not in docker's environment than need rewrite connection hosts in `hlm.yml` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).
 
 Build and run with docker
 

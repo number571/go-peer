@@ -1,10 +1,10 @@
 hls 
-hls.cfg
+hls.yml
 hls.db
 pub.key
 priv.key 
 *.db_push1
 *.db_push2
-*.cfg_push1
-*.cfg_push2
+*.yml_push1
+*.yml_push2
 !cmd/hls

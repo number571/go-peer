@@ -1,4 +1,4 @@
 prog_*
 hls
 other_nodes
-hls.cfg 
+hls.yml 

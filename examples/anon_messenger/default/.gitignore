@@ -2,5 +2,5 @@ prog_*
 hls
 hlm 
 hlt
-!*.cfg
-hls.cfg 
+!*.yml
+hls.yml 

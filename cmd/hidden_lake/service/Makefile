@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp $(ROOPATH)/cmd/hidden_lake/_configs/hls.cfg .
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/hls.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hls ./cmd/hls # main 
 
@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hls $(BINPATH)/hls_*
-	rm -rf hls.cfg hls.db
+	rm -rf hls.yml hls.db
 
 docker-default: docker-build docker-run
 docker-build:

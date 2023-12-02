@@ -54,19 +54,19 @@ func TestBytes(t *testing.T) {
 func TestSerialize(t *testing.T) {
 	t.Parallel()
 
-	if string(Serialize(tgMessage, true)) != tcIndentJSON {
+	if string(SerializeJSON(tgMessage, true)) != tcIndentJSON {
 		t.Error("serialize string is invalid (indent)")
 		return
 	}
 
-	if string(Serialize(tgMessage, false)) != tcJSON {
+	if string(SerializeJSON(tgMessage, false)) != tcJSON {
 		t.Error("serialize string is invalid (non indent)")
 		return
 	}
 
 	res := new(tsMessage)
 
-	if err := Deserialize([]byte(tcJSON), res); err != nil {
+	if err := DeserializeJSON([]byte(tcJSON), res); err != nil {
 		t.Error(err)
 		return
 	}
@@ -76,7 +76,7 @@ func TestSerialize(t *testing.T) {
 		return
 	}
 
-	if err := Deserialize([]byte(`qwerty`), res); err == nil {
+	if err := DeserializeJSON([]byte(`qwerty`), res); err == nil {
 		t.Error("success deserialize invalid data")
 		return
 	}

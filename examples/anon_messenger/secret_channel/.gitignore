@@ -3,5 +3,5 @@ hls
 hlm 
 hlt
 web/
-!*.cfg
-hls.cfg
+!*.yml
+hls.yml

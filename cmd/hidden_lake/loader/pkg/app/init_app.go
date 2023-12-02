@@ -13,7 +13,7 @@ import (
 func InitApp(pDefaultPath string) (types.IApp, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 
-	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathCFG), nil)
+	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
