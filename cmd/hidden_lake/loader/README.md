@@ -61,21 +61,16 @@ Creates `./hll.yml` or `./_mounted/hll.yml` (docker) files.
 
 Default config `hll.yml`
 
-```json
-{
-	"settings": {
-		"messages_capacity": 2048,
-        "work_size_bits": 20
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"http": "127.0.0.1:9561"
-	}
-}
+```yaml
+settings:
+  messages_capacity: 2048
+  work_size_bits: 20
+logging:
+  - info
+  - warn
+  - erro
+address:
+  http: 127.0.0.1:9561
 ```
 
 Build and run with docker
@@ -98,28 +93,21 @@ $ make docker-run
 "producers"  A list of the HLTs producers
 ```
 
-```json
-{
-	"settings": {
-        "messages_capacity": 2048,
-        "work_size_bits": 20,
-        "network_key": "hlt-network-key"
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"address": {
-		"http": "127.0.0.1:9561"
-	},
-    "producers": [
-		"localhost:8582"
-	],
-	"consumers": [
-		"localhost:7582"
-	]
-}
+```yaml
+settings:
+  messages_capacity: 2048
+  work_size_bits: 20
+  network_key: hlt-network-key
+logging:
+  - info
+  - warn
+  - erro
+address:
+  http: 127.0.0.1:9561
+producers:
+  - localhost:8582
+consumers:
+  - localhost:7582
 ```
 
 ## Response structure from HLL API

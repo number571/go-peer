@@ -44,23 +44,18 @@ The file `hlm.db` stores all sent/received messages in encrypted view.
 
 Default config `hlm.yml`
 
-```json
-{
-	"settings": {
-		"messages_capacity": 2048
-	},
-	"logging": [
-		"info",
-		"warn",
-		"erro"
-	],
-	"language": "ENG",
-	"address": {
-		"interface": "127.0.0.1:9591",
-		"incoming": "127.0.0.1:9592"
-	},
-	"connection": "127.0.0.1:9572"
-}
+```yaml
+settings:
+  messages_capacity: 2048
+logging:
+  - info
+  - warn
+  - erro
+language: ENG
+address:
+  interface: 127.0.0.1:9591
+  incoming: 127.0.0.1:9592
+connection: 127.0.0.1:9572
 ```
 
 If messenger works not in docker's environment than need rewrite connection hosts in `hlm.yml` file from `service` and `traffic` to IP addresses (example: `127.0.0.1:9572` and also `127.0.0.1:9581` for local network).

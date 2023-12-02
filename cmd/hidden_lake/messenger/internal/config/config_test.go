@@ -14,20 +14,18 @@ const (
 )
 
 const (
-	tcConfigTemplate = `{
-	"settings": {
-		"messages_capacity": %d
-	},
-	"logging": ["info", "erro"],
-	"language": "RUS",
-	"address": {
-		"interface": "%s",
-		"incoming": "%s",
-		"pprof": "%s"
-	},
-	"connection": "%s",
-	"storage_key": "%s"
-}`
+	tcConfigTemplate = `settings:
+  messages_capacity: %d
+logging:
+  - info
+  - erro
+language: RUS
+address:
+  interface: '%s'
+  incoming: '%s'
+  pprof: '%s'
+connection: '%s'
+storage_key: '%s'`
 )
 
 const (
