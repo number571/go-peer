@@ -56,7 +56,7 @@ func main() {
 	strConnectsBuilder := strings.Builder{}
 	strConnectsBuilder.Grow(len(gListOfConnects))
 	for _, c := range gListOfConnects {
-		strConnectsBuilder.WriteString("\n\t- " + c)
+		strConnectsBuilder.WriteString("\n  - " + c)
 	}
 	strConnects := strConnectsBuilder.String()
 
