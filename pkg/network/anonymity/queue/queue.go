@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -16,27 +17,29 @@ var (
 )
 
 type sMessageQueue struct {
-	fIsRun    bool
-	fMutex    sync.Mutex
-	fSettings ISettings
-	fClient   client.IClient
-	fQueue    chan message.IMessage
-	fMsgPool  sPool
+	fIsRun       bool
+	fMutex       sync.Mutex
+	fSettings    ISettings
+	fClient      client.IClient
+	fNetSettFunc INetworkSettingsFunc
+	fQueue       chan net_message.IMessage
+	fMsgPool     sPool
 }
 
 type sPool struct {
 	fSignal   chan struct{}
-	fQueue    chan message.IMessage
+	fQueue    chan net_message.IMessage
 	fReceiver asymmetric.IPubKey
 }
 
-func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
+func NewMessageQueue(pSett ISettings, pClient client.IClient, pNetSettFunc INetworkSettingsFunc) IMessageQueue {
 	return &sMessageQueue{
-		fSettings: pSett,
-		fClient:   pClient,
-		fQueue:    make(chan message.IMessage, pSett.GetMainCapacity()),
+		fSettings:    pSett,
+		fClient:      pClient,
+		fNetSettFunc: pNetSettFunc,
+		fQueue:       make(chan net_message.IMessage, pSett.GetMainCapacity()),
 		fMsgPool: sPool{
-			fQueue:    make(chan message.IMessage, pSett.GetPoolCapacity()),
+			fQueue:    make(chan net_message.IMessage, pSett.GetPoolCapacity()),
 			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
 		},
 	}
@@ -47,10 +50,16 @@ func (p *sMessageQueue) GetSettings() ISettings {
 }
 
 func (p *sMessageQueue) GetClient() client.IClient {
+	return p.fClient
+}
+
+func (p *sMessageQueue) ClearQueue() {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	return p.fClient
+	p.fQueue = make(chan net_message.IMessage, p.fSettings.GetMainCapacity())
+	p.fMsgPool.fQueue = make(chan net_message.IMessage, p.fSettings.GetPoolCapacity())
+	p.fMsgPool.fReceiver = asymmetric.NewRSAPrivKey(p.fClient.GetPrivKey().GetSize()).GetPubKey()
 }
 
 func (p *sMessageQueue) Run() error {
@@ -69,11 +78,10 @@ func (p *sMessageQueue) Run() error {
 			case <-p.readSignal():
 				return
 			case <-time.After(p.fSettings.GetDuration() / 2):
-				currLen := len(p.fMsgPool.fQueue)
-				if uint64(currLen) >= p.fSettings.GetPoolCapacity() {
+				if p.hasLimit() {
 					continue
 				}
-				p.fMsgPool.fQueue <- p.newPseudoMessage()
+				p.fMsgPool.fQueue <- p.newPseudoNetworkMessage()
 			}
 		}
 	}()
@@ -102,11 +110,18 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 		return errors.New("queue already full, need wait and retry")
 	}
 
-	p.fQueue <- pMsg
+	networkMask, messageSettings := p.fNetSettFunc()
+	p.fQueue <- net_message.NewMessage(
+		messageSettings,
+		payload.NewPayload(
+			networkMask,
+			pMsg.ToBytes(),
+		),
+	)
 	return nil
 }
 
-func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
+func (p *sMessageQueue) DequeueMessage() <-chan net_message.IMessage {
 	closed := make(chan bool)
 
 	go func() {
@@ -126,7 +141,7 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 	}()
 
 	if <-closed {
-		queue := make(chan message.IMessage)
+		queue := make(chan net_message.IMessage)
 		close(queue)
 		return queue
 	}
@@ -138,15 +153,22 @@ func (p *sMessageQueue) DequeueMessage() <-chan message.IMessage {
 	return queue
 }
 
-func (p *sMessageQueue) newPseudoMessage() message.IMessage {
-	msg, err := p.GetClient().EncryptPayload(
+func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
+	msg, err := p.fClient.EncryptPayload(
 		p.fMsgPool.fReceiver,
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
 		panic(err)
 	}
-	return msg
+	networkMask, messageSettings := p.fNetSettFunc()
+	return net_message.NewMessage(
+		messageSettings,
+		payload.NewPayload(
+			networkMask,
+			msg.ToBytes(),
+		),
+	)
 }
 
 func (p *sMessageQueue) readSignal() <-chan struct{} {
@@ -154,4 +176,12 @@ func (p *sMessageQueue) readSignal() <-chan struct{} {
 	defer p.fMutex.Unlock()
 
 	return p.fMsgPool.fSignal
+}
+
+func (p *sMessageQueue) hasLimit() bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	currLen := len(p.fMsgPool.fQueue)
+	return uint64(currLen) >= p.fSettings.GetPoolCapacity()
 }

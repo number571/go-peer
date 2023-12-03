@@ -26,31 +26,20 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
 
 		// enrich logger
+		pld := pNetMsg.GetPayload()
 		logBuilder.
 			WithConn(pConn).
-			WithSize(len(pNetMsg.ToBytes()))
+			WithHash(pNetMsg.GetHash()).
+			WithProof(pNetMsg.GetProof()).
+			WithSize(len(pld.GetBody()))
 
-		_, err := message.LoadMessage(
-			pCfg.GetSettings(),
-			pNetMsg.GetPayload().GetBody(),
-		)
-		if err != nil {
+		if _, err := message.LoadMessage(pCfg.GetSettings(), pld.GetBody()); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 			return fmt.Errorf("load message: %w", err)
 		}
 
-		var (
-			hash  = pNetMsg.GetHash()
-			proof = pNetMsg.GetProof()
-			hltDB = pWrapperDB.Get()
-		)
-
-		// enrich logger
-		logBuilder.
-			WithHash(hash).
-			WithProof(proof)
-
 		// check database
+		hltDB := pWrapperDB.Get()
 		if hltDB == nil {
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
 			return errors.New("database is nil")
@@ -70,11 +59,6 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
-
-		// msgString := msgconv.FromBytesToString(msg.ToBytes())
-		// if msgString == "" {
-		// 	panic("got invalid result (func=FromBytesToString)")
-		// }
 
 		for _, cHost := range pCfg.GetConsumers() {
 			_, err := api.Request(

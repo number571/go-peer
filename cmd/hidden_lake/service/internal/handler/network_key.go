@@ -44,6 +44,7 @@ func HandleNetworkKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode
 			}
 
 			pNode.GetNetworkNode().GetSettings().GetConnSettings().SetNetworkKey(networkKey)
+			pNode.GetMessageQueue().ClearQueue()
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: set network key")

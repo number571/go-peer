@@ -10,6 +10,14 @@
 
 - Update `cmd/hidden_lake`: append _daemon/journal_hlX.sh script
 
+### CHANGES
+
+- Update `pkg/client/queue`: move to pkg/network/anonymity/queue
+
+### BUG FIXES
+
+- Update `pkg/network/anonymity`: fix static period of generate messages
+
 <!-- ... -->
 
 ## v1.5.22

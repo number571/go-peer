@@ -6,8 +6,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/network/anonymity/queue"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -30,6 +31,9 @@ func main() {
 			}),
 			asymmetric.NewRSAPrivKey(1024),
 		),
+		func() (uint64, net_message.ISettings) {
+			return 1, net_message.NewSettings(&net_message.SSettings{})
+		},
 	)
 
 	if err := q.Run(); err != nil {
@@ -50,7 +54,11 @@ func main() {
 	}
 
 	for i := 0; i < 3; i++ {
-		msg := <-q.DequeueMessage()
+		netMsg := <-q.DequeueMessage()
+		msg, err := message.LoadMessage(q.GetClient().GetSettings(), netMsg.GetPayload().GetBody())
+		if err != nil {
+			panic(err)
+		}
 		pubKey, pld, err := q.GetClient().DecryptMessage(msg)
 		if err != nil {
 			panic(err)

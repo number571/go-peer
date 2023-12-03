@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 
@@ -182,17 +182,7 @@ func (p *sNode) runQueue() error {
 			}
 
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-
-			// store hash and push message to network
-			netMsg := net_message.NewMessage(
-				p.fNetwork.GetSettings().GetConnSettings(),
-				payload.NewPayload(
-					p.fSettings.GetNetworkMask(),
-					msg.ToBytes(),
-				),
-			)
-
-			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok {
+			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
 				// internal logger
 				continue
 			}
@@ -216,22 +206,20 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		// enrich logger
 		logBuilder.WithConn(pConn)
 
-		client := p.fQueue.GetClient()
-		msg, err := message.LoadMessage(
-			client.GetSettings(),
-			pMsg.GetPayload().GetBody(),
-		)
-		if err != nil {
-			return fmt.Errorf("load message: %w", err)
-		}
-
 		// try store hash of message
-		if ok, err := p.storeHashWithBroadcast(logBuilder, msg, pMsg); !ok {
+		if ok, err := p.storeHashWithBroadcast(logBuilder, pMsg); !ok {
 			// internal logger
 			if err != nil {
 				return fmt.Errorf("store hash with broadcast: %w", err)
 			}
 			return nil
+		}
+
+		// load encrypted message
+		client := p.fQueue.GetClient()
+		msg, err := message.LoadMessage(client.GetSettings(), pMsg.GetPayload().GetBody())
+		if err != nil {
+			return fmt.Errorf("load message: %w", err)
 		}
 
 		// try decrypt message
@@ -356,14 +344,9 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	return nil
 }
 
-func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pMsg message.IMessage, pNetMsg net_message.IMessage) (bool, error) {
-	if pMsg == nil {
-		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnMessageNull))
-		return false, errors.New("message is nil")
-	}
-
+func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
 	var (
-		size      = len(pMsg.ToBytes())
+		size      = len(pNetMsg.GetPayload().GetBody())
 		hash      = pNetMsg.GetHash()
 		proof     = pNetMsg.GetProof()
 		database  = p.fWrapperDB.Get()

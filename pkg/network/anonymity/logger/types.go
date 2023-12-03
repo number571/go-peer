@@ -10,7 +10,7 @@ type (
 )
 
 const (
-	CLogFinal = CLogErroEncryptPayload
+	CLogFinal = CLogErroInvalidNetworkMask
 )
 
 const (
@@ -37,6 +37,7 @@ const (
 	CLogErroDatabaseGet
 	CLogErroDatabaseSet
 	CLogErroEncryptPayload
+	CLogErroInvalidNetworkMask
 )
 
 type ILogBuilder interface {

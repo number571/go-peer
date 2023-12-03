@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -64,6 +65,9 @@ func TestRunStopQueue(t *testing.T) {
 			FDuration:     100 * time.Millisecond,
 		}),
 		client,
+		func() (uint64, net_message.ISettings) {
+			return 1, net_message.NewSettings(&net_message.SSettings{})
+		},
 	)
 
 	if err := queue.Run(); err != nil {
@@ -125,6 +129,9 @@ func TestQueue(t *testing.T) {
 			FDuration:     100 * time.Millisecond,
 		}),
 		oldClient,
+		func() (uint64, net_message.ISettings) {
+			return 1, net_message.NewSettings(&net_message.SSettings{})
+		},
 	)
 
 	sett := queue.GetSettings()
@@ -144,7 +151,7 @@ func testQueue(queue IMessageQueue) error {
 		return err
 	}
 
-	msgs := make([]message.IMessage, 0, 3)
+	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
 		msgs = append(msgs, <-queue.DequeueMessage())
 	}
@@ -171,7 +178,11 @@ func testQueue(queue IMessageQueue) error {
 		queue.EnqueueMessage(msg)
 	}
 	for i := 0; i < 3; i++ {
-		msg := <-queue.DequeueMessage()
+		netMsg := <-queue.DequeueMessage()
+		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
+		if err != nil {
+			return err
+		}
 		if !bytes.Equal(msg.GetHash(), hash) {
 			return fmt.Errorf("hash of messages not equals (%d)", i)
 		}

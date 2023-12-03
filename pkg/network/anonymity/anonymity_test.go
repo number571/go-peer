@@ -10,10 +10,10 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
@@ -474,17 +474,12 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, nil, nil); ok || err == nil {
-		t.Error("success use store function with null message")
-		return
-	}
-
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); !ok || err != nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
 	}
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); ok || err != nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); ok || err != nil {
 		switch {
 		case ok:
 			t.Error("success store one message again")
@@ -495,7 +490,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	node.GetWrapperDB().Set(nil)
-	if ok, err := node.storeHashWithBroadcast(logBuilder, msg, netMsg); ok || err == nil {
+	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); ok || err == nil {
 		t.Error("success use store function with null database")
 		return
 	}
@@ -632,11 +627,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 	if err != nil {
 		return nil
 	}
+	networkMask := uint64(1)
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:   "TEST",
-			FRetryEnqueue:  0,
-			FNetworkMask:   1,
+			FNetworkMask:   networkMask,
 			FFetchTimeWait: timeWait,
 		}),
 		logger.NewLogger(
@@ -677,6 +672,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
+			func() (uint64, net_message.ISettings) {
+				return networkMask, net_message.NewSettings(&net_message.SSettings{
+					FWorkSizeBits: testutils.TCWorkSize,
+				})
+			},
 		),
 		asymmetric.NewListPubKeys(),
 	)

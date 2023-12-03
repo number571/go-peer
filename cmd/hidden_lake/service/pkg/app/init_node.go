@@ -5,12 +5,13 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/client/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/queue_set"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -69,6 +70,12 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				}),
 				pPrivKey,
 			),
+			func() (uint64, net_message.ISettings) {
+				return pkg_settings.CNetworkMask, net_message.NewSettings(&net_message.SSettings{
+					FNetworkKey:   cfgSettings.GetNetworkKey(),
+					FWorkSizeBits: cfgSettings.GetWorkSizeBits(),
+				})
+			},
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
