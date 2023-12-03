@@ -2,6 +2,16 @@
 
 <!-- ... -->
 
+## v1.5.23
+
+*??? ??, ????*
+
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake`: append _daemon/journal_hlX.sh script
+
+<!-- ... -->
+
 ## v1.5.22
 
 *December 03, 2023*
