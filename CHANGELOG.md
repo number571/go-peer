@@ -4,7 +4,7 @@
 
 ## v1.5.22
 
-*??? ??, ????*
+*December 03, 2023*
 
 ### IMPROVEMENTS
 
