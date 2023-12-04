@@ -672,11 +672,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
-			func() (uint64, net_message.ISettings) {
-				return networkMask, net_message.NewSettings(&net_message.SSettings{
-					FWorkSizeBits: testutils.TCWorkSize,
-				})
-			},
+		).WithNetworkSettings(
+			networkMask,
+			net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 		),
 		asymmetric.NewListPubKeys(),
 	)

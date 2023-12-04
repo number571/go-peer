@@ -141,11 +141,11 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 				}),
 				asymmetric.NewRSAPrivKey(keySize),
 			),
-			func() (uint64, net_message.ISettings) {
-				return networkMask, net_message.NewSettings(&net_message.SSettings{
-					FWorkSizeBits: workSize,
-				})
-			},
+		).WithNetworkSettings(
+			networkMask,
+			net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits: workSize,
+			}),
 		),
 		asymmetric.NewListPubKeys(),
 	)

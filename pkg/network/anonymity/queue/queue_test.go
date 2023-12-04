@@ -65,9 +65,6 @@ func TestRunStopQueue(t *testing.T) {
 			FDuration:     100 * time.Millisecond,
 		}),
 		client,
-		func() (uint64, net_message.ISettings) {
-			return 1, net_message.NewSettings(&net_message.SSettings{})
-		},
 	)
 
 	if err := queue.Run(); err != nil {
@@ -129,9 +126,6 @@ func TestQueue(t *testing.T) {
 			FDuration:     100 * time.Millisecond,
 		}),
 		oldClient,
-		func() (uint64, net_message.ISettings) {
-			return 1, net_message.NewSettings(&net_message.SSettings{})
-		},
 	)
 
 	sett := queue.GetSettings()

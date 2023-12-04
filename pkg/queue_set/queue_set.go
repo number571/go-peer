@@ -12,7 +12,7 @@ var (
 
 type sQueueSet struct {
 	fSettings ISettings
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fMap      map[string][]byte
 	fQueue    []string
 	fIndex    int
@@ -31,8 +31,8 @@ func (p *sQueueSet) GetSettings() ISettings {
 }
 
 func (p *sQueueSet) GetQueueKeys() [][]byte {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	queueSlice := p.fQueue[:p.fIndex]
 	keys := make([][]byte, 0, len(queueSlice))
@@ -70,8 +70,8 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 }
 
 func (p *sQueueSet) Load(pKey []byte) ([]byte, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	val, ok := p.fMap[encoding.HexEncode(pKey)]
 	return val, ok

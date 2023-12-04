@@ -9,11 +9,9 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type INetworkSettingsFunc func() (uint64, net_message.ISettings)
-
 type IMessageQueue interface {
 	types.IApp
-	ClearQueue()
+	WithNetworkSettings(uint64, net_message.ISettings) IMessageQueue
 
 	GetSettings() ISettings
 	GetClient() client.IClient

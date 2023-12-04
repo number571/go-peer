@@ -14,7 +14,7 @@ var (
 
 type sConnKeeper struct {
 	fIsRun    bool
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fSignal   chan struct{}
 	fNode     network.INode
 	fSettings ISettings
@@ -86,8 +86,8 @@ NEXT:
 }
 
 func (p *sConnKeeper) readSignal() <-chan struct{} {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fSignal
 }

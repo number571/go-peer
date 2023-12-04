@@ -26,7 +26,7 @@ var (
 )
 
 type sNode struct {
-	fMutex         sync.Mutex
+	fMutex         sync.RWMutex
 	fSettings      ISettings
 	fLogger        logger.ILogger
 	fWrapperDB     IWrapperDB
@@ -413,16 +413,16 @@ func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {
 }
 
 func (p *sNode) getRoute(pHead uint32) (IHandlerF, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	f, ok := p.fHandleRoutes[pHead]
 	return f, ok
 }
 
 func (p *sNode) getAction(pActionKey string) (chan []byte, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	f, ok := p.fHandleActions[pActionKey]
 	return f, ok

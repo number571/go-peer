@@ -70,12 +70,12 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 				}),
 				pPrivKey,
 			),
-			func() (uint64, net_message.ISettings) {
-				return pkg_settings.CNetworkMask, net_message.NewSettings(&net_message.SSettings{
-					FNetworkKey:   cfgSettings.GetNetworkKey(),
-					FWorkSizeBits: cfgSettings.GetWorkSizeBits(),
-				})
-			},
+		).WithNetworkSettings(
+			pkg_settings.CNetworkMask,
+			net_message.NewSettings(&net_message.SSettings{
+				FNetworkKey:   cfgSettings.GetNetworkKey(),
+				FWorkSizeBits: cfgSettings.GetWorkSizeBits(),
+			}),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
