@@ -628,6 +628,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		return nil
 	}
 	networkMask := uint64(1)
+	networkKey := "old_network_key"
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:   "TEST",
@@ -646,6 +647,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FNetworkKey:       networkKey,
 					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
 					FWaitReadDeadline: time.Hour,
@@ -675,6 +677,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		).WithNetworkSettings(
 			networkMask,
 			net_message.NewSettings(&net_message.SSettings{
+				FNetworkKey:   networkKey,
 				FWorkSizeBits: testutils.TCWorkSize,
 			}),
 		),

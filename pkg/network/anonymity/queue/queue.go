@@ -18,7 +18,7 @@ var (
 
 type sMessageQueue struct {
 	fIsRun bool
-	fMutex sync.RWMutex
+	fMutex sync.Mutex
 
 	fNetworkMask uint64
 	fMsgSettings net_message.ISettings
@@ -54,23 +54,6 @@ func (p *sMessageQueue) GetSettings() ISettings {
 
 func (p *sMessageQueue) GetClient() client.IClient {
 	return p.fClient
-}
-
-func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings net_message.ISettings) IMessageQueue {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fNetworkMask = pNetworkMask
-	p.fMsgSettings = pMsgSettings
-
-	for len(p.fQueue) > 0 {
-		<-p.fQueue
-	}
-	for len(p.fMsgPool.fQueue) > 0 {
-		<-p.fMsgPool.fQueue
-	}
-
-	return p
 }
 
 func (p *sMessageQueue) Run() error {
@@ -113,6 +96,23 @@ func (p *sMessageQueue) Stop() error {
 	return nil
 }
 
+func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings net_message.ISettings) IMessageQueue {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	for len(p.fQueue) > 0 {
+		<-p.fQueue
+	}
+	for len(p.fMsgPool.fQueue) > 0 {
+		<-p.fMsgPool.fQueue
+	}
+
+	p.fNetworkMask = pNetworkMask
+	p.fMsgSettings = pMsgSettings
+
+	return p
+}
+
 func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
@@ -131,8 +131,11 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sMessageQueue) DequeueMessage() <-chan net_message.IMessage {
-	closed := make(chan bool)
+func (p *sMessageQueue) DequeueMessage() (net_message.IMessage, bool) {
+	var (
+		result net_message.IMessage
+		closed = make(chan bool)
+	)
 
 	go func() {
 		select {
@@ -140,32 +143,29 @@ func (p *sMessageQueue) DequeueMessage() <-chan net_message.IMessage {
 			closed <- true
 			return
 		case <-time.After(p.fSettings.GetDuration()):
-			p.fMutex.Lock()
-			defer p.fMutex.Unlock()
+			defer func() { closed <- false }()
 
-			if len(p.fQueue) == 0 {
-				p.fQueue <- (<-p.fMsgPool.fQueue)
+			p.fMutex.Lock()
+			queueLen := len(p.fQueue)
+			p.fMutex.Unlock()
+
+			if queueLen == 0 {
+				result = <-p.fMsgPool.fQueue
+				return
 			}
-			closed <- false
+
+			result = <-p.fQueue
+			return
 		}
 	}()
 
-	if <-closed {
-		queue := make(chan net_message.IMessage)
-		close(queue)
-		return queue
-	}
-
-	p.fMutex.Lock()
-	queue := p.fQueue
-	p.fMutex.Unlock()
-
-	return queue
+	// closed => !ok
+	return result, !<-closed
 }
 
 func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	msg, err := p.fClient.EncryptPayload(
 		p.fMsgPool.fReceiver,
@@ -185,15 +185,15 @@ func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
 }
 
 func (p *sMessageQueue) readSignal() <-chan struct{} {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	return p.fMsgPool.fSignal
 }
 
 func (p *sMessageQueue) poolHasLimit() bool {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	currLen := len(p.fMsgPool.fQueue)
 	return uint64(currLen) >= p.fSettings.GetPoolCapacity()

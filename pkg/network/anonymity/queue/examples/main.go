@@ -50,7 +50,7 @@ func main() {
 	}
 
 	for i := 0; i < 3; i++ {
-		netMsg := <-q.DequeueMessage()
+		netMsg, _ := q.DequeueMessage()
 		msg, err := message.LoadMessage(q.GetClient().GetSettings(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)

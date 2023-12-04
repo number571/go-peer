@@ -165,7 +165,8 @@ func testQueue(queue IMessageQueue) error {
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
-		msgs = append(msgs, <-queue.DequeueMessage())
+		msg, _ := queue.DequeueMessage()
+		msgs = append(msgs, msg)
 	}
 
 	for i := 0; i < len(msgs)-1; i++ {
@@ -190,7 +191,7 @@ func testQueue(queue IMessageQueue) error {
 		queue.EnqueueMessage(msg)
 	}
 	for i := 0; i < 3; i++ {
-		netMsg := <-queue.DequeueMessage()
+		netMsg, _ := queue.DequeueMessage()
 		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			return err
@@ -203,7 +204,7 @@ func testQueue(queue IMessageQueue) error {
 	closed := make(chan bool)
 	go func() {
 		// test close with parallel dequeue
-		_, ok := <-queue.DequeueMessage()
+		_, ok := queue.DequeueMessage()
 		closed <- ok
 	}()
 

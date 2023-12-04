@@ -13,7 +13,6 @@
 ### CHANGES
 
 - Update `pkg/client/queue`: move to pkg/network/anonymity/queue
-- Update `pkg/*`: change mutexes to RW mutexes
 
 ### BUG FIXES
 

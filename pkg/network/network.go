@@ -22,7 +22,7 @@ var (
 )
 
 type sNode struct {
-	fMutex        sync.RWMutex
+	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
 	fQueuePusher  queue_set.IQueuePusher
@@ -156,8 +156,8 @@ func (p *sNode) HandleFunc(pHead uint64, pHandle IHandlerF) INode {
 
 // Retrieves the entire list of connections with addresses.
 func (p *sNode) GetConnections() map[string]conn.IConn {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	var mapping = make(map[string]conn.IConn, len(p.fConnections))
 	for addr, conn := range p.fConnections {
@@ -267,8 +267,8 @@ func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
 
 // Checks the current number of connections with the limit.
 func (p *sNode) hasMaxConnSize() bool {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	maxConns := p.fSettings.GetMaxConnects()
 	return uint64(len(p.fConnections)) >= maxConns
@@ -276,8 +276,8 @@ func (p *sNode) hasMaxConnSize() bool {
 
 // Saves the connection to the map.
 func (p *sNode) getConnection(pAddress string) (conn.IConn, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	conn, ok := p.fConnections[pAddress]
 	return conn, ok
@@ -293,8 +293,8 @@ func (p *sNode) setConnection(pAddress string, pConn conn.IConn) {
 
 // Gets the handler function by key.
 func (p *sNode) getFunction(pHead uint64) (IHandlerF, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	f, ok := p.fHandleRoutes[pHead]
 	return f, ok
@@ -310,8 +310,8 @@ func (p *sNode) setListener(pListener net.Listener) {
 
 // Gets the listener.
 func (p *sNode) getListener() net.Listener {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	return p.fListener
 }
