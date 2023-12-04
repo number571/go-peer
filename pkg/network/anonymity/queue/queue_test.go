@@ -126,6 +126,12 @@ func TestQueue(t *testing.T) {
 			FDuration:     100 * time.Millisecond,
 		}),
 		oldClient,
+	).WithNetworkSettings(
+		uint64(1),
+		net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   "old_network_key",
+			FWorkSizeBits: 10,
+		}),
 	)
 
 	sett := queue.GetSettings()
@@ -144,6 +150,18 @@ func testQueue(queue IMessageQueue) error {
 	if err := queue.Run(); err != nil {
 		return err
 	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	queue.WithNetworkSettings(
+		uint64(1),
+		net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   "new_network_key",
+			FWorkSizeBits: 10,
+		}),
+	)
+
+	time.Sleep(100 * time.Millisecond)
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {

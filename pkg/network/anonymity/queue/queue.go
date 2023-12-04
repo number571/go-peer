@@ -63,8 +63,13 @@ func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings ne
 	p.fNetworkMask = pNetworkMask
 	p.fMsgSettings = pMsgSettings
 
-	p.fQueue = make(chan net_message.IMessage, p.fSettings.GetMainCapacity())
-	p.fMsgPool.fQueue = make(chan net_message.IMessage, p.fSettings.GetPoolCapacity())
+	for len(p.fQueue) > 0 {
+		<-p.fQueue
+	}
+	for len(p.fMsgPool.fQueue) > 0 {
+		<-p.fMsgPool.fQueue
+	}
+
 	return p
 }
 
@@ -84,7 +89,7 @@ func (p *sMessageQueue) Run() error {
 			case <-p.readSignal():
 				return
 			case <-time.After(p.fSettings.GetDuration() / 2):
-				if p.hasLimit() {
+				if p.poolHasLimit() {
 					continue
 				}
 				p.fMsgPool.fQueue <- p.newPseudoNetworkMessage()
@@ -151,9 +156,9 @@ func (p *sMessageQueue) DequeueMessage() <-chan net_message.IMessage {
 		return queue
 	}
 
-	p.fMutex.RLock()
+	p.fMutex.Lock()
 	queue := p.fQueue
-	p.fMutex.RUnlock()
+	p.fMutex.Unlock()
 
 	return queue
 }
@@ -186,7 +191,7 @@ func (p *sMessageQueue) readSignal() <-chan struct{} {
 	return p.fMsgPool.fSignal
 }
 
-func (p *sMessageQueue) hasLimit() bool {
+func (p *sMessageQueue) poolHasLimit() bool {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
