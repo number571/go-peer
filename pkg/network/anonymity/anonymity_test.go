@@ -547,10 +547,14 @@ func TestRecvSendMessage(t *testing.T) {
 		}
 	}
 
-	if err := node.send(msg); err == nil {
-		t.Error("success send message (push to queue) over queue capacity")
-		return
+	for i := 0; i < 3; i++ {
+		// message can be dequeued in the send's call time
+		if err := node.send(msg); err != nil {
+			return
+		}
 	}
+
+	t.Error("success send message (push to queue) over queue capacity")
 }
 
 // nodes[0], nodes[1] = clients

@@ -176,8 +176,8 @@ func (p *sNode) runQueue() error {
 
 	go func() {
 		for {
-			msg, ok := p.fQueue.DequeueMessage()
-			if !ok {
+			msg := p.fQueue.DequeueMessage()
+			if msg == nil {
 				break
 			}
 

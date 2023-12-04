@@ -131,7 +131,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sMessageQueue) DequeueMessage() (net_message.IMessage, bool) {
+func (p *sMessageQueue) DequeueMessage() net_message.IMessage {
 	var (
 		result net_message.IMessage
 		closed = make(chan bool)
@@ -159,8 +159,8 @@ func (p *sMessageQueue) DequeueMessage() (net_message.IMessage, bool) {
 		}
 	}()
 
-	// closed => !ok
-	return result, !<-closed
+	<-closed
+	return result
 }
 
 func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
