@@ -1,3 +1,4 @@
 !_configs/*
 !_configs/docker/*
+!_configs/prod/*/*
 _mounted/priv.key

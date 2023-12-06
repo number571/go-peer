@@ -1,0 +1,18 @@
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: 4096
+  messages_capacity: 2048
+  queue_period_ms: 5000
+  limit_void_size_bytes: 4096
+  network_key: 8Jkl93Mdk93md1bz
+logging:
+- info
+- warn
+- erro
+address:
+  tcp: 127.0.0.1:9581
+  http: 127.0.0.1:9582
+connections:
+- 94.103.91.81:9581
+- 195.133.1.126:9581

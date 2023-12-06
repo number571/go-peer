@@ -9,6 +9,8 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake`: append _daemon/journal_hlX.sh script
+- Update `cmd/hidden_lake`: append _configs/prod configurations
+- Update `docs`: append hidden_lake_anonymous_network.pptx document
 
 ### CHANGES
 
