@@ -21,6 +21,10 @@ Also, the composition of these works can be found in the book [The general theor
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
 
+### 3. Presentations
+
+1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
+
 ## Default applications ports
 
 1. HLS = 957x
