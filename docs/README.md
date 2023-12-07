@@ -11,7 +11,11 @@
 
 Also, the composition of these works can be found in the book [The general theory of anonymous communications](https://ridero.ru/books/obshaya_teoriya_anonimnykh_kommunikacii/). This book can be purchased in a tangible form on the [Ozon](https://www.ozon.ru/product/obshchaya-teoriya-anonimnyh-kommunikatsiy-vtoroe-izdanie-kovalenko-a-g-1193224608/) and [Wildberries](https://www.wildberries.ru/catalog/177390621/detail.aspx) marketplaces. You can download the book in digital form for free [here](https://github.com/number571/go-peer/blob/master/docs/general_theory_of_anonymous_communications.pdf).
 
-### 2. Habr
+### 2. Presentations
+
+1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
+
+### 3. Habr
 
 1. [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
 2. [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
@@ -20,10 +24,6 @@ Also, the composition of these works can be found in the book [The general theor
 5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
-
-### 3. Presentations
-
-1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
 
 ## Default applications ports
 

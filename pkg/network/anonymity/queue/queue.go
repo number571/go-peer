@@ -164,9 +164,6 @@ func (p *sMessageQueue) DequeueMessage() net_message.IMessage {
 }
 
 func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	msg, err := p.fClient.EncryptPayload(
 		p.fMsgPool.fReceiver,
 		payload.NewPayload(0, []byte{1}),
@@ -175,10 +172,15 @@ func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
 		panic(err)
 	}
 
+	p.fMutex.Lock()
+	msgSettings := p.fMsgSettings
+	networkMask := p.fNetworkMask
+	p.fMutex.Unlock()
+
 	return net_message.NewMessage(
-		p.fMsgSettings,
+		msgSettings,
 		payload.NewPayload(
-			p.fNetworkMask,
+			networkMask,
 			msg.ToBytes(),
 		),
 	)
