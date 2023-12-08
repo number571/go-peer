@@ -7,6 +7,8 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -51,7 +53,7 @@ var (
 	}
 )
 
-func TestClientWithMessageSize(t *testing.T) {
+func TestClientPanicWithMessageSize(t *testing.T) {
 	t.Parallel()
 
 	defer func() {
@@ -64,6 +66,24 @@ func TestClientWithMessageSize(t *testing.T) {
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: 1024,
 			FKeySizeBits:      tcKeySizeBits,
+		}),
+		tgPrivKey,
+	)
+}
+
+func TestClientPanicWithKeySize(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	_ = NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: tcMessageSize,
+			FKeySizeBits:      4096,
 		}),
 		tgPrivKey,
 	)
@@ -141,7 +161,8 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	sMsg5 := *sMsg
-	sMsg5.FPubKey = "11111111111111111111111111111111"
+	randomBytes := random.NewStdPRNG().GetBytes(symmetric.CAESBlockSize + tcKeySizeBits + 10)
+	sMsg5.FPubKey = encoding.HexEncode(randomBytes)
 	if _, _, err := client1.DecryptMessage(&sMsg5); err == nil {
 		t.Error("success decrypt message with incorrect sender key (public key is nil)")
 		return

@@ -6,13 +6,16 @@ import (
 )
 
 type tsMessage struct {
-	FResult string `json:"result"`
-	FReturn int    `json:"return"`
+	FResult string `yaml:"result" json:"result"`
+	FReturn int    `yaml:"return" json:"return"`
 }
 
 const (
 	tgBytesInNum = uint64(0xABCDEF0123456789)
 	tcJSON       = `{"result":"hello","return":5}`
+	tcYaml       = `result: hello
+return: 5
+`
 )
 
 var (
@@ -44,7 +47,7 @@ func TestBytes(t *testing.T) {
 	}
 }
 
-func TestSerialize(t *testing.T) {
+func TestSerializeJSON(t *testing.T) {
 	t.Parallel()
 
 	if string(SerializeJSON(tgMessage)) != tcJSON {
@@ -65,6 +68,32 @@ func TestSerialize(t *testing.T) {
 	}
 
 	if err := DeserializeJSON([]byte(`qwerty`), res); err == nil {
+		t.Error("success deserialize invalid data")
+		return
+	}
+}
+
+func TestSerializeYAML(t *testing.T) {
+	t.Parallel()
+
+	if string(SerializeYAML(tgMessage)) != tcYaml {
+		t.Error("serialize string is invalid (non indent)")
+		return
+	}
+
+	res := new(tsMessage)
+
+	if err := DeserializeYAML([]byte(tcYaml), res); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if res.FResult != "hello" || res.FReturn != 5 {
+		t.Error("fields not equals")
+		return
+	}
+
+	if err := DeserializeYAML([]byte(`qwerty`), res); err == nil {
 		t.Error("success deserialize invalid data")
 		return
 	}

@@ -29,6 +29,28 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
+func TestQueuePanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	queueSet := NewQueueSet(
+		NewSettings(&SSettings{
+			FCapacity: 3,
+		}),
+	)
+	sQueueSet := queueSet.(*sQueueSet)
+
+	sQueueSet.fMap["abc"] = []byte{123}
+	sQueueSet.fQueue[sQueueSet.fIndex] = "abc"
+	sQueueSet.fIndex++
+
+	_ = queueSet.GetQueueKeys()
+}
+
 func TestQueueSet(t *testing.T) {
 	queueSet := NewQueueSet(
 		NewSettings(&SSettings{
