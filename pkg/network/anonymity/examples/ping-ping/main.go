@@ -22,6 +22,7 @@ import (
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -53,6 +54,15 @@ func main() {
 		service1 = newNode(serviceAddress, "SERVICE-1", dbPath1)
 		service2 = newNode("", "SERVICE-2", dbPath2)
 	)
+
+	defer func() {
+		if err := closeNode(service1); err != nil {
+			panic(err)
+		}
+		if err := closeNode(service2); err != nil {
+			panic(err)
+		}
+	}()
 
 	service1.HandleFunc(serviceHeader, handler("#1"))
 	service2.HandleFunc(serviceHeader, handler("#2"))
@@ -118,6 +128,14 @@ func handler(serviceName string) anonymity.IHandlerF {
 	}
 }
 
+func closeNode(node anonymity.INode) error {
+	return utils.MergeErrors(
+		node.Stop(),
+		node.GetNetworkNode().Stop(),
+		node.GetWrapperDB().Close(),
+	)
+}
+
 func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
@@ -131,7 +149,6 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   name,
-			FRetryEnqueue:  0,
 			FNetworkMask:   networkMask,
 			FFetchTimeWait: time.Minute,
 		}),
@@ -170,7 +187,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
 				FPoolCapacity: (1 << 4),
-				FDuration:     5 * time.Second,
+				FDuration:     2 * time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{

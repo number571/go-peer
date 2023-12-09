@@ -19,6 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -47,6 +48,15 @@ func main() {
 		service = newNode(serviceAddress, "SERVICE-1", dbPath1)
 		client  = newNode("", "SERVICE-2", dbPath2)
 	)
+
+	defer func() {
+		if err := closeNode(client); err != nil {
+			panic(err)
+		}
+		if err := closeNode(service); err != nil {
+			panic(err)
+		}
+	}()
 
 	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes))), nil
@@ -80,6 +90,14 @@ func main() {
 	fmt.Println(string(res))
 }
 
+func closeNode(node anonymity.INode) error {
+	return utils.MergeErrors(
+		node.Stop(),
+		node.GetNetworkNode().Stop(),
+		node.GetWrapperDB().Close(),
+	)
+}
+
 func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	db, err := database.NewKeyValueDB(
 		storage.NewSettings(&storage.SSettings{
@@ -93,7 +111,6 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   name,
-			FRetryEnqueue:  0,
 			FNetworkMask:   networkMask,
 			FFetchTimeWait: time.Minute,
 		}),
@@ -132,7 +149,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
 				FPoolCapacity: (1 << 4),
-				FDuration:     5 * time.Second,
+				FDuration:     2 * time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{

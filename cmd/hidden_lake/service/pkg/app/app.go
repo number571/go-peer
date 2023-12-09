@@ -172,7 +172,6 @@ func (p *sApp) Stop() error {
 	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
 
-	p.fNode.HandleFunc(pkg_settings.CServiceMask, nil)
 	err := utils.MergeErrors(
 		interrupt.StopAll([]types.IApp{
 			p.fNode,

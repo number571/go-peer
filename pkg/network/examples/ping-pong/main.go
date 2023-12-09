@@ -22,6 +22,14 @@ func main() {
 		service1 = newNode(serviceAddress)
 		service2 = newNode("")
 	)
+	defer func() {
+		if err := service1.Stop(); err != nil {
+			panic(err)
+		}
+		if err := service2.Stop(); err != nil {
+			panic(err)
+		}
+	}()
 
 	service1.HandleFunc(serviceHeader, handler("#1"))
 	service2.HandleFunc(serviceHeader, handler("#2"))

@@ -21,6 +21,11 @@ func main() {
 	var (
 		service = newNode(serviceAddress)
 	)
+	defer func() {
+		if err := service.Stop(); err != nil {
+			panic(err)
+		}
+	}()
 
 	service.HandleFunc(serviceHeader, handler())
 
@@ -33,6 +38,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	sendMsg := message.NewMessage(
 		conn.GetSettings(),
