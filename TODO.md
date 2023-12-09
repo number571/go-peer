@@ -11,3 +11,4 @@
 9. Append example of use functions (godoc)
 10. Append errors (as traffic/database) for all interface methods
 11. HLN: Hidden Lake Network
+12. Append Batch's to database

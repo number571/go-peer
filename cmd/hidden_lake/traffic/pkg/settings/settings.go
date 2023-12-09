@@ -11,6 +11,7 @@ const (
 )
 
 const (
+	CDefaultHashesWindow     = (2 << 10)
 	CDefaultMessagesCapacity = (2 << 10)
 )
 

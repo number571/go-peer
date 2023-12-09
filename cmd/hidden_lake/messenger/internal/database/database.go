@@ -16,7 +16,7 @@ type sKeyValueDB struct {
 }
 
 func NewKeyValueDB(pSettings storage.ISettings) (IKVDatabase, error) {
-	db, err := gp_database.NewKeyValueDB(pSettings)
+	db, err := gp_database.NewKVDatabase(pSettings)
 	if err != nil {
 		return nil, fmt.Errorf("new key/value database: %w", err)
 	}

@@ -19,6 +19,7 @@ type ISettings interface {
 	net_message.ISettings
 
 	GetPath() string
+	GetHashesWindow() uint64
 	GetMessagesCapacity() uint64
 }
 

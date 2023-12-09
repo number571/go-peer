@@ -53,6 +53,7 @@ settings:
   work_size_bits: 20
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
+  hashes_window: 2048
   messages_capacity: 2048
 logging:
   - info
@@ -107,6 +108,7 @@ settings:
   message_size_bytes: 8192
   key_size_bits: 4096
   work_size_bits: 20
+  hashes_window: 2048
   messages_capacity: 2048
   queue_period_ms: 5000
   limit_void_size_bytes: 4096

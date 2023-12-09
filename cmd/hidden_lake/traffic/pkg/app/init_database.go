@@ -13,8 +13,9 @@ func (p *sApp) initDatabase() error {
 	sett := database.NewSettings(&database.SSettings{
 		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
 		FNetworkKey:       cfgSettings.GetNetworkKey(),
-		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
 		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
+		FHashesWindow:     cfgSettings.GetHashesWindow(),
+		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
 	})
 
 	if !p.fConfig.GetStorage() {

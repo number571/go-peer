@@ -8,4 +8,12 @@ import (
 type IKVDatabase interface {
 	storage.IKVStorage
 	types.ICloser
+
+	// NewBatch() IKVBatch
 }
+
+// type IKVBatch interface {
+// 	Set([]byte, []byte) error
+// 	Del([]byte) error
+// 	Do() error
+// }

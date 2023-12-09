@@ -115,6 +115,20 @@ limit_void_size_bytes: 4096
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
             </tr>
+            <tr>
+                <td>5</td>
+                <td>HLTs</td>
+                <td>v1.5.22</td>
+                <td>xxx.xxx.xxx.xxx</td>
+                <td>9582</td>
+                <td>j2BR39JfDf7Bajx3</td>
+                <td>[]</td>
+                <td><a href="https://firstvds.su">firstvds.su</a></td>
+                <td>Russia</td>
+                <td>Moscow</td>
+                <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
+                <td>±10.12.2023</td>
+            </tr>
         </table>
     </td>
     <td>

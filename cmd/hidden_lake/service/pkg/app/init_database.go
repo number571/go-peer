@@ -9,7 +9,7 @@ import (
 )
 
 func (p *sApp) initDatabase() error {
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath: fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
 		}),

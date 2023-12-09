@@ -99,7 +99,7 @@ func closeNode(node anonymity.INode) error {
 }
 
 func newNode(serviceAddress, name, dbPath string) anonymity.INode {
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath: dbPath,
 		}),

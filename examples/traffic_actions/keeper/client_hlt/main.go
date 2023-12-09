@@ -21,7 +21,7 @@ const (
 
 const (
 	cLocalAddressHLT = "localhost:9582"
-	cProdAddressHLT  = "-" // nothing
+	cProdAddressHLT  = "xxx.xxx.xxx.xxx:9582" // 1x3.1GHz, 2.0GB RAM, 300GB HDD
 )
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 
 	netSett := net_message.NewSettings(&net_message.SSettings{
 		FWorkSizeBits: 20,
-		FNetworkKey:   "some-network-key",
+		FNetworkKey:   "j2BR39JfDf7Bajx3",
 	})
 
 	readPrivKey, err := os.ReadFile("priv.key")

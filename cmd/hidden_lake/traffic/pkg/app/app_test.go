@@ -38,6 +38,7 @@ func TestApp(t *testing.T) {
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FQueuePeriodMS:    testutils.TCQueuePeriod,
+				FHashesWindow:     testutils.TCCapacity,
 				FMessagesCapacity: testutils.TCCapacity,
 				FNetworkKey:       "_",
 				FKeySizeBits:      testutils.TcKeySize,

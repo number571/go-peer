@@ -19,6 +19,7 @@ type IConfigSettings interface {
 
 	GetWorkSizeBits() uint64
 	GetQueuePeriodMS() uint64
+	GetHashesWindow() uint64
 	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64
 	GetNetworkKey() string

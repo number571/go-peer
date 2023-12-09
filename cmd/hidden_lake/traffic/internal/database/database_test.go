@@ -24,7 +24,7 @@ const (
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
 }
@@ -41,11 +41,18 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
+			FPath:             dbPath,
 			FMessagesCapacity: testutils.TCCapacity,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FPath: dbPath,
+			FPath:         dbPath,
+			FHashesWindow: testutils.TCCapacity,
+		})
+	case 2:
+		_ = NewSettings(&SSettings{
+			FHashesWindow:     testutils.TCCapacity,
+			FMessagesCapacity: testutils.TCCapacity,
 		})
 	}
 }
@@ -60,6 +67,7 @@ func TestIInitDatabase(t *testing.T) {
 		FPath:             path,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err == nil {
@@ -85,6 +93,7 @@ func TestDatabaseHashesPanic(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {
@@ -117,6 +126,7 @@ func TestDatabaseLoad(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {
@@ -170,6 +180,7 @@ func TestDatabasePush(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     1,
 		FMessagesCapacity: 1,
 	}))
 	if err != nil {
@@ -253,6 +264,7 @@ func TestDatabase(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {

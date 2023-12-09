@@ -20,6 +20,7 @@ type SConfigSettings struct {
 	FMessageSizeBytes   uint64 `yaml:"message_size_bytes"`
 	FWorkSizeBits       uint64 `yaml:"work_size_bits"`
 	FKeySizeBits        uint64 `yaml:"key_size_bits"`
+	FHashesWindow       uint64 `yaml:"hashes_window"`
 	FMessagesCapacity   uint64 `yaml:"messages_capacity"`
 	FQueuePeriodMS      uint64 `yaml:"queue_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `yaml:"limit_void_size_bytes,omitempty"`
@@ -101,6 +102,10 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 
 func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 	return p.FQueuePeriodMS
+}
+
+func (p *SConfigSettings) GetHashesWindow() uint64 {
+	return p.FHashesWindow
 }
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {

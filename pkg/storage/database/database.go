@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	_ IKVDatabase = &sKeyValueDB{}
+	_ IKVDatabase = &sKVDatabase{}
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 	cSaltSize = 32
 )
 
-type sKeyValueDB struct {
+type sKVDatabase struct {
 	fMutex    sync.Mutex
 	fDB       *leveldb.DB
 	fSettings storage.ISettings
@@ -34,7 +34,7 @@ type sKeyValueDB struct {
 	fAuthKey  []byte
 }
 
-func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
+func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 	path := pSett.GetPath()
 	opt := &opt.Options{
 		DisableBlockCache: true,
@@ -88,7 +88,7 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 		return nil, fmt.Errorf("incorrect salt hash: %w", err)
 	}
 
-	return &sKeyValueDB{
+	return &sKVDatabase{
 		fDB:       db,
 		fSettings: pSett,
 		fCipher:   symmetric.NewAESCipher(cipherKey),
@@ -96,11 +96,11 @@ func NewKeyValueDB(pSett storage.ISettings) (IKVDatabase, error) {
 	}, nil
 }
 
-func (p *sKeyValueDB) GetSettings() storage.ISettings {
+func (p *sKVDatabase) GetSettings() storage.ISettings {
 	return p.fSettings
 }
 
-func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
+func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -114,7 +114,7 @@ func (p *sKeyValueDB) Set(pKey []byte, pValue []byte) error {
 	return nil
 }
 
-func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
+func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -130,7 +130,7 @@ func (p *sKeyValueDB) Get(pKey []byte) ([]byte, error) {
 	)
 }
 
-func (p *sKeyValueDB) Del(pKey []byte) error {
+func (p *sKVDatabase) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -149,7 +149,7 @@ func (p *sKeyValueDB) Del(pKey []byte) error {
 	return nil
 }
 
-func (p *sKeyValueDB) Close() error {
+func (p *sKVDatabase) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

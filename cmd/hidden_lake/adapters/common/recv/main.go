@@ -28,7 +28,7 @@ const (
 
 func initDB() database.IKVDatabase {
 	var err error
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath: databasePath,
 		}),

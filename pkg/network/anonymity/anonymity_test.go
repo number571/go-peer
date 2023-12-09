@@ -621,7 +621,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 }
 
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
 			FWorkSize: testutils.TCWorkSize,

@@ -25,7 +25,7 @@ type sDatabase struct {
 }
 
 func NewDatabase(pSett ISettings) (IDatabase, error) {
-	kvDB, err := database.NewKeyValueDB(
+	kvDB, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath: pSett.GetPath(),
 		}),
@@ -50,9 +50,9 @@ func (p *sDatabase) Hashes() ([][]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	msgsLimit := p.Settings().GetMessagesCapacity()
-	res := make([][]byte, 0, msgsLimit)
-	for i := uint64(0); i < msgsLimit; i++ {
+	limit := p.Settings().GetHashesWindow()
+	res := make([][]byte, 0, limit)
+	for i := uint64(0); i < limit; i++ {
 		hash, err := p.fDB.Get(getKeyHash(i))
 		if err != nil {
 			break

@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake`: append _daemon/journal_hlX.sh script
 - Update `cmd/hidden_lake`: append _configs/prod configurations
 - Update `docs`: append hidden_lake_anonymous_network.pptx document
+- Update `cmd/hidden_lake`: append new HLTs node (firstvds.ru provider) into README
 
 ### CHANGES
 
@@ -18,6 +19,8 @@
 - Update `pkg/network`: rename Run -> Listen, Stop -> Close
 - Update `pkg/network/anonymity`: append fIsRun field
 - Update `cmd/hidden_lake/composite`: append fIsRun fields
+- Update `cmd/hidden_lake/traffic`: append GetHashesWindow method
+- Update `pkg/storage/database`: rename NewKeyValueDB -> NewKVDatabase
 
 ### BUG FIXES
 

@@ -26,7 +26,7 @@ func TestTryRecover(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 5)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -57,7 +57,7 @@ func TestTryRecover(t *testing.T) {
 		os.Remove(dbPath + "/" + name)
 	}
 
-	store, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err = NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -122,7 +122,7 @@ func TestInvalidCreateDB(t *testing.T) {
 	dbPath := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 	defer os.RemoveAll(dbPath)
 
-	_, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	_, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -139,7 +139,7 @@ func TestInvalidInitDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -169,7 +169,7 @@ func TestInvalidInitDB(t *testing.T) {
 		return
 	}
 
-	db := store.(*sKeyValueDB)
+	db := store.(*sKVDatabase)
 	if err := db.fDB.Delete([]byte(cHashKey), nil); err != nil {
 		t.Error(err)
 		return
@@ -177,7 +177,7 @@ func TestInvalidInitDB(t *testing.T) {
 
 	store.Close()
 
-	_, errx := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	_, errx := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -194,7 +194,7 @@ func TestCreateDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",
@@ -232,7 +232,7 @@ func TestCipherKey(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER1",
@@ -249,7 +249,7 @@ func TestCipherKey(t *testing.T) {
 	}
 
 	store.Close() // open this database with another key
-	_, err = NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	_, err = NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER2",
@@ -266,7 +266,7 @@ func TestBasicDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	store, err := NewKVDatabase(storage.NewSettings(&storage.SSettings{
 		FPath:     dbPath,
 		FWorkSize: testutils.TCWorkSize,
 		FPassword: "CIPHER",

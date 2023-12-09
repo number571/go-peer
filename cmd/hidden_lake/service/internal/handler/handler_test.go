@@ -172,7 +172,7 @@ func testRunNewNode(dbPath, addr string) anonymity.INode {
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {
-	db, err := database.NewKeyValueDB(
+	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     dbPath,
 			FWorkSize: testutils.TCWorkSize,
