@@ -103,11 +103,11 @@ func testAllPushFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB str
 	}()
 	interrupt.StopAll([]types.IApp{
 		node,
-		node.GetNetworkNode(),
 	})
 	interrupt.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
+		node.GetNetworkNode(),
 	})
 }
 
@@ -142,7 +142,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Run(); err != nil {
+	if err := node.GetNetworkNode().Listen(); err != nil {
 		return nil
 	}
 	return node

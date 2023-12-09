@@ -49,10 +49,10 @@ func TestHLS(t *testing.T) {
 	defer func() {
 		interrupt.StopAll([]types.IApp{
 			nodeService,
-			nodeService.GetNetworkNode(),
 		})
 		interrupt.CloseAll([]types.ICloser{
 			nodeService.GetWrapperDB(),
+			nodeService.GetNetworkNode(),
 		})
 	}()
 
@@ -65,10 +65,10 @@ func TestHLS(t *testing.T) {
 	defer func() {
 		interrupt.StopAll([]types.IApp{
 			nodeClient,
-			nodeClient.GetNetworkNode(),
 		})
 		interrupt.CloseAll([]types.ICloser{
 			nodeClient.GetWrapperDB(),
+			nodeClient.GetNetworkNode(),
 		})
 	}()
 }
@@ -110,7 +110,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Run(); err != nil {
+	if err := node.GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
 		return nil, nil
 	}

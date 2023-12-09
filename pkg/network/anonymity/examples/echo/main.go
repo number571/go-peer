@@ -68,7 +68,7 @@ func main() {
 	if err := service.Run(); err != nil {
 		panic(err)
 	}
-	if err := service.GetNetworkNode().Run(); err != nil {
+	if err := service.GetNetworkNode().Listen(); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait
@@ -93,8 +93,8 @@ func main() {
 func closeNode(node anonymity.INode) error {
 	return utils.MergeErrors(
 		node.Stop(),
-		node.GetNetworkNode().Stop(),
 		node.GetWrapperDB().Close(),
+		node.GetNetworkNode().Close(),
 	)
 }
 

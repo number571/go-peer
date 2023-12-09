@@ -15,10 +15,14 @@
 ### CHANGES
 
 - Update `pkg/client/queue`: move to pkg/network/anonymity/queue
+- Update `pkg/network`: rename Run -> Listen, Stop -> Close
+- Update `pkg/network/anonymity`: append fIsRun field
+- Update `cmd/hidden_lake/composite`: append fIsRun fields
 
 ### BUG FIXES
 
 - Update `pkg/network/anonymity`: fix static period of generate messages
+- Update `cmd/hidden_lake`: fix lock mutex of .Stop method in applications
 
 <!-- ... -->
 

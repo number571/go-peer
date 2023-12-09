@@ -27,6 +27,7 @@ var (
 
 type sNode struct {
 	fMutex         sync.Mutex
+	fIsRun         bool
 	fSettings      ISettings
 	fLogger        logger.ILogger
 	fWrapperDB     IWrapperDB
@@ -58,6 +59,13 @@ func NewNode(
 }
 
 func (p *sNode) Run() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	if p.fIsRun {
+		return errors.New("anonymity node already is running")
+	}
+
 	if err := p.runQueue(); err != nil {
 		return fmt.Errorf("run node: %w", err)
 	}
@@ -65,14 +73,25 @@ func (p *sNode) Run() error {
 		p.fSettings.GetNetworkMask(),
 		p.handleWrapper(),
 	)
+
+	p.fIsRun = true
 	return nil
 }
 
 func (p *sNode) Stop() error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	if !p.fIsRun {
+		return errors.New("anonymity node already is stopped")
+	}
+
 	p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
 	if err := p.fQueue.Stop(); err != nil {
 		return fmt.Errorf("stop node: %w", err)
 	}
+
+	p.fIsRun = false
 	return nil
 }
 

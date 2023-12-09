@@ -95,7 +95,7 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 // Opens a tcp connection to receive data from outside.
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
-func (p *sNode) Run() error {
+func (p *sNode) Listen() error {
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
 		return fmt.Errorf("run node: %w", err)
@@ -104,6 +104,7 @@ func (p *sNode) Run() error {
 	go func(pListener net.Listener) {
 		defer pListener.Close()
 		p.setListener(pListener)
+
 		for {
 			tconn, err := p.getListener().Accept()
 			if err != nil {
@@ -128,7 +129,7 @@ func (p *sNode) Run() error {
 }
 
 // Closes the listener and all connections.
-func (p *sNode) Stop() error {
+func (p *sNode) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

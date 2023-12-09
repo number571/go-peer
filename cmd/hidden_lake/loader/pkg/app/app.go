@@ -63,11 +63,11 @@ func (p *sApp) Run() error {
 	if p.fIsRun {
 		return errors.New("application already running")
 	}
-	p.fIsRun = true
 
 	p.initServiceHTTP()
 	p.initServicePPROF()
 
+	p.fIsRun = true
 	res := make(chan error)
 
 	go func() {
@@ -97,7 +97,7 @@ func (p *sApp) Run() error {
 	select {
 	case err := <-res:
 		resErr := fmt.Errorf("got run error: %w", err)
-		return utils.MergeErrors(resErr, p.Stop())
+		return utils.MergeErrors(resErr, p.stop())
 	case <-time.After(cInitStart):
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
 		return nil
@@ -108,6 +108,10 @@ func (p *sApp) Stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	return p.stop()
+}
+
+func (p *sApp) stop() error {
 	if !p.fIsRun {
 		return errors.New("application already stopped or not started")
 	}

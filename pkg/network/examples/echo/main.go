@@ -22,14 +22,14 @@ func main() {
 		service = newNode(serviceAddress)
 	)
 	defer func() {
-		if err := service.Stop(); err != nil {
+		if err := service.Close(); err != nil {
 			panic(err)
 		}
 	}()
 
 	service.HandleFunc(serviceHeader, handler())
 
-	if err := service.Run(); err != nil {
+	if err := service.Listen(); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait

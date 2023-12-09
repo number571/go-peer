@@ -102,10 +102,10 @@ func testAllOnlineFree(node anonymity.INode, pathCfg, pathDB string) {
 	}()
 	interrupt.StopAll([]types.IApp{
 		node,
-		node.GetNetworkNode(),
 	})
 	interrupt.CloseAll([]types.ICloser{
 		node.GetWrapperDB(),
+		node.GetNetworkNode(),
 	})
 }
 
@@ -136,7 +136,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Run(); err != nil {
+	if err := node.GetNetworkNode().Listen(); err != nil {
 		return nil
 	}
 	return node

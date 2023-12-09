@@ -73,7 +73,7 @@ func main() {
 	if err := service1.Run(); err != nil {
 		panic(err)
 	}
-	if err := service1.GetNetworkNode().Run(); err != nil {
+	if err := service1.GetNetworkNode().Listen(); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second)
@@ -131,8 +131,8 @@ func handler(serviceName string) anonymity.IHandlerF {
 func closeNode(node anonymity.INode) error {
 	return utils.MergeErrors(
 		node.Stop(),
-		node.GetNetworkNode().Stop(),
 		node.GetWrapperDB().Close(),
+		node.GetNetworkNode().Close(),
 	)
 }
 

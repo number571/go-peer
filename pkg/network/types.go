@@ -13,7 +13,8 @@ type (
 )
 
 type INode interface {
-	types.IApp
+	types.ICloser
+	Listen() error
 
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn

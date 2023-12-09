@@ -23,10 +23,10 @@ func main() {
 		service2 = newNode("")
 	)
 	defer func() {
-		if err := service1.Stop(); err != nil {
+		if err := service1.Close(); err != nil {
 			panic(err)
 		}
-		if err := service2.Stop(); err != nil {
+		if err := service2.Close(); err != nil {
 			panic(err)
 		}
 	}()
@@ -34,10 +34,9 @@ func main() {
 	service1.HandleFunc(serviceHeader, handler("#1"))
 	service2.HandleFunc(serviceHeader, handler("#2"))
 
-	if err := service1.Run(); err != nil {
+	if err := service1.Listen(); err != nil {
 		panic(err)
 	}
-	defer service1.Stop()
 
 	time.Sleep(time.Second) // wait
 

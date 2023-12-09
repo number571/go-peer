@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"sync"
+
 	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
 	"github.com/number571/go-peer/pkg/types"
@@ -12,8 +15,10 @@ var (
 )
 
 type sApp struct {
-	fHLS types.IApp
-	fHLM types.IApp
+	fMutex sync.Mutex
+	fIsRun bool
+	fHLS   types.IApp
+	fHLM   types.IApp
 }
 
 func initApp(pPath, pKey string) (types.IApp, error) {
@@ -34,12 +39,33 @@ func initApp(pPath, pKey string) (types.IApp, error) {
 }
 
 func (p *sApp) Run() error {
-	if err := p.fHLS.Run(); err != nil {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	if p.fIsRun {
+		return errors.New("application already is running")
+	}
+
+	if err := utils.MergeErrors(p.fHLS.Run(), p.fHLM.Run()); err != nil {
 		return err
 	}
-	return p.fHLM.Run()
+
+	p.fIsRun = true
+	return nil
 }
 
 func (p *sApp) Stop() error {
-	return utils.MergeErrors(p.fHLM.Stop(), p.fHLS.Stop())
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	if !p.fIsRun {
+		return errors.New("anonymity node already is stopped")
+	}
+
+	if err := utils.MergeErrors(p.fHLM.Stop(), p.fHLS.Stop()); err != nil {
+		return err
+	}
+
+	p.fIsRun = false
+	return nil
 }

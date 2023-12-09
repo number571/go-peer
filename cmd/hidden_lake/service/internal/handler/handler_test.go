@@ -117,11 +117,11 @@ func testAllFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string)
 	}()
 	interrupt.StopAll([]types.IApp{
 		node,
-		node.GetNetworkNode(),
 	})
 	interrupt.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
+		node.GetNetworkNode(),
 	})
 }
 

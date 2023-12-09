@@ -228,22 +228,22 @@ func TestNodeConnection(t *testing.T) {
 	)
 	defer testFreeNodes([]INode{node1, node2, node3})
 
-	if err := node2.Run(); err != nil {
+	if err := node2.Listen(); err != nil {
 		t.Error(err)
 		return
 	}
-	defer node2.Stop()
+	defer node2.Close()
 
-	if err := node2.Run(); err == nil {
+	if err := node2.Listen(); err == nil {
 		t.Error("success second run node")
 		return
 	}
 
-	if err := node3.Run(); err != nil {
+	if err := node3.Listen(); err != nil {
 		t.Error(err)
 		return
 	}
-	defer node3.Stop()
+	defer node3.Close()
 
 	if err := node1.AddConnection("unknown_connection_address"); err == nil {
 		t.Error("success add incorrect connection address")
@@ -291,12 +291,12 @@ func TestNodeConnection(t *testing.T) {
 		return
 	}
 
-	if err := node2.Stop(); err != nil {
+	if err := node2.Close(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := node2.Stop(); err == nil {
+	if err := node2.Close(); err == nil {
 		t.Error("success stop already stopped process")
 		return
 	}
@@ -353,10 +353,10 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects, time.Minute)
 	}
 
-	if err := nodes[2].Run(); err != nil {
+	if err := nodes[2].Listen(); err != nil {
 		return nodes, nil, err
 	}
-	if err := nodes[4].Run(); err != nil {
+	if err := nodes[4].Listen(); err != nil {
 		return nodes, nil, err
 	}
 
@@ -408,6 +408,6 @@ func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 
 func testFreeNodes(nodes []INode) {
 	for _, node := range nodes {
-		node.Stop()
+		node.Close()
 	}
 }

@@ -586,11 +586,11 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		)
 	}
 
-	if err := nodes[2].GetNetworkNode().Run(); err != nil {
+	if err := nodes[2].GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
 		return [5]INode{}
 	}
-	if err := nodes[4].GetNetworkNode().Run(); err != nil {
+	if err := nodes[4].GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
 		return [5]INode{}
 	}
@@ -696,8 +696,8 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 func testFreeNodes(nodes []INode, typeDB int) {
 	for _, node := range nodes {
 		node.GetWrapperDB().Close()
+		node.GetNetworkNode().Close()
 		node.Stop()
-		node.GetNetworkNode().Stop()
 	}
 	testDeleteDB(typeDB)
 }

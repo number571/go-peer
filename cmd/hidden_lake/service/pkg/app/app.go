@@ -83,7 +83,6 @@ func (p *sApp) Run() error {
 	if p.fIsRun {
 		return errors.New("application already running")
 	}
-	p.fIsRun = true
 
 	if err := p.initDatabase(); err != nil {
 		return fmt.Errorf("init database: %w", err)
@@ -92,6 +91,7 @@ func (p *sApp) Run() error {
 	p.initServiceHTTP()
 	p.initServicePPROF()
 
+	p.fIsRun = true
 	res := make(chan error)
 
 	go func() {
@@ -145,7 +145,7 @@ func (p *sApp) Run() error {
 		}
 
 		// run node in server mode
-		err := p.fNode.GetNetworkNode().Run()
+		err := p.fNode.GetNetworkNode().Listen()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			res <- err
 			return
@@ -155,7 +155,7 @@ func (p *sApp) Run() error {
 	select {
 	case err := <-res:
 		resErr := fmt.Errorf("got run error: %w", err)
-		return utils.MergeErrors(resErr, p.Stop())
+		return utils.MergeErrors(resErr, p.stop())
 	case <-time.After(cInitStart):
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
 		return nil
@@ -166,6 +166,10 @@ func (p *sApp) Stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	return p.stop()
+}
+
+func (p *sApp) stop() error {
 	if !p.fIsRun {
 		return errors.New("application already stopped or not started")
 	}
@@ -176,12 +180,12 @@ func (p *sApp) Stop() error {
 		interrupt.StopAll([]types.IApp{
 			p.fNode,
 			p.fConnKeeper,
-			p.fNode.GetNetworkNode(),
 		}),
 		interrupt.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
 			p.fNode.GetWrapperDB(),
+			p.fNode.GetNetworkNode(),
 		}),
 	)
 	if err != nil {
