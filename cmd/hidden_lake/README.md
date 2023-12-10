@@ -131,7 +131,7 @@ messages_capacity: 33554432
                 <td>9582</td>
                 <td>j2BR39JfDf7Bajx3</td>
                 <td>[]</td>
-                <td><a href="https://firstvds.su">firstvds.su</a></td>
+                <td><a href="https://firstvds.ru">firstvds.ru</a></td>
                 <td>Russia</td>
                 <td>Moscow</td>
                 <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
