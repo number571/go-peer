@@ -34,7 +34,16 @@ func (p *sInMemoryDatabase) Settings() ISettings {
 }
 
 func (p *sInMemoryDatabase) Hashes() ([][]byte, error) {
-	return p.fQueueSet.GetQueueKeys(), nil
+	limit := p.Settings().GetHashesWindow()
+
+	queueKeys := p.fQueueSet.GetQueueKeys()
+	queueLen := uint64(len(queueKeys))
+
+	if limit < queueLen {
+		return queueKeys[queueLen-limit:], nil
+	}
+
+	return queueKeys, nil
 }
 
 func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {

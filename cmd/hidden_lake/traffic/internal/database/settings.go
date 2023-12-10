@@ -27,9 +27,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPath == "" {
 		panic(`p.FPath == ""`)
 	}
-	if p.FHashesWindow == 0 {
-		panic("p.FHashesWindow == 0")
-	}
 	if p.FMessagesCapacity == 0 {
 		panic("p.FMessagesCapacity == 0")
 	}

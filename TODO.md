@@ -12,3 +12,5 @@
 10. Append errors (as traffic/database) for all interface methods
 11. HLN: Hidden Lake Network
 12. Append Batch's to database
+13. Think about append void bytes into network.IMessage
+
