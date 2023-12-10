@@ -135,7 +135,7 @@ messages_capacity: 33554432
                 <td>Russia</td>
                 <td>Moscow</td>
                 <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
-                <td>±10.12.2023</td>
+                <td>±10.12.2024</td>
             </tr>
         </table>
     </td>
