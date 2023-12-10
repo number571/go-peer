@@ -28,11 +28,19 @@ $ make docker-run
 ## Settings
 
 ```yaml
+# [HLS, HLT]
 message_size_bytes: 8192
 work_size_bits: 20
 key_size_bits: 4096
 queue_period_ms: 5000
 limit_void_size_bytes: 4096
+
+# [HLT]
+hashes_window: 2048
+## 2^20 msgs ~= 8GiB: (62.233.46.109, 94.103.91.81)
+messages_capacity: 1048576  
+## 2^25 msgs ~= 256GiB: (185.43.4.253)
+messages_capacity: 33554432
 ```
 
 ## Connections
