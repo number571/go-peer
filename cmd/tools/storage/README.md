@@ -4,7 +4,7 @@
 
 ```bash
 usage: 
-    ./main (get|put|del) [storage-path] [data-key]
+    ./main (get|set|del) [storage-path] [data-key]
 stdin:
     [password]EOL
     [data-value]EOF
@@ -16,7 +16,7 @@ EOF - End of File (Ctrl+D)
 ## Example
 
 ```bash
-$ ./main put storage.stg data-key
+$ ./main set storage.stg data-key
 > [password]EOL
 > [data-value]EOF
 ok

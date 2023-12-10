@@ -6,7 +6,7 @@
 usage: 
     ./main [service-name] [login]
 stdin:
-    [master-key]EOF
+    [master-key]EOL
 ```
 
 EOL - End of Line (Enter)

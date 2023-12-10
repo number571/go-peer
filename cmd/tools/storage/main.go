@@ -19,7 +19,7 @@ func main() {
 	if len(os.Args) != 4 {
 		panic(fmt.Sprintf(
 			"usage:\n\t%s\nstdin:\n\t%s\n\t%s\n\n",
-			"./main (get|put|del) [storage-path] [data-key]",
+			"./main (get|set|del) [storage-path] [data-key]",
 			"[password]EOL",
 			"[data-value]EOF",
 		))
@@ -47,7 +47,7 @@ func main() {
 			panic(err)
 		}
 		io.Copy(os.Stdout, bytes.NewBuffer(data))
-	case "PUT":
+	case "SET":
 		if _, err := stg.Get(dateKey); err == nil {
 			panic("data-key already exist")
 		}

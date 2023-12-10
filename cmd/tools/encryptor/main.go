@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -31,7 +30,7 @@ func main() {
 		privKey asymmetric.IPrivKey
 	)
 
-	keyBytes, err := ioutil.ReadFile(os.Args[2])
+	keyBytes, err := os.ReadFile(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
