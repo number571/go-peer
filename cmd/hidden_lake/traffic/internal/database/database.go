@@ -50,12 +50,24 @@ func (p *sDatabase) Hashes() ([][]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	limit := p.Settings().GetHashesWindow()
-	res := make([][]byte, 0, limit)
-	for i := uint64(0); i < limit; i++ {
-		hash, err := p.fDB.Get(getKeyHash(i))
+	hashesWindow := p.Settings().GetHashesWindow()
+	messagesCapacity := p.Settings().GetMessagesCapacity()
+
+	res := make([][]byte, 0, hashesWindow)
+
+	start := uint64(0)
+	pointer := p.getPointer()
+
+	if pointer > hashesWindow {
+		start = pointer - hashesWindow
+	} else {
+		start = (pointer - hashesWindow + messagesCapacity) % messagesCapacity
+	}
+
+	for i := uint64(start); i < (start + hashesWindow); i++ {
+		hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
 		if err != nil {
-			break
+			continue
 		}
 		if len(hash) != hashing.CSHA256Size {
 			panic("incorrect hash size")

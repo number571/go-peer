@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/traffic`: fix order get hashes from database
+
 <!-- ... -->
 
 ## v1.5.23

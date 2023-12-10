@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -160,6 +161,90 @@ func TestDatabaseLoad(t *testing.T) {
 	if _, err := kvDB.Load(hash2); err == nil {
 		t.Error("success load with incorrect hash")
 		return
+	}
+}
+
+func TestDatabaseHashes(t *testing.T) {
+	t.Parallel()
+
+	const (
+		hashesWindow     = 2
+		messagesCapacity = 5
+	)
+
+	if hashesWindow > messagesCapacity {
+		panic("hashesWindow > messagesCapacity")
+	}
+
+	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
+	os.RemoveAll(pathDB)
+
+	kvDB, err := NewDatabase(NewSettings(&SSettings{
+		FPath:             pathDB,
+		FNetworkKey:       testutils.TCNetworkKey,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FHashesWindow:     hashesWindow,
+		FMessagesCapacity: messagesCapacity,
+	}))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		kvDB.Close()
+		os.RemoveAll(pathDB)
+	}()
+
+	cl := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+	)
+
+	lastHashes := make([][]byte, 0, hashesWindow)
+
+	for i := 0; i < messagesCapacity; i++ {
+		msg, err := newNetworkMessageWithData(cl, testutils.TCNetworkKey, fmt.Sprintf("%d", i))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if err := kvDB.Push(msg); err != nil {
+			t.Error(err)
+			return
+		}
+		if i >= messagesCapacity-hashesWindow {
+			lastHashes = append(lastHashes, msg.GetHash())
+		}
+		fmt.Println(encoding.HexEncode(msg.GetHash()))
+	}
+
+	gotHashes, err := kvDB.Hashes()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	fmt.Println()
+
+	for _, v := range gotHashes {
+		fmt.Println(encoding.HexEncode(v))
+	}
+
+	fmt.Println()
+
+	for _, v := range lastHashes {
+		fmt.Println(encoding.HexEncode(v))
+	}
+
+	for i := range gotHashes {
+		if !bytes.Equal(gotHashes[i], lastHashes[i]) {
+			t.Error("got invalid hash values")
+			return
+		}
 	}
 }
 
@@ -358,10 +443,10 @@ func TestDatabase(t *testing.T) {
 	}
 }
 
-func newNetworkMessage(cl client.IClient, networkKey string) (net_message.IMessage, error) {
+func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_message.IMessage, error) {
 	msg, err := cl.EncryptPayload(
 		cl.GetPubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(data)),
 	)
 	if err != nil {
 		return nil, err
@@ -374,4 +459,8 @@ func newNetworkMessage(cl client.IClient, networkKey string) (net_message.IMessa
 		payload.NewPayload(0, msg.ToBytes()),
 	)
 	return netMsg, nil
+}
+
+func newNetworkMessage(cl client.IClient, networkKey string) (net_message.IMessage, error) {
+	return newNetworkMessageWithData(cl, networkKey, testutils.TcBody)
 }
