@@ -18,7 +18,7 @@ type sInMemoryDatabase struct {
 	fQueueSet queue_set.IQueueSet
 }
 
-func NewInMemoryDatabase(pSett ISettings) IDatabase {
+func NewInMemoryDatabase(pSett ISettings) (IDatabase, error) {
 	return &sInMemoryDatabase{
 		fSettings: pSett,
 		fQueueSet: queue_set.NewQueueSet(
@@ -26,7 +26,7 @@ func NewInMemoryDatabase(pSett ISettings) IDatabase {
 				FCapacity: pSett.GetMessagesCapacity(),
 			}),
 		),
-	}
+	}, nil
 }
 
 func (p *sInMemoryDatabase) Settings() ISettings {

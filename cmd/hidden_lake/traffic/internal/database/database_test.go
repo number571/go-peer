@@ -167,6 +167,11 @@ func TestDatabaseLoad(t *testing.T) {
 func TestDatabaseHashes(t *testing.T) {
 	t.Parallel()
 
+	testDatabaseHashes(t, 4, NewDatabase)
+	testDatabaseHashes(t, 5, NewInMemoryDatabase)
+}
+
+func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISettings) (IDatabase, error)) {
 	const (
 		hashesWindow     = 2
 		messagesCapacity = 5
@@ -176,10 +181,10 @@ func TestDatabaseHashes(t *testing.T) {
 		panic("hashesWindow > messagesCapacity")
 	}
 
-	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
+	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewDatabase(NewSettings(&SSettings{
+	kvDB, err := dbConstruct(NewSettings(&SSettings{
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,

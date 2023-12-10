@@ -18,12 +18,17 @@ func (p *sApp) initDatabase() error {
 		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
 	})
 
-	if !p.fConfig.GetStorage() {
-		p.fWrapperDB.Set(database.NewInMemoryDatabase(sett))
-		return nil
-	}
+	var (
+		db  database.IDatabase
+		err error
+	)
 
-	db, err := database.NewDatabase(sett)
+	switch {
+	case p.fConfig.GetStorage():
+		db, err = database.NewDatabase(sett)
+	default:
+		db, err = database.NewInMemoryDatabase(sett)
+	}
 	if err != nil {
 		return fmt.Errorf("init database: %w", err)
 	}
