@@ -10,6 +10,7 @@
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
 10. Think about append void bytes into network.IMessage
+11. Some methods to context.Context implementation
 
 ### Tests
 
@@ -22,3 +23,4 @@
 2. HLF: Hidden Lake Filer
 3. HLE: Hidden Lake Encryptor
 4. HLN: Hidden Lake Network
+5. HLH: Hidden Lake Helpers (HLE, HLL)

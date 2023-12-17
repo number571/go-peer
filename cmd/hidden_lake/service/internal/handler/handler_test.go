@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -102,22 +103,20 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, *http.Server) {
+func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, context.CancelFunc, *http.Server) {
 	wcfg := testNewWrapper(cfgPath)
-	node := testRunNewNode(dbPath, "")
+	node, cancel := testRunNewNode(dbPath, "")
 	srvc := testRunService(wcfg, node, srvAddr)
 	time.Sleep(200 * time.Millisecond)
-	return wcfg, node, srvc
+	return wcfg, node, cancel, srvc
 }
 
-func testAllFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string) {
+func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Server, pathCfg, pathDB string) {
 	defer func() {
 		os.RemoveAll(pathDB)
 		os.RemoveAll(pathCfg)
 	}()
-	interrupt.StopAll([]types.IApp{
-		node,
-	})
+	cancel()
 	interrupt.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
@@ -163,12 +162,11 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 	return config.NewWrapper(cfg)
 }
 
-func testRunNewNode(dbPath, addr string) anonymity.INode {
+func testRunNewNode(dbPath, addr string) (anonymity.INode, context.CancelFunc) {
 	node := testNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
-	if err := node.Run(); err != nil {
-		return nil
-	}
-	return node
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() { _ = node.Run(ctx) }()
+	return node, cancel
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -41,15 +42,13 @@ func TestHLS(t *testing.T) {
 	defer srv.Close()
 
 	// service
-	nodeService, err := testStartNodeHLS(t)
+	nodeService, nodeCancel, err := testStartNodeHLS(t)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer func() {
-		interrupt.StopAll([]types.IApp{
-			nodeService,
-		})
+		nodeCancel()
 		interrupt.CloseAll([]types.ICloser{
 			nodeService.GetWrapperDB(),
 			nodeService.GetNetworkNode(),
@@ -57,15 +56,13 @@ func TestHLS(t *testing.T) {
 	}()
 
 	// client
-	nodeClient, err := testStartClientHLS()
+	nodeClient, clientCancel, err := testStartClientHLS()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer func() {
-		interrupt.StopAll([]types.IApp{
-			nodeClient,
-		})
+		clientCancel()
 		interrupt.CloseAll([]types.ICloser{
 			nodeClient.GetWrapperDB(),
 			nodeClient.GetNetworkNode(),
@@ -75,7 +72,7 @@ func TestHLS(t *testing.T) {
 
 // HLS
 
-func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
+func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error) {
 	rawCFG := &config.SConfig{
 		FServices: map[string]string{
 			tcServiceAddressInHLS: testutils.TgAddrs[5],
@@ -90,12 +87,12 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 
 	cfg, err := config.BuildConfig(fmt.Sprintf(tcPathConfigTemplate, 9), rawCFG)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
+	node, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
 	if node == nil {
-		return nil, fmt.Errorf("node is not running")
+		return nil, nil, fmt.Errorf("node is not running")
 	}
 
 	node.HandleFunc(
@@ -112,24 +109,24 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, error) {
 
 	if err := node.GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
-		return nil, nil
+		return nil, cancel, nil
 	}
-	return node, nil
+	return node, cancel, nil
 }
 
 // CLIENT
 
-func testStartClientHLS() (anonymity.INode, error) {
+func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 	time.Sleep(time.Second)
 
-	node := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
+	node, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
 	if node == nil {
-		return nil, fmt.Errorf("node is not running")
+		return nil, cancel, fmt.Errorf("node is not running")
 	}
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().AddConnection(testutils.TgAddrs[4]); err != nil {
-		return nil, err
+		return nil, cancel, err
 	}
 
 	pld := adapters.NewPayload(
@@ -145,18 +142,18 @@ func testStartClientHLS() (anonymity.INode, error) {
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
 	respBytes, err := node.FetchPayload(pubKey, pld)
 	if err != nil {
-		return node, err
+		return node, cancel, err
 	}
 
 	resp, err := response.LoadResponse(respBytes)
 	if err != nil {
-		return node, err
+		return node, cancel, err
 	}
 
 	body := resp.GetBody()
 	if string(body) != "{\"echo\":\"hello, world!\",\"error\":0}\n" {
-		return node, fmt.Errorf("result does not match; got '%s'", string(body))
+		return node, cancel, fmt.Errorf("result does not match; got '%s'", string(body))
 	}
 
-	return node, nil
+	return node, cancel, nil
 }

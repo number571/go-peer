@@ -7,7 +7,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type tsCommand tsCloser
 type tsCloser struct {
 	fFlag bool
 }
@@ -31,48 +30,11 @@ func TestCloser(t *testing.T) {
 	}
 }
 
-func TestStopper(t *testing.T) {
-	t.Parallel()
-
-	err := StopAll([]types.IApp{
-		testNewCommand(false),
-		testNewCommand(false),
-		testNewCommand(false),
-	})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if err := StopAll([]types.IApp{testNewCommand(true)}); err == nil {
-		t.Error("nothing error?")
-		return
-	}
-}
-
 func testNewCloser(flag bool) types.ICloser {
 	return &tsCloser{flag}
 }
 
 func (c *tsCloser) Close() error {
-	if c.fFlag {
-		return fmt.Errorf("some error")
-	}
-	return nil
-}
-
-func testNewCommand(flag bool) types.IApp {
-	return &tsCommand{flag}
-}
-
-func (c *tsCommand) Run() error {
-	if c.fFlag {
-		return fmt.Errorf("some error")
-	}
-	return nil
-}
-
-func (c *tsCommand) Stop() error {
 	if c.fFlag {
 		return fmt.Errorf("some error")
 	}

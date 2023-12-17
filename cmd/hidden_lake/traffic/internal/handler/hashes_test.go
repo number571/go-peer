@@ -22,8 +22,8 @@ func TestHandleHashesAPI(t *testing.T) {
 	addr := testutils.TgAddrs[19]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, connKeeper, wDB, hltClient := testAllRun(addr, "")
-	defer testAllFree(addr, srv, connKeeper, wDB)
+	srv, connKeeper, cancel, wDB, hltClient := testAllRun(addr, "")
+	defer testAllFree(addr, srv, connKeeper, cancel, wDB)
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])

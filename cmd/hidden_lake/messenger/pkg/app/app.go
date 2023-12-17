@@ -1,11 +1,11 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/database"
@@ -19,12 +19,8 @@ import (
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 )
 
-const (
-	cInitStart = time.Second * 3
-)
-
 var (
-	_ types.IApp = &sApp{}
+	_ types.IRunner = &sApp{}
 )
 
 type sApp struct {
@@ -46,7 +42,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
-) types.IApp {
+) types.IRunner {
 	httpLogger := std_logger.NewStdLogger(pCfg.GetLogging(), http_logger.GetLogFunc())
 	stdfLogger := std_logger.NewStdLogger(pCfg.GetLogging(), std_logger.GetLogFunc())
 
@@ -58,24 +54,33 @@ func NewApp(
 	}
 }
 
-func (p *sApp) Run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sApp) Run(pCtx context.Context) error {
+	err := func() error {
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
 
-	if p.fIsRun {
-		return errors.New("application already running")
-	}
+		if p.fIsRun {
+			return errors.New("application already running")
+		}
 
-	if err := p.initDatabase(); err != nil {
-		return fmt.Errorf("open database: %w", err)
+		if err := p.initDatabase(); err != nil {
+			return fmt.Errorf("init database: %w", err)
+		}
+
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
+		p.fIsRun = true
+
+		return nil
+	}()
+	if err != nil {
+		return err
 	}
 
 	p.initIncomingServiceHTTP()
 	p.initInterfaceServiceHTTP()
 	p.initServicePPROF()
 
-	p.fIsRun = true
-	res := make(chan error)
+	chErr := make(chan error)
 
 	go func() {
 		if p.fConfig.GetAddress().GetPPROF() == "" {
@@ -84,7 +89,7 @@ func (p *sApp) Run() error {
 
 		err := p.fServicePPROF.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			res <- err
+			chErr <- err
 			return
 		}
 	}()
@@ -92,7 +97,7 @@ func (p *sApp) Run() error {
 	go func() {
 		err := p.fIntServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			res <- err
+			chErr <- err
 			return
 		}
 	}()
@@ -100,34 +105,28 @@ func (p *sApp) Run() error {
 	go func() {
 		err := p.fIncServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			res <- err
+			chErr <- err
 			return
 		}
 	}()
 
 	select {
-	case err := <-res:
-		resErr := fmt.Errorf("got run error: %w", err)
-		return utils.MergeErrors(resErr, p.stop())
-	case <-time.After(cInitStart):
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
-		return nil
+	case <-pCtx.Done():
+		return p.stop()
+	case err := <-chErr:
+		return utils.MergeErrors(
+			fmt.Errorf("got run error: %w", err),
+			p.stop(),
+		)
 	}
-}
-
-func (p *sApp) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.stop()
 }
 
 func (p *sApp) stop() error {
-	if !p.fIsRun {
-		return errors.New("application already stopped or not started")
-	}
-	p.fIsRun = false
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+	p.fIsRun = false
 
 	err := interrupt.CloseAll([]types.ICloser{
 		p.fIntServiceHTTP,
@@ -138,5 +137,6 @@ func (p *sApp) stop() error {
 	if err != nil {
 		return fmt.Errorf("close/stop all: %w", err)
 	}
+
 	return nil
 }

@@ -15,7 +15,7 @@ import (
 )
 
 // initApp work with the raw data = read files, read args
-func InitApp(pDefaultPath, pDefaultKey string) (types.IApp, error) {
+func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", pDefaultKey)
 

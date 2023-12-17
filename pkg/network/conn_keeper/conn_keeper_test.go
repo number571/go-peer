@@ -1,6 +1,7 @@
 package conn_keeper
 
 import (
+	"context"
 	"net"
 	"testing"
 	"time"
@@ -63,29 +64,31 @@ func TestConnKeeper(t *testing.T) {
 		return
 	}
 
-	if err := connKeeper.Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	defer cancel1()
 
-	if err := connKeeper.Run(); err == nil {
-		t.Error("error is nil with already running connKeeper")
-		return
-	}
+	go func() {
+		if err := connKeeper.Run(ctx1); err != nil {
+			t.Error(err)
+			return
+		}
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+
+	ctx2, cancel2 := context.WithCancel(context.Background())
+	defer cancel2()
+
+	go func() {
+		if err := connKeeper.Run(ctx2); err == nil {
+			t.Error("error is nil with already running connKeeper")
+			return
+		}
+	}()
 
 	time.Sleep(time.Second)
 	if len(connKeeper.GetNetworkNode().GetConnections()) != 1 {
 		t.Error("length of connections != 1")
-		return
-	}
-
-	if err := connKeeper.Stop(); err != nil {
-		t.Error(err)
-		return
-	}
-
-	if err := connKeeper.Stop(); err == nil {
-		t.Error("error is nil with already closed connKeeper")
 		return
 	}
 }

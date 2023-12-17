@@ -17,7 +17,7 @@ type (
 )
 
 type INode interface {
-	types.IApp
+	types.IRunner
 
 	GetSettings() ISettings
 	GetWrapperDB() IWrapperDB

@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -30,7 +31,6 @@ type sMessageQueue struct {
 }
 
 type sPool struct {
-	fSignal   chan struct{}
 	fQueue    chan net_message.IMessage
 	fReceiver asymmetric.IPubKey
 }
@@ -56,44 +56,34 @@ func (p *sMessageQueue) GetClient() client.IClient {
 	return p.fClient
 }
 
-func (p *sMessageQueue) Run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sMessageQueue) Run(pCtx context.Context) error {
+	err := func() error {
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
 
-	if p.fIsRun {
-		return errors.New("queue already running")
-	}
-	p.fIsRun = true
-
-	p.fMsgPool.fSignal = make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-p.readSignal():
-				return
-			case <-time.After(p.fSettings.GetDuration() / 2):
-				if p.poolHasLimit() {
-					continue
-				}
-				p.fMsgPool.fQueue <- p.newPseudoNetworkMessage()
-			}
+		if p.fIsRun {
+			return errors.New("queue already running")
 		}
+
+		p.fIsRun = true
+		return nil
 	}()
-
-	return nil
-}
-
-func (p *sMessageQueue) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if !p.fIsRun {
-		return errors.New("queue already closed or not started")
+	if err != nil {
+		return err
 	}
-	p.fIsRun = false
 
-	close(p.fMsgPool.fSignal)
-	return nil
+	for {
+		select {
+		case <-pCtx.Done():
+			p.fIsRun = false
+			return nil
+		case <-time.After(p.fSettings.GetDuration() / 2):
+			if p.poolHasLimit() {
+				continue
+			}
+			p.fMsgPool.fQueue <- p.newPseudoNetworkMessage()
+		}
+	}
 }
 
 func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings net_message.ISettings) IMessageQueue {
@@ -131,7 +121,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	return nil
 }
 
-func (p *sMessageQueue) DequeueMessage() net_message.IMessage {
+func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessage {
 	var (
 		result net_message.IMessage
 		closed = make(chan bool)
@@ -139,7 +129,7 @@ func (p *sMessageQueue) DequeueMessage() net_message.IMessage {
 
 	go func() {
 		select {
-		case <-p.readSignal():
+		case <-pCtx.Done():
 			closed <- true
 			return
 		case <-time.After(p.fSettings.GetDuration()):
@@ -184,13 +174,6 @@ func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
 			msg.ToBytes(),
 		),
 	)
-}
-
-func (p *sMessageQueue) readSignal() <-chan struct{} {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fMsgPool.fSignal
 }
 
 func (p *sMessageQueue) poolHasLimit() bool {

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -53,17 +54,18 @@ func TestApp(t *testing.T) {
 		return
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	app := NewApp(cfg, ".")
-	if err := app.Run(); err != nil {
-		t.Error(err)
-		return
-	}
-	defer func() {
-		if err := app.Stop(); err != nil {
+
+	go func() {
+		if err := app.Run(ctx); err != nil {
 			t.Error(err)
 			return
 		}
 	}()
+	time.Sleep(100 * time.Millisecond)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -88,13 +90,27 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	// try run after stop
-	if err := app.Stop(); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := app.Run(); err != nil {
-		t.Error(err)
-		return
-	}
+	// try twice running
+	go func() {
+		if err := app.Run(ctx); err == nil {
+			t.Error("success double run")
+			return
+		}
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+	cancel()
+	time.Sleep(100 * time.Millisecond)
+
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	defer cancel1()
+
+	// try twice running
+	go func() {
+		if err := app.Run(ctx1); err != nil {
+			t.Error(err)
+			return
+		}
+	}()
+	time.Sleep(100 * time.Millisecond)
 }

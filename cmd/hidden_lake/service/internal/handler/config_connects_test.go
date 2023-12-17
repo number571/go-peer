@@ -17,8 +17,8 @@ func TestHandleConnectsAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 0)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 0)
 
-	wcfg, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[6])
-	defer testAllFree(node, srv, pathCfg, pathDB)
+	wcfg, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[6])
+	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),

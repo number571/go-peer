@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,11 +26,11 @@ func TestHandleRequestAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 7)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 7)
 
-	_, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[9])
-	defer testAllFree(node, srv, pathCfg, pathDB)
+	_, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[9])
+	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
-	pushNode, pushSrv := testAllPushCreate(pathCfg, pathDB)
-	defer testAllPushFree(pushNode, pushSrv, pathCfg, pathDB)
+	pushNode, pushCancel, pushSrv := testAllPushCreate(pathCfg, pathDB)
+	defer testAllPushFree(pushNode, pushCancel, pushSrv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
@@ -82,28 +83,26 @@ func testFetch(t *testing.T, client hls_client.IClient) {
 	}
 }
 
-func testAllPushCreate(pathCfg, pathDB string) (anonymity.INode, *http.Server) {
+func testAllPushCreate(pathCfg, pathDB string) (anonymity.INode, context.CancelFunc, *http.Server) {
 	os.RemoveAll(pathCfg + "_push1")
 	os.RemoveAll(pathDB + "_push1")
 
-	pushNode := testNewPushNode(pathCfg+"_push1", pathDB+"_push1")
+	pushNode, cancel := testNewPushNode(pathCfg+"_push1", pathDB+"_push1")
 	if pushNode == nil {
-		return nil, nil
+		return nil, cancel, nil
 	}
 
 	pushSrv := testStartServerHTTP(testutils.TgAddrs[10])
 	time.Sleep(200 * time.Millisecond)
-	return pushNode, pushSrv
+	return pushNode, cancel, pushSrv
 }
 
-func testAllPushFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB string) {
+func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Server, pathCfg, pathDB string) {
 	defer func() {
 		os.RemoveAll(pathCfg + "_push1")
 		os.RemoveAll(pathDB + "_push1")
 	}()
-	interrupt.StopAll([]types.IApp{
-		node,
-	})
+	cancel()
 	interrupt.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
@@ -111,8 +110,8 @@ func testAllPushFree(node anonymity.INode, srv *http.Server, pathCfg, pathDB str
 	})
 }
 
-func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
-	node := testRunNewNode(dbPath, testutils.TgAddrs[11])
+func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
+	node, cancel := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
@@ -127,7 +126,7 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 
 	cfg, err := config.BuildConfig(cfgPath, rawCFG)
 	if err != nil {
-		return nil
+		return nil, cancel
 	}
 
 	node.HandleFunc(
@@ -143,7 +142,8 @@ func testNewPushNode(cfgPath, dbPath string) anonymity.INode {
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().Listen(); err != nil {
-		return nil
+		return nil, cancel
 	}
-	return node
+
+	return node, cancel
 }

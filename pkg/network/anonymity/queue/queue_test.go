@@ -2,6 +2,7 @@ package queue
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -67,14 +68,27 @@ func TestRunStopQueue(t *testing.T) {
 		client,
 	)
 
-	if err := queue.Run(); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := queue.Run(); err == nil {
-		t.Error("success run already running queue")
-		return
-	}
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	defer cancel1()
+
+	go func() {
+		if err := queue.Run(ctx1); err != nil {
+			t.Error(err)
+			return
+		}
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+
+	ctx2, cancel2 := context.WithCancel(context.Background())
+	defer cancel2()
+
+	go func() {
+		if err := queue.Run(ctx2); err == nil {
+			t.Error("success run already running queue")
+			return
+		}
+	}()
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -96,15 +110,6 @@ func TestRunStopQueue(t *testing.T) {
 
 	if err := queue.EnqueueMessage(msg); err == nil {
 		t.Error("success enqueue message with max capacity")
-		return
-	}
-
-	if err := queue.Stop(); err != nil {
-		t.Error(err)
-		return
-	}
-	if err := queue.Stop(); err == nil {
-		t.Error("success stop already stopped queue")
 		return
 	}
 }
@@ -147,9 +152,14 @@ func TestQueue(t *testing.T) {
 }
 
 func testQueue(queue IMessageQueue) error {
-	if err := queue.Run(); err != nil {
-		return err
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		if err := queue.Run(ctx); err != nil {
+			return
+		}
+	}()
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -165,7 +175,7 @@ func testQueue(queue IMessageQueue) error {
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
-		msg := queue.DequeueMessage()
+		msg := queue.DequeueMessage(ctx)
 		msgs = append(msgs, msg)
 	}
 
@@ -191,7 +201,7 @@ func testQueue(queue IMessageQueue) error {
 		queue.EnqueueMessage(msg)
 	}
 	for i := 0; i < 3; i++ {
-		netMsg := queue.DequeueMessage()
+		netMsg := queue.DequeueMessage(ctx)
 		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			return err
@@ -204,14 +214,11 @@ func testQueue(queue IMessageQueue) error {
 	notClosed := make(chan bool)
 	go func() {
 		// test close with parallel dequeue
-		msg := queue.DequeueMessage()
+		msg := queue.DequeueMessage(ctx)
 		notClosed <- (msg != nil)
 	}()
 
-	if err := queue.Stop(); err != nil {
-		return err
-	}
-
+	cancel()
 	if <-notClosed {
 		return fmt.Errorf("success dequeue with close")
 	}

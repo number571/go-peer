@@ -1,6 +1,7 @@
 package conn_keeper
 
 import (
+	"context"
 	"errors"
 	"sync"
 	"time"
@@ -15,7 +16,6 @@ var (
 type sConnKeeper struct {
 	fIsRun    bool
 	fMutex    sync.Mutex
-	fSignal   chan struct{}
 	fNode     network.INode
 	fSettings ISettings
 }
@@ -35,59 +35,54 @@ func (p *sConnKeeper) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sConnKeeper) Run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sConnKeeper) Run(pCtx context.Context) error {
+	err := func() error {
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
 
-	if p.fIsRun {
-		return errors.New("conn keeper already started")
-	}
-	p.fIsRun = true
-
-	p.fSignal = make(chan struct{})
-	p.tryConnectToAll()
-
-	go func() {
-		for {
-			select {
-			case <-p.readSignal():
-				return
-			case <-time.After(p.fSettings.GetDuration()):
-				p.tryConnectToAll()
-			}
+		if p.fIsRun {
+			return errors.New("conn keeper already running")
 		}
+
+		p.fIsRun = true
+		return nil
 	}()
-
-	return nil
-}
-
-func (p *sConnKeeper) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if !p.fIsRun {
-		return errors.New("conn keeper already closed or not started")
+	if err != nil {
+		return err
 	}
-	p.fIsRun = false
 
-	close(p.fSignal)
-	return nil
+	for {
+		p.tryConnectToAll()
+		select {
+		case <-pCtx.Done():
+			p.fMutex.Lock()
+			p.fIsRun = false
+			p.fMutex.Unlock()
+			return nil
+		case <-time.After(p.fSettings.GetDuration()):
+			// next iter
+		}
+	}
 }
 
 func (p *sConnKeeper) tryConnectToAll() {
-NEXT:
-	for _, address := range p.fSettings.GetConnections() {
-		mapConns := p.fNode.GetConnections()
-		if _, ok := mapConns[address]; ok {
-			continue NEXT
-		}
-		p.fNode.AddConnection(address)
+	connList := p.fSettings.GetConnections()
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(connList))
+
+	for _, addr := range connList {
+		go func(addr string) {
+			defer wg.Done()
+
+			mapConns := p.fNode.GetConnections()
+			if _, ok := mapConns[addr]; ok {
+				return
+			}
+
+			p.fNode.AddConnection(addr)
+		}(addr)
 	}
-}
 
-func (p *sConnKeeper) readSignal() <-chan struct{} {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fSignal
+	wg.Wait()
 }

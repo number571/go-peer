@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -11,17 +12,17 @@ import (
 )
 
 var (
-	_ types.IApp = &sApp{}
+	_ types.IRunner = &sApp{}
 )
 
 type sApp struct {
 	fMutex sync.Mutex
 	fIsRun bool
-	fHLS   types.IApp
-	fHLM   types.IApp
+	fHLS   types.IRunner
+	fHLM   types.IRunner
 }
 
-func initApp(pPath, pKey string) (types.IApp, error) {
+func initApp(pPath, pKey string) (types.IRunner, error) {
 	hlsApp, err := hls_app.InitApp(pPath, pKey)
 	if err != nil {
 		return nil, err
@@ -38,34 +39,38 @@ func initApp(pPath, pKey string) (types.IApp, error) {
 	}, nil
 }
 
-func (p *sApp) Run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sApp) Run(pCtx context.Context) error {
+	err := func() error {
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
 
-	if p.fIsRun {
-		return errors.New("application already is running")
-	}
+		if p.fIsRun {
+			return errors.New("application already running")
+		}
 
-	if err := utils.MergeErrors(p.fHLS.Run(), p.fHLM.Run()); err != nil {
+		p.fIsRun = true
+		return nil
+	}()
+	if err != nil {
 		return err
 	}
+	defer func() {
+		p.fMutex.Lock()
+		p.fIsRun = false
+		p.fMutex.Unlock()
+	}()
 
-	p.fIsRun = true
-	return nil
-}
+	var (
+		hlsErr = make(chan error)
+		hlmErr = make(chan error)
+	)
 
-func (p *sApp) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	go func() {
+		hlsErr <- p.fHLS.Run(pCtx)
+	}()
+	go func() {
+		hlmErr <- p.fHLM.Run(pCtx)
+	}()
 
-	if !p.fIsRun {
-		return errors.New("anonymity node already is stopped")
-	}
-
-	if err := utils.MergeErrors(p.fHLM.Stop(), p.fHLS.Stop()); err != nil {
-		return err
-	}
-
-	p.fIsRun = false
-	return nil
+	return utils.MergeErrors(<-hlsErr, <-hlmErr)
 }

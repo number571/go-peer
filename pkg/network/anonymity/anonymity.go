@@ -2,6 +2,7 @@ package anonymity
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -58,41 +59,63 @@ func NewNode(
 	}
 }
 
-func (p *sNode) Run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sNode) Run(pCtx context.Context) error {
+	err := func() error {
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
 
-	if p.fIsRun {
-		return errors.New("anonymity node already is running")
+		if p.fIsRun {
+			return errors.New("node already running")
+		}
+
+		p.fIsRun = true
+		p.fNetwork.HandleFunc(
+			p.fSettings.GetNetworkMask(),
+			p.handleWrapper(),
+		)
+
+		return nil
+	}()
+	if err != nil {
+		return err
 	}
 
-	if err := p.runQueue(); err != nil {
-		return fmt.Errorf("run node: %w", err)
+	chErr := make(chan error)
+	go func() {
+		if err := p.fQueue.Run(pCtx); err != nil {
+			chErr <- fmt.Errorf("run queue: %w", err)
+		}
+		chErr <- nil
+	}()
+
+	for {
+		select {
+		case <-pCtx.Done():
+			p.fMutex.Lock()
+			p.fIsRun = false
+			p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
+			p.fMutex.Unlock()
+			return <-chErr
+		default:
+			msg := p.fQueue.DequeueMessage(pCtx)
+			if msg == nil {
+				break
+			}
+
+			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
+			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+				// internal logger
+				break
+			}
+
+			// enrich logger
+			logBuilder.
+				WithPubKey(p.fQueue.GetClient().GetPubKey()).
+				WithType(anon_logger.CLogBaseBroadcast)
+
+			p.fLogger.PushInfo(logBuilder)
+		}
 	}
-	p.fNetwork.HandleFunc(
-		p.fSettings.GetNetworkMask(),
-		p.handleWrapper(),
-	)
-
-	p.fIsRun = true
-	return nil
-}
-
-func (p *sNode) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if !p.fIsRun {
-		return errors.New("anonymity node already is stopped")
-	}
-
-	p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
-	if err := p.fQueue.Stop(); err != nil {
-		return fmt.Errorf("stop node: %w", err)
-	}
-
-	p.fIsRun = false
-	return nil
 }
 
 func (p *sNode) GetLogger() logger.ILogger {
@@ -186,36 +209,6 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 	case <-time.After(p.fSettings.GetFetchTimeWait()):
 		return nil, errors.New("recv time is over")
 	}
-}
-
-func (p *sNode) runQueue() error {
-	if err := p.fQueue.Run(); err != nil {
-		return fmt.Errorf("run queue: %w", err)
-	}
-
-	go func() {
-		for {
-			msg := p.fQueue.DequeueMessage()
-			if msg == nil {
-				break
-			}
-
-			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
-				// internal logger
-				continue
-			}
-
-			// enrich logger
-			logBuilder.
-				WithPubKey(p.fQueue.GetClient().GetPubKey()).
-				WithType(anon_logger.CLogBaseBroadcast)
-
-			p.fLogger.PushInfo(logBuilder)
-		}
-	}()
-
-	return nil
 }
 
 func (p *sNode) handleWrapper() network.IHandlerF {
@@ -343,6 +336,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return fmt.Errorf("encrypt payload: %w", err)
 	}
+
 	var (
 		size = len(msg.ToBytes())
 		hash = msg.GetHash()

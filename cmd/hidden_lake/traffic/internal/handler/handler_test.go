@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -36,7 +37,7 @@ func testNetworkMessageSettings() net_message.ISettings {
 	})
 }
 
-func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, database.IWrapperDB, hlt_client.IClient) {
+func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc, database.IWrapperDB, hlt_client.IClient) {
 	db, err := database.NewDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
@@ -47,11 +48,11 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 		}),
 	)
 	if err != nil {
-		return nil, nil, nil, nil
+		return nil, nil, nil, nil, nil
 	}
 
 	wDB := database.NewWrapperDB().Set(db)
-	srv, connKeeper := testRunService(wDB, addr, addrNode)
+	srv, connKeeper, cancel := testRunService(wDB, addr, addrNode)
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -63,18 +64,18 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, d
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, connKeeper, wDB, hltClient
+	return srv, connKeeper, cancel, wDB, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, wDB database.IWrapperDB) {
+func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, cancel context.CancelFunc, wDB database.IWrapperDB) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	interrupt.StopAll([]types.IApp{connKeeper})
+	cancel()
 	interrupt.CloseAll([]types.ICloser{srv, wDB})
 }
 
-func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper) {
+func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {
 	mux := http.NewServeMux()
 
 	connKeeperSettings := &conn_keeper.SSettings{
@@ -100,9 +101,9 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 			},
 		),
 	)
-	if err := connKeeper.Run(); err != nil {
-		return nil, nil
-	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() { _ = connKeeper.Run(ctx) }()
 
 	cfg := &config.SConfig{
 		FSettings: &config.SConfigSettings{
@@ -153,7 +154,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		srv.ListenAndServe()
 	}()
 
-	return srv, connKeeper
+	return srv, connKeeper, cancel
 }
 
 func testNewClient() client.IClient {

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -84,5 +85,8 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			}
 			return f2f
 		}(),
+	).HandleFunc(
+		pkg_settings.CServiceMask,
+		handler.HandleServiceTCP(pCfg, pLogger),
 	)
 }

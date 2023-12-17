@@ -1,5 +1,5 @@
-CMDPATH=../../cmd
-BINPATH=../../bin
+CMDPATH=../../../cmd
+BINPATH=../../../bin
 .PHONY: default init build run clean
 default: init clean build run
 init: 

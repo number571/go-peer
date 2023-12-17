@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -32,9 +33,14 @@ func main() {
 		),
 	)
 
-	if err := q.Run(); err != nil {
-		panic(err)
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		if err := q.Run(ctx); err != nil {
+			panic(err)
+		}
+	}()
 
 	for i := 0; i < 3; i++ {
 		msg, err := q.GetClient().EncryptPayload(
@@ -50,7 +56,10 @@ func main() {
 	}
 
 	for i := 0; i < 3; i++ {
-		netMsg := q.DequeueMessage()
+		netMsg := q.DequeueMessage(ctx)
+		if netMsg == nil {
+			panic("net message is nil")
+		}
 		msg, err := message.LoadMessage(q.GetClient().GetSettings(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)

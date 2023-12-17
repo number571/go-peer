@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -65,17 +66,19 @@ func main() {
 	service.GetListPubKeys().AddPubKey(client.GetMessageQueue().GetClient().GetPubKey())
 	client.GetListPubKeys().AddPubKey(service.GetMessageQueue().GetClient().GetPubKey())
 
-	if err := service.Run(); err != nil {
-		panic(err)
-	}
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	defer cancel1()
+
+	go func() { _ = service.Run(ctx1) }()
 	if err := service.GetNetworkNode().Listen(); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait
 
-	if err := client.Run(); err != nil {
-		panic(err)
-	}
+	ctx2, cancel2 := context.WithCancel(context.Background())
+	defer cancel2()
+
+	go func() { _ = client.Run(ctx2) }()
 	if err := client.GetNetworkNode().AddConnection(serviceAddress); err != nil {
 		panic(err)
 	}
@@ -92,7 +95,6 @@ func main() {
 
 func closeNode(node anonymity.INode) error {
 	return utils.MergeErrors(
-		node.Stop(),
 		node.GetWrapperDB().Close(),
 		node.GetNetworkNode().Close(),
 	)

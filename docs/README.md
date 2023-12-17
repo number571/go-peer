@@ -188,7 +188,7 @@ if err := g(
 When a type is bound to an interface, it must be explicitly specified like this.
 ```go
 var (
-	_ types.IApp = &sApp{}
+	_ types.IRunner = &sApp{}
 )
 ```
 

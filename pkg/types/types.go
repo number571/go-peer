@@ -1,8 +1,9 @@
 package types
 
-type IApp interface {
-	Run() error
-	Stop() error
+import "context"
+
+type IRunner interface {
+	Run(context.Context) error
 }
 
 type ICloser interface {

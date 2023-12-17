@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -24,11 +25,11 @@ func TestHandleOnlineAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 6)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 6)
 
-	_, node, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[12])
-	defer testAllFree(node, srv, pathCfg, pathDB)
+	_, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[12])
+	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
-	pushNode := testAllOnlineCreate(pathCfg, pathDB)
-	defer testAllOnlineFree(pushNode, pathCfg, pathDB)
+	pushNode, pushCancel := testAllOnlineCreate(pathCfg, pathDB)
+	defer testAllOnlineFree(pushNode, pushCancel, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
@@ -82,35 +83,33 @@ func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
 	}
 }
 
-func testAllOnlineCreate(pathCfg, pathDB string) anonymity.INode {
+func testAllOnlineCreate(pathCfg, pathDB string) (anonymity.INode, context.CancelFunc) {
 	os.RemoveAll(pathCfg + "_push2")
 	os.RemoveAll(pathDB + "_push2")
 
-	pushNode := testOnlinePushNode(pathCfg+"_push2", pathDB+"_push2")
+	pushNode, cancel := testOnlinePushNode(pathCfg+"_push2", pathDB+"_push2")
 	if pushNode == nil {
-		return nil
+		return nil, nil
 	}
 
 	time.Sleep(200 * time.Millisecond)
-	return pushNode
+	return pushNode, cancel
 }
 
-func testAllOnlineFree(node anonymity.INode, pathCfg, pathDB string) {
+func testAllOnlineFree(node anonymity.INode, cancel context.CancelFunc, pathCfg, pathDB string) {
 	defer func() {
 		os.RemoveAll(pathCfg + "_push2")
 		os.RemoveAll(pathDB + "_push2")
 	}()
-	interrupt.StopAll([]types.IApp{
-		node,
-	})
+	cancel()
 	interrupt.CloseAll([]types.ICloser{
 		node.GetWrapperDB(),
 		node.GetNetworkNode(),
 	})
 }
 
-func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
-	node := testRunNewNode(dbPath, testutils.TgAddrs[13])
+func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
+	node, cancel := testRunNewNode(dbPath, testutils.TgAddrs[13])
 
 	cfg, err := config.BuildConfig(cfgPath, &config.SConfig{
 		FSettings: &config.SConfigSettings{
@@ -121,7 +120,7 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 		},
 	})
 	if err != nil {
-		return nil
+		return nil, cancel
 	}
 
 	node.HandleFunc(
@@ -137,7 +136,8 @@ func testOnlinePushNode(cfgPath, dbPath string) anonymity.INode {
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().Listen(); err != nil {
-		return nil
+		return nil, cancel
 	}
-	return node
+
+	return node, cancel
 }

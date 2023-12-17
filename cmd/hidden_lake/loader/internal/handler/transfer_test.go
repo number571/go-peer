@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,19 +31,20 @@ const (
 	tcNameHLT2 = tcTestData + "/hlt_2"
 )
 
-func testCreateHLS(netMsgSettings net_message.ISettings, path, addr string) (types.IApp, hlt_client.IClient, error) {
+func testCreateHLS(netMsgSettings net_message.ISettings, path, addr string) (types.IRunner, context.CancelFunc, hlt_client.IClient, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+
 	if err := copyWithPaste(path, addr); err != nil {
-		return nil, nil, err
+		return nil, cancel, nil, err
 	}
 
 	app1, err := hls_app.InitApp(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, cancel, nil, err
 	}
 
-	if err := app1.Run(); err != nil {
-		return nil, nil, err
-	}
+	go func() { _ = app1.Run(ctx) }()
+	time.Sleep(100 * time.Millisecond)
 
 	hltClient1 := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -53,7 +55,7 @@ func testCreateHLS(netMsgSettings net_message.ISettings, path, addr string) (typ
 		),
 	)
 
-	return app1, hltClient1, nil
+	return app1, cancel, hltClient1, nil
 }
 
 func testInitTransfer() {
@@ -79,19 +81,19 @@ func TestHandleTransferAPI(t *testing.T) {
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
 
-	hltApp1, hltClient1, err := testCreateHLS(netMsgSettings, tcNameHLT1, tgProducer)
+	_, cancel1, hltClient1, err := testCreateHLS(netMsgSettings, tcNameHLT1, tgProducer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer hltApp1.Stop()
+	defer cancel1()
 
-	hltApp2, hltClient2, err := testCreateHLS(netMsgSettings, tcNameHLT2, tgConsumer)
+	_, cancel2, hltClient2, err := testCreateHLS(netMsgSettings, tcNameHLT2, tgConsumer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer hltApp2.Stop()
+	defer cancel2()
 
 	service := testRunService(tgTService)
 	defer service.Close()

@@ -1,6 +1,7 @@
 package anonymity
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -34,8 +35,8 @@ const (
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	node := testNewNode(time.Minute, "", 9, 0)
-	defer testFreeNodes([]INode{node}, 9)
+	node, cancels := testNewNode(time.Minute, "", 9, 0)
+	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 9)
 
 	sett := node.GetSettings()
 	if sett.GetFetchTimeWait() != time.Minute {
@@ -86,12 +87,12 @@ func TestComplexFetchPayload(t *testing.T) {
 	t.Parallel()
 
 	addresses := [2]string{testutils.TgAddrs[2], testutils.TgAddrs[3]}
-	nodes := testNewNodes(t, time.Minute, addresses, 0)
+	nodes, cancels := testNewNodes(t, time.Minute, addresses, 0)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], 0)
+	defer testFreeNodes(nodes[:], cancels[:], 0)
 
 	wg := sync.WaitGroup{}
 	wg.Add(tcIter)
@@ -126,12 +127,12 @@ func TestF2FWithoutFriends(t *testing.T) {
 
 	// 3 seconds for wait
 	addresses := [2]string{testutils.TgAddrs[31], testutils.TgAddrs[32]}
-	nodes := testNewNodes(t, 3*time.Second, addresses, 1)
+	nodes, cancels := testNewNodes(t, 3*time.Second, addresses, 1)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], 1)
+	defer testFreeNodes(nodes[:], cancels[:], 1)
 
 	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
 	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
@@ -186,12 +187,12 @@ func TestFetchPayload(t *testing.T) {
 	t.Parallel()
 
 	addresses := [2]string{testutils.TgAddrs[35], testutils.TgAddrs[36]}
-	nodes := testNewNodes(t, time.Minute, addresses, 4)
+	nodes, cancels := testNewNodes(t, time.Minute, addresses, 4)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], 4)
+	defer testFreeNodes(nodes[:], cancels[:], 4)
 
 	nodes[1].HandleFunc(
 		testutils.TcHead,
@@ -234,12 +235,12 @@ func TestBroadcastPayload(t *testing.T) {
 	t.Parallel()
 
 	addresses := [2]string{testutils.TgAddrs[33], testutils.TgAddrs[34]}
-	nodes := testNewNodes(t, time.Minute, addresses, 3)
+	nodes, cancels := testNewNodes(t, time.Minute, addresses, 3)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], 3)
+	defer testFreeNodes(nodes[:], cancels[:], 3)
 
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
@@ -353,9 +354,10 @@ func TestBroadcastPayload(t *testing.T) {
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()
 
-	node := testNewNode(time.Minute, "", 7, 0).(*sNode)
-	defer testFreeNodes([]INode{node}, 7)
+	_node, cancel := testNewNode(time.Minute, "", 7, 0)
+	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 7)
 
+	node := _node.(*sNode)
 	handler := node.handleWrapper()
 	client := node.fQueue.GetClient()
 	pubKey := client.GetPubKey()
@@ -452,9 +454,10 @@ func TestHandleWrapper(t *testing.T) {
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	t.Parallel()
 
-	node := testNewNode(time.Minute, "", 6, 0).(*sNode)
-	defer testFreeNodes([]INode{node}, 6)
+	_node, cancel := testNewNode(time.Minute, "", 6, 0)
+	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 6)
 
+	node := _node.(*sNode)
 	client := node.fQueue.GetClient()
 
 	msgBody := "hello, world!"
@@ -501,9 +504,10 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 func TestRecvSendMessage(t *testing.T) {
 	t.Parallel()
 
-	node := testNewNode(time.Minute, "", 5, 0).(*sNode)
-	defer testFreeNodes([]INode{node}, 5)
+	_node, cancel := testNewNode(time.Minute, "", 5, 0)
+	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 5)
 
+	node := _node.(*sNode)
 	if _, err := node.recv("not_exist"); err == nil {
 		t.Error("success got action by undefined key")
 		return
@@ -561,15 +565,16 @@ func TestRecvSendMessage(t *testing.T) {
 // nodes[2], nodes[3], nodes[4] = routes
 // nodes[2], nodes[4] are have open ports
 // Scheme: (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int) [5]INode {
+func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int) ([5]INode, [5]context.CancelFunc) {
 	nodes := [5]INode{}
+	cancels := [5]context.CancelFunc{}
 	addrs := [5]string{"", "", addresses[0], "", addresses[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = testNewNode(timeWait, addrs[i], typeDB, i)
+		nodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running %d", i, typeDB)
-			return [5]INode{}
+			return [5]INode{}, [5]context.CancelFunc{}
 		}
 	}
 
@@ -588,11 +593,11 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 
 	if err := nodes[2].GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 	if err := nodes[4].GetNetworkNode().Listen(); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 
 	time.Sleep(200 * time.Millisecond)
@@ -600,27 +605,27 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
 	if err := nodes[0].GetNetworkNode().AddConnection(addresses[0]); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 	if err := nodes[1].GetNetworkNode().AddConnection(addresses[1]); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 
 	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
 	if err := nodes[3].GetNetworkNode().AddConnection(addresses[0]); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 	if err := nodes[3].GetNetworkNode().AddConnection(addresses[1]); err != nil {
 		t.Error(err)
-		return [5]INode{}
+		return [5]INode{}, [5]context.CancelFunc{}
 	}
 
-	return nodes
+	return nodes, cancels
 }
 
-func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
+func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
@@ -629,7 +634,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		}),
 	)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	networkMask := uint64(1)
 	networkKey := "old_network_key"
@@ -687,17 +692,16 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) INode {
 		),
 		asymmetric.NewListPubKeys(),
 	)
-	if err := node.Run(); err != nil {
-		return nil
-	}
-	return node
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() { _ = node.Run(ctx) }()
+	return node, cancel
 }
 
-func testFreeNodes(nodes []INode, typeDB int) {
-	for _, node := range nodes {
+func testFreeNodes(nodes []INode, cancels []context.CancelFunc, typeDB int) {
+	for i, node := range nodes {
 		node.GetWrapperDB().Close()
 		node.GetNetworkNode().Close()
-		node.Stop()
+		cancels[i]()
 	}
 	testDeleteDB(typeDB)
 }

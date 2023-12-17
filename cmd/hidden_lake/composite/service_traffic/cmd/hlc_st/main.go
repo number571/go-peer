@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,11 +16,16 @@ func main() {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	if err := app.Run(); err != nil {
-		panic(err)
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	closed := make(chan struct{})
 	defer func() {
-		if err := app.Stop(); err != nil {
+		cancel()
+		<-closed
+	}()
+
+	go func() {
+		defer func() { closed <- struct{}{} }()
+		if err := app.Run(ctx); err != nil {
 			panic(err)
 		}
 	}()

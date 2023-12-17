@@ -19,8 +19,8 @@ func TestHandleMessageAPI(t *testing.T) {
 	addr := testutils.TgAddrs[20]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, connKeeper, db, hltClient := testAllRun(addr, "")
-	defer testAllFree(addr, srv, connKeeper, db)
+	srv, connKeeper, cancel, db, hltClient := testAllRun(addr, "")
+	defer testAllFree(addr, srv, connKeeper, cancel, db)
 
 	client := testNewClient()
 	msg, err := client.EncryptPayload(

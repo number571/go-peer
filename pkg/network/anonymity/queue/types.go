@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"context"
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
@@ -10,14 +11,14 @@ import (
 )
 
 type IMessageQueue interface {
-	types.IApp
+	types.IRunner
 	WithNetworkSettings(uint64, net_message.ISettings) IMessageQueue
 
 	GetSettings() ISettings
 	GetClient() client.IClient
 
 	EnqueueMessage(message.IMessage) error
-	DequeueMessage() net_message.IMessage
+	DequeueMessage(context.Context) net_message.IMessage
 }
 
 type ISettings interface {

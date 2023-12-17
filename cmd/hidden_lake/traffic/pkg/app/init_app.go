@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-func InitApp(pDefaultPath string) (types.IApp, error) {
+func InitApp(pDefaultPath string) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathYML), nil)

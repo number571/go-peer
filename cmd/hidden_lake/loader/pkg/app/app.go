@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ const (
 )
 
 var (
-	_ types.IApp = &sApp{}
+	_ types.IRunner = &sApp{}
 )
 
 type sApp struct {
@@ -41,7 +42,7 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
-) types.IApp {
+) types.IRunner {
 	logging := pCfg.GetLogging()
 
 	var (
@@ -56,7 +57,7 @@ func NewApp(
 	}
 }
 
-func (p *sApp) Run() error {
+func (p *sApp) Run(pCtx context.Context) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -68,7 +69,7 @@ func (p *sApp) Run() error {
 	p.initServicePPROF()
 
 	p.fIsRun = true
-	res := make(chan error)
+	chErr := make(chan error)
 
 	go func() {
 		if p.fConfig.GetAddress().GetPPROF() == "" {
@@ -77,7 +78,7 @@ func (p *sApp) Run() error {
 
 		err := p.fServicePPROF.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			res <- err
+			chErr <- err
 			return
 		}
 	}()
@@ -89,34 +90,46 @@ func (p *sApp) Run() error {
 
 		err := p.fServiceHTTP.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			res <- err
+			chErr <- err
 			return
 		}
 	}()
 
+	deadline, ok := pCtx.Deadline()
+	if !ok {
+		// set default value
+		deadline = time.Now().Add(cInitStart)
+	}
+
+	dlCtx, cancel := context.WithDeadline(pCtx, deadline)
+	defer cancel()
+
 	select {
-	case err := <-res:
-		resErr := fmt.Errorf("got run error: %w", err)
-		return utils.MergeErrors(resErr, p.stop())
-	case <-time.After(cInitStart):
+	case err := <-chErr:
+		return utils.MergeErrors(
+			fmt.Errorf("got run error: %w", err),
+			p.stop(),
+		)
+
+	case <-dlCtx.Done():
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
+		p.fIsRun = true
+
+		go func() {
+			<-pCtx.Done()
+
+			p.fMutex.Lock()
+			_ = p.stop()
+			p.fMutex.Unlock()
+		}()
+
 		return nil
 	}
 }
 
-func (p *sApp) Stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.stop()
-}
-
 func (p *sApp) stop() error {
-	if !p.fIsRun {
-		return errors.New("application already stopped or not started")
-	}
-	p.fIsRun = false
 	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
+	p.fIsRun = false
 
 	err := interrupt.CloseAll([]types.ICloser{
 		p.fServiceHTTP,
