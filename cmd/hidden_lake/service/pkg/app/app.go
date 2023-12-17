@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -30,7 +29,6 @@ var (
 
 type sApp struct {
 	fState state.IState
-	fMutex sync.Mutex
 
 	fPathTo     string
 	fWrapper    config.IWrapper
@@ -160,9 +158,6 @@ func (p *sApp) Run(pCtx context.Context) error {
 }
 
 func (p *sApp) stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	err := utils.MergeErrors(
 		interrupt.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
@@ -174,6 +169,5 @@ func (p *sApp) stop() error {
 	if err != nil {
 		return fmt.Errorf("close/stop all: %w", err)
 	}
-
 	return nil
 }

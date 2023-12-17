@@ -17,6 +17,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/traffic`: fix order get hashes from database
+- Update `cmd/hidden_lake/loader`: fix close pprof service
 
 <!-- ... -->
 

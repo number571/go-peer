@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/loader/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/settings"
@@ -23,7 +22,6 @@ var (
 
 type sApp struct {
 	fState state.IState
-	fMutex sync.Mutex
 
 	fConfig config.IConfig
 
@@ -108,15 +106,12 @@ func (p *sApp) Run(pCtx context.Context) error {
 }
 
 func (p *sApp) stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	err := interrupt.CloseAll([]types.ICloser{
 		p.fServiceHTTP,
+		p.fServicePPROF,
 	})
 	if err != nil {
 		return fmt.Errorf("close/stop all: %w", err)
 	}
-
 	return nil
 }
