@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/_data"
@@ -224,25 +223,12 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 		if i >= messagesCapacity-hashesWindow {
 			lastHashes = append(lastHashes, msg.GetHash())
 		}
-		fmt.Println(encoding.HexEncode(msg.GetHash()))
 	}
 
 	gotHashes, err := kvDB.Hashes()
 	if err != nil {
 		t.Error(err)
 		return
-	}
-
-	fmt.Println()
-
-	for _, v := range gotHashes {
-		fmt.Println(encoding.HexEncode(v))
-	}
-
-	fmt.Println()
-
-	for _, v := range lastHashes {
-		fmt.Println(encoding.HexEncode(v))
 	}
 
 	for i := range gotHashes {
