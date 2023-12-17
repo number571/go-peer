@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -13,6 +12,7 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/state"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/loader/internal/config"
 	hll_settings "github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/settings"
@@ -21,14 +21,13 @@ import (
 )
 
 type sTransfer struct {
-	fMutex  sync.Mutex
-	fIsRun  bool
+	fState  state.IState
 	fConfig config.IConfig
 	fCancel context.CancelFunc
 }
 
 func HandleTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) http.HandlerFunc {
-	transfer := &sTransfer{fConfig: pConfig}
+	transfer := &sTransfer{fConfig: pConfig, fState: state.NewBoolState()}
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hll_settings.CServiceName, pR)
@@ -66,13 +65,9 @@ func HandleTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) http.Hand
 }
 
 func (p *sTransfer) run() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if p.fIsRun {
-		return errors.New("loader already is running")
+	if err := p.fState.Enable(nil); err != nil {
+		return fmt.Errorf("transfer running error: %w", err)
 	}
-	p.fIsRun = true
 
 	ctx := context.Background()
 	ctxWithCancel, cancelFunction := context.WithCancel(ctx)
@@ -84,14 +79,9 @@ func (p *sTransfer) run() error {
 }
 
 func (p *sTransfer) stop() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if !p.fIsRun {
-		return errors.New("loader already is stopped")
+	if err := p.fState.Disable(nil); err != nil {
+		return err
 	}
-	p.fIsRun = false
-
 	p.fCancel()
 	return nil
 }

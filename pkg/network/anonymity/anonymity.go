@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/state"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -28,7 +29,7 @@ var (
 
 type sNode struct {
 	fMutex         sync.Mutex
-	fIsRun         bool
+	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
 	fWrapperDB     IWrapperDB
@@ -48,6 +49,7 @@ func NewNode(
 	pFriends asymmetric.IListPubKeys,
 ) INode {
 	return &sNode{
+		fState:         state.NewBoolState(),
 		fSettings:      pSett,
 		fLogger:        pLogger,
 		fWrapperDB:     pWrapperDB,
@@ -60,25 +62,26 @@ func NewNode(
 }
 
 func (p *sNode) Run(pCtx context.Context) error {
-	err := func() error {
-		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
-		if p.fIsRun {
-			return errors.New("node already running")
-		}
-
-		p.fIsRun = true
+	enableFunc := func() error {
 		p.fNetwork.HandleFunc(
 			p.fSettings.GetNetworkMask(),
 			p.handleWrapper(),
 		)
-
 		return nil
-	}()
-	if err != nil {
-		return err
 	}
+	if err := p.fState.Enable(enableFunc); err != nil {
+		return fmt.Errorf("node running error: %w", err)
+	}
+
+	defer func() {
+		disableFunc := func() error {
+			p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
+			return nil
+		}
+		if err := p.fState.Disable(disableFunc); err != nil {
+			panic(err)
+		}
+	}()
 
 	chErr := make(chan error)
 	go func() {
@@ -91,10 +94,6 @@ func (p *sNode) Run(pCtx context.Context) error {
 	for {
 		select {
 		case <-pCtx.Done():
-			p.fMutex.Lock()
-			p.fIsRun = false
-			p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
-			p.fMutex.Unlock()
 			return <-chErr
 		default:
 			msg := p.fQueue.DequeueMessage(pCtx)

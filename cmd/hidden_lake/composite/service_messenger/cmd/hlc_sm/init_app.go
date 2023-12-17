@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
-	"sync"
+	"fmt"
 
 	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
+	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 )
@@ -16,8 +16,7 @@ var (
 )
 
 type sApp struct {
-	fMutex sync.Mutex
-	fIsRun bool
+	fState state.IState
 	fHLS   types.IRunner
 	fHLM   types.IRunner
 }
@@ -34,30 +33,20 @@ func initApp(pPath, pKey string) (types.IRunner, error) {
 	}
 
 	return &sApp{
-		fHLS: hlsApp,
-		fHLM: hlmApp,
+		fState: state.NewBoolState(),
+		fHLS:   hlsApp,
+		fHLM:   hlmApp,
 	}, nil
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	err := func() error {
-		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
-		if p.fIsRun {
-			return errors.New("application already running")
-		}
-
-		p.fIsRun = true
-		return nil
-	}()
-	if err != nil {
-		return err
+	if err := p.fState.Enable(nil); err != nil {
+		return fmt.Errorf("application running error: %w", err)
 	}
 	defer func() {
-		p.fMutex.Lock()
-		p.fIsRun = false
-		p.fMutex.Unlock()
+		if err := p.fState.Disable(nil); err != nil {
+			panic(err)
+		}
 	}()
 
 	var (

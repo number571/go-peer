@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -28,7 +29,7 @@ var (
 )
 
 type sApp struct {
-	fIsRun bool
+	fState state.IState
 	fMutex sync.Mutex
 
 	fPathTo     string
@@ -60,6 +61,7 @@ func NewApp(
 
 	node := initNode(pCfg, pPrivKey, anonLogger)
 	return &sApp{
+		fState:      state.NewBoolState(),
 		fPathTo:     pPathTo,
 		fWrapper:    config.NewWrapper(pCfg),
 		fNode:       node,
@@ -72,26 +74,24 @@ func NewApp(
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	err := func() error {
-		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
-		if p.fIsRun {
-			return errors.New("application already running")
-		}
-
+	enableFunc := func() error {
 		if err := p.initDatabase(); err != nil {
 			return fmt.Errorf("init database: %w", err)
 		}
-
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
-		p.fIsRun = true
-
 		return nil
-	}()
-	if err != nil {
-		return err
 	}
+	if err := p.fState.Enable(enableFunc); err != nil {
+		return fmt.Errorf("application running error: %w", err)
+	}
+
+	defer func() {
+		disableFunc := func() error {
+			p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+			return p.stop()
+		}
+		_ = p.fState.Disable(disableFunc)
+	}()
 
 	p.initServiceHTTP()
 	p.initServicePPROF()
@@ -153,21 +153,15 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	select {
 	case <-pCtx.Done():
-		return p.stop()
+		return nil
 	case err := <-chErr:
-		return utils.MergeErrors(
-			fmt.Errorf("got run error: %w", err),
-			p.stop(),
-		)
+		return fmt.Errorf("got run error: %w", err)
 	}
 }
 
 func (p *sApp) stop() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
-
-	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
-	p.fIsRun = false
 
 	err := utils.MergeErrors(
 		interrupt.CloseAll([]types.ICloser{

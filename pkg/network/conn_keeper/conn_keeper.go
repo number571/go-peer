@@ -2,11 +2,12 @@ package conn_keeper
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/state"
 )
 
 var (
@@ -14,14 +15,14 @@ var (
 )
 
 type sConnKeeper struct {
-	fIsRun    bool
-	fMutex    sync.Mutex
+	fState    state.IState
 	fNode     network.INode
 	fSettings ISettings
 }
 
 func NewConnKeeper(pSett ISettings, pNode network.INode) IConnKeeper {
 	return &sConnKeeper{
+		fState:    state.NewBoolState(),
 		fNode:     pNode,
 		fSettings: pSett,
 	}
@@ -36,28 +37,19 @@ func (p *sConnKeeper) GetSettings() ISettings {
 }
 
 func (p *sConnKeeper) Run(pCtx context.Context) error {
-	err := func() error {
-		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
-		if p.fIsRun {
-			return errors.New("conn keeper already running")
-		}
-
-		p.fIsRun = true
-		return nil
-	}()
-	if err != nil {
-		return err
+	if err := p.fState.Enable(nil); err != nil {
+		return fmt.Errorf("conn keeper running error: %w", err)
 	}
+	defer func() {
+		if err := p.fState.Disable(nil); err != nil {
+			panic(err)
+		}
+	}()
 
 	for {
 		p.tryConnectToAll()
 		select {
 		case <-pCtx.Done():
-			p.fMutex.Lock()
-			p.fIsRun = false
-			p.fMutex.Unlock()
 			return nil
 		case <-time.After(p.fSettings.GetDuration()):
 			// next iter

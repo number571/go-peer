@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/state"
 )
 
 var (
@@ -18,7 +20,7 @@ var (
 )
 
 type sMessageQueue struct {
-	fIsRun bool
+	fState state.IState
 	fMutex sync.Mutex
 
 	fNetworkMask uint64
@@ -37,6 +39,7 @@ type sPool struct {
 
 func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
 	return &sMessageQueue{
+		fState:       state.NewBoolState(),
 		fMsgSettings: net_message.NewSettings(&net_message.SSettings{}),
 		fSettings:    pSett,
 		fClient:      pClient,
@@ -57,25 +60,18 @@ func (p *sMessageQueue) GetClient() client.IClient {
 }
 
 func (p *sMessageQueue) Run(pCtx context.Context) error {
-	err := func() error {
-		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
-		if p.fIsRun {
-			return errors.New("queue already running")
-		}
-
-		p.fIsRun = true
-		return nil
-	}()
-	if err != nil {
-		return err
+	if err := p.fState.Enable(nil); err != nil {
+		return fmt.Errorf("queue running error: %w", err)
 	}
+	defer func() {
+		if err := p.fState.Disable(nil); err != nil {
+			panic(err)
+		}
+	}()
 
 	for {
 		select {
 		case <-pCtx.Done():
-			p.fIsRun = false
 			return nil
 		case <-time.After(p.fSettings.GetDuration() / 2):
 			if p.poolHasLimit() {

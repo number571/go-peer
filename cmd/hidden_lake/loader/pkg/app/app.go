@@ -6,20 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/loader/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/settings"
+	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/settings"
 	"github.com/number571/go-peer/internal/interrupt"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
-	"github.com/number571/go-peer/pkg/utils"
-)
-
-const (
-	cInitStart = 3 * time.Second
 )
 
 var (
@@ -27,7 +22,7 @@ var (
 )
 
 type sApp struct {
-	fIsRun bool
+	fState state.IState
 	fMutex sync.Mutex
 
 	fConfig config.IConfig
@@ -51,6 +46,7 @@ func NewApp(
 	)
 
 	return &sApp{
+		fState:      state.NewBoolState(),
 		fConfig:     pCfg,
 		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,
@@ -58,17 +54,25 @@ func NewApp(
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if p.fIsRun {
-		return errors.New("application already running")
+	enableFunc := func() error {
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
+		return nil
 	}
+	if err := p.fState.Enable(enableFunc); err != nil {
+		return fmt.Errorf("application running error: %w", err)
+	}
+
+	defer func() {
+		disableFunc := func() error {
+			p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
+			return p.stop()
+		}
+		_ = p.fState.Disable(disableFunc)
+	}()
 
 	p.initServiceHTTP()
 	p.initServicePPROF()
 
-	p.fIsRun = true
 	chErr := make(chan error)
 
 	go func() {
@@ -95,41 +99,17 @@ func (p *sApp) Run(pCtx context.Context) error {
 		}
 	}()
 
-	deadline, ok := pCtx.Deadline()
-	if !ok {
-		// set default value
-		deadline = time.Now().Add(cInitStart)
-	}
-
-	dlCtx, cancel := context.WithDeadline(pCtx, deadline)
-	defer cancel()
-
 	select {
-	case err := <-chErr:
-		return utils.MergeErrors(
-			fmt.Errorf("got run error: %w", err),
-			p.stop(),
-		)
-
-	case <-dlCtx.Done():
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", settings.CServiceName))
-		p.fIsRun = true
-
-		go func() {
-			<-pCtx.Done()
-
-			p.fMutex.Lock()
-			_ = p.stop()
-			p.fMutex.Unlock()
-		}()
-
+	case <-pCtx.Done():
 		return nil
+	case err := <-chErr:
+		return fmt.Errorf("got run error: %w", err)
 	}
 }
 
 func (p *sApp) stop() error {
-	p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", settings.CServiceName))
-	p.fIsRun = false
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
 
 	err := interrupt.CloseAll([]types.ICloser{
 		p.fServiceHTTP,

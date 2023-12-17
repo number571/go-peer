@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg`: append new package 'state'
+
 ### CHANGES
 
 - Update `pkg/types`: Run method of Runner now contains context.Context parameter
