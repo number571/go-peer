@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/number571/go-peer/internal/api"
@@ -61,18 +62,27 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 			// need pass error (some of connections may be closed)
 		}
 
-		for _, cHost := range pCfg.GetConsumers() {
-			_, err := api.Request(
-				httpClient,
-				http.MethodPost,
-				fmt.Sprintf("http://%s", cHost),
-				pNetMsg.ToString(),
-			)
-			if err != nil {
-				pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
-				continue
-			}
+		consumers := pCfg.GetConsumers()
+
+		wg := sync.WaitGroup{}
+		wg.Add(len(consumers))
+
+		for _, cHost := range consumers {
+			go func(cHost string) {
+				defer wg.Done()
+				_, err := api.Request(
+					httpClient,
+					http.MethodPost,
+					fmt.Sprintf("http://%s", cHost),
+					pNetMsg.ToString(),
+				)
+				if err != nil {
+					pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
+				}
+			}(cHost)
 		}
+
+		wg.Wait()
 
 		pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return nil

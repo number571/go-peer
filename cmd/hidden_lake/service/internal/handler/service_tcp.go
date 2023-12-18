@@ -21,7 +21,7 @@ import (
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
-	return func(pCtx context.Context, _ anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+	return func(_ context.Context, _ anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
 
 		// enrich logger
