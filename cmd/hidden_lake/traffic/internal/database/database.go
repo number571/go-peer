@@ -47,35 +47,21 @@ func (p *sDatabase) Settings() ISettings {
 }
 
 func (p *sDatabase) Hashes() ([][]byte, error) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	keyHashes := p.getKeyHashes()
 
-	hashesWindow := p.Settings().GetHashesWindow()
-	messagesCapacity := p.Settings().GetMessagesCapacity()
-
-	res := make([][]byte, 0, hashesWindow)
-
-	start := uint64(0)
-	pointer := p.getPointer()
-
-	if pointer > hashesWindow {
-		start = pointer - hashesWindow
-	} else {
-		start = (pointer - hashesWindow + messagesCapacity) % messagesCapacity
-	}
-
-	for i := uint64(start); i < (start + hashesWindow); i++ {
-		hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
+	result := make([][]byte, 0, len(keyHashes))
+	for i := 0; i < len(keyHashes); i++ {
+		hash, err := p.fDB.Get(keyHashes[i])
 		if err != nil {
 			continue
 		}
 		if len(hash) != hashing.CSHA256Size {
 			panic("incorrect hash size")
 		}
-		res = append(res, hash)
+		result = append(result, hash)
 	}
 
-	return res, nil
+	return result, nil
 }
 
 func (p *sDatabase) Push(pMsg net_message.IMessage) error {
@@ -151,12 +137,32 @@ func (p *sDatabase) Close() error {
 	return nil
 }
 
+func (p *sDatabase) getKeyHashes() [][]byte {
+	pointer := p.getPointer()
+
+	hashesWindow := p.Settings().GetHashesWindow()
+	messagesCapacity := p.Settings().GetMessagesCapacity()
+
+	start := uint64(0)
+	if pointer > hashesWindow {
+		start = pointer - hashesWindow
+	} else {
+		start = (pointer - hashesWindow + messagesCapacity) % messagesCapacity
+	}
+
+	keyHashes := make([][]byte, 0, hashesWindow)
+	for i := uint64(start); i < (start + hashesWindow); i++ {
+		keyHashes = append(keyHashes, getKeyHash(i%messagesCapacity))
+	}
+
+	return keyHashes
+}
+
 func (p *sDatabase) getPointer() uint64 {
 	data, err := p.fDB.Get(getKeyPointer())
 	if err != nil {
 		return 0
 	}
-
 	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
 	return encoding.BytesToUint64(res)
