@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -23,7 +24,7 @@ const (
 	cErrorLoadRequest
 )
 
-func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -64,6 +65,7 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.BroadcastPayload(
+				pCtx,
 				pubKey,
 				adapters.NewPayload(pkg_settings.CServiceMask, data),
 			)
@@ -80,6 +82,7 @@ func HandleNetworkRequestAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 
 		case http.MethodPost:
 			respBytes, err := pNode.FetchPayload(
+				pCtx,
 				pubKey,
 				adapters.NewPayload(pkg_settings.CServiceMask, data),
 			)

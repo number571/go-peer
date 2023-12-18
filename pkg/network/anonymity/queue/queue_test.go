@@ -3,6 +3,7 @@ package queue
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -72,7 +73,7 @@ func TestRunStopQueue(t *testing.T) {
 	defer cancel1()
 
 	go func() {
-		if err := queue.Run(ctx1); err != nil {
+		if err := queue.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 			return
 		}
@@ -156,7 +157,7 @@ func testQueue(queue IMessageQueue) error {
 	defer cancel()
 
 	go func() {
-		if err := queue.Run(ctx); err != nil {
+		if err := queue.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			return
 		}
 	}()

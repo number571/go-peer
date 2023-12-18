@@ -2,6 +2,7 @@ package conn_keeper
 
 import (
 	"context"
+	"errors"
 	"net"
 	"testing"
 	"time"
@@ -68,7 +69,7 @@ func TestConnKeeper(t *testing.T) {
 	defer cancel1()
 
 	go func() {
-		if err := connKeeper.Run(ctx1); err != nil {
+		if err := connKeeper.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 			return
 		}

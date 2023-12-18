@@ -17,7 +17,7 @@ func TestHandleNetworkKeyAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 4)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
 
-	wcfg, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[25])
+	wcfg, node, _, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[25])
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(

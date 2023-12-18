@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -9,21 +10,21 @@ import (
 )
 
 type (
-	IHandlerF func(INode, conn.IConn, message.IMessage) error
+	IHandlerF func(context.Context, INode, conn.IConn, message.IMessage) error
 )
 
 type INode interface {
 	types.ICloser
-	Listen() error
+	Listen(context.Context) error
 
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn
 
-	AddConnection(string) error
+	AddConnection(context.Context, string) error
 	DelConnection(string) error
 
 	HandleFunc(uint64, IHandlerF) INode
-	BroadcastMessage(message.IMessage) error
+	BroadcastMessage(context.Context, message.IMessage) error
 }
 
 type ISettings interface {

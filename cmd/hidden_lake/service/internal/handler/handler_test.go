@@ -103,12 +103,12 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, context.CancelFunc, *http.Server) {
+func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, context.Context, context.CancelFunc, *http.Server) {
 	wcfg := testNewWrapper(cfgPath)
-	node, cancel := testRunNewNode(dbPath, "")
-	srvc := testRunService(wcfg, node, srvAddr)
+	node, ctx, cancel := testRunNewNode(dbPath, "")
+	srvc := testRunService(ctx, wcfg, node, srvAddr)
 	time.Sleep(200 * time.Millisecond)
-	return wcfg, node, cancel, srvc
+	return wcfg, node, ctx, cancel, srvc
 }
 
 func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Server, pathCfg, pathDB string) {
@@ -124,7 +124,7 @@ func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Serv
 	})
 }
 
-func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
+func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
 	mux := http.NewServeMux()
 
 	logger := logger.NewLogger(
@@ -134,10 +134,10 @@ func testRunService(wcfg config.IWrapper, node anonymity.INode, addr string) *ht
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleConfigSettingsPath, HandleConfigSettingsAPI(wcfg, logger))
-	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(ctx, wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkKeyPath, HandleNetworkKeyAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node))
 
@@ -162,11 +162,11 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 	return config.NewWrapper(cfg)
 }
 
-func testRunNewNode(dbPath, addr string) (anonymity.INode, context.CancelFunc) {
+func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, context.CancelFunc) {
 	node := testNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()
-	return node, cancel
+	return node, ctx, cancel
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {

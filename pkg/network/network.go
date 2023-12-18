@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -48,7 +49,7 @@ func (p *sNode) GetSettings() ISettings {
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
-func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
+func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) error {
 	// node can redirect received message
 	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
@@ -61,7 +62,7 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 
 		chErr := make(chan error)
 		go func(c conn.IConn) {
-			chErr <- c.WriteMessage(pMsg)
+			chErr <- c.WriteMessage(pCtx, pMsg)
 		}(c)
 
 		go func(a string, c conn.IConn) {
@@ -95,17 +96,19 @@ func (p *sNode) BroadcastMessage(pMsg message.IMessage) error {
 // Opens a tcp connection to receive data from outside.
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
-func (p *sNode) Listen() error {
+func (p *sNode) Listen(pCtx context.Context) error {
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
 		return fmt.Errorf("run node: %w", err)
 	}
+	defer listener.Close()
 
-	go func(pListener net.Listener) {
-		defer pListener.Close()
-		p.setListener(pListener)
-
-		for {
+	p.setListener(listener)
+	for {
+		select {
+		case <-pCtx.Done():
+			return pCtx.Err()
+		default:
 			tconn, err := p.getListener().Accept()
 			if err != nil {
 				break
@@ -121,11 +124,9 @@ func (p *sNode) Listen() error {
 			address := tconn.RemoteAddr().String()
 
 			p.setConnection(address, conn)
-			go p.handleConn(address, conn)
+			go p.handleConn(pCtx, address, conn)
 		}
-	}(listener)
-
-	return nil
+	}
 }
 
 // Closes the listener and all connections.
@@ -170,7 +171,7 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 
 // Connects to the node at the specified address and automatically starts reading all incoming messages.
 // Checks the number of connections.
-func (p *sNode) AddConnection(pAddress string) error {
+func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	if p.hasMaxConnSize() {
 		return errors.New("has max connections size")
 	}
@@ -186,7 +187,7 @@ func (p *sNode) AddConnection(pAddress string) error {
 	}
 
 	p.setConnection(pAddress, conn)
-	go p.handleConn(pAddress, conn)
+	go p.handleConn(pCtx, pAddress, conn)
 
 	return nil
 }
@@ -211,7 +212,7 @@ func (p *sNode) DelConnection(pAddress string) error {
 }
 
 // Processes the received data from the connection.
-func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
+func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.IConn) {
 	defer p.DelConnection(pAddress)
 	for {
 		var (
@@ -220,23 +221,30 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 		)
 
 		go func() {
-			msg, err := pConn.ReadMessage(readerCh)
+			msg, err := pConn.ReadMessage(pCtx, readerCh)
 			if err != nil {
 				returnCh <- false
 				return
 			}
-			returnCh <- p.handleMessage(pConn, msg)
+			returnCh <- p.handleMessage(pCtx, pConn, msg)
 		}()
 
-		<-readerCh
 		select {
+		case <-pCtx.Done():
+			return
+		case <-readerCh:
+			// pass
+		}
+
+		select {
+		case <-pCtx.Done():
+			return
+		case <-time.After(p.fSettings.GetReadTimeout()):
+			return
 		case ok := <-returnCh:
 			if !ok {
 				return
 			}
-		case <-time.After(p.fSettings.GetReadTimeout()):
-			<-returnCh
-			return
 		}
 	}
 }
@@ -244,7 +252,7 @@ func (p *sNode) handleConn(pAddress string, pConn conn.IConn) {
 // Processes the message for correctness and redirects it to the handler function.
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
-func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
+func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg message.IMessage) bool {
 	// hash of message already in queue
 	if !p.fQueuePusher.Push(pMsg.GetHash(), []byte{}) {
 		return true
@@ -258,7 +266,7 @@ func (p *sNode) handleMessage(pConn conn.IConn, pMsg message.IMessage) bool {
 		return false
 	}
 
-	if err := f(p, pConn, pMsg); err != nil {
+	if err := f(pCtx, p, pConn, pMsg); err != nil {
 		// function error = protocol error
 		return false
 	}

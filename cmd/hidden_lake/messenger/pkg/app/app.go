@@ -109,7 +109,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	select {
 	case <-pCtx.Done():
-		return nil
+		return pCtx.Err()
 	case err := <-chErr:
 		return fmt.Errorf("got run error: %w", err)
 	}

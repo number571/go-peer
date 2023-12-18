@@ -72,7 +72,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 	for {
 		select {
 		case <-pCtx.Done():
-			return nil
+			return pCtx.Err()
 		case <-time.After(p.fSettings.GetDuration() / 2):
 			if p.poolHasLimit() {
 				continue
@@ -118,35 +118,19 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 }
 
 func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessage {
-	var (
-		result net_message.IMessage
-		closed = make(chan bool)
-	)
+	select {
+	case <-pCtx.Done():
+		return nil
+	case <-time.After(p.fSettings.GetDuration()):
+		p.fMutex.Lock()
+		queueLen := len(p.fQueue)
+		p.fMutex.Unlock()
 
-	go func() {
-		select {
-		case <-pCtx.Done():
-			closed <- true
-			return
-		case <-time.After(p.fSettings.GetDuration()):
-			defer func() { closed <- false }()
-
-			p.fMutex.Lock()
-			queueLen := len(p.fQueue)
-			p.fMutex.Unlock()
-
-			if queueLen == 0 {
-				result = <-p.fMsgPool.fQueue
-				return
-			}
-
-			result = <-p.fQueue
-			return
+		if queueLen == 0 {
+			return <-p.fMsgPool.fQueue
 		}
-	}()
-
-	<-closed
-	return result
+		return <-p.fQueue
+	}
 }
 
 func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {

@@ -97,6 +97,8 @@ func TestComplexFetchPayload(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(tcIter)
 
+	ctx := context.Background()
+
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
@@ -104,6 +106,7 @@ func TestComplexFetchPayload(t *testing.T) {
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
+				ctx,
 				nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 				adapters.NewPayload(testutils.TcHead, []byte(reqBody)),
 			)
@@ -137,8 +140,11 @@ func TestF2FWithoutFriends(t *testing.T) {
 	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
 	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
 
+	ctx := context.Background()
+
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
+		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcBody)),
 	)
@@ -196,13 +202,16 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
 
+	ctx := context.Background()
+
 	msgBody := "hello, world!"
 	result, err := nodes[0].FetchPayload(
+		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
@@ -222,6 +231,7 @@ func TestFetchPayload(t *testing.T) {
 	}
 
 	_, err2 := nodes[0].FetchPayload(
+		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
@@ -245,15 +255,18 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
 		},
 	)
 
+	ctx := context.Background()
+
 	msgBody := "hello, world!"
 	err := nodes[0].BroadcastPayload(
+		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
@@ -280,6 +293,7 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 
 	err2 := nodes[0].BroadcastPayload(
+		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
@@ -377,21 +391,23 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
+	ctx := context.Background()
+
 	sett := net_message.NewSettings(&net_message.SSettings{})
 	netMsg := node.testNewNetworkMessage(sett, msg)
-	if err := handler(nil, nil, netMsg); err != nil {
+	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := handler(nil, nil, netMsg); err != nil {
+	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error("repeated message:", err.Error())
 		return
 	}
 
 	node.HandleFunc(
 		111,
-		func(_ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error")
 		},
 	)
@@ -409,7 +425,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	netMsg2 := node.testNewNetworkMessage(sett, msg2)
-	if err := handler(nil, nil, netMsg2); err != nil {
+	if err := handler(ctx, nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -427,7 +443,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	netMsg3 := node.testNewNetworkMessage(sett, msg3)
-	if err := handler(nil, nil, netMsg3); err != nil {
+	if err := handler(ctx, nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -445,7 +461,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	netMsg4 := node.testNewNetworkMessage(sett, msg4)
-	if err := handler(nil, nil, netMsg4); err != nil {
+	if err := handler(ctx, nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
@@ -477,12 +493,13 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); !ok || err != nil {
+	ctx := context.Background()
+	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
 	}
 
-	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); ok || err != nil {
+	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err != nil {
 		switch {
 		case ok:
 			t.Error("success store one message again")
@@ -493,7 +510,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	node.GetWrapperDB().Set(nil)
-	if ok, err := node.storeHashWithBroadcast(logBuilder, netMsg); ok || err == nil {
+	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
 		t.Error("success use store function with null database")
 		return
 	}
@@ -544,8 +561,10 @@ func TestRecvSendMessage(t *testing.T) {
 		return
 	}
 
+	ctx := context.Background()
+
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.send(msg); err != nil {
+		if err := node.send(ctx, msg); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -553,7 +572,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.send(msg); err != nil {
+		if err := node.send(ctx, msg); err != nil {
 			return
 		}
 	}
@@ -584,40 +603,43 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	for _, node := range nodes {
 		node.HandleFunc(
 			testutils.TcHead,
-			func(_ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(fmt.Sprintf("%s (response)", string(reqBytes))), nil
 			},
 		)
 	}
 
-	if err := nodes[2].GetNetworkNode().Listen(); err != nil {
-		t.Error(err)
-		return [5]INode{}, [5]context.CancelFunc{}
-	}
-	if err := nodes[4].GetNetworkNode().Listen(); err != nil {
-		t.Error(err)
-		return [5]INode{}, [5]context.CancelFunc{}
-	}
+	ctx := context.Background()
+	go func() {
+		if err := nodes[2].GetNetworkNode().Listen(ctx); err != nil {
+			t.Error(err)
+		}
+	}()
+	go func() {
+		if err := nodes[4].GetNetworkNode().Listen(ctx); err != nil {
+			t.Error(err)
+		}
+	}()
 
 	time.Sleep(200 * time.Millisecond)
 
 	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
-	if err := nodes[0].GetNetworkNode().AddConnection(addresses[0]); err != nil {
+	if err := nodes[0].GetNetworkNode().AddConnection(ctx, addresses[0]); err != nil {
 		t.Error(err)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
-	if err := nodes[1].GetNetworkNode().AddConnection(addresses[1]); err != nil {
+	if err := nodes[1].GetNetworkNode().AddConnection(ctx, addresses[1]); err != nil {
 		t.Error(err)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
 
 	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
-	if err := nodes[3].GetNetworkNode().AddConnection(addresses[0]); err != nil {
+	if err := nodes[3].GetNetworkNode().AddConnection(ctx, addresses[0]); err != nil {
 		t.Error(err)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
-	if err := nodes[3].GetNetworkNode().AddConnection(addresses[1]); err != nil {
+	if err := nodes[3].GetNetworkNode().AddConnection(ctx, addresses[1]); err != nil {
 		t.Error(err)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}

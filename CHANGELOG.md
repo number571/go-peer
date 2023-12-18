@@ -12,7 +12,7 @@
 
 ### CHANGES
 
-- Update `pkg/types`: Run method of Runner now contains context.Context parameter
+- Update `pkg`: Change functions / methods to context.Context implementation
 
 ### BUG FIXES
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -16,7 +17,7 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
+func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
 	tcpHandler := HandleServiceTCP(pCfg, pWrapperDB, pAnonLogger)
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
@@ -81,7 +82,7 @@ func HandleMessageAPI(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTP
 				return
 			}
 
-			if err := tcpHandler(pNode, nil, netMsg); err != nil {
+			if err := tcpHandler(pCtx, pNode, nil, netMsg); err != nil {
 				// internal logger
 				api.Response(pW, http.StatusBadRequest, "failed: handle message")
 				return

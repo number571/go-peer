@@ -98,7 +98,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		_ = p.fState.Disable(disableFunc)
 	}()
 
-	p.initServiceHTTP()
+	p.initServiceHTTP(pCtx)
 	p.initServicePPROF()
 
 	chErr := make(chan error)
@@ -141,7 +141,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 			return
 		}
 
-		if err := p.fNode.Listen(); err != nil {
+		if err := p.fNode.Listen(pCtx); err != nil {
 			chErr <- err
 			return
 		}
@@ -149,7 +149,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	select {
 	case <-pCtx.Done():
-		return nil
+		return pCtx.Err()
 	case err := <-chErr:
 		return fmt.Errorf("got run error: %w", err)
 	}

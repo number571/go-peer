@@ -90,7 +90,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 		return nil, nil, err
 	}
 
-	node, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
+	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
 	if node == nil {
 		return nil, nil, fmt.Errorf("node is not running")
 	}
@@ -107,10 +107,10 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Listen(); err != nil {
-		t.Error(err)
-		return nil, cancel, nil
-	}
+	go func() {
+		_ = node.GetNetworkNode().Listen(ctx)
+	}()
+
 	return node, cancel, nil
 }
 
@@ -119,13 +119,13 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 	time.Sleep(time.Second)
 
-	node, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
+	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
 	if node == nil {
 		return nil, cancel, fmt.Errorf("node is not running")
 	}
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().AddConnection(testutils.TgAddrs[4]); err != nil {
+	if err := node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
 		return nil, cancel, err
 	}
 
@@ -140,7 +140,7 @@ func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 	)
 
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
-	respBytes, err := node.FetchPayload(pubKey, pld)
+	respBytes, err := node.FetchPayload(ctx, pubKey, pld)
 	if err != nil {
 		return node, cancel, err
 	}

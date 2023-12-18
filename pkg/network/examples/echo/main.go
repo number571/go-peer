@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -29,7 +30,8 @@ func main() {
 
 	service.HandleFunc(serviceHeader, handler())
 
-	if err := service.Listen(); err != nil {
+	ctx := context.Background()
+	if err := service.Listen(ctx); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait
@@ -48,14 +50,14 @@ func main() {
 		conn.GetSettings(),
 		payload.NewPayload(serviceHeader, []byte("hello, world!")),
 	)
-	if err := conn.WriteMessage(sendMsg); err != nil {
+	if err := conn.WriteMessage(ctx, sendMsg); err != nil {
 		panic(err)
 	}
 
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
-	recvMsg, err := conn.ReadMessage(readCh)
+	recvMsg, err := conn.ReadMessage(ctx, readCh)
 	if err != nil {
 		panic(err)
 	}
@@ -64,8 +66,8 @@ func main() {
 }
 
 func handler() network.IHandlerF {
-	return func(node network.INode, c conn.IConn, msg message.IMessage) error {
-		c.WriteMessage(message.NewMessage(
+	return func(ctx context.Context, node network.INode, c conn.IConn, msg message.IMessage) error {
+		c.WriteMessage(ctx, message.NewMessage(
 			node.GetSettings().GetConnSettings(),
 			payload.NewPayload(
 				serviceHeader,

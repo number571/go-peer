@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -97,9 +98,9 @@ func TestBroadcast(t *testing.T) {
 	wg.Add(4 * tcIter)
 
 	headHandle := uint64(testutils.TcHead)
-	handleF := func(node INode, conn conn.IConn, pMsg message.IMessage) error {
+	handleF := func(pCtx context.Context, node INode, conn conn.IConn, pMsg message.IMessage) error {
 		defer wg.Done()
-		defer node.BroadcastMessage(pMsg)
+		defer node.BroadcastMessage(pCtx, pMsg)
 
 		tcMutex.Lock()
 		defer tcMutex.Unlock()
@@ -127,6 +128,7 @@ func TestBroadcast(t *testing.T) {
 	}
 
 	// nodes[0] -> nodes[1:]
+	ctx := context.Background()
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			pld := payload.NewPayload(
@@ -134,7 +136,7 @@ func TestBroadcast(t *testing.T) {
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
 			sett := nodes[0].GetSettings().GetConnSettings()
-			nodes[0].BroadcastMessage(message.NewMessage(sett, pld))
+			nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld))
 		}(i)
 	}
 
@@ -228,49 +230,60 @@ func TestNodeConnection(t *testing.T) {
 	)
 	defer testFreeNodes([]INode{node1, node2, node3})
 
-	if err := node2.Listen(); err != nil {
-		t.Error(err)
-		return
-	}
+	ctx := context.Background()
+	go func() {
+		if err := node2.Listen(ctx); err != nil {
+			t.Error(err)
+			return
+		}
+	}()
 	defer node2.Close()
 
-	if err := node2.Listen(); err == nil {
-		t.Error("success second run node")
-		return
-	}
+	time.Sleep(200 * time.Millisecond)
 
-	if err := node3.Listen(); err != nil {
-		t.Error(err)
-		return
-	}
+	go func() {
+		if err := node2.Listen(ctx); err == nil {
+			t.Error("success second run node")
+			return
+		}
+	}()
+
+	go func() {
+		if err := node3.Listen(ctx); err != nil {
+			t.Error(err)
+			return
+		}
+	}()
 	defer node3.Close()
 
-	if err := node1.AddConnection("unknown_connection_address"); err == nil {
+	time.Sleep(200 * time.Millisecond)
+
+	if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {
 		t.Error("success add incorrect connection address")
 		return
 	}
 
-	if err := node1.AddConnection(testutils.TgAddrs[27]); err != nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[27]); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := node1.AddConnection(testutils.TgAddrs[27]); err == nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[27]); err == nil {
 		t.Error("success add already exist connection")
 		return
 	}
 
-	if err := node1.AddConnection(testutils.TgAddrs[28]); err != nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[28]); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := node1.AddConnection(testutils.TgAddrs[28]); err == nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[28]); err == nil {
 		t.Error("success add second connection with limit = 1")
 		return
 	}
 
-	if err := node3.AddConnection(testutils.TgAddrs[27]); err != nil {
+	if err := node3.AddConnection(ctx, testutils.TgAddrs[27]); err != nil {
 		t.Error(err)
 		return
 	}
@@ -295,11 +308,6 @@ func TestNodeConnection(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	if err := node2.Close(); err == nil {
-		t.Error("success stop already stopped process")
-		return
-	}
 }
 
 func TestHandleMessage(t *testing.T) {
@@ -309,28 +317,29 @@ func TestHandleMessage(t *testing.T) {
 	defer testFreeNodes([]INode{node})
 
 	sett := node.GetSettings().GetConnSettings()
+	ctx := context.Background()
 
 	node.HandleFunc(1, nil)
 	msg1 := message.NewMessage(sett, payload.NewPayload(1, []byte{1}))
-	if ok := node.handleMessage(nil, msg1); ok {
+	if ok := node.handleMessage(ctx, nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
 	}
 
-	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b message.IMessage) error {
+	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return errors.New("some error")
 	})
 	msg2 := message.NewMessage(sett, payload.NewPayload(1, []byte{2}))
-	if ok := node.handleMessage(nil, msg2); ok {
+	if ok := node.handleMessage(ctx, nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
 	}
 
-	node.HandleFunc(1, func(i1 INode, i2 conn.IConn, b message.IMessage) error {
+	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return nil
 	})
 	msg3 := message.NewMessage(sett, payload.NewPayload(1, []byte{3}))
-	if ok := node.handleMessage(nil, msg3); !ok {
+	if ok := node.handleMessage(ctx, nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return
 	}
@@ -353,20 +362,18 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects, time.Minute)
 	}
 
-	if err := nodes[2].Listen(); err != nil {
-		return nodes, nil, err
-	}
-	if err := nodes[4].Listen(); err != nil {
-		return nodes, nil, err
-	}
+	ctx := context.Background()
+
+	go func() { _ = nodes[2].Listen(ctx) }()
+	go func() { _ = nodes[4].Listen(ctx) }()
 
 	time.Sleep(500 * time.Millisecond)
 
-	nodes[0].AddConnection(testutils.TgAddrs[0])
-	nodes[1].AddConnection(testutils.TgAddrs[1])
+	nodes[0].AddConnection(ctx, testutils.TgAddrs[0])
+	nodes[1].AddConnection(ctx, testutils.TgAddrs[1])
 
-	nodes[3].AddConnection(testutils.TgAddrs[0])
-	nodes[3].AddConnection(testutils.TgAddrs[1])
+	nodes[3].AddConnection(ctx, testutils.TgAddrs[0])
+	nodes[3].AddConnection(ctx, testutils.TgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {

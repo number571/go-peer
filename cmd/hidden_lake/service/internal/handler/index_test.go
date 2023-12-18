@@ -18,7 +18,7 @@ func TestHandleIndexAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 3)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 3)
 
-	_, node, cancel, srv := testAllCreate(pathCfg, pathDB, addr)
+	_, node, _, cancel, srv := testAllCreate(pathCfg, pathDB, addr)
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(

@@ -47,17 +47,17 @@ func (p *sConnKeeper) Run(pCtx context.Context) error {
 	}()
 
 	for {
-		p.tryConnectToAll()
+		p.tryConnectToAll(pCtx)
 		select {
 		case <-pCtx.Done():
-			return nil
+			return pCtx.Err()
 		case <-time.After(p.fSettings.GetDuration()):
 			// next iter
 		}
 	}
 }
 
-func (p *sConnKeeper) tryConnectToAll() {
+func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
 	connList := p.fSettings.GetConnections()
 
 	wg := sync.WaitGroup{}
@@ -72,7 +72,7 @@ func (p *sConnKeeper) tryConnectToAll() {
 				return
 			}
 
-			p.fNode.AddConnection(addr)
+			p.fNode.AddConnection(pCtx, addr)
 		}(addr)
 	}
 

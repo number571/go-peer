@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -60,7 +61,7 @@ func TestApp(t *testing.T) {
 	app := NewApp(cfg, ".")
 
 	go func() {
-		if err := app.Run(ctx); err != nil {
+		if err := app.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 			return
 		}
@@ -107,7 +108,7 @@ func TestApp(t *testing.T) {
 
 	// try twice running
 	go func() {
-		if err := app.Run(ctx1); err != nil {
+		if err := app.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 			return
 		}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -37,7 +38,7 @@ func main() {
 	defer cancel()
 
 	go func() {
-		if err := q.Run(ctx); err != nil {
+		if err := q.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			panic(err)
 		}
 	}()

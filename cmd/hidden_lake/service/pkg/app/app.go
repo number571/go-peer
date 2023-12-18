@@ -91,7 +91,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		_ = p.fState.Disable(disableFunc)
 	}()
 
-	p.initServiceHTTP()
+	p.initServiceHTTP(pCtx)
 	p.initServicePPROF()
 
 	chErr := make(chan error)
@@ -128,7 +128,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		}
 
 		// run node in server mode
-		err := p.fNode.GetNetworkNode().Listen()
+		err := p.fNode.GetNetworkNode().Listen(pCtx)
 		if err != nil && !errors.Is(err, net.ErrClosed) {
 			chErr <- err
 			return
@@ -151,7 +151,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	select {
 	case <-pCtx.Done():
-		return nil
+		return pCtx.Err()
 	case err := <-chErr:
 		return fmt.Errorf("got run error: %w", err)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -34,13 +35,14 @@ func main() {
 	service1.HandleFunc(serviceHeader, handler("#1"))
 	service2.HandleFunc(serviceHeader, handler("#2"))
 
-	if err := service1.Listen(); err != nil {
+	ctx := context.Background()
+	if err := service1.Listen(ctx); err != nil {
 		panic(err)
 	}
 
 	time.Sleep(time.Second) // wait
 
-	if err := service2.AddConnection(serviceAddress); err != nil {
+	if err := service2.AddConnection(ctx, serviceAddress); err != nil {
 		panic(err)
 	}
 
@@ -51,13 +53,13 @@ func main() {
 			[]byte("0"),
 		),
 	)
-	service2.BroadcastMessage(msg)
+	service2.BroadcastMessage(ctx, msg)
 
 	select {}
 }
 
 func handler(serviceName string) network.IHandlerF {
-	return func(n network.INode, _ conn.IConn, msg message.IMessage) error {
+	return func(ctx context.Context, n network.INode, _ conn.IConn, msg message.IMessage) error {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 
 		num, err := strconv.Atoi(string(msg.GetPayload().GetBody()))
@@ -71,7 +73,7 @@ func handler(serviceName string) network.IHandlerF {
 		}
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
-		n.BroadcastMessage(message.NewMessage(
+		n.BroadcastMessage(ctx, message.NewMessage(
 			n.GetSettings().GetConnSettings(),
 			payload.NewPayload(
 				serviceHeader,

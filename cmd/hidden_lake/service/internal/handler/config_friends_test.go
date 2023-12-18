@@ -18,7 +18,7 @@ func TestHandleFriendsAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 1)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 1)
 
-	wcfg, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[7])
+	wcfg, node, _, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[7])
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(

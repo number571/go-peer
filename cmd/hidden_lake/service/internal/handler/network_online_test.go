@@ -25,7 +25,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 6)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 6)
 
-	_, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[12])
+	_, node, ctx, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[12])
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	pushNode, pushCancel := testAllOnlineCreate(pathCfg, pathDB)
@@ -39,7 +39,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnection(testutils.TgAddrs[13])
+	node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[13])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	testGetOnlines(t, client, node)
@@ -109,7 +109,7 @@ func testAllOnlineFree(node anonymity.INode, cancel context.CancelFunc, pathCfg,
 }
 
 func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
-	node, cancel := testRunNewNode(dbPath, testutils.TgAddrs[13])
+	node, ctx, cancel := testRunNewNode(dbPath, testutils.TgAddrs[13])
 
 	cfg, err := config.BuildConfig(cfgPath, &config.SConfig{
 		FSettings: &config.SConfigSettings{
@@ -135,9 +135,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Listen(); err != nil {
-		return nil, cancel
-	}
+	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
 
 	return node, cancel
 }

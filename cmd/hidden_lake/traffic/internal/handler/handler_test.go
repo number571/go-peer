@@ -95,7 +95,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 		conn_keeper.NewSettings(connKeeperSettings),
 		testNewNetworkNode("").HandleFunc(
 			1, // default value
-			func(_ network.INode, _ conn.IConn, _ net_message.IMessage) error {
+			func(_ context.Context, _ network.INode, _ conn.IConn, _ net_message.IMessage) error {
 				// pass response actions
 				return nil
 			},
@@ -143,7 +143,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(cfg, wDB, logger, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
 
 	srv := &http.Server{
 		Addr:    addr,

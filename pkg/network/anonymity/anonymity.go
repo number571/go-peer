@@ -84,12 +84,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 	}()
 
 	chErr := make(chan error)
-	go func() {
-		if err := p.fQueue.Run(pCtx); err != nil {
-			chErr <- fmt.Errorf("run queue: %w", err)
-		}
-		chErr <- nil
-	}()
+	go func() { chErr <- p.fQueue.Run(pCtx) }()
 
 	for {
 		select {
@@ -102,7 +97,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 			}
 
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-			if ok, _ := p.storeHashWithBroadcast(logBuilder, msg); !ok {
+			if ok, _ := p.storeHashWithBroadcast(pCtx, logBuilder, msg); !ok {
 				// internal logger
 				break
 			}
@@ -148,9 +143,9 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 }
 
 // Send message without response waiting.
-func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
+func (p *sNode) BroadcastPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
 	// internal logger
-	if err := p.enqueuePayload(cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
+	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
 		return fmt.Errorf("broadcast payload: %w", err)
 	}
 	return nil
@@ -158,7 +153,7 @@ func (p *sNode) BroadcastPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayloa
 
 // Send message with response waiting.
 // Payload head must be uint32.
-func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
+func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
 	headAction := uint32(random.NewStdPRNG().GetUint64())
 	newPld := payload.NewPayload(
 		joinHead(headAction, pPld.GetHead()).uint64(),
@@ -171,7 +166,7 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 	defer p.delAction(actionKey)
 
 	// internal logger
-	if err := p.enqueuePayload(cIsRequest, pRecv, newPld); err != nil {
+	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, newPld); err != nil {
 		return nil, fmt.Errorf("fetch payload: %w", err)
 	}
 
@@ -183,13 +178,17 @@ func (p *sNode) FetchPayload(pRecv asymmetric.IPubKey, pPld adapters.IPayload) (
 	return resp, nil
 }
 
-func (p *sNode) send(pMsg message.IMessage) error {
+func (p *sNode) send(pCtx context.Context, pMsg message.IMessage) error {
 	for i := uint64(0); i <= p.fSettings.GetRetryEnqueue(); i++ {
-		if err := p.fQueue.EnqueueMessage(pMsg); err != nil {
-			time.Sleep(p.fQueue.GetSettings().GetDuration())
-			continue
+		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
+			return nil
 		}
-		return nil
+		select {
+		case <-pCtx.Done():
+			return pCtx.Err()
+		case <-time.After(p.fQueue.GetSettings().GetDuration()):
+			// next iter
+		}
 	}
 	return errors.New("enqueue message as send")
 }
@@ -211,14 +210,14 @@ func (p *sNode) recv(pActionKey string) ([]byte, error) {
 }
 
 func (p *sNode) handleWrapper() network.IHandlerF {
-	return func(_ network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
+	return func(pCtx context.Context, _ network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 		// enrich logger
 		logBuilder.WithConn(pConn)
 
 		// try store hash of message
-		if ok, err := p.storeHashWithBroadcast(logBuilder, pMsg); !ok {
+		if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pMsg); !ok {
 			// internal logger
 			if err != nil {
 				return fmt.Errorf("store hash with broadcast: %w", err)
@@ -278,7 +277,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			}
 
 			// response can be nil
-			resp, err := f(p, sender, unwrapBytes(body))
+			resp, err := f(pCtx, p, sender, unwrapBytes(body))
 			if err != nil {
 				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
 				return nil
@@ -289,8 +288,8 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			}
 
 			// create the message and put this to the queue
+			_ = p.enqueuePayload(pCtx, cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
 			// internal logger
-			_ = p.enqueuePayload(cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
 			return nil
 
 		// undefined type of message (not request/response)
@@ -301,7 +300,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 	}
 }
 
-func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 	// enrich logger
@@ -347,7 +346,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 		WithSize(size).
 		WithType(logType)
 
-	if err := p.send(msg); err != nil {
+	if err := p.send(pCtx, msg); err != nil {
 		p.fLogger.PushErro(logBuilder)
 		return fmt.Errorf("send message: %w", err)
 	}
@@ -356,7 +355,7 @@ func (p *sNode) enqueuePayload(pType iDataType, pRecv asymmetric.IPubKey, pPld p
 	return nil
 }
 
-func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
+func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
 	var (
 		size      = len(pNetMsg.GetPayload().GetBody())
 		hash      = pNetMsg.GetHash()
@@ -400,7 +399,7 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pNet
 	// do not send data if than already received
 	if !hashIsExist {
 		// broadcast message to network
-		if err := p.networkBroadcast(pNetMsg); err != nil {
+		if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
 			p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
 		}
@@ -409,9 +408,9 @@ func (p *sNode) storeHashWithBroadcast(pLogBuilder anon_logger.ILogBuilder, pNet
 	return true, nil
 }
 
-func (p *sNode) networkBroadcast(pMsg net_message.IMessage) error {
+func (p *sNode) networkBroadcast(pCtx context.Context, pMsg net_message.IMessage) error {
 	// redirect message to another nodes
-	if err := p.fNetwork.BroadcastMessage(pMsg); err != nil {
+	if err := p.fNetwork.BroadcastMessage(pCtx, pMsg); err != nil {
 		return fmt.Errorf("network broadcast message: %w", err)
 	}
 	return nil

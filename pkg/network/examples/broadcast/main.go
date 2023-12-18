@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -34,12 +35,13 @@ func main() {
 	service1.HandleFunc(serviceHeader, handler("#1"))
 	service2.HandleFunc(serviceHeader, handler("#2"))
 
-	if err := service1.Listen(); err != nil {
+	ctx := context.Background()
+	if err := service1.Listen(ctx); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait
 
-	if err := service2.AddConnection(serviceAddress); err != nil {
+	if err := service2.AddConnection(ctx, serviceAddress); err != nil {
 		panic(err)
 	}
 
@@ -53,7 +55,7 @@ func main() {
 		}
 	}()
 
-	err = conn.WriteMessage(message.NewMessage(
+	err = conn.WriteMessage(ctx, message.NewMessage(
 		conn.GetSettings(),
 		payload.NewPayload(
 			serviceHeader,
@@ -68,8 +70,8 @@ func main() {
 }
 
 func handler(serviceName string) network.IHandlerF {
-	return func(n network.INode, _ conn.IConn, msg message.IMessage) error {
-		defer n.BroadcastMessage(msg)
+	return func(ctx context.Context, n network.INode, _ conn.IConn, msg message.IMessage) error {
+		defer n.BroadcastMessage(ctx, msg)
 		fmt.Printf("service '%s' got '%s'\n", serviceName, string(msg.GetPayload().GetBody()))
 		return nil
 	}

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -14,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleConfigConnectsAPI(pCtx context.Context, pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -57,7 +58,7 @@ func HandleConfigConnectsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			_ = pNode.GetNetworkNode().AddConnection(connect) // connection may be refused (closed)
+			_ = pNode.GetNetworkNode().AddConnection(pCtx, connect) // connection may be refused (closed)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: update connections")

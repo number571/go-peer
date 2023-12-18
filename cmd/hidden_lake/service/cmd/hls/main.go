@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,7 +28,7 @@ func main() {
 
 	go func() {
 		defer func() { closed <- struct{}{} }()
-		if err := app.Run(ctx); err != nil {
+		if err := app.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			panic(err)
 		}
 	}()

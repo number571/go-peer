@@ -59,7 +59,7 @@ func main() {
 		}
 	}()
 
-	service.HandleFunc(serviceHeader, func(_ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+	service.HandleFunc(serviceHeader, func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes))), nil
 	})
 
@@ -70,7 +70,7 @@ func main() {
 	defer cancel1()
 
 	go func() { _ = service.Run(ctx1) }()
-	if err := service.GetNetworkNode().Listen(); err != nil {
+	if err := service.GetNetworkNode().Listen(ctx1); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second) // wait
@@ -79,11 +79,12 @@ func main() {
 	defer cancel2()
 
 	go func() { _ = client.Run(ctx2) }()
-	if err := client.GetNetworkNode().AddConnection(serviceAddress); err != nil {
+	if err := client.GetNetworkNode().AddConnection(ctx2, serviceAddress); err != nil {
 		panic(err)
 	}
 
 	res, err := client.FetchPayload(
+		ctx2,
 		service.GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(serviceHeader, []byte("hello, world!")),
 	)

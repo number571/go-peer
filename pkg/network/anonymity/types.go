@@ -1,6 +1,7 @@
 package anonymity
 
 import (
+	"context"
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -13,11 +14,12 @@ import (
 )
 
 type (
-	IHandlerF func(INode, asymmetric.IPubKey, []byte) ([]byte, error)
+	IHandlerF func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
 )
 
 type INode interface {
 	types.IRunner
+	HandleFunc(uint32, IHandlerF) INode
 
 	GetSettings() ISettings
 	GetWrapperDB() IWrapperDB
@@ -26,10 +28,8 @@ type INode interface {
 	GetListPubKeys() asymmetric.IListPubKeys
 	GetLogger() logger.ILogger
 
-	HandleFunc(uint32, IHandlerF) INode
-
-	BroadcastPayload(asymmetric.IPubKey, adapters.IPayload) error
-	FetchPayload(asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
+	BroadcastPayload(context.Context, asymmetric.IPubKey, adapters.IPayload) error
+	FetchPayload(context.Context, asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
 }
 
 type ISettings interface {

@@ -2,6 +2,7 @@ package conn
 
 import (
 	"bytes"
+	"context"
 	"net"
 	"strings"
 	"testing"
@@ -108,7 +109,9 @@ func TestClosedConn(t *testing.T) {
 
 	pld := payload.NewPayload(1, []byte("aaa"))
 	msg := message.NewMessage(conn.GetSettings(), pld)
-	if err := conn.WriteMessage(msg); err == nil {
+
+	ctx := context.Background()
+	if err := conn.WriteMessage(ctx, msg); err == nil {
 		t.Error("success write payload to closed connection")
 		return
 	}
@@ -116,18 +119,18 @@ func TestClosedConn(t *testing.T) {
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
-	if _, err := conn.ReadMessage(readCh); err == nil {
+	if _, err := conn.ReadMessage(ctx, readCh); err == nil {
 		t.Error("success read payload from closed connection")
 		return
 	}
 
 	sconn := conn.(*sConn)
-	if err := sconn.sendBytes([]byte("hello, world!")); err == nil {
+	if err := sconn.sendBytes(ctx, []byte("hello, world!")); err == nil {
 		t.Error("success send bytes to closed connection")
 		return
 	}
 
-	if _, err := sconn.recvDataBytes(128); err == nil {
+	if _, err := sconn.recvDataBytes(ctx, 128); err == nil {
 		t.Error("success recv data bytes from closed connection")
 		return
 	}
@@ -135,7 +138,7 @@ func TestClosedConn(t *testing.T) {
 	readCh2 := make(chan struct{})
 	go func() { <-readCh2 }()
 
-	if _, _, _, err := sconn.recvHeadBytes(readCh2, time.Minute); err == nil {
+	if _, _, _, err := sconn.recvHeadBytes(ctx, readCh2, time.Minute); err == nil {
 		t.Error("success recv head bytes from closed connection")
 		return
 	}
@@ -197,7 +200,8 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
 	msg := message.NewMessage(conn.GetSettings(), pld)
-	if err := conn.WriteMessage(msg); err != nil {
+	ctx := context.Background()
+	if err := conn.WriteMessage(ctx, msg); err != nil {
 		t.Error(err)
 		return
 	}
@@ -205,7 +209,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
-	msgRecv, err := conn.ReadMessage(readCh)
+	msgRecv, err := conn.ReadMessage(ctx, readCh)
 	if err != nil {
 		t.Error(err)
 		return
@@ -247,14 +251,16 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 			readCh := make(chan struct{})
 			go func() { <-readCh }()
 
-			msg, err := conn.ReadMessage(readCh)
+			ctx := context.Background()
+
+			msg, err := conn.ReadMessage(ctx, readCh)
 			if err != nil {
 				break
 			}
 
 			ok := func() bool {
 				defer conn.Close()
-				return conn.WriteMessage(msg) == nil
+				return conn.WriteMessage(ctx, msg) == nil
 			}()
 
 			if !ok {

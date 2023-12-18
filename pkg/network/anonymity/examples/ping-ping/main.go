@@ -75,7 +75,7 @@ func main() {
 	defer cancel1()
 
 	go func() { _ = service1.Run(ctx1) }()
-	if err := service1.GetNetworkNode().Listen(); err != nil {
+	if err := service1.GetNetworkNode().Listen(ctx1); err != nil {
 		panic(err)
 	}
 	time.Sleep(time.Second)
@@ -84,11 +84,12 @@ func main() {
 	defer cancel2()
 
 	go func() { _ = service2.Run(ctx2) }()
-	if err := service2.GetNetworkNode().AddConnection(serviceAddress); err != nil {
+	if err := service2.GetNetworkNode().AddConnection(ctx2, serviceAddress); err != nil {
 		panic(err)
 	}
 
 	err := service2.BroadcastPayload(
+		ctx2,
 		service1.GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(
 			serviceHeader,
@@ -103,7 +104,7 @@ func main() {
 }
 
 func handler(serviceName string) anonymity.IHandlerF {
-	return func(node anonymity.INode, pubKey asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+	return func(ctx context.Context, node anonymity.INode, pubKey asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		num, err := strconv.Atoi(string(reqBytes))
 		if err != nil {
 			panic(err)
@@ -117,6 +118,7 @@ func handler(serviceName string) anonymity.IHandlerF {
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
 		err = node.BroadcastPayload(
+			ctx,
 			pubKey,
 			adapters.NewPayload(
 				serviceHeader,

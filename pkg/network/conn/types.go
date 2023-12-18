@@ -1,6 +1,7 @@
 package conn
 
 import (
+	"context"
 	"net"
 	"time"
 
@@ -14,8 +15,8 @@ type IConn interface {
 	GetSettings() ISettings
 	GetSocket() net.Conn
 
-	WriteMessage(net_message.IMessage) error
-	ReadMessage(chan struct{}) (net_message.IMessage, error)
+	WriteMessage(context.Context, net_message.IMessage) error
+	ReadMessage(context.Context, chan struct{}) (net_message.IMessage, error)
 }
 
 type ISettings interface {

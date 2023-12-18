@@ -26,7 +26,7 @@ func TestHandleRequestAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 7)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 7)
 
-	_, node, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[9])
+	_, node, ctx, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[9])
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	pushNode, pushCancel, pushSrv := testAllPushCreate(pathCfg, pathDB)
@@ -40,7 +40,7 @@ func TestHandleRequestAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnection(testutils.TgAddrs[11])
+	node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[11])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	testBroadcast(t, client)
@@ -111,7 +111,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 }
 
 func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
-	node, cancel := testRunNewNode(dbPath, testutils.TgAddrs[11])
+	node, ctx, cancel := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
@@ -141,9 +141,7 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
-	if err := node.GetNetworkNode().Listen(); err != nil {
-		return nil, cancel
-	}
+	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
 
 	return node, cancel
 }
