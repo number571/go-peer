@@ -7,5 +7,4 @@ import (
 type ICipher interface {
 	crypto.IEncrypter
 	crypto.IDecrypter
-	crypto.IParameter
 }

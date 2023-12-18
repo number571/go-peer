@@ -2,7 +2,8 @@ package hashing
 
 import (
 	"crypto/sha256"
-	"fmt"
+
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -10,13 +11,7 @@ var (
 )
 
 const (
-	cHashPrefixTemplate = "Hash(%s){"
-	cKeySuffix          = "}"
-)
-
-const (
-	CSHA256Size    = sha256.Size
-	CSHA256KeyType = "go-peer/sha256"
+	CSHA256Size = sha256.Size
 )
 
 type sSHA256Hasher struct {
@@ -32,17 +27,9 @@ func NewSHA256Hasher(pData []byte) IHasher {
 }
 
 func (p *sSHA256Hasher) ToString() string {
-	return fmt.Sprintf(cHashPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
+	return encoding.HexEncode(p.ToBytes())
 }
 
 func (p *sSHA256Hasher) ToBytes() []byte {
 	return p.fHash
-}
-
-func (p *sSHA256Hasher) GetType() string {
-	return CSHA256KeyType
-}
-
-func (p *sSHA256Hasher) GetSize() uint64 {
-	return CSHA256Size
 }

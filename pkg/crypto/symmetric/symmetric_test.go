@@ -21,22 +21,6 @@ func TestAESKeySize(t *testing.T) {
 	_ = NewAESCipher([]byte{123})
 }
 
-func TestAESGetters(t *testing.T) {
-	t.Parallel()
-
-	cipher := NewAESCipher(tgKey)
-
-	if cipher.GetSize() != CAESKeySize {
-		t.Error("got incorrect size")
-		return
-	}
-
-	if cipher.GetType() != CAESKeyType {
-		t.Error("got incorrect type")
-		return
-	}
-}
-
 func TestAESEncrypt(t *testing.T) {
 	t.Parallel()
 

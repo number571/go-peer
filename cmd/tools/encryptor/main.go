@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -24,10 +23,10 @@ func main() {
 	}
 
 	var (
-		mod     = strings.ToUpper(os.Args[1])
-		param   crypto.IParameter
+		mode    = strings.ToUpper(os.Args[1])
 		pubKey  asymmetric.IPubKey
 		privKey asymmetric.IPrivKey
+		keySize uint64
 	)
 
 	keyBytes, err := os.ReadFile(os.Args[2])
@@ -35,35 +34,38 @@ func main() {
 		panic(err)
 	}
 
-	switch mod {
+	switch mode {
 	case "E":
 		pubKey = asymmetric.LoadRSAPubKey(string(keyBytes))
 		if pubKey == nil {
 			panic("incorrect public key")
 		}
-		param = pubKey
+		keySize = pubKey.GetSize()
 	case "D":
 		privKey = asymmetric.LoadRSAPrivKey(string(keyBytes))
 		if privKey == nil {
 			panic("incorrect private key")
 		}
-		param = privKey
+		keySize = privKey.GetSize()
+	default:
+		panic("unkown mode")
 	}
 
-	dataValue := readUntilEOF()
+	// TODO: dynamic size of message
+	dataValue := string(readUntilEOF())
 	sett := message.NewSettings(&message.SSettings{
-		FMessageSizeBytes: getMessageSize(param, dataValue),
-		FKeySizeBits:      privKey.GetSize(),
+		FMessageSizeBytes: (8 << 10),
+		FKeySizeBits:      keySize,
 	})
 
-	switch mod {
+	switch mode {
 	case "E":
 		c := client.NewClient(sett, asymmetric.NewRSAPrivKey(pubKey.GetSize()))
-		msg, err := c.EncryptPayload(pubKey, payload.NewPayload(0x1, dataValue))
+		msg, err := c.EncryptPayload(pubKey, payload.NewPayload(0x1, []byte(dataValue)))
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(msg.ToBytes()))
+		fmt.Println(msg.ToString())
 	case "D":
 		c := client.NewClient(sett, privKey)
 		msg, err := message.LoadMessage(sett, dataValue)
@@ -84,9 +86,4 @@ func readUntilEOF() []byte {
 		panic(err)
 	}
 	return res
-}
-
-func getMessageSize(param crypto.IParameter, dataValue []byte) uint64 {
-	defaultSize := param.GetSize() << 1                // init size by key size
-	return (defaultSize + uint64(len(dataValue))) << 1 // size with hex encode
 }

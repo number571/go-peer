@@ -13,6 +13,8 @@
 ### CHANGES
 
 - Update `pkg`: Change functions / methods to context.Context implementation
+- Update `cmd/hidden_lake/traffic`: append wait group for send to consumers
+- Update `pkg/crypto`: delete 'go-peer' prefixs
 
 ### BUG FIXES
 

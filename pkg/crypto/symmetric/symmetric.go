@@ -14,7 +14,6 @@ var (
 const (
 	CAESBlockSize = aes.BlockSize
 	CAESKeySize   = 32
-	CAESKeyType   = "go-peer/aes"
 )
 
 type sAESCipher struct {
@@ -57,12 +56,4 @@ func (p *sAESCipher) DecryptBytes(pMsg []byte) []byte {
 
 	stream.XORKeyStream(result, pMsg[blockSize:])
 	return result
-}
-
-func (p *sAESCipher) GetType() string {
-	return CAESKeyType
-}
-
-func (p *sAESCipher) GetSize() uint64 {
-	return CAESKeySize
 }

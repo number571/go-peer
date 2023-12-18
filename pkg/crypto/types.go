@@ -7,8 +7,3 @@ type IEncrypter interface {
 type IDecrypter interface {
 	DecryptBytes(pMsg []byte) []byte
 }
-
-type IParameter interface {
-	GetType() string
-	GetSize() uint64
-}

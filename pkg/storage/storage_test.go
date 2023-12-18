@@ -62,6 +62,12 @@ func TestCryptoStorage(t *testing.T) {
 		return
 	}
 
+	// // used only once for set value into test storage
+	// if err := store.Set([]byte("KEY"), encoding.HexDecode(tcSavedSecret)); err != nil {
+	// 	t.Error(err)
+	// 	return
+	// }
+
 	gotSecret, err := store.Get([]byte("KEY"))
 	if err != nil {
 		t.Error(err)

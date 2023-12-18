@@ -3,15 +3,12 @@ package hashing
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-	"fmt"
+
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
 	_ IHasher = &sHMACSHA256Hasher{}
-)
-
-const (
-	CHMACSHA256KeyType = "go-peer/hmac-sha256"
 )
 
 type sHMACSHA256Hasher struct {
@@ -27,17 +24,9 @@ func NewHMACSHA256Hasher(pKey []byte, pData []byte) IHasher {
 }
 
 func (p *sHMACSHA256Hasher) ToString() string {
-	return fmt.Sprintf(cHashPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
+	return encoding.HexEncode(p.ToBytes())
 }
 
 func (p *sHMACSHA256Hasher) ToBytes() []byte {
 	return p.fHash
-}
-
-func (p *sHMACSHA256Hasher) GetType() string {
-	return CHMACSHA256KeyType
-}
-
-func (p *sHMACSHA256Hasher) GetSize() uint64 {
-	return CSHA256Size
 }

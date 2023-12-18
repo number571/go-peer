@@ -20,13 +20,10 @@ var (
 )
 
 const (
-	cPrivKeyPrefixTemplate = "PrivKey(%s){"
-	cPubKeyPrefixTemplate  = "PubKey(%s){"
-	cKeySuffix             = "}"
-)
-
-const (
-	CRSAKeyType = "go-peer/rsa"
+	cPrivKeyPrefix = "PrivKey{"
+	cPubKeyPrefix  = "PubKey{"
+	cAddressPrefix = "Address{"
+	cKeySuffix     = "}"
 )
 
 /*
@@ -65,7 +62,7 @@ func LoadRSAPrivKey(pPrivKey interface{}) IPrivKey {
 	case string:
 		x = skipSpaceChars(x)
 		var (
-			prefix = fmt.Sprintf(cPrivKeyPrefixTemplate, CRSAKeyType)
+			prefix = cPrivKeyPrefix
 			suffix = cKeySuffix
 		)
 
@@ -106,11 +103,7 @@ func (p *sRSAPrivKey) ToBytes() []byte {
 }
 
 func (p *sRSAPrivKey) ToString() string {
-	return fmt.Sprintf(cPrivKeyPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
-}
-
-func (p *sRSAPrivKey) GetType() string {
-	return CRSAKeyType
+	return fmt.Sprintf(cPrivKeyPrefix+"%X"+cKeySuffix, p.ToBytes())
 }
 
 func (p *sRSAPrivKey) GetSize() uint64 {
@@ -175,7 +168,7 @@ func LoadRSAPubKey(pPubKey interface{}) IPubKey {
 	case string:
 		x = skipSpaceChars(x)
 		var (
-			prefix = fmt.Sprintf(cPubKeyPrefixTemplate, CRSAKeyType)
+			prefix = cPubKeyPrefix
 			suffix = cKeySuffix
 		)
 
@@ -216,11 +209,7 @@ func (p *sRSAPubKey) ToBytes() []byte {
 }
 
 func (p *sRSAPubKey) ToString() string {
-	return fmt.Sprintf(cPubKeyPrefixTemplate+"%X"+cKeySuffix, p.GetType(), p.ToBytes())
-}
-
-func (p *sRSAPubKey) GetType() string {
-	return CRSAKeyType
+	return fmt.Sprintf(cPubKeyPrefix+"%X"+cKeySuffix, p.ToBytes())
 }
 
 func (p *sRSAPubKey) GetSize() uint64 {
@@ -248,11 +237,7 @@ func (p *sAddress) ToBytes() []byte {
 }
 
 func (p *sAddress) ToString() string {
-	return fmt.Sprintf("Address(%s){%X}", p.GetType(), p.ToBytes())
-}
-
-func (p *sAddress) GetType() string {
-	return CRSAKeyType
+	return fmt.Sprintf(cAddressPrefix+"%X"+cKeySuffix, p.ToBytes())
 }
 
 func (p *sAddress) GetSize() uint64 {
