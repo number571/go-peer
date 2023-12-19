@@ -9,6 +9,8 @@
 7. Append example of use functions (godoc)
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
+10. HLT: do not delete hashes of messages
+11. HLT: change Hashes method -> (count of hashes, gethash)
 
 ### Tests
 

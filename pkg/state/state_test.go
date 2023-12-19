@@ -1,3 +1,4 @@
+// gotests -all -parallel . > state_test.go
 package state
 
 import (
