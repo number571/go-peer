@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
 	cIsIncomingSize = 1
 	cTimestampSize  = encoding.CSizeUint64
+	cSenderIDSize   = hashing.CSHA256Size
 )
 
 var (
@@ -19,19 +21,24 @@ var (
 type sMessage struct {
 	fIsIncoming bool
 	fTimestamp  uint64
+	fSenderID   []byte
 	fMessage    []byte
 }
 
-func NewMessage(pIsIncoming bool, pMessage []byte) IMessage {
+func NewMessage(pIsIncoming bool, pSenderID []byte, pMessage []byte) IMessage {
+	if len(pSenderID) != cSenderIDSize {
+		panic("len(pSenderID) != cSenderIDSize")
+	}
 	return &sMessage{
 		fIsIncoming: pIsIncoming,
 		fTimestamp:  uint64(time.Now().Unix()),
+		fSenderID:   pSenderID,
 		fMessage:    pMessage,
 	}
 }
 
 func LoadMessage(pMsgBytes []byte) IMessage {
-	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize) {
+	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize + cSenderIDSize) {
 		return nil
 	}
 
@@ -46,8 +53,13 @@ func LoadMessage(pMsgBytes []byte) IMessage {
 	return &sMessage{
 		fIsIncoming: isIncoming,
 		fTimestamp:  encoding.BytesToUint64(blockTimestamp),
-		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize:],
+		fSenderID:   pMsgBytes[cIsIncomingSize+cTimestampSize : cIsIncomingSize+cTimestampSize+cSenderIDSize],
+		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize+cSenderIDSize:],
 	}
+}
+
+func (p *sMessage) GetSenderID() string {
+	return encoding.HexEncode(p.fSenderID)
 }
 
 func (p *sMessage) IsIncoming() bool {
@@ -72,6 +84,7 @@ func (p *sMessage) ToBytes() []byte {
 		[][]byte{
 			{firstByte},
 			blockTimestamp[:],
+			p.fSenderID,
 			[]byte(p.fMessage),
 		},
 		[]byte{},

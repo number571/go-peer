@@ -21,12 +21,18 @@ const (
 
 const (
 	CHeaderPublicKey    = "Hl-Service-Public-Key"
+	CHeaderRequestId    = "Hl-Service-Request-Id"
 	CHeaderResponseMode = "Hl-Service-Response-Mode"
 )
 
 const (
 	CHeaderResponseModeON  = "on" // default
 	CHeaderResponseModeOFF = "off"
+)
+
+const (
+	CHandleRequestQueueSize = (1 << 10) // 1024 values
+	CHandleRequestIDSize    = 16        // bytes
 )
 
 const (

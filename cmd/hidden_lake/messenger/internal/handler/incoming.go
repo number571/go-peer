@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -13,6 +14,8 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -28,6 +31,13 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		if pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			return
+		}
+
+		senderID := encoding.HexDecode(pR.Header.Get(hlm_settings.CHeaderSenderId))
+		if len(senderID) != hashing.CSHA256Size {
+			pLogger.PushWarn(logBuilder.WithMessage("get_sender_id"))
+			api.Response(pW, http.StatusUnauthorized, "failed: get sender id from messenger")
 			return
 		}
 
@@ -57,7 +67,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, doMessageProcessor(rawMsgBytes))
+		dbMsg := database.NewMessage(true, senderID, doMessageProcessor(rawMsgBytes))
 
 		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
@@ -67,7 +77,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 
 		gChatQueue.Push(&chat_queue.SMessage{
 			FAddress:     fPubKey.GetAddress().ToString(),
-			FMessageInfo: getMessageInfo(dbMsg.GetMessage(), dbMsg.GetTimestamp()),
+			FMessageInfo: getMessageInfo(dbMsg.GetSenderID(), dbMsg.GetMessage(), dbMsg.GetTimestamp()),
 		})
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
@@ -104,7 +114,8 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
+func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
+	cutSenderID := fmt.Sprintf("%s...%s", string(pSenderID[:8]), string(pSenderID[len(pSenderID)-8:]))
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes)
@@ -112,6 +123,7 @@ func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 			panic("message data = nil")
 		}
 		return utils.SMessageInfo{
+			FSenderID:  cutSenderID,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
@@ -121,6 +133,7 @@ func getMessageInfo(pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 			panic("filename = nil OR message data = nil")
 		}
 		return utils.SMessageInfo{
+			FSenderID:  cutSenderID,
 			FFileName:  filename,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,

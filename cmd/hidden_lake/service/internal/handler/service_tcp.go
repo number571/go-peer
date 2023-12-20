@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/queue_set"
 
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
@@ -23,6 +24,12 @@ import (
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
+	queueSet := queue_set.NewQueueSet(
+		queue_set.NewSettings(&queue_set.SSettings{
+			FCapacity: pkg_settings.CHandleRequestQueueSize,
+		}),
+	)
+
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
 
@@ -38,9 +45,23 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, err
 		}
 
+		// get unique ID of request from the header
+		loadReqHead := loadReq.GetHead()
+		requestID, ok := loadReqHead[pkg_settings.CHeaderRequestId]
+		if !ok || len(requestID) != pkg_settings.CHandleRequestIDSize {
+			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedRequestID))
+			return nil, err
+		}
+
+		// try store ID of request to the queue
+		if ok := queueSet.Push([]byte(requestID), []byte{}); !ok {
+			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
+			return nil, nil
+		}
+
 		// share request to all friends
 		if pCfg.GetShare() {
-			friends := copyFriendsMap(pCfg.GetFriends())
+			friends := pCfg.GetFriends()
 
 			wg := sync.WaitGroup{}
 			wg.Add(len(friends))
@@ -85,7 +106,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 
 		// append headers from request & set service headers
-		for key, val := range loadReq.GetHead() {
+		for key, val := range loadReqHead {
 			pushReq.Header.Set(key, val)
 		}
 		pushReq.Header.Set(pkg_settings.CHeaderPublicKey, sender.ToString())
@@ -120,14 +141,6 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
 		}
 	}
-}
-
-func copyFriendsMap(pMap map[string]asymmetric.IPubKey) map[string]asymmetric.IPubKey {
-	result := make(map[string]asymmetric.IPubKey, len(pMap))
-	for k, v := range pMap {
-		result[k] = v
-	}
-	return result
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

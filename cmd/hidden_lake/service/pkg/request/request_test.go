@@ -3,6 +3,8 @@ package request
 import (
 	"bytes"
 	"testing"
+
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 const (
@@ -54,6 +56,9 @@ func TestRequest(t *testing.T) {
 	}
 
 	for k, v := range request.GetHead() {
+		if k == settings.CHeaderRequestId {
+			continue
+		}
 		v1, ok := tgHead[k]
 		if !ok {
 			t.Errorf("header undefined '%s'", k)
@@ -106,6 +111,9 @@ func TestLoadRequest(t *testing.T) {
 	}
 
 	for k, v := range request1.GetHead() {
+		if k == settings.CHeaderRequestId {
+			continue
+		}
 		v1, ok := request2.GetHead()[k]
 		if !ok {
 			t.Errorf("header undefined '%s'", k)

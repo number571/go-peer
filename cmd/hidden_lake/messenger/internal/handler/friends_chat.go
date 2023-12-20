@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
@@ -80,13 +81,14 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			if err := trySendMessage(client, aliasName, msgBytes); err != nil {
+			if err := trySendMessage(client, myPubKey, aliasName, msgBytes); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
 				fmt.Fprint(pW, fmt.Errorf("error: push message to network: %w", err))
 				return
 			}
 
-			dbMsg := database.NewMessage(false, doMessageProcessor(msgBytes))
+			senderID := myPubKey.GetAddress().ToBytes()
+			dbMsg := database.NewMessage(false, senderID, doMessageProcessor(msgBytes))
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("push_message"))
 				fmt.Fprint(pW, fmt.Errorf("error: add message to database: %w", err))
@@ -127,7 +129,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		for _, msg := range msgs {
 			res.FMessages = append(res.FMessages, sChatMessage{
 				FIsIncoming:  msg.IsIncoming(),
-				FMessageInfo: getMessageInfo(msg.GetMessage(), msg.GetTimestamp()),
+				FMessageInfo: getMessageInfo(msg.GetSenderID(), msg.GetMessage(), msg.GetTimestamp()),
 			})
 		}
 
@@ -187,7 +189,7 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte) error {
+func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pAliasName string, pMsgBytes []byte) error {
 	msgLimit, err := getMessageLimit(pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
@@ -206,7 +208,8 @@ func trySendMessage(pClient client.IClient, pAliasName string, pMsgBytes []byte)
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(map[string]string{
-				"Content-Type": "application/json",
+				"Content-Type":               "application/json",
+				hlm_settings.CHeaderSenderId: encoding.HexEncode(pMyPubKey.GetAddress().ToBytes()),
 			}).
 			WithBody(pMsgBytes),
 	)

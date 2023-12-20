@@ -20,6 +20,7 @@ type IRelation interface {
 
 type IMessage interface {
 	IsIncoming() bool
+	GetSenderID() string
 	GetTimestamp() string
 	GetMessage() []byte
 	ToBytes() []byte
