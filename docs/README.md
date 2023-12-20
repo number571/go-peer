@@ -13,8 +13,8 @@ Also, the composition of these works can be found in the book [The general theor
 
 ### 2. Presentations
 
-1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
-2. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "GA")
+1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "Presentation HLAN")
+2. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "Presentation GA")
 
 ### 3. Habr
 
@@ -25,6 +25,10 @@ Also, the composition of these works can be found in the book [The general theor
 5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
+
+### 4. Videos
+
+1. [Hidden Lake Messenger](https://www.youtube.com/watch?v=o2J6ewvBKmg "Video HLM")
 
 ## Default applications ports
 
