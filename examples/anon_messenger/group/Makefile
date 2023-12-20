@@ -25,6 +25,7 @@ build:
 	# COPY HLT PROGRAM
 	cp $(BINPATH)/hlt ./middle_hlt/prog_hlt0
 	# BUILD HLS, HLM CONFIGS
+	make build -C group_hls
 	make build -C node1_hlm
 	make build -C node2_hlm
 	make build -C node3_hlm

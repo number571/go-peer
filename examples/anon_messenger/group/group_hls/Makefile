@@ -1,5 +1,7 @@
-.PHONY: default run clean 
-default: clean run 
+.PHONY: default build run clean 
+default: clean build run 
+build:
+	cp hls_copy.yml hls.yml 
 run:
 	./prog_hls0 --key priv.key &
 clean:
