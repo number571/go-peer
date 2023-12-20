@@ -25,11 +25,12 @@ type SConfigSettings struct {
 type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging    []string  `yaml:"logging,omitempty"`
-	FLanguage   string    `yaml:"language,omitempty"`
-	FAddress    *SAddress `yaml:"address"`
-	FConnection string    `yaml:"connection"`
-	FStorageKey string    `yaml:"storage_key,omitempty"`
+	FLogging    []string          `yaml:"logging,omitempty"`
+	FLanguage   string            `yaml:"language,omitempty"`
+	FAddress    *SAddress         `yaml:"address"`
+	FConnection string            `yaml:"connection"`
+	FStorageKey string            `yaml:"storage_key,omitempty"`
+	FSecretKeys map[string]string `yaml:"secret_keys,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -202,4 +203,15 @@ func (p *sLogging) HasWarn() bool {
 
 func (p *sLogging) HasErro() bool {
 	return (*p)[2]
+}
+
+func (p *SConfig) GetSecretKeys() map[string]string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	result := make(map[string]string)
+	for k, v := range p.FSecretKeys {
+		result[k] = v
+	}
+	return result
 }

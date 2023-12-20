@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -16,6 +17,9 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -81,7 +85,10 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			if err := trySendMessage(client, myPubKey, aliasName, msgBytes); err != nil {
+			// secret key can be = nil
+			secretKey := pCfg.GetSecretKeys()[aliasName]
+
+			if err := trySendMessage(client, myPubKey, secretKey, aliasName, msgBytes); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
 				fmt.Fprint(pW, fmt.Errorf("error: push message to network: %w", err))
 				return
@@ -189,13 +196,13 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pAliasName string, pMsgBytes []byte) error {
+func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKey, pAliasName string, pMsgBytes []byte) error {
 	msgLimit, err := getMessageLimit(pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
 	}
 
-	if uint64(len(pMsgBytes)) > msgLimit {
+	if uint64(len(pMsgBytes)) > (msgLimit + symmetric.CAESBlockSize + hashing.CSHA256Size) {
 		return fmt.Errorf("error: len message > limit: %w", err)
 	}
 
@@ -204,14 +211,29 @@ func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pAlias
 		return nil
 	}
 
+	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
+	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
+
 	return pClient.BroadcastRequest(
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
-			WithHead(map[string]string{
-				"Content-Type":               "application/json",
-				hlm_settings.CHeaderSenderId: encoding.HexEncode(pMyPubKey.GetAddress().ToBytes()),
-			}).
-			WithBody(pMsgBytes),
+			WithHead(
+				map[string]string{
+					"Content-Type":               "application/json",
+					hlm_settings.CHeaderSenderId: encoding.HexEncode(pMyPubKey.GetAddress().ToBytes()),
+				},
+			).
+			WithBody(
+				symmetric.NewAESCipher(cipherKey).EncryptBytes(
+					bytes.Join(
+						[][]byte{
+							hashing.NewHMACSHA256Hasher(authKey, pMsgBytes).ToBytes(),
+							pMsgBytes,
+						},
+						[]byte{},
+					),
+				),
+			),
 	)
 }
 

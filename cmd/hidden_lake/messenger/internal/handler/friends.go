@@ -20,37 +20,51 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
+		cfg := pWrapper.GetConfig()
+		cfgEditor := pWrapper.GetEditor()
+
 		if pR.URL.Path != "/friends" {
-			NotFoundPage(pLogger, pCfg)(pW, pR)
+			NotFoundPage(pLogger, cfg)(pW, pR)
 			return
 		}
 
 		pR.ParseForm()
 
-		client := getClient(pCfg)
+		client := getClient(cfg)
+		secretKeys := cfg.GetSecretKeys()
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
+			secretKey := strings.TrimSpace(pR.FormValue("secret_key")) // may be nil
 			if aliasName == hlm_settings.CIamAliasName || aliasName == "" || pubStrKey == "" {
 				pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
 				fmt.Fprint(pW, "error: host or port is null")
 				return
 			}
+
 			pubKey := asymmetric.LoadRSAPubKey(pubStrKey)
 			if pubKey == nil {
 				pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 				fmt.Fprint(pW, "error: public key is nil")
 				return
 			}
+
 			if err := client.AddFriend(aliasName, pubKey); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("add_friend"))
 				fmt.Fprint(pW, "error: add friend")
+				return
+			}
+
+			secretKeys[aliasName] = secretKey
+			if err := cfgEditor.UpdateSecretKeys(secretKeys); err != nil {
+				pLogger.PushWarn(logBuilder.WithMessage("add_secret_key"))
+				fmt.Fprint(pW, "error: add secret key")
 				return
 			}
 		case http.MethodDelete:
@@ -60,9 +74,17 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 				fmt.Fprint(pW, "error: alias_name is null")
 				return
 			}
+
 			if err := client.DelFriend(aliasName); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("del_friend"))
 				fmt.Fprint(pW, "error: del friend")
+				return
+			}
+
+			delete(secretKeys, aliasName)
+			if err := cfgEditor.UpdateSecretKeys(secretKeys); err != nil {
+				pLogger.PushWarn(logBuilder.WithMessage("del_secret_key"))
+				fmt.Fprint(pW, "error: del secret key")
 				return
 			}
 		}
@@ -75,7 +97,7 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 		}
 
 		result := new(sFriends)
-		result.sTemplate = getTemplate(pCfg)
+		result.sTemplate = getTemplate(cfg)
 		result.FFriends = make([]string, 0, len(friends)+1) // +1 CIamAliasName
 
 		friendsList := make([]string, 0, len(friends))

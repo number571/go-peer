@@ -12,6 +12,7 @@ type IWrapper interface {
 
 type IEditor interface {
 	UpdateLanguage(utils.ILanguage) error
+	UpdateSecretKeys(map[string]string) error
 }
 
 type IConfig interface {
@@ -21,6 +22,7 @@ type IConfig interface {
 	GetConnection() string
 	GetStorageKey() string
 	GetLanguage() utils.ILanguage
+	GetSecretKeys() map[string]string
 }
 
 type IConfigSettings interface {

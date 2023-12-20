@@ -9,3 +9,5 @@ address:
   interface: localhost:6060
   incoming: localhost:6061
 connection: localhost:6572
+secret_keys:
+  Group: abc

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -15,10 +16,13 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
@@ -41,10 +45,23 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		rawMsgBytes, err := io.ReadAll(pR.Body)
+		encMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: response message")
+			return
+		}
+
+		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
+		if fPubKey == nil {
+			panic("public key is null (invalid data from HLS)!")
+		}
+
+		hlsClient := getClient(pCfg)
+		rawMsgBytes, err := decryptMsgBytes(pCfg, hlsClient, fPubKey, encMsgBytes)
+		if err != nil {
+			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
+			api.Response(pW, http.StatusConflict, "failed: decrypt message")
 			return
 		}
 
@@ -54,16 +71,11 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		myPubKey, err := getClient(pCfg).GetPubKey()
+		myPubKey, err := hlsClient.GetPubKey()
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
-		}
-
-		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
-		if fPubKey == nil {
-			panic("public key is null (invalid data from HLS)!")
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
@@ -90,6 +102,44 @@ func doMessageProcessor(msgBytes []byte) []byte {
 		return []byte(utils.ReplaceTextToEmoji(string(msgBytes)))
 	}
 	return msgBytes
+}
+
+func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymmetric.IPubKey, encMsgBytes []byte) ([]byte, error) {
+	aliasName := ""
+
+	friends, err := pClient.GetFriends()
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range friends {
+		if bytes.Equal(v.ToBytes(), pPubKey.ToBytes()) {
+			aliasName = k
+			break
+		}
+	}
+	if aliasName == "" {
+		return nil, errors.New("alias name not found")
+	}
+
+	// secret key can be = nil
+	secretKey := pCfg.GetSecretKeys()[aliasName]
+
+	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(secretKey)
+	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(secretKey)
+
+	decBytes := symmetric.NewAESCipher(cipherKey).DecryptBytes(encMsgBytes)
+	if len(decBytes) < hashing.CSHA256Size {
+		return nil, errors.New("failed decrypt bytes")
+	}
+
+	msgBytes := decBytes[hashing.CSHA256Size:]
+	gotHash := decBytes[:hashing.CSHA256Size]
+	newHash := hashing.NewHMACSHA256Hasher(authKey, msgBytes).ToBytes()
+	if !bytes.Equal(gotHash, newHash) {
+		return nil, errors.New("failed auth bytes")
+	}
+
+	return msgBytes, nil
 }
 
 func isValidMsgBytes(rawMsgBytes []byte) error {
