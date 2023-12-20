@@ -14,6 +14,7 @@ Also, the composition of these works can be found in the book [The general theor
 ### 2. Presentations
 
 1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
+2. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "GA")
 
 ### 3. Habr
 
