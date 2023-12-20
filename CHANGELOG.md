@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `pkg`: append new package 'state'
+- Update `cmd/hidden_lake/service`: append option 'share' into the config
 
 ### CHANGES
 

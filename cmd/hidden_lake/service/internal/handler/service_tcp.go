@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -17,11 +18,12 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
+	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
-	return func(_ context.Context, _ anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
 
 		// enrich logger
@@ -34,6 +36,34 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
 			return nil, err
+		}
+
+		// share request to all friends
+		if pCfg.GetShare() {
+			friends := copyFriendsMap(pCfg.GetFriends())
+
+			wg := sync.WaitGroup{}
+			wg.Add(len(friends))
+
+			for _, pubKey := range friends {
+				go func(pubKey asymmetric.IPubKey) {
+					defer wg.Done()
+
+					// do not send a request to the creator of the request
+					if bytes.Equal(pubKey.ToBytes(), sender.ToBytes()) {
+						return
+					}
+
+					// redirect request to another node
+					_ = pNode.BroadcastPayload(
+						pCtx,
+						pubKey,
+						adapters.NewPayload(pkg_settings.CServiceMask, reqBytes),
+					)
+				}(pubKey)
+			}
+
+			wg.Wait()
 		}
 
 		// get service's address by hostname
@@ -76,8 +106,8 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			// send response to the client
 			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoResponseFromService))
 			return response.NewResponse(resp.StatusCode).
-					WithHead(getHead(resp)).
-					WithBody(getBody(resp)).
+					WithHead(getResponseHead(resp)).
+					WithBody(getResponseBody(resp)).
 					ToBytes(),
 				nil
 		case pkg_settings.CHeaderResponseModeOFF:
@@ -92,7 +122,15 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 	}
 }
 
-func getHead(pResp *http.Response) map[string]string {
+func copyFriendsMap(pMap map[string]asymmetric.IPubKey) map[string]asymmetric.IPubKey {
+	result := make(map[string]asymmetric.IPubKey, len(pMap))
+	for k, v := range pMap {
+		result[k] = v
+	}
+	return result
+}
+
+func getResponseHead(pResp *http.Response) map[string]string {
 	headers := make(map[string]string)
 	for k := range pResp.Header {
 		switch strings.ToLower(k) {
@@ -105,7 +143,7 @@ func getHead(pResp *http.Response) map[string]string {
 	return headers
 }
 
-func getBody(pResp *http.Response) []byte {
+func getResponseBody(pResp *http.Response) []byte {
 	data, err := io.ReadAll(pResp.Body)
 	if err != nil {
 		return nil

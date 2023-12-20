@@ -59,6 +59,7 @@ const (
 logging:
   - info
   - erro
+share: true
 address:
   tcp: %s
   http: %s
@@ -261,6 +262,11 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetNetworkKey() != tcNetwork {
 		t.Error("network is invalid")
+		return
+	}
+
+	if cfg.GetShare() != true {
+		t.Error("share is invalid")
 		return
 	}
 

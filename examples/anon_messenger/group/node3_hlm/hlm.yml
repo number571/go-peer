@@ -1,0 +1,11 @@
+settings:
+  messages_capacity: 2048
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: localhost:6060
+  incoming: localhost:6061
+connection: localhost:6572

@@ -32,6 +32,7 @@ type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
 	FLogging     []string          `yaml:"logging,omitempty"`
+	FShare       bool              `yaml:"share,omitempty"`
 	FAddress     *SAddress         `yaml:"address,omitempty"`
 	FConnections []string          `yaml:"connections,omitempty"`
 	FServices    map[string]string `yaml:"services,omitempty"`
@@ -197,6 +198,10 @@ func (p *SConfig) loadPubKeys() error {
 	}
 
 	return nil
+}
+
+func (p *SConfig) GetShare() bool {
+	return p.FShare
 }
 
 func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
