@@ -12,6 +12,7 @@ func (p *sApp) initServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
+	mux.HandleFunc(pkg_settings.CHandlePointerPath, handler.HandlePointerAPI(p.fWrapperDB, p.fHTTPLogger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, handler.HandleHashesAPI(p.fWrapperDB, p.fHTTPLogger))
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(pCtx, p.fConfig, p.fWrapperDB, p.fHTTPLogger, p.fAnonLogger, p.fNode))
 

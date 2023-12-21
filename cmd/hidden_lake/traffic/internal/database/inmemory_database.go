@@ -33,6 +33,10 @@ func (p *sInMemoryDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
+func (p *sInMemoryDatabase) Pointer() uint64 {
+	return p.fQueueSet.GetIndex()
+}
+
 func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
 	key, ok := p.fQueueSet.GetKey(i)
 	if !ok {

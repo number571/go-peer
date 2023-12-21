@@ -7,6 +7,7 @@ import (
 type IClient interface {
 	GetIndex() (string, error)
 
+	GetPointer() (uint64, error)
 	GetHash(uint64) (string, error)
 
 	GetMessage(string) (net_message.IMessage, error)
@@ -20,6 +21,7 @@ type IBuilder interface {
 type IRequester interface {
 	GetIndex() (string, error)
 
+	GetPointer() (uint64, error)
 	GetHash(uint64) (string, error)
 
 	GetMessage(string) (net_message.IMessage, error)

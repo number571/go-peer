@@ -15,7 +15,7 @@ type sQueueSet struct {
 	fMutex    sync.Mutex
 	fMap      map[string][]byte
 	fQueue    []string
-	fIndex    int
+	fIndex    uint64
 }
 
 func NewQueueSet(pSettings ISettings) IQueueSet {
@@ -28,6 +28,13 @@ func NewQueueSet(pSettings ISettings) IQueueSet {
 
 func (p *sQueueSet) GetSettings() ISettings {
 	return p.fSettings
+}
+
+func (p *sQueueSet) GetIndex() uint64 {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fIndex
 }
 
 func (p *sQueueSet) GetKey(i uint64) ([]byte, bool) {
@@ -65,7 +72,7 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	p.fMap[encKey] = pValue
 
 	// increment queue index
-	p.fIndex = (p.fIndex + 1) % len(p.fQueue)
+	p.fIndex = (p.fIndex + 1) % uint64(len(p.fQueue))
 	return true
 }
 

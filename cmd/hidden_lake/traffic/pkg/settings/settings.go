@@ -17,6 +17,7 @@ const (
 
 const (
 	CHandleIndexPath   = "/api/index"
+	CHandlePointerPath = "/api/pointer"
 	CHandleHashesPath  = "/api/hashes"
 	CHandleMessagePath = "/api/message"
 )

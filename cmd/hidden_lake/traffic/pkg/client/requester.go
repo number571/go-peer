@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
@@ -19,6 +20,7 @@ var (
 
 const (
 	cHandleIndexTemplate   = "%s" + hlt_settings.CHandleIndexPath
+	cHandlePointerTemplate = "%s" + hlt_settings.CHandlePointerPath
 	cHandleHashesTemplate  = "%s" + hlt_settings.CHandleHashesPath + "?id=%d"
 	cHandleMessageTemplate = "%s" + hlt_settings.CHandleMessagePath
 )
@@ -54,6 +56,25 @@ func (p *sRequester) GetIndex() (string, error) {
 	}
 
 	return result, nil
+}
+
+func (p *sRequester) GetPointer() (uint64, error) {
+	resp, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(cHandlePointerTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("get pointer (requester): %w", err)
+	}
+
+	pointer, err := strconv.ParseUint(string(resp), 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("atoi pointer (requester): %w", err)
+	}
+
+	return uint64(pointer), nil
 }
 
 func (p *sRequester) GetHash(i uint64) (string, error) {

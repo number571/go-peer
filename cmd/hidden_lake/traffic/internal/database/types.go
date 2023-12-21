@@ -11,6 +11,7 @@ type IDatabase interface {
 	Push(net_message.IMessage) error
 	Load([]byte) (net_message.IMessage, error)
 	Hash(uint64) ([]byte, error)
+	Pointer() uint64
 
 	Settings() ISettings
 }

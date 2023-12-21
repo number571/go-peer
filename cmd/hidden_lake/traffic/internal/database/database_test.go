@@ -171,6 +171,10 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 			t.Error(err)
 			return
 		}
+		if kvDB.Pointer() != uint64(i+1)%messagesCapacity {
+			t.Error("got invalid pointer")
+			return
+		}
 		pushHashes = append(pushHashes, msg.GetHash())
 	}
 

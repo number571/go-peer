@@ -141,6 +141,7 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
+	mux.HandleFunc(pkg_settings.CHandlePointerPath, HandlePointerAPI(wDB, logger))
 	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
 

@@ -30,6 +30,14 @@ func (p *sClient) GetIndex() (string, error) {
 	return res, nil
 }
 
+func (p *sClient) GetPointer() (uint64, error) {
+	res, err := p.fRequester.GetPointer()
+	if err != nil {
+		return 0, fmt.Errorf("get pointer (client): %w", err)
+	}
+	return res, nil
+}
+
 func (p *sClient) GetHash(i uint64) (string, error) {
 	res, err := p.fRequester.GetHash(i)
 	if err != nil {

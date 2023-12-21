@@ -46,6 +46,13 @@ func (p *sDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
+func (p *sDatabase) Pointer() uint64 {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.getPointer()
+}
+
 func (p *sDatabase) Hash(i uint64) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
