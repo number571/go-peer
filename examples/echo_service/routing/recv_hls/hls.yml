@@ -5,7 +5,8 @@ settings:
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
 services:
-  hidden-echo-service: localhost:8080
+  hidden-echo-service:  
+    host: localhost:8080
 connections:
   - localhost:6583
 friends:

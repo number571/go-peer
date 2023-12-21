@@ -96,7 +96,8 @@ logging:
   - warn
   - erro
 services:
-  hidden-echo-service: localhost:8080
+  hidden-echo-service: 
+    host: localhost:8080
 connections: 
   - %s
 friends:

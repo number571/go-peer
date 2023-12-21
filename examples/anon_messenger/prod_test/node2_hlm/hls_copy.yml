@@ -12,7 +12,8 @@ logging:
 address:
   http: localhost:7572
 services:
-  go-peer/hidden-lake-messenger: localhost:7071
+  go-peer/hidden-lake-messenger: 
+    host: localhost:7071
 connections:
   - 195.133.1.126:9581
 friends:

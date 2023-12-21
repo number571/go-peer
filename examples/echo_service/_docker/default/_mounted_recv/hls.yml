@@ -9,7 +9,8 @@ logging:
   - warn
   - erro
 services:
-  hidden-echo-service: recv-echo-service:8080
+  hidden-echo-service: 
+    host: recv-echo-service:8080
 connections:
   - traffic-middle:6581
 friends:

@@ -96,7 +96,8 @@ address:
   tcp: 127.0.0.1:9571
   http: 127.0.0.1:9572
 services:
-  go-peer/hidden-lake-messenger: 127.0.0.1:9592
+  go-peer/hidden-lake-messenger: 
+    host: 127.0.0.1:9592
 ```
 
 Build and run with docker
@@ -245,7 +246,8 @@ address:
   tcp: localhost:9571
   http: localhost:9572
 services:
-  hidden-default-service: localhost:8080
+  hidden-default-service: 
+    host: localhost:8080
 connections:
   - localhost:8571
 friends:
