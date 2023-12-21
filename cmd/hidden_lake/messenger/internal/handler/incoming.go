@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -165,7 +164,6 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 }
 
 func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
-	cutSenderID := fmt.Sprintf("%s...%s", string(pSenderID[:8]), string(pSenderID[len(pSenderID)-8:]))
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes)
@@ -173,7 +171,7 @@ func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) ut
 			panic("message data = nil")
 		}
 		return utils.SMessageInfo{
-			FSenderID:  cutSenderID,
+			FSenderID:  pSenderID,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
@@ -183,7 +181,7 @@ func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) ut
 			panic("filename = nil OR message data = nil")
 		}
 		return utils.SMessageInfo{
-			FSenderID:  cutSenderID,
+			FSenderID:  pSenderID,
 			FFileName:  filename,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,

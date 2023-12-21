@@ -19,6 +19,12 @@ Babilejo
 </script>
 
 <script type="text/javascript" defer>
+  function cutSenderID(senderID) {
+    let first = senderID.slice(0, 8);
+    let last = senderID.substr(senderID.length - 8);
+    return first + "..." + last;
+  }
+
   function escapeOutput(toOutput) {
     return toOutput.replace(/\&/g, '&amp;')
       .replace(/\</g, '&lt;')
@@ -73,7 +79,7 @@ Babilejo
         insertHTML = `
           <div class="d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.sender_id + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
               <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + escapeOutput(messageInfo.message) + `</p>
               <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
             </div>
@@ -84,7 +90,7 @@ Babilejo
         insertHTML = `
           <div class="d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.sender_id + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
               <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">
                 ` + filename + `
               </button>
@@ -137,7 +143,11 @@ Babilejo
   <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
     <div>
       {{if (eq .FMessageInfo.FFileName "")}}
-      <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">{{.FMessageInfo.FSenderID}}</p>
+      <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+        <script>
+          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
+        </script>
+      </p>
       <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
       {{else}}
       <button class="btn btn-muted text-center text-dark w-100"
@@ -152,7 +162,11 @@ Babilejo
   <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
     <div>
       {{if (eq .FMessageInfo.FFileName "")}}
-      <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">{{.FMessageInfo.FSenderID}}</p>
+      <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+        <script>
+          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
+        </script>
+      </p>
       <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
       {{else}}
       <button class="btn btn-primary text-center text-white w-100"

@@ -11,6 +11,7 @@
 - Update `pkg`: append new package 'state'
 - Update `cmd/hidden_lake/service`: append option 'share' into the config
 - Update `cmd/hidden_lake/messenger`: append sender's identificators
+- Update `cmd/hidden_lake/messenger`: append secret key for friend's communications
 
 ### CHANGES
 
