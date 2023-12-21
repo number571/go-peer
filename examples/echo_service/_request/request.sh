@@ -1,10 +1,12 @@
 #!/bin/bash
 
+REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16)
 JSON_DATA='{
         "method":"POST",
         "host":"hidden-echo-service",
         "path":"/echo",
         "head":{
+                "Hl-Service-Request-Id": "'${REQUEST_ID}'",
                 "Accept": "application/json"
         },
         "body":"aGVsbG8sIHdvcmxkIQ=="

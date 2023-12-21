@@ -9,3 +9,5 @@ address:
   interface: messenger-node1:8080
   incoming: messenger-node1:8081
 connection: service-node1:8572
+secret_keys:
+  Bob: abc

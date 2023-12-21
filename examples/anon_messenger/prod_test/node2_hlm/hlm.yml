@@ -8,3 +8,5 @@ address:
   interface: localhost:7070
   incoming: localhost:7071
 connection: localhost:7572
+secret_keys:
+  Alice: abc

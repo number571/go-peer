@@ -9,3 +9,5 @@ address:
   interface: messenger-node2:7070
   incoming: messenger-node2:7071
 connection: service-node2:7572
+secret_keys:
+  Alice: abc

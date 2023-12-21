@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
 const (
@@ -21,7 +24,8 @@ const (
         "host":"hidden-echo-service",
         "path":"/echo",
         "head":{
-                "Accept": "application/json"
+			"%s": "%s",
+            "Accept": "application/json"
         },
         "body":"%s"
 	}`
@@ -45,7 +49,14 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
 	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	requestData := replacer.Replace(fmt.Sprintf(cJsonDataTemplate, base64.StdEncoding.EncodeToString(pMessage)))
+	requestData := replacer.Replace(
+		fmt.Sprintf(
+			cJsonDataTemplate,
+			hls_settings.CHeaderRequestId,
+			random.NewStdPRNG().GetString(hls_settings.CHandleRequestIDSize),
+			base64.StdEncoding.EncodeToString(pMessage),
+		),
+	)
 	req, err := http.NewRequest(
 		http.MethodPost,
 		"http://localhost:7572/api/network/request",

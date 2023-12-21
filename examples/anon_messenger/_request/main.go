@@ -9,9 +9,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+)
+
+const (
+	cSecretKey = "abc"
 )
 
 const (
@@ -25,6 +34,8 @@ const (
         "host":"go-peer/hidden-lake-messenger",
         "path":"/push",
         "head":{
+			"%s": "%s",
+			"%s": "%s",
             "Accept": "application/json"
         },
         "body":"%s"
@@ -45,7 +56,29 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
 	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	requestData := replacer.Replace(fmt.Sprintf(cJsonDataTemplate, base64.StdEncoding.EncodeToString(pMessage)))
+	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(cSecretKey)
+	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(cSecretKey)
+
+	encMessage := symmetric.NewAESCipher(cipherKey).EncryptBytes(
+		bytes.Join(
+			[][]byte{
+				hashing.NewHMACSHA256Hasher(authKey, pMessage).ToBytes(),
+				pMessage,
+			},
+			[]byte{},
+		),
+	)
+
+	requestData := replacer.Replace(
+		fmt.Sprintf(
+			cJsonDataTemplate,
+			hlm_settings.CHeaderSenderId,
+			encoding.HexEncode(random.NewStdPRNG().GetBytes(hashing.CSHA256Size)),
+			hls_settings.CHeaderRequestId,
+			random.NewStdPRNG().GetString(hls_settings.CHandleRequestIDSize),
+			base64.StdEncoding.EncodeToString(encMessage),
+		),
+	)
 	req, err := http.NewRequest(
 		http.MethodPut,
 		"http://localhost:7572/api/network/request",
