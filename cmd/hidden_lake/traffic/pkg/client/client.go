@@ -30,10 +30,10 @@ func (p *sClient) GetIndex() (string, error) {
 	return res, nil
 }
 
-func (p *sClient) GetHashes() ([]string, error) {
-	res, err := p.fRequester.GetHashes()
+func (p *sClient) GetHash(i uint64) (string, error) {
+	res, err := p.fRequester.GetHash(i)
 	if err != nil {
-		return nil, fmt.Errorf("get hashes (client): %w", err)
+		return "", fmt.Errorf("get hashes (client): %w", err)
 	}
 	return res, nil
 }

@@ -31,7 +31,7 @@ const (
 	tcNameHLT2 = tcTestData + "/hlt_2"
 )
 
-func testCreateHLS(netMsgSettings net_message.ISettings, path, addr string) (types.IRunner, context.CancelFunc, hlt_client.IClient, error) {
+func testCreateHLT(netMsgSettings net_message.ISettings, path, addr string) (types.IRunner, context.CancelFunc, hlt_client.IClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	if err := copyWithPaste(path, addr); err != nil {
@@ -81,14 +81,14 @@ func TestHandleTransferAPI(t *testing.T) {
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
 
-	_, cancel1, hltClient1, err := testCreateHLS(netMsgSettings, tcNameHLT1, tgProducer)
+	_, cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer cancel1()
 
-	_, cancel2, hltClient2, err := testCreateHLS(netMsgSettings, tcNameHLT2, tgConsumer)
+	_, cancel2, hltClient2, err := testCreateHLT(netMsgSettings, tcNameHLT2, tgConsumer)
 	if err != nil {
 		t.Error(err)
 		return
@@ -129,15 +129,14 @@ func TestHandleTransferAPI(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		err = hltClient1.PutMessage(
-			net_message.NewMessage(
-				netMsgSettings,
-				payload.NewPayload(
-					hls_settings.CNetworkMask,
-					encMsg.ToBytes(),
-				),
+		netMsg := net_message.NewMessage(
+			netMsgSettings,
+			payload.NewPayload(
+				hls_settings.CNetworkMask,
+				encMsg.ToBytes(),
 			),
 		)
+		err = hltClient1.PutMessage(netMsg)
 		if err != nil {
 			t.Error(err)
 			return
@@ -151,21 +150,26 @@ func TestHandleTransferAPI(t *testing.T) {
 		return
 	}
 
+	time.Sleep(time.Second)
+
 	// LOAD MESSAGES
 
-	hashes, err := hltClient2.GetHashes()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	for i, h := range hashes {
+	for i := uint64(0); ; i++ {
+		h, err := hltClient2.GetHash(i)
+		if err != nil {
+			if i != 5 {
+				t.Error(i, err)
+			}
+			return
+		}
+
 		netMsg, err := hltClient2.GetMessage(h)
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		msg, err := message.LoadMessage(msgSettings, netMsg.GetPayload().ToBytes())
+		msg, err := message.LoadMessage(msgSettings, netMsg.GetPayload().GetBody())
 		if err != nil {
 			t.Error(err)
 			return

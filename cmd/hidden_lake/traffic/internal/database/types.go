@@ -10,7 +10,7 @@ type IDatabase interface {
 
 	Push(net_message.IMessage) error
 	Load([]byte) (net_message.IMessage, error)
-	Hashes() ([][]byte, error)
+	Hash(uint64) ([]byte, error)
 
 	Settings() ISettings
 }
@@ -19,7 +19,6 @@ type ISettings interface {
 	net_message.ISettings
 
 	GetPath() string
-	GetHashesWindow() uint64
 	GetMessagesCapacity() uint64
 }
 

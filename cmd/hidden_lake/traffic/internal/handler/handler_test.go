@@ -43,7 +43,6 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, c
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
 			FNetworkKey:       testutils.TCNetworkKey,
 			FWorkSizeBits:     testutils.TCWorkSize,
-			FHashesWindow:     testutils.TCCapacity,
 			FMessagesCapacity: testutils.TCCapacity,
 		}),
 	)

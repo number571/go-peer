@@ -54,18 +54,13 @@ func TestHandleHashesAPI(t *testing.T) {
 		return
 	}
 
-	hashes, err := hltClient.GetHashes()
+	hash, err := hltClient.GetHash(0)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if len(hashes) != 1 {
-		t.Error("len hashes != 1")
-		return
-	}
-
-	if !bytes.Equal(encoding.HexDecode(hashes[0]), netMsg.GetHash()) {
+	if !bytes.Equal(encoding.HexDecode(hash), netMsg.GetHash()) {
 		t.Error("hashes not equals")
 		return
 	}

@@ -18,6 +18,8 @@
 - Update `pkg`: Change functions / methods to context.Context implementation
 - Update `cmd/hidden_lake/traffic`: append wait group for send to consumers
 - Update `pkg/crypto`: delete 'go-peer' prefixs
+- Update `cmd/hidden_lake/traffic`: change method of get hashes
+- Update `cmd/hidden_lake/traffic`: delete hashes_window parameter from config
 
 ### BUG FIXES
 

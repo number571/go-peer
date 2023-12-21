@@ -2,7 +2,6 @@ settings:
   message_size_bytes: 8192
   key_size_bits: 1024
   work_size_bits: 10
-  hashes_window: 2048
   messages_capacity: 2048
   network_key: some-network-key
 storage: true

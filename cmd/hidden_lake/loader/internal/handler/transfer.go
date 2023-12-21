@@ -114,12 +114,11 @@ func transferToConsumers(pCtx context.Context, pCfg config.IConfig, pProducer hl
 		consumerClients = append(consumerClients, makeHLTClient(pCfg, c))
 	}
 
-	hashes, err := pProducer.GetHashes()
-	if err != nil {
-		return
-	}
-
-	for i, hash := range hashes {
+	for i := uint64(0); i < pCfg.GetSettings().GetMessagesCapacity(); i++ {
+		hash, err := pProducer.GetHash(i)
+		if err != nil {
+			return
+		}
 		select {
 		case <-pCtx.Done():
 			return

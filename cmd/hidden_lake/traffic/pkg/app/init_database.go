@@ -14,7 +14,6 @@ func (p *sApp) initDatabase() error {
 		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
 		FNetworkKey:       cfgSettings.GetNetworkKey(),
 		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
-		FHashesWindow:     cfgSettings.GetHashesWindow(),
 		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
 	})
 

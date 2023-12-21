@@ -46,36 +46,17 @@ func (p *sDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sDatabase) Hashes() ([][]byte, error) {
+func (p *sDatabase) Hash(i uint64) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	hashesWindow := p.Settings().GetHashesWindow()
 	messagesCapacity := p.Settings().GetMessagesCapacity()
-
-	res := make([][]byte, 0, hashesWindow)
-
-	start := uint64(0)
-	pointer := p.getPointer()
-
-	if pointer > hashesWindow {
-		start = pointer - hashesWindow
-	} else {
-		start = (pointer - hashesWindow + messagesCapacity) % messagesCapacity
+	hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
+	if err != nil {
+		return nil, GErrMessageIsNotExist
 	}
 
-	for i := uint64(start); i < (start + hashesWindow); i++ {
-		hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
-		if err != nil {
-			continue
-		}
-		if len(hash) != hashing.CSHA256Size {
-			panic("incorrect hash size")
-		}
-		res = append(res, hash)
-	}
-
-	return res, nil
+	return hash, nil
 }
 
 func (p *sDatabase) Push(pMsg net_message.IMessage) error {
@@ -156,7 +137,6 @@ func (p *sDatabase) getPointer() uint64 {
 	if err != nil {
 		return 0
 	}
-
 	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], data)
 	return encoding.BytesToUint64(res)

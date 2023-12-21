@@ -30,21 +30,21 @@ func (p *sQueueSet) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sQueueSet) GetQueueKeys() [][]byte {
+func (p *sQueueSet) GetKey(i uint64) ([]byte, bool) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	queueSlice := p.fQueue[:p.fIndex]
-	keys := make([][]byte, 0, len(queueSlice))
-	for _, v := range queueSlice {
-		h := encoding.HexDecode(v)
-		if h == nil {
-			panic("decode hex key param")
-		}
-		keys = append(keys, h)
+	queueLen := uint64(len(p.fQueue))
+	if queueLen <= i {
+		return nil, false
 	}
 
-	return keys
+	hash := encoding.HexDecode(p.fQueue[i])
+	if hash == nil {
+		return nil, false
+	}
+
+	return hash, true
 }
 
 func (p *sQueueSet) Push(pKey, pValue []byte) bool {
@@ -52,8 +52,8 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	defer p.fMutex.Unlock()
 
 	// hash already exists in queue
-	sHash := encoding.HexEncode(pKey)
-	if _, ok := p.fMap[sHash]; ok {
+	encKey := encoding.HexEncode(pKey)
+	if _, ok := p.fMap[encKey]; ok {
 		return false
 	}
 
@@ -61,8 +61,8 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	delete(p.fMap, p.fQueue[p.fIndex])
 
 	// push hash to queue
-	p.fQueue[p.fIndex] = sHash
-	p.fMap[sHash] = pValue
+	p.fQueue[p.fIndex] = encKey
+	p.fMap[encKey] = pValue
 
 	// increment queue index
 	p.fIndex = (p.fIndex + 1) % len(p.fQueue)

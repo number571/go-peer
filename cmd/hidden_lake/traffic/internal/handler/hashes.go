@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -28,19 +29,22 @@ func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) htt
 			return
 		}
 
-		hashes, err := database.Hashes()
+		query := pR.URL.Query()
+		id, err := strconv.Atoi(query.Get("id"))
+		if err != nil {
+			pLogger.PushErro(logBuilder.WithMessage("get_id"))
+			api.Response(pW, http.StatusInternalServerError, "failed: get id")
+			return
+		}
+
+		hash, err := database.Hash(uint64(id))
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("get_hashes"))
 			api.Response(pW, http.StatusInternalServerError, "failed: load size from DB")
 			return
 		}
 
-		strHashes := make([]string, 0, len(hashes))
-		for _, h := range hashes {
-			strHashes = append(strHashes, encoding.HexEncode(h))
-		}
-
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, strHashes)
+		api.Response(pW, http.StatusOK, encoding.HexEncode(hash))
 	}
 }

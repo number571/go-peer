@@ -60,53 +60,12 @@ func TestIInitDatabase(t *testing.T) {
 		FPath:             path,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err == nil {
 		t.Error("success init database with invalid path")
 		return
 	}
-}
-
-func TestDatabaseHashesPanic(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	t.Parallel()
-
-	pathDB := fmt.Sprintf(tcPathDBTemplate, 3)
-	os.RemoveAll(pathDB)
-
-	kvDB, err := NewDatabase(NewSettings(&SSettings{
-		FPath:             pathDB,
-		FNetworkKey:       testutils.TCNetworkKey,
-		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     testutils.TCCapacity,
-		FMessagesCapacity: testutils.TCCapacity,
-	}))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	defer func() {
-		kvDB.Close()
-		os.RemoveAll(pathDB)
-	}()
-
-	ptrDB := kvDB.(*sDatabase)
-
-	if err := ptrDB.fDB.Set(getKeyHash(0), []byte{123}); err != nil {
-		t.Error(err)
-		return
-	}
-
-	_, _ = kvDB.Hashes() // panic
 }
 
 func TestDatabaseLoad(t *testing.T) {
@@ -119,7 +78,6 @@ func TestDatabaseLoad(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {
@@ -172,13 +130,8 @@ func TestDatabaseHashes(t *testing.T) {
 
 func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISettings) (IDatabase, error)) {
 	const (
-		hashesWindow     = 2
-		messagesCapacity = 5
+		messagesCapacity = 3
 	)
-
-	if hashesWindow > messagesCapacity {
-		panic("hashesWindow > messagesCapacity")
-	}
 
 	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
@@ -187,7 +140,6 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     hashesWindow,
 		FMessagesCapacity: messagesCapacity,
 	}))
 	if err != nil {
@@ -208,9 +160,8 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
-	lastHashes := make([][]byte, 0, hashesWindow)
-
-	for i := 0; i < messagesCapacity; i++ {
+	pushHashes := make([][]byte, 0, messagesCapacity+1)
+	for i := 0; i < messagesCapacity+1; i++ {
 		msg, err := newNetworkMessageWithData(cl, testutils.TCNetworkKey, fmt.Sprintf("%d", i))
 		if err != nil {
 			t.Error(err)
@@ -220,20 +171,21 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 			t.Error(err)
 			return
 		}
-		if i >= messagesCapacity-hashesWindow {
-			lastHashes = append(lastHashes, msg.GetHash())
+		pushHashes = append(pushHashes, msg.GetHash())
+	}
+
+	for i := uint64(0); i < messagesCapacity+1; i++ {
+		hash, err := kvDB.Hash(i)
+		if err != nil {
+			break
 		}
-	}
-
-	gotHashes, err := kvDB.Hashes()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	for i := range gotHashes {
-		if !bytes.Equal(gotHashes[i], lastHashes[i]) {
-			t.Error("got invalid hash values")
+		if bytes.Equal(hash, pushHashes[0]) {
+			t.Error("hash not overwritten")
+			return
+		}
+		index := (2 + i) % (messagesCapacity)
+		if !bytes.Equal(hash, pushHashes[1:][index]) {
+			t.Error("got invalid hash")
 			return
 		}
 	}
@@ -249,7 +201,6 @@ func TestDatabasePush(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     1,
 		FMessagesCapacity: 1,
 	}))
 	if err != nil {
@@ -333,7 +284,6 @@ func TestDatabase(t *testing.T) {
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
-		FHashesWindow:     testutils.TCCapacity,
 		FMessagesCapacity: testutils.TCCapacity,
 	}))
 	if err != nil {
@@ -369,10 +319,13 @@ func TestDatabase(t *testing.T) {
 		putHashes = append(putHashes, msg.GetHash())
 	}
 
-	getHashes, err := kvDB.Hashes()
-	if err != nil {
-		t.Error(err)
-		return
+	getHashes := make([][]byte, 0, 3)
+	for i := uint64(0); ; i++ {
+		hash, err := kvDB.Hash(i)
+		if err != nil {
+			break
+		}
+		getHashes = append(getHashes, hash)
 	}
 
 	if len(getHashes) != 3 {

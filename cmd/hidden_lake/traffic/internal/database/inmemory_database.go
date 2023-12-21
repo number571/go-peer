@@ -33,17 +33,12 @@ func (p *sInMemoryDatabase) Settings() ISettings {
 	return p.fSettings
 }
 
-func (p *sInMemoryDatabase) Hashes() ([][]byte, error) {
-	limit := p.Settings().GetHashesWindow()
-
-	queueKeys := p.fQueueSet.GetQueueKeys()
-	queueLen := uint64(len(queueKeys))
-
-	if limit < queueLen {
-		return queueKeys[queueLen-limit:], nil
+func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
+	key, ok := p.fQueueSet.GetKey(i)
+	if !ok {
+		return nil, GErrMessageIsNotExist
 	}
-
-	return queueKeys, nil
+	return key, nil
 }
 
 func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {

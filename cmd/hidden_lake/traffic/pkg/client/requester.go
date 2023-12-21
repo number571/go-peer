@@ -8,6 +8,7 @@ import (
 
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -18,7 +19,7 @@ var (
 
 const (
 	cHandleIndexTemplate   = "%s" + hlt_settings.CHandleIndexPath
-	cHandleHashesTemplate  = "%s" + hlt_settings.CHandleHashesPath
+	cHandleHashesTemplate  = "%s" + hlt_settings.CHandleHashesPath + "?id=%d"
 	cHandleMessageTemplate = "%s" + hlt_settings.CHandleMessagePath
 )
 
@@ -55,23 +56,21 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) GetHashes() ([]string, error) {
+func (p *sRequester) GetHash(i uint64) (string, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandleHashesTemplate, p.fHost),
+		fmt.Sprintf(cHandleHashesTemplate, p.fHost, i),
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get hashes (requester): %w", err)
+		return "", fmt.Errorf("get hashes (requester): %w", err)
 	}
 
-	var hashes []string
-	if err := encoding.DeserializeJSON([]byte(resp), &hashes); err != nil {
-		return nil, fmt.Errorf("deserialize hashes (requeser): %w", err)
+	if len(resp) != 2*hashing.CSHA256Size {
+		return "", errors.New("got invalid size of hash")
 	}
-
-	return hashes, nil
+	return string(resp), nil
 }
 
 func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {

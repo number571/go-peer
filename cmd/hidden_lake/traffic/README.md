@@ -53,7 +53,6 @@ settings:
   work_size_bits: 20
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
-  hashes_window: 2048
   messages_capacity: 2048
 logging:
   - info
@@ -108,7 +107,6 @@ settings:
   message_size_bytes: 8192
   key_size_bits: 4096
   work_size_bits: 20
-  hashes_window: 2048
   messages_capacity: 2048
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
@@ -152,7 +150,7 @@ consumers:
 #### 1.1. GET Request
 
 ```bash
-curl -i -X GET -H 'Accept: application/json' http://localhost:9582/api/hashes
+curl -i -X GET -H 'Accept: application/json' http://localhost:9582/api/hashes?id=0
 ```
 
 #### 1.1. GET Response
@@ -162,10 +160,8 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 Date: Mon, 07 Aug 2023 02:59:42 GMT
 Content-Length: 68
-```
 
-```json
-["0315007d065c0996e4c178f45d70dd4e5f6b317f0bcb831dfbed0b14289fa7ed"]
+0315007d065c0996e4c178f45d70dd4e5f6b317f0bcb831dfbed0b14289fa7ed
 ```
 
 ### 2. /api/message

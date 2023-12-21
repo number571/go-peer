@@ -129,9 +129,13 @@ func checkMessages(netMsgSettings net_message.ISettings, msgSettings message.ISe
 
 	client := client.NewClient(msgSettings, privKey)
 
-	hashes, err := hltClient.GetHashes()
-	if err != nil {
-		return err
+	hashes := make([]string, 0, messageCount)
+	for i := uint64(0); ; i++ {
+		hash, err := hltClient.GetHash(i)
+		if err != nil {
+			break
+		}
+		hashes = append(hashes, hash)
 	}
 
 	for _, ph := range pushedHashes {

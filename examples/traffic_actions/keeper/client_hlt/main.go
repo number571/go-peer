@@ -121,12 +121,11 @@ func main() {
 
 		fmt.Println(string(pld.GetBody()))
 	case "h", "hashes":
-		hashes, err := hltClient.GetHashes()
-		if err != nil {
-			panic(err)
-		}
-
-		for i, hash := range hashes {
+		for i := uint64(0); ; i++ {
+			hash, err := hltClient.GetHash(i)
+			if err != nil {
+				return
+			}
 			fmt.Printf("[%d] %s\n", i+1, hash)
 		}
 	}

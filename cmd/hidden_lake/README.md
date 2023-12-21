@@ -36,7 +36,6 @@ queue_period_ms: 5000
 limit_void_size_bytes: 4096
 
 # [HLT]
-hashes_window: 2048
 ## [62.233.46.109, 94.103.91.81]
 messages_capacity: 1048576 # 2^20 msgs ~= 8GiB
 ## [185.43.4.253]
