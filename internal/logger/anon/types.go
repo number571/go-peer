@@ -26,6 +26,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 
 	// extend
 	CLogBaseResponseModeFromService: "RSPMD",
+	CLogInfoOnlyShareRequest:        "OSHRQ",
 	CLogInfoResponseFromService:     "RSPSR",
 	CLogInfoRequestIDAlreadyExist:   "RQIDE",
 	CLogWarnRequestToService:        "RQTSR",
@@ -40,6 +41,7 @@ const (
 	CLogBaseResponseModeFromService anon_logger.ILogType = iota + anon_logger.CLogFinal + 1
 
 	// INFO
+	CLogInfoOnlyShareRequest
 	CLogInfoResponseFromService
 	CLogInfoRequestIDAlreadyExist
 

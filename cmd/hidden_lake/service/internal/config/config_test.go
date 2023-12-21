@@ -59,7 +59,6 @@ const (
 logging:
   - info
   - erro
-share: true
 address:
   tcp: %s
   http: %s
@@ -71,8 +70,12 @@ friends:
   %s: %s
   %s: %s
 services:
-  %s: %s
-  %s: %s
+  %s: 
+    host: %s
+    share: true
+  %s: 
+    host: %s
+    share: true
 `
 )
 
@@ -265,11 +268,6 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetShare() != true {
-		t.Error("share is invalid")
-		return
-	}
-
 	if cfg.GetAddress().GetTCP() != tcAddressTCP {
 		t.Error("address_tcp is invalid")
 		return
@@ -302,8 +300,12 @@ func TestComplexConfig(t *testing.T) {
 			t.Errorf("service undefined '%s'", k)
 			return
 		}
-		if v != v1 {
-			t.Errorf("service address is invalid '%s'", v1)
+		if v != v1.GetHost() {
+			t.Errorf("service host is invalid '%s'", v1)
+			return
+		}
+		if !v1.GetShare() {
+			t.Error("service share is invalid")
 			return
 		}
 	}

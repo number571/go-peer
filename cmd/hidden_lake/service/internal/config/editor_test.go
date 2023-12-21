@@ -49,7 +49,7 @@ func (p *tsConfig) GetAddress() IAddress                      { return nil }
 func (p *tsConfig) GetNetworkKey() string                     { return "" }
 func (p *tsConfig) GetConnections() []string                  { return nil }
 func (p *tsConfig) GetFriends() map[string]asymmetric.IPubKey { return nil }
-func (p *tsConfig) GetService(_ string) (string, bool)        { return "", false }
+func (p *tsConfig) GetService(_ string) (IService, bool)      { return nil, false }
 
 func TestPanicEditor(t *testing.T) {
 	t.Parallel()

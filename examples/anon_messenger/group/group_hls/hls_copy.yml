@@ -8,7 +8,9 @@ logging:
   - info
   - warn
   - erro
-share: true
+services:
+  go-peer/hidden-lake-messenger: 
+    share: true
 connections:
   - localhost:4581
 friends:

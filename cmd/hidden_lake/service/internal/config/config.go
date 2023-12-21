@@ -31,12 +31,11 @@ type SConfigSettings struct {
 type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging     []string          `yaml:"logging,omitempty"`
-	FShare       bool              `yaml:"share,omitempty"`
-	FAddress     *SAddress         `yaml:"address,omitempty"`
-	FConnections []string          `yaml:"connections,omitempty"`
-	FServices    map[string]string `yaml:"services,omitempty"`
-	FFriends     map[string]string `yaml:"friends,omitempty"`
+	FLogging     []string             `yaml:"logging,omitempty"`
+	FAddress     *SAddress            `yaml:"address,omitempty"`
+	FConnections []string             `yaml:"connections,omitempty"`
+	FServices    map[string]*SService `yaml:"services,omitempty"`
+	FFriends     map[string]string    `yaml:"friends,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
@@ -45,6 +44,11 @@ type SConfig struct {
 }
 
 type sLogging []bool
+
+type SService struct {
+	FHost  string `yaml:"host,omitempty"`
+	FShare bool   `yaml:"share,omitempty"`
+}
 
 type SAddress struct {
 	FTCP   string `yaml:"tcp,omitempty"`
@@ -124,6 +128,11 @@ func (p *SConfig) GetSettings() IConfigSettings {
 }
 
 func (p *SConfig) isValid() bool {
+	for _, v := range p.FServices {
+		if v.FHost == "" && !v.FShare {
+			return false
+		}
+	}
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
 		p.FSettings.FKeySizeBits != 0 &&
@@ -137,6 +146,12 @@ func (p *SConfig) initConfig() error {
 
 	if p.FAddress == nil {
 		p.FAddress = new(SAddress)
+	}
+
+	for k, v := range p.FServices {
+		if v == nil {
+			p.FServices[k] = new(SService)
+		}
 	}
 
 	if !p.isValid() {
@@ -200,10 +215,6 @@ func (p *SConfig) loadPubKeys() error {
 	return nil
 }
 
-func (p *SConfig) GetShare() bool {
-	return p.FShare
-}
-
 func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
@@ -230,12 +241,20 @@ func (p *SConfig) GetConnections() []string {
 	return p.FConnections
 }
 
-func (p *SConfig) GetService(name string) (string, bool) {
+func (p *SConfig) GetService(name string) (IService, bool) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	addr, ok := p.FServices[name]
-	return addr, ok
+	service, ok := p.FServices[name]
+	return service, ok
+}
+
+func (p *SService) GetHost() string {
+	return p.FHost
+}
+
+func (p *SService) GetShare() bool {
+	return p.FShare
 }
 
 func (p *sLogging) HasInfo() bool {

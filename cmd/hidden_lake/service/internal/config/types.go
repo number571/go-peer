@@ -30,11 +30,15 @@ type IConfigSettings interface {
 type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
-	GetShare() bool
 	GetAddress() IAddress
 	GetConnections() []string
 	GetFriends() map[string]asymmetric.IPubKey
-	GetService(string) (string, bool)
+	GetService(string) (IService, bool)
+}
+
+type IService interface {
+	GetHost() string
+	GetShare() bool
 }
 
 type IAddress interface {

@@ -53,9 +53,12 @@ friends:
   test_name1: %s
   test_name2: %s
 services:
-  test_service1: test_address1
-  test_service2: test_address2
-  test_service3: test_address3
+  test_service1: 
+    host: test_address1
+  test_service2: 
+    host: test_address2
+  test_service3: 
+    host: test_address3
 `,
 		testutils.TcKeySize,
 		testutils.TgPubKeys[0],

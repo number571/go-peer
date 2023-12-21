@@ -59,8 +59,15 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, nil
 		}
 
+		// get service's address by hostname
+		service, ok := pCfg.GetService(loadReq.GetHost())
+		if !ok {
+			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
+			return nil, fmt.Errorf("failed: address undefined")
+		}
+
 		// share request to all friends
-		if pCfg.GetShare() {
+		if service.GetShare() {
 			friends := pCfg.GetFriends()
 
 			wg := sync.WaitGroup{}
@@ -87,17 +94,17 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			wg.Wait()
 		}
 
-		// get service's address by hostname
-		address, ok := pCfg.GetService(loadReq.GetHost())
-		if !ok {
-			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
-			return nil, fmt.Errorf("failed: address undefined")
+		// host can be nil only if share=true
+		// this validation rule in the config
+		if service.GetHost() == "" {
+			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoOnlyShareRequest))
+			return nil, nil
 		}
 
 		// generate new request to serivce
 		pushReq, err := http.NewRequest(
 			loadReq.GetMethod(),
-			fmt.Sprintf("http://%s%s", address, loadReq.GetPath()),
+			fmt.Sprintf("http://%s%s", service.GetHost(), loadReq.GetPath()),
 			bytes.NewReader(loadReq.GetBody()),
 		)
 		if err != nil {
