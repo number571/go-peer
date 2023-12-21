@@ -214,20 +214,24 @@ func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecre
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
 
+	myAddress := pMyPubKey.GetAddress().ToBytes()
 	return pClient.BroadcastRequest(
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
 			WithHead(
 				map[string]string{
 					"Content-Type":               "application/json",
-					hlm_settings.CHeaderSenderId: encoding.HexEncode(pMyPubKey.GetAddress().ToBytes()),
+					hlm_settings.CHeaderSenderId: encoding.HexEncode(myAddress),
 				},
 			).
 			WithBody(
 				symmetric.NewAESCipher(cipherKey).EncryptBytes(
 					bytes.Join(
 						[][]byte{
-							hashing.NewHMACSHA256Hasher(authKey, pMsgBytes).ToBytes(),
+							hashing.NewHMACSHA256Hasher(
+								authKey,
+								bytes.Join([][]byte{myAddress, pMsgBytes}, []byte{}),
+							).ToBytes(),
 							pMsgBytes,
 						},
 						[]byte{},

@@ -57,7 +57,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		hlsClient := getClient(pCfg)
-		rawMsgBytes, err := decryptMsgBytes(pCfg, hlsClient, fPubKey, encMsgBytes)
+		rawMsgBytes, err := decryptMsgBytes(pCfg, hlsClient, fPubKey, senderID, encMsgBytes)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
 			api.Response(pW, http.StatusConflict, "failed: decrypt message")
@@ -103,7 +103,7 @@ func doMessageProcessor(msgBytes []byte) []byte {
 	return msgBytes
 }
 
-func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymmetric.IPubKey, encMsgBytes []byte) ([]byte, error) {
+func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymmetric.IPubKey, senderID, encMsgBytes []byte) ([]byte, error) {
 	aliasName := ""
 
 	friends, err := pClient.GetFriends()
@@ -132,9 +132,10 @@ func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymme
 	}
 
 	msgBytes := decBytes[hashing.CSHA256Size:]
-	gotHash := decBytes[:hashing.CSHA256Size]
-	newHash := hashing.NewHMACSHA256Hasher(authKey, msgBytes).ToBytes()
-	if !bytes.Equal(gotHash, newHash) {
+
+	authBytes := bytes.Join([][]byte{senderID, msgBytes}, []byte{})
+	newHash := hashing.NewHMACSHA256Hasher(authKey, authBytes).ToBytes()
+	if !bytes.Equal(decBytes[:hashing.CSHA256Size], newHash) {
 		return nil, errors.New("failed auth bytes")
 	}
 
