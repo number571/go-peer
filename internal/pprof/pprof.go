@@ -2,6 +2,7 @@ package pprof
 
 import (
 	"net/http"
+	"time"
 
 	"net/http/pprof"
 )
@@ -16,8 +17,9 @@ func InitPprofService(pAddr string) *http.Server {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	server := &http.Server{
-		Addr:    pAddr,
-		Handler: mux,
+		Addr:        pAddr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	return server

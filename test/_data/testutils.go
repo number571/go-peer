@@ -2,7 +2,21 @@ package testutils
 
 import (
 	_ "embed"
+	"time"
 )
+
+func TryN(n int, t time.Duration, f func() error) error {
+	var resErr error
+	for i := 0; i < n; i++ {
+		time.Sleep(t)
+		if err := f(); err != nil {
+			resErr = err
+			continue
+		}
+		return nil
+	}
+	return resErr
+}
 
 const (
 	TCMessageSize   = (100 << 10)

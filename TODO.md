@@ -14,6 +14,7 @@
 
 1. Write tests for coverage > 80%
 2. Rewrite tests with 'gotests' tool
+3. Rewrite http tests with 'httptest' package
 
 ### Applications
 

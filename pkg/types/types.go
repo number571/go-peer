@@ -1,14 +1,15 @@
 package types
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 type IRunner interface {
 	Run(context.Context) error
 }
 
-type ICloser interface {
-	Close() error
-}
+type ICloser io.Closer
 
 type IConverter interface {
 	ToString() string

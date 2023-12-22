@@ -239,11 +239,15 @@ func TestNodeConnection(t *testing.T) {
 	}()
 	defer node2.Close()
 
-	time.Sleep(200 * time.Millisecond)
-
 	go func() {
-		if err := node2.Listen(ctx); err == nil {
-			t.Error("success second run node")
+		err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+			if err := node2.Listen(ctx); err == nil {
+				return errors.New("success second run node")
+			}
+			return nil
+		})
+		if err1 != nil {
+			t.Error(err1)
 			return
 		}
 	}()
@@ -256,10 +260,14 @@ func TestNodeConnection(t *testing.T) {
 	}()
 	defer node3.Close()
 
-	time.Sleep(200 * time.Millisecond)
-
-	if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {
-		t.Error("success add incorrect connection address")
+	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {
+			return errors.New("success add incorrect connection address")
+		}
+		return nil
+	})
+	if err1 != nil {
+		t.Error(err1)
 		return
 	}
 
@@ -288,10 +296,14 @@ func TestNodeConnection(t *testing.T) {
 		return
 	}
 
-	time.Sleep(200 * time.Millisecond)
-
-	if len(node3.GetConnections()) != 1 {
-		t.Error("has more than 1 connections (node2 should be auto disconnects by max conns param)")
+	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		if len(node3.GetConnections()) != 1 {
+			return errors.New("has more than 1 connections (node2 should be auto disconnects by max conns param)")
+		}
+		return nil
+	})
+	if err2 != nil {
+		t.Error(err2)
 		return
 	}
 
@@ -367,10 +379,18 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	go func() { _ = nodes[2].Listen(ctx) }()
 	go func() { _ = nodes[4].Listen(ctx) }()
 
-	time.Sleep(500 * time.Millisecond)
-
-	nodes[0].AddConnection(ctx, testutils.TgAddrs[0])
-	nodes[1].AddConnection(ctx, testutils.TgAddrs[1])
+	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		return nodes[0].AddConnection(ctx, testutils.TgAddrs[0])
+	})
+	if err1 != nil {
+		return [5]INode{}, nil, err1
+	}
+	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		return nodes[1].AddConnection(ctx, testutils.TgAddrs[1])
+	})
+	if err2 != nil {
+		return [5]INode{}, nil, err2
+	}
 
 	nodes[3].AddConnection(ctx, testutils.TgAddrs[0])
 	nodes[3].AddConnection(ctx, testutils.TgAddrs[1])

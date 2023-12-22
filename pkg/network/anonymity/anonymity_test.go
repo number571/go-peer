@@ -514,8 +514,6 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		t.Error("success use store function with null database")
 		return
 	}
-
-	time.Sleep(time.Second + 100*time.Millisecond) // queue duration
 }
 
 func TestRecvSendMessage(t *testing.T) {
@@ -622,15 +620,20 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}()
 
-	time.Sleep(200 * time.Millisecond)
-
+	// try connect to new node listeners
 	// nodes to routes (nodes[0] -> nodes[2], nodes[1] -> nodes[4])
-	if err := nodes[0].GetNetworkNode().AddConnection(ctx, addresses[0]); err != nil {
-		t.Error(err)
+	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		return nodes[0].GetNetworkNode().AddConnection(ctx, addresses[0])
+	})
+	if err1 != nil {
+		t.Error(err1)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
-	if err := nodes[1].GetNetworkNode().AddConnection(ctx, addresses[1]); err != nil {
-		t.Error(err)
+	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		return nodes[1].GetNetworkNode().AddConnection(ctx, addresses[1])
+	})
+	if err2 != nil {
+		t.Error(err2)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
 

@@ -142,8 +142,9 @@ func testRunServer(addr string) *http.Server {
 	})
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {

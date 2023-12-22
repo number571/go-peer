@@ -146,8 +146,9 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {

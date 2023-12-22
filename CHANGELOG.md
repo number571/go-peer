@@ -30,6 +30,7 @@
 - Update `cmd/hidden_lake/traffic`: fix order get hashes from database
 - Update `cmd/hidden_lake/helpers/loader`: fix close pprof service
 - Update `cmd/hidden_lake`: fix _mounted paths with config files
+- Update `cmd/hidden_lake`: append field ReadTimeout and use function http.TimeoutHandler into http.Server
 
 <!-- ... -->
 

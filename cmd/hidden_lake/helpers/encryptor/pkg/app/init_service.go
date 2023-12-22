@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/handler"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
@@ -25,7 +26,8 @@ func (p *sApp) initServiceHTTP() {
 	mux.HandleFunc(hle_settings.CHandleDecryptPath, handler.HandleDecryptAPI(p.fConfig, p.fHTTPLogger, client))
 
 	p.fServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetHTTP(),
-		Handler: mux,
+		Addr:        p.fConfig.GetAddress().GetHTTP(),
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 }

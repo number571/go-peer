@@ -72,8 +72,9 @@ func testStartServerHTTP(addr string) *http.Server {
 	mux.HandleFunc("/echo", testEchoPage)
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {
@@ -145,8 +146,9 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 	mux.HandleFunc(pkg_settings.CHandleNodeKeyPath, HandleNodeKeyAPI(wcfg, logger, node))
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {

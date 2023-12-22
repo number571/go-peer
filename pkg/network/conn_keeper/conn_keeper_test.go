@@ -75,21 +75,30 @@ func TestConnKeeper(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(100 * time.Millisecond)
-
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
 
 	go func() {
-		if err := connKeeper.Run(ctx2); err == nil {
-			t.Error("error is nil with already running connKeeper")
+		err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+			if err := connKeeper.Run(ctx2); err == nil {
+				return errors.New("error is nil with already running connKeeper")
+			}
+			return nil
+		})
+		if err1 != nil {
+			t.Error(err1)
 			return
 		}
 	}()
 
-	time.Sleep(time.Second)
-	if len(connKeeper.GetNetworkNode().GetConnections()) != 1 {
-		t.Error("length of connections != 1")
+	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		if len(connKeeper.GetNetworkNode().GetConnections()) != 1 {
+			return errors.New("length of connections != 1")
+		}
+		return nil
+	})
+	if err1 != nil {
+		t.Error(err1)
 		return
 	}
 }

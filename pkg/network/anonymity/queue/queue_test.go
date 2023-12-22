@@ -79,19 +79,21 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(100 * time.Millisecond)
-
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
 
 	go func() {
-		if err := queue.Run(ctx2); err == nil {
-			t.Error("success run already running queue")
+		err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+			if err := queue.Run(ctx2); err == nil {
+				return errors.New("success run already running queue")
+			}
+			return nil
+		})
+		if err1 != nil {
+			t.Error(err1)
 			return
 		}
 	}()
-
-	time.Sleep(100 * time.Millisecond)
 
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
@@ -118,20 +120,19 @@ func TestRunStopQueue(t *testing.T) {
 func TestQueue(t *testing.T) {
 	t.Parallel()
 
-	oldClient := client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
-		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
-	)
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FPoolCapacity: testutils.TCQueueCapacity,
 			FDuration:     100 * time.Millisecond,
 		}),
-		oldClient,
+		client.NewClient(
+			message.NewSettings(&message.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FKeySizeBits:      testutils.TcKeySize,
+			}),
+			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		),
 	).WithNetworkSettings(
 		uint64(1),
 		net_message.NewSettings(&net_message.SSettings{
@@ -162,21 +163,24 @@ func testQueue(queue IMessageQueue) error {
 		}
 	}()
 
+	// wait minimum one generated message
 	time.Sleep(100 * time.Millisecond)
 
+	// clear old messages
 	queue.WithNetworkSettings(
-		uint64(1),
+		uint64(3),
 		net_message.NewSettings(&net_message.SSettings{
 			FNetworkKey:   "new_network_key",
-			FWorkSizeBits: 10,
+			FWorkSizeBits: 1,
 		}),
 	)
-
-	time.Sleep(100 * time.Millisecond)
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
 		msg := queue.DequeueMessage(ctx)
+		if msg.GetPayload().GetHead() != 3 {
+			return errors.New("got invalid header")
+		}
 		msgs = append(msgs, msg)
 	}
 
@@ -201,6 +205,7 @@ func testQueue(queue IMessageQueue) error {
 	for i := 0; i < 3; i++ {
 		queue.EnqueueMessage(msg)
 	}
+
 	for i := 0; i < 3; i++ {
 		netMsg := queue.DequeueMessage(ctx)
 		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())

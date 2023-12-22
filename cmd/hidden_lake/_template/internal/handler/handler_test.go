@@ -2,12 +2,11 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/_template/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
 	"github.com/number571/go-peer/pkg/logger"
-	net_message "github.com/number571/go-peer/pkg/network/message"
-	testutils "github.com/number571/go-peer/test/_data"
 )
 
 func testRunService(addr string) *http.Server {
@@ -24,8 +23,9 @@ func testRunService(addr string) *http.Server {
 	mux.HandleFunc(settings.CHandleIndexPath, HandleIndexAPI(logger))
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {
@@ -33,11 +33,4 @@ func testRunService(addr string) *http.Server {
 	}()
 
 	return srv
-}
-
-func testNetworkMessageSettings() net_message.ISettings {
-	return net_message.NewSettings(&net_message.SSettings{
-		FNetworkKey:   testutils.TCNetworkKey,
-		FWorkSizeBits: testutils.TCWorkSize,
-	})
 }

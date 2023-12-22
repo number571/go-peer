@@ -3,6 +3,7 @@ package app
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/handler"
@@ -20,8 +21,9 @@ func (p *sApp) initIncomingServiceHTTP() {
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetIncoming(),
-		Handler: mux,
+		Addr:        p.fConfig.GetAddress().GetIncoming(),
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 }
 
@@ -46,8 +48,9 @@ func (p *sApp) initInterfaceServiceHTTP() {
 	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS))
 
 	p.fIntServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetInterface(),
-		Handler: mux,
+		Addr:        p.fConfig.GetAddress().GetInterface(),
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 }
 

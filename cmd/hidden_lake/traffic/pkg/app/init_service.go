@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/handler"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
@@ -17,7 +18,8 @@ func (p *sApp) initServiceHTTP(pCtx context.Context) {
 	mux.HandleFunc(pkg_settings.CHandleMessagePath, handler.HandleMessageAPI(pCtx, p.fConfig, p.fWrapperDB, p.fHTTPLogger, p.fAnonLogger, p.fNode))
 
 	p.fServiceHTTP = &http.Server{
-		Addr:    p.fConfig.GetAddress().GetHTTP(),
-		Handler: mux,
+		Addr:        p.fConfig.GetAddress().GetHTTP(),
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 }

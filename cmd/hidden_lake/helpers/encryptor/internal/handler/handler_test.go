@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
@@ -43,8 +44,9 @@ func testRunService(addr string) *http.Server {
 	mux.HandleFunc(settings.CHandleDecryptPath, HandleDecryptAPI(cfg, logger, client))
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:        addr,
+		ReadTimeout: time.Second,
+		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
 	go func() {
