@@ -23,11 +23,13 @@
 - Update `cmd/hidden_lake/traffic`: change method of get hashes
 - Update `cmd/hidden_lake/traffic`: delete hashes_window parameter from config
 - Update `cmd/hidden_lake/helpers`: move HLE, HLL, HLA to helpers/ 
+- Update `.dockerignore`: append dockerignore with ignore .git path
 
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/traffic`: fix order get hashes from database
 - Update `cmd/hidden_lake/helpers/loader`: fix close pprof service
+- Update `cmd/hidden_lake`: fix _mounted paths with config files
 
 <!-- ... -->
 

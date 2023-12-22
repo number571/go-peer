@@ -27,8 +27,11 @@ clean:
 	rm -rf hle.yml
 
 docker-default: docker-build docker-run
-docker-build:
+docker-build: docker-configs
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_encryptor
+docker-configs:
+	mkdir ./_mounted | true 
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
 docker-run:
 	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9551:9551 hl_encryptor
 docker-clean:

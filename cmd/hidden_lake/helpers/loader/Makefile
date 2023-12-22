@@ -27,8 +27,11 @@ clean:
 	rm -rf hll.yml
 
 docker-default: docker-build docker-run
-docker-build:
+docker-build: docker-configs
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_loader
+docker-configs:
+	mkdir ./_mounted | true 
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
 docker-run:
 	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9561:9561 hl_loader
 docker-clean:

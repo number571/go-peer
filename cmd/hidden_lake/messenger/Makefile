@@ -27,8 +27,11 @@ clean:
 	rm -rf hlm.yml hlm.db 
 
 docker-default: docker-build docker-run
-docker-build:
+docker-build: docker-configs
 	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_messenger
+docker-configs:
+	mkdir ./_mounted | true 
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
 docker-run:
 	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9591:9591 -p 9592:9592 hl_messenger
 docker-clean:
