@@ -13,6 +13,7 @@
 - Update `cmd/hidden_lake/messenger`: append sender's identificators
 - Update `cmd/hidden_lake/messenger`: append secret key for friend's communications
 - Update `cmd/hidden_lake/encryptor`: append new service = HLE
+- Update `cmd/hidden_lake/_template`: append new service = HL_T for development
 
 ### CHANGES
 
