@@ -1,5 +1,5 @@
 GC=go build
-BINPATH=../../../../../bin
+BINPATH=../../../../../../bin
 .PHONY: default build run clean
 default: build run
 build:
