@@ -12,7 +12,6 @@
 10. HLT: do not delete hashes of messages
 11. HLT: change Hashes method -> (count of hashes, gethash)
 12. Append template service for develop into cmd/hidden_lake
-13. Rename HLS: {"receiver", "req_data"} -> {"alias_name", "hex_data"}
 
 ### Tests
 

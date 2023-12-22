@@ -7,17 +7,13 @@ build:
 	make -C ./messenger build
 	make -C ./traffic build
 	make -C ./composite build
-	make -C ./helpers/loader build
-	make -C ./helpers/encryptor build
-	make -C ./helpers/adapters build
+	make -C ./helpers build
 clean:
 	make -C ./service clean
 	make -C ./messenger clean
 	make -C ./traffic clean
 	make -C ./composite clean
-	make -C ./helpers/loader clean
-	make -C ./helpers/encryptor clean
-	make -C ./helpers/adapters clean
+	make -C ./helpers clean
 
 docker-default: docker-build docker-run
 docker-build: docker-configs

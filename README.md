@@ -106,6 +106,8 @@ Also, the composition of these works can be found in the book `The general theor
 3. Create anonymizing nodes (HLS) in the Hidden Lake network
 4. Create new relay nodes (HLT) in the Hidden Lake network
 5. Append new theoretical works or update current
+6. Create new secure / anonymity applications
+7. Popularize technology and applications
 
 ## Library based applications
 
