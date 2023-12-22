@@ -23,7 +23,7 @@ func (p *sApp) initServiceHTTP(pCtx context.Context) {
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fWrapper.GetConfig().GetAddress().GetHTTP(),
-		ReadTimeout: time.Second,
+		ReadTimeout: (5 * time.Second),
 		// FetchTimeout = max of time waiting in the all handlers
 		Handler: http.TimeoutHandler(mux, hls_settings.CFetchTimeout, "timeout"),
 	}
