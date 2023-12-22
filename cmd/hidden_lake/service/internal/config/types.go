@@ -4,6 +4,7 @@ import (
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IWrapper interface {
@@ -19,10 +20,8 @@ type IEditor interface {
 
 type IConfigSettings interface {
 	message.ISettings
+	net_message.ISettings
 
-	GetNetworkKey() string
-	GetWorkSizeBits() uint64
-	GetKeySizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64
 }

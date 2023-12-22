@@ -503,7 +503,7 @@ JSON_DATA='{
 # PUT  = broadcast without response from service
 PUSH_FORMAT='{
         "receiver":"Alice",
-        "hex_data":"'$(str2hex "$JSON_DATA")'"
+        "req_data":"'$(str2hex "$JSON_DATA")'"
 }';
 ```
 

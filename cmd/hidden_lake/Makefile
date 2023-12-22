@@ -6,16 +6,18 @@ build:
 	make -C ./service build
 	make -C ./messenger build
 	make -C ./traffic build
-	make -C ./loader build
-	make -C ./adapters build
 	make -C ./composite build
+	make -C ./helpers/loader build
+	make -C ./helpers/encryptor build
+	make -C ./helpers/adapters build
 clean:
 	make -C ./service clean
 	make -C ./messenger clean
 	make -C ./traffic clean
-	make -C ./loader clean
-	make -C ./adapters clean
 	make -C ./composite clean
+	make -C ./helpers/loader clean
+	make -C ./helpers/encryptor clean
+	make -C ./helpers/adapters clean
 
 docker-default: docker-build docker-run
 docker-build: docker-configs
@@ -33,4 +35,3 @@ build-main:
 	make -C ./service build
 	make -C ./messenger build
 	make -C ./traffic build
-	make -C ./loader build

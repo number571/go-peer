@@ -12,6 +12,7 @@
 - Update `cmd/hidden_lake/service`: append option 'share' into the config
 - Update `cmd/hidden_lake/messenger`: append sender's identificators
 - Update `cmd/hidden_lake/messenger`: append secret key for friend's communications
+- Update `cmd/hidden_lake/encryptor`: append new service = HLE
 
 ### CHANGES
 
@@ -20,11 +21,12 @@
 - Update `pkg/crypto`: delete 'go-peer' prefixs
 - Update `cmd/hidden_lake/traffic`: change method of get hashes
 - Update `cmd/hidden_lake/traffic`: delete hashes_window parameter from config
+- Update `cmd/hidden_lake/helpers`: move HLE, HLL, HLA to helpers/ 
 
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/traffic`: fix order get hashes from database
-- Update `cmd/hidden_lake/loader`: fix close pprof service
+- Update `cmd/hidden_lake/helpers/loader`: fix close pprof service
 
 <!-- ... -->
 
@@ -356,7 +358,7 @@
 - Update `hidden_lake/traffic`: delete redirect message to nodes from HTTP handler
 - Update `hidden_lake/traffic`: append redirect message to nodes from TCP handler
 - Change `examples`: replace middle_hls to middle_hlt
-- Change `hidden_lake/adapters`: change recv: hlt-port -> hls-port
+- Change `hidden_lake/helpers/adapters`: change recv: hlt-port -> hls-port
 - Update `theory_of_the_structure_of_hidden_systems`: Append link to economic reasons
 
 ### BUG FIXES

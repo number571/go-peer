@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	hll_client "github.com/number571/go-peer/cmd/hidden_lake/loader/pkg/client"
+	hll_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/client"

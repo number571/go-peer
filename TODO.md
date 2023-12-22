@@ -11,6 +11,8 @@
 9. Append Batch's to database
 10. HLT: do not delete hashes of messages
 11. HLT: change Hashes method -> (count of hashes, gethash)
+12. Append template service for develop into cmd/hidden_lake
+13. Rename HLS: {"receiver", "req_data"} -> {"alias_name", "hex_data"}
 
 ### Tests
 
@@ -21,6 +23,4 @@
 
 1. HLF: Hidden Lake Forum
 2. HLF: Hidden Lake Filer
-3. HLE: Hidden Lake Encryptor
-4. HLN: Hidden Lake Network
-5. HLH: Hidden Lake Helpers (HLE, HLL)
+3. HLN: Hidden Lake Network

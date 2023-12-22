@@ -113,7 +113,8 @@ Also, the composition of these works can be found in the book `The general theor
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
 3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
 4. [Hidden Lake Loader](#4-hidden-lake-loader) 
-5. [Hidden Lake Adapters](#5-hidden-lake-adapters) 
+5. [Hidden Lake Encryptor](#5-hidden-lake-encryptor) 
+6. [Hidden Lake Adapters](#6-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
@@ -514,9 +515,9 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 
 ## 4. Hidden Lake Loader
 
-> [github.com/number571/go-peer/cmd/hidden_lake/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/loader "HLL")
+> [github.com/number571/go-peer/cmd/hidden_lake/helpers/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/loader "HLL")
 
-<img src="cmd/hidden_lake/loader/_images/hll_logo.png" alt="hll_logo.png"/>
+<img src="cmd/hidden_lake/helpers/loader/_images/hll_logo.png" alt="hll_logo.png"/>
 
 The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applications. It is used to redirect traffic from HLT producers (storages) to HLT consumers. Previously, it was used as a component of HLM, and then HLS applications.
 
@@ -524,7 +525,7 @@ The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applic
 
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
 
-<p align="center"><img src="cmd/hidden_lake/loader/_images/hll_arch.png" alt="hll_arch.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/helpers/loader/_images/hll_arch.png" alt="hll_arch.png"/></p>
 <p align="center">Figure 10. Architecture of HLL.</p>
 
 ### Build and run
@@ -532,7 +533,7 @@ HLL uses the HLT service interface to download and upload messages. This propert
 Default build and run
 
 ```bash 
-$ cd ./cmd/hidden_lake/loader
+$ cd ./cmd/hidden_lake/helpers/loader
 $ make build # create hll, hll_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hll
 
@@ -560,7 +561,7 @@ address:
 Build and run with docker
 
 ```bash 
-$ cd ./cmd/hidden_lake/loader
+$ cd ./cmd/hidden_lake/helpers/loader
 $ make docker-build 
 $ make docker-run
 
@@ -572,7 +573,7 @@ $ make docker-run
 
 In the example, two HLT services are created, where one is a message producer, the other a consumer. First, messages are entered into the manufacturer, then the HLL (message transportation) function is turned on, and at the end, the delivery of all previously entered messages is checked, but already on the consumer's side.
 
-<p align="center"><img src="cmd/hidden_lake/loader/_images/hll_logger.png" alt="hll_logger.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/helpers/loader/_images/hll_logger.png" alt="hll_logger.png"/></p>
 <p align="center">Figure 11. Example of running HLL service.</p>
 
 Build and run HLT services
@@ -592,11 +593,82 @@ Get valid response
 messages have been successfully transported
 ```
 
-## 5. Hidden Lake Adapters
+## 5. Hidden Lake Encryptor
 
-> [github.com/number571/go-peer/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
+> [github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor "HLE")
 
-<img src="cmd/hidden_lake/adapters/_images/hla_logo.png" alt="hla_logo.png"/>
+<img src="cmd/hidden_lake/helpers/encryptor/_images/hle_logo.png" alt="hle_logo.png"/>
+
+The `Hidden Lake Encryptor` is a small service of the Hidden Lake network applications. It is used to encrypt and decrypt HL type messages.
+
+### How it works
+
+HLE uses the `pkg/client` and `pkg/network/message` packages. Encrypted messages can then be sent to HLT for storage and distribution.
+
+### Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/helpers/encryptor
+$ make build # create hle, hle_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hle
+
+> [INFO] 2023/12/22 11:03:47 HLE is running...
+> ...
+```
+
+Open ports `9551` (HTTP).
+Creates `./hle.yml` or `./_mounted/hle.yml` (docker) file.
+
+Default config `hle.yml`
+
+```yaml
+settings:
+  message_size_bytes: 8192
+  work_size_bits: 20
+  key_size_bits: 4096
+logging:
+- info
+- warn
+- erro
+address:
+  http: 127.0.0.1:9551
+```
+
+Build and run with docker
+
+```bash 
+$ cd ./cmd/hidden_lake/helpers/encryptor
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/12/22 04:32:08 HLE is running...
+> ...
+```
+
+## Example 
+
+Build and run HLE service
+```bash
+$ cd examples/encrypt_message
+$ make
+```
+
+Encrypt and decrypt message
+```bash
+$ cd examples/encrypt_message/client_hle
+$ go run ./main.go e 'hello, world'
+> 000000000003df67bf78638d051770be...15ce81c8f862ad747405a07236238d04
+$ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07236238d04'
+> hello, world
+```
+
+## 6. Hidden Lake Adapters
+
+> [github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/adapters "HLA")
+
+<img src="cmd/hidden_lake/helpers/adapters/_images/hla_logo.png" alt="hla_logo.png"/>
 
 The `Hidden Lake Adapters` are a way to exchange data between multiple HLS processes via third-party services. Thus, there is no need to use your own computing resources in the face of individual servers to store or distribute the traffic generated by HLS. 
 
@@ -607,7 +679,7 @@ The `Hidden Lake Adapters` are a way to exchange data between multiple HLS proce
 Adapters in their full execution represent one design template - "Flyweight". They are based on the composition of HLS and HLT processes.
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
-<p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
+<p align="center"><img src="cmd/hidden_lake/helpers/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
 <p align="center">Figure 12. Architecture of HLA.</p>
 
 ### Example 
@@ -639,7 +711,7 @@ Request took 8 seconds
 
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
-<p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/helpers/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 13. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.

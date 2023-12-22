@@ -3,6 +3,7 @@ package config
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/client/message"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IConfig interface {
@@ -16,12 +17,11 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	message.ISettings
+	net_message.ISettings
 
-	GetWorkSizeBits() uint64
 	GetQueuePeriodMS() uint64
 	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64
-	GetNetworkKey() string
 }
 
 type IAddress interface {

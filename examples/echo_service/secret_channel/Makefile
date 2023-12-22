@@ -9,9 +9,9 @@ build:
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/service
 	make build -C $(CMDPATH)/hidden_lake/traffic
-	make build -C $(CMDPATH)/hidden_lake/adapters/common/send
-	make build -C $(CMDPATH)/hidden_lake/adapters/common/recv
-	make build -C $(CMDPATH)/hidden_lake/adapters/common/service
+	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/send
+	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/recv
+	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service
 	make build -C ./recv_hls
 	# COPY HLS PROGRAM
 	cp -r $(BINPATH)/hls ./recv_hls/prog_hls1

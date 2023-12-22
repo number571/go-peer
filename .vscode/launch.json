@@ -39,17 +39,6 @@
                 "hidden": true
             }
         },
-        {
-            "name": "/cmd/hidden_lake/loader",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/loader/cmd/hll",
-            "cwd": "${workspaceFolder}/cmd/hidden_lake/loader",
-            "presentation": {
-                "hidden": true
-            }
-        },
         // Test Echo Service
         {
             "name": "/examples/echo_service/default/middle_hlt",

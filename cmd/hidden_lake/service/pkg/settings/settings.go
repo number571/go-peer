@@ -11,7 +11,7 @@ const (
 
 const (
 	CServiceMask = uint32(0x1750571)
-	CNetworkMask = uint64(0x676F2D7065657201)
+	CNetworkMask = uint64(0x676F2D7065657201) // bytes_prefix: go-peer
 )
 
 const (
