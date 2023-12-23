@@ -19,7 +19,7 @@ import (
 
 const (
 	// IV + Hash + PayloadHead + Proof
-	cPayloadSizeOverHead = symmetric.CAESBlockSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
+	cPayloadOverHeadSize = symmetric.CAESBlockSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
 
 	// IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
 	cEncryptRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
@@ -243,7 +243,7 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, dea
 	copy(voidSizeBytes[:], recvHead[firstSizeIndex:secondSizeIndex])
 
 	encMsgSize := encoding.BytesToUint64(encMsgSizeBytes)
-	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadSizeOverHead) {
+	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadOverHeadSize) {
 		return 0, 0, nil, errors.New("invalid header.encMsgSize")
 	}
 
