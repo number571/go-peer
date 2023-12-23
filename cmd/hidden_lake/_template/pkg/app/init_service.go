@@ -13,6 +13,7 @@ func (p *sApp) initServiceHTTP() {
 
 	// TODO: need implementation
 	mux.HandleFunc(hl_t_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
+	mux.HandleFunc(hl_t_settings.CHandleConfigSettingsPath, handler.HandleConfigSettingsAPI(p.fConfig, p.fHTTPLogger))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetHTTP(),

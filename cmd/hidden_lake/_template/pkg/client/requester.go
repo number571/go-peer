@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/config"
 	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
-	cHandleIndexTemplate = "%s" + hl_t_settings.CHandleIndexPath
+	cHandleIndexTemplate          = "%s" + hl_t_settings.CHandleIndexPath
+	cHandleConfigSettingsTemplate = "%s" + hl_t_settings.CHandleConfigSettingsPath
 )
 
 var (
@@ -46,4 +49,23 @@ func (p *sRequester) GetIndex() (string, error) {
 	}
 
 	return result, nil
+}
+
+func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+	res, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get settings (requester): %w", err)
+	}
+
+	cfgSettings := new(config.SConfigSettings)
+	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+		return nil, fmt.Errorf("decode settings (requester): %w", err)
+	}
+
+	return cfgSettings, nil
 }

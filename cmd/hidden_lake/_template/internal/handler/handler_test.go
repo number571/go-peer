@@ -13,7 +13,11 @@ func testRunService(addr string) *http.Server {
 	mux := http.NewServeMux()
 
 	// TODO: need implementation
-	_ = &config.SConfig{}
+	cfg := &config.SConfig{
+		FSettings: &config.SConfigSettings{
+			FValue: "TODO",
+		},
+	}
 
 	logger := logger.NewLogger(
 		logger.NewSettings(&logger.SSettings{}),
@@ -21,6 +25,7 @@ func testRunService(addr string) *http.Server {
 	)
 
 	mux.HandleFunc(settings.CHandleIndexPath, HandleIndexAPI(logger))
+	mux.HandleFunc(settings.CHandleConfigSettingsPath, HandleConfigSettingsAPI(cfg, logger))
 
 	srv := &http.Server{
 		Addr:        addr,

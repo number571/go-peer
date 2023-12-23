@@ -1,4 +1,5 @@
-settings: {}
+settings:
+  value: TODO
 logging:
 - info
 - warn

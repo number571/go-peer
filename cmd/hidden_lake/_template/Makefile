@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	# cp ../../_configs/hl_t.yml .
+	cp ../_configs/hl_t.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hl_t ./cmd/hl_t
 

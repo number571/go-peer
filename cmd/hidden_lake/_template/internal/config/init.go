@@ -13,6 +13,9 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
+			FSettings: &SConfigSettings{
+				FValue: "TODO",
+			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
 				FHTTP: hl_t_settings.CDefaultHTTPAddress,

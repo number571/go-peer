@@ -15,6 +15,7 @@ var (
 )
 
 type SConfigSettings struct {
+	FValue string `json:"value" yaml:"value"`
 	// TODO: need implementation
 }
 
@@ -121,6 +122,10 @@ func (p *SConfig) loadLogging() error {
 
 func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
+}
+
+func (p *SConfigSettings) GetValue() string {
+	return p.FValue
 }
 
 func (p *SConfig) GetAddress() IAddress {

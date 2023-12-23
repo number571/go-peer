@@ -77,7 +77,11 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 			if p.poolHasLimit() {
 				continue
 			}
-			p.fMsgPool.fQueue <- p.newPseudoNetworkMessage()
+			netMsg := p.newPseudoNetworkMessage()
+			if netMsg == nil {
+				continue
+			}
+			p.fMsgPool.fQueue <- netMsg
 		}
 	}
 }
@@ -134,6 +138,11 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 }
 
 func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
+	p.fMutex.Lock()
+	msgSettings := p.fMsgSettings
+	networkMask := p.fNetworkMask
+	p.fMutex.Unlock()
+
 	msg, err := p.fClient.EncryptPayload(
 		p.fMsgPool.fReceiver,
 		payload.NewPayload(0, []byte{1}),
@@ -142,18 +151,30 @@ func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
 		panic(err)
 	}
 
-	p.fMutex.Lock()
-	msgSettings := p.fMsgSettings
-	networkMask := p.fNetworkMask
-	p.fMutex.Unlock()
-
-	return net_message.NewMessage(
+	netMsg := net_message.NewMessage(
 		msgSettings,
 		payload.NewPayload(
 			networkMask,
 			msg.ToBytes(),
 		),
 	)
+
+	settingsChanged := false
+
+	p.fMutex.Lock()
+	switch {
+	case
+		networkMask != p.fNetworkMask,
+		msgSettings.GetNetworkKey() != p.fMsgSettings.GetNetworkKey(),
+		msgSettings.GetWorkSizeBits() != p.fMsgSettings.GetWorkSizeBits():
+		settingsChanged = true
+	}
+	p.fMutex.Unlock()
+
+	if settingsChanged {
+		return nil
+	}
+	return netMsg
 }
 
 func (p *sMessageQueue) poolHasLimit() bool {
