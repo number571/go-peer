@@ -164,7 +164,7 @@ func testQueue(queue IMessageQueue) error {
 	}()
 
 	// wait minimum one generated message
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	// clear old messages
 	queue.WithNetworkSettings(

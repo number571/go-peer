@@ -42,6 +42,7 @@ func testRunService(addr string) *http.Server {
 	mux.HandleFunc(settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(settings.CHandleEncryptPath, HandleEncryptAPI(cfg, logger, client))
 	mux.HandleFunc(settings.CHandleDecryptPath, HandleDecryptAPI(cfg, logger, client))
+	mux.HandleFunc(settings.CHandlePubKeyPath, HandlePubKeyAPI(logger, client.GetPubKey()))
 
 	srv := &http.Server{
 		Addr:        addr,

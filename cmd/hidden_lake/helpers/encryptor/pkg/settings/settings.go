@@ -17,4 +17,5 @@ const (
 	CHandleIndexPath   = "/api/index"
 	CHandleEncryptPath = "/api/encrypt"
 	CHandleDecryptPath = "/api/decrypt"
+	CHandlePubKeyPath  = "/api/pubkey"
 )

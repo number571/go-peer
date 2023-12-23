@@ -24,6 +24,7 @@ func (p *sApp) initServiceHTTP() {
 	mux.HandleFunc(hle_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
 	mux.HandleFunc(hle_settings.CHandleEncryptPath, handler.HandleEncryptAPI(p.fConfig, p.fHTTPLogger, client))
 	mux.HandleFunc(hle_settings.CHandleDecryptPath, handler.HandleDecryptAPI(p.fConfig, p.fHTTPLogger, client))
+	mux.HandleFunc(hle_settings.CHandlePubKeyPath, handler.HandlePubKeyAPI(p.fHTTPLogger, client.GetPubKey()))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetHTTP(),

@@ -86,15 +86,15 @@ func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings ne
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
+	p.fNetworkMask = pNetworkMask
+	p.fMsgSettings = pMsgSettings
+
 	for len(p.fQueue) > 0 {
 		<-p.fQueue
 	}
 	for len(p.fMsgPool.fQueue) > 0 {
 		<-p.fMsgPool.fQueue
 	}
-
-	p.fNetworkMask = pNetworkMask
-	p.fMsgSettings = pMsgSettings
 
 	return p
 }

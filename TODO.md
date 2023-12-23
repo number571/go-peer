@@ -9,6 +9,8 @@
 7. Append example of use functions (godoc)
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
+10. Append ConfigSettings Handle to all services
+11. Delete GetNetworkKey from HLS (get from ConfigSettings)
 
 ### Tests
 

@@ -16,6 +16,7 @@ const (
 	cHandleIndexTemplate   = "%s" + hle_settings.CHandleIndexPath
 	cHandleEncryptTemplate = "%s" + hle_settings.CHandleEncryptPath
 	cHandleDecryptTemplate = "%s" + hle_settings.CHandleDecryptPath
+	cHandlePubKeyTemplate  = "%s" + hle_settings.CHandlePubKeyPath
 )
 
 var (
@@ -104,4 +105,23 @@ func (p *sRequester) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IP
 	}
 
 	return pubKey, data, nil
+}
+
+func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
+	res, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(cHandlePubKeyTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get public key (requester): %w", err)
+	}
+
+	pubKey := asymmetric.LoadRSAPubKey(string(res))
+	if pubKey == nil {
+		return nil, errors.New("got invalid public key")
+	}
+
+	return pubKey, nil
 }

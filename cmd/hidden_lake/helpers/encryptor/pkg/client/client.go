@@ -44,3 +44,11 @@ func (p *sClient) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IPubK
 	}
 	return pubKey, data, nil
 }
+
+func (p *sClient) GetPubKey() (asymmetric.IPubKey, error) {
+	pubKey, err := p.fRequester.GetPubKey()
+	if err != nil {
+		return nil, fmt.Errorf("get public key (client): %w", err)
+	}
+	return pubKey, nil
+}

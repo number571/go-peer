@@ -27,14 +27,14 @@ func HandleDecryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pClient cl
 			return
 		}
 
-		encMessageStr, err := io.ReadAll(pR.Body)
+		msgStringAsBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: read encrypted message")
 			return
 		}
 
-		netMsg, err := net_message.LoadMessage(pConfig.GetSettings(), string(encMessageStr))
+		netMsg, err := net_message.LoadMessage(pConfig.GetSettings(), string(msgStringAsBytes))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decode_net_message"))
 			api.Response(pW, http.StatusNotAcceptable, "failed: decode network message")
