@@ -9,9 +9,6 @@
 7. Append example of use functions (godoc)
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
-10. Append ConfigSettings Handle to all services
-11. Update README with ConfigSettings API
-12. Update README with API route paths
 
 ### Tests
 
