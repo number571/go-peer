@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/config"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -19,10 +20,11 @@ var (
 )
 
 const (
-	cHandleIndexTemplate   = "%s" + hlt_settings.CHandleIndexPath
-	cHandlePointerTemplate = "%s" + hlt_settings.CHandlePointerPath
-	cHandleHashesTemplate  = "%s" + hlt_settings.CHandleHashesPath + "?id=%d"
-	cHandleMessageTemplate = "%s" + hlt_settings.CHandleMessagePath
+	cHandleIndexTemplate          = "%s" + hlt_settings.CHandleIndexPath
+	cHandleStoragePointerTemplate = "%s" + hlt_settings.CHandleStoragePointerPath
+	cHandleStorageHashesTemplate  = "%s" + hlt_settings.CHandleStorageHashesPath + "?id=%d"
+	cHandleNetworkMessageTemplate = "%s" + hlt_settings.CHandleNetworkMessagePath
+	cHandleConfigSettingsTemplate = "%s" + hlt_settings.CHandleConfigSettings
 )
 
 type sRequester struct {
@@ -62,7 +64,7 @@ func (p *sRequester) GetPointer() (uint64, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandlePointerTemplate, p.fHost),
+		fmt.Sprintf(cHandleStoragePointerTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -81,7 +83,7 @@ func (p *sRequester) GetHash(i uint64) (string, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandleHashesTemplate, p.fHost, i),
+		fmt.Sprintf(cHandleStorageHashesTemplate, p.fHost, i),
 		nil,
 	)
 	if err != nil {
@@ -98,7 +100,7 @@ func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandleMessageTemplate+"?hash=%s", p.fHost, pHash),
+		fmt.Sprintf(cHandleNetworkMessageTemplate+"?hash=%s", p.fHost, pHash),
 		nil,
 	)
 	if err != nil {
@@ -120,11 +122,30 @@ func (p *sRequester) PutMessage(pRequest string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(cHandleMessageTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkMessageTemplate, p.fHost),
 		pRequest,
 	)
 	if err != nil {
 		return fmt.Errorf("put message (requester): %w", err)
 	}
 	return nil
+}
+
+func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+	res, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get settings (requester): %w", err)
+	}
+
+	cfgSettings := new(config.SConfigSettings)
+	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+		return nil, fmt.Errorf("decode settings (requester): %w", err)
+	}
+
+	return cfgSettings, nil
 }

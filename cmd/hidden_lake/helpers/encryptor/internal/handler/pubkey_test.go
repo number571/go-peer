@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -35,8 +34,6 @@ func TestHandlePubKeyAPI(t *testing.T) {
 
 	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
 	if !bytes.Equal(gotPubKey.ToBytes(), pubKey.ToBytes()) {
-		fmt.Println(gotPubKey.ToString())
-		fmt.Println(pubKey.ToString())
 		t.Error("public keys not equals")
 		return
 	}

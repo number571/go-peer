@@ -24,8 +24,7 @@ const (
 	cHandleConfigFriendsTemplate  = "%s" + hls_settings.CHandleConfigFriendsPath
 	cHandleNetworkOnlineTemplate  = "%s" + hls_settings.CHandleNetworkOnlinePath
 	cHandleNetworkRequestTemplate = "%s" + hls_settings.CHandleNetworkRequestPath
-	cHandleNetworkKeyTemplate     = "%s" + hls_settings.CHandleNetworkKeyPath
-	cHandleNodeKeyTemplate        = "%s" + hls_settings.CHandleNodeKeyPath
+	cHandleNetworkPubKeyTemplate  = "%s" + hls_settings.CHandleNetworkPubKeyPath
 )
 
 type sRequester struct {
@@ -78,27 +77,11 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 	return cfgSettings, nil
 }
 
-func (p *sRequester) GetNetworkKey() (string, error) {
-	res, err := api.Request(
-		p.fClient,
-		http.MethodGet,
-		fmt.Sprintf(cHandleNetworkKeyTemplate, p.fHost),
-		nil,
-	)
-
-	result := string(res)
-	if err != nil {
-		return "", fmt.Errorf("get network key (requester): %w", err)
-	}
-
-	return result, nil
-}
-
 func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 	_, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(cHandleNetworkKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
 		pNetworkKey,
 	)
 	if err != nil {
@@ -269,7 +252,7 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandleNodeKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleNetworkPubKeyTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {

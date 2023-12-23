@@ -10,7 +10,8 @@
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
 10. Append ConfigSettings Handle to all services
-11. Delete GetNetworkKey from HLS (get from ConfigSettings)
+11. Update README with ConfigSettings API
+12. Update README with API route paths
 
 ### Tests
 

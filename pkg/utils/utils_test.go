@@ -28,7 +28,6 @@ func TestMergeErrors(t *testing.T) {
 		return
 	}
 	if err.Error() != tgErrorStr {
-		fmt.Println(err.Error())
 		t.Error("got another string error")
 		return
 	}

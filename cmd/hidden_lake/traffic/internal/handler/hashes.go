@@ -32,15 +32,15 @@ func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) htt
 		query := pR.URL.Query()
 		id, err := strconv.Atoi(query.Get("id"))
 		if err != nil {
-			pLogger.PushErro(logBuilder.WithMessage("get_id"))
-			api.Response(pW, http.StatusInternalServerError, "failed: get id")
+			pLogger.PushWarn(logBuilder.WithMessage("get_id"))
+			api.Response(pW, http.StatusBadRequest, "failed: get id")
 			return
 		}
 
 		hash, err := database.Hash(uint64(id))
 		if err != nil {
-			pLogger.PushErro(logBuilder.WithMessage("get_hashes"))
-			api.Response(pW, http.StatusInternalServerError, "failed: load size from DB")
+			pLogger.PushWarn(logBuilder.WithMessage("get_hashes"))
+			api.Response(pW, http.StatusNotAcceptable, "failed: load size from DB")
 			return
 		}
 

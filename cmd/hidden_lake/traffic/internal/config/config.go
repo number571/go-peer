@@ -17,13 +17,13 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessageSizeBytes   uint64 `yaml:"message_size_bytes"`
-	FWorkSizeBits       uint64 `yaml:"work_size_bits"`
-	FKeySizeBits        uint64 `yaml:"key_size_bits"`
-	FMessagesCapacity   uint64 `yaml:"messages_capacity"`
-	FQueuePeriodMS      uint64 `yaml:"queue_period_ms,omitempty"`
-	FLimitVoidSizeBytes uint64 `yaml:"limit_void_size_bytes,omitempty"`
-	FNetworkKey         string `yaml:"network_key,omitempty"`
+	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
+	FWorkSizeBits       uint64 `json:"work_size_bits" yaml:"work_size_bits"`
+	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
+	FMessagesCapacity   uint64 `json:"messages_capacity" yaml:"messages_capacity"`
+	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty" yaml:"queue_period_ms,omitempty"`
+	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
+	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {

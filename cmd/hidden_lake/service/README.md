@@ -295,11 +295,10 @@ and put result to "hex_data" HLS API
 ```
 1. GET/POST/DELETE /api/config/connects
 2. GET/POST/DELETE /api/config/friends
-3. GET             /api/config/settings
+3. GET/POST        /api/config/settings
 4. GET/DELETE      /api/network/online
 5. POST/PUT        /api/network/request
-6. GET/POST        /api/network/key
-7. GET             /api/node/key
+6. GET             /api/network/pubkey
 ```
 
 ### 1. /api/config/connects
@@ -433,6 +432,23 @@ Content-Length: 120
 {"message_size_bytes":8192,"work_size_bits":20,"queue_period_ms":5000,"key_size_bits":4096,"limit_void_size_bytes":4096}
 ```
 
+#### 3.2. POST Request
+
+```bash
+curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/config/settings --data "used_network_key"'
+```
+
+#### 3.2. POST Response
+
+```
+HTTP/1.1 200 OK
+Date: Sun, 06 Aug 2023 23:22:49 GMT
+Content-Length: 24
+Content-Type: text/plain; charset=utf-8
+
+success: set network key
+```
+
 ### 4. /api/network/online
 
 #### 4.1. GET Request
@@ -543,51 +559,15 @@ Content-Type: text/plain; charset=utf-8
 success: broadcast
 ```
 
-### 6. /api/network/key
+### 6. /api/network/pubkey
 
 #### 6.1. GET Request
 
 ```bash
-curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/network/key
+curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/network/pubkey
 ```
 
 #### 6.1. GET Response
-
-```
-HTTP/1.1 200 OK
-Date: Sun, 06 Aug 2023 23:23:01 GMT
-Content-Length: 16
-Content-Type: text/plain; charset=utf-8
-
-used_network_key
-```
-
-#### 6.2. POST Request
-
-```bash
-curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/network/key --data "used_network_key"'
-```
-
-#### 6.2. POST Response
-
-```
-HTTP/1.1 200 OK
-Date: Sun, 06 Aug 2023 23:22:49 GMT
-Content-Length: 24
-Content-Type: text/plain; charset=utf-8
-
-success: set network key
-```
-
-### 7. /api/node/key
-
-#### 7.1. GET Request
-
-```bash
-curl -i -X GET -H 'Accept: application/json' http://localhost:9572/api/node/key
-```
-
-#### 7.1. GET Response
 
 ```
 HTTP/1.1 200 OK

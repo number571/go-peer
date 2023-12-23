@@ -111,6 +111,8 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 			FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 			FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 			FKeySizeBits:        testutils.TcKeySize,
+			FNetworkKey:         testutils.TCNetworkKey,
+			FMessagesCapacity:   testutils.TCCapacity,
 		},
 	}
 
@@ -141,9 +143,10 @@ func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*htt
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
-	mux.HandleFunc(pkg_settings.CHandlePointerPath, HandlePointerAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleHashesPath, HandleHashesAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleStoragePointerPath, HandlePointerAPI(wDB, logger))
+	mux.HandleFunc(pkg_settings.CHandleStorageHashesPath, HandleHashesAPI(wDB, logger))
+	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleConfigSettings, HandleConfigSettingsAPI(cfg, logger))
 
 	srv := &http.Server{
 		Addr:        addr,

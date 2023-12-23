@@ -114,13 +114,13 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 
 		result.FPublicKey = myPubKey.ToString()
 
-		networkKey, err := client.GetNetworkKey()
+		gotSettings, err := client.GetSettings()
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_network_key"))
 			fmt.Fprint(pW, "error: read network key")
 			return
 		}
-		result.FNetworkKey = networkKey
+		result.FNetworkKey = gotSettings.GetNetworkKey()
 
 		// append HLS connections to backup connections
 		allConns, err := getAllConnections(cfg, client)

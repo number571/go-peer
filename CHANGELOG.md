@@ -24,6 +24,8 @@
 - Update `cmd/hidden_lake/traffic`: delete hashes_window parameter from config
 - Update `cmd/hidden_lake/helpers`: move HLE, HLL, HLA to helpers/ 
 - Update `.dockerignore`: append dockerignore with ignore .git path
+- Update `cmd/hidden_lake/service`: delete GetNetworkKey method from client
+- Update `cmd/hidden_lake`: change API route paths 
 
 ### BUG FIXES
 
@@ -31,6 +33,7 @@
 - Update `cmd/hidden_lake/helpers/loader`: fix close pprof service
 - Update `cmd/hidden_lake`: fix _mounted paths with config files
 - Update `cmd/hidden_lake`: append field ReadTimeout and use function http.TimeoutHandler into http.Server
+- Update `cmd/hidden_lake/service`: fix HandleSettings API with network_key
 
 <!-- ... -->
 

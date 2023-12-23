@@ -80,8 +80,7 @@ const (
 	CHandleConfigFriendsPath  = "/api/config/friends"
 	CHandleNetworkOnlinePath  = "/api/network/online"
 	CHandleNetworkRequestPath = "/api/network/request"
-	CHandleNetworkKeyPath     = "/api/network/key"
-	CHandleNodeKeyPath        = "/api/node/key"
+	CHandleNetworkPubKeyPath  = "/api/network/pubkey"
 )
 
 func GetConnDeadline(pQueuePeriod time.Duration) time.Duration {

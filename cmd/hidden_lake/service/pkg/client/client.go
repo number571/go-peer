@@ -41,14 +41,6 @@ func (p *sClient) GetSettings() (config.IConfigSettings, error) {
 	return res, nil
 }
 
-func (p *sClient) GetNetworkKey() (string, error) {
-	res, err := p.fRequester.GetNetworkKey()
-	if err != nil {
-		return "", fmt.Errorf("get network key (client): %w", err)
-	}
-	return res, nil
-}
-
 func (p *sClient) SetNetworkKey(pNetworkKey string) error {
 	err := p.fRequester.SetNetworkKey(pNetworkKey)
 	if err != nil {

@@ -16,10 +16,11 @@ const (
 )
 
 const (
-	CHandleIndexPath   = "/api/index"
-	CHandlePointerPath = "/api/pointer"
-	CHandleHashesPath  = "/api/hashes"
-	CHandleMessagePath = "/api/message"
+	CHandleIndexPath          = "/api/index"
+	CHandleStoragePointerPath = "/api/storage/pointer"
+	CHandleStorageHashesPath  = "/api/storage/hashes"
+	CHandleNetworkMessagePath = "/api/network/message"
+	CHandleConfigSettings     = "/api/config/settings"
 )
 
 const (

@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	testutils "github.com/number571/go-peer/test/_data"
 )
@@ -17,7 +16,7 @@ func TestHandleNetworkKeyAPI(t *testing.T) {
 	pathCfg := fmt.Sprintf(tcPathConfigTemplate, 4)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, 4)
 
-	wcfg, node, _, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[25])
+	_, node, _, cancel, srv := testAllCreate(pathCfg, pathDB, testutils.TgAddrs[25])
 	defer testAllFree(node, cancel, srv, pathCfg, pathDB)
 
 	client := hls_client.NewClient(
@@ -30,25 +29,24 @@ func TestHandleNetworkKeyAPI(t *testing.T) {
 
 	networkKey := "test_network_key"
 	testSetNetworkKey(t, client, networkKey)
-	testGetNetworkKey(t, client, wcfg.GetConfig(), networkKey)
+	testGetNetworkKey(t, client, networkKey)
 }
 
-func testGetNetworkKey(t *testing.T, client hls_client.IClient, cfg config.IConfig, networkKey string) {
-	gotNetworkKey, err := client.GetNetworkKey()
+func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
+	settings, err := client.GetSettings()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if gotNetworkKey != networkKey {
+	if settings.GetNetworkKey() != networkKey {
 		t.Error("got network key != networkKey")
 		return
 	}
 }
 
 func testSetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
-	err := client.SetNetworkKey(networkKey)
-	if err != nil {
+	if err := client.SetNetworkKey(networkKey); err != nil {
 		t.Error(err)
 		return
 	}

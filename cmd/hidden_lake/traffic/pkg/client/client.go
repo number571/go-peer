@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/config"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -59,4 +60,12 @@ func (p *sClient) PutMessage(pMsg net_message.IMessage) error {
 		return fmt.Errorf("put message (client): %w", err)
 	}
 	return nil
+}
+
+func (p *sClient) GetSettings() (config.IConfigSettings, error) {
+	res, err := p.fRequester.GetSettings()
+	if err != nil {
+		return nil, fmt.Errorf("get settings (client): %w", err)
+	}
+	return res, nil
 }

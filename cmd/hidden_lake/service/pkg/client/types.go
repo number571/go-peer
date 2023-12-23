@@ -13,9 +13,7 @@ type IClient interface {
 	GetIndex() (string, error)
 	GetSettings() (config.IConfigSettings, error)
 
-	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error
-
 	GetPubKey() (asymmetric.IPubKey, error)
 
 	GetOnlines() ([]string, error)
@@ -37,9 +35,7 @@ type IRequester interface {
 	GetIndex() (string, error)
 	GetSettings() (config.IConfigSettings, error)
 
-	GetNetworkKey() (string, error)
 	SetNetworkKey(string) error
-
 	GetPubKey() (asymmetric.IPubKey, error)
 
 	GetOnlines() ([]string, error)

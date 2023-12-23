@@ -13,13 +13,12 @@ func (p *sApp) initServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(hls_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
-	mux.HandleFunc(hls_settings.CHandleConfigSettingsPath, handler.HandleConfigSettingsAPI(p.fWrapper, p.fHTTPLogger))
+	mux.HandleFunc(hls_settings.CHandleConfigSettingsPath, handler.HandleConfigSettingsAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleConfigConnectsPath, handler.HandleConfigConnectsAPI(pCtx, p.fWrapper, p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleConfigFriendsPath, handler.HandleConfigFriendsAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleNetworkOnlinePath, handler.HandleNetworkOnlineAPI(p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(pCtx, p.fWrapper, p.fHTTPLogger, p.fNode))
-	mux.HandleFunc(hls_settings.CHandleNetworkKeyPath, handler.HandleNetworkKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
-	mux.HandleFunc(hls_settings.CHandleNodeKeyPath, handler.HandleNodeKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
+	mux.HandleFunc(hls_settings.CHandleNetworkPubKeyPath, handler.HandleNetworkPubKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fWrapper.GetConfig().GetAddress().GetHTTP(),
