@@ -13,13 +13,13 @@ import (
 func TestHandleIndexAPI(t *testing.T) {
 	t.Parallel()
 
-	service := testRunService(testutils.TgAddrs[47])
+	service := testRunService(testutils.TgAddrs[54])
 	defer service.Close()
 
 	time.Sleep(100 * time.Millisecond)
 	hleClient := hle_client.NewClient(
 		hle_client.NewRequester(
-			"http://"+testutils.TgAddrs[47],
+			"http://"+testutils.TgAddrs[54],
 			&http.Client{Timeout: time.Second / 2},
 			testNetworkMessageSettings(),
 		),

@@ -15,10 +15,10 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessageSizeBytes uint64 `yaml:"message_size_bytes"`
-	FWorkSizeBits     uint64 `yaml:"work_size_bits"`
-	FKeySizeBits      uint64 `yaml:"key_size_bits"`
-	FNetworkKey       string `yaml:"network_key,omitempty"`
+	FMessageSizeBytes uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
+	FKeySizeBits      uint64 `json:"key_size_bits" yaml:"key_size_bits"`
+	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FNetworkKey       string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {

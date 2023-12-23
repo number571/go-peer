@@ -1,12 +1,14 @@
 package client
 
 import (
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IClient interface {
 	GetIndex() (string, error)
+	GetSettings() (config.IConfigSettings, error)
 
 	GetPubKey() (asymmetric.IPubKey, error)
 
@@ -16,6 +18,7 @@ type IClient interface {
 
 type IRequester interface {
 	GetIndex() (string, error)
+	GetSettings() (config.IConfigSettings, error)
 
 	GetPubKey() (asymmetric.IPubKey, error)
 

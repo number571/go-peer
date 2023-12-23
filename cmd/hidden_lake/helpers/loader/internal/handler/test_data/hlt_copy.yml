@@ -3,6 +3,7 @@ settings:
   key_size_bits: 1024
   messages_capacity: 2048
   work_size_bits: %d
+  network_key: %s
 storage: true
 address:
   http: '%s'

@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -51,4 +52,12 @@ func (p *sClient) GetPubKey() (asymmetric.IPubKey, error) {
 		return nil, fmt.Errorf("get public key (client): %w", err)
 	}
 	return pubKey, nil
+}
+
+func (p *sClient) GetSettings() (config.IConfigSettings, error) {
+	res, err := p.fRequester.GetSettings()
+	if err != nil {
+		return nil, fmt.Errorf("get settings (client): %w", err)
+	}
+	return res, nil
 }

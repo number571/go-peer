@@ -127,15 +127,16 @@ consumers:
 ## HLL API
 
 ```
-1. POST/DELETE /api/transfer
+1. POST/DELETE /api/network/transfer
+2. GET         /api/config/settings
 ```
 
-### 1. /api/transfer
+### 1. /api/network/transfer
 
 #### 1.1. POST Request
 
 ```bash
-curl -i -X POST -H 'Accept: application/json' http://localhost:9561/api/transfer
+curl -i -X POST -H 'Accept: application/json' http://localhost:9561/api/network/transfer
 ```
 
 #### 1.1. POST Response
@@ -152,7 +153,7 @@ success: run transfer
 #### 1.2. DELETE Request
 
 ```bash
-curl -i -X DELETE -H 'Accept: application/json' http://localhost:9561/api/transfer
+curl -i -X DELETE -H 'Accept: application/json' http://localhost:9561/api/network/transfer
 ```
 
 #### 1.2. DELETE Response
@@ -164,4 +165,25 @@ Date: Mon, 07 Aug 2023 02:59:42 GMT
 Content-Length: 68
 
 success: stop transfer
+```
+
+### 2. /api/config/settings
+
+#### 2.1. GET Request
+
+```bash
+curl -i -X GET -H 'Accept: application/json' http://localhost:9561/api/config/settings
+```
+
+#### 2.1. GET Response
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Sat, 23 Dec 2023 17:09:53 GMT
+Content-Length: 46
+```
+
+```json
+{"messages_capacity":2048,"work_size_bits":20}
 ```

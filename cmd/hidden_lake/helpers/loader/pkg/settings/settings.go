@@ -14,6 +14,7 @@ const (
 )
 
 const (
-	CHandleIndexPath    = "/api/index"
-	CHandleTransferPath = "/api/transfer"
+	CHandleIndexPath           = "/api/index"
+	CHandleNetworkTransferPath = "/api/network/transfer"
+	CHandleConfigSettings      = "/api/config/settings"
 )

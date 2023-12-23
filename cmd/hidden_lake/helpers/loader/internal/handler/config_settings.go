@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -24,7 +24,9 @@ func HandleConfigSettingsAPI(pCfg config.IConfig, pLogger logger.ILogger) http.H
 
 		sett := pCfg.GetSettings()
 		api.Response(pW, http.StatusOK, config.SConfigSettings{
-			FValue: sett.GetValue(),
+			FMessagesCapacity: sett.GetMessagesCapacity(),
+			FWorkSizeBits:     sett.GetWorkSizeBits(),
+			FNetworkKey:       sett.GetNetworkKey(),
 		})
 	}
 }

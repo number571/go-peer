@@ -15,9 +15,9 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessagesCapacity uint64 `yaml:"messages_capacity"`
-	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
-	FNetworkKey       string `yaml:"network_key,omitempty"`
+	FMessagesCapacity uint64 `json:"messages_capacity" yaml:"messages_capacity"`
+	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FNetworkKey       string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {

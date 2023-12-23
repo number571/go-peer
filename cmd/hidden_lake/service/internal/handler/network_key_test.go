@@ -39,6 +39,7 @@ func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey strin
 		return
 	}
 
+	fmt.Println(settings.GetNetworkKey(), networkKey)
 	if settings.GetNetworkKey() != networkKey {
 		t.Error("got network key != networkKey")
 		return

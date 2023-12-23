@@ -23,6 +23,7 @@ func testRunService(addr string) *http.Server {
 		FSettings: &config.SConfigSettings{
 			FMessagesCapacity: testutils.TCCapacity,
 			FWorkSizeBits:     testutils.TCWorkSize,
+			FNetworkKey:       testutils.TCNetworkKey,
 		},
 		FProducers: []string{tgProducer},
 		FConsumers: []string{tgConsumer},
@@ -34,7 +35,8 @@ func testRunService(addr string) *http.Server {
 	)
 
 	mux.HandleFunc(settings.CHandleIndexPath, HandleIndexAPI(logger))
-	mux.HandleFunc(settings.CHandleTransferPath, HandleTransferAPI(cfg, logger))
+	mux.HandleFunc(settings.CHandleNetworkTransferPath, HandleNetworkTransferAPI(cfg, logger))
+	mux.HandleFunc(settings.CHandleConfigSettings, HandleConfigSettingsAPI(cfg, logger))
 
 	srv := &http.Server{
 		Addr:        addr,

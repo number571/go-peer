@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -13,10 +14,11 @@ import (
 )
 
 const (
-	cHandleIndexTemplate   = "%s" + hle_settings.CHandleIndexPath
-	cHandleEncryptTemplate = "%s" + hle_settings.CHandleEncryptPath
-	cHandleDecryptTemplate = "%s" + hle_settings.CHandleDecryptPath
-	cHandlePubKeyTemplate  = "%s" + hle_settings.CHandlePubKeyPath
+	cHandleIndexTemplate          = "%s" + hle_settings.CHandleIndexPath
+	cHandleMessageEncryptTemplate = "%s" + hle_settings.CHandleMessageEncryptPath
+	cHandleMessageDecryptTemplate = "%s" + hle_settings.CHandleMessageDecryptPath
+	cHandleServicePubKeyTemplate  = "%s" + hle_settings.CHandleServicePubKeyPath
+	cHandleConfigSettingsTemplate = "%s" + hle_settings.CHandleConfigSettings
 )
 
 var (
@@ -60,7 +62,7 @@ func (p *sRequester) EncryptMessage(pPubKey asymmetric.IPubKey, pData []byte) (n
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(cHandleEncryptTemplate, p.fHost),
+		fmt.Sprintf(cHandleMessageEncryptTemplate, p.fHost),
 		hle_settings.SContainer{
 			FPublicKey: pPubKey.ToString(),
 			FHexData:   encoding.HexEncode(pData),
@@ -82,7 +84,7 @@ func (p *sRequester) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IP
 	resp, err := api.Request(
 		p.fClient,
 		http.MethodPost,
-		fmt.Sprintf(cHandleDecryptTemplate, p.fHost),
+		fmt.Sprintf(cHandleMessageDecryptTemplate, p.fHost),
 		pNetMsg.ToString(),
 	)
 	if err != nil {
@@ -111,7 +113,7 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	res, err := api.Request(
 		p.fClient,
 		http.MethodGet,
-		fmt.Sprintf(cHandlePubKeyTemplate, p.fHost),
+		fmt.Sprintf(cHandleServicePubKeyTemplate, p.fHost),
 		nil,
 	)
 	if err != nil {
@@ -124,4 +126,23 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	}
 
 	return pubKey, nil
+}
+
+func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+	res, err := api.Request(
+		p.fClient,
+		http.MethodGet,
+		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get settings (requester): %w", err)
+	}
+
+	cfgSettings := new(config.SConfigSettings)
+	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+		return nil, fmt.Errorf("decode settings (requester): %w", err)
+	}
+
+	return cfgSettings, nil
 }

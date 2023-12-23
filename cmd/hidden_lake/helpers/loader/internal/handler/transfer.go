@@ -26,7 +26,7 @@ type sTransfer struct {
 	fCancel context.CancelFunc
 }
 
-func HandleTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) http.HandlerFunc {
+func HandleNetworkTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) http.HandlerFunc {
 	transfer := &sTransfer{fConfig: pConfig, fState: state.NewBoolState()}
 
 	return func(pW http.ResponseWriter, pR *http.Request) {

@@ -19,7 +19,7 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-func HandleEncryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pClient client.IClient) http.HandlerFunc {
+func HandleMessageEncryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pClient client.IClient) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hle_settings.CServiceName, pR)
 

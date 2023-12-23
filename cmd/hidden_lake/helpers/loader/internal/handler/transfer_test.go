@@ -64,6 +64,7 @@ func testInitTransfer() {
 
 	os.Mkdir(tcNameHLT1, 0o777)
 	os.Mkdir(tcNameHLT2, 0o777)
+
 }
 
 func TestHandleTransferAPI(t *testing.T) {
@@ -79,6 +80,7 @@ func TestHandleTransferAPI(t *testing.T) {
 
 	netMsgSettings := net_message.NewSettings(&net_message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
+		FNetworkKey:   testutils.TCNetworkKey,
 	})
 
 	_, cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)
@@ -200,7 +202,7 @@ func copyWithPaste(pathTo, addr string) error {
 	}
 	return os.WriteFile(
 		pathTo+"/hlt.yml",
-		[]byte(fmt.Sprintf(string(cfgDataFmt), testutils.TCWorkSize, addr)),
+		[]byte(fmt.Sprintf(string(cfgDataFmt), testutils.TCWorkSize, testutils.TCNetworkKey, addr)),
 		0o644,
 	)
 }

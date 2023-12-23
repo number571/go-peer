@@ -12,7 +12,8 @@ func (p *sApp) initServiceHTTP() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(hll_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
-	mux.HandleFunc(hll_settings.CHandleTransferPath, handler.HandleTransferAPI(p.fConfig, p.fHTTPLogger))
+	mux.HandleFunc(hll_settings.CHandleNetworkTransferPath, handler.HandleNetworkTransferAPI(p.fConfig, p.fHTTPLogger))
+	mux.HandleFunc(hll_settings.CHandleConfigSettings, handler.HandleConfigSettingsAPI(p.fConfig, p.fHTTPLogger))
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetHTTP(),

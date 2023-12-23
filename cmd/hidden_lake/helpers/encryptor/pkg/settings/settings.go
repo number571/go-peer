@@ -14,8 +14,9 @@ const (
 )
 
 const (
-	CHandleIndexPath   = "/api/index"
-	CHandleEncryptPath = "/api/encrypt"
-	CHandleDecryptPath = "/api/decrypt"
-	CHandlePubKeyPath  = "/api/pubkey"
+	CHandleIndexPath          = "/api/index"
+	CHandleMessageEncryptPath = "/api/message/encrypt"
+	CHandleMessageDecryptPath = "/api/message/decrypt"
+	CHandleServicePubKeyPath  = "/api/service/pubkey"
+	CHandleConfigSettings     = "/api/config/settings"
 )

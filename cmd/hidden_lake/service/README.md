@@ -429,7 +429,7 @@ Content-Length: 120
 ```
 
 ```json
-{"message_size_bytes":8192,"work_size_bits":20,"queue_period_ms":5000,"key_size_bits":4096,"limit_void_size_bytes":4096}
+{"message_size_bytes":8192,"queue_period_ms":5000,"key_size_bits":4096,"work_size_bits":20,"limit_void_size_bytes":4096}
 ```
 
 #### 3.2. POST Request

@@ -15,7 +15,6 @@ import (
 func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
-		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
@@ -25,6 +24,8 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 
 		switch pR.Method {
 		case http.MethodGet:
+			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
+
 			sett := pWrapper.GetConfig().GetSettings()
 			api.Response(pW, http.StatusOK, config.SConfigSettings{
 				FMessageSizeBytes:   sett.GetMessageSizeBytes(),

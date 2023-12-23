@@ -2,6 +2,8 @@ package client
 
 import (
 	"fmt"
+
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/config"
 )
 
 var (
@@ -38,4 +40,12 @@ func (p *sClient) StopTransfer() error {
 		return fmt.Errorf("stop loader (client): %w", err)
 	}
 	return nil
+}
+
+func (p *sClient) GetSettings() (config.IConfigSettings, error) {
+	res, err := p.fRequester.GetSettings()
+	if err != nil {
+		return nil, fmt.Errorf("get settings (client): %w", err)
+	}
+	return res, nil
 }
