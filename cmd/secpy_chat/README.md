@@ -26,7 +26,7 @@ friends:
 <p align="center"><img src="_images/secpy_chat.gif" alt="secpy_chat.gif"/></p>
 <p align="center">Figure 1. Chat node1 with node2.</p>
 
-The application connects to two services at once: HLE and HLT. The first service makes it possible to encrypt and decrypt messages. The second service allows you to send and receive encrypted messages from the network. In this case, the secpy_chat is guided only by the interfaces of the services, representing the frontend component.
+The application connects to two services at once: [HLE](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor) and [HLT](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic). The first service makes it possible to encrypt and decrypt messages. The second service allows you to send and receive encrypted messages from the network. In this case, the secpy_chat is guided only by the interfaces of the services, representing the frontend component.
 
 ## Example 
 
