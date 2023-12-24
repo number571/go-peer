@@ -1,10 +1,25 @@
 ## Secpy-Chat
 
-> Secpy-Chat application
+> The Secpy-Chat application
 
 <img src="_images/secpy_chat_logo.png" alt="secpy_chat_logo.png"/>
 
 The application `secpy_chat` allows you to communicate securely (using end-to-end encryption) using HLT and HLE applications. This is an example of how it is possible to write client-safe applications for the Hidden Lake environment without being based on the Go programming language (the main language for writing Hidden Lake applications).
+
+## Config structure
+
+```
+"hlt_host" address of the HLT service
+"hle_host" address of the HLE service
+"friends"  map of {"alias_name":"public_key"}
+```
+
+```yaml
+hlt_host: localhost:9582
+hle_host: localhost:9551
+friends: 
+  Alice: PubKey{3082020A02820201...3324D10203010001}
+```
 
 ## How it works
 
@@ -39,19 +54,4 @@ $ python3 main.py
 # waiting client#2
 > [Alice]: hello
 > world!
-```
-
-## Config structure
-
-```
-"hlt_host" address of the HLT service
-"hle_host" address of the HLE service
-"friends"  map of {"alias_name":"public_key"}
-```
-
-```yaml
-hlt_host: localhost:9582
-hle_host: localhost:9551
-friends: 
-  Alice: PubKey{3082020A02820201...3324D10203010001}
 ```

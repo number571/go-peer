@@ -6,7 +6,6 @@ FRIENDS = {} # it is being overwritten
 
 def main():
     init_load_config("config.yml")
-
     parallel_run(input_task, output_task)
 
 def init_load_config(cfg_path):
