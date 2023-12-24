@@ -1,4 +1,4 @@
-## M-A
+# M-A
 
 > Micro-Anonymous network
 

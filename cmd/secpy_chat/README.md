@@ -1,10 +1,12 @@
-## Secpy-Chat
+# Secpy-Chat
 
 > The Secpy-Chat application
 
 <img src="_images/secpy_chat_logo.png" alt="secpy_chat_logo.png"/>
 
 The application `secpy_chat` allows you to communicate securely (using end-to-end encryption) using HLT and HLE applications. This is an example of how it is possible to write client-safe applications for the Hidden Lake environment without being based on the Go programming language (the main language for writing Hidden Lake applications).
+
+> More information about Secpy-Chat in the [habr.com/ru/articles/782836/](https://habr.com/ru/articles/782836/ "Habr Secpy-Chat")
 
 ## Config structure
 
