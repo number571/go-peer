@@ -8,7 +8,7 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/helpers/encryptor
-	# COPY HLT
+	# COPY HLE
 	cp -r $(BINPATH)/hle ./service_hle/prog_hle
 run: 
 	# MAKEFILE RUN

@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd`: append new application 'secpy_chat'
+
 <!-- ... -->
 
 ## v1.5.24
