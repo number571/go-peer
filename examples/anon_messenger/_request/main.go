@@ -73,11 +73,6 @@ func sendMessage(pReceiver string, pMessage []byte) {
 		),
 	)
 
-	for _, v := range encMessage {
-		fmt.Printf("\\x%02x", v)
-	}
-	fmt.Println()
-
 	requestData := replacer.Replace(
 		fmt.Sprintf(
 			cJsonDataTemplate,

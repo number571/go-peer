@@ -20,7 +20,7 @@ import (
 
 const (
 	hltHost1 = "localhost:7582"
-	hltHost2 = "localhost:7582"
+	hltHost2 = "localhost:8582"
 	hllHost  = "localhost:6561"
 )
 

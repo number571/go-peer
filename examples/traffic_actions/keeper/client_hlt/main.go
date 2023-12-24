@@ -128,5 +128,7 @@ func main() {
 			}
 			fmt.Printf("[%d] %s\n", i+1, hash)
 		}
+	default:
+		panic("unknown mode")
 	}
 }
