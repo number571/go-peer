@@ -16,7 +16,7 @@ def init_load_config(cfg_path):
             config_loaded = yaml.safe_load(stream)
         except yaml.YAMLError as e:
             print("@ failed load config")
-            exit(2)
+            exit(3)
     
     HLT_URL = "http://" + config_loaded["hlt_host"]
     HLE_URL = "http://" + config_loaded["hle_host"]
@@ -44,7 +44,7 @@ def output_task():
         messages_capacity = json.loads(resp_hlt.content)["messages_capacity"]
     except ValueError:
         print("@ got response invalid data from HLT (/api/config/settings)")
-        exit(1)
+        exit(2)
     
     global_pointer = -1
     while True:
@@ -102,16 +102,10 @@ def output_task():
                 continue
         
             # CHECK GOT PUBLIC KEY IN FRIENDS LIST
-            friend_name = ""
             user_id = hashlib.sha256(json_resp["public_key"].encode('utf-8')).hexdigest()
-
-            friend_exist = False 
-            for k, v in FRIENDS.items():
-                friend_id = hashlib.sha256(v.encode('utf-8')).hexdigest()
-                if user_id == friend_id:
-                    friend_name = k
-                    friend_exist = True
-                    break
+            friend_name = get_friend_name(user_id)
+            if friend_name == "":
+                continue 
 
             got_data = bytes.fromhex(json_resp["hex_data"]).decode('utf-8')
             print(f"[{friend_name}]: {got_data}\n> ", end="")
@@ -135,10 +129,6 @@ def input_task():
             friend = _friend
             continue
 
-        if msg.startswith("/exit"):
-            print("$ goodbye")
-            sys.exit(0)
-        
         if friend == "":
             print("@ friend is null, use /friend to set")
             continue 
@@ -158,6 +148,13 @@ def input_task():
         if resp_hlt.status_code != 200:
             print("@ got response error from HLT (/api/network/message)")
             continue 
+
+def get_friend_name(user_id):
+    for k, v in FRIENDS.items():
+        friend_id = hashlib.sha256(v.encode('utf-8')).hexdigest()
+        if user_id == friend_id:
+            return k
+    return ""
 
 if __name__ == "__main__":
     main()
