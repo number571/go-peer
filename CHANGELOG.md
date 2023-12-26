@@ -15,6 +15,11 @@
 - Update `cmd/hidden_lake/messenger`: delete 'iam' user
 - Update `pkg/network/anonymity`: delete check 'len(connections) == 0' in BroadcastPayload and FetchPayload
 - Update `cmd/hidden_lake/service`: append check 'len(connections) == 0' before BroadcastPayload or FetchPayload
+- Update `pkg/storage/database`: keys in database now encrypted
+
+### BUG FIXES
+
+- Update `cmd/hidden_lake/messenger`: fix JS view of load huge chat messages
 
 <!-- ... -->
 

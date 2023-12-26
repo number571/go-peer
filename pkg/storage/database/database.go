@@ -104,11 +104,8 @@ func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
-		return errors.New("key is reserved")
-	}
-
-	if err := p.fDB.Put(pKey, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
+	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
+	if err := p.fDB.Put(key, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
 		return fmt.Errorf("insert key/value to database: %w", err)
 	}
 	return nil
@@ -118,7 +115,8 @@ func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	encValue, err := p.fDB.Get(pKey, nil)
+	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
+	encValue, err := p.fDB.Get(key, nil)
 	if err != nil {
 		return nil, fmt.Errorf("read value by key: %w", err)
 	}
@@ -134,15 +132,12 @@ func (p *sKVDatabase) Del(pKey []byte) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if bytes.Equal(pKey, []byte(cSaltKey)) || bytes.Equal(pKey, []byte(cHashKey)) {
-		return errors.New("key is reserved")
-	}
-
-	if _, err := p.fDB.Get(pKey, nil); err != nil {
+	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
+	if _, err := p.fDB.Get(key, nil); err != nil {
 		return fmt.Errorf("read value by key for delete: %w", err)
 	}
 
-	if err := p.fDB.Delete(pKey, nil); err != nil {
+	if err := p.fDB.Delete(key, nil); err != nil {
 		return fmt.Errorf("delete value by key: %w", err)
 	}
 

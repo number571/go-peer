@@ -77,7 +77,7 @@ Babilejo
       var insertHTML = "";
       if (messageInfo.filename == "") { // got text message
         insertHTML = `
-          <div class="d-flex flex-row justify-content-start mb-2 pt-1">
+          <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
               <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
               <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + escapeOutput(messageInfo.message) + `</p>
@@ -88,7 +88,7 @@ Babilejo
       } else { // got file message
         let filename = escapeOutput(messageInfo.filename);
         insertHTML = `
-          <div class="d-flex flex-row justify-content-start mb-2 pt-1">
+          <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
               <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
               <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">

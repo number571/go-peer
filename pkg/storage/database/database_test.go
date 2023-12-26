@@ -149,16 +149,6 @@ func TestInvalidInitDB(t *testing.T) {
 		return
 	}
 
-	if err := store.Set([]byte(cSaltKey), []byte{1}); err == nil {
-		t.Error("success rewrite cSaltKey")
-		return
-	}
-
-	if err := store.Set([]byte(cHashKey), []byte{1}); err == nil {
-		t.Error("success rewrite cHashKey")
-		return
-	}
-
 	if err := store.Del([]byte(cSaltKey)); err == nil {
 		t.Error("success delete cSaltKey")
 		return
