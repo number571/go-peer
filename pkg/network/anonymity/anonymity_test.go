@@ -224,21 +224,6 @@ func TestFetchPayload(t *testing.T) {
 		t.Error("got invalid message body")
 		return
 	}
-
-	if err := nodes[0].GetNetworkNode().DelConnection(testutils.TgAddrs[35]); err != nil {
-		t.Error(err)
-		return
-	}
-
-	_, err2 := nodes[0].FetchPayload(
-		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
-	)
-	if err2 == nil {
-		t.Error("success fetch payload without connections")
-		return
-	}
 }
 
 func TestBroadcastPayload(t *testing.T) {
@@ -284,21 +269,6 @@ func TestBroadcastPayload(t *testing.T) {
 		// success
 	case <-time.After(5 * time.Second):
 		t.Error("error: time after 5 seconds")
-		return
-	}
-
-	if err := nodes[0].GetNetworkNode().DelConnection(testutils.TgAddrs[33]); err != nil {
-		t.Error(err)
-		return
-	}
-
-	err2 := nodes[0].BroadcastPayload(
-		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
-	)
-	if err2 == nil {
-		t.Error("success broadcast payload without connections")
 		return
 	}
 }
@@ -523,7 +493,7 @@ func TestRecvSendMessage(t *testing.T) {
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 5)
 
 	node := _node.(*sNode)
-	if _, err := node.recv("not_exist"); err == nil {
+	if _, err := node.recvResponse("not_exist"); err == nil {
 		t.Error("success got action by undefined key")
 		return
 	}
@@ -541,7 +511,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	close(action)
 
-	if _, err := node.recv(actionKey); err == nil {
+	if _, err := node.recvResponse(actionKey); err == nil {
 		t.Error("success got closed action")
 		return
 	}
@@ -562,7 +532,7 @@ func TestRecvSendMessage(t *testing.T) {
 	ctx := context.Background()
 
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.send(ctx, msg); err != nil {
+		if err := node.enqueueMessage(ctx, msg); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -570,7 +540,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.send(ctx, msg); err != nil {
+		if err := node.enqueueMessage(ctx, msg); err != nil {
 			return
 		}
 	}

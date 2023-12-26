@@ -240,25 +240,18 @@ func TestNodeConnection(t *testing.T) {
 	defer node2.Close()
 
 	go func() {
-		err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
-			if err := node2.Listen(ctx); err == nil {
-				return errors.New("success second run node")
-			}
-			return nil
-		})
-		if err1 != nil {
-			t.Error(err1)
-			return
-		}
-	}()
-
-	go func() {
 		if err := node3.Listen(ctx); err != nil {
 			t.Error(err)
 			return
 		}
 	}()
 	defer node3.Close()
+
+	time.Sleep(200 * time.Millisecond)
+	if err := node2.Listen(ctx); err == nil {
+		t.Error("success second run node")
+		return
+	}
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {

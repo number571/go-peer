@@ -82,15 +82,11 @@ func TestRunStopQueue(t *testing.T) {
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
 
+	time.Sleep(100 * time.Millisecond)
+
 	go func() {
-		err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
-			if err := queue.Run(ctx2); err == nil {
-				return errors.New("success run already running queue")
-			}
-			return nil
-		})
-		if err1 != nil {
-			t.Error(err1)
+		if err := queue.Run(ctx2); err == nil {
+			t.Error("success run already running queue")
 			return
 		}
 	}()

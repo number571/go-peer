@@ -10,6 +10,12 @@
 
 - Update `cmd`: append new application 'secpy_chat'
 
+### CHANGES
+
+- Update `cmd/hidden_lake/messenger`: delete 'iam' user
+- Update `pkg/network/anonymity`: delete check 'len(connections) == 0' in BroadcastPayload and FetchPayload
+- Update `cmd/hidden_lake/service`: append check 'len(connections) == 0' before BroadcastPayload or FetchPayload
+
 <!-- ... -->
 
 ## v1.5.24

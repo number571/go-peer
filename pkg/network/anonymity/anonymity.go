@@ -170,7 +170,7 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 		return nil, fmt.Errorf("fetch payload: %w", err)
 	}
 
-	resp, err := p.recv(actionKey)
+	resp, err := p.recvResponse(actionKey)
 	if err != nil {
 		return nil, fmt.Errorf("receive response from fetch: %w", err)
 	}
@@ -178,7 +178,7 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 	return resp, nil
 }
 
-func (p *sNode) send(pCtx context.Context, pMsg message.IMessage) error {
+func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) error {
 	for i := uint64(0); i <= p.fSettings.GetRetryEnqueue(); i++ {
 		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
 			return nil
@@ -193,7 +193,7 @@ func (p *sNode) send(pCtx context.Context, pMsg message.IMessage) error {
 	return errors.New("enqueue message as send")
 }
 
-func (p *sNode) recv(pActionKey string) ([]byte, error) {
+func (p *sNode) recvResponse(pActionKey string) ([]byte, error) {
 	action, ok := p.getAction(pActionKey)
 	if !ok {
 		return nil, errors.New("action undefined")
@@ -225,10 +225,13 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			return nil
 		}
 
-		// load encrypted message
 		client := p.fQueue.GetClient()
+
+		// load encrypted message
 		msg, err := message.LoadMessage(client.GetSettings(), pMsg.GetPayload().GetBody())
 		if err != nil {
+			// problem from sender's side
+			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 			return fmt.Errorf("load message: %w", err)
 		}
 
@@ -306,11 +309,6 @@ func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asym
 	// enrich logger
 	logBuilder.WithPubKey(p.fQueue.GetClient().GetPubKey())
 
-	if len(p.fNetwork.GetConnections()) == 0 {
-		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotConnection))
-		return errors.New("length of connections = 0")
-	}
-
 	var (
 		newBody []byte
 		logType anon_logger.ILogType
@@ -346,9 +344,9 @@ func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asym
 		WithSize(size).
 		WithType(logType)
 
-	if err := p.send(pCtx, msg); err != nil {
+	if err := p.enqueueMessage(pCtx, msg); err != nil {
 		p.fLogger.PushErro(logBuilder)
-		return fmt.Errorf("send message: %w", err)
+		return fmt.Errorf("enqueue message: %w", err)
 	}
 
 	p.fLogger.PushInfo(logBuilder)

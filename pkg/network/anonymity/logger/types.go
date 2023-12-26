@@ -10,7 +10,7 @@ type (
 )
 
 const (
-	CLogFinal = CLogErroInvalidNetworkMask
+	CLogFinal = CLogErroEncryptPayload
 )
 
 const (
@@ -29,7 +29,6 @@ const (
 	// WARN
 	CLogWarnMessageNull
 	CLogWarnNotFriend
-	CLogWarnNotConnection
 	CLogWarnUnknownRoute
 	CLogWarnIncorrectResponse
 
@@ -37,7 +36,6 @@ const (
 	CLogErroDatabaseGet
 	CLogErroDatabaseSet
 	CLogErroEncryptPayload
-	CLogErroInvalidNetworkMask
 )
 
 type ILogBuilder interface {

@@ -88,7 +88,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			// secret key can be = nil
 			secretKey := pCfg.GetSecretKeys()[aliasName]
 
-			if err := trySendMessage(client, myPubKey, secretKey, aliasName, msgBytes); err != nil {
+			if err := sendMessage(client, myPubKey, secretKey, aliasName, msgBytes); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
 				fmt.Fprint(pW, fmt.Errorf("error: push message to network: %w", err))
 				return
@@ -196,7 +196,7 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	return handler.Filename, fileBytes, nil
 }
 
-func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKey, pAliasName string, pMsgBytes []byte) error {
+func sendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKey, pAliasName string, pMsgBytes []byte) error {
 	msgLimit, err := getMessageLimit(pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
@@ -204,11 +204,6 @@ func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecre
 
 	if uint64(len(pMsgBytes)) > (msgLimit + symmetric.CAESBlockSize + hashing.CSHA256Size) {
 		return fmt.Errorf("error: len message > limit: %w", err)
-	}
-
-	// if the sender = receiver then there is no need to send a message to the network
-	if pAliasName == hlm_settings.CIamAliasName {
-		return nil
 	}
 
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
@@ -242,10 +237,6 @@ func trySendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecre
 }
 
 func getReceiverPubKey(client client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {
-	if aliasName == hlm_settings.CIamAliasName {
-		return myPubKey, nil
-	}
-
 	friends, err := client.GetFriends()
 	if err != nil {
 		return nil, fmt.Errorf("error: read friends: %w", err)

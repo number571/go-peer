@@ -62,6 +62,12 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			panic("undefined error code")
 		}
 
+		if len(pNode.GetNetworkNode().GetConnections()) == 0 {
+			pLogger.PushWarn(logBuilder.WithMessage("no_connection"))
+			api.Response(pW, http.StatusBadGateway, "failed: no connection")
+			return
+		}
+
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.BroadcastPayload(

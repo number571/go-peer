@@ -16,11 +16,6 @@ const (
 )
 
 const (
-	CIamAliasName    = "__iam__"
-	CDefaultLanguage = "ENG"
-)
-
-const (
 	CHeaderSenderId = "Hl-Messenger-Sender-Id"
 )
 
@@ -38,6 +33,7 @@ const (
 )
 
 const (
+	CDefaultLanguage         = "ENG"
 	CDefaultMessagesCapacity = (2 << 10) // count
 )
 

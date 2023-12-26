@@ -42,7 +42,7 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
 			secretKey := strings.TrimSpace(pR.FormValue("secret_key")) // may be nil
-			if aliasName == hlm_settings.CIamAliasName || aliasName == "" || pubStrKey == "" {
+			if aliasName == "" || pubStrKey == "" {
 				pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
 				fmt.Fprint(pW, "error: host or port is null")
 				return
@@ -69,7 +69,7 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 			}
 		case http.MethodDelete:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
-			if aliasName == hlm_settings.CIamAliasName || aliasName == "" {
+			if aliasName == "" {
 				pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
 				fmt.Fprint(pW, "error: alias_name is null")
 				return
@@ -98,7 +98,7 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 
 		result := new(sFriends)
 		result.sTemplate = getTemplate(cfg)
-		result.FFriends = make([]string, 0, len(friends)+1) // +1 CIamAliasName
+		result.FFriends = make([]string, 0, len(friends))
 
 		friendsList := make([]string, 0, len(friends))
 		for aliasName := range friends {
@@ -106,7 +106,6 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 		}
 		sort.Strings(friendsList)
 
-		result.FFriends = append(result.FFriends, hlm_settings.CIamAliasName) // in top
 		result.FFriends = append(result.FFriends, friendsList...)
 
 		t, err := template.ParseFS(
