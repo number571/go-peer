@@ -20,7 +20,7 @@ const (
 )
 
 const (
-	cLocalAddressHLT = "localhost:9582"
+	cLocalAddressHLT = "localhost:8582"
 	cProdAddressHLT  = "185.43.4.253:9582" // 1x3.1GHz, 2.0GB RAM, 300GB HDD
 )
 

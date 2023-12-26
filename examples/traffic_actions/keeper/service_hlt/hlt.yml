@@ -10,4 +10,4 @@ logging:
   - warn
   - erro
 address:
-  http: localhost:9582
+  http: localhost:8582
