@@ -8,6 +8,12 @@ The application `secpy_chat` allows you to communicate securely (using end-to-en
 
 > More information about Secpy-Chat in the [habr.com/ru/articles/782836/](https://habr.com/ru/articles/782836/ "Habr Secpy-Chat")
 
+## Dependencies 
+
+```bash
+pip3 install -r requirements.txt
+```
+
 ## Config structure
 
 ```
