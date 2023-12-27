@@ -10,7 +10,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/internal/interrupt"
+	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -121,7 +121,7 @@ func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Serv
 		os.RemoveAll(pathCfg)
 	}()
 	cancel()
-	interrupt.CloseAll([]types.ICloser{
+	closer.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
 		node.GetNetworkNode(),

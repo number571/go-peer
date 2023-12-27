@@ -12,7 +12,7 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/internal/interrupt"
+	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -103,7 +103,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 		os.RemoveAll(pathDB + "_push1")
 	}()
 	cancel()
-	interrupt.CloseAll([]types.ICloser{
+	closer.CloseAll([]types.ICloser{
 		srv,
 		node.GetWrapperDB(),
 		node.GetNetworkNode(),

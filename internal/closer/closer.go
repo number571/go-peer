@@ -1,4 +1,4 @@
-package interrupt
+package closer
 
 import (
 	"github.com/number571/go-peer/pkg/types"

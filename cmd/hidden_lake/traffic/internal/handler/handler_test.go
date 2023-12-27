@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/database"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	"github.com/number571/go-peer/internal/interrupt"
+	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -71,7 +71,7 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
 	cancel()
-	interrupt.CloseAll([]types.ICloser{srv, wDB})
+	closer.CloseAll([]types.ICloser{srv, wDB})
 }
 
 func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {

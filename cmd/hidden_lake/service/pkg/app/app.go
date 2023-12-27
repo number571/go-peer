@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -16,11 +18,11 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/internal/interrupt"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
+	internal_types "github.com/number571/go-peer/internal/types"
 )
 
 var (
@@ -72,82 +74,29 @@ func NewApp(
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	enableFunc := func() error {
-		if err := p.initDatabase(); err != nil {
-			return fmt.Errorf("init database: %w", err)
-		}
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", pkg_settings.CServiceName))
-		return nil
+	services := []internal_types.IService{
+		p.runListenerPPROF,
+		p.runListenerHTTP,
+		p.runListenerNode,
+		p.runConnKeeper,
+		p.runNode,
 	}
-	if err := p.fState.Enable(enableFunc); err != nil {
+
+	ctx, cancel := context.WithCancel(pCtx)
+	defer cancel()
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(services))
+
+	if err := p.fState.Enable(p.enable(ctx)); err != nil {
 		return fmt.Errorf("application running error: %w", err)
 	}
+	defer func() { _ = p.fState.Disable(p.disable(cancel, wg)) }()
 
-	defer func() {
-		disableFunc := func() error {
-			p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", pkg_settings.CServiceName))
-			return p.stop()
-		}
-		_ = p.fState.Disable(disableFunc)
-	}()
-
-	p.initServiceHTTP(pCtx)
-	p.initServicePPROF()
-
-	chErr := make(chan error)
-
-	go func() {
-		if p.fWrapper.GetConfig().GetAddress().GetPPROF() == "" {
-			return
-		}
-
-		err := p.fServicePPROF.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			chErr <- err
-			return
-		}
-	}()
-
-	go func() {
-		if p.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
-			return
-		}
-
-		err := p.fServiceHTTP.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			chErr <- err
-			return
-		}
-	}()
-
-	go func() {
-		// if node in client mode
-		tcpAddress := p.fWrapper.GetConfig().GetAddress().GetTCP()
-		if tcpAddress == "" {
-			return
-		}
-
-		// run node in server mode
-		err := p.fNode.GetNetworkNode().Listen(pCtx)
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			chErr <- err
-			return
-		}
-	}()
-
-	go func() {
-		if err := p.fConnKeeper.Run(pCtx); err != nil {
-			chErr <- err
-			return
-		}
-	}()
-
-	go func() {
-		if err := p.fNode.Run(pCtx); err != nil {
-			chErr <- err
-			return
-		}
-	}()
+	chErr := make(chan error, len(services))
+	for _, f := range services {
+		go f(ctx, wg, chErr)
+	}
 
 	select {
 	case <-pCtx.Done():
@@ -157,9 +106,34 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
+func (p *sApp) enable(pCtx context.Context) state.IStateFunc {
+	return func() error {
+		if err := p.initDatabase(); err != nil {
+			return fmt.Errorf("init database: %w", err)
+		}
+
+		p.initServiceHTTP(pCtx)
+		p.initServicePPROF()
+
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hls_settings.CServiceName))
+		return nil
+	}
+}
+
+func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateFunc {
+	return func() error {
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hls_settings.CServiceName))
+
+		pCancel()
+		pWg.Wait() // wait canceled context
+
+		return p.stop()
+	}
+}
+
 func (p *sApp) stop() error {
 	err := utils.MergeErrors(
-		interrupt.CloseAll([]types.ICloser{
+		closer.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
 			p.fNode.GetWrapperDB(),
@@ -170,4 +144,79 @@ func (p *sApp) stop() error {
 		return fmt.Errorf("close/stop all: %w", err)
 	}
 	return nil
+}
+
+func (p *sApp) runListenerPPROF(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
+	defer wg.Done()
+
+	if p.fWrapper.GetConfig().GetAddress().GetPPROF() == "" {
+		return
+	}
+
+	go func() {
+		err := p.fServicePPROF.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			pChErr <- err
+			return
+		}
+	}()
+
+	<-pCtx.Done()
+}
+
+func (p *sApp) runListenerHTTP(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
+	defer wg.Done()
+
+	if p.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
+		return
+	}
+
+	go func() {
+		err := p.fServiceHTTP.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			pChErr <- err
+			return
+		}
+	}()
+
+	<-pCtx.Done()
+}
+
+func (p *sApp) runListenerNode(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
+	defer wg.Done()
+
+	// if node in client mode
+	tcpAddress := p.fWrapper.GetConfig().GetAddress().GetTCP()
+	if tcpAddress == "" {
+		return
+	}
+
+	go func() {
+		// run node in server mode
+		err := p.fNode.GetNetworkNode().Listen(pCtx)
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			pChErr <- err
+			return
+		}
+	}()
+
+	<-pCtx.Done()
+}
+
+func (p *sApp) runConnKeeper(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
+	defer wg.Done()
+
+	if err := p.fConnKeeper.Run(pCtx); err != nil {
+		pChErr <- err
+		return
+	}
+}
+
+func (p *sApp) runNode(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
+	defer wg.Done()
+
+	if err := p.fNode.Run(pCtx); err != nil {
+		pChErr <- err
+		return
+	}
 }

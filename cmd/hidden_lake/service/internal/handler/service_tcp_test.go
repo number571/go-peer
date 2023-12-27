@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/internal/interrupt"
+	"github.com/number571/go-peer/internal/closer"
 	testutils "github.com/number571/go-peer/test/_data"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -49,7 +49,7 @@ func TestHLS(t *testing.T) {
 	}
 	defer func() {
 		nodeCancel()
-		interrupt.CloseAll([]types.ICloser{
+		closer.CloseAll([]types.ICloser{
 			nodeService.GetWrapperDB(),
 			nodeService.GetNetworkNode(),
 		})
@@ -63,7 +63,7 @@ func TestHLS(t *testing.T) {
 	}
 	defer func() {
 		clientCancel()
-		interrupt.CloseAll([]types.ICloser{
+		closer.CloseAll([]types.ICloser{
 			nodeClient.GetWrapperDB(),
 			nodeClient.GetNetworkNode(),
 		})

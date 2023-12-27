@@ -16,11 +16,14 @@
 - Update `pkg/network/anonymity`: delete check 'len(connections) == 0' in BroadcastPayload and FetchPayload
 - Update `cmd/hidden_lake/service`: append check 'len(connections) == 0' before BroadcastPayload or FetchPayload
 - Update `pkg/storage/database`: keys in database now encrypted
+- Update `internal/msgconv`: deleted
+- Update `internal/interrupt`: rename 'interrupt' package to 'closer'
 
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/messenger`: fix JS view of load huge chat messages
 - Update `pkg/network`: fix node.Listen(ctx) with 'return err' after Accept()
+- Update `cmd/hidden_lake`: fix App close child contexts
 
 <!-- ... -->
 

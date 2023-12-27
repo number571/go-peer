@@ -9,7 +9,6 @@
 7. Append example of use functions (godoc)
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
-10. Correct context child cancel
 
 ### Tests
 
@@ -19,8 +18,8 @@
 
 ### Applications
 
-1. HLF: Hidden Lake Forum
-2. HLF: Hidden Lake Filer
+1. HLFo: Hidden Lake Forum
+2. HLFi: Hidden Lake Filer
 3. HLN: Hidden Lake Network
 
 ### Articles -> Book
