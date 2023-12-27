@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/internal/config"
@@ -141,7 +142,8 @@ func (p *sApp) Run(pCtx context.Context) error {
 			return
 		}
 
-		if err := p.fNode.Listen(pCtx); err != nil {
+		err := p.fNode.Listen(pCtx)
+		if err != nil && !errors.Is(err, net.ErrClosed) {
 			chErr <- err
 			return
 		}

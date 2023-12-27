@@ -111,7 +111,7 @@ func (p *sNode) Listen(pCtx context.Context) error {
 		default:
 			tconn, err := p.getListener().Accept()
 			if err != nil {
-				break
+				return err
 			}
 
 			if p.hasMaxConnSize() {

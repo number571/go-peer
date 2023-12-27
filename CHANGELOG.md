@@ -20,6 +20,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/messenger`: fix JS view of load huge chat messages
+- Update `pkg/network`: fix node.Listen(ctx) with 'return err' after Accept()
 
 <!-- ... -->
 

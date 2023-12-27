@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"sync"
 	"testing"
@@ -580,12 +581,12 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 
 	ctx := context.Background()
 	go func() {
-		if err := nodes[2].GetNetworkNode().Listen(ctx); err != nil {
+		if err := nodes[2].GetNetworkNode().Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 		}
 	}()
 	go func() {
-		if err := nodes[4].GetNetworkNode().Listen(ctx); err != nil {
+		if err := nodes[4].GetNetworkNode().Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 		}
 	}()

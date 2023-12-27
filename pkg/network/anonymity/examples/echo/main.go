@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -70,9 +72,12 @@ func main() {
 	defer cancel1()
 
 	go func() { _ = service.Run(ctx1) }()
-	if err := service.GetNetworkNode().Listen(ctx1); err != nil {
-		panic(err)
-	}
+	go func() {
+		err := service.GetNetworkNode().Listen(ctx1)
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			panic(err)
+		}
+	}()
 	time.Sleep(time.Second) // wait
 
 	ctx2, cancel2 := context.WithCancel(context.Background())

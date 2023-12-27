@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network"
@@ -31,9 +33,12 @@ func main() {
 	service.HandleFunc(serviceHeader, handler())
 
 	ctx := context.Background()
-	if err := service.Listen(ctx); err != nil {
-		panic(err)
-	}
+	go func() {
+		err := service.Listen(ctx)
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			panic(err)
+		}
+	}()
 	time.Sleep(time.Second) // wait
 
 	conn, err := conn.NewConn(connSettings(), serviceAddress)

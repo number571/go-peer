@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net"
 	"strconv"
 	"time"
 
@@ -36,9 +38,12 @@ func main() {
 	service2.HandleFunc(serviceHeader, handler("#2"))
 
 	ctx := context.Background()
-	if err := service1.Listen(ctx); err != nil {
-		panic(err)
-	}
+	go func() {
+		err := service1.Listen(ctx)
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			panic(err)
+		}
+	}()
 
 	time.Sleep(time.Second) // wait
 

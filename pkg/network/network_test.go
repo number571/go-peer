@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"sync"
 	"testing"
 	"time"
@@ -232,7 +233,7 @@ func TestNodeConnection(t *testing.T) {
 
 	ctx := context.Background()
 	go func() {
-		if err := node2.Listen(ctx); err != nil {
+		if err := node2.Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 			return
 		}
@@ -240,7 +241,7 @@ func TestNodeConnection(t *testing.T) {
 	defer node2.Close()
 
 	go func() {
-		if err := node3.Listen(ctx); err != nil {
+		if err := node3.Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 			return
 		}
@@ -248,10 +249,12 @@ func TestNodeConnection(t *testing.T) {
 	defer node3.Close()
 
 	time.Sleep(200 * time.Millisecond)
-	if err := node2.Listen(ctx); err == nil {
-		t.Error("success second run node")
-		return
-	}
+	go func() {
+		if err := node2.Listen(ctx); err == nil {
+			t.Error("success second run node")
+			return
+		}
+	}()
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {
