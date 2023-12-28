@@ -20,6 +20,7 @@
 - Update `internal/interrupt`: rename 'interrupt' package to 'closer'
 - Update `go-peer`: append CVersion constant
 - Update `pkg`: rename IWrapperDB -> IDBWrapper
+- Update `pkg/network/anonymity`: delete multi addresses in the database hashes
 
 ### BUG FIXES
 

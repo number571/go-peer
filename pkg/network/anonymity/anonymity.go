@@ -1,7 +1,6 @@
 package anonymity
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -367,55 +366,44 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 		WithSize(size)
 
 	// try push hash into database
-	hashIsExist, hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, hash)
+	hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, hash)
 	if err != nil || !hashIsSaved {
 		// internal logger
 		return false, err
 	}
 
-	if !hashIsExist {
-		// broadcast message to network
-		if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
-			p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
-			// need pass error (some of connections may be closed)
-		}
+	// broadcast message to network
+	if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
+		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
+		// need pass error (some of connections may be closed)
 	}
 
 	return true, nil
 }
 
-func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) (bool, bool, error) {
+func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) (bool, error) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	var (
-		database  = p.fDBWrapper.Get()
-		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
-	)
-
+	database := p.fDBWrapper.Get()
 	if database == nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-		return false, false, errors.New("database is nil")
+		return false, errors.New("database is nil")
 	}
 
-	// get all addressed by current hash
-	allAddresses, err := database.Get(pHash)
-
-	// check already received data by hash and address
-	hashIsExist := (err == nil)
-	if hashIsExist && bytes.Contains(allAddresses, myAddress) {
+	// check already received data by hash
+	if _, err := database.Get(pHash); err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
-		return true, false, nil
+		return false, nil
 	}
 
 	// set hash to database with new address
-	updateAddresses := bytes.Join([][]byte{allAddresses, myAddress}, []byte{})
-	if err := database.Set(pHash, updateAddresses); err != nil {
+	if err := database.Set(pHash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-		return false, false, fmt.Errorf("database set: %w", err)
+		return false, fmt.Errorf("database set: %w", err)
 	}
 
-	return hashIsExist, true, nil
+	return true, nil
 }
 
 func (p *sNode) networkBroadcast(pCtx context.Context, pMsg net_message.IMessage) error {

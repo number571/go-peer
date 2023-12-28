@@ -1,7 +1,7 @@
 def get_sizes(b):
     return f"\n\t{int(b)}B,\n\t{b/1024}KiB,\n\t{b/1024/1024}MiB,\n\t{b/1024/1024/1024}GiB"
 
-STORE_SIZE = 64 # key=[sha256(message)=32B]:value=[sha256(pub_key)=32B]
+STORE_SIZE = 32 # key=[sha256(message)=32B]:value=[]
 NODE_COUNT = 10 # N
 PERIOD     = 5  # seconds
 
