@@ -9,6 +9,7 @@
 7. Append example of use functions (godoc)
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
+10. HLS: fix requestID when request is sent
 
 ### Tests
 

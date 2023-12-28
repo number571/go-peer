@@ -11,7 +11,7 @@ The application `secpy_chat` allows you to communicate securely (using end-to-en
 ## Dependencies 
 
 ```bash
-pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 ## Config structure
