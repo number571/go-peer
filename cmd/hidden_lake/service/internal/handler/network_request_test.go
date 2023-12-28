@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -111,7 +111,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 }
 
 func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
-	node, ctx, cancel := testRunNewNode(dbPath, testutils.TgAddrs[11])
+	node, ctx, cancel, qpWrapper := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
@@ -130,13 +130,14 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 	}
 
 	node.HandleFunc(
-		pkg_settings.CServiceMask,
+		hls_settings.CServiceMask,
 		HandleServiceTCP(
 			cfg,
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },
 			),
+			qpWrapper,
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())

@@ -31,8 +31,8 @@ const (
 )
 
 const (
-	CHandleRequestQueueSize = (1 << 10) // 1024 values
-	CHandleRequestIDSize    = 32        // string chars
+	CRequestQueueCapacity = (1 << 10) // 1024 request_ids ~= 16KiB
+	CRequestIDSize        = 16        // string chars (bytes)
 )
 
 const (
@@ -44,7 +44,7 @@ const (
 	CDefaultMessageSize   = (8 << 10) // 8KiB
 	CDefaultWorkSize      = 20        // bits
 	CDefaultKeySize       = 4096      // bits
-	CDefaultQueuePeriod   = 5000      // 5seconds
+	CDefaultQueuePeriod   = 5000      // 5 seconds
 	CDefaultLimitVoidSize = (4 << 10) // 4KiB
 )
 
@@ -59,13 +59,13 @@ const (
 )
 
 const (
-	CQueueCapacity     = (1 << 6) // messages in queue
-	CQueuePoolCapacity = (1 << 5) // generated fake messages
+	CQueueCapacity     = (1 << 8) // 256 messages ~= 2MiB
+	CQueuePoolCapacity = (1 << 5) //  32 messages ~= 256KiB
 )
 
 const (
-	CNetworkQueueSize = (1 << 10) // 1024 hashes
-	CNetworkMaxConns  = (1 << 8)  // 256 conns
+	CNetworkQueueCapacity = (2 << 10) // 2048 hashes ~= 64KiB
+	CNetworkMaxConns      = (1 << 8)  // 256 conns
 )
 
 const (

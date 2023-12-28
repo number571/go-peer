@@ -13,11 +13,12 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -27,9 +28,13 @@ var (
 	mutexRID = sync.Mutex{}
 )
 
-func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
+func HandleServiceTCP(
+	pCfg config.IConfig,
+	pLogger logger.ILogger,
+	pQPWrapper queue_pusher.IQPWrapper,
+) anonymity.IHandlerF {
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
-		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
+		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
@@ -50,8 +55,8 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, errors.New("request id is invalid")
 		}
 
-		// try set request id into database
-		if ok, err := setRequestID(pNode, requestID); err != nil {
+		// try set request id into queue
+		if ok, err := setRequestID(pQPWrapper, requestID); err != nil {
 			if ok {
 				pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
 				return nil, nil
@@ -87,7 +92,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 					_ = pNode.BroadcastPayload(
 						pCtx,
 						pubKey,
-						adapters.NewPayload(pkg_settings.CServiceMask, reqBytes),
+						adapters.NewPayload(hls_settings.CServiceMask, reqBytes),
 					)
 				}(pubKey)
 			}
@@ -117,7 +122,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		for key, val := range loadReq.GetHead() {
 			pushReq.Header.Set(key, val)
 		}
-		pushReq.Header.Set(pkg_settings.CHeaderPublicKey, sender.ToString())
+		pushReq.Header.Set(hls_settings.CHeaderPublicKey, sender.ToString())
 
 		// send request to service
 		// and receive response from service
@@ -129,9 +134,9 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		defer resp.Body.Close()
 
 		// get response mode: on/off
-		respMode := resp.Header.Get(pkg_settings.CHeaderResponseMode)
+		respMode := resp.Header.Get(hls_settings.CHeaderResponseMode)
 		switch respMode {
-		case "", pkg_settings.CHeaderResponseModeON:
+		case "", hls_settings.CHeaderResponseModeON:
 			// send response to the client
 			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoResponseFromService))
 			return response.NewResponse(resp.StatusCode).
@@ -139,7 +144,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 					WithBody(getResponseBody(resp)).
 					ToBytes(),
 				nil
-		case pkg_settings.CHeaderResponseModeOFF:
+		case hls_settings.CHeaderResponseModeOFF:
 			// response is not required by the client side
 			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
 			return nil, nil
@@ -152,36 +157,29 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 }
 
 func getRequestID(pRequest request.IRequest) (string, bool) {
-	requestID, ok := pRequest.GetHead()[pkg_settings.CHeaderRequestId]
-	if !ok || len(requestID) != pkg_settings.CHandleRequestIDSize {
+	requestID, ok := pRequest.GetHead()[hls_settings.CHeaderRequestId]
+	if !ok || len(requestID) != hls_settings.CRequestIDSize {
 		return "", false
 	}
 	return requestID, true
 }
 
-func setRequestID(pNode anonymity.INode, pRequestID string) (bool, error) {
+func setRequestID(
+	pQPWrapper queue_pusher.IQPWrapper,
+	pRequestID string,
+) (bool, error) {
 	mutexRID.Lock()
 	defer mutexRID.Unlock()
 
-	// get database from wrapper
-	database := pNode.GetWrapperDB().Get()
-	if database == nil {
-		return false, errors.New("database is nil")
+	// get queue from wrapper
+	queuePusher := pQPWrapper.Get()
+	if queuePusher == nil {
+		return false, errors.New("queue is nil")
 	}
 
-	// reqIDKey = ['r'+32byte]
-	reqIDKey := make([]byte, 1+len(pRequestID))
-	reqIDKey[0] = byte('r')
-	copy(reqIDKey[1:], []byte(pRequestID))
-
-	// request id already exist in the database
-	if _, err := database.Get([]byte(reqIDKey)); err == nil {
+	// request id already exist in queue
+	if ok := queuePusher.Push([]byte(pRequestID), []byte{}); !ok {
 		return true, errors.New("already exist")
-	}
-
-	// try store ID of request to the queue
-	if err := database.Set([]byte(reqIDKey), []byte{}); err != nil {
-		return false, err
 	}
 
 	return true, nil

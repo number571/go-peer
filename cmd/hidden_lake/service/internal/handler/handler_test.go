@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/client"
@@ -109,8 +110,8 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 
 func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, context.Context, context.CancelFunc, *http.Server) {
 	wcfg := testNewWrapper(cfgPath)
-	node, ctx, cancel := testRunNewNode(dbPath, "")
-	srvc := testRunService(ctx, wcfg, node, srvAddr)
+	node, ctx, cancel, qpWrapper := testRunNewNode(dbPath, "")
+	srvc := testRunService(ctx, wcfg, node, srvAddr, qpWrapper)
 	time.Sleep(200 * time.Millisecond)
 	return wcfg, node, ctx, cancel, srvc
 }
@@ -128,7 +129,7 @@ func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Serv
 	})
 }
 
-func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.INode, addr string) *http.Server {
+func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.INode, addr string, pQPWrapper queue_pusher.IQPWrapper) *http.Server {
 	mux := http.NewServeMux()
 
 	logger := logger.NewLogger(
@@ -141,7 +142,7 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(ctx, wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, wcfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, wcfg, logger, node, pQPWrapper))
 	mux.HandleFunc(pkg_settings.CHandleNetworkPubKeyPath, HandleNetworkPubKeyAPI(wcfg, logger, node))
 
 	srv := &http.Server{
@@ -166,11 +167,18 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 	return config.NewWrapper(cfg)
 }
 
-func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, context.CancelFunc) {
+func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, context.CancelFunc, queue_pusher.IQPWrapper) {
+	qpWrapper := queue_pusher.NewQPWrapper().Set(
+		queue_set.NewQueueSet(
+			queue_set.NewSettings(&queue_set.SSettings{
+				FCapacity: testutils.TCCapacity,
+			}),
+		),
+	)
 	node := testNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()
-	return node, ctx, cancel
+	return node, ctx, cancel, qpWrapper
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {

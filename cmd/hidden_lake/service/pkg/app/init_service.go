@@ -17,7 +17,7 @@ func (p *sApp) initServiceHTTP(pCtx context.Context) {
 	mux.HandleFunc(hls_settings.CHandleConfigConnectsPath, handler.HandleConfigConnectsAPI(pCtx, p.fWrapper, p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleConfigFriendsPath, handler.HandleConfigFriendsAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
 	mux.HandleFunc(hls_settings.CHandleNetworkOnlinePath, handler.HandleNetworkOnlineAPI(p.fHTTPLogger, p.fNode))
-	mux.HandleFunc(hls_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(pCtx, p.fWrapper, p.fHTTPLogger, p.fNode))
+	mux.HandleFunc(hls_settings.CHandleNetworkRequestPath, handler.HandleNetworkRequestAPI(pCtx, p.fWrapper, p.fHTTPLogger, p.fNode, p.fQPWrapper))
 	mux.HandleFunc(hls_settings.CHandleNetworkPubKeyPath, handler.HandleNetworkPubKeyAPI(p.fWrapper, p.fHTTPLogger, p.fNode))
 
 	p.fServiceHTTP = &http.Server{

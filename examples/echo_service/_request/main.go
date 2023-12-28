@@ -53,7 +53,7 @@ func sendMessage(pReceiver string, pMessage []byte) {
 		fmt.Sprintf(
 			cJsonDataTemplate,
 			hls_settings.CHeaderRequestId,
-			random.NewStdPRNG().GetString(hls_settings.CHandleRequestIDSize),
+			random.NewStdPRNG().GetString(hls_settings.CRequestIDSize),
 			base64.StdEncoding.EncodeToString(pMessage),
 		),
 	)

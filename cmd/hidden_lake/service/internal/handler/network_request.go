@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -25,7 +26,13 @@ const (
 	cErrorLoadRequestID
 )
 
-func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(
+	pCtx context.Context,
+	pWrapper config.IWrapper,
+	pLogger logger.ILogger,
+	pNode anonymity.INode,
+	pQPWrapper queue_pusher.IQPWrapper,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -73,7 +80,7 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			return
 		}
 
-		if ok, err := setRequestID(pNode, requestID); err != nil {
+		if ok, err := setRequestID(pQPWrapper, requestID); err != nil {
 			if ok {
 				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
 				api.Response(pW, http.StatusBadGateway, "failed: request id exist")

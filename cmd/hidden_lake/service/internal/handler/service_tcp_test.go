@@ -90,7 +90,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 		return nil, nil, err
 	}
 
-	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
+	node, ctx, cancel, qpWrapper := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
 	if node == nil {
 		return nil, nil, fmt.Errorf("node is not running")
 	}
@@ -103,6 +103,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },
 			),
+			qpWrapper,
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
@@ -119,7 +120,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 	time.Sleep(time.Second)
 
-	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
+	node, ctx, cancel, _ := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
 	if node == nil {
 		return nil, cancel, fmt.Errorf("node is not running")
 	}

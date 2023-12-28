@@ -44,7 +44,7 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 		}),
 		queue_set.NewQueueSet(
 			queue_set.NewSettings(&queue_set.SSettings{
-				FCapacity: hls_settings.CNetworkQueueSize,
+				FCapacity: hls_settings.CNetworkQueueCapacity,
 			}),
 		),
 	).HandleFunc(

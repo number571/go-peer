@@ -79,7 +79,7 @@ func sendMessage(pReceiver string, pMessage []byte) {
 			hlm_settings.CHeaderSenderId,
 			encoding.HexEncode(senderID),
 			hls_settings.CHeaderRequestId,
-			random.NewStdPRNG().GetString(hls_settings.CHandleRequestIDSize),
+			random.NewStdPRNG().GetString(hls_settings.CRequestIDSize),
 			base64.StdEncoding.EncodeToString(encMessage),
 		),
 	)

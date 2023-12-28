@@ -109,7 +109,7 @@ func testAllOnlineFree(node anonymity.INode, cancel context.CancelFunc, pathCfg,
 }
 
 func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
-	node, ctx, cancel := testRunNewNode(dbPath, testutils.TgAddrs[13])
+	node, ctx, cancel, qpWrapper := testRunNewNode(dbPath, testutils.TgAddrs[13])
 
 	cfg, err := config.BuildConfig(cfgPath, &config.SConfig{
 		FSettings: &config.SConfigSettings{
@@ -131,6 +131,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },
 			),
+			qpWrapper,
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())

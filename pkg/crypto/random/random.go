@@ -41,6 +41,20 @@ func (p *sStdPRNG) GetBytes(n uint64) []byte {
 }
 
 // Generates a cryptographically strong pseudo-random string.
+/*
+	// 1:2
+	raw_byte = 2^8 (1 byte)
+	hex_byte = 2^4 + 2^4 (2 bytes)
+
+	// 3:4
+	raw_byte = 2^8 + 2^8 + 2^8 (3 bytes)
+	cur_byte = 2^6 + 2^6 + 2^6 + 2^6 (4 bytes)
+
+	// result
+	security[p=128] = random(16) raw_bytes
+	security[p=128] = random(32) hex_byte
+	security[p=128] = random(21.(3)) cur_byte
+*/
 func (p *sStdPRNG) GetString(n uint64) string {
 	result := strings.Builder{}
 	result.Grow(int(n))

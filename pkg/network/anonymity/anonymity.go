@@ -398,13 +398,8 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 		return false, false, errors.New("database is nil")
 	}
 
-	// hashKey = ['h'+32byte]
-	hashKey := make([]byte, 1+len(pHash))
-	hashKey[0] = byte('h')
-	copy(hashKey[1:], []byte(pHash))
-
 	// get all addressed by current hash
-	allAddresses, err := database.Get(hashKey)
+	allAddresses, err := database.Get(pHash)
 
 	// check already received data by hash and address
 	hashIsExist := (err == nil)
@@ -415,7 +410,7 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 
 	// set hash to database with new address
 	updateAddresses := bytes.Join([][]byte{allAddresses, myAddress}, []byte{})
-	if err := database.Set(hashKey, updateAddresses); err != nil {
+	if err := database.Set(pHash, updateAddresses); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 		return false, false, fmt.Errorf("database set: %w", err)
 	}

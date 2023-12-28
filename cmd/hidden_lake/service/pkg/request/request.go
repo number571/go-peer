@@ -27,7 +27,7 @@ func NewRequest(pMethod, pHost, pPath string) IRequest {
 		FHost:   pHost,
 		FPath:   pPath,
 		FHead: map[string]string{
-			settings.CHeaderRequestId: prng.GetString(settings.CHandleRequestIDSize),
+			settings.CHeaderRequestId: prng.GetString(settings.CRequestIDSize),
 		},
 	}
 }
