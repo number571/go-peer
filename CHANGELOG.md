@@ -18,6 +18,7 @@
 - Update `pkg/storage/database`: keys in database now encrypted
 - Update `internal/msgconv`: deleted
 - Update `internal/interrupt`: rename 'interrupt' package to 'closer'
+- Update `go-peer`: append CVersion constant
 
 ### BUG FIXES
 

@@ -5,8 +5,22 @@ import (
 	"strings"
 )
 
+func GetBoolFlagValue(pKey string) bool {
+	return getBoolFlagValueBySlice(os.Args[1:], pKey)
+}
+
 func GetFlagValue(pKey, pDefault string) string {
 	return getFlagValueBySlice(os.Args[1:], pKey, pDefault)
+}
+
+func getBoolFlagValueBySlice(args []string, pKey string) bool {
+	for _, arg := range args {
+		trimArg := strings.TrimLeft(arg, "-")
+		if trimArg == pKey {
+			return true
+		}
+	}
+	return false
 }
 
 func getFlagValueBySlice(args []string, pKey, pDefault string) string {

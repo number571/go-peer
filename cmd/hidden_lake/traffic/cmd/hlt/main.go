@@ -3,15 +3,23 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	gopeer "github.com/number571/go-peer"
 	"github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
+	"github.com/number571/go-peer/internal/flag"
 )
 
 func main() {
+	if flag.GetBoolFlagValue("version") {
+		fmt.Println(gopeer.CVersion)
+		return
+	}
+
 	app, err := app.InitApp(".")
 	if err != nil {
 		panic(err)
