@@ -31,8 +31,8 @@ const (
 )
 
 const (
-	CRequestQueueCapacity = (1 << 10) // 1024 request_ids ~= 16KiB
-	CRequestIDSize        = 16        // string chars (bytes)
+	CRequestQueueCapacity = (1 << 10) // 1024 request_ids ~= 44KiB
+	CRequestIDSize        = 44        // string chars (ASCII bytes)
 )
 
 const (

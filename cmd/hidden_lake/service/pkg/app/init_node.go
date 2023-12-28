@@ -5,7 +5,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -20,12 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 )
 
-func initNode(
-	pCfg config.IConfig,
-	pPrivKey asymmetric.IPrivKey,
-	pLogger logger.ILogger,
-	pQPWrapper queue_pusher.IQPWrapper,
-) anonymity.INode {
+func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
 	cfgSettings := pCfg.GetSettings()
 
 	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
@@ -93,6 +87,6 @@ func initNode(
 		}(),
 	).HandleFunc(
 		pkg_settings.CServiceMask,
-		handler.HandleServiceTCP(pCfg, pLogger, pQPWrapper),
+		handler.HandleServiceTCP(pCfg, pLogger),
 	)
 }

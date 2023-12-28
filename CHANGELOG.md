@@ -27,7 +27,7 @@
 - Update `pkg/network`: fix node.Listen(ctx) with 'return err' after Accept()
 - Update `cmd/hidden_lake`: fix App close child contexts
 - Update `pkg/network/anonymity`: fix database set hash (append mutex)
-- Update `cmd/hidden_lake/service`: fix queue set request id (append also into Request handler)
+- Update `cmd/hidden_lake/service`: fix database set request id (append also into Request handler)
 
 <!-- ... -->
 

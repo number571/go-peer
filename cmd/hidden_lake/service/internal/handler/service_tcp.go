@@ -18,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -28,11 +27,7 @@ var (
 	mutexRID = sync.Mutex{}
 )
 
-func HandleServiceTCP(
-	pCfg config.IConfig,
-	pLogger logger.ILogger,
-	pQPWrapper queue_pusher.IQPWrapper,
-) anonymity.IHandlerF {
+func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
@@ -55,8 +50,8 @@ func HandleServiceTCP(
 			return nil, errors.New("request id is invalid")
 		}
 
-		// try set request id into queue
-		if ok, err := setRequestID(pQPWrapper, requestID); err != nil {
+		// try set request id into database
+		if ok, err := setRequestID(pNode, requestID); err != nil {
 			if ok {
 				pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
 				return nil, nil
@@ -164,22 +159,24 @@ func getRequestID(pRequest request.IRequest) (string, bool) {
 	return requestID, true
 }
 
-func setRequestID(
-	pQPWrapper queue_pusher.IQPWrapper,
-	pRequestID string,
-) (bool, error) {
+func setRequestID(pNode anonymity.INode, pRequestID string) (bool, error) {
 	mutexRID.Lock()
 	defer mutexRID.Unlock()
 
-	// get queue from wrapper
-	queuePusher := pQPWrapper.Get()
-	if queuePusher == nil {
-		return false, errors.New("queue is nil")
+	// get database from wrapper
+	database := pNode.GetDBWrapper().Get()
+	if database == nil {
+		return false, errors.New("database is nil")
 	}
 
-	// request id already exist in queue
-	if ok := queuePusher.Push([]byte(pRequestID), []byte{}); !ok {
+	// request id already exist in the database
+	if _, err := database.Get([]byte(pRequestID)); err == nil {
 		return true, errors.New("already exist")
+	}
+
+	// try store ID of request to the queue
+	if err := database.Set([]byte(pRequestID), []byte{}); err != nil {
+		return false, err
 	}
 
 	return true, nil

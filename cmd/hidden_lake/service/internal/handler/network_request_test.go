@@ -111,7 +111,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 }
 
 func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFunc) {
-	node, ctx, cancel, qpWrapper := testRunNewNode(dbPath, testutils.TgAddrs[11])
+	node, ctx, cancel := testRunNewNode(dbPath, testutils.TgAddrs[11])
 	rawCFG := &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
@@ -137,7 +137,6 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },
 			),
-			qpWrapper,
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())

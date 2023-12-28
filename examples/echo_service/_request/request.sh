@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16)
+REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 44)
 JSON_DATA='{
         "method":"POST",
         "host":"hidden-echo-service",

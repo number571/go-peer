@@ -1,11 +1,11 @@
 def get_sizes(b):
     return f"\n\t{int(b)}B,\n\t{b/1024}KiB,\n\t{b/1024/1024}MiB,\n\t{b/1024/1024/1024}GiB"
 
-HASH_SIZE  = 64 # hash(sha256) of message + hash(sha256) of public key
+STORE_SIZE = 64 # key=[sha256(message)=32B]:value=[sha256(pub_key)=32B]
 NODE_COUNT = 10 # N
-PERIOD     = 5 # seconds
+PERIOD     = 5  # seconds
 
-size_in_second = (HASH_SIZE * NODE_COUNT) / PERIOD
+size_in_second = (STORE_SIZE * NODE_COUNT) / PERIOD
 size_in_minute = size_in_second * 60
 size_in_hour   = size_in_minute * 60
 size_in_day    = size_in_hour * 24

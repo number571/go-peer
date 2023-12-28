@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/queue_pusher"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -36,7 +35,6 @@ type sApp struct {
 	fPathTo     string
 	fWrapper    config.IWrapper
 	fNode       anonymity.INode
-	fQPWrapper  queue_pusher.IQPWrapper
 	fConnKeeper conn_keeper.IConnKeeper
 	fPrivKey    asymmetric.IPrivKey
 
@@ -61,15 +59,13 @@ func NewApp(
 		stdfLogger = std_logger.NewStdLogger(logging, std_logger.GetLogFunc())
 	)
 
-	qpWrapper := queue_pusher.NewQPWrapper()
-	node := initNode(pCfg, pPrivKey, anonLogger, qpWrapper)
+	node := initNode(pCfg, pPrivKey, anonLogger)
 
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fPathTo:     pPathTo,
 		fWrapper:    config.NewWrapper(pCfg),
 		fNode:       node,
-		fQPWrapper:  qpWrapper,
 		fConnKeeper: initConnKeeper(pCfg, node),
 		fPrivKey:    pPrivKey,
 		fAnonLogger: anonLogger,
@@ -119,7 +115,6 @@ func (p *sApp) enable(pCtx context.Context) state.IStateFunc {
 
 		p.initServiceHTTP(pCtx)
 		p.initServicePPROF()
-		p.initQueuePusher()
 
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hls_settings.CServiceName))
 		return nil
