@@ -355,11 +355,9 @@ func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asym
 
 func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
 	var (
-		size      = len(pNetMsg.GetPayload().GetBody())
-		hash      = pNetMsg.GetHash()
-		proof     = pNetMsg.GetProof()
-		database  = p.fWrapperDB.Get()
-		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
+		size  = len(pNetMsg.GetPayload().GetBody())
+		hash  = pNetMsg.GetHash()
+		proof = pNetMsg.GetProof()
 	)
 
 	// enrich logger
@@ -368,33 +366,13 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 		WithProof(proof).
 		WithSize(size)
 
-	if database == nil {
-		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-		return false, errors.New("database is nil")
+	// try push hash into database
+	hashIsExist, hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, hash)
+	if err != nil || !hashIsSaved {
+		// internal logger
+		return false, err
 	}
 
-	// check already received data by hash
-	allAddresses, err := database.Get(hash)
-	hashIsExist := (err == nil)
-	if hashIsExist && bytes.Contains(allAddresses, myAddress) {
-		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
-		return false, nil
-	}
-
-	// set hash to database
-	updateAddresses := bytes.Join(
-		[][]byte{
-			allAddresses,
-			myAddress,
-		},
-		[]byte{},
-	)
-	if err := database.Set(hash, updateAddresses); err != nil {
-		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-		return false, fmt.Errorf("database set: %w", err)
-	}
-
-	// do not send data if than already received
 	if !hashIsExist {
 		// broadcast message to network
 		if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
@@ -404,6 +382,41 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 	}
 
 	return true, nil
+}
+
+func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) (bool, bool, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	var (
+		database  = p.fWrapperDB.Get()
+		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
+	)
+
+	if database == nil {
+		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
+		return false, false, errors.New("database is nil")
+	}
+
+	// get all addressed by current hash
+	hashKey := bytes.Join([][]byte{[]byte("h"), pHash}, []byte{})
+	allAddresses, err := database.Get(hashKey)
+
+	// check already received data by hash and address
+	hashIsExist := (err == nil)
+	if hashIsExist && bytes.Contains(allAddresses, myAddress) {
+		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
+		return true, false, nil
+	}
+
+	// set hash to database with new address
+	updateAddresses := bytes.Join([][]byte{allAddresses, myAddress}, []byte{})
+	if err := database.Set(hashKey, updateAddresses); err != nil {
+		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
+		return false, false, fmt.Errorf("database set: %w", err)
+	}
+
+	return hashIsExist, true, nil
 }
 
 func (p *sNode) networkBroadcast(pCtx context.Context, pMsg net_message.IMessage) error {

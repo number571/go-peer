@@ -32,7 +32,7 @@ const (
 
 const (
 	CHandleRequestQueueSize = (1 << 10) // 1024 values
-	CHandleRequestIDSize    = 16        // bytes
+	CHandleRequestIDSize    = 32        // string chars
 )
 
 const (

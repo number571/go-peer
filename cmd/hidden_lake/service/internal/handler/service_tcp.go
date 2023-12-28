@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,20 +17,17 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/queue_set"
 
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
-	queueSet := queue_set.NewQueueSet(
-		queue_set.NewSettings(&queue_set.SSettings{
-			FCapacity: pkg_settings.CHandleRequestQueueSize,
-		}),
-	)
+var (
+	mutexRID = sync.Mutex{}
+)
 
+func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(pkg_settings.CServiceName)
 
@@ -46,17 +44,20 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 
 		// get unique ID of request from the header
-		loadReqHead := loadReq.GetHead()
-		requestID, ok := loadReqHead[pkg_settings.CHeaderRequestId]
-		if !ok || len(requestID) != pkg_settings.CHandleRequestIDSize {
+		requestID, ok := getRequestID(loadReq)
+		if !ok {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedRequestID))
-			return nil, err
+			return nil, errors.New("request id is invalid")
 		}
 
-		// try store ID of request to the queue
-		if ok := queueSet.Push([]byte(requestID), []byte{}); !ok {
-			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
-			return nil, nil
+		// try set request id into database
+		if ok, err := setRequestID(pNode, requestID); err != nil {
+			if ok {
+				pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
+				return nil, nil
+			}
+			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroPushDatabaseType))
+			return nil, err
 		}
 
 		// get service's address by hostname
@@ -113,7 +114,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 
 		// append headers from request & set service headers
-		for key, val := range loadReqHead {
+		for key, val := range loadReq.GetHead() {
 			pushReq.Header.Set(key, val)
 		}
 		pushReq.Header.Set(pkg_settings.CHeaderPublicKey, sender.ToString())
@@ -148,6 +149,38 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
 		}
 	}
+}
+
+func getRequestID(pRequest request.IRequest) (string, bool) {
+	requestID, ok := pRequest.GetHead()[pkg_settings.CHeaderRequestId]
+	if !ok || len(requestID) != pkg_settings.CHandleRequestIDSize {
+		return "", false
+	}
+	return requestID, true
+}
+
+func setRequestID(pNode anonymity.INode, pRequestID string) (bool, error) {
+	mutexRID.Lock()
+	defer mutexRID.Unlock()
+
+	// get database from wrapper
+	database := pNode.GetWrapperDB().Get()
+	if database == nil {
+		return false, errors.New("database is nil")
+	}
+
+	// request id already exist in the database
+	reqIDKey := bytes.Join([][]byte{[]byte("r"), []byte(pRequestID)}, []byte{})
+	if _, err := database.Get([]byte(reqIDKey)); err == nil {
+		return true, errors.New("already exist")
+	}
+
+	// try store ID of request to the queue
+	if err := database.Set([]byte(reqIDKey), []byte{}); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

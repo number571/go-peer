@@ -24,6 +24,8 @@
 - Update `cmd/hidden_lake/messenger`: fix JS view of load huge chat messages
 - Update `pkg/network`: fix node.Listen(ctx) with 'return err' after Accept()
 - Update `cmd/hidden_lake`: fix App close child contexts
+- Update `pkg/network/anonymity`: fix database set hash
+- Update `cmd/hidden_lake/service`: fix database set request id
 
 <!-- ... -->
 

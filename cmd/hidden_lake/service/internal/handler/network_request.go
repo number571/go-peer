@@ -22,6 +22,7 @@ const (
 	cErrorGetFriends
 	cErrorDecodeData
 	cErrorLoadRequest
+	cErrorLoadRequestID
 )
 
 func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
@@ -42,7 +43,7 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			return
 		}
 
-		pubKey, data, errCode := unwrapRequest(pWrapper.GetConfig(), vRequest)
+		pubKey, requestID, data, errCode := unwrapRequest(pWrapper.GetConfig(), vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
@@ -58,6 +59,10 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			pLogger.PushWarn(logBuilder.WithMessage("load_request"))
 			api.Response(pW, http.StatusForbidden, "failed: decode request")
 			return
+		case cErrorLoadRequestID:
+			pLogger.PushWarn(logBuilder.WithMessage("load_request_id"))
+			api.Response(pW, http.StatusForbidden, "failed: decode request id")
+			return
 		default:
 			panic("undefined error code")
 		}
@@ -65,6 +70,17 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 		if len(pNode.GetNetworkNode().GetConnections()) == 0 {
 			pLogger.PushWarn(logBuilder.WithMessage("no_connection"))
 			api.Response(pW, http.StatusBadGateway, "failed: no connection")
+			return
+		}
+
+		if ok, err := setRequestID(pNode, requestID); err != nil {
+			if ok {
+				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
+				api.Response(pW, http.StatusBadGateway, "failed: request id exist")
+				return
+			}
+			pLogger.PushErro(logBuilder.WithMessage("set_request_id"))
+			api.Response(pW, http.StatusBadGateway, "failed: set request id")
 			return
 		}
 
@@ -113,17 +129,24 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 	}
 }
 
-func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, []byte, int) {
+func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, string, []byte, int) {
 	friends := pConfig.GetFriends()
 
 	pubKey, ok := friends[pRequest.FReceiver]
 	if !ok {
-		return nil, nil, cErrorGetFriends
+		return nil, "", nil, cErrorGetFriends
 	}
 
-	if _, err := request.LoadRequest(pRequest.FReqData); err != nil {
-		return nil, nil, cErrorLoadRequest
+	loadReq, err := request.LoadRequest(pRequest.FReqData)
+	if err != nil {
+		return nil, "", nil, cErrorLoadRequest
 	}
 
-	return pubKey, []byte(pRequest.FReqData), cErrorNone
+	// get unique ID of request from the header
+	requestID, ok := getRequestID(loadReq)
+	if !ok {
+		return nil, "", nil, cErrorLoadRequestID
+	}
+
+	return pubKey, requestID, []byte(pRequest.FReqData), cErrorNone
 }

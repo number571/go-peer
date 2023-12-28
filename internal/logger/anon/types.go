@@ -31,6 +31,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 	CLogWarnUndefinedService:        "UNDSR",
 	CLogWarnUndefinedRequestID:      "UNRID",
 	CLogErroLoadRequestType:         "LDRQT",
+	CLogErroPushDatabaseType:        "PSHDB",
 	CLogErroProxyRequestType:        "PXRQT",
 }
 
@@ -50,5 +51,6 @@ const (
 
 	// ERRO
 	CLogErroLoadRequestType
+	CLogErroPushDatabaseType
 	CLogErroProxyRequestType
 )
