@@ -169,8 +169,12 @@ func setRequestID(pNode anonymity.INode, pRequestID string) (bool, error) {
 		return false, errors.New("database is nil")
 	}
 
+	// reqIDKey = ['r'+32byte]
+	reqIDKey := make([]byte, 1+len(pRequestID))
+	reqIDKey[0] = byte('r')
+	copy(reqIDKey[1:], []byte(pRequestID))
+
 	// request id already exist in the database
-	reqIDKey := bytes.Join([][]byte{[]byte("r"), []byte(pRequestID)}, []byte{})
 	if _, err := database.Get([]byte(reqIDKey)); err == nil {
 		return true, errors.New("already exist")
 	}

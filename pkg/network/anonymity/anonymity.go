@@ -398,8 +398,12 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 		return false, false, errors.New("database is nil")
 	}
 
+	// hashKey = ['h'+32byte]
+	hashKey := make([]byte, 1+len(pHash))
+	hashKey[0] = byte('h')
+	copy(hashKey[1:], []byte(pHash))
+
 	// get all addressed by current hash
-	hashKey := bytes.Join([][]byte{[]byte("h"), pHash}, []byte{})
 	allAddresses, err := database.Get(hashKey)
 
 	// check already received data by hash and address
