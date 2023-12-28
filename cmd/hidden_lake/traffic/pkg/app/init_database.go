@@ -32,6 +32,6 @@ func (p *sApp) initDatabase() error {
 		return fmt.Errorf("init database: %w", err)
 	}
 
-	p.fWrapperDB.Set(db)
+	p.fDBWrapper.Set(db)
 	return nil
 }

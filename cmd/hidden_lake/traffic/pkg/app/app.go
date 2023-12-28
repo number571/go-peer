@@ -34,7 +34,7 @@ type sApp struct {
 
 	fPathTo     string
 	fConfig     config.IConfig
-	fWrapperDB  database.IWrapperDB
+	fDBWrapper  database.IDBWrapper
 	fNode       network.INode
 	fConnKeeper conn_keeper.IConnKeeper
 
@@ -65,13 +65,13 @@ func NewApp(
 		std_logger.GetLogFunc(),
 	)
 
-	wDB := database.NewWrapperDB()
-	node := initNode(pCfg, wDB, anonLogger)
+	dbWrapper := database.NewDBWrapper()
+	node := initNode(pCfg, dbWrapper, anonLogger)
 
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fConfig:     pCfg,
-		fWrapperDB:  wDB,
+		fDBWrapper:  dbWrapper,
 		fNode:       node,
 		fConnKeeper: initConnKeeper(pCfg, node),
 		fPathTo:     pPathTo,
@@ -142,7 +142,7 @@ func (p *sApp) stop() error {
 		closer.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
-			p.fWrapperDB,
+			p.fDBWrapper,
 			p.fConnKeeper.GetNetworkNode(),
 		}),
 	)

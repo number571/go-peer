@@ -124,7 +124,7 @@ func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Serv
 	cancel()
 	closer.CloseAll([]types.ICloser{
 		srv,
-		node.GetWrapperDB(),
+		node.GetDBWrapper(),
 		node.GetNetworkNode(),
 	})
 }
@@ -204,7 +204,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
 		),
-		anonymity.NewWrapperDB().Set(db),
+		anonymity.NewDBWrapper().Set(db),
 		testNewNetworkNode(addr),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{

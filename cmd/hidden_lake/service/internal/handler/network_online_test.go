@@ -103,7 +103,7 @@ func testAllOnlineFree(node anonymity.INode, cancel context.CancelFunc, pathCfg,
 	}()
 	cancel()
 	closer.CloseAll([]types.ICloser{
-		node.GetWrapperDB(),
+		node.GetDBWrapper(),
 		node.GetNetworkNode(),
 	})
 }

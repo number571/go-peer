@@ -14,7 +14,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.INode {
+func initNode(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logger.ILogger) network.INode {
 	cfgSettings := pCfg.GetSettings()
 
 	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
@@ -49,6 +49,6 @@ func initNode(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logge
 		),
 	).HandleFunc(
 		hls_settings.CNetworkMask,
-		handler.HandleServiceTCP(pCfg, pWrapperDB, pLogger),
+		handler.HandleServiceTCP(pCfg, pDBWrapper, pLogger),
 	)
 }

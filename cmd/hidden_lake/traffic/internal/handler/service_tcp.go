@@ -21,7 +21,7 @@ import (
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 )
 
-func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogger logger.ILogger) network.IHandlerF {
+func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logger.ILogger) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
 
 	return func(pCtx context.Context, pNode network.INode, pConn conn.IConn, pNetMsg net_message.IMessage) error {
@@ -41,7 +41,7 @@ func HandleServiceTCP(pCfg config.IConfig, pWrapperDB database.IWrapperDB, pLogg
 		}
 
 		// check database
-		hltDB := pWrapperDB.Get()
+		hltDB := pDBWrapper.Get()
 		if hltDB == nil {
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
 			return errors.New("database is nil")

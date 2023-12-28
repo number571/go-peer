@@ -23,9 +23,9 @@ type ISettings interface {
 	GetMessagesCapacity() uint64
 }
 
-type IWrapperDB interface {
+type IDBWrapper interface {
 	types.ICloser
 
 	Get() IDatabase
-	Set(IDatabase) IWrapperDB
+	Set(IDatabase) IDBWrapper
 }

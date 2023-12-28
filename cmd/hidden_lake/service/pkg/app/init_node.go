@@ -41,7 +41,7 @@ func initNode(
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
 		pLogger,
-		anonymity.NewWrapperDB(),
+		anonymity.NewDBWrapper(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      pCfg.GetAddress().GetTCP(),

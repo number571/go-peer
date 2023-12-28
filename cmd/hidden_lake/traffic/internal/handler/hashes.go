@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) http.HandlerFunc {
+func HandleHashesAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
@@ -22,7 +22,7 @@ func HandleHashesAPI(pWrapperDB database.IWrapperDB, pLogger logger.ILogger) htt
 			return
 		}
 
-		database := pWrapperDB.Get()
+		database := pDBWrapper.Get()
 		if database == nil {
 			pLogger.PushErro(logBuilder.WithMessage("get_database"))
 			api.Response(pW, http.StatusInternalServerError, "failed: get database")

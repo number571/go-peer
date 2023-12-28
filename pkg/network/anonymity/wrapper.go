@@ -9,19 +9,19 @@ import (
 )
 
 var (
-	_ IWrapperDB = &sWrapperDB{}
+	_ IDBWrapper = &sDBWrapper{}
 )
 
-type sWrapperDB struct {
+type sDBWrapper struct {
 	fMutex   sync.Mutex
 	fWrapper wrapper.IWrapper
 }
 
-func NewWrapperDB() IWrapperDB {
-	return &sWrapperDB{fWrapper: wrapper.NewWrapper()}
+func NewDBWrapper() IDBWrapper {
+	return &sDBWrapper{fWrapper: wrapper.NewWrapper()}
 }
 
-func (p *sWrapperDB) Get() database.IKVDatabase {
+func (p *sDBWrapper) Get() database.IKVDatabase {
 	db, ok := p.fWrapper.Get().(database.IKVDatabase)
 	if !ok {
 		return nil
@@ -29,7 +29,7 @@ func (p *sWrapperDB) Get() database.IKVDatabase {
 	return db
 }
 
-func (p *sWrapperDB) Set(pDB database.IKVDatabase) IWrapperDB {
+func (p *sDBWrapper) Set(pDB database.IKVDatabase) IDBWrapper {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -37,7 +37,7 @@ func (p *sWrapperDB) Set(pDB database.IKVDatabase) IWrapperDB {
 	return p
 }
 
-func (p *sWrapperDB) Close() error {
+func (p *sDBWrapper) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

@@ -17,8 +17,8 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pWrapperDB database.IWrapperDB, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
-	tcpHandler := HandleServiceTCP(pCfg, pWrapperDB, pAnonLogger)
+func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper database.IDBWrapper, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
+	tcpHandler := HandleServiceTCP(pCfg, pDBWrapper, pAnonLogger)
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
@@ -29,7 +29,7 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pWrapperDB data
 			return
 		}
 
-		database := pWrapperDB.Get()
+		database := pDBWrapper.Get()
 		if database == nil {
 			pHTTPLogger.PushErro(logBuilder.WithMessage("get_database"))
 			api.Response(pW, http.StatusInternalServerError, "failed: get database")

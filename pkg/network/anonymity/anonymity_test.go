@@ -179,7 +179,7 @@ func TestDataType(t *testing.T) {
 func TestWrapper(t *testing.T) {
 	t.Parallel()
 
-	wrapper := NewWrapperDB()
+	wrapper := NewDBWrapper()
 	if db := wrapper.Get(); db != nil {
 		t.Error("db is not null")
 		return
@@ -480,7 +480,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
-	node.GetWrapperDB().Set(nil)
+	node.GetDBWrapper().Set(nil)
 	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
 		t.Error("success use store function with null database")
 		return
@@ -644,7 +644,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
 		),
-		NewWrapperDB().Set(db),
+		NewDBWrapper().Set(db),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      addr,
@@ -695,7 +695,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 
 func testFreeNodes(nodes []INode, cancels []context.CancelFunc, typeDB int) {
 	for i, node := range nodes {
-		node.GetWrapperDB().Close()
+		node.GetDBWrapper().Close()
 		node.GetNetworkNode().Close()
 		cancels[i]()
 	}

@@ -22,7 +22,7 @@ type INode interface {
 	HandleFunc(uint32, IHandlerF) INode
 
 	GetSettings() ISettings
-	GetWrapperDB() IWrapperDB
+	GetDBWrapper() IDBWrapper
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
@@ -39,9 +39,9 @@ type ISettings interface {
 	GetFetchTimeWait() time.Duration
 }
 
-type IWrapperDB interface {
+type IDBWrapper interface {
 	types.ICloser
 
 	Get() database.IKVDatabase
-	Set(database.IKVDatabase) IWrapperDB
+	Set(database.IKVDatabase) IDBWrapper
 }

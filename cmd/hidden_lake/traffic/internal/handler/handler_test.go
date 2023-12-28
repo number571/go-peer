@@ -37,7 +37,7 @@ func testNetworkMessageSettings() net_message.ISettings {
 	})
 }
 
-func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc, database.IWrapperDB, hlt_client.IClient) {
+func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc, database.IDBWrapper, hlt_client.IClient) {
 	db, err := database.NewDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
@@ -50,7 +50,7 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, c
 		return nil, nil, nil, nil, nil
 	}
 
-	wDB := database.NewWrapperDB().Set(db)
+	wDB := database.NewDBWrapper().Set(db)
 	srv, connKeeper, cancel := testRunService(wDB, addr, addrNode)
 
 	hltClient := hlt_client.NewClient(
@@ -66,7 +66,7 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, c
 	return srv, connKeeper, cancel, wDB, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, cancel context.CancelFunc, wDB database.IWrapperDB) {
+func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, cancel context.CancelFunc, wDB database.IDBWrapper) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
@@ -74,7 +74,7 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 	closer.CloseAll([]types.ICloser{srv, wDB})
 }
 
-func testRunService(wDB database.IWrapperDB, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {
+func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {
 	mux := http.NewServeMux()
 
 	connKeeperSettings := &conn_keeper.SSettings{

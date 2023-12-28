@@ -17,6 +17,6 @@ func (p *sApp) initDatabase() error {
 	if err != nil {
 		return fmt.Errorf("new key/value database: %w", err)
 	}
-	p.fNode.GetWrapperDB().Set(db)
+	p.fNode.GetDBWrapper().Set(db)
 	return nil
 }

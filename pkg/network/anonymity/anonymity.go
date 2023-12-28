@@ -32,7 +32,7 @@ type sNode struct {
 	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
-	fWrapperDB     IWrapperDB
+	fDBWrapper     IDBWrapper
 	fNetwork       network.INode
 	fQueue         queue.IMessageQueue
 	fFriends       asymmetric.IListPubKeys
@@ -43,7 +43,7 @@ type sNode struct {
 func NewNode(
 	pSett ISettings,
 	pLogger logger.ILogger,
-	pWrapperDB IWrapperDB,
+	pDBWrapper IDBWrapper,
 	pNetwork network.INode,
 	pQueue queue.IMessageQueue,
 	pFriends asymmetric.IListPubKeys,
@@ -52,7 +52,7 @@ func NewNode(
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
 		fLogger:        pLogger,
-		fWrapperDB:     pWrapperDB,
+		fDBWrapper:     pDBWrapper,
 		fNetwork:       pNetwork,
 		fQueue:         pQueue,
 		fFriends:       pFriends,
@@ -120,8 +120,8 @@ func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sNode) GetWrapperDB() IWrapperDB {
-	return p.fWrapperDB
+func (p *sNode) GetDBWrapper() IDBWrapper {
+	return p.fDBWrapper
 }
 
 func (p *sNode) GetNetworkNode() network.INode {
@@ -389,7 +389,7 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 	defer p.fMutex.Unlock()
 
 	var (
-		database  = p.fWrapperDB.Get()
+		database  = p.fDBWrapper.Get()
 		myAddress = p.fQueue.GetClient().GetPubKey().GetAddress().ToBytes()
 	)
 

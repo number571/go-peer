@@ -142,7 +142,7 @@ func (p *sApp) stop() error {
 		closer.CloseAll([]types.ICloser{
 			p.fServiceHTTP,
 			p.fServicePPROF,
-			p.fNode.GetWrapperDB(),
+			p.fNode.GetDBWrapper(),
 			p.fNode.GetNetworkNode(),
 		}),
 	)

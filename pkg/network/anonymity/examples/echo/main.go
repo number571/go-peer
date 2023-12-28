@@ -101,7 +101,7 @@ func main() {
 
 func closeNode(node anonymity.INode) error {
 	return utils.MergeErrors(
-		node.GetWrapperDB().Close(),
+		node.GetDBWrapper().Close(),
 		node.GetNetworkNode().Close(),
 	)
 }
@@ -144,7 +144,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 				)
 			},
 		),
-		anonymity.NewWrapperDB().Set(db),
+		anonymity.NewDBWrapper().Set(db),
 		network.NewNode(
 			nodeSettings(serviceAddress),
 			queue_set.NewQueueSet(

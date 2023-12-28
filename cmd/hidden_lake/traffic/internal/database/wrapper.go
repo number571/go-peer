@@ -8,19 +8,19 @@ import (
 )
 
 var (
-	_ IWrapperDB = &sWrapperDB{}
+	_ IDBWrapper = &sDBWrapper{}
 )
 
-type sWrapperDB struct {
+type sDBWrapper struct {
 	fMutex   sync.Mutex
 	fWrapper wrapper.IWrapper
 }
 
-func NewWrapperDB() IWrapperDB {
-	return &sWrapperDB{fWrapper: wrapper.NewWrapper()}
+func NewDBWrapper() IDBWrapper {
+	return &sDBWrapper{fWrapper: wrapper.NewWrapper()}
 }
 
-func (p *sWrapperDB) Get() IDatabase {
+func (p *sDBWrapper) Get() IDatabase {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -32,7 +32,7 @@ func (p *sWrapperDB) Get() IDatabase {
 	return db
 }
 
-func (p *sWrapperDB) Set(pDB IDatabase) IWrapperDB {
+func (p *sDBWrapper) Set(pDB IDatabase) IDBWrapper {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -40,7 +40,7 @@ func (p *sWrapperDB) Set(pDB IDatabase) IWrapperDB {
 	return p
 }
 
-func (p *sWrapperDB) Close() error {
+func (p *sDBWrapper) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

@@ -19,6 +19,7 @@
 - Update `internal/msgconv`: deleted
 - Update `internal/interrupt`: rename 'interrupt' package to 'closer'
 - Update `go-peer`: append CVersion constant
+- Update `pkg`: rename IWrapperDB -> IDBWrapper
 
 ### BUG FIXES
 
