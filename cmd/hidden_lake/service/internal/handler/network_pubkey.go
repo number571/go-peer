@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/logger"
@@ -12,7 +11,7 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 )
 
-func HandleNetworkPubKeyAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkPubKeyAPI(pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 

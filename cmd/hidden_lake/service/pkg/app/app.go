@@ -33,7 +33,7 @@ type sApp struct {
 	fState state.IState
 
 	fPathTo     string
-	fWrapper    config.IWrapper
+	fConfig     config.IConfig
 	fNode       anonymity.INode
 	fConnKeeper conn_keeper.IConnKeeper
 	fPrivKey    asymmetric.IPrivKey
@@ -64,7 +64,7 @@ func NewApp(
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fPathTo:     pPathTo,
-		fWrapper:    config.NewWrapper(pCfg),
+		fConfig:     pCfg,
 		fNode:       node,
 		fConnKeeper: initConnKeeper(pCfg, node),
 		fPrivKey:    pPrivKey,
@@ -150,7 +150,7 @@ func (p *sApp) stop() error {
 func (p *sApp) runListenerPPROF(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
 	defer wg.Done()
 
-	if p.fWrapper.GetConfig().GetAddress().GetPPROF() == "" {
+	if p.fConfig.GetAddress().GetPPROF() == "" {
 		return
 	}
 
@@ -168,7 +168,7 @@ func (p *sApp) runListenerPPROF(pCtx context.Context, wg *sync.WaitGroup, pChErr
 func (p *sApp) runListenerHTTP(pCtx context.Context, wg *sync.WaitGroup, pChErr chan<- error) {
 	defer wg.Done()
 
-	if p.fWrapper.GetConfig().GetAddress().GetHTTP() == "" {
+	if p.fConfig.GetAddress().GetHTTP() == "" {
 		return
 	}
 
@@ -187,7 +187,7 @@ func (p *sApp) runListenerNode(pCtx context.Context, wg *sync.WaitGroup, pChErr 
 	defer wg.Done()
 
 	// if node in client mode
-	tcpAddress := p.fWrapper.GetConfig().GetAddress().GetTCP()
+	tcpAddress := p.fConfig.GetAddress().GetTCP()
 	if tcpAddress == "" {
 		return
 	}

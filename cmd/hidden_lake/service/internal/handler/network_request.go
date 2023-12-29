@@ -25,7 +25,7 @@ const (
 	cErrorLoadRequestID
 )
 
-func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(pCtx context.Context, pConfig config.IConfig, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -43,7 +43,7 @@ func HandleNetworkRequestAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			return
 		}
 
-		pubKey, requestID, data, errCode := unwrapRequest(pWrapper.GetConfig(), vRequest)
+		pubKey, requestID, data, errCode := unwrapRequest(pConfig, vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
