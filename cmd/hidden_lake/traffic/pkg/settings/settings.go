@@ -2,7 +2,7 @@ package settings
 
 const (
 	CServiceName  = "HLT"
-	CTitlePattern = "go-peer/hidden-lake-traffic"
+	CTitlePattern = "hidden-lake-traffic"
 )
 
 const (

@@ -209,7 +209,7 @@ address:
   tcp: 127.0.0.1:9571
   http: 127.0.0.1:9572
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     host: 127.0.0.1:9592
 ```
 

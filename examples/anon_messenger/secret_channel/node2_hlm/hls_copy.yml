@@ -13,7 +13,7 @@ logging:
   - warn
   - erro
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     host: localhost:7071
 friends:
   Alice: >-

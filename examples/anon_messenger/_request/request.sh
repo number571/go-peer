@@ -14,7 +14,7 @@ fi
 REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 44)
 JSON_DATA='{
         "method":"POST",
-        "host":"go-peer/hidden-lake-messenger",
+        "host":"hidden-lake-messenger",
         "path":"/push",
         "head":{
             "Hl-Messenger-Sender-Id": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",

@@ -96,7 +96,7 @@ address:
   tcp: 127.0.0.1:9571
   http: 127.0.0.1:9572
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     host: 127.0.0.1:9592
 ```
 
@@ -286,7 +286,7 @@ and put result to "hex_data" HLS API
 
 ```json
 {
-	"result":"go-peer/hidden-lake-service",
+	"result":"hidden-lake-service",
 	"return":1
 }
 ```

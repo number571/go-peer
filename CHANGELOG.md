@@ -22,6 +22,7 @@
 - Update `go-peer`: append CVersion constant
 - Update `pkg`: rename IWrapperDB -> IDBWrapper
 - Update `pkg/network/anonymity`: delete multi addresses in the database hashes
+- Update `cmd/hidden_lake`: delete prefix 'go-peer/' from services
 
 ### BUG FIXES
 

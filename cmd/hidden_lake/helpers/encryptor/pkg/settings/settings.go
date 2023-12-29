@@ -2,7 +2,7 @@ package settings
 
 const (
 	CServiceName  = "HLE"
-	CTitlePattern = "go-peer/hidden-lake-encryptor"
+	CTitlePattern = "hidden-lake-encryptor"
 )
 
 const (

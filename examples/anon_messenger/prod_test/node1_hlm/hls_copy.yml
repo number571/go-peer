@@ -12,7 +12,7 @@ logging:
 address:
   http: localhost:8572
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     host: localhost:8081
 connections:
   - 94.103.91.81:9581

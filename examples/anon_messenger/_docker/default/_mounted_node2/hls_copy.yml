@@ -13,7 +13,7 @@ address:
 connections:
   - traffic-middle:6581
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     host: messenger-node2:7071
 friends:
   Alice: >-

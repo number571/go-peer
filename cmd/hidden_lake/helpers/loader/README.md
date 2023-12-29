@@ -119,7 +119,7 @@ consumers:
 
 ```json
 {
-	"result":"go-peer/hidden-lake-loader",
+	"result":"hidden-lake-loader",
 	"return":1
 }
 ```

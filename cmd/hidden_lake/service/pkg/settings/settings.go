@@ -6,7 +6,7 @@ import (
 
 const (
 	CServiceName  = "HLS"
-	CTitlePattern = "go-peer/hidden-lake-service"
+	CTitlePattern = "hidden-lake-service"
 )
 
 const (

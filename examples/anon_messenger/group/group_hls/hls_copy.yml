@@ -9,7 +9,7 @@ logging:
   - warn
   - erro
 services:
-  go-peer/hidden-lake-messenger: 
+  hidden-lake-messenger: 
     share: true
 connections:
   - localhost:4581

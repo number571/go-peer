@@ -133,7 +133,7 @@ consumers:
 
 ```json
 {
-	"result":"go-peer/hidden-lake-traffic",
+	"result":"hidden-lake-traffic",
 	"return":1
 }
 ```

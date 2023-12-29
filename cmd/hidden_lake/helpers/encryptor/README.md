@@ -105,7 +105,7 @@ address:
 
 ```json
 {
-	"result":"go-peer/hidden-lake-encryptor",
+	"result":"hidden-lake-encryptor",
 	"return":1
 }
 ```

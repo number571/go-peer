@@ -2,7 +2,7 @@ package settings
 
 const (
 	CServiceName  = "HLL"
-	CTitlePattern = "go-peer/hidden-lake-loader"
+	CTitlePattern = "hidden-lake-loader"
 )
 
 const (

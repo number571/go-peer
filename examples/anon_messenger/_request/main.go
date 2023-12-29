@@ -31,7 +31,7 @@ const (
 
 	cJsonDataTemplate = `{
         "method":"POST",
-        "host":"go-peer/hidden-lake-messenger",
+        "host":"hidden-lake-messenger",
         "path":"/push",
         "head":{
 			"%s": "%s",
