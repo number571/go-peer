@@ -6,42 +6,34 @@
 
 The `Hidden Lake` is an anonymous network built on a `micro-service` architecture. At the heart of HL is the core - `HLS` (service), which generates anonymizing traffic and combines many other services (for example, `HLT` and `HLM`). Thus, Hidden Lake is not a whole and monolithic solution, but a composition of several combined services.
 
-## Build and run
+## How it works
 
-```bash
-$ cd ./cmd/hidden_lake
-$ make docker-build
-$ make docker-run
+The scheme of the anonymous Hidden Lake network boils down to the use of three levels: `network` (N), `friendly` (F), and `application` (A).
 
-> hidden_lake-traffic-1    | [INFO] 2023/11/22 18:59:27 HLT is running...
-> hidden_lake-messenger-1  | [INFO] 2023/11/22 18:59:27 HLM is running...
-> hidden_lake-service-1    | [INFO] 2023/11/22 18:59:29 HLS is running...
-...
-> hidden_lake-service-1    | [INFO] 2023/11/22 18:59:36 service=HLS type=BRDCS hash=B04B315A...290EB85C addr=24DC908B...E8299D18 proof=0000365777 size=8192B conn=127.0.0.1:
-> hidden_lake-traffic-1    | [INFO] 2023/11/22 18:59:36 service=HLT type=BRDCS hash=B04B315A...290EB85C addr=00000000...00000000 proof=0000365777 size=8240B conn=172.26.0.2:9571
-> hidden_lake-service-1    | [INFO] 2023/11/22 18:59:41 service=HLS type=BRDCS hash=E1A8DDFC...674A9E06 addr=24DC908B...E8299D18 proof=0001019421 size=8192B conn=127.0.0.1:
-> hidden_lake-traffic-1    | [INFO] 2023/11/22 18:59:41 service=HLT type=BRDCS hash=E1A8DDFC...674A9E06 addr=00000000...00000000 proof=0001019421 size=8240B conn=172.26.0.2:9571
-...
-```
+<p align="center"><img src="_images/hl_scheme.jpg" alt="hl_scheme.jpg"/></p>
+<p align="center">Figure 1. The scheme of the anonymous Hidden Lake network.</p>
 
-## Settings
+1. The network layer ensures the transfer of raw bytes from one node to another. HLS and HLT services interact at this level. HLT is an auxiliary service that is used to relay messages from HLS. The HLT can be replaced by an HLS node.
+2. The friendly layer (also known as anonymizing) performs the function of anonymizing traffic by setting up a list of friends and queue control on the side of the HLS service. Cryptographic routing based on public keys works at this level.
+3. The application layer boils down to using the final logic of the application itself to transmit and receive messages. One of the main tasks of this level is to control data security, provided that intermediate (group) HLS nodes exist/are used.
+
+## Settings and connections
 
 ```yaml
-# [HLS, HLT]
+# [HLS, HLT] nodes
 message_size_bytes: 8192
 work_size_bits: 20
 key_size_bits: 4096
 queue_period_ms: 5000
 limit_void_size_bytes: 4096
+# 'network_key' parameter is shown in the table
 
-# [HLT]
+# [HLT] nodes
 ## [62.233.46.109, 94.103.91.81]
 messages_capacity: 1048576 # 2^20 msgs ~= 8GiB
 ## [185.43.4.253]
 messages_capacity: 33554432 # 2^25 msgs ~= 256GiB
 ```
-
-## Connections
 
 <table style="width: 100%">
   <tr>
@@ -163,3 +155,77 @@ messages_capacity: 33554432 # 2^25 msgs ~= 256GiB
     </td>
   </tr>
 </table>
+
+## Build and run
+
+Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are three ways to run HLS: through `docker`, through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
+
+### 1. Running from docker
+
+```bash
+$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
+$ cd go-peer/cmd/hidden_lake/service
+$ make docker-default
+...
+> [INFO] 2023/12/29 16:27:40 HLS is running...
+> [INFO] 2023/12/29 16:27:45 service=HLS type=BRDCS hash=FF59D8F9...1D2EAF8D addr=23FDFF8A...FE95F5E0 proof=0000160292 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 16:27:50 service=HLS type=BRDCS hash=ACE23689...CA39CB6D addr=23FDFF8A...FE95F5E0 proof=0001491994 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 16:27:55 service=HLS type=BRDCS hash=0C6EC76D...FB83729D addr=23FDFF8A...FE95F5E0 proof=0001762328 size=8192B conn=127.0.0.1:
+...
+```
+
+### 2. Running from source code
+
+```bash
+$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
+$ cd go-peer/cmd/hidden_lake/service
+$ make default
+...
+> [INFO] 2023/12/29 23:29:43 HLS is running...
+> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
+...
+```
+
+### 3. Running from release version
+
+When starting from the release version, you must specify the processor architecture and platform used. Available architectures: `amd64`, `arm64`. Available platforms: `windows`, `darwin`, `linux`.
+
+```bash
+$ wget https://github.com/number571/go-peer/releases/download/<tag-name>/hls_<arch-name>_<platform-name>
+$ chmod +x hls_<arch-name>_<platform-name>
+$ ./hls_<arch-name>_<platform-name>
+...
+> [INFO] 2023/12/29 23:31:43 HLS is running...
+> [INFO] 2023/12/29 23:31:48 service=HLS type=BRDCS hash=E8CDB448...FF23639E addr=E04D2DC8...61D4FE2A proof=0001277744 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:31:53 service=HLS type=BRDCS hash=C6B5C47F...AB63128A addr=E04D2DC8...61D4FE2A proof=0001062655 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:31:58 service=HLS type=BRDCS hash=5789D462...B81C3A5F addr=E04D2DC8...61D4FE2A proof=0000517841 size=8192B conn=127.0.0.1
+...
+```
+
+### Production running
+
+The HLS node is easy to connect to a production environment. To do this, it is sufficient to specify two parameters: `network_key` and `connections`. The network_key parameter is used to separate networks from each other, preventing them from merging. The connections parameter is used for direct network connection to HLS and HLT nodes.
+
+```bash
+$ cd cmd/hidden_lake/service
+
+# [From docker]: $ yes | cp ../_configs/prod/1/hls.yml ./_mounted
+$ yes | cp ../_configs/prod/1/hls.yml . # [From source | release]
+
+# [From docker]:  $ make docker-run
+# [From source]:  $ make run
+$ ./hls_<arch-name>_<platform-name> # [From release]
+...
+> [INFO] 2023/12/29 23:49:26 HLS is running...
+> [INFO] 2023/12/29 23:49:27 service=HLS type=UNDEC hash=1079200E...FFCD5871 addr=00000000...00000000 proof=0000165513 size=8192B conn=94.103.91.81:9581
+> [INFO] 2023/12/29 23:49:31 service=HLS type=BRDCS hash=1DE4BC0F...AC611F44 addr=E04D2DC8...61D4FE2A proof=0000265462 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:49:32 service=HLS type=UNDEC hash=EECEF795...1B042618 addr=00000000...00000000 proof=0002571939 size=8192B conn=94.103.91.81:9581
+> [INFO] 2023/12/29 23:49:36 service=HLS type=BRDCS hash=98AC78E7...AAA7F8F1 addr=E04D2DC8...61D4FE2A proof=0001741261 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:49:37 service=HLS type=UNDEC hash=7CB7B53A...1FE35530 addr=00000000...00000000 proof=0000199886 size=8192B conn=94.103.91.81:9581
+> [INFO] 2023/12/29 23:49:41 service=HLS type=BRDCS hash=5D609534...9CC17DAE addr=E04D2DC8...61D4FE2A proof=0001091209 size=8192B conn=127.0.0.1:
+...
+```
+
+> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test).

@@ -260,6 +260,7 @@
 - Update `cmd/hidden_lake/messenger`: append entropy check password
 - Update `pkg/client,pkg/network/conn,pkg/storage`: append comments with algorithm's work
 - Update `pkg/network/conn`: readPayload now return error reason
+- Update `cmd/hidden_lake/README.md`: update readme
 
 ### CHANGES
 

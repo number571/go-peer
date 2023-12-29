@@ -46,7 +46,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		// get unique ID of request from the header
 		requestID, ok := getRequestID(loadReq)
 		if !ok {
-			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedRequestID))
+			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnInvalidRequestID))
 			return nil, errors.New("request id is invalid")
 		}
 

@@ -148,7 +148,7 @@ Each network participant sets a message generation period for himself (the perio
 
 Since the encrypted message does not disclose the recipient in any way, each network participant tries to decrypt the message with his private key. The true recipient is only the one who can decrypt the message. At the same time, the true recipient acts according to the protocol and further distributes the received packet, even knowing the meaninglessness of the subsequent dispatch. This property makes it impossible to determine the recipient.
 
-> Simple example of the `client` package (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/pkg/client/_examples](https://github.com/number571/go-peer/tree/master/pkg/client/_examples "Package client");
+> Simple example of the `client` package (encrypt/decrypt functions) in the directory [github.com/number571/go-peer/pkg/client/examples](https://github.com/number571/go-peer/tree/master/pkg/client/examples "Package client");
 
 <p align="center"><img src="cmd/hidden_lake/service/_images/hls_view.jpg" alt="hls_view.jpg"/></p>
 <p align="center">Figure 2. Two participants are constantly generating messages for their periods on the network. It is impossible to determine their real activity.</p>
@@ -320,7 +320,7 @@ $ cd examples/echo_service/_docker/default
 $ make
 ```
 
-> Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/_examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/_examples "Package anonymity");
+> Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/examples "Package anonymity");
 
 ## 2. Hidden Lake Messenger
 
