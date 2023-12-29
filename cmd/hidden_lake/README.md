@@ -1,4 +1,4 @@
-## HL
+# HL
 
 > Hidden Lake
 
@@ -13,9 +13,9 @@ The scheme of the anonymous Hidden Lake network boils down to the use of three l
 <p align="center"><img src="_images/hl_scheme.jpg" alt="hl_scheme.jpg"/></p>
 <p align="center">Figure 1. The scheme of the anonymous Hidden Lake network.</p>
 
-1. The network layer ensures the transfer of raw bytes from one node to another. HLS and HLT services interact at this level. HLT is an auxiliary service that is used to relay messages from HLS. The HLT can be replaced by an HLS node.
-2. The friendly layer (also known as anonymizing) performs the function of anonymizing traffic by setting up a list of friends and queue control on the side of the HLS service. Cryptographic routing based on public keys works at this level.
-3. The application layer boils down to using the final logic of the application itself to transmit and receive messages. One of the main tasks of this level is to control data security, provided that intermediate (group) HLS nodes exist/are used.
+1. The network layer ensures the `transfer of raw bytes` from one node to another. HLS and HLT services interact at this level. HLT is an auxiliary service that is used to relay messages from HLS. The HLT can be replaced by an HLS node.
+2. The friendly layer (also known as anonymizing) performs the function of `anonymizing traffic` by setting up a list of friends and queue control on the side of the HLS service. Cryptographic routing based on public keys works at this level.
+3. The application layer boils down to using the final `logic of the application` itself to transmit and receive messages. One of the main tasks of this level is to control data security, provided that intermediate (group) HLS nodes exist/are used.
 
 ## Settings and connections
 
