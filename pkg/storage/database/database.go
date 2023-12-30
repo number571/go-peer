@@ -85,7 +85,7 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 
 	newSaltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
 	if !bytes.Equal(gotSaltHash, newSaltHash) {
-		return nil, fmt.Errorf("incorrect salt hash: %w", err)
+		return nil, errors.New("incorrect salt hash")
 	}
 
 	return &sKVDatabase{

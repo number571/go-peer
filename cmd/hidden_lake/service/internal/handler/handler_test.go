@@ -169,6 +169,7 @@ func testNewWrapper(cfgPath string) config.IWrapper {
 }
 
 func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, context.CancelFunc) {
+	os.RemoveAll(dbPath)
 	node := testNewNode(dbPath, addr).HandleFunc(pkg_settings.CServiceMask, nil)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()
@@ -184,7 +185,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		}),
 	)
 	if err != nil {
-		return nil
+		panic(err)
 	}
 	networkMask := uint64(1)
 	node := anonymity.NewNode(
