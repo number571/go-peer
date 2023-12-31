@@ -53,7 +53,7 @@ func NewCryptoStorage(pSettings ISettings) (IKVStorage, error) {
 		store.fSalt = encdata[:cSaltSize]
 	}
 
-	keyBuilder := keybuilder.NewKeyBuilder(pSettings.GetWorkSize(), store.fSalt)
+	keyBuilder := keybuilder.NewKeyBuilder(1<<pSettings.GetWorkSize(), store.fSalt)
 	cipherKey := keyBuilder.Build(pSettings.GetPassword())
 	store.fCipher = symmetric.NewAESCipher(cipherKey)
 
@@ -189,7 +189,7 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 }
 
 func (p *sCryptoStorage) newCipherWithMapKey(pKey []byte) (symmetric.ICipher, string) {
-	keyBuilder := keybuilder.NewKeyBuilder(p.fSettings.GetWorkSize(), p.fSalt)
+	keyBuilder := keybuilder.NewKeyBuilder(1<<p.fSettings.GetWorkSize(), p.fSalt)
 	cipherKey := keyBuilder.Build(encoding.HexEncode(pKey)) // map key as a password
 	return symmetric.NewAESCipher(cipherKey), hashing.NewSHA256Hasher(cipherKey).ToString()
 }

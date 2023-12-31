@@ -40,12 +40,11 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 		nonce   = uint64(0)
-		hash    []byte
 	)
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for nonce < math.MaxUint64 {
 		bNonce := encoding.Uint64ToBytes(nonce)
-		hash = pbkdf2.Key(
+		hash := pbkdf2.Key(
 			packHash,
 			bNonce[:],
 			int(p.fIter),
@@ -63,8 +62,10 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 
 // Verifies the work of the proof of work function.
 func (p *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
-	intHash := big.NewInt(1)
-	target := big.NewInt(1)
+	var (
+		intHash = big.NewInt(1)
+		target  = big.NewInt(1)
+	)
 	bNonce := encoding.Uint64ToBytes(nonce)
 	hash := pbkdf2.Key(
 		packHash,

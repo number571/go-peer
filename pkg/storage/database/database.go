@@ -64,11 +64,11 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 	}
 
 	cipherSalt := saltValue[:cSaltSize]
-	cipherKeyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), cipherSalt)
+	cipherKeyBuilder := keybuilder.NewKeyBuilder(1<<pSett.GetWorkSize(), cipherSalt)
 	cipherKey := cipherKeyBuilder.Build(pSett.GetPassword())
 
 	authSalt := saltValue[cSaltSize:]
-	authKeyBuilder := keybuilder.NewKeyBuilder(pSett.GetWorkSize(), authSalt)
+	authKeyBuilder := keybuilder.NewKeyBuilder(1<<pSett.GetWorkSize(), authSalt)
 	authKey := authKeyBuilder.Build(pSett.GetPassword())
 
 	if isInitSalt {

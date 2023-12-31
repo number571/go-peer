@@ -26,8 +26,6 @@ const (
 )
 
 const (
-	cWorkSizeKey = 1
-
 	// first digits of PI
 	cAuthSalt = "1415926535_8979323846_2643383279_5028841971_6939937510"
 
@@ -326,7 +324,7 @@ func (p *sConn) autoUpdateState() {
 }
 
 func buildState(pNetworkKey string) (symmetric.ICipher, []byte) {
-	cipherKeyBuilder := keybuilder.NewKeyBuilder(cWorkSizeKey, []byte(cCipherSalt))
-	authKeyBuilder := keybuilder.NewKeyBuilder(cWorkSizeKey, []byte(cAuthSalt))
+	cipherKeyBuilder := keybuilder.NewKeyBuilder(1, []byte(cCipherSalt))
+	authKeyBuilder := keybuilder.NewKeyBuilder(1, []byte(cAuthSalt))
 	return symmetric.NewAESCipher(cipherKeyBuilder.Build(pNetworkKey)), authKeyBuilder.Build(pNetworkKey)
 }

@@ -12,14 +12,14 @@ var (
 )
 
 type sKeyBuilder struct {
-	fSalt []byte
-	fBits uint64
+	fIterN uint64
+	fSalt  []byte
 }
 
-func NewKeyBuilder(pBits uint64, pSalt []byte) IKeyBuilder {
+func NewKeyBuilder(pIterN uint64, pSalt []byte) IKeyBuilder {
 	return &sKeyBuilder{
-		fBits: pBits,
-		fSalt: pSalt,
+		fIterN: pIterN,
+		fSalt:  pSalt,
 	}
 }
 
@@ -27,7 +27,7 @@ func (p *sKeyBuilder) Build(pPassword string) []byte {
 	return pbkdf2.Key(
 		[]byte(pPassword),
 		p.fSalt,
-		(1 << p.fBits),
+		int(p.fIterN),
 		int(symmetric.CAESKeySize),
 		sha256.New,
 	)

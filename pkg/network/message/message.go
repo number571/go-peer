@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	cWorkSizeKey = 1
+	// pbkdf2(sha256, N=2)
 	cPuzzleIterN = 2
 
 	// third digits of PI
@@ -115,9 +115,6 @@ func (p *sMessage) ToString() string {
 }
 
 func getHash(networkKey string, pBytes []byte) []byte {
-	authKey := keybuilder.NewKeyBuilder(
-		cWorkSizeKey,
-		[]byte(cAuthSalt),
-	).Build(networkKey)
+	authKey := keybuilder.NewKeyBuilder(1, []byte(cAuthSalt)).Build(networkKey)
 	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
 }

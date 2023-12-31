@@ -24,6 +24,7 @@
 - Update `pkg`: rename IWrapperDB -> IDBWrapper
 - Update `pkg/network/anonymity`: delete multi addresses in the database hashes
 - Update `cmd/hidden_lake`: delete prefix 'go-peer/' from services
+- Update `pkg/crypto/keybuilder`: from bits -> to iter 
 
 ### BUG FIXES
 
