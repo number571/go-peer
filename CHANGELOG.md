@@ -10,6 +10,7 @@
 
 - Update `cmd`: append new application 'secpy_chat'
 - Update `cmd/hidden_lake/README.md`: update readme
+- Update `pkg/crypto/puzzle`: change sha256 -> pbkdf2(sha256, N)
 
 ### CHANGES
 
@@ -31,6 +32,7 @@
 - Update `cmd/hidden_lake`: fix App close child contexts
 - Update `pkg/network/anonymity`: fix database set hash (append mutex)
 - Update `cmd/hidden_lake/service`: fix database set request id (append also into Request handler)
+- Update `pkg/network`: fix close connections from long time handler
 
 <!-- ... -->
 

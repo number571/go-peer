@@ -77,7 +77,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 			if p.poolHasLimit() {
 				continue
 			}
-			netMsg := p.newPseudoNetworkMessage()
+			netMsg := p.newPseudoNetworkMessage(pCtx)
 			if netMsg == nil {
 				continue
 			}
@@ -126,18 +126,21 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	case <-pCtx.Done():
 		return nil
 	case <-time.After(p.fSettings.GetDuration()):
-		p.fMutex.Lock()
-		queueLen := len(p.fQueue)
-		p.fMutex.Unlock()
-
-		if queueLen == 0 {
-			return <-p.fMsgPool.fQueue
+		select {
+		case x := <-p.fQueue:
+			return x
+		default:
+			select {
+			case <-pCtx.Done():
+				return nil
+			case x := <-p.fMsgPool.fQueue:
+				return x
+			}
 		}
-		return <-p.fQueue
 	}
 }
 
-func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
+func (p *sMessageQueue) newPseudoNetworkMessage(pCtx context.Context) net_message.IMessage {
 	p.fMutex.Lock()
 	msgSettings := p.fMsgSettings
 	networkMask := p.fNetworkMask
@@ -151,30 +154,33 @@ func (p *sMessageQueue) newPseudoNetworkMessage() net_message.IMessage {
 		panic(err)
 	}
 
-	netMsg := net_message.NewMessage(
-		msgSettings,
-		payload.NewPayload(
-			networkMask,
-			msg.ToBytes(),
-		),
-	)
+	chNetMsg := make(chan net_message.IMessage)
+	go func() {
+		chNetMsg <- net_message.NewMessage(
+			msgSettings,
+			payload.NewPayload(
+				networkMask,
+				msg.ToBytes(),
+			),
+		)
+	}()
 
-	settingsChanged := false
-
-	p.fMutex.Lock()
-	switch {
-	case
-		networkMask != p.fNetworkMask,
-		msgSettings.GetNetworkKey() != p.fMsgSettings.GetNetworkKey(),
-		msgSettings.GetWorkSizeBits() != p.fMsgSettings.GetWorkSizeBits():
-		settingsChanged = true
-	}
-	p.fMutex.Unlock()
-
-	if settingsChanged {
+	select {
+	case <-pCtx.Done():
 		return nil
+	case x := <-chNetMsg:
+		p.fMutex.Lock()
+		defer p.fMutex.Unlock()
+
+		settingsChanged := networkMask != p.fNetworkMask ||
+			msgSettings.GetNetworkKey() != p.fMsgSettings.GetNetworkKey() ||
+			msgSettings.GetWorkSizeBits() != p.fMsgSettings.GetWorkSizeBits()
+
+		if settingsChanged {
+			return nil
+		}
+		return x
 	}
-	return netMsg
 }
 
 func (p *sMessageQueue) poolHasLimit() bool {

@@ -96,17 +96,13 @@ func (p *sNode) Run(pCtx context.Context) error {
 			}
 
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-			if ok, _ := p.storeHashWithBroadcast(pCtx, logBuilder, msg); !ok {
-				// internal logger
-				break
-			}
 
 			// enrich logger
 			logBuilder.
-				WithPubKey(p.fQueue.GetClient().GetPubKey()).
-				WithType(anon_logger.CLogBaseBroadcast)
+				WithPubKey(p.fQueue.GetClient().GetPubKey())
 
-			p.fLogger.PushInfo(logBuilder)
+			// internal logger
+			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, msg)
 		}
 	}
 }
@@ -143,8 +139,8 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) BroadcastPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
-	// internal logger
 	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
+		// internal logger
 		return fmt.Errorf("broadcast payload: %w", err)
 	}
 	return nil
@@ -164,8 +160,8 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	// internal logger
 	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, newPld); err != nil {
+		// internal logger
 		return nil, fmt.Errorf("fetch payload: %w", err)
 	}
 
@@ -289,9 +285,9 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 				return nil
 			}
 
+			// internal logger
 			// create the message and put this to the queue
 			_ = p.enqueuePayload(pCtx, cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
-			// internal logger
 			return nil
 
 		// undefined type of message (not request/response)
@@ -374,10 +370,13 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 
 	// broadcast message to network
 	if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
+		// some connections can return errors
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
-		// need pass error (some of connections may be closed)
+		return true, nil
 	}
 
+	// full success broadcast
+	p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 	return true, nil
 }
 

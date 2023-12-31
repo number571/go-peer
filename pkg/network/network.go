@@ -50,6 +50,12 @@ func (p *sNode) GetSettings() ISettings {
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) error {
+	// can't broadcast message to the network if len(connections) = 0
+	connections := p.GetConnections()
+	if len(connections) == 0 {
+		return errors.New("no connections")
+	}
+
 	// node can redirect received message
 	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
@@ -57,7 +63,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 	wg := sync.WaitGroup{}
 
 	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
-	for a, c := range p.GetConnections() {
+	for a, c := range connections {
 		wg.Add(1)
 
 		chErr := make(chan error)
@@ -216,34 +222,36 @@ func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.ICo
 	defer p.DelConnection(pAddress)
 	for {
 		var (
-			readerCh = make(chan struct{})
-			returnCh = make(chan bool)
+			readHeadCh = make(chan struct{})
+			readFullCh = make(chan message.IMessage)
 		)
 
 		go func() {
-			msg, err := pConn.ReadMessage(pCtx, readerCh)
+			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
 			if err != nil {
-				returnCh <- false
+				readFullCh <- nil
 				return
 			}
-			returnCh <- p.handleMessage(pCtx, pConn, msg)
+			readFullCh <- msg
 		}()
 
 		select {
 		case <-pCtx.Done():
 			return
-		case <-readerCh:
-			// pass
-		}
-
-		select {
-		case <-pCtx.Done():
-			return
-		case <-time.After(p.fSettings.GetReadTimeout()):
-			return
-		case ok := <-returnCh:
-			if !ok {
+		case <-readHeadCh:
+			select {
+			case <-pCtx.Done():
 				return
+			case <-time.After(p.fSettings.GetReadTimeout()):
+				return
+			case msg := <-readFullCh:
+				if msg == nil {
+					return
+				}
+				if ok := p.handleMessage(pCtx, pConn, msg); !ok {
+					return
+				}
+				break
 			}
 		}
 	}

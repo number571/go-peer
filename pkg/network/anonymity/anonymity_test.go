@@ -539,7 +539,7 @@ func TestRecvSendMessage(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
 		if err := node.enqueueMessage(ctx, msg); err != nil {
 			return
