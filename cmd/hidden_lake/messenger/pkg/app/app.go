@@ -56,7 +56,7 @@ func NewApp(
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	services := []internal_types.IService{
+	services := []internal_types.IServiceF{
 		p.runListenerPPROF,
 		p.runIncomingListenerHTTP,
 		p.runInterfaceListenerHTTP,
@@ -86,7 +86,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
-func (p *sApp) enable(_ context.Context) state.IStateFunc {
+func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
 		if err := p.initDatabase(); err != nil {
 			return fmt.Errorf("init database: %w", err)
@@ -101,7 +101,7 @@ func (p *sApp) enable(_ context.Context) state.IStateFunc {
 	}
 }
 
-func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateFunc {
+func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateF {
 	return func() error {
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlm_settings.CServiceName))
 

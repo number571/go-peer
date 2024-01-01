@@ -5,4 +5,4 @@ import (
 	"sync"
 )
 
-type IService func(context.Context, *sync.WaitGroup, chan<- error)
+type IServiceF func(context.Context, *sync.WaitGroup, chan<- error)

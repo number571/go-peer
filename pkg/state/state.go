@@ -19,7 +19,7 @@ func NewBoolState() IState {
 	return &sState{}
 }
 
-func (p *sState) Enable(f IStateFunc) error {
+func (p *sState) Enable(f IStateF) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -37,7 +37,7 @@ func (p *sState) Enable(f IStateFunc) error {
 	return nil
 }
 
-func (p *sState) Disable(f IStateFunc) error {
+func (p *sState) Disable(f IStateF) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

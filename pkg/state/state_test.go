@@ -33,7 +33,7 @@ func Test_sState_Enable(t *testing.T) {
 		fEnabled bool
 	}
 	type args struct {
-		f IStateFunc
+		f IStateF
 	}
 	tests := []struct {
 		name    string
@@ -109,7 +109,7 @@ func Test_sState_Disable(t *testing.T) {
 		fEnabled bool
 	}
 	type args struct {
-		f IStateFunc
+		f IStateF
 	}
 	tests := []struct {
 		name    string
