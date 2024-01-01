@@ -39,10 +39,9 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 	var (
 		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
-		nonce   = uint64(0)
 	)
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
-	for nonce < math.MaxUint64 {
+	for nonce := uint64(0); nonce < math.MaxUint64; nonce++ {
 		bNonce := encoding.Uint64ToBytes(nonce)
 		hash := pbkdf2.Key(
 			packHash,
@@ -55,7 +54,6 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 		if intHash.Cmp(target) == -1 {
 			return nonce
 		}
-		nonce++
 	}
 	return 0
 }
