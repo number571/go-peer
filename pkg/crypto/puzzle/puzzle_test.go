@@ -82,18 +82,6 @@ BenchmarkPuzzle/parallel-12                  100         148150797 ns/op
 */
 
 /*
-PBKDF2, tcN = 1
-BenchmarkPuzzle/classic-pbkdf2-12            100        1420053053 ns/op
---- BENCH: BenchmarkPuzzle/classic-pbkdf2-12
-    puzzle_test.go:184: Timer: 2.680241873s
-    puzzle_test.go:184: Timer: 2m22.00527795s
-BenchmarkPuzzle/parallel-pbkdf2-12           100         529875241 ns/op
---- BENCH: BenchmarkPuzzle/parallel-pbkdf2-12
-    puzzle_test.go:184: Timer: 829.850422ms
-    puzzle_test.go:184: Timer: 52.98738265s
-*/
-
-/*
 PBKDF2, tcN = 2
 BenchmarkPuzzle/classic-pbkdf2-12            100        2072725056 ns/op
 --- BENCH: BenchmarkPuzzle/classic-pbkdf2-12
@@ -103,18 +91,6 @@ BenchmarkPuzzle/parallel-pbkdf2-12           100         742923374 ns/op
 --- BENCH: BenchmarkPuzzle/parallel-pbkdf2-12
     puzzle_test.go:164: Timer: 1.582913278s
     puzzle_test.go:164: Timer: 1m14.292203667s
-*/
-
-/*
-PBKDF2, tcN = 4
-BenchmarkPuzzle/classic-pbkdf2-12            100        3496014792 ns/op
---- BENCH: BenchmarkPuzzle/classic-pbkdf2-12
-    puzzle_test.go:142: Timer: 737.164055ms
-    puzzle_test.go:142: Timer: 5m49.601461294s
-BenchmarkPuzzle/parallel-pbkdf2-12           100         886905385 ns/op
---- BENCH: BenchmarkPuzzle/parallel-pbkdf2-12
-    puzzle_test.go:142: Timer: 173.95526ms
-    puzzle_test.go:142: Timer: 1m28.690512668s
 */
 
 // go test -bench=BenchmarkPuzzleParallel -benchtime=100x
@@ -203,8 +179,8 @@ func (p *sPoWPuzzle) testParallelProofBytes(packHash []byte) uint64 {
 
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for i := uint64(0); i < parallel; i++ {
-		var intHash big.Int
 		go func(i uint64) {
+			var intHash big.Int
 			for nonce := i; nonce < math.MaxUint64; nonce += parallel {
 				select {
 				case <-closed:
@@ -270,8 +246,8 @@ func (p *sPoWPuzzle) testParallelPBKDF2ProofBytes(packHash []byte) uint64 {
 
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for i := uint64(0); i < parallel; i++ {
-		var intHash big.Int
 		go func(i uint64) {
+			var intHash big.Int
 			for nonce := i; nonce < math.MaxUint64; nonce += parallel {
 				select {
 				case <-closed:
