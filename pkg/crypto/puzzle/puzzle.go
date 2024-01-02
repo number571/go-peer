@@ -1,12 +1,13 @@
 package puzzle
 
 import (
-	"bytes"
+	"crypto/sha256"
 	"math"
 	"math/big"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -19,14 +20,16 @@ var (
 
 type sPoWPuzzle struct {
 	fDiff uint8
+	fIter uint64
 }
 
-func NewPoWPuzzle(pDiff uint64) IPuzzle {
+func NewPoWPuzzle(pDiff, pIter uint64) IPuzzle {
 	if pDiff >= math.MaxUint8 {
 		panic("diff >= 256")
 	}
 	return &sPoWPuzzle{
 		fDiff: uint8(pDiff),
+		fIter: pIter,
 	}
 }
 
@@ -40,13 +43,13 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for nonce := uint64(0); nonce < math.MaxUint64; nonce++ {
 		bNonce := encoding.Uint64ToBytes(nonce)
-		hash := hashing.NewSHA256Hasher(bytes.Join(
-			[][]byte{
-				packHash,
-				bNonce[:],
-			},
-			[]byte{},
-		)).ToBytes()
+		hash := pbkdf2.Key(
+			packHash,
+			bNonce[:],
+			int(p.fIter),
+			hashing.CSHA256Size,
+			sha256.New,
+		)
 		intHash.SetBytes(hash)
 		if intHash.Cmp(target) == -1 {
 			return nonce
@@ -62,13 +65,13 @@ func (p *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
 		target  = big.NewInt(1)
 	)
 	bNonce := encoding.Uint64ToBytes(nonce)
-	hash := hashing.NewSHA256Hasher(bytes.Join(
-		[][]byte{
-			packHash,
-			bNonce[:],
-		},
-		[]byte{},
-	)).ToBytes()
+	hash := pbkdf2.Key(
+		packHash,
+		bNonce[:],
+		int(p.fIter),
+		hashing.CSHA256Size,
+		sha256.New,
+	)
 	intHash.SetBytes(hash)
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	return intHash.Cmp(target) == -1

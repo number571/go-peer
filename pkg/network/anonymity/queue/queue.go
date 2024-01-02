@@ -73,8 +73,12 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
-		case <-time.After(p.fSettings.GetDuration() / 2):
+		default:
 			if p.poolHasLimit() {
+				select {
+				case <-pCtx.Done():
+				case <-time.After(p.fSettings.GetDuration() / 2):
+				}
 				continue
 			}
 			netMsg := p.newPseudoNetworkMessage(pCtx)

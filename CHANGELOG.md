@@ -6,10 +6,6 @@
 
 *??? ??, ????*
 
-### CHANGES
-
-- Update `pkg/crypto/puzzle`: back pbkdf2(sha256, N) -> sha256
-
 <!-- ... -->
 
 ## v1.5.25
