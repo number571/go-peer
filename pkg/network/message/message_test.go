@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -19,8 +20,8 @@ var (
 const (
 	tcHead       = 12345
 	tcBody       = "hello, world!"
-	tcNetworkKey = "network_key"
-	tcProof      = 4706
+	tcNetworkKey = "network_key_1"
+	tcProof      = 1359
 )
 
 type sInvalidPayload struct{}
@@ -63,6 +64,7 @@ func TestMessage(t *testing.T) {
 	}
 
 	if msg.GetProof() != tcProof {
+		fmt.Println(msg.GetProof())
 		t.Error("got invalid proof")
 		return
 	}
@@ -89,7 +91,7 @@ func TestMessage(t *testing.T) {
 
 	msg3 := NewMessage(sett, pld).(*sMessage)
 	msg3.fHash = random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-	msg3.fProof = puzzle.NewPoWPuzzle(testutils.TCWorkSize, 1).ProofBytes(msg3.fHash)
+	msg3.fProof = puzzle.NewPoWPuzzle(testutils.TCWorkSize).ProofBytes(msg3.fHash)
 	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
 		t.Error("success load with invalid hash")
 		return

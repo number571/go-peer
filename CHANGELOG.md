@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/crypto/puzzle`: back pbkdf2 -> sha256
+
 ### BUG FIXES
 
 - Update `pkg/network/anonymity/queue`: fix generating period of pseudo messages
