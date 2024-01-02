@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/crypto/puzzle`: change pbkdf2(sha256, N) -> hmac(sha256)
+
 <!-- ... -->
 
 ## v1.5.25

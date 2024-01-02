@@ -12,9 +12,6 @@ import (
 )
 
 const (
-	// pbkdf2(sha256, N=2)
-	cPuzzleIterN = 2
-
 	// third digits of PI
 	cAuthSalt = "8214808651_3282306647_0938446095_5058223172_5359408128"
 )
@@ -31,7 +28,7 @@ type sMessage struct {
 
 func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
 	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits(), cPuzzleIterN).ProofBytes(hash)
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)
 
 	return &sMessage{
 		fProof:   proof,
@@ -64,7 +61,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	copy(proofArray[:], proofBytes[:])
 
 	proof := encoding.BytesToUint64(proofArray)
-	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits(), cPuzzleIterN)
+	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(gotHash, proof) {
 		return nil, errors.New("got invalid proof of work")
 	}
