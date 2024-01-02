@@ -20,7 +20,7 @@ const (
 	tcHead       = 12345
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key"
-	tcProof      = 382
+	tcProof      = 180
 )
 
 type sInvalidPayload struct{}

@@ -7,10 +7,6 @@ PPROF_PORT=_
 _COVERAGE_RAW=_ 
 _COVERAGE_VAR=_
 
-# updates in 'test-coverage' block
-_COUNT_UP_TESTS_RAW=_
-_COUNT_UP_TESTS_VAR=_
-
 _TEST_RESULT_PATH=./test/result
 _TEST_PPROF_PATH=./test/pprof
 
@@ -44,13 +40,9 @@ test-run: clean
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
 test-coverage: clean
-	$(eval _COUNT_UP_TESTS_RAW=git status | grep "_test.go" | wc -l)
-	$(eval _COUNT_UP_TESTS_VAR := $(shell echo "`${_COUNT_UP_TESTS_RAW}`/1" | bc))
-	if [ $(_COUNT_UP_TESTS_VAR) -gt 0 ]; then \
-		go fmt ./...; \
-		go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 ./...; \
-		$(_CHECK_ERROR); \
-	fi
+	go fmt ./...; \
+	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 ./...; \
+	$(_CHECK_ERROR); \
 
 test-coverage-view:
 	go tool cover -html=$(_TEST_RESULT_PATH)/coverage.out

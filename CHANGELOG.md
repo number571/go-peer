@@ -8,7 +8,7 @@
 
 ### CHANGES
 
-- Update `pkg/crypto/puzzle`: change pbkdf2(sha256, N) -> hmac(sha256)
+- Update `pkg/crypto/puzzle`: back pbkdf2(sha256, N) -> sha256
 
 <!-- ... -->
 

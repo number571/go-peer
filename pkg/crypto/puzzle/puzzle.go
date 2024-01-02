@@ -1,6 +1,7 @@
 package puzzle
 
 import (
+	"bytes"
 	"math"
 	"math/big"
 
@@ -39,10 +40,13 @@ func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for nonce := uint64(0); nonce < math.MaxUint64; nonce++ {
 		bNonce := encoding.Uint64ToBytes(nonce)
-		hash := hashing.NewHMACSHA256Hasher(
-			packHash,
-			bNonce[:],
-		).ToBytes()
+		hash := hashing.NewSHA256Hasher(bytes.Join(
+			[][]byte{
+				packHash,
+				bNonce[:],
+			},
+			[]byte{},
+		)).ToBytes()
 		intHash.SetBytes(hash)
 		if intHash.Cmp(target) == -1 {
 			return nonce
@@ -58,10 +62,13 @@ func (p *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
 		target  = big.NewInt(1)
 	)
 	bNonce := encoding.Uint64ToBytes(nonce)
-	hash := hashing.NewHMACSHA256Hasher(
-		packHash,
-		bNonce[:],
-	).ToBytes()
+	hash := hashing.NewSHA256Hasher(bytes.Join(
+		[][]byte{
+			packHash,
+			bNonce[:],
+		},
+		[]byte{},
+	)).ToBytes()
 	intHash.SetBytes(hash)
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	return intHash.Cmp(target) == -1
