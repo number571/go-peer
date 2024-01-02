@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	cLocalAddressHLE = "localhost:9551"
+	cLocalAddressHLE = "localhost:8551"
 )
 
 func main() {
