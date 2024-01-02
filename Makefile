@@ -7,7 +7,7 @@ PPROF_PORT=_
 _COVERAGE_RAW=_ 
 _COVERAGE_VAR=_
 
-# 
+# updates in 'test-coverage' block
 _COUNT_UP_TESTS_RAW=_
 _COUNT_UP_TESTS_VAR=_
 
