@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `pkg/network/anonymity/queue`: fix generating period of pseudo messages
+
 <!-- ... -->
 
 ## v1.5.25
