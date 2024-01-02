@@ -10,6 +10,7 @@
 8. Append errors (as traffic/database) for all interface methods
 9. Append Batch's to database
 10. HLM: append address of user in the chat
+11. Append parallel option for net_message.IMessage, puzzle.IPuzzle, hls.IApp
 
 ### Tests
 

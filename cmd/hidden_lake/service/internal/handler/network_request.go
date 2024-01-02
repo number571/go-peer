@@ -67,12 +67,6 @@ func HandleNetworkRequestAPI(pCtx context.Context, pConfig config.IConfig, pLogg
 			panic("undefined error code")
 		}
 
-		if len(pNode.GetNetworkNode().GetConnections()) == 0 {
-			pLogger.PushWarn(logBuilder.WithMessage("no_connection"))
-			api.Response(pW, http.StatusBadGateway, "failed: no connection")
-			return
-		}
-
 		if ok, err := setRequestID(pNode, requestID); err != nil {
 			if ok {
 				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
