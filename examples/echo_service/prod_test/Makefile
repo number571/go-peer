@@ -1,8 +1,8 @@
 CMDPATH=../../../cmd
 BINPATH=../../../bin
 
+N=10
 PROD=1
-NUM_NODES=10
 LIST_NODES=$(shell ls ./other_nodes | wc -l)
 
 .PHONY: default init build run clean
@@ -12,7 +12,7 @@ init:
 	pkill -15 --version
 
 generate-configs: 
-	go run ./gen_cfgs prod_$(PROD) $(NUM_NODES)
+	go run ./gen_cfgs prod_$(PROD) $(N)
 
 build: generate-configs
 	# MAKEFILE BUILD
