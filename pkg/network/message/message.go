@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	// pbkdf2(sha256, N=2)
-	cPuzzleIterN = 2
+	// pbkdf2(sha256, N=1)
+	cPuzzleIterN = 1
 
 	// third digits of PI
 	cAuthSalt = "8214808651_3282306647_0938446095_5058223172_5359408128"
