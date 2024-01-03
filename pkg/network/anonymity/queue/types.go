@@ -24,5 +24,6 @@ type IMessageQueue interface {
 type ISettings interface {
 	GetMainCapacity() uint64
 	GetPoolCapacity() uint64
+	GetParallel() uint64
 	GetDuration() time.Duration
 }

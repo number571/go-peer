@@ -46,7 +46,7 @@ func TestMessage(t *testing.T) {
 		FWorkSizeBits: testutils.TCWorkSize,
 		FNetworkKey:   tcNetworkKey,
 	})
-	msg := NewMessage(sett, pld)
+	msg := NewMessage(sett, pld, 1)
 
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
@@ -89,15 +89,15 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg3 := NewMessage(sett, pld).(*sMessage)
+	msg3 := NewMessage(sett, pld, 1).(*sMessage)
 	msg3.fHash = random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-	msg3.fProof = puzzle.NewPoWPuzzle(testutils.TCWorkSize).ProofBytes(msg3.fHash)
+	msg3.fProof = puzzle.NewPoWPuzzle(testutils.TCWorkSize).ProofBytes(msg3.fHash, 1)
 	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
 		t.Error("success load with invalid hash")
 		return
 	}
 
-	msg4 := NewMessage(sett, &sInvalidPayload{})
+	msg4 := NewMessage(sett, &sInvalidPayload{}, 1)
 	if _, err := LoadMessage(sett, msg4.ToBytes()); err == nil {
 		t.Error("success load with invalid payload")
 		return

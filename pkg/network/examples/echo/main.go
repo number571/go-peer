@@ -54,6 +54,7 @@ func main() {
 	sendMsg := message.NewMessage(
 		conn.GetSettings(),
 		payload.NewPayload(serviceHeader, []byte("hello, world!")),
+		1,
 	)
 	if err := conn.WriteMessage(ctx, sendMsg); err != nil {
 		panic(err)
@@ -78,6 +79,7 @@ func handler() network.IHandlerF {
 				serviceHeader,
 				[]byte(fmt.Sprintf("echo: [%s]", string(msg.GetPayload().GetBody()))),
 			),
+			1,
 		))
 		return nil
 	}

@@ -26,8 +26,9 @@ var (
 type sApp struct {
 	fState state.IState
 
-	fConfig  config.IConfig
-	fPrivKey asymmetric.IPrivKey
+	fParallel uint64
+	fConfig   config.IConfig
+	fPrivKey  asymmetric.IPrivKey
 
 	fHTTPLogger logger.ILogger
 	fStdfLogger logger.ILogger
@@ -40,6 +41,7 @@ func NewApp(
 	pCfg config.IConfig,
 	pPrivKey asymmetric.IPrivKey,
 	pPathTo string,
+	pParallel uint64,
 ) types.IRunner {
 	logging := pCfg.GetLogging()
 
@@ -50,6 +52,7 @@ func NewApp(
 
 	return &sApp{
 		fState:      state.NewBoolState(),
+		fParallel:   pParallel,
 		fConfig:     pCfg,
 		fPrivKey:    pPrivKey,
 		fHTTPLogger: httpLogger,

@@ -36,7 +36,7 @@ const (
 var (
 	tcConfig = fmt.Sprintf(`settings:
   message_size_bytes: 8192
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: %d
   queue_period_ms: 1000
   limit_void_size_bytes: 4096
@@ -205,6 +205,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: testutils.TCQueueCapacity,
 				FPoolCapacity: testutils.TCQueueCapacity,
+				FParallel:     1,
 				FDuration:     500 * time.Millisecond,
 			}),
 			client.NewClient(

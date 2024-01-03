@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/config"
@@ -15,6 +16,12 @@ import (
 
 // initApp work with the raw data = read files, read args
 func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
+	strParallel := flag.GetFlagValue("parallel", "1")
+	setParallel, err := strconv.Atoi(strParallel)
+	if err != nil {
+		return nil, fmt.Errorf("set parallel: %w", err)
+	}
+
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", pDefaultKey)
 
@@ -32,7 +39,7 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 		return nil, errors.New("size of private key is invalid")
 	}
 
-	return NewApp(cfg, privKey, inputPath), nil
+	return NewApp(cfg, privKey, inputPath, uint64(setParallel)), nil
 }
 
 func getPrivKey(pCfg config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"math"
 	"math/big"
+	"runtime"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -32,33 +33,60 @@ func NewPoWPuzzle(pDiff uint64) IPuzzle {
 
 // Proof of work by the method of finding the desired hash.
 // Hash must start with 'diff' number of zero bits.
-func (p *sPoWPuzzle) ProofBytes(packHash []byte) uint64 {
+func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 	var (
+		chNonce = make(chan uint64)
+		closed  = make(chan struct{})
 		target  = big.NewInt(1)
 		intHash = big.NewInt(1)
 	)
-	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
-	for nonce := uint64(0); nonce < math.MaxUint64; nonce++ {
-		bNonce := encoding.Uint64ToBytes(nonce)
-		hash := hashing.NewSHA256Hasher(bytes.Join(
-			[][]byte{packHash, bNonce[:]},
-			[]byte{},
-		)).ToBytes()
-		intHash.SetBytes(hash)
-		if intHash.Cmp(target) == -1 {
-			return nonce
-		}
+
+	maxParallel := uint64(runtime.GOMAXPROCS(0))
+	setParallel := pParallel
+	if pParallel > maxParallel {
+		setParallel = maxParallel
 	}
-	return 0
+
+	packHash := make([]byte, len(pPackHash))
+	copy(packHash, pPackHash)
+
+	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
+	for i := uint64(0); i < setParallel; i++ {
+		go func(i uint64) {
+			for nonce := i; nonce < math.MaxUint64; nonce += setParallel {
+				select {
+				case <-closed:
+					return
+				default:
+					bNonce := encoding.Uint64ToBytes(nonce)
+					hash := hashing.NewSHA256Hasher(bytes.Join(
+						[][]byte{packHash, bNonce[:]},
+						[]byte{},
+					)).ToBytes()
+					intHash.SetBytes(hash)
+					if intHash.Cmp(target) == -1 {
+						chNonce <- nonce
+					}
+				}
+			}
+		}(i)
+	}
+	result := <-chNonce
+	close(closed)
+	return result
 }
 
 // Verifies the work of the proof of work function.
-func (p *sPoWPuzzle) VerifyBytes(packHash []byte, nonce uint64) bool {
+func (p *sPoWPuzzle) VerifyBytes(pPackHash []byte, pNonce uint64) bool {
 	var (
 		intHash = big.NewInt(1)
 		target  = big.NewInt(1)
 	)
-	bNonce := encoding.Uint64ToBytes(nonce)
+
+	packHash := make([]byte, len(pPackHash))
+	copy(packHash, pPackHash)
+
+	bNonce := encoding.Uint64ToBytes(pNonce)
 	hash := hashing.NewSHA256Hasher(bytes.Join(
 		[][]byte{packHash, bNonce[:]},
 		[]byte{},

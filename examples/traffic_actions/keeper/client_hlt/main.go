@@ -31,7 +31,7 @@ func main() {
 	})
 
 	netSett := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: 20,
+		FWorkSizeBits: 22,
 		FNetworkKey:   "j2BR39JfDf7Bajx3",
 	})
 
@@ -84,6 +84,7 @@ func main() {
 		netMsg := net_message.NewMessage(
 			netSett,
 			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+			1,
 		)
 
 		if err := hltClient.PutMessage(netMsg); err != nil {

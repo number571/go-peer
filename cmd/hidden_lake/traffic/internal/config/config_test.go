@@ -20,7 +20,7 @@ const (
 	tcConsumer1     = "test_consumer1"
 	tcConsumer2     = "test_consumer2"
 	tcMessageSize   = (1 << 20)
-	tcWorkSize      = 20
+	tcWorkSize      = 22
 	tcCapMessages   = 1000
 	tcQueuePeriodMS = 5000
 )

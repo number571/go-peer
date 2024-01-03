@@ -21,7 +21,7 @@ func main() {
 	}
 
 	netSett := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: 20,
+		FWorkSizeBits: 22,
 		FNetworkKey:   "j2BR39JfDf7Bajx3",
 	})
 

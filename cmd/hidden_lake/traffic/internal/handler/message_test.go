@@ -35,6 +35,7 @@ func TestHandleMessageAPI(t *testing.T) {
 	netMsg := net_message.NewMessage(
 		testNetworkMessageSettings(),
 		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+		1,
 	)
 	if err := hltClient.PutMessage(netMsg); err != nil {
 		t.Error(err)

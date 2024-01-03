@@ -37,7 +37,7 @@ Default config `hle.yml`
 ```yaml
 settings:
   message_size_bytes: 8192
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: 4096
 logging:
 - info
@@ -85,7 +85,7 @@ $ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07
 ```yaml
 settings:
   message_size_bytes: 8192
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: 4096
   network_key: hle-network-key
 logging:
@@ -192,5 +192,5 @@ Content-Length: 68
 ```
 
 ```json
-{"message_size_bytes":8192,"key_size_bits":4096,"work_size_bits":20}
+{"message_size_bytes":8192,"key_size_bits":4096,"work_size_bits":22}
 ```

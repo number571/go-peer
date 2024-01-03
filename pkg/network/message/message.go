@@ -26,9 +26,9 @@ type sMessage struct {
 	fPayload payload.IPayload
 }
 
-func NewMessage(pSett ISettings, pPld payload.IPayload) IMessage {
+func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel uint64) IMessage {
 	hash := getHash(pSett.GetNetworkKey(), pPld.ToBytes())
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash)
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 
 	return &sMessage{
 		fProof:   proof,

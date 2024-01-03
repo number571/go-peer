@@ -86,7 +86,7 @@ func initRecvNode(pConnects string) *sNodeHLS {
 		fPath: "recv_hls",
 		fConfig: fmt.Sprintf(`settings:
   message_size_bytes: %d
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
@@ -115,7 +115,7 @@ func initSendNode(pConnects string) *sNodeHLS {
 		fPath: "send_hls",
 		fConfig: fmt.Sprintf(`settings:
   message_size_bytes: %d
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
@@ -154,7 +154,7 @@ clean:
 			pI),
 		fConfig: fmt.Sprintf(`settings:
   message_size_bytes: %d
-  work_size_bits: 20
+  work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
   limit_void_size_bytes: 4096

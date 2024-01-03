@@ -670,6 +670,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: testutils.TCQueueCapacity,
 				FPoolCapacity: testutils.TCQueueCapacity,
+				FParallel:     1,
 				FDuration:     time.Second,
 			}),
 			client.NewClient(
@@ -715,5 +716,6 @@ func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsg message.
 			p.fSettings.GetNetworkMask(),
 			pMsg.ToBytes(),
 		),
+		1,
 	)
 }

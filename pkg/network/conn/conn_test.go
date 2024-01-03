@@ -108,7 +108,7 @@ func TestClosedConn(t *testing.T) {
 	}
 
 	pld := payload.NewPayload(1, []byte("aaa"))
-	msg := message.NewMessage(conn.GetSettings(), pld)
+	msg := message.NewMessage(conn.GetSettings(), pld, 1)
 
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err == nil {
@@ -199,7 +199,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	conn.GetSettings().SetNetworkKey(pNetworkKey)
 
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
-	msg := message.NewMessage(conn.GetSettings(), pld)
+	msg := message.NewMessage(conn.GetSettings(), pld, 1)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
 		t.Error(err)

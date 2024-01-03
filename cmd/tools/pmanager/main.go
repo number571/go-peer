@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	workSize = 20
+	workSize = 22
 )
 
 func main() {

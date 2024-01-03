@@ -50,6 +50,7 @@ func NewApp(
 	pCfg config.IConfig,
 	pPrivKey asymmetric.IPrivKey,
 	pPathTo string,
+	pParallel uint64,
 ) types.IRunner {
 	logging := pCfg.GetLogging()
 
@@ -59,7 +60,7 @@ func NewApp(
 		stdfLogger = std_logger.NewStdLogger(logging, std_logger.GetLogFunc())
 	)
 
-	node := initNode(pCfg, pPrivKey, anonLogger)
+	node := initNode(pCfg, pPrivKey, anonLogger, pParallel)
 
 	return &sApp{
 		fState:      state.NewBoolState(),

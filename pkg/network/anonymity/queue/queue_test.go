@@ -64,6 +64,7 @@ func TestRunStopQueue(t *testing.T) {
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FPoolCapacity: 1,
+			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),
 		client,
@@ -120,6 +121,7 @@ func TestQueue(t *testing.T) {
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FPoolCapacity: testutils.TCQueueCapacity,
+			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),
 		client.NewClient(

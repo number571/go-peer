@@ -40,7 +40,7 @@ Default config `hll.yml`
 ```yaml
 settings:
   messages_capacity: 2048
-  work_size_bits: 20
+  work_size_bits: 22
 logging:
 - info
 - warn
@@ -96,7 +96,7 @@ messages have been successfully transported
 ```yaml
 settings:
   messages_capacity: 2048
-  work_size_bits: 20
+  work_size_bits: 22
   network_key: hlt-network-key
 logging:
   - info
@@ -185,5 +185,5 @@ Content-Length: 46
 ```
 
 ```json
-{"messages_capacity":2048,"work_size_bits":20}
+{"messages_capacity":2048,"work_size_bits":22}
 ```

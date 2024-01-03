@@ -6,9 +6,14 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/crypto/puzzle`: append parallel option
+
 ### CHANGES
 
 - Update `pkg/crypto/puzzle`: back pbkdf2 -> sha256
+- Update `cmd/hidden_lake`: up work_size_bits: 20 -> 22
 
 ### BUG FIXES
 

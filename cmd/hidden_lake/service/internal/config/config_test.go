@@ -28,7 +28,7 @@ const (
 	tcServiceName1  = "test_service1"
 	tcServiceName2  = "test_service2"
 	tcMessageSize   = (1 << 20)
-	tcWorkSize      = 20
+	tcWorkSize      = 22
 	tcQueuePeriod   = 1000
 	tcLimitVoidSize = (1 << 20)
 )

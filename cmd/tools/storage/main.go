@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	cWorkSize = 20 // bits
+	cWorkSize = 22 // bits
 )
 
 func main() {

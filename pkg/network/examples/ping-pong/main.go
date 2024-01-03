@@ -57,6 +57,7 @@ func main() {
 			serviceHeader,
 			[]byte("0"),
 		),
+		1,
 	)
 	service2.BroadcastMessage(ctx, msg)
 
@@ -84,6 +85,7 @@ func handler(serviceName string) network.IHandlerF {
 				serviceHeader,
 				[]byte(fmt.Sprintf("%d", num+1)),
 			),
+			1,
 		))
 
 		return nil

@@ -12,6 +12,7 @@ type SSettings sSettings
 type sSettings struct {
 	FMainCapacity uint64
 	FPoolCapacity uint64
+	FParallel     uint64
 	FDuration     time.Duration
 }
 
@@ -19,6 +20,7 @@ func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FMainCapacity: pSett.FMainCapacity,
 		FPoolCapacity: pSett.FPoolCapacity,
+		FParallel:     pSett.FParallel,
 		FDuration:     pSett.FDuration,
 	}).mustNotNull()
 }
@@ -30,10 +32,17 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FPoolCapacity == 0 {
 		panic(`p.FPoolCapacity == 0`)
 	}
+	if p.FParallel == 0 {
+		panic(`p.FParallel == 0`)
+	}
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
 	}
 	return p
+}
+
+func (p *sSettings) GetParallel() uint64 {
+	return p.FParallel
 }
 
 func (p *sSettings) GetMainCapacity() uint64 {

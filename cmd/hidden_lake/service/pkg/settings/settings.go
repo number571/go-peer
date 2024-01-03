@@ -42,7 +42,7 @@ const (
 
 const (
 	CDefaultMessageSize   = (8 << 10) // 8KiB
-	CDefaultWorkSize      = 20        // bits
+	CDefaultWorkSize      = 22        // bits
 	CDefaultKeySize       = 4096      // bits
 	CDefaultQueuePeriod   = 5000      // 5 seconds
 	CDefaultLimitVoidSize = (4 << 10) // 4KiB
@@ -82,7 +82,3 @@ const (
 	CHandleNetworkRequestPath = "/api/network/request"
 	CHandleNetworkPubKeyPath  = "/api/network/pubkey"
 )
-
-func GetConnDeadline(pQueuePeriod time.Duration) time.Duration {
-	return pQueuePeriod / 2
-}

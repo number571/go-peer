@@ -54,7 +54,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if sett.GetWorkSizeBits() != 20 {
+	if sett.GetWorkSizeBits() != 22 {
 		t.Error("invalid work size")
 		return
 	}

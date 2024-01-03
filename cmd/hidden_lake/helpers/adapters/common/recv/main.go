@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	workSize    = 20
+	workSize    = 22
 	messageSize = (8 << 10)
 )
 

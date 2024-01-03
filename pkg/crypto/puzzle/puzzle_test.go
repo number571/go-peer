@@ -30,7 +30,7 @@ func TestPuzzle(t *testing.T) {
 	)
 
 	hash := hashing.NewSHA256Hasher(msg).ToBytes()
-	proof := puzzle.ProofBytes(hash)
+	proof := puzzle.ProofBytes(hash, 1)
 
 	if !puzzle.VerifyBytes(hash, proof) {
 		t.Error("proof is invalid")
@@ -68,7 +68,7 @@ BenchmarkPuzzle/22-bit-12                    100        1746838647 ns/op
 func BenchmarkPuzzle(b *testing.B) {
 	benchTable := []struct {
 		name     string
-		function func([]byte) uint64
+		function func([]byte, uint64) uint64
 	}{
 		{
 			name:     "20-bit",
@@ -98,7 +98,7 @@ func BenchmarkPuzzle(b *testing.B) {
 
 			now := time.Now()
 			for i := 0; i < b.N; i++ {
-				_ = t.function(randomBytes[i])
+				_ = t.function(randomBytes[i], 1)
 			}
 			end := time.Since(now)
 

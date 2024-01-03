@@ -121,6 +121,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 			p.fNetworkMask,
 			pMsg.ToBytes(),
 		),
+		p.fSettings.GetParallel(),
 	)
 	return nil
 }
@@ -166,6 +167,7 @@ func (p *sMessageQueue) newPseudoNetworkMessage(pCtx context.Context) net_messag
 				networkMask,
 				msg.ToBytes(),
 			),
+			p.fSettings.GetParallel(),
 		)
 	}()
 

@@ -137,7 +137,7 @@ func TestBroadcast(t *testing.T) {
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
 			sett := nodes[0].GetSettings().GetConnSettings()
-			nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld))
+			nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld, 1))
 		}(i)
 	}
 
@@ -328,7 +328,7 @@ func TestHandleMessage(t *testing.T) {
 	ctx := context.Background()
 
 	node.HandleFunc(1, nil)
-	msg1 := message.NewMessage(sett, payload.NewPayload(1, []byte{1}))
+	msg1 := message.NewMessage(sett, payload.NewPayload(1, []byte{1}), 1)
 	if ok := node.handleMessage(ctx, nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
@@ -337,7 +337,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return errors.New("some error")
 	})
-	msg2 := message.NewMessage(sett, payload.NewPayload(1, []byte{2}))
+	msg2 := message.NewMessage(sett, payload.NewPayload(1, []byte{2}), 1)
 	if ok := node.handleMessage(ctx, nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
@@ -346,7 +346,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
 		return nil
 	})
-	msg3 := message.NewMessage(sett, payload.NewPayload(1, []byte{3}))
+	msg3 := message.NewMessage(sett, payload.NewPayload(1, []byte{3}), 1)
 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return

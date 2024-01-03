@@ -405,6 +405,7 @@ func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_
 			FWorkSizeBits: testutils.TCWorkSize,
 		}),
 		payload.NewPayload(0, msg.ToBytes()),
+		1,
 	)
 	return netMsg, nil
 }

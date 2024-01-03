@@ -19,12 +19,9 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 )
 
-func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger) anonymity.INode {
+func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger, pParallel uint64) anonymity.INode {
 	cfgSettings := pCfg.GetSettings()
-
 	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
-	connDeadline := pkg_settings.GetConnDeadline(queueDuration)
-
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
@@ -48,8 +45,8 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
-					FReadDeadline:     connDeadline,
-					FWriteDeadline:    connDeadline,
+					FReadDeadline:     queueDuration,
+					FWriteDeadline:    queueDuration,
 				}),
 			}),
 			queue_set.NewQueueSet(
@@ -62,6 +59,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: pkg_settings.CQueueCapacity,
 				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
+				FParallel:     pParallel,
 				FDuration:     queueDuration,
 			}),
 			client.NewClient(

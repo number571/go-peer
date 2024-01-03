@@ -137,6 +137,7 @@ func TestHandleTransferAPI(t *testing.T) {
 				hls_settings.CNetworkMask,
 				encMsg.ToBytes(),
 			),
+			1,
 		)
 		err = hltClient1.PutMessage(netMsg)
 		if err != nil {
