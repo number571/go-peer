@@ -13,6 +13,7 @@
 ### BUG FIXES
 
 - Update `pkg/network/anonymity/queue`: fix generating period of pseudo messages
+- Update `pkg/network/conn`: fix get header bytes
 
 <!-- ... -->
 

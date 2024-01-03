@@ -130,7 +130,7 @@ func TestClosedConn(t *testing.T) {
 		return
 	}
 
-	if _, err := sconn.recvDataBytes(ctx, 128); err == nil {
+	if _, err := sconn.recvDataBytes(ctx, 128, time.Second); err == nil {
 		t.Error("success recv data bytes from closed connection")
 		return
 	}
