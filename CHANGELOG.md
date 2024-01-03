@@ -10,6 +10,10 @@
 
 - Update `pkg/crypto/asymmetric`: IAddress -> hashing.IHasher
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/[service|encryptor]`: fix -parallel option = 0
+
 <!-- ... -->
 
 ## v1.5.26
