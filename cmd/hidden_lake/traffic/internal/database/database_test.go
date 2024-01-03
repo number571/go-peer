@@ -369,7 +369,7 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
-		if pubKey.GetAddress().ToString() != cl.GetPubKey().GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != cl.GetPubKey().GetHasher().ToString() {
 			t.Error("load public key != init public key")
 			return
 		}

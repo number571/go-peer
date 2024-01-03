@@ -87,7 +87,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:     fPubKey.GetAddress().ToString(),
+			FAddress:     fPubKey.GetHasher().ToString(),
 			FMessageInfo: getMessageInfo(dbMsg.GetSenderID(), dbMsg.GetMessage(), dbMsg.GetTimestamp()),
 		})
 

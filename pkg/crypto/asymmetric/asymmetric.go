@@ -16,13 +16,11 @@ import (
 var (
 	_ IPrivKey = &sRSAPrivKey{}
 	_ IPubKey  = &sRSAPubKey{}
-	_ IAddress = &sAddress{}
 )
 
 const (
 	cPrivKeyPrefix = "PrivKey{"
 	cPubKeyPrefix  = "PubKey{"
-	cAddressPrefix = "Address{"
 	cKeySuffix     = "}"
 )
 
@@ -146,13 +144,13 @@ func sign(pPrivKey *rsa.PrivateKey, pHash []byte) []byte {
  */
 
 type sRSAPubKey struct {
-	fAddr   IAddress
+	fHasher hashing.IHasher
 	fPubKey *rsa.PublicKey
 }
 
 func newRSAPubKey(pPubKey *rsa.PublicKey) IPubKey {
 	return &sRSAPubKey{
-		fAddr:   newRSAAddress(pPubKey),
+		fHasher: newRSAHasher(pPubKey),
 		fPubKey: pPubKey,
 	}
 }
@@ -196,8 +194,8 @@ func (p *sRSAPubKey) EncryptBytes(pMsg []byte) []byte {
 	return encryptRSA(p.fPubKey, pMsg)
 }
 
-func (p *sRSAPubKey) GetAddress() IAddress {
-	return p.fAddr
+func (p *sRSAPubKey) GetHasher() hashing.IHasher {
+	return p.fHasher
 }
 
 func (p *sRSAPubKey) VerifyBytes(pMsg []byte, pSign []byte) bool {
@@ -220,28 +218,10 @@ func (p *sRSAPubKey) GetSize() uint64 {
  * Address
  */
 
-type sAddress struct {
-	fBytes []byte
-}
-
-func newRSAAddress(pPubKey *rsa.PublicKey) IAddress {
-	return &sAddress{
-		fBytes: hashing.NewSHA256Hasher(
-			rsaPublicKeyToBytes(pPubKey),
-		).ToBytes(),
-	}
-}
-
-func (p *sAddress) ToBytes() []byte {
-	return p.fBytes
-}
-
-func (p *sAddress) ToString() string {
-	return fmt.Sprintf(cAddressPrefix+"%X"+cKeySuffix, p.ToBytes())
-}
-
-func (p *sAddress) GetSize() uint64 {
-	return hashing.CSHA256Size
+func newRSAHasher(pPubKey *rsa.PublicKey) hashing.IHasher {
+	return hashing.NewSHA256Hasher(
+		rsaPublicKeyToBytes(pPubKey),
+	)
 }
 
 // Used RSA(OAEP).

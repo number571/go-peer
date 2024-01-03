@@ -313,7 +313,7 @@ func TestComplexConfig(t *testing.T) {
 	for name, pubStr := range tgPubKeys {
 		v1 := cfg.GetFriends()[name]
 		pubKey := asymmetric.LoadRSAPubKey(pubStr)
-		if pubKey.GetAddress().ToString() != v1.GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != v1.GetHasher().ToString() {
 			t.Errorf("public key is invalid '%s'", v1)
 			return
 		}

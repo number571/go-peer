@@ -73,7 +73,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if pubKey.GetAddress().ToString() != q.GetClient().GetPubKey().GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != q.GetClient().GetPubKey().GetHasher().ToString() {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

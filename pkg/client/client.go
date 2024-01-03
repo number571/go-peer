@@ -119,8 +119,8 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			p.GetPubKey().GetAddress().ToBytes(),
-			pRecv.GetAddress().ToBytes(),
+			p.GetPubKey().GetHasher().ToBytes(),
+			pRecv.GetHasher().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},
@@ -195,8 +195,8 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	// Check received hash and generated hash.
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			pubKey.GetAddress().ToBytes(),
-			p.GetPubKey().GetAddress().ToBytes(),
+			pubKey.GetHasher().ToBytes(),
+			p.GetPubKey().GetHasher().ToBytes(),
 			doublePayload.ToBytes(),
 		},
 		[]byte{},

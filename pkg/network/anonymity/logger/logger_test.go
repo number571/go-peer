@@ -49,8 +49,8 @@ func TestLogger(t *testing.T) {
 		return
 	}
 
-	if getter.GetPubKey().GetAddress().ToString() != pubKey.GetAddress().ToString() {
-		t.Error("getter.GetPubKey().GetAddress().ToString() != pubKey.GetAddress().ToString()")
+	if getter.GetPubKey().GetHasher().ToString() != pubKey.GetHasher().ToString() {
+		t.Error("getter.GetPubKey().GetHasher().ToString() != pubKey.GetHasher().ToString()")
 		return
 	}
 

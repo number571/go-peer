@@ -94,7 +94,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			senderID := myPubKey.GetAddress().ToBytes()
+			senderID := myPubKey.GetHasher().ToBytes()
 			dbMsg := database.NewMessage(false, senderID, doMessageProcessor(msgBytes))
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("push_message"))
@@ -128,7 +128,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			sTemplate: getTemplate(pCfg),
 			FAddress: sChatAddress{
 				FAliasName:  aliasName,
-				FPubKeyHash: recvPubKey.GetAddress().ToString(),
+				FPubKeyHash: recvPubKey.GetHasher().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),
 		}
@@ -209,7 +209,7 @@ func sendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKe
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
 
-	myAddress := pMyPubKey.GetAddress().ToBytes()
+	myAddress := pMyPubKey.GetHasher().ToBytes()
 	return pClient.BroadcastRequest(
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).

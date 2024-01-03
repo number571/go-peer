@@ -43,7 +43,7 @@ func getLog(logStrType string, pLogGetter anon_logger.ILogGetter) string {
 
 	addr := make([]byte, hashing.CSHA256Size)
 	if x := pLogGetter.GetPubKey(); x != nil {
-		addr = x.GetAddress().ToBytes()
+		addr = x.GetHasher().ToBytes()
 	}
 
 	hash := make([]byte, hashing.CSHA256Size)

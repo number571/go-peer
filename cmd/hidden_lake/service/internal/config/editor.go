@@ -125,7 +125,7 @@ func pubKeysToStrings(pPubKeys map[string]asymmetric.IPubKey) map[string]string 
 func hasDuplicatePubKeys(pPubKeys map[string]asymmetric.IPubKey) bool {
 	mapping := make(map[string]struct{})
 	for _, pubKey := range pPubKeys {
-		pubStr := pubKey.GetAddress().ToString()
+		pubStr := pubKey.GetHasher().ToString()
 		if _, ok := mapping[pubStr]; ok {
 			return true
 		}

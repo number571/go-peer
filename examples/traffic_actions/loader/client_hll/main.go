@@ -165,7 +165,7 @@ func checkMessages(netMsgSettings net_message.ISettings, msgSettings message.ISe
 			return err
 		}
 
-		if pubKey.GetAddress().ToString() != client.GetPubKey().GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
 			return errors.New("got invalid public key")
 		}
 

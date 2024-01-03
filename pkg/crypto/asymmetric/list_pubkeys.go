@@ -25,7 +25,7 @@ func (p *sListPubKeys) InPubKeys(pPubKey IPubKey) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	_, ok := p.fMapping[pPubKey.GetAddress().ToString()]
+	_, ok := p.fMapping[pPubKey.GetHasher().ToString()]
 	return ok
 }
 
@@ -47,7 +47,7 @@ func (p *sListPubKeys) AddPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fMapping[pPubKey.GetAddress().ToString()] = pPubKey
+	p.fMapping[pPubKey.GetHasher().ToString()] = pPubKey
 }
 
 // Delete public key from list of friends.
@@ -55,5 +55,5 @@ func (p *sListPubKeys) DelPubKey(pub IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	delete(p.fMapping, pub.GetAddress().ToString())
+	delete(p.fMapping, pub.GetHasher().ToString())
 }

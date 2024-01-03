@@ -189,7 +189,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			return
 		}
 
-		if pubKey.GetAddress().ToString() != client.GetPubKey().GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
 			t.Error("got bad public key")
 			return
 		}

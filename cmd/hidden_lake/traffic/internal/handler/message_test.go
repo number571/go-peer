@@ -64,7 +64,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	if gotPubKey.GetAddress().ToString() != client.GetPubKey().GetAddress().ToString() {
+	if gotPubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
 		t.Error(err)
 		return
 	}

@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/crypto/asymmetric`: IAddress -> hashing.IHasher
+
 <!-- ... -->
 
 ## v1.5.26

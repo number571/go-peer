@@ -451,6 +451,6 @@ func (p *sNode) delAction(pActionKey string) {
 }
 
 func newActionKey(pPubKey asymmetric.IPubKey, pHead uint32) string {
-	pubKeyAddr := pPubKey.GetAddress().ToString()
+	pubKeyAddr := pPubKey.GetHasher().ToString()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pHead)
 }

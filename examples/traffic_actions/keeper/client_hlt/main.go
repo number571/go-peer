@@ -116,7 +116,7 @@ func main() {
 			panic("payload head != constant head")
 		}
 
-		if pubKey.GetAddress().ToString() != client.GetPubKey().GetAddress().ToString() {
+		if pubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
 			panic("public key is incorrect")
 		}
 

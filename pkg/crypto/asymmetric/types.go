@@ -2,13 +2,9 @@ package asymmetric
 
 import (
 	"github.com/number571/go-peer/pkg/crypto"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/types"
 )
-
-type IAddress interface {
-	types.IConverter
-	GetSize() uint64
-}
 
 type IListPubKeys interface {
 	InPubKeys(IPubKey) bool
@@ -22,7 +18,7 @@ type IPubKey interface {
 	types.IConverter
 	GetSize() uint64
 
-	GetAddress() IAddress
+	GetHasher() hashing.IHasher
 	VerifyBytes([]byte, []byte) bool
 }
 
