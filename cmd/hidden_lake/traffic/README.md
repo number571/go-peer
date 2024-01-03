@@ -76,6 +76,11 @@ $ make docker-run
 > ...
 ```
 
+```bash
+$ ./hlt -path=/root
+# path = path to config and database files
+```
+
 ## Example 
 
 Build and run service

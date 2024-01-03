@@ -60,6 +60,13 @@ $ make docker-run
 > ...
 ```
 
+## Running options
+
+```bash
+$ ./hll -path=/root
+# path = path to config and database files
+```
+
 ## Example 
 
 In the example, two HLT services are created, where one is a message producer, the other a consumer. First, messages are entered into the manufacturer, then the HLL (message transportation) function is turned on, and at the end, the delivery of all previously entered messages is checked, but already on the consumer's side.

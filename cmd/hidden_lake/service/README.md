@@ -114,6 +114,15 @@ $ make docker-run
 > ...
 ```
 
+## Running options
+
+```bash
+$ ./hls -path=/root -key=/root/priv.key -parallel=1
+# path     = path to config and database files
+# key      = path to private key file
+# parallel = num of parallel functions for PoW algorithm
+```
+
 ## Example
 
 There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
