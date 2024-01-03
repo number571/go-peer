@@ -22,6 +22,9 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 	if err != nil {
 		return nil, fmt.Errorf("set parallel: %w", err)
 	}
+	if setParallel == 0 {
+		return nil, errors.New("set parallel = 0")
+	}
 
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", pDefaultKey)
