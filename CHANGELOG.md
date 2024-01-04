@@ -13,6 +13,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/[service|encryptor]`: fix -parallel option = 0
+- Update `pkg/crypto/puzzle`: fix ProofBytes in parallel mode
 
 <!-- ... -->
 

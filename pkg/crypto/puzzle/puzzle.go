@@ -35,10 +35,8 @@ func NewPoWPuzzle(pDiff uint64) IPuzzle {
 // Hash must start with 'diff' number of zero bits.
 func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 	var (
-		chNonce = make(chan uint64)
-		closed  = make(chan struct{})
-		target  = big.NewInt(1)
-		intHash = big.NewInt(1)
+		closed = make(chan struct{})
+		target = big.NewInt(1)
 	)
 
 	maxParallel := uint64(runtime.GOMAXPROCS(0))
@@ -50,9 +48,12 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 	packHash := make([]byte, len(pPackHash))
 	copy(packHash, pPackHash)
 
+	chNonce := make(chan uint64, setParallel)
+
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for i := uint64(0); i < setParallel; i++ {
 		go func(i uint64) {
+			intHash := big.NewInt(1)
 			for nonce := i; nonce < math.MaxUint64; nonce += setParallel {
 				select {
 				case <-closed:
@@ -66,6 +67,7 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 					intHash.SetBytes(hash)
 					if intHash.Cmp(target) == -1 {
 						chNonce <- nonce
+						return
 					}
 				}
 			}
