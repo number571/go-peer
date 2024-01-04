@@ -79,7 +79,7 @@ func testDatabaseLoad(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewDatabase(NewSettings(&SSettings{
+	kvDB, err := dbConstruct(NewSettings(&SSettings{
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
@@ -112,7 +112,11 @@ func testDatabaseLoad(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 		return
 	}
 
-	ptrDB := kvDB.(*sDatabase)
+	ptrDB, ok := kvDB.(*sDatabase)
+	if !ok {
+		// pass inmemory_database
+		return
+	}
 
 	hash2 := hashing.NewSHA256Hasher([]byte{123}).ToBytes()
 	if err := ptrDB.fDB.Set(getKeyMessage(hash2), []byte{123}); err != nil {
@@ -211,7 +215,7 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
 
-	kvDB, err := NewDatabase(NewSettings(&SSettings{
+	kvDB, err := dbConstruct(NewSettings(&SSettings{
 		FPath:             pathDB,
 		FNetworkKey:       testutils.TCNetworkKey,
 		FWorkSizeBits:     testutils.TCWorkSize,
