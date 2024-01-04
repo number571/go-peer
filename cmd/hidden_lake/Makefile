@@ -6,13 +6,13 @@ build:
 	make -C ./service build
 	make -C ./messenger build
 	make -C ./traffic build
-	make -C ./composite build
+	make -C ./composites build
 	make -C ./helpers build
 clean:
 	make -C ./service clean
 	make -C ./messenger clean
 	make -C ./traffic clean
-	make -C ./composite clean
+	make -C ./composites clean
 	make -C ./helpers clean
 
 docker-default: docker-build docker-run

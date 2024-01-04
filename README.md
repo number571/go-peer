@@ -76,7 +76,7 @@ All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `
 
 Some final applications are compositions of other applications. Due to this, such applications are named in a slightly different way. Designation of abbreviations:
 
-1. `hlc` - Hidden Lake Composite
+1. `hlc` - Hidden Lake Composites
 2. `hlc_sm` - Composite of HLS (service) + HLM (messenger)
 3. `hlc_st` - Composite of HLS + HLT (traffic)
 4. `hlc_stm` - Composite of HLS + HLT + HLM
