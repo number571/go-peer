@@ -11,6 +11,12 @@ _TEST_RESULT_PATH=./test/result
 _TEST_PPROF_PATH=./test/pprof
 
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
+_GO_TEST_LIST=\
+	go list ./... | \
+	grep -v /examples | \
+	grep -v /cmd/tools/ | \
+	grep -v /cmd/micro_anon/ | \
+	grep -vsE '/cmd/hidden_lake/.*/cmd/'
 
 .PHONY: default clean \
 	test-run test-coverage test-coverage-view \
@@ -41,7 +47,7 @@ test-run: clean
 
 test-coverage: clean
 	go fmt ./...; \
-	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 ./...; \
+	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`; \
 	$(_CHECK_ERROR); \
 
 test-coverage-view:
