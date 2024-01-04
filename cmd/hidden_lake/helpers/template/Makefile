@@ -1,6 +1,6 @@
 N=1
 GC=go build
-ROOPATH=../../..
+ROOPATH=../../../..
 BINPATH=$(ROOPATH)/bin
 
 .PHONY: default build run test clean \
@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../_configs/hl_t.yml .
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/hl_t.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hl_t ./cmd/hl_t
 

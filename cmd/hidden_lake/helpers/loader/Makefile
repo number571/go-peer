@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../../_configs/hll.yml .
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/hll.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hll ./cmd/hll
 

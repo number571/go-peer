@@ -8,7 +8,7 @@ BINPATH=$(ROOPATH)/bin
 
 default: build run
 default-config: 
-	cp ../../_configs/hle.yml .
+	cp $(ROOPATH)/cmd/hidden_lake/_configs/hle.yml .
 build: default-config
 	$(GC) -o $(BINPATH)/hle ./cmd/hle
 
@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hle $(BINPATH)/hle_*
-	rm -rf hle.yml
+	rm -rf hle.yml priv.key
 
 docker-default: docker-build docker-run
 docker-build: docker-configs

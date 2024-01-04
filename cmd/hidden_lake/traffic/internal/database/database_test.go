@@ -71,7 +71,12 @@ func TestIInitDatabase(t *testing.T) {
 func TestDatabaseLoad(t *testing.T) {
 	t.Parallel()
 
-	pathDB := fmt.Sprintf(tcPathDBTemplate, 2)
+	testDatabaseLoad(t, 8, NewDatabase)
+	testDatabaseLoad(t, 9, NewInMemoryDatabase)
+}
+
+func testDatabaseLoad(t *testing.T, numDB int, dbConstruct func(pSett ISettings) (IDatabase, error)) {
+	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
 
 	kvDB, err := NewDatabase(NewSettings(&SSettings{
@@ -198,7 +203,12 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 func TestDatabasePush(t *testing.T) {
 	t.Parallel()
 
-	pathDB := fmt.Sprintf(tcPathDBTemplate, 1)
+	testDatabasePush(t, 6, NewDatabase)
+	testDatabasePush(t, 7, NewInMemoryDatabase)
+}
+
+func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings) (IDatabase, error)) {
+	pathDB := fmt.Sprintf(tcPathDBTemplate, numDB)
 	os.RemoveAll(pathDB)
 
 	kvDB, err := NewDatabase(NewSettings(&SSettings{

@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hls $(BINPATH)/hls_*
-	rm -rf hls.yml hls.db
+	rm -rf hls.yml hls.db priv.key
 
 docker-default: docker-build docker-run
 docker-build: docker-configs
