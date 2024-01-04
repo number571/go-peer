@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	hl_t_client "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/client"
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
+	hl_t_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/client"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 	testutils "github.com/number571/go-peer/test/_data"
 )
 

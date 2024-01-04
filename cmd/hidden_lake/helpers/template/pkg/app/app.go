@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/internal/config"
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/internal/config"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -54,7 +54,7 @@ func NewApp(
 }
 
 func (p *sApp) Run(pCtx context.Context) error {
-	services := []internal_types.IService{
+	services := []internal_types.IServiceF{
 		p.runListenerPPROF,
 		p.runListenerHTTP,
 	}
@@ -83,7 +83,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
-func (p *sApp) enable(_ context.Context) state.IStateFunc {
+func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
 		p.initServiceHTTP()
 		p.initServicePPROF()
@@ -93,7 +93,7 @@ func (p *sApp) enable(_ context.Context) state.IStateFunc {
 	}
 }
 
-func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateFunc {
+func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateF {
 	return func() error {
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hl_t_settings.CServiceName))
 

@@ -9,6 +9,7 @@
 ### CHANGES
 
 - Update `pkg/crypto/asymmetric`: IAddress -> hashing.IHasher
+- Update `cmd/hidden_lake/_template`: _template -> helpers/template
 
 ### BUG FIXES
 

@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/config"
 )
 
 var (

@@ -1,6 +1,6 @@
 package client
 
-import "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/config"
+import "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/config"
 
 type IClient interface {
 	GetIndex() (string, error)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/types"
 )

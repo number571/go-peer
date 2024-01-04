@@ -7,7 +7,7 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 )
 
 func HandleIndexAPI(pLogger logger.ILogger) http.HandlerFunc {

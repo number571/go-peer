@@ -20,11 +20,11 @@ type sEditor struct {
 
 func newEditor(pCfg IConfig) IEditor {
 	if pCfg == nil {
-		return nil
+		panic("cfg = nil")
 	}
 	v, ok := pCfg.(*SConfig)
 	if !ok {
-		return nil
+		panic("cfg is invalid")
 	}
 	return &sEditor{
 		fConfig: v,

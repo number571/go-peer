@@ -6,22 +6,17 @@ import (
 )
 
 const (
-	tcConfigFile    = "config_test.txt"
-	tcLogging       = true
-	tcStorage       = true
-	tcNetwork       = "test_network"
-	tcAddress1      = "test_address1"
-	tcAddress2      = "test_address2"
-	tcConnection1   = "test_connection1"
-	tcConnection2   = "test_connection2"
-	tcProducer1     = "test_producer1"
-	tcProducer2     = "test_producer2"
-	tcConsumer1     = "test_consumer1"
-	tcConsumer2     = "test_consumer2"
-	tcMessageSize   = (1 << 20)
-	tcWorkSize      = 22
-	tcCapMessages   = 1000
-	tcQueuePeriodMS = 5000
+	tcConfigFile  = "config_test.txt"
+	tcLogging     = true
+	tcNetwork     = "test_network"
+	tcAddress1    = "test_address1"
+	tcAddress2    = "test_address2"
+	tcProducer1   = "test_producer1"
+	tcProducer2   = "test_producer2"
+	tcConsumer1   = "test_consumer1"
+	tcConsumer2   = "test_consumer2"
+	tcWorkSize    = 22
+	tcCapMessages = 1000
 )
 
 func testConfigDefaultInit(configPath string) {

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/_template/internal/handler"
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/_template/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/internal/handler"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 )
 
 func (p *sApp) initServiceHTTP() {
