@@ -213,12 +213,10 @@ func sendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKe
 	return pClient.BroadcastRequest(
 		pAliasName,
 		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
-			WithHead(
-				map[string]string{
-					"Content-Type":               "application/json",
-					hlm_settings.CHeaderSenderId: encoding.HexEncode(myAddress),
-				},
-			).
+			WithHead(map[string]string{
+				"Content-Type":               "application/json",
+				hlm_settings.CHeaderSenderId: encoding.HexEncode(myAddress),
+			}).
 			WithBody(
 				symmetric.NewAESCipher(cipherKey).EncryptBytes(
 					bytes.Join(

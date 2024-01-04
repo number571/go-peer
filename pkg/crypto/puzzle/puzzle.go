@@ -45,10 +45,9 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 		setParallel = maxParallel
 	}
 
+	chNonce := make(chan uint64, setParallel)
 	packHash := make([]byte, len(pPackHash))
 	copy(packHash, pPackHash)
-
-	chNonce := make(chan uint64, setParallel)
 
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	for i := uint64(0); i < setParallel; i++ {
@@ -73,6 +72,7 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 			}
 		}(i)
 	}
+
 	result := <-chNonce
 	close(closed)
 	return result
@@ -88,12 +88,12 @@ func (p *sPoWPuzzle) VerifyBytes(pPackHash []byte, pNonce uint64) bool {
 	packHash := make([]byte, len(pPackHash))
 	copy(packHash, pPackHash)
 
+	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	bNonce := encoding.Uint64ToBytes(pNonce)
 	hash := hashing.NewSHA256Hasher(bytes.Join(
 		[][]byte{packHash, bNonce[:]},
 		[]byte{},
 	)).ToBytes()
 	intHash.SetBytes(hash)
-	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	return intHash.Cmp(target) == -1
 }

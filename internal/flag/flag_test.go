@@ -17,6 +17,46 @@ func TestPanicFlagValue(t *testing.T) {
 	_ = getFlagValueBySlice(argsSlice, "key", "_")
 }
 
+func TestBoolFlagValue(t *testing.T) {
+	t.Parallel()
+
+	argsSlice := []string{
+		"--key", "123",
+		"-name",
+		"value", "571",
+	}
+
+	if !getBoolFlagValueBySlice(argsSlice, "key") {
+		t.Error("!key")
+		return
+	}
+
+	if !getBoolFlagValueBySlice(argsSlice, "123") {
+		t.Error("!123")
+		return
+	}
+
+	if !getBoolFlagValueBySlice(argsSlice, "name") {
+		t.Error("!name")
+		return
+	}
+
+	if !getBoolFlagValueBySlice(argsSlice, "value") {
+		t.Error("!value")
+		return
+	}
+
+	if !getBoolFlagValueBySlice(argsSlice, "571") {
+		t.Error("!571")
+		return
+	}
+
+	if getBoolFlagValueBySlice(argsSlice, "undefined") {
+		t.Error("success get undefined value")
+		return
+	}
+}
+
 func TestFlagValue(t *testing.T) {
 	t.Parallel()
 
