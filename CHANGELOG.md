@@ -10,6 +10,7 @@
 
 - Update `pkg/crypto/asymmetric`: IAddress -> hashing.IHasher
 - Update `cmd/hidden_lake/_template`: _template -> helpers/template
+- Update `Makefile`: delete from test-coverage examples, tools, micro_anon, cmd directories
 
 ### BUG FIXES
 

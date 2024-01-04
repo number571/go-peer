@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"io/ioutil"
+	"os"
 )
 
 func main() {
@@ -17,11 +17,11 @@ func main() {
 		Type:  "PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privKey),
 	}
-	ioutil.WriteFile("priv.key", pem.EncodeToMemory(privateKeyBlock), 0644)
+	os.WriteFile("priv.key", pem.EncodeToMemory(privateKeyBlock), 0644)
 
 	publicKeyBlock := &pem.Block{
 		Type:  "PUBLIC KEY",
 		Bytes: x509.MarshalPKCS1PublicKey(&privKey.PublicKey),
 	}
-	ioutil.WriteFile("pub.key", pem.EncodeToMemory(publicKeyBlock), 0644)
+	os.WriteFile("pub.key", pem.EncodeToMemory(publicKeyBlock), 0644)
 }
