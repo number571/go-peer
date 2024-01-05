@@ -23,11 +23,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-var (
-	mutexRID = sync.Mutex{}
-)
-
-func HandleServiceTCP(pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.IHandlerF {
+func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.IHandlerF {
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
@@ -67,7 +63,7 @@ func HandleServiceTCP(pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.I
 		}
 
 		// try set request id into database
-		if ok, err := setRequestID(pNode, requestID); err != nil {
+		if ok, err := setRequestID(pMutex, pNode, requestID); err != nil {
 			if ok {
 				pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
 				return nil, nil
@@ -182,9 +178,9 @@ func getRequestID(pRequest request.IRequest) (string, bool) {
 	return requestID, true
 }
 
-func setRequestID(pNode anonymity.INode, pRequestID string) (bool, error) {
-	mutexRID.Lock()
-	defer mutexRID.Unlock()
+func setRequestID(pMutex *sync.Mutex, pNode anonymity.INode, pRequestID string) (bool, error) {
+	pMutex.Lock()
+	defer pMutex.Unlock()
 
 	// get database from wrapper
 	database := pNode.GetDBWrapper().Get()

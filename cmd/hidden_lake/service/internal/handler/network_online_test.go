@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -126,6 +127,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(
+			&sync.Mutex{},
 			config.NewWrapper(cfg),
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),

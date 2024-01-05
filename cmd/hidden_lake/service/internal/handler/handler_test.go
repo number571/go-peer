@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -137,13 +138,14 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 	)
 
 	cfg := wcfg.GetConfig()
+	mtx := &sync.Mutex{}
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
 	mux.HandleFunc(pkg_settings.CHandleConfigSettingsPath, HandleConfigSettingsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigConnectsPath, HandleConfigConnectsAPI(ctx, wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, cfg, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, mtx, cfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkPubKeyPath, HandleNetworkPubKeyAPI(logger, node))
 
 	srv := &http.Server{

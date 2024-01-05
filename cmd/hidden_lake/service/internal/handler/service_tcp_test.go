@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -98,6 +99,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(
+			&sync.Mutex{},
 			config.NewWrapper(cfg),
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
