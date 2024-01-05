@@ -33,8 +33,9 @@ type SConfig struct {
 
 	FLogging     []string             `yaml:"logging,omitempty"`
 	FAddress     *SAddress            `yaml:"address,omitempty"`
-	FConnections []string             `yaml:"connections,omitempty"`
+	FF2FDisabled bool                 `yaml:"f2f_disabled,omitempty"`
 	FServices    map[string]*SService `yaml:"services,omitempty"`
+	FConnections []string             `yaml:"connections,omitempty"`
 	FFriends     map[string]string    `yaml:"friends,omitempty"`
 
 	fFilepath string
@@ -224,6 +225,10 @@ func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
 		result[k] = v
 	}
 	return result
+}
+
+func (p *SConfig) GetF2FDisabled() bool {
+	return p.FF2FDisabled
 }
 
 func (p *SConfig) GetLogging() logger.ILogging {

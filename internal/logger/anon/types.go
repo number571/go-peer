@@ -13,6 +13,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 	anon_logger.CLogBaseGetResponse:       "GETRS",
 	anon_logger.CLogInfoExist:             "EXIST",
 	anon_logger.CLogInfoUndecryptable:     "UNDEC",
+	anon_logger.CLogInfoPassF2FOption:     "PF2FO",
 	anon_logger.CLogInfoWithoutResponse:   "WTHRS",
 	anon_logger.CLogWarnMessageNull:       "MNULL",
 	anon_logger.CLogWarnNotFriend:         "NTFRN",
@@ -24,6 +25,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 
 	// extend
 	CLogBaseResponseModeFromService: "RSPMD",
+	CLogBaseAppendNewFriend:         "APNFR",
 	CLogInfoOnlyShareRequest:        "OSHRQ",
 	CLogInfoResponseFromService:     "RSPSR",
 	CLogInfoRequestIDAlreadyExist:   "RQIDE",
@@ -38,6 +40,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 const (
 	// BASE
 	CLogBaseResponseModeFromService anon_logger.ILogType = iota + anon_logger.CLogFinal + 1
+	CLogBaseAppendNewFriend
 
 	// INFO
 	CLogInfoOnlyShareRequest

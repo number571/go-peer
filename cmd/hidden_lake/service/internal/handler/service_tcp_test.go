@@ -98,7 +98,7 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(
-			cfg,
+			config.NewWrapper(cfg),
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },

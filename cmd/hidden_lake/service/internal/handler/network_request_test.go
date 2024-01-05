@@ -132,7 +132,7 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 	node.HandleFunc(
 		hls_settings.CServiceMask,
 		HandleServiceTCP(
-			cfg,
+			config.NewWrapper(cfg),
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },

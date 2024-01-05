@@ -19,12 +19,14 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 )
 
-func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger, pParallel uint64) anonymity.INode {
-	cfgSettings := pCfg.GetSettings()
+func initNode(pCfgW config.IWrapper, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger, pParallel uint64) anonymity.INode {
+	cfg := pCfgW.GetConfig()
+	cfgSettings := cfg.GetSettings()
 	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
+			FF2FDisabled:   cfg.GetF2FDisabled(),
 			FNetworkMask:   pkg_settings.CNetworkMask,
 			FRetryEnqueue:  pkg_settings.CRetryEnqueue,
 			FFetchTimeWait: pkg_settings.CFetchTimeout,
@@ -35,7 +37,7 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 		anonymity.NewDBWrapper(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FAddress:      pCfg.GetAddress().GetTCP(),
+				FAddress:      cfg.GetAddress().GetTCP(),
 				FMaxConnects:  pkg_settings.CNetworkMaxConns,
 				FReadTimeout:  queueDuration,
 				FWriteTimeout: queueDuration,
@@ -78,13 +80,13 @@ func initNode(pCfg config.IConfig, pPrivKey asymmetric.IPrivKey, pLogger logger.
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
-			for _, pubKey := range pCfg.GetFriends() {
+			for _, pubKey := range cfg.GetFriends() {
 				f2f.AddPubKey(pubKey)
 			}
 			return f2f
 		}(),
 	).HandleFunc(
 		pkg_settings.CServiceMask,
-		handler.HandleServiceTCP(pCfg, pLogger),
+		handler.HandleServiceTCP(pCfgW, pLogger),
 	)
 }

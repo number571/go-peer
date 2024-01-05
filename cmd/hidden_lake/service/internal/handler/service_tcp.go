@@ -27,7 +27,7 @@ var (
 	mutexRID = sync.Mutex{}
 )
 
-func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHandlerF {
+func HandleServiceTCP(pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.IHandlerF {
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
@@ -35,6 +35,22 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		logBuilder.
 			WithSize(len(reqBytes)).
 			WithPubKey(sender)
+
+		cfg := pCfgW.GetConfig()
+		friends := cfg.GetFriends()
+
+		// append public key to list of friends if f2f option is disabled
+		if cfg.GetF2FDisabled() && !inFriendsList(friends, sender) {
+			// update config state with new friend
+			friends[sender.GetHasher().ToString()] = sender
+			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
+				pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
+				return nil, err
+			}
+			// update list of friends and continue read request
+			pNode.GetListPubKeys().AddPubKey(sender)
+			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
+		}
 
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
@@ -61,7 +77,7 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 		}
 
 		// get service's address by hostname
-		service, ok := pCfg.GetService(loadReq.GetHost())
+		service, ok := cfg.GetService(loadReq.GetHost())
 		if !ok {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
 			return nil, fmt.Errorf("failed: address undefined")
@@ -69,8 +85,6 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 
 		// share request to all friends
 		if service.GetShare() {
-			friends := pCfg.GetFriends()
-
 			wg := sync.WaitGroup{}
 			wg.Add(len(friends))
 
@@ -149,6 +163,15 @@ func HandleServiceTCP(pCfg config.IConfig, pLogger logger.ILogger) anonymity.IHa
 			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
 		}
 	}
+}
+
+func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IPubKey) bool {
+	pubKey, ok := pFriends[pPubKey.GetHasher().ToString()]
+	if !ok || !bytes.Equal(pubKey.ToBytes(), pPubKey.ToBytes()) {
+		// the same keys, but different values
+		return false
+	}
+	return true
 }
 
 func getRequestID(pRequest request.IRequest) (string, bool) {

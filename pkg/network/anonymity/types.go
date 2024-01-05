@@ -34,6 +34,7 @@ type INode interface {
 
 type ISettings interface {
 	GetServiceName() string
+	GetF2FDisabled() bool
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
 	GetFetchTimeWait() time.Duration

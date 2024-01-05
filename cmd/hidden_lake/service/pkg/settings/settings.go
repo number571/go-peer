@@ -46,6 +46,7 @@ const (
 	CDefaultKeySize       = 4096      // bits
 	CDefaultQueuePeriod   = 5000      // 5 seconds
 	CDefaultLimitVoidSize = (4 << 10) // 4KiB
+	CDefaultF2FDisabled   = false     // friend-to-friend
 )
 
 const (

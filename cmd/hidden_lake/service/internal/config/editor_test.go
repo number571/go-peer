@@ -50,6 +50,7 @@ func (p *tsConfig) GetNetworkKey() string                     { return "" }
 func (p *tsConfig) GetConnections() []string                  { return nil }
 func (p *tsConfig) GetFriends() map[string]asymmetric.IPubKey { return nil }
 func (p *tsConfig) GetService(_ string) (IService, bool)      { return nil, false }
+func (p *tsConfig) GetF2FDisabled() bool                      { return false }
 
 func TestPanicEditor(t *testing.T) {
 	t.Parallel()

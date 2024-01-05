@@ -30,8 +30,9 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
-	GetConnections() []string
+	GetF2FDisabled() bool
 	GetFriends() map[string]asymmetric.IPubKey
+	GetConnections() []string
 	GetService(string) (IService, bool)
 }
 

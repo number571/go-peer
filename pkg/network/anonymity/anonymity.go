@@ -240,10 +240,17 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		// enrich logger
 		logBuilder.WithPubKey(sender)
 
-		// check sender in f2f list
+		// check sender's public key in f2f list
 		if !p.fFriends.InPubKeys(sender) {
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
-			return nil
+			switch p.fSettings.GetF2FDisabled() {
+			case true:
+				// continue to read a message from unknown public key
+				p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
+			default:
+				// ignore reading messages from unknown public key
+				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
+				return nil
+			}
 		}
 
 		// get header of payload

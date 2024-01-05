@@ -63,6 +63,7 @@ address:
   tcp: %s
   http: %s
   pprof: %s
+f2f_disabled: true
 connections:
   - %s
   - %s
@@ -280,6 +281,11 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetPPROF() != tcAddressPPROF {
 		t.Error("address_pprof is invalid")
+		return
+	}
+
+	if !cfg.GetF2FDisabled() {
+		t.Error("f2f_disabled is invalid")
 		return
 	}
 

@@ -24,6 +24,7 @@ const (
 	// INFO
 	CLogInfoExist
 	CLogInfoUndecryptable
+	CLogInfoPassF2FOption
 	CLogInfoWithoutResponse
 
 	// WARN
