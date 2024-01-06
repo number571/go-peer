@@ -3,7 +3,7 @@
 <h2>
 	<p align="center">
     	<strong>
-        	The Hidden Lake network
+        	Theoretically Provable Anonymous Network
    		</strong>
 	</p>
 	<p align="center">
