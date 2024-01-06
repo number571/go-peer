@@ -8,19 +8,15 @@ _COVERAGE_RAW=_
 _COVERAGE_VAR=_
 
 _TEST_RESULT_PATH=./test/result
-_TEST_PPROF_PATH=./test/pprof
 
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
 _GO_TEST_LIST=\
 	go list ./... | \
-	grep -v /examples | \
-	grep -v /cmd/tools/ | \
-	grep -v /cmd/micro_anon/ | \
-	grep -vsE '/cmd/hidden_lake/.*/cmd/'
+	grep -v /examples/ | \
+	grep -v /cmd/
 
 .PHONY: default clean \
 	test-run test-coverage test-coverage-view \
-	pprof-run \
 	git-status git-push 
 
 default: test-run
@@ -31,7 +27,7 @@ clean:
 
 ### TEST
 # example run: make test-run N=10
-# for i in {1..100}; do echo $i; go test -count=1 ./...; done;
+# for i in {1..100}; do echo $i; go test -race -shuffle=on -count=1 ./...; done;
 
 test-run: clean
 	go vet ./...;
@@ -45,15 +41,19 @@ test-run: clean
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
 
+### TEST COVERAGE
+
 test-coverage: clean
-	go fmt ./...; \
-	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`; \
-	$(_CHECK_ERROR); \
+	make test-coverage -C cmd/hidden_lake/
+	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
+	$(_CHECK_ERROR)
 
 test-coverage-view:
+	make test-coverage-view -C cmd/hidden_lake/
 	go tool cover -html=$(_TEST_RESULT_PATH)/coverage.out
 
 test-coverage-badge: 
+	make test-coverage-badge -C cmd/hidden_lake/
 	$(eval _COVERAGE_RAW=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -Eo '[0-9]+\.[0-9]+')
 	$(eval _COVERAGE_VAR := $(shell echo "`${_COVERAGE_RAW}`/1" | bc))
 	if [ $(_COVERAGE_VAR) -lt 60 ]; then \
@@ -67,21 +67,10 @@ test-coverage-badge:
 ### GIT
 
 git-status: test-coverage test-coverage-badge
+	go fmt ./...
 	git add .
 	git status 
 
 git-push:
 	git commit -m "update"
 	git push 
-
-### PPROF
-# make pprof-run PPROF_NAME=hls PPROF_PORT=9573
-# make pprof-run PPROF_NAME=hlt PPROF_PORT=9583
-# make pprof-run PPROF_NAME=hlm PPROF_PORT=9593
-
-pprof-run:
-	go tool pprof -png -output $(_TEST_PPROF_PATH)/$(PPROF_NAME)/threadcreate.png http://localhost:$(PPROF_PORT)/debug/pprof/threadcreate
-	go tool pprof -png -output $(_TEST_PPROF_PATH)/$(PPROF_NAME)/profile.png http://localhost:$(PPROF_PORT)/debug/pprof/profile?seconds=5
-	go tool pprof -png -output $(_TEST_PPROF_PATH)/$(PPROF_NAME)/heap.png http://localhost:$(PPROF_PORT)/debug/pprof/heap
-	go tool pprof -png -output $(_TEST_PPROF_PATH)/$(PPROF_NAME)/goroutine.png http://localhost:$(PPROF_PORT)/debug/pprof/goroutine
-	go tool pprof -png -output $(_TEST_PPROF_PATH)/$(PPROF_NAME)/allocs.png http://localhost:$(PPROF_PORT)/debug/pprof/allocs

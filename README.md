@@ -13,17 +13,17 @@
 		<a href="https://github.com/topics/golang">
         	<img src="https://img.shields.io/github/go-mod/go-version/number571/go-peer" alt="Go" />
 		</a>
-		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
-        	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
-		</a>
 		<a href="https://github.com/number571/go-peer/releases">
         	<img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
 		</a>
-		<a href="https://github.com/number571/go-peer/pulse">
-        	<img src="https://img.shields.io/github/commit-activity/m/number571/go-peer" alt="Activity" />
+		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
+        	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
-		<a href="https://github.com/number571/go-peer/commits/master">
-        	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
+		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
+        	<img src="test/result/badge.svg" alt="Coverage" />
+		</a>
+		<a href="https://godoc.org/github.com/number571/go-peer">
+        	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
 		</a>
 	</p>
 	<p align="center">
@@ -33,11 +33,11 @@
 		<a href="https://goreportcard.com/report/github.com/number571/go-peer">
         	<img src="https://goreportcard.com/badge/github.com/number571/go-peer" alt="GoReportCard" />
 		</a>
-		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
-        	<img src="test/result/badge.svg" alt="Coverage" />
+		<a href="https://github.com/number571/go-peer/pulse">
+        	<img src="https://img.shields.io/github/commit-activity/m/number571/go-peer" alt="Activity" />
 		</a>
-		<a href="https://godoc.org/github.com/number571/go-peer">
-        	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
+		<a href="https://github.com/number571/go-peer/commits/master">
+        	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
 		</a>
 	</p>
 	<p align="center">
