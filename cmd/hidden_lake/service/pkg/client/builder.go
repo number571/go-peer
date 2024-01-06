@@ -19,10 +19,12 @@ func NewBuilder() IBuilder {
 
 func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {
 	if pPubKey == nil {
+		// del friend
 		return &pkg_settings.SFriend{
 			FAliasName: pAliasName,
 		}
 	}
+	// add friend
 	return &pkg_settings.SFriend{
 		FAliasName: pAliasName,
 		FPublicKey: pPubKey.ToString(),

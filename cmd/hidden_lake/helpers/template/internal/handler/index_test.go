@@ -10,6 +10,27 @@ import (
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
+func TestErrorsAPI(t *testing.T) {
+	t.Parallel()
+
+	client := hl_t_client.NewClient(
+		hl_t_client.NewRequester(
+			"http://"+testutils.TcUnknownHost,
+			&http.Client{Timeout: time.Second},
+		),
+	)
+
+	if _, err := client.GetIndex(); err == nil {
+		t.Error("success get index with unknown host")
+		return
+	}
+
+	if _, err := client.GetSettings(); err == nil {
+		t.Error("success get settings with unknown host")
+		return
+	}
+}
+
 func TestHandleIndexAPI(t *testing.T) {
 	t.Parallel()
 

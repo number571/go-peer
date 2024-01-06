@@ -118,6 +118,10 @@ var (
 )
 
 const (
+	TcUnknownHost = "localhost:65535"
+)
+
+const (
 	TcHead         = uint32(0xDEADBEAF)
 	TcBody         = "hello, world!"
 	TcBodyTemplate = TcBody + " (%d)"

@@ -15,8 +15,8 @@
 - Update `pkg/crypto/asymmetric`: IAddress -> hashing.IHasher
 - Update `cmd/hidden_lake/_template`: _template -> helpers/template
 - Update `cmd/hidden_lake/composite`: composite -> composites
-- Update `Makefile`: delete from test-coverage examples, tools, micro_anon, cmd directories
 - Update `cmd/hidden_lake/service`: delete global mutex from handler functions
+- Update `Makefile`: go test coverage from go-peer -> [go-peer, cmd/hidden_lake]
 
 ### BUG FIXES
 

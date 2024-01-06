@@ -64,7 +64,6 @@ func testInitTransfer() {
 
 	os.Mkdir(tcNameHLT1, 0o777)
 	os.Mkdir(tcNameHLT2, 0o777)
-
 }
 
 func TestHandleTransferAPI(t *testing.T) {

@@ -7,9 +7,83 @@ import (
 	"time"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/utils"
 )
+
+func TestErrorsAPI(t *testing.T) {
+	t.Parallel()
+
+	client := hls_client.NewClient(
+		hls_client.NewBuilder(),
+		hls_client.NewRequester(
+			"http://"+testutils.TcUnknownHost,
+			&http.Client{Timeout: time.Second},
+		),
+	)
+
+	if err := client.AddConnection(""); err == nil {
+		t.Error("success add connection with unknown host")
+		return
+	}
+
+	if err := client.DelConnection(""); err == nil {
+		t.Error("success del connection with unknown host")
+		return
+	}
+
+	if err := client.AddFriend("", asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])); err == nil {
+		t.Error("success add friend with unknown host")
+		return
+	}
+
+	if err := client.DelFriend(""); err == nil {
+		t.Error("success del friend with unknown host")
+		return
+	}
+
+	if err := client.BroadcastRequest("", request.NewRequest("", "", "")); err == nil {
+		t.Error("success broadcast request with unknown host")
+		return
+	}
+
+	if _, err := client.FetchRequest("", request.NewRequest("", "", "")); err == nil {
+		t.Error("success fetch request with unknown host")
+		return
+	}
+
+	if _, err := client.GetIndex(); err == nil {
+		t.Error("success get index with unknown host")
+		return
+	}
+
+	if _, err := client.GetConnections(); err == nil {
+		t.Error("success get connections with unknown host")
+		return
+	}
+
+	if _, err := client.GetFriends(); err == nil {
+		t.Error("success get friends with unknown host")
+		return
+	}
+
+	if _, err := client.GetOnlines(); err == nil {
+		t.Error("success get onlines with unknown host")
+		return
+	}
+
+	if _, err := client.GetPubKey(); err == nil {
+		t.Error("success get pub key with unknown host")
+		return
+	}
+
+	if _, err := client.GetSettings(); err == nil {
+		t.Error("success get settings with unknown host")
+		return
+	}
+}
 
 func TestHandleIndexAPI(t *testing.T) {
 	t.Parallel()
