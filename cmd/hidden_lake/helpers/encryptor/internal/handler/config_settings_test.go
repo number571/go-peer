@@ -6,7 +6,7 @@ import (
 	"time"
 
 	hle_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/client"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestHandleConfigSettingsAPI(t *testing.T) {

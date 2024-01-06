@@ -9,7 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/messenger/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (

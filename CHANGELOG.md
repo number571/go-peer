@@ -286,7 +286,7 @@
 - Update `cmd/hidden_lake/composite`: update Makefiles build/clean
 - Update `examples/echo_service`: rename with_stress_test -> prod_test
 - Update `examples/traffic_keeper`: append -tags=prod
-- Update `test/_data`: change 4096 bit key -> 1024 bit key
+- Update `test/utils`: change 4096 bit key -> 1024 bit key
 - Update `pkg/client/queue`: change receiver of void messages -> random public key
 - Update `internal/settings`: delete internal/settings
 - Update `cmd/hidden_lake/messenger`: delete fields "message_size_bytes", "work_size_bits", "key_size_bits" from settings
@@ -573,7 +573,7 @@
 - Service `hidden_lake`: rename CHeaderHLS -> CServiceMask
 - Package `storage`: deleted memory storage
 - Package `database`: deleted settings value - salt
-- Package `test/_data`: reduced the dependency of other packages on this
+- Package `test/utils`: reduced the dependency of other packages on this
 - Package `internal/api`: JSON (return, result) -> http code, result
 - Package `encoding`: Serialize function now Marshal (not MarshalIndent) data
 - Example `images`: replace HLS, HLA gifs with requests

@@ -14,7 +14,7 @@ import (
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (

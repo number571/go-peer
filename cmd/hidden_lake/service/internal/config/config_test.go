@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (

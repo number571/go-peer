@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (

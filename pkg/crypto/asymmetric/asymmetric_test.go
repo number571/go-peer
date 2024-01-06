@@ -147,6 +147,16 @@ func TestRSASign(t *testing.T) {
 		t.Error("signature is invalid")
 		return
 	}
+
+	if pub.VerifyBytes(msg, []byte{123}) {
+		t.Error("success verify with invalid signature")
+		return
+	}
+
+	if pub.VerifyBytes([]byte{123}, msg) {
+		t.Error("success verify with invalid message")
+		return
+	}
 }
 
 func TestRSAEncrypt(t *testing.T) {

@@ -3,7 +3,7 @@ package asymmetric
 import (
 	"testing"
 
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 var (

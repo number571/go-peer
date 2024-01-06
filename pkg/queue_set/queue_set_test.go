@@ -29,6 +29,24 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
+func TestPanicQueueSet(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	queueSet := NewQueueSet(
+		NewSettings(&SSettings{
+			FCapacity: 3,
+		}),
+	).(*sQueueSet)
+
+	queueSet.fQueue[0] = "abc"
+	_, _ = queueSet.GetKey(0)
+}
+
 func TestQueueSet(t *testing.T) {
 	queueSet := NewQueueSet(
 		NewSettings(&SSettings{
@@ -51,6 +69,10 @@ func TestQueueSet(t *testing.T) {
 		key := encoding.Uint64ToBytes(uint64(i))
 		if ok := queueSet.Push(key[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
 			t.Errorf("failed push %d", i)
+			return
+		}
+		if queueSet.GetIndex() != uint64((i+1)%3) {
+			t.Error("got invalid index")
 			return
 		}
 	}

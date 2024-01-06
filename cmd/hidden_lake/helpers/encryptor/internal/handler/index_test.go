@@ -7,7 +7,7 @@ import (
 
 	hle_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestHandleIndexAPI(t *testing.T) {

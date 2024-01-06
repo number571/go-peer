@@ -59,6 +59,7 @@ func (p *sConnKeeper) Run(pCtx context.Context) error {
 
 func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
 	connList := p.fSettings.GetConnections()
+	mapConns := p.fNode.GetConnections()
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(connList))
@@ -66,12 +67,9 @@ func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
 	for _, addr := range connList {
 		go func(addr string) {
 			defer wg.Done()
-
-			mapConns := p.fNode.GetConnections()
 			if _, ok := mapConns[addr]; ok {
 				return
 			}
-
 			p.fNode.AddConnection(pCtx, addr)
 		}(addr)
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/settings"
 	"github.com/number571/go-peer/pkg/logger"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 var (

@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -20,7 +21,7 @@ import (
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -36,7 +37,7 @@ const (
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	node, cancels := testNewNode(time.Minute, "", 9, 0)
+	node, cancels := testNewNode(time.Minute, "", 9, 0, false)
 	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 9)
 
 	sett := node.GetSettings()
@@ -274,72 +275,69 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 }
 
-// func TestEnqueuePayload(t *testing.T) {
-// 	t.Parallel()
+func TestEnqueuePayload(t *testing.T) {
+	t.Parallel()
 
-// 	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
-// 	nodes := testNewNodes(t, time.Minute, addresses, 8)
-// 	if nodes[0] == nil {
-// 		t.Error("nodes is null")
-// 		return
-// 	}
-// 	defer testFreeNodes(nodes[:], 8)
+	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
+	nodes, cancels := testNewNodes(t, time.Minute, addresses, 8)
+	if nodes[0] == nil {
+		t.Error("nodes is null")
+		return
+	}
+	defer testFreeNodes(nodes[:], cancels[:], 8)
 
-// 	node := nodes[0].(*sNode)
-// 	client := nodes[0].GetMessageQueue().GetClient()
-// 	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
+	node := nodes[0].(*sNode)
+	client := nodes[0].GetMessageQueue().GetClient()
+	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
 
-// 	msgBody := "hello, world!"
-// 	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
-// 	if err := node.enqueuePayload('?', pubKey, pld); err == nil {
-// 		t.Error("success with undefined type of message")
-// 		return
-// 	}
+	ctx := context.Background()
 
-// 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
-// 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
-// 	if err := node.enqueuePayload(cIsRequest, pubKey, overPld); err == nil {
-// 		t.Error("success with overhead message")
-// 		return
-// 	}
+	msgBody := "hello, world!"
+	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
+	if err := node.enqueuePayload(ctx, '?', pubKey, pld); err == nil {
+		t.Error("success with undefined type of message")
+		return
+	}
 
-// 	msg, err := client.EncryptPayload(
-// 		pubKey,
-// 		adapters.NewPayload(
-// 			testutils.TcHead,
-// 			wrapRequest([]byte(msgBody)),
-// 		).ToOrigin(),
-// 	)
-// 	if err != nil {
-// 		t.Error(err)
-// 		return
-// 	}
+	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
+	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
+	if err := node.enqueuePayload(ctx, cIsRequest, pubKey, overPld); err == nil {
+		t.Error("success with overhead message")
+		return
+	}
 
-// 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-// 		if err := node.send(msg); err != nil {
-// 			t.Error("failed send message (push to queue)")
-// 			return
-// 		}
-// 	}
+	msg, err := client.EncryptPayload(
+		pubKey,
+		adapters.NewPayload(
+			testutils.TcHead,
+			wrapRequest([]byte(msgBody)),
+		).ToOrigin(),
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
-// 	for i := 0; i < 5; i++ {
-// 		if err := node.enqueuePayload(cIsRequest, pubKey, pld); err != nil {
-// 			return
-// 		}
-// 		for j := 0; j < testutils.TCQueueCapacity; j++ {
-// 			if err := node.send(msg); err != nil {
-// 				break // fill queue on limit
-// 			}
-// 		}
-// 	}
+	for i := 0; i < testutils.TCQueueCapacity; i++ {
+		if err := node.enqueueMessage(ctx, msg); err != nil {
+			t.Error("failed send message (push to queue)")
+			return
+		}
+	}
 
-// 	t.Error("success enqueue payload over queue capacity")
-// }
+	for i := 0; i < 5; i++ {
+		if err := node.enqueuePayload(ctx, cIsRequest, pubKey, pld); err != nil {
+			return
+		}
+	}
+
+	t.Error("success enqueue payload over queue capacity")
+}
 
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 7, 0)
+	_node, cancel := testNewNode(time.Minute, "", 7, 0, true)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 7)
 
 	node := _node.(*sNode)
@@ -347,7 +345,8 @@ func TestHandleWrapper(t *testing.T) {
 	client := node.fQueue.GetClient()
 	pubKey := client.GetPubKey()
 
-	node.GetListPubKeys().AddPubKey(pubKey)
+	// // ignore add public key (f2f_disabled=true)
+	// node.GetListPubKeys().AddPubKey(pubKey)
 
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
@@ -365,7 +364,7 @@ func TestHandleWrapper(t *testing.T) {
 	ctx := context.Background()
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.testNewNetworkMessage(sett, msg)
+	netMsg := node.testNewNetworkMessage(sett, msg.ToBytes())
 	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
@@ -395,7 +394,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg2 := node.testNewNetworkMessage(sett, msg2)
+	netMsg2 := node.testNewNetworkMessage(sett, msg2.ToBytes())
 	if err := handler(ctx, nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -413,7 +412,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg3 := node.testNewNetworkMessage(sett, msg3)
+	netMsg3 := node.testNewNetworkMessage(sett, msg3.ToBytes())
 	if err := handler(ctx, nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -431,9 +430,22 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	netMsg4 := node.testNewNetworkMessage(sett, msg4)
+	netMsg4 := node.testNewNetworkMessage(sett, msg4.ToBytes())
 	if err := handler(ctx, nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
+		return
+	}
+
+	netMsg5 := node.testNewNetworkMessage(sett, []byte{123})
+	if err := handler(ctx, nil, nil, netMsg5); err == nil {
+		t.Error("got success code with invalid message body")
+		return
+	}
+
+	node.GetDBWrapper().Set(nil)
+	netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
+	if err := handler(ctx, nil, nil, netMsg41); err == nil {
+		t.Error("got success code with closed database")
 		return
 	}
 }
@@ -441,7 +453,7 @@ func TestHandleWrapper(t *testing.T) {
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 6, 0)
+	_node, cancel := testNewNode(time.Minute, "", 6, 0, false)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 6)
 
 	node := _node.(*sNode)
@@ -461,7 +473,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.testNewNetworkMessage(sett, msg)
+	netMsg := node.testNewNetworkMessage(sett, msg.ToBytes())
 	logBuilder := anon_logger.NewLogBuilder("_")
 
 	ctx := context.Background()
@@ -490,7 +502,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 func TestRecvSendMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 5, 0)
+	_node, cancel := testNewNode(time.Minute, "", 5, 0, false)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 5)
 
 	node := _node.(*sNode)
@@ -559,7 +571,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	addrs := [5]string{"", "", addresses[0], "", addresses[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i)
+		nodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i, false)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running %d", i, typeDB)
 			return [5]INode{}, [5]context.CancelFunc{}
@@ -621,7 +633,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	return nodes, cancels
 }
 
-func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode, context.CancelFunc) {
+func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
@@ -637,6 +649,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:   "TEST",
+			FF2FDisabled:   f2fDisabled,
 			FNetworkMask:   networkMask,
 			FFetchTimeWait: timeWait,
 		}),
@@ -709,12 +722,12 @@ func testDeleteDB(typeDB int) {
 	}
 }
 
-func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsg message.IMessage) net_message.IMessage {
+func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsgBytes []byte) net_message.IMessage {
 	return net_message.NewMessage(
 		pSett,
 		payload.NewPayload(
 			p.fSettings.GetNetworkMask(),
-			pMsg.ToBytes(),
+			pMsgBytes,
 		),
 		1,
 	)

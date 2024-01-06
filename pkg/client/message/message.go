@@ -65,8 +65,6 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 		if msg.FPayload == nil {
 			return nil, errors.New("hex decode payload")
 		}
-	default:
-		panic("got unknown type")
 	}
 
 	if !msg.IsValid(psett) {

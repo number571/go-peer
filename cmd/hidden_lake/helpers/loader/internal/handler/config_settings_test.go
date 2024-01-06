@@ -6,7 +6,7 @@ import (
 	"time"
 
 	hll_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/client"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestHandleConfigSettingsAPI(t *testing.T) {

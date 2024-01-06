@@ -2,7 +2,6 @@ package storage
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -151,15 +150,11 @@ func (p *sCryptoStorage) isExist() bool {
 
 func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 	// Encrypt and save storage
-	data, err := json.Marshal(pMapping)
-	if err != nil {
-		return fmt.Errorf("marshal decrypted map: %w", err)
-	}
-
-	err = os.WriteFile(
+	jsonData := encoding.SerializeJSON(pMapping)
+	err := os.WriteFile(
 		p.fSettings.GetPath(),
 		bytes.Join(
-			[][]byte{p.fSalt, p.fCipher.EncryptBytes(data)},
+			[][]byte{p.fSalt, p.fCipher.EncryptBytes(jsonData)},
 			[]byte{},
 		),
 		0o644,
@@ -167,7 +162,6 @@ func (p *sCryptoStorage) encrypt(pMapping *storageData) error {
 	if err != nil {
 		return fmt.Errorf("write to storage: %w", err)
 	}
-
 	return nil
 }
 
@@ -180,8 +174,7 @@ func (p *sCryptoStorage) decrypt() (*storageData, error) {
 	}
 
 	data := p.fCipher.DecryptBytes(encdata[cSaltSize:])
-	err = json.Unmarshal(data, &mapping)
-	if err != nil {
+	if err := encoding.DeserializeJSON(data, &mapping); err != nil {
 		return nil, fmt.Errorf("unmarshal decrypt map: %w", err)
 	}
 

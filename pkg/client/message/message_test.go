@@ -6,7 +6,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (
@@ -111,6 +111,16 @@ func TestMessage(t *testing.T) {
 }
 
 func testMessage(t *testing.T, msg IMessage) {
+	if !bytes.Equal(msg.ToBytes(), testutils.TCBinaryMessage) {
+		t.Error("invalid convert to bytes")
+		return
+	}
+
+	if msg.ToString() != testutils.TCStringMessage {
+		t.Error("invalid convert to string")
+		return
+	}
+
 	if !bytes.Equal(msg.GetSalt(), encoding.HexDecode(tcSalt)) {
 		t.Error("incorrect salt value")
 		return

@@ -48,7 +48,7 @@ func (p *sQueueSet) GetKey(i uint64) ([]byte, bool) {
 
 	hash := encoding.HexDecode(p.fQueue[i])
 	if hash == nil {
-		return nil, false
+		panic("got invalid hex encoded hash")
 	}
 
 	return hash, true
@@ -59,8 +59,8 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	defer p.fMutex.Unlock()
 
 	// hash already exists in queue
-	encKey := encoding.HexEncode(pKey)
-	if _, ok := p.fMap[encKey]; ok {
+	hexKey := encoding.HexEncode(pKey)
+	if _, ok := p.fMap[hexKey]; ok {
 		return false
 	}
 
@@ -68,8 +68,8 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	delete(p.fMap, p.fQueue[p.fIndex])
 
 	// push hash to queue
-	p.fQueue[p.fIndex] = encKey
-	p.fMap[encKey] = pValue
+	p.fQueue[p.fIndex] = hexKey
+	p.fMap[hexKey] = pValue
 
 	// increment queue index
 	p.fIndex = (p.fIndex + 1) % uint64(len(p.fQueue))

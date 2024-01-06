@@ -26,7 +26,7 @@ func NewAESCipher(pKey []byte) ICipher {
 	}
 	block, err := aes.NewCipher(pKey)
 	if err != nil {
-		return nil
+		panic("got error from NewCipher")
 	}
 	return &sAESCipher{
 		fBlock: block,

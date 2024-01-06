@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/queue_set"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestSettings(t *testing.T) {
@@ -58,15 +58,17 @@ func TestConnKeeper(t *testing.T) {
 	listener := testNewService(t)
 	defer testFreeService(listener)
 
-	connKeeper := newTestConnKeeper(time.Second / 2)
-
+	connKeeper := newTestConnKeeper(50 * time.Millisecond)
 	if node := connKeeper.GetNetworkNode(); node == nil {
 		t.Error("network node is nil")
 		return
 	}
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
-	defer cancel1()
+	defer func() {
+		cancel1()
+		time.Sleep(100 * time.Millisecond)
+	}()
 
 	go func() {
 		if err := connKeeper.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
@@ -74,6 +76,8 @@ func TestConnKeeper(t *testing.T) {
 			return
 		}
 	}()
+
+	time.Sleep(100 * time.Millisecond)
 
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()

@@ -7,7 +7,7 @@ import (
 
 	hl_t_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/client"
 	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestHandleIndexAPI(t *testing.T) {

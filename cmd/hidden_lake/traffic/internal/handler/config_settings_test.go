@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestHandleConfigSettingsAPI(t *testing.T) {

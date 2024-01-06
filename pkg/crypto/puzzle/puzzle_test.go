@@ -6,7 +6,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestPuzzleDiffSize(t *testing.T) {
@@ -52,7 +52,7 @@ func TestPuzzle(t *testing.T) {
 func TestMultiPuzzle(t *testing.T) {
 	t.Parallel()
 
-	parallel := uint64(runtime.GOMAXPROCS(0))
+	parallel := uint64(runtime.GOMAXPROCS(0) + 1)
 	puzzle := NewPoWPuzzle(4)
 	for i := uint64(0); i < 1_000; i++ {
 		arr := encoding.Uint64ToBytes(i)

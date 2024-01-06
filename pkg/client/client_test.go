@@ -7,15 +7,14 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
-	testutils "github.com/number571/go-peer/test/_data"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (
-	tcMessageSize = (2 << 10)
-	tcKeySizeBits = 1024
+	tcPubKey1023Bit = "PubKey{30818802818067D7C7F48CCCF318A504721D8521ED04DFD24DE947D50476212E279DADA7F627102D6140B922BC30E778BE7FD120E73D02C407E4D053D55C8F3CFACED11CCB8DC96539F51E34B32544EAB8812129BE7AD107E9A352E70F912962D6D0BABAB629F20332A3FBA66BC28D2944F44859959788428300F58DA0873A6796073B17CEEB0203010001}"
+	tcMessageSize   = (2 << 10)
+	tcKeySizeBits   = 1024
 )
 
 var (
@@ -140,73 +139,62 @@ func TestDecrypt(t *testing.T) {
 	sMsg := msg.(*message.SMessage)
 
 	sMsg1 := *sMsg
-	sMsg1.FHash = "0"
+	sMsg1.FHash = "0000000000000000" + "0000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg1); err == nil {
 		t.Error("success decrypt message with incorrect hash")
 		return
 	}
 
 	sMsg3 := *sMsg
-	sMsg3.FEncKey = "0"
+	sMsg3.FEncKey = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg3); err == nil {
 		t.Error("success decrypt message with incorrect session key")
 		return
 	}
 
 	sMsg4 := *sMsg
-	sMsg4.FPubKey = "0"
+	sMsg4.FPubKey = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg4); err == nil {
-		t.Error("success decrypt message with incorrect sender key (iv block)")
+		t.Error("success decrypt message with incorrect sender key (incorrect)")
 		return
 	}
 
-	sMsg5 := *sMsg
-	randomBytes := random.NewStdPRNG().GetBytes(symmetric.CAESBlockSize + tcKeySizeBits + 10)
-	sMsg5.FPubKey = encoding.HexEncode(randomBytes)
-	if _, _, err := client1.DecryptMessage(&sMsg5); err == nil {
-		t.Error("success decrypt message with incorrect sender key (public key is nil)")
+	somePubKey := asymmetric.LoadRSAPubKey(tcPubKey1023Bit)
+	msg2, err := client1.EncryptPayload(somePubKey, pl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if _, _, err := client1.DecryptMessage(msg2); err == nil {
+		t.Error("success decrypt message with incorrect sender key (size)")
 		return
 	}
 
 	sMsg6 := *sMsg
-	sMsg6.FPayload = []byte{111}
+	sMsg6.FPayload = []byte("111")
 	if _, _, err := client1.DecryptMessage(&sMsg6); err == nil {
 		t.Error("success decrypt message with incorrect payload (iv block)")
 		return
 	}
 
 	sMsg7 := *sMsg
-	sMsg7.FPayload = []byte("11111111111111111111111111111111")
+	sMsg7.FPayload = random.NewStdPRNG().GetBytes(948)
 	if _, _, err := client1.DecryptMessage(&sMsg7); err == nil {
 		t.Error("success decrypt message with incorrect payload (payload is nil)")
 		return
 	}
 
 	sMsg8 := *sMsg
-	sMsg8.FSalt = "0"
+	sMsg8.FSalt = "00000000000000000000000000000000" + "0000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg8); err == nil {
 		t.Error("success decrypt message with incorrect salt")
 		return
 	}
 
 	sMsg9 := *sMsg
-	sMsg9.FHash = "111da32433c2d7f99b38042d7b73db291bd803c55f3c83745ae3ebae6ba111"
+	sMsg9.FSign = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg9); err == nil {
-		t.Error("success decrypt message with incorrect hash check")
-		return
-	}
-
-	sMsg10 := *sMsg
-	sMsg10.FSign = "0"
-	if _, _, err := client1.DecryptMessage(&sMsg10); err == nil {
 		t.Error("success decrypt message with incorrect sign")
-		return
-	}
-
-	sMsg11 := *sMsg
-	sMsg11.FSign = "111ce5d111c74a0b8638f24f8ff200f64ca0e88cda1fd483783930b08e465fa9fc9565a0a3afbdfdf3f463bc77e526f2c41c6ddd2dae5d6f90e741442e2939731cbdad4071c29eff83dff932589b2cbfd8fa8a5fac19de4c40c3adde4cde1235c0bbf053b0e04e826993f8060a50c671c6bf56ce24fe4e921b60f6ca2239932ebd1b8c8556d5a2ac13e5ef1d8ea9c111"
-	if _, _, err := client1.DecryptMessage(&sMsg11); err == nil {
-		t.Error("success decrypt message with incorrect sign check")
 		return
 	}
 }
