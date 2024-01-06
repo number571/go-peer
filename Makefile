@@ -59,9 +59,9 @@ test-coverage-badge:
 	if [ $(_COVERAGE_VAR) -lt 60 ]; then \
 		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-crimson" > $(_TEST_RESULT_PATH)/badge.svg; \
 	elif [ $(_COVERAGE_VAR) -gt 80 ]; then \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-chartreuse" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
 	else \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-gold" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
 ### GIT
