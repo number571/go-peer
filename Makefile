@@ -57,11 +57,11 @@ test-coverage-badge:
 	$(eval _COVERAGE_RAW=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -Eo '[0-9]+\.[0-9]+')
 	$(eval _COVERAGE_VAR := $(shell echo "`${_COVERAGE_RAW}`/1" | bc))
 	if [ $(_COVERAGE_VAR) -lt 60 ]; then \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-red" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-crimson" > $(_TEST_RESULT_PATH)/badge.svg; \
 	elif [ $(_COVERAGE_VAR) -gt 80 ]; then \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-chartreuse" > $(_TEST_RESULT_PATH)/badge.svg; \
 	else \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-orange" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-gold" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
 ### GIT
