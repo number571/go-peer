@@ -32,12 +32,29 @@ The `Hidden Lake` is an anonymous network built on a `micro-service` architectur
 
 The scheme of the anonymous Hidden Lake network boils down to the use of three levels: `network` (N), `friendly` (F), and `application` (A).
 
-<p align="center"><img src="_images/hl_scheme.jpg" alt="hl_scheme.jpg"/></p>
-<p align="center">Figure 1. The scheme of the anonymous Hidden Lake network.</p>
-
 1. The network layer ensures the `transfer of raw bytes` from one node to another. HLS and HLT services interact at this level. HLT is an auxiliary service that is used to relay messages from HLS. The HLT can be replaced by an HLS node.
 2. The friendly layer (also known as anonymizing) performs the function of `anonymizing traffic` by setting up a list of friends and queue control on the side of the HLS service. Cryptographic routing based on public keys works at this level.
 3. The application layer boils down to using the final `logic of the application` itself to transmit and receive messages. One of the main tasks of this level is to control data security, provided that intermediate (group) HLS nodes exist/are used.
+
+<p align="center"><img src="_images/hl_scheme.jpg" alt="hl_scheme.jpg"/></p>
+<p align="center">Figure 1. The scheme of the anonymous Hidden Lake network.</p>
+
+The anonymous Hidden Lake network is an `abstract` network. This means that regardless of the system in which it is located and regardless of the number of nodes, as well as their location, the HL network remains anonymous. This property is achieved due to a theoretically provable `queue-based` task. Its algorithm can be described as follows.
+
+1. Each message is `encrypted` with the recipient's key,
+2. The message is sent during the period `= T` to all network participants,
+3. Period T of one participant regardless of periods `T1, T2, ..., Tn` of other participants,
+4. If there is no message for the period T, then an `empty message` without a recipient is sent to the network,
+5. Each participant `tries to decrypt` the message they received from the network.
+
+<p align="center"><img src="service/_images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
+<p align="center">Figure 2. Queue and message generation in HLS.</p>
+
+By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) network, which means building trusted communications. Due to this approach, members of the HL network can avoid `spam` in their direction, as well as `possible attacks` if vulnerabilities are found in the code.
+
+Currently, the anonymous Hidden Lake network consists of five services: HLS, HLT, HLM, HLL, HLE. The `main services` are HLS and HLT. The HLM service is `applied`. The `helper services` are HLL and HLE.
+
+> More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [habr.com/ru/articles/765464](https://habr.com/ru/articles/765464/ "Habr HL")
 
 ## Settings and connections
 
