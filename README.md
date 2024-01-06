@@ -25,6 +25,9 @@
 		<a href="https://godoc.org/github.com/number571/go-peer">
         	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
 		</a>
+		<a href="https://github.com/avelino/awesome-go">
+        	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome" />
+		</a>
 	</p>
 	<p align="center">
 		<a href="https://github.com/number571/go-peer/actions">
