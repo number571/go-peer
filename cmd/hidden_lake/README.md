@@ -229,6 +229,18 @@ $ make default
 ...
 ```
 
+or just
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls@<tag-name>
+$ hls
+> [INFO] 2023/12/29 23:29:43 HLS is running...
+> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
+...
+```
+
 ### 3. Running from release version
 
 When starting from the release version, you must specify the processor architecture and platform used. Available architectures: `amd64`, `arm64`. Available platforms: `windows`, `darwin`, `linux`.

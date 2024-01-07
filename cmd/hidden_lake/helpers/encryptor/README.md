@@ -6,6 +6,12 @@
 
 The `Hidden Lake Encryptor` is a small service of the Hidden Lake network applications. It is used to encrypt and decrypt HL type messages.
 
+## Installation
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/cmd/hle@latest
+```
+
 ## How it works
 
 HLE uses the `pkg/client` and `pkg/network/message` packages. Encrypted messages can then be sent to HLT for storage and distribution.

@@ -19,6 +19,12 @@ A feature of HLS (compared to many other anonymous networks) is its easy adaptat
 
 > More information about HLS in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [habr.com/ru/post/696504](https://habr.com/ru/post/696504/ "Habr HLS")
 
+## Installation
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls@latest
+```
+
 ## How it works
 
 Each network participant sets a message generation period for himself (the period can be a network constant for all system participants). When one cycle of the period ends and the next begins, each participant sends his encrypted message to all his connections (those in turn to all of their own, etc.). If there is no true message to send, then a pseudo message is generated (filled with random bytes) that looks like a normal encrypted one. The period property ensures the anonymity of the sender.

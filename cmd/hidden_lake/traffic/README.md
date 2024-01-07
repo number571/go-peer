@@ -8,6 +8,12 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 
 > More information about HLT in the [habr.com/ru/post/717184](https://habr.com/ru/post/717184/ "Habr HLT")
 
+## Installation
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/traffic/cmd/hlt@latest
+```
+
 ## How it works
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.

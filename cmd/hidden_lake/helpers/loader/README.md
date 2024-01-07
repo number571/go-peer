@@ -6,6 +6,12 @@
 
 The `Hidden Lake Loader` is a small service of the Hidden Lake network applications. It is used to redirect traffic from HLT producers (storages) to HLT consumers. Previously, it was used as a component of HLM, and then HLS applications.
 
+## Installation
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/cmd/hll@latest
+```
+
 ## How it works
 
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.

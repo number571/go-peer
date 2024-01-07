@@ -11,7 +11,6 @@
 9. Append Batch's to database
 10. HLM: append address of user in the chat
 11. HLM to applications/
-11. HLS delete global mutex in handlers
 
 ### Tests
 

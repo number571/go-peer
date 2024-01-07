@@ -10,6 +10,12 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 > More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
 
+## Installation
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/messenger/cmd/hlm@latest
+```
+
 ## How it works
 
 Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
