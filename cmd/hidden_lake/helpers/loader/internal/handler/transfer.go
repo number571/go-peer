@@ -16,7 +16,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/internal/config"
 	hll_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/settings"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 

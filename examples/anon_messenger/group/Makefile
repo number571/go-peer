@@ -12,7 +12,7 @@ build:
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/applications/messenger
 	make build -C $(CMDPATH)/hidden_lake/service
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	# COPY HLM PROGRAM
 	cp $(BINPATH)/hlm ./node1_hlm/prog_hlm1
 	cp $(BINPATH)/hlm ./node2_hlm/prog_hlm2

@@ -7,7 +7,7 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	make build -C $(CMDPATH)/hidden_lake/service
 	make build -C ./recv_hls
 	# COPY HLS

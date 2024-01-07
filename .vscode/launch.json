@@ -29,12 +29,12 @@
             }
         },
         {
-            "name": "/cmd/hidden_lake/traffic",
+            "name": "/cmd/hidden_lake/helpers/traffic",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
-            "cwd": "${workspaceFolder}/cmd/hidden_lake/traffic",
+            "program": "${workspaceFolder}/cmd/hidden_lake/helpers/traffic/cmd/hlt",
+            "cwd": "${workspaceFolder}/cmd/hidden_lake/helpers/traffic",
             "presentation": {
                 "hidden": true
             }
@@ -45,7 +45,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
+            "program": "${workspaceFolder}/cmd/hidden_lake/helpers/traffic/cmd/hlt",
             "cwd": "${workspaceFolder}/examples/echo_service/default/middle_hlt",
             "postDebugTask": "postDebugTask/examples/echo_service/default",
             "presentation": {
@@ -97,7 +97,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/traffic/cmd/hlt",
+            "program": "${workspaceFolder}/cmd/hidden_lake/helpers/traffic/cmd/hlt",
             "cwd": "${workspaceFolder}/examples/anon_messenger/default/middle_hlt",
             "postDebugTask": "postDebugTask/examples/anon_messenger/default",
             "presentation": {
@@ -154,7 +154,7 @@
             "name": "Run Hidden Lake",
             "configurations": [
                 "/cmd/hidden_lake/service",
-                "/cmd/hidden_lake/traffic",
+                "/cmd/hidden_lake/helpers/traffic",
                 "/cmd/hidden_lake/applications/messenger"
             ],
             "preLaunchTask": "preLaunchTask/cmd/hidden_lake",

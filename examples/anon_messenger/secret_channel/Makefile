@@ -12,7 +12,7 @@ build:
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/applications/messenger
 	make build -C $(CMDPATH)/hidden_lake/service
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	# MAKEFILE BUILD ADAPTERS
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service 
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/send 

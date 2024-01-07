@@ -426,9 +426,9 @@ $ make
 
 ## 3. Hidden Lake Traffic
 
-> [github.com/number571/go-peer/cmd/hidden_lake/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/traffic "HLT");
+> [github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic "HLT");
 
-<img src="cmd/hidden_lake/traffic/_images/hlt_logo.png" alt="hlt_logo.png"/>
+<img src="cmd/hidden_lake/helpers/traffic/_images/hlt_logo.png" alt="hlt_logo.png"/>
 
 The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time.
 
@@ -438,7 +438,7 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
-<p align="center"><img src="cmd/hidden_lake/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/helpers/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 9. Example of running HLT client.</p>
 
 ### Supported platforms
@@ -458,7 +458,7 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 Default build and run
 
 ```bash 
-$ cd ./cmd/hidden_lake/traffic
+$ cd ./cmd/hidden_lake/helpers/traffic
 $ make build # create hlt, hlt_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlt
 
@@ -493,7 +493,7 @@ connections:
 Build and run with docker
 
 ```bash 
-$ cd ./cmd/hidden_lake/traffic
+$ cd ./cmd/hidden_lake/helpers/traffic
 $ make docker-build 
 $ make docker-run
 

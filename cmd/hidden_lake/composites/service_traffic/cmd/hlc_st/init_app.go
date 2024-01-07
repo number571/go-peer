@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	hlt_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
-	hlt_app "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"

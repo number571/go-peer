@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 )
 
 const (

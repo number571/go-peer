@@ -18,6 +18,7 @@
 - Update `cmd/hidden_lake/service`: delete global mutex from handler functions
 - Update `Makefile`: go test coverage from go-peer -> [go-peer, cmd/hidden_lake]
 - Update `cmd/hidden_lake/messenger`: messenger -> applications/messenger
+- Update `cmd/hidden_lake/traffic`: traffic -> helpers/traffic
 
 ### BUG FIXES
 
@@ -98,10 +99,10 @@
 ### CHANGES
 
 - Update `pkg`: Change functions / methods to context.Context implementation
-- Update `cmd/hidden_lake/traffic`: append wait group for send to consumers
+- Update `cmd/hidden_lake/helpers/traffic`: append wait group for send to consumers
 - Update `pkg/crypto`: delete 'go-peer' prefixs
-- Update `cmd/hidden_lake/traffic`: change method of get hashes
-- Update `cmd/hidden_lake/traffic`: delete hashes_window parameter from config
+- Update `cmd/hidden_lake/helpers/traffic`: change method of get hashes
+- Update `cmd/hidden_lake/helpers/traffic`: delete hashes_window parameter from config
 - Update `cmd/hidden_lake/helpers`: move HLE, HLL, HLA to helpers/ 
 - Update `.dockerignore`: append dockerignore with ignore .git path
 - Update `cmd/hidden_lake/service`: delete GetNetworkKey method from client
@@ -109,7 +110,7 @@
 
 ### BUG FIXES
 
-- Update `cmd/hidden_lake/traffic`: fix order get hashes from database
+- Update `cmd/hidden_lake/helpers/traffic`: fix order get hashes from database
 - Update `cmd/hidden_lake/helpers/loader`: fix close pprof service
 - Update `cmd/hidden_lake`: fix _mounted paths with config files
 - Update `cmd/hidden_lake`: append field ReadTimeout and use function http.TimeoutHandler into http.Server
@@ -134,7 +135,7 @@
 - Update `pkg/network`: rename Run -> Listen, Stop -> Close
 - Update `pkg/network/anonymity`: append fIsRun field
 - Update `cmd/hidden_lake/composite`: append fIsRun fields
-- Update `cmd/hidden_lake/traffic`: append GetHashesWindow method
+- Update `cmd/hidden_lake/helpers/traffic`: append GetHashesWindow method
 - Update `pkg/storage/database`: rename NewKeyValueDB -> NewKVDatabase
 
 ### BUG FIXES
@@ -166,7 +167,7 @@
 - Update `cmd/hidden_lake/*/pkg/settings`: move CHandle*name*Template to cmd/hidden_lake/*/pkg/client
 - Update `pkg/types`: rename ICommand -> IApp
 - Update `pkg/client/message`: append new checks into IsValid method
-- Update `cmd/hidden_lake/traffic`: append to config settings "key_size_bits" param
+- Update `cmd/hidden_lake/helpers/traffic`: append to config settings "key_size_bits" param
 - Update `pkg/encoding`: delete pretty serialize json
 - Update `vendor`: append vendor path
 
@@ -194,14 +195,14 @@
 - Update `pkg`: _examples/ -> examples/
 - Update `pkg/types`: move CloseAll, StopAll functions to internal/interrupt
 - Update `cmd/hidden_lake/service`: delete HandleMessage API
-- Update `cmd/hidden_lake/traffic`: database (GetHashes, Load): string arg -> []byte arg
+- Update `cmd/hidden_lake/helpers/traffic`: database (GetHashes, Load): string arg -> []byte arg
 - Update `Dockerfile*`: append modifier '--platform linux/amd64' to section FROM 
-- Update `cmd/hidden_lake/traffic`: interfaces with message (pkg/client/message) -> message (pkg/network/message)
+- Update `cmd/hidden_lake/helpers/traffic`: interfaces with message (pkg/client/message) -> message (pkg/network/message)
 
 ### BUG FIXES
 
 - Update `pkg/network`: rewrite inMapWithSet -> inQueueWithSet
-- Update `cmd/hidden_lake/traffic`: fix HandleMessage API
+- Update `cmd/hidden_lake/helpers/traffic`: fix HandleMessage API
 - Update `cmd/hidden_lake/service`: delete field 'messages_capacity' from config
 
 <!-- ... -->
@@ -246,7 +247,7 @@
 
 - Update `cmd/hidden_lake/applications/messenger`: append _daemon scripts
 - Update `pkg/network`: append return error for IHandlerF
-- Update `cmd/hidden_lake/traffic`: now HLT redirect messages from producers to network/consumers
+- Update `cmd/hidden_lake/helpers/traffic`: now HLT redirect messages from producers to network/consumers
 - Update `pkg/network/anonymity`: replace logbuilder's string format into internal/logger/anon
 - Update `pkg/network/conn`: append ReadTimeout param for function ReadPayload
 
@@ -432,18 +433,18 @@
 
 - Append `examples`: routing to echo_service 
 - Create `CONNECTIONS.md`: list of connections to HLT relayers and HLS nodes
-- Update `hidden_lake/traffic`: append option 'storage'=(true|false)
+- Update `hidden_lake/helpers/traffic`: append option 'storage'=(true|false)
 - Update `network/anonymous`: change logger -> logBuilder
 - Replace `hidden_lake/service`: constants (message_size_bytes, work_size_bits, key_size_bits, queue_period_ms, messages_capacity) to configs .hls, .hlt, .hlm
-- Update `hidden_lake/traffic`: append check/push hash messages into database
+- Update `hidden_lake/helpers/traffic`: append check/push hash messages into database
 - Create `.vscode`: append debug running options "Run Hidden Lake" and "Test Echo Service"
 - Update `hidden_lake/applications/messenger`: append onlyWritableCharacters into HandleIncomigHTTP 
 
 ### CHANGES
 
 - Update `README.md`: delete tree/master suffix in view urls
-- Update `hidden_lake/traffic`: delete redirect message to nodes from HTTP handler
-- Update `hidden_lake/traffic`: append redirect message to nodes from TCP handler
+- Update `hidden_lake/helpers/traffic`: delete redirect message to nodes from HTTP handler
+- Update `hidden_lake/helpers/traffic`: append redirect message to nodes from TCP handler
 - Change `examples`: replace middle_hls to middle_hlt
 - Change `hidden_lake/helpers/adapters`: change recv: hlt-port -> hls-port
 - Update `theory_of_the_structure_of_hidden_systems`: Append link to economic reasons

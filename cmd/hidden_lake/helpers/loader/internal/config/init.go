@@ -4,8 +4,8 @@ import (
 	"os"
 
 	hll_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/settings"
+	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/settings"
 	logger "github.com/number571/go-peer/internal/logger/std"
 )
 

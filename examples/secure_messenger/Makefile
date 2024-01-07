@@ -8,7 +8,7 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/helpers/encryptor
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	# COPY HLE
 	cp -r $(BINPATH)/hle ./node1/prog_hle_1
 	cp -r $(BINPATH)/hle ./node2/prog_hle_2

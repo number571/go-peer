@@ -7,7 +7,7 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	# COPY HLT
 	cp -r $(BINPATH)/hlt ./service_hlt/prog_hlt
 run: 

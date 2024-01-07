@@ -9,9 +9,9 @@ import (
 	"time"
 
 	hll_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/client"
+	hls_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/app"
+	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	hls_app "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
-	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/client"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"

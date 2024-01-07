@@ -8,7 +8,7 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/service
-	make build -C $(CMDPATH)/hidden_lake/traffic
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/send
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/recv
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service
