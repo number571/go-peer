@@ -30,7 +30,7 @@ The `Hidden Lake` is an anonymous network built on a `micro-service` architectur
 
 By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) network, which means building trusted communications. Due to this approach, members of the HL network can avoid `spam` in their direction, as well as `possible attacks` if vulnerabilities are found in the code.
 
-Currently, the anonymous Hidden Lake network consists of five services: HLS, HLT, HLM, HLL, HLE. The `main services` are HLS and HLT. The HLM service is `applied`. The `helper services` are HLL and HLE.
+Currently, the anonymous Hidden Lake network consists of five services: HLS, HLT, HLM, HLL, HLE. The `main services` include only HLS. Currently, only HLM applies to `application services`. The `helper services` are HLT, HLL and HLE.
 
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [habr.com/ru/articles/765464](https://habr.com/ru/articles/765464/ "Habr HL")
 
