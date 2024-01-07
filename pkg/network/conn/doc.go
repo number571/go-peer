@@ -14,5 +14,7 @@
 			L - length
 			M - message bytes
 			V - void bytes
+
+	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg
 */
 package conn

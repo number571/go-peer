@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `pkg/network/anonymity|cmd/hidden_lake/service`: append f2f_disable option
+- Update `cmd/hidden_lake`: append schemes of message layers
 
 ### CHANGES
 

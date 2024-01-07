@@ -47,7 +47,7 @@ The anonymous Hidden Lake network is an `abstract` network. This means that rega
 <p align="center"><img src="service/_images/hls_queue.jpg" alt="hls_queue.jpg"/></p>
 <p align="center">Figure 1. Queue and message generation in HLS.</p>
 
-The scheme of the anonymous Hidden Lake network boils down to the use of three levels: `network` (N), `friendly` (F), and `application` (A).
+According to the interaction of nodes with each other, the Hidden Lake network scheme can be represented in the form of three layers: `network` (N), `friendly` (F), and `application` (A).
 
 1. The network layer ensures the `transfer of raw bytes` from one node to another. HLS and HLT services interact at this level. HLT is an auxiliary service that is used to relay messages from HLS. The HLT can be replaced by an HLS node.
 2. The friendly layer (also known as anonymizing) performs the function of `anonymizing traffic` by setting up a list of friends and queue control on the side of the HLS service. Cryptographic routing based on public keys works at this level.
@@ -55,6 +55,13 @@ The scheme of the anonymous Hidden Lake network boils down to the use of three l
 
 <p align="center"><img src="_images/hl_scheme.jpg" alt="hl_scheme.jpg"/></p>
 <p align="center">Figure 2. The scheme of the anonymous Hidden Lake network.</p>
+
+The above-described paradigm of dividing the interactions of network participants into levels can also be displayed through the prism of `message layers`. Unlike the method of separation according to the interaction of nodes with each other, in which there were three levels, there are four levels at the level of consideration of the message structure. This is due to the fact that the second and third levels are interconnected through an HLS service that performs the role of anonymization and message transportation.
+
+<p align="center"><img src="_images/hl_layers.jpg" alt="hl_layers.jpg"/></p>
+<p align="center">Figure 3. The layers of the Hidden Lake message.</p>
+
+You can find out more about the message levels using the following schemes: [layer1](https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg), [layer2](https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg), [layer3](_images/hl_layer3_request.jpg), [layer4](_images/hl_layer4_body.jpg).
 
 Since the anonymous Hidden Lake network is formed due to the microservice architecture, some individual services can be used `outside` the HL architecture due to the common `go-peer` protocol. For example, it becomes possible to create messengers with `end-to-end encryption` based on HLT and HLE services, bypassing the anonymizing HLS service (as example [secpy-chat](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat "Secpy-Chat")).
 
