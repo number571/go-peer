@@ -11,6 +11,7 @@
 9. Append Batch's to database
 10. HLM: append address of user in the chat
 11. HLM to applications/
+12. Request layers from go-peer to HLM
 
 ### Tests
 
@@ -20,10 +21,11 @@
 
 ### Applications
 
-1. HLFo: Hidden Lake Forum
-2. HLFi: Hidden Lake Filer
+1. HLFO: Hidden Lake Forum
+2. HLFI: Hidden Lake Filer
 3. HLN: Hidden Lake Network
 4. HLP: Hidden Lake Publisher
+5. HLSH: Hidden Lake Shell 
 
 ### Articles -> Book
 

@@ -10,7 +10,7 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/messenger
+	make build -C $(CMDPATH)/hidden_lake/applications/messenger
 	make build -C $(CMDPATH)/hidden_lake/service
 	make build -C $(CMDPATH)/hidden_lake/traffic
 	# MAKEFILE BUILD ADAPTERS

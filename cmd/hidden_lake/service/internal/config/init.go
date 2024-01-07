@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	logger "github.com/number571/go-peer/internal/logger/std"
 )

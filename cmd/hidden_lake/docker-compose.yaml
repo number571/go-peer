@@ -29,7 +29,7 @@ services:
   messenger:
     build:
       context: ./../../
-      dockerfile: cmd/hidden_lake/messenger/Dockerfile
+      dockerfile: cmd/hidden_lake/applications/messenger/Dockerfile
     environment:
       SERVICE_PATH: /mounted
     volumes:

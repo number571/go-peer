@@ -17,6 +17,7 @@
 - Update `cmd/hidden_lake/composite`: composite -> composites
 - Update `cmd/hidden_lake/service`: delete global mutex from handler functions
 - Update `Makefile`: go test coverage from go-peer -> [go-peer, cmd/hidden_lake]
+- Update `cmd/hidden_lake/messenger`: messenger -> applications/messenger
 
 ### BUG FIXES
 
@@ -57,7 +58,7 @@
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/messenger`: delete 'iam' user
+- Update `cmd/hidden_lake/applications/messenger`: delete 'iam' user
 - Update `pkg/network/anonymity`: delete check 'len(connections) == 0' in BroadcastPayload and FetchPayload
 - Update `cmd/hidden_lake/service`: append check 'len(connections) == 0' before BroadcastPayload or FetchPayload
 - Update `pkg/storage/database`: keys in database now encrypted
@@ -72,7 +73,7 @@
 
 ### BUG FIXES
 
-- Update `cmd/hidden_lake/messenger`: fix JS view of load huge chat messages
+- Update `cmd/hidden_lake/applications/messenger`: fix JS view of load huge chat messages
 - Update `pkg/network`: fix node.Listen(ctx) with 'return err' after Accept()
 - Update `cmd/hidden_lake`: fix App close child contexts
 - Update `pkg/network/anonymity`: fix database set hash (append mutex)
@@ -89,8 +90,8 @@
 
 - Update `pkg`: append new package 'state'
 - Update `cmd/hidden_lake/service`: append option 'share' into the config
-- Update `cmd/hidden_lake/messenger`: append sender's identificators
-- Update `cmd/hidden_lake/messenger`: append secret key for friend's communications
+- Update `cmd/hidden_lake/applications/messenger`: append sender's identificators
+- Update `cmd/hidden_lake/applications/messenger`: append secret key for friend's communications
 - Update `cmd/hidden_lake/encryptor`: append new service = HLE
 - Update `cmd/hidden_lake/_template`: append new service = HL_T for development
 
@@ -223,7 +224,7 @@
 - Update `cmd/hidden_lake/service`: CNetworkMaxConns 64 -> 256
 - Update `examples/echo_service/prod_test`: append switch prod_1/prod_2 in Makefile with PROD param
 - Update `cmd/hidden_lake`: delete jino, timeweb.cloud providers
-- Update `cmd/hidden_lake/messenger`: delete auth
+- Update `cmd/hidden_lake/applications/messenger`: delete auth
 - Update `cmd/hidden_lake/service`: delete SetPrivKey/ResetPrivKey
 - Update `cmd/hidden_lake/service`: generates priv key file
 - Update `cmd/hidden_lake/*`: workSize, storageKey are can be null value
@@ -243,7 +244,7 @@
 
 ### IMPROVEMENTS
 
-- Update `cmd/hidden_lake/messenger`: append _daemon scripts
+- Update `cmd/hidden_lake/applications/messenger`: append _daemon scripts
 - Update `pkg/network`: append return error for IHandlerF
 - Update `cmd/hidden_lake/traffic`: now HLT redirect messages from producers to network/consumers
 - Update `pkg/network/anonymity`: replace logbuilder's string format into internal/logger/anon
@@ -252,7 +253,7 @@
 ### CHANGES
 
 - Update `pkg/network/anonymity`: delete hash field from IHandlerF
-- Update `cmd/hidden_lake/messenger`: refactoring sMessage fields (timestamp, blockUID)
+- Update `cmd/hidden_lake/applications/messenger`: refactoring sMessage fields (timestamp, blockUID)
 - Update `cmd/hidden_lake/service`: rename service headerd
 - Update `cmd/hidden_lake`: refactoring running pprof service 
 - Update `pkg/storage`: delete getHashing setting, check FPassword setting
@@ -279,9 +280,9 @@
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/messenger`: now not deleted connections from HLS config after logout
+- Update `cmd/hidden_lake/applications/messenger`: now not deleted connections from HLS config after logout
 - Update `pkg/client`: move GetMessageLimit from func to method on *sClient
-- Update `cmd/hidden_lake/messenger`: change sizes of buttons, card blocks in settings.html
+- Update `cmd/hidden_lake/applications/messenger`: change sizes of buttons, card blocks in settings.html
 - Update `README.md`: append 'Releases' chapter
 - Update `cmd/hidden_lake/composite`: update Makefiles build/clean
 - Update `examples/echo_service`: rename with_stress_test -> prod_test
@@ -289,12 +290,12 @@
 - Update `test/utils`: change 4096 bit key -> 1024 bit key
 - Update `pkg/client/queue`: change receiver of void messages -> random public key
 - Update `internal/settings`: delete internal/settings
-- Update `cmd/hidden_lake/messenger`: delete fields "message_size_bytes", "work_size_bits", "key_size_bits" from settings
+- Update `cmd/hidden_lake/applications/messenger`: delete fields "message_size_bytes", "work_size_bits", "key_size_bits" from settings
 
 ### BUG FIXES
 
 - Update `pkg/network`: fix update network key
-- Update `cmd/hidden_lake/messenger`: fix state with network key
+- Update `cmd/hidden_lake/applications/messenger`: fix state with network key
 
 <!-- ... -->
 
@@ -306,19 +307,19 @@
 
 - Update `pkg/crypto/entropy`: now used pbkdf2. {[Issue](https://github.com/number571/go-peer/issues/4)}
 - Update `pkg/storage`: update test
-- Update `cmd/hidden_lake/messenger`: append entropy check password
+- Update `cmd/hidden_lake/applications/messenger`: append entropy check password
 - Update `pkg/client,pkg/network/conn,pkg/storage`: append comments with algorithm's work
 - Update `pkg/network/conn`: readPayload now return error reason
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/messenger`: append check of message size
-- Update `cmd/hidden_lake/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
+- Update `cmd/hidden_lake/applications/messenger`: append check of message size
+- Update `cmd/hidden_lake/applications/messenger`: deleted HLM<->HLM encryption throw HLS (changed threat model)
 - Update `pkg/crypto/entropy`: rename interfaces/functions to keyBuilder 
-- Update `cmd/hidden_lake/messenger`: change login="user", password="password" => login="username", password="hello, world!"
+- Update `cmd/hidden_lake/applications/messenger`: change login="user", password="password" => login="username", password="hello, world!"
 - Update `pkg/*/_examples`: update examples for client, network, anonymity packages
 - Update `pkg/crypto/symmetric`: new cipher now create cipher.Block interface
-- Update `cmd/hidden_lake/messenger/README.md`: fix urls to images
+- Update `cmd/hidden_lake/applications/messenger/README.md`: fix urls to images
 - Update `pkg/network/conn`: deleted FetchPayload method
 
 ### BUG FIXES
@@ -336,7 +337,7 @@
 
 - Update `docs`: append article decentralized_key_exchange_protocol
 - Update `cmd/hidden_lake/README.md`: append to connections "characteristics", "provider" fields
-- Update `cmd/hidden_lake/messenger`: append network key updater 
+- Update `cmd/hidden_lake/applications/messenger`: append network key updater 
 - Update `cmd/hidden_lake`: append http loggers to service, traffic, messenger
 
 ### CHANGES
@@ -353,11 +354,11 @@
 
 - Update `hidden_lake/service`: messageSize (4 << 20) -> (4 << 10)
 - Update `Makefiles`: append .exe extenstion to windows compile
-- Update `hidden_lake/messenger`: edit CDefaultConnectionHLSAddress -> hls_settings.CDefaultHTTPAddress
+- Update `hidden_lake/applications/messenger`: edit CDefaultConnectionHLSAddress -> hls_settings.CDefaultHTTPAddress
 - Update `cmd/hidden_lake/service,traffic`: update README API
-- Update `cmd/hidden_lake/messenger`: fix relation priv_key with HLS (append check IsMyPubKey?)
-- Update `cmd/hidden_lake/messenger`: append check in state/update.go for got messages from HLT
-- Update `cmd/hidden_lake/messenger`: append E2E encryption of request messages HLM <-> HLM throw HLS
+- Update `cmd/hidden_lake/applications/messenger`: fix relation priv_key with HLS (append check IsMyPubKey?)
+- Update `cmd/hidden_lake/applications/messenger`: append check in state/update.go for got messages from HLT
+- Update `cmd/hidden_lake/applications/messenger`: append E2E encryption of request messages HLM <-> HLM throw HLS
 - Update `pkg/client`: fix static size of messages
 
 <!-- ... -->
@@ -368,12 +369,12 @@
 
 ### IMPROVEMENTS
 
-- Update `hidden_lake/messenger`: append RUS language
-- Update `hidden_lake/messenger`: append ESP language
-- Update `hidden_lake/messenger`: append mobile/android app
-- Update `hidden_lake/messenger`: append config editor (Language)
-- Update `hidden_lake/messenger`: append connect to storage/backup nodes (HLT) 
-- Update `hidden_lake/messenger`: append parallel load traffic from HLTs
+- Update `hidden_lake/applications/messenger`: append RUS language
+- Update `hidden_lake/applications/messenger`: append ESP language
+- Update `hidden_lake/applications/messenger`: append mobile/android app
+- Update `hidden_lake/applications/messenger`: append config editor (Language)
+- Update `hidden_lake/applications/messenger`: append connect to storage/backup nodes (HLT) 
+- Update `hidden_lake/applications/messenger`: append parallel load traffic from HLTs
 - Update `hidden_lake/service`: append to SetPrivKey ephemeral public key
 - Update `examples/anon_messenger`: append request.sh for sending text, files
 - Update `hidden_lake/service`: replace LimitVoidSize from code to config
@@ -384,7 +385,7 @@
 - Rename `hidden_lake/_monolith`: rename _monolith/ -> composite/
 - Change `hidden_lake/composite`: changed the order stop apps
 - Update `theory_of_the_structure_of_hidden_systems`: updated the schemes in the algebraic model
-- Delete `hidden_lake/messenger`: delete config field "traffic"
+- Delete `hidden_lake/applications/messenger`: delete config field "traffic"
 - Update `*.yml`: :9571 -> 127.0.0.1:9571, :9582 -> 127.0.0.1:9582, ...
 - Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
 - Update `pkg/anonymity/logbuilder`: append size of messages
@@ -408,17 +409,17 @@
 
 ### IMPROVEMENTS
 
-- Update `hidden_lake/messenger`: than got new message -> auto scroll to bottom
-- Update `hidden_lake/messenger`: append support emoji's text
-- Update `hidden_lake/messenger`: append constant chat with ourself
-- Update `hidden_lake/messenger`: append support file transfer
+- Update `hidden_lake/applications/messenger`: than got new message -> auto scroll to bottom
+- Update `hidden_lake/applications/messenger`: append support emoji's text
+- Update `hidden_lake/applications/messenger`: append constant chat with ourself
+- Update `hidden_lake/applications/messenger`: append support file transfer
 - Create `hidden_lake/_monolith`: create service_messenger, service_traffic, service_traffic_messenger
 
 ### CHANGES
 
 - Move `CONNECTIONS.md`: merge data of connections with cmd/hidden_lake's README.md 
 - Change `hidden_lake/Makefile`: "composite-default: composite-build" -> "composite-default: composite-build composite-run"
-- Change `hidden_lake/messenger`: move CChatLimitMessages to config value as "messages_capacity"
+- Change `hidden_lake/applications/messenger`: move CChatLimitMessages to config value as "messages_capacity"
 - Change `hidden_lake`: move app path's from internal/ to pkg/, move config path's from pkg/ to internal/
 
 <!-- ... -->
@@ -436,7 +437,7 @@
 - Replace `hidden_lake/service`: constants (message_size_bytes, work_size_bits, key_size_bits, queue_period_ms, messages_capacity) to configs .hls, .hlt, .hlm
 - Update `hidden_lake/traffic`: append check/push hash messages into database
 - Create `.vscode`: append debug running options "Run Hidden Lake" and "Test Echo Service"
-- Update `hidden_lake/messenger`: append onlyWritableCharacters into HandleIncomigHTTP 
+- Update `hidden_lake/applications/messenger`: append onlyWritableCharacters into HandleIncomigHTTP 
 
 ### CHANGES
 
@@ -452,7 +453,7 @@
 - Update `README.md`: url with images -> _images
 - Update `cmd/micro_anon`: change panic error -> print error
 - Change `hidden_lake/service`: rename CLogWarnOffResponseFromService, CLogWarnResponseFromService -> CLogInfoOffResponseFromService, CLogInfoResponseFromService
-- Update `hidden_lake/messenger`: replace convertToPlain -> escapeOutput function
+- Update `hidden_lake/applications/messenger`: replace convertToPlain -> escapeOutput function
 
 <!-- ... -->
 
@@ -531,19 +532,19 @@
 
 ### CHANGES
 
-- Project `hidden_lake/messenger`: deleted HLS part from hlm_m application
+- Project `hidden_lake/applications/messenger`: deleted HLS part from hlm_m application
 - Package `encoding`: Serialize function with option (indent/not indent)
-- Project `hidden_lake/messenger`: deleted HLS part from hlm application (build and run)
+- Project `hidden_lake/applications/messenger`: deleted HLS part from hlm application (build and run)
 - Package `pkg/storage/database`: replace sqlite3 to leveldb
 - Project `mobile_applications`: deleted mobile applications HLS, HLM, HLT
 - Module `go.mod`: decrease version from 1.17 to 1.16
 - Update `README.md`: append installation, requirements
-- Project `hidden_lake/messenger`: rename interface and methods in IState -> IStateManager
+- Project `hidden_lake/applications/messenger`: rename interface and methods in IState -> IStateManager
 - Directory `tools`: moved to cmd/tools
 
 ### BUG FIXES
 
-- Project `hidden_lake/messenger`: append checks pStateManager.GetWrapperDB().Get() on nil
+- Project `hidden_lake/applications/messenger`: append checks pStateManager.GetWrapperDB().Get() on nil
 - Package `crypto/entropy`: fix range hashes with one input data
 
 <!-- ... -->

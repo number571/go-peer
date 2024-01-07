@@ -19,15 +19,15 @@ _TEST_PPROF_PATH=./_test/pprof
 default: build 
 build:
 	make -C ./service build
-	make -C ./messenger build
 	make -C ./traffic build
 	make -C ./composites build
+	make -C ./applications build
 	make -C ./helpers build
 clean:
 	make -C ./service clean
-	make -C ./messenger clean
 	make -C ./traffic clean
 	make -C ./composites clean
+	make -C ./applications clean
 	make -C ./helpers clean
 
 docker-default: docker-build docker-run

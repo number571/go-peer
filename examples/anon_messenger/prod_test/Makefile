@@ -7,7 +7,7 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/messenger
+	make build -C $(CMDPATH)/hidden_lake/applications/messenger
 	make build -C $(CMDPATH)/hidden_lake/service
 	# COPY HLM PROGRAM
 	cp $(BINPATH)/hlm ./node1_hlm/prog_hlm1

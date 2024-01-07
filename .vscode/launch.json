@@ -18,12 +18,12 @@
             }
         },
         {
-            "name": "/cmd/hidden_lake/messenger",
+            "name": "/cmd/hidden_lake/applications/messenger",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
-            "cwd": "${workspaceFolder}/cmd/hidden_lake/messenger",
+            "program": "${workspaceFolder}/cmd/hidden_lake/applications/messenger/cmd/hlm",
+            "cwd": "${workspaceFolder}/cmd/hidden_lake/applications/messenger",
             "presentation": {
                 "hidden": true
             }
@@ -109,7 +109,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
+            "program": "${workspaceFolder}/cmd/hidden_lake/applications/messenger/cmd/hlm",
             "cwd": "${workspaceFolder}/examples/anon_messenger/default/node1_hlm",
             "presentation": {
                 "hidden": true
@@ -131,7 +131,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/cmd/hidden_lake/messenger/cmd/hlm",
+            "program": "${workspaceFolder}/cmd/hidden_lake/applications/messenger/cmd/hlm",
             "cwd": "${workspaceFolder}/examples/anon_messenger/default/node2_hlm",
             "presentation": {
                 "hidden": true
@@ -155,7 +155,7 @@
             "configurations": [
                 "/cmd/hidden_lake/service",
                 "/cmd/hidden_lake/traffic",
-                "/cmd/hidden_lake/messenger"
+                "/cmd/hidden_lake/applications/messenger"
             ],
             "preLaunchTask": "preLaunchTask/cmd/hidden_lake",
             // the postDebugTask is not executed

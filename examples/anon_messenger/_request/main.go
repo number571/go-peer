@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/settings"
+	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 

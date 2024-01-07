@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/messenger/pkg/app"
+	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/app"
 	hls_app "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/app"
 	hlt_app "github.com/number571/go-peer/cmd/hidden_lake/traffic/pkg/app"
 	"github.com/number571/go-peer/pkg/state"

@@ -86,11 +86,11 @@ Some final applications are compositions of other applications. Due to this, suc
 ## Dependencies
 
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
-2. Go library (used by `cmd/hidden_lake/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
-3. Go library (used by `cmd/hidden_lake/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
+2. Go library (used by `cmd/hidden_lake/applications/messenger`) [github.com/boombuler/barcode](https://github.com/boombuler/barcode "boombuler/barcode");
+3. Go library (used by `cmd/hidden_lake/applications/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
 4. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
 5. Go library (used by `pkg/encoding`) [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2");
-6. CSS/JS library (used by `cmd/hidden_lake/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+6. CSS/JS library (used by `cmd/hidden_lake/applications/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Theoretical works
 
@@ -326,9 +326,9 @@ $ make
 
 ## 2. Hidden Lake Messenger
 
-> [github.com/number571/go-peer/cmd/hidden_lake/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger "HLM");
+> [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger "HLM");
 
-<img src="cmd/hidden_lake/messenger/_images/hlm_logo.png" alt="hlm_logo.png"/>
+<img src="cmd/hidden_lake/applications/messenger/_images/hlm_logo.png" alt="hlm_logo.png"/>
 
 The `Hidden Lake Messenger` is a messenger based on the core of an anonymous network with theoretically provable anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of transactions (sending, receiving).
 
@@ -340,7 +340,7 @@ HLM is an application that implements a graphical user interface (GUI) on a brow
 
 Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
 
-<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
+<p align="center"><img src="cmd/hidden_lake/applications/messenger/_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 6. Example of chat room in HLM.</p>
 
 However, there are additional features aimed at the security of the HLM application itself. All messages are stored in a local database in encrypted form with a key formed from `storage_key` param.
@@ -356,7 +356,7 @@ However, there are additional features aimed at the security of the HLM applicat
 Default build and run
 
 ```bash 
-$ cd ./cmd/hidden_lake/messenger
+$ cd ./cmd/hidden_lake/applications/messenger
 $ make build # create hlm, hlm_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
 $ make run # run ./bin/hlm
 
@@ -387,7 +387,7 @@ connection: 127.0.0.1:9572
 Build and run with docker
 
 ```bash 
-$ cd ./cmd/hidden_lake/messenger
+$ cd ./cmd/hidden_lake/applications/messenger
 $ make docker-build 
 $ make docker-run
 
@@ -408,7 +408,7 @@ $ make
 The output of the `middle_hls` node is similar to `Figure 4`.
 Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 
-<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/applications/messenger/_images/hlm_about.png" alt="hlm_about.png"/></p>
 <p align="center">Figure 7. Home page of the HLM application.</p>
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
@@ -419,10 +419,10 @@ $ cd examples/anon_messenger/_docker/default
 $ make
 ```
 
-<p align="center"><img src="cmd/hidden_lake/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
+<p align="center"><img src="cmd/hidden_lake/applications/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 8. Log of the three nodes with request/response actions.</p>
 
-> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/messenger/_images "Path to HLM images")
+> More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger/_images "Path to HLM images")
 
 ## 3. Hidden Lake Traffic
 
