@@ -16,7 +16,7 @@
         <a href="https://github.com/number571/go-peer/blob/master/LICENSE">
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
-		<a href="https://github.com/number571/go-peer/blob/d35b65b2aa3d80eca68a529c7fd056701f20dee9/Makefile#L47">
+		<a href="https://github.com/number571/go-peer/blob/d06ff1b7d35ceb8fa779acda2e1335896b0afdb1/cmd/hidden_lake/Makefile#L50">
         	<img src="_test/result/badge.svg" alt="Coverage" />
 		</a>
         <a href="https://pkg.go.dev/github.com/number571/go-peer/cmd/hidden_lake?status.svg">
