@@ -6,6 +6,16 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/messenger`: delete QR codes
+- Update `cmd/hidden_lake/messenger`: append own address in settings
+
+### BUG FIXES
+
+- Update `cmd/hidden_lake/messenger`: fix view of friends with long names
+- Update `cmd/hidden_lake/messenger`: fix view of connections with host, port inputs
+
 <!-- ... -->
 
 ## v1.5.27

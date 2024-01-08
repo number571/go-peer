@@ -25,9 +25,10 @@ type sConnection struct {
 
 type sSettings struct {
 	*sTemplate
-	FPublicKey   string
-	FNetworkKey  string
-	FConnections []sConnection
+	FNetworkKey    string
+	FPublicKey     string
+	FPublicKeyHash string
+	FConnections   []sConnection
 }
 
 func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
@@ -113,6 +114,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		result.sTemplate = getTemplate(cfg)
 
 		result.FPublicKey = myPubKey.ToString()
+		result.FPublicKeyHash = myPubKey.GetHasher().ToString()
 
 		gotSettings, err := client.GetSettings()
 		if err != nil {
@@ -120,6 +122,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			fmt.Fprint(pW, "error: read network key")
 			return
 		}
+
 		result.FNetworkKey = gotSettings.GetNetworkKey()
 
 		// append HLS connections to backup connections

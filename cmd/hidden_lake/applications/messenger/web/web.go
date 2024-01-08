@@ -9,7 +9,7 @@ import (
 const (
 	// cUsedEmbedFS=false used for debug
 	// not recommended use in real environment
-	cUsedEmbedFS = true
+	cUsedEmbedFS = false
 )
 
 const (

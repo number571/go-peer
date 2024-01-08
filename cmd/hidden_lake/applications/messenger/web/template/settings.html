@@ -50,6 +50,10 @@ Agordoj
                 <input hidden name="method" value="PUT">
                 <div class="row">
                     <div class="col-md-6 w-50">
+                        <input type="text" value="{{.FPublicKeyHash}}" disabled
+                            class="text-center form-control bg-dark text-info w-100">
+                    </div>
+                    <div class="col-md-6 w-50">
                         <button id="button_copy" type="button" class="btn btn-secondary w-100"
                             onclick="copy_text('public_key');set_info_color('button_copy');">
                             {{if (eq .FLanguage 0)}}
@@ -60,17 +64,6 @@ Agordoj
                             Ŝlosilo
                             {{end}}
                         </button>
-                    </div>
-                    <div class="col-md-6 w-50">
-                        <a href="/qr/public_key" class="btn btn-secondary button w-100">
-                            {{if (eq .FLanguage 0)}}
-                            QR code
-                            {{else if (eq .FLanguage 1)}}
-                            QR код
-                            {{else if (eq .FLanguage 2)}}
-                            QR kodo
-                            {{end}}
-                        </a>
                     </div>
                 </div>
             </form>
@@ -155,7 +148,7 @@ Agordoj
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST">
                 <div class="row mb-3">
-                    <div class="col-md-5 w-25">
+                    <div class="col-md-5 w-50">
                         {{if (eq .FLanguage 0)}}
                         <input type="text" name="host" placeholder="Host"
                             class="text-center form-control bg-dark text-white w-100">

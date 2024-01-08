@@ -11,6 +11,14 @@ Amikoj
 {{end}}
 
 {{define "main"}}
+<style>
+    .ellipsis {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
     <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
         {{if (eq .FLanguage 0)}}
@@ -86,7 +94,7 @@ Amikoj
                         <input hidden type="text" name="alias_name" value="{{.}}"
                             class="text-center form-control w-100">
                         <!-- GET -->
-                        <a href="/friends/chat?alias_name={{.}}" class="btn btn-secondary button w-100">{{.}}</a>
+                        <a href="/friends/chat?alias_name={{.}}" class="ellipsis btn btn-secondary button w-100">{{.}}</a>
                     </div>
                     <div class="col-md-4 w-25">
                         <input type="submit" name="submit" value="✖" class="btn btn-info w-100">

@@ -1,8 +1,3 @@
-# github.com/boombuler/barcode v1.0.1
-## explicit
-github.com/boombuler/barcode
-github.com/boombuler/barcode/qr
-github.com/boombuler/barcode/utils
 # github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
 github.com/golang/snappy
 # github.com/syndtr/goleveldb v1.0.0

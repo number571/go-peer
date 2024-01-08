@@ -38,15 +38,14 @@ const (
 )
 
 const (
-	CHandleIndexPath          = "/"
-	CHandleAboutPath          = "/about"
-	CHandleFaviconPath        = "/favicon.ico"
-	CHandleSettingsPath       = "/settings"
-	CHandleQRPublicKeyKeyPath = "/qr/public_key"
-	CHandleFriendsPath        = "/friends"
-	CHandleFriendsChatPath    = "/friends/chat"
-	CHandleFriendsUploadPath  = "/friends/upload"
-	CHandleFriendsChatWSPath  = "/friends/chat/ws"
+	CHandleIndexPath         = "/"
+	CHandleAboutPath         = "/about"
+	CHandleFaviconPath       = "/favicon.ico"
+	CHandleSettingsPath      = "/settings"
+	CHandleFriendsPath       = "/friends"
+	CHandleFriendsChatPath   = "/friends/chat"
+	CHandleFriendsUploadPath = "/friends/upload"
+	CHandleFriendsChatWSPath = "/friends/chat/ws"
 )
 
 const (
