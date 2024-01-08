@@ -30,6 +30,9 @@ The `Hidden Lake` is an anonymous network built on a `micro-service` architectur
 
 By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) network, which means building trusted communications. Due to this approach, members of the HL network can avoid `spam` in their direction, as well as `possible attacks` if vulnerabilities are found in the code.
 
+> [!IMPORTANT]
+> The project is being actively developed, the implementation of some details may change over time. More information about the changes can be obtained from the [CHANGELOG.md](https://github.com/number571/go-peer/blob/master/CHANGELOG.md) file.
+
 Currently, the anonymous Hidden Lake network consists of five services: HLS, HLT, HLM, HLL, HLE. The `main services` include only HLS. Currently, only HLM applies to `application services`. The `helper services` are HLT, HLL and HLE.
 
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [habr.com/ru/articles/765464](https://habr.com/ru/articles/765464/ "Habr HL")
@@ -61,11 +64,80 @@ The above-described paradigm of dividing the interactions of network participant
 <p align="center"><img src="_images/hl_layers.jpg" alt="hl_layers.jpg"/></p>
 <p align="center">Figure 3. The layers of the Hidden Lake message.</p>
 
-You can find out more about the message levels using the following schemes: [layer1](https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg), [layer2](https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg), [layer3](_images/hl_layer3_request.jpg), [layer4](_images/hl_layer4_body.jpg).
-
 Since the anonymous Hidden Lake network is formed due to the microservice architecture, some individual services can be used `outside` the HL architecture due to the common `go-peer` protocol. For example, it becomes possible to create messengers with `end-to-end encryption` based on HLT and HLE services, bypassing the anonymizing HLS service (as example [secpy-chat](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat "Secpy-Chat")).
 
-## Settings and connections
+> You can find out more about the message levels using the following schemes: 
+> [layer-1](https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg), 
+> [layer-2](https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg), 
+> [layer-3](_images/hl_layer3_request.jpg), 
+> [layer-4](_images/hl_layer4_body.jpg).
+> All schemes can be found in the [hidden_lake_message_layers.svg](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_message_layers.svg) file.
+
+## Build and run
+
+Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are three ways to run HLS: through `docker`, through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
+
+### 1. Running from docker
+
+```bash
+$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
+$ cd go-peer/cmd/hidden_lake/service
+$ make docker-default
+...
+> [INFO] 2023/12/29 16:27:40 HLS is running...
+> [INFO] 2023/12/29 16:27:45 service=HLS type=BRDCS hash=FF59D8F9...1D2EAF8D addr=23FDFF8A...FE95F5E0 proof=0000160292 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 16:27:50 service=HLS type=BRDCS hash=ACE23689...CA39CB6D addr=23FDFF8A...FE95F5E0 proof=0001491994 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 16:27:55 service=HLS type=BRDCS hash=0C6EC76D...FB83729D addr=23FDFF8A...FE95F5E0 proof=0001762328 size=8192B conn=127.0.0.1:
+...
+```
+
+### 2. Running from source code
+
+```bash
+$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
+$ cd go-peer/cmd/hidden_lake/service
+$ make default
+...
+> [INFO] 2023/12/29 23:29:43 HLS is running...
+> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
+...
+```
+
+or just
+
+```bash
+$ go install github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls@<tag-name>
+$ hls
+> [INFO] 2023/12/29 23:29:43 HLS is running...
+> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
+...
+```
+
+### 3. Running from release version
+
+When starting from the release version, you must specify the processor architecture and platform used. Available architectures: `amd64`, `arm64`. Available platforms: `windows`, `darwin`, `linux`.
+
+```bash
+$ wget https://github.com/number571/go-peer/releases/download/<tag-name>/hls_<arch-name>_<platform-name>
+$ chmod +x hls_<arch-name>_<platform-name>
+$ ./hls_<arch-name>_<platform-name>
+...
+> [INFO] 2023/12/29 23:31:43 HLS is running...
+> [INFO] 2023/12/29 23:31:48 service=HLS type=BRDCS hash=E8CDB448...FF23639E addr=E04D2DC8...61D4FE2A proof=0001277744 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:31:53 service=HLS type=BRDCS hash=C6B5C47F...AB63128A addr=E04D2DC8...61D4FE2A proof=0001062655 size=8192B conn=127.0.0.1:
+> [INFO] 2023/12/29 23:31:58 service=HLS type=BRDCS hash=5789D462...B81C3A5F addr=E04D2DC8...61D4FE2A proof=0000517841 size=8192B conn=127.0.0.1
+...
+```
+
+## Production
+
+### Settings
+
+The Hidden Lake network must have `common configuration` file settings for successful data exchange between network nodes. If some settings are different, other nodes will consider it a `protocol violation` and reject the connection attempt. You can find ready-made configuration files for HLS and HLT services in the [prod/1](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/1), [prod/2](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/2) directories.
 
 ```yaml
 # [HLS, HLT] nodes
@@ -74,13 +146,12 @@ work_size_bits: 22
 key_size_bits: 4096
 queue_period_ms: 5000
 limit_void_size_bytes: 4096
-# 'network_key' parameter is shown in the table
 
 # [HLT] nodes
-## [62.233.46.109, 94.103.91.81]
-messages_capacity: 1048576 # 2^20 msgs ~= 8GiB
-## [185.43.4.253]
-messages_capacity: 33554432 # 2^25 msgs ~= 256GiB
+messages_capacity: 1048576  ## 2^20 msgs ~= 8GiB
+                            ## [ID=1,ID=3]
+messages_capacity: 33554432 ## 2^25 msgs ~= 256GiB
+                            ## [ID=5]
 ```
 
 <table style="width: 100%">
@@ -204,67 +275,7 @@ messages_capacity: 33554432 # 2^25 msgs ~= 256GiB
   </tr>
 </table>
 
-## Build and run
-
-Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are three ways to run HLS: through `docker`, through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
-
-### 1. Running from docker
-
-```bash
-$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
-$ cd go-peer/cmd/hidden_lake/service
-$ make docker-default
-...
-> [INFO] 2023/12/29 16:27:40 HLS is running...
-> [INFO] 2023/12/29 16:27:45 service=HLS type=BRDCS hash=FF59D8F9...1D2EAF8D addr=23FDFF8A...FE95F5E0 proof=0000160292 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 16:27:50 service=HLS type=BRDCS hash=ACE23689...CA39CB6D addr=23FDFF8A...FE95F5E0 proof=0001491994 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 16:27:55 service=HLS type=BRDCS hash=0C6EC76D...FB83729D addr=23FDFF8A...FE95F5E0 proof=0001762328 size=8192B conn=127.0.0.1:
-...
-```
-
-### 2. Running from source code
-
-```bash
-$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
-$ cd go-peer/cmd/hidden_lake/service
-$ make default
-...
-> [INFO] 2023/12/29 23:29:43 HLS is running...
-> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
-...
-```
-
-or just
-
-```bash
-$ go install github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls@<tag-name>
-$ hls
-> [INFO] 2023/12/29 23:29:43 HLS is running...
-> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
-...
-```
-
-### 3. Running from release version
-
-When starting from the release version, you must specify the processor architecture and platform used. Available architectures: `amd64`, `arm64`. Available platforms: `windows`, `darwin`, `linux`.
-
-```bash
-$ wget https://github.com/number571/go-peer/releases/download/<tag-name>/hls_<arch-name>_<platform-name>
-$ chmod +x hls_<arch-name>_<platform-name>
-$ ./hls_<arch-name>_<platform-name>
-...
-> [INFO] 2023/12/29 23:31:43 HLS is running...
-> [INFO] 2023/12/29 23:31:48 service=HLS type=BRDCS hash=E8CDB448...FF23639E addr=E04D2DC8...61D4FE2A proof=0001277744 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:31:53 service=HLS type=BRDCS hash=C6B5C47F...AB63128A addr=E04D2DC8...61D4FE2A proof=0001062655 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:31:58 service=HLS type=BRDCS hash=5789D462...B81C3A5F addr=E04D2DC8...61D4FE2A proof=0000517841 size=8192B conn=127.0.0.1
-...
-```
-
-### Production running
+### Running
 
 The HLS node is easy to connect to a production environment. To do this, it is sufficient to specify two parameters: `network_key` and `connections`. The network_key parameter is used to separate networks from each other, preventing them from merging. The connections parameter is used for direct network connection to HLS and HLT nodes.
 
