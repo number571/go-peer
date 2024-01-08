@@ -25,15 +25,6 @@ Babilejo
     return first + "..." + last;
   }
 
-  function escapeOutput(toOutput) {
-    return toOutput.replace(/\&/g, '&amp;')
-      .replace(/\</g, '&lt;')
-      .replace(/\>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/\'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
-  }
-
   function downloadBase64File(contentBase64, fileName) {
     const linkSource = `data:application/octet-stream;base64,${contentBase64}`;
     const downloadLink = document.createElement('a');
@@ -80,13 +71,13 @@ Babilejo
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
               <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
-              <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + escapeOutput(messageInfo.message) + `</p>
+              <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + messageInfo.message + `</p>
               <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
             </div>
           </div>
         `
       } else { // got file message
-        let filename = escapeOutput(messageInfo.filename);
+        let filename = messageInfo.filename;
         insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>

@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"errors"
+	"html"
 	"io"
 	"net/http"
 	"strings"
@@ -173,7 +174,7 @@ func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) ut
 		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,
-			FMessage:   msgData,
+			FMessage:   html.EscapeString(msgData),
 			FTimestamp: pTimestamp,
 		}
 	case isFile(pRawMsgBytes):
@@ -183,7 +184,7 @@ func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) ut
 		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,
-			FFileName:  filename,
+			FFileName:  html.EscapeString(filename),
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
