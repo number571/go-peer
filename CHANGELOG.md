@@ -2,14 +2,21 @@
 
 <!-- ... -->
 
-## v1.5.27
+## v1.5.28
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.5.27
+
+*January 08, 2024*
 
 ### IMPROVEMENTS
 
 - Update `pkg/network/anonymity|cmd/hidden_lake/service`: append f2f_disable option
 - Update `cmd/hidden_lake`: append schemes of message layers
+- Update `go-peer`: test coverage = 95%
 
 ### CHANGES
 

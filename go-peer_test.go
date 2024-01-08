@@ -1,6 +1,7 @@
 package gopeer
 
 import (
+	"bytes"
 	"os"
 	"regexp"
 	"testing"
@@ -23,6 +24,16 @@ func TestGoPeerVersion(t *testing.T) {
 	// current version is always previous version in the changelog
 	if match[1][1] != CVersion {
 		t.Error("the versions do not match")
+		return
+	}
+
+	if match[0][1] == match[1][1] {
+		t.Error("the same versions inline")
+		return
+	}
+
+	if bytes.Count(changelog, []byte("*??? ??, ????*")) != 1 {
+		t.Error("is there no new version or more than one new version?")
 		return
 	}
 }
