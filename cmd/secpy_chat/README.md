@@ -1,8 +1,27 @@
-# Secpy-Chat
-
-> The Secpy-Chat application
-
 <img src="_images/secpy_chat_logo.png" alt="secpy_chat_logo.png"/>
+
+<h2>
+	<p align="center">
+    <strong>
+      Console messenger with end-to-end encryption
+   	</strong>
+	</p>
+	<p align="center">
+    <a href="https://github.com/topics/python">
+      <img src="https://img.shields.io/badge/Python-v3-1f425f.svg" alt="Python" />
+		</a>
+    <a href="https://github.com/number571/go-peer/releases">
+      <img src="https://img.shields.io/github/v/release/number571/go-peer.svg" alt="Release" />
+		</a>
+    <a href="https://github.com/number571/go-peer/blob/master/LICENSE">
+      <img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
+		</a>
+    <a href="https://github.com/number571/go-peer">
+      <img src="https://github.com/number571/go-peer/blob/master/images/go-peer_badge.png" alt="Go-Peer" />
+		</a>
+	</p>
+	About project
+</h2>
 
 The application `secpy_chat` allows you to communicate securely (using end-to-end encryption) using HLT and HLE applications. This is an example of how it is possible to write client-safe applications for the Hidden Lake environment without being based on the Go programming language (the main language for writing Hidden Lake applications).
 

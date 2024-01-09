@@ -22,6 +22,9 @@
         <a href="https://pkg.go.dev/github.com/number571/go-peer/cmd/hidden_lake?status.svg">
         	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
 		</a>
+        <a href="https://github.com/number571/go-peer">
+        	<img src="https://github.com/number571/go-peer/blob/master/images/go-peer_badge.png" alt="Go-Peer" />
+		</a>
 	</p>
 	About project
 </h2>

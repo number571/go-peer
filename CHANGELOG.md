@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/messenger`: delete QR codes
 - Update `cmd/hidden_lake/messenger`: append own address in settings
 - Update `cmd/hidden_lake/messenger`: escapeOutput from JS -> html.EscapeString from Go
+- Update `examples/echo_service/default`: middle_hlt -> middle_hls
 
 ### BUG FIXES
 

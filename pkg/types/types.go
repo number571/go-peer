@@ -5,11 +5,11 @@ import (
 	"io"
 )
 
+type ICloser io.Closer
+
 type IRunner interface {
 	Run(context.Context) error
 }
-
-type ICloser io.Closer
 
 type IConverter interface {
 	ToString() string
