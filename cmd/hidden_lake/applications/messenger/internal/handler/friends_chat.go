@@ -30,10 +30,12 @@ type sChatMessage struct {
 	FIsIncoming  bool
 	FMessageInfo utils.SMessageInfo
 }
+
 type sChatAddress struct {
 	FAliasName  string
 	FPubKeyHash string
 }
+
 type sChatMessages struct {
 	*sTemplate
 	FAddress  sChatAddress
@@ -54,23 +56,20 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
-			pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
-			fmt.Fprint(pW, "alias name is null")
+			ErrorPage(pLogger, pCfg, "get_alias_name", "alias name is nil")(pW, pR)
 			return
 		}
 
 		client := getClient(pCfg)
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
-			fmt.Fprint(pW, fmt.Errorf("error: read public key: %w", err))
+			ErrorPage(pLogger, pCfg, "get_public_key", "read public key")(pW, pR)
 			return
 		}
 
 		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_receiver"))
-			fmt.Fprint(pW, fmt.Errorf("error: get receiver by public key: %w", err))
+			ErrorPage(pLogger, pCfg, "get_receiver", "get receiver by public key")(pW, pR)
 			return
 		}
 
@@ -80,8 +79,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		case http.MethodPost, http.MethodPut:
 			msgBytes, err := getMessageBytes(pR)
 			if err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("get_message"))
-				fmt.Fprint(pW, fmt.Errorf("error: get message bytes: %w", err))
+				ErrorPage(pLogger, pCfg, "get_message", "get message bytes")(pW, pR)
 				return
 			}
 
@@ -89,16 +87,14 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			secretKey := pCfg.GetSecretKeys()[aliasName]
 
 			if err := sendMessage(client, myPubKey, secretKey, aliasName, msgBytes); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("send_message"))
-				fmt.Fprint(pW, fmt.Errorf("error: push message to network: %w", err))
+				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
 
 			senderID := myPubKey.GetHasher().ToBytes()
 			dbMsg := database.NewMessage(false, senderID, doMessageProcessor(msgBytes))
 			if err := pDB.Push(rel, dbMsg); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("push_message"))
-				fmt.Fprint(pW, fmt.Errorf("error: add message to database: %w", err))
+				ErrorPage(pLogger, pCfg, "push_message", "add message to database")(pW, pR)
 				return
 			}
 
@@ -119,8 +115,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 
 		msgs, err := pDB.Load(rel, start, size)
 		if err != nil {
-			pLogger.PushErro(logBuilder.WithMessage("read_database"))
-			fmt.Fprint(pW, fmt.Errorf("error: read database: %w", err))
+			ErrorPage(pLogger, pCfg, "read_database", "read database")(pW, pR)
 			return
 		}
 
@@ -159,7 +154,7 @@ func getMessageBytes(pR *http.Request) ([]byte, error) {
 	case http.MethodPost:
 		strMsg := strings.TrimSpace(pR.FormValue("input_message"))
 		if strMsg == "" {
-			return nil, errors.New("error: message is null")
+			return nil, errors.New("error: message is nil")
 		}
 		if utils.HasNotWritableCharacters(strMsg) {
 			return nil, errors.New("error: message has not writable characters")

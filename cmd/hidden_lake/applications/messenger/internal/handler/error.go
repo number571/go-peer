@@ -12,7 +12,13 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 )
 
-func NotFoundPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+type sError struct {
+	*sTemplate
+	FTitle   string
+	FMessage string
+}
+
+func ErrorPage(pLogger logger.ILogger, pCfg config.IConfig, pTitle, pMessage string) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -20,13 +26,21 @@ func NotFoundPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc 
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),
 			"index.html",
-			"page404.html",
+			"error.html",
 		)
 		if err != nil {
 			panic("can't load hmtl files")
 		}
 
-		pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogNotFound))
-		t.Execute(pW, getTemplate(pCfg))
+		pLogger.PushWarn(logBuilder.WithMessage(pTitle))
+		t.Execute(pW, &sError{
+			sTemplate: getTemplate(pCfg),
+			FTitle:    pTitle,
+			FMessage:  pMessage,
+		})
 	}
+}
+
+func NotFoundPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+	return ErrorPage(pLogger, pCfg, "404_page", "page not found")
 }

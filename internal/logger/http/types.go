@@ -22,6 +22,5 @@ const (
 	CLogSuccess    = "_"
 	CLogMethod     = "method"
 	CLogDecodeBody = "decode_body"
-	CLogNotFound   = "not_found"
 	CLogRedirect   = "redirect"
 )

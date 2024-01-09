@@ -53,7 +53,7 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 		}
 		msg := LoadMessage(data)
 		if msg == nil {
-			return nil, errors.New("message is null")
+			return nil, errors.New("message is nil")
 		}
 		res = append(res, msg)
 	}

@@ -54,7 +54,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 
 		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
 		if fPubKey == nil {
-			panic("public key is null (invalid data from HLS)!")
+			panic("public key is nil (invalid data from HLS)!")
 		}
 
 		hlsClient := getClient(pCfg)
@@ -148,7 +148,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	case isText(rawMsgBytes):
 		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes))
 		if strMsg == "" {
-			return errors.New("failed: message is null")
+			return errors.New("failed: message is nil")
 		}
 		if utils.HasNotWritableCharacters(strMsg) {
 			return errors.New("failed: message has not writable characters")

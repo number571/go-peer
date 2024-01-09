@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	"sort"
@@ -43,56 +42,48 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
 			secretKey := strings.TrimSpace(pR.FormValue("secret_key")) // may be nil
 			if aliasName == "" || pubStrKey == "" {
-				pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
-				fmt.Fprint(pW, "error: host or port is null")
+				ErrorPage(pLogger, cfg, "get_alias_name", "host or port is nil")(pW, pR)
 				return
 			}
 
 			pubKey := asymmetric.LoadRSAPubKey(pubStrKey)
 			if pubKey == nil {
-				pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
-				fmt.Fprint(pW, "error: public key is nil")
+				ErrorPage(pLogger, cfg, "get_public_key", "public key is nil")(pW, pR)
 				return
 			}
 
 			if err := client.AddFriend(aliasName, pubKey); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("add_friend"))
-				fmt.Fprint(pW, "error: add friend")
+				ErrorPage(pLogger, cfg, "add_friend", "add friend")(pW, pR)
 				return
 			}
 
 			secretKeys[aliasName] = secretKey
 			if err := cfgEditor.UpdateSecretKeys(secretKeys); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("add_secret_key"))
-				fmt.Fprint(pW, "error: add secret key")
+				ErrorPage(pLogger, cfg, "add_secret_key", "add secret key")(pW, pR)
 				return
 			}
 		case http.MethodDelete:
 			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			if aliasName == "" {
-				pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
-				fmt.Fprint(pW, "error: alias_name is null")
+				ErrorPage(pLogger, cfg, "get_alias_name", "alias_name is nil")(pW, pR)
 				return
 			}
 
 			if err := client.DelFriend(aliasName); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("del_friend"))
-				fmt.Fprint(pW, "error: del friend")
+				ErrorPage(pLogger, cfg, "del_friend", "delete friend")(pW, pR)
 				return
 			}
 
 			delete(secretKeys, aliasName)
 			if err := cfgEditor.UpdateSecretKeys(secretKeys); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("del_secret_key"))
-				fmt.Fprint(pW, "error: del secret key")
+				ErrorPage(pLogger, cfg, "del_secret_key", "delete secret key")(pW, pR)
 				return
 			}
 		}
 
 		friends, err := client.GetFriends()
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
-			fmt.Fprint(pW, "error: read friends")
+			ErrorPage(pLogger, cfg, "get_friends", "read friends")(pW, pR)
 			return
 		}
 

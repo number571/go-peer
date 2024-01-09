@@ -48,8 +48,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		client := getClient(cfg)
 		myPubKey, err := client.GetPubKey()
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
-			fmt.Fprint(pW, "error: read public key")
+			ErrorPage(pLogger, cfg, "get_public_key", "read public key")(pW, pR)
 			return
 		}
 
@@ -57,21 +56,18 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
 			if err := client.SetNetworkKey(networkKey); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("set_network_key"))
-				fmt.Fprint(pW, "error: update network key")
+				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
 				return
 			}
 		case http.MethodPut:
 			language := strings.TrimSpace(pR.FormValue("language"))
 			res, err := utils.ToILanguage(language)
 			if err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("to_language"))
-				fmt.Fprint(pW, "error: load unknown language")
+				ErrorPage(pLogger, cfg, "to_language", "load unknown language")(pW, pR)
 				return
 			}
 			if err := cfgEditor.UpdateLanguage(res); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("update_language"))
-				fmt.Fprint(pW, "error: update language")
+				ErrorPage(pLogger, cfg, "update_language", "update language")(pW, pR)
 				return
 			}
 		case http.MethodPost:
@@ -79,33 +75,28 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			port := strings.TrimSpace(pR.FormValue("port"))
 
 			if host == "" || port == "" {
-				pLogger.PushWarn(logBuilder.WithMessage("get_host_port"))
-				fmt.Fprint(pW, "error: host or port is null")
+				ErrorPage(pLogger, cfg, "get_host_port", "host or port is nil")(pW, pR)
 				return
 			}
 			if _, err := strconv.Atoi(port); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("port_to_int"))
-				fmt.Fprint(pW, "error: port is not a number")
+				ErrorPage(pLogger, cfg, "port_to_int", "port is not a number")(pW, pR)
 				return
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
 			if err := client.AddConnection(connect); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("add_connection"))
-				fmt.Fprint(pW, "error: add connection")
+				ErrorPage(pLogger, cfg, "add_connection", "add connection")(pW, pR)
 				return
 			}
 		case http.MethodDelete:
 			connect := strings.TrimSpace(pR.FormValue("address"))
 			if connect == "" {
-				pLogger.PushWarn(logBuilder.WithMessage("get_connection"))
-				fmt.Fprint(pW, "error: connect is null")
+				ErrorPage(pLogger, cfg, "get_connection", "connect is nil")(pW, pR)
 				return
 			}
 
 			if err := client.DelConnection(connect); err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("del_connection"))
-				fmt.Fprint(pW, "error: del connection")
+				ErrorPage(pLogger, cfg, "del_connection", "delete connection")(pW, pR)
 				return
 			}
 		}
@@ -118,8 +109,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 
 		gotSettings, err := client.GetSettings()
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_network_key"))
-			fmt.Fprint(pW, "error: read network key")
+			ErrorPage(pLogger, cfg, "get_network_key", "read network key")(pW, pR)
 			return
 		}
 
@@ -128,8 +118,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		// append HLS connections to backup connections
 		allConns, err := getAllConnections(cfg, client)
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_all_connections"))
-			fmt.Fprint(pW, fmt.Errorf("error: get online connections: %w", err))
+			ErrorPage(pLogger, cfg, "get_all_connections", "get online connections")(pW, pR)
 			return
 		}
 

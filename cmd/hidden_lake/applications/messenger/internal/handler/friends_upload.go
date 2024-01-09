@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -30,8 +29,7 @@ func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.Handler
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
-			pLogger.PushWarn(logBuilder.WithMessage("get_alias_name"))
-			fmt.Fprint(pW, "alias name is null")
+			ErrorPage(pLogger, pCfg, "get_alias_name", "alias name is nil")(pW, pR)
 			return
 		}
 
@@ -46,8 +44,7 @@ func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.Handler
 
 		msgLimit, err := getMessageLimit(getClient(pCfg))
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("get_message_size"))
-			fmt.Fprint(pW, "get message size (limit)")
+			ErrorPage(pLogger, pCfg, "get_message_size", "get message size (limit)")(pW, pR)
 			return
 		}
 

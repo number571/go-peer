@@ -1,0 +1,18 @@
+{{define "title"}}
+{{.FTitle}}
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
+        {{if (eq .FLanguage 0)}}
+        Error
+        {{else if (eq .FLanguage 1)}}
+        Ошибка
+        {{else if (eq .FLanguage 2)}}
+        Eraro
+        {{end}}
+    </h1>
+    <p>{{.FMessage}}</p>
+</div>
+{{end}}
