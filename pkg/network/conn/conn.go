@@ -3,8 +3,6 @@ package conn
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -15,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -52,7 +51,7 @@ type sConn struct {
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 	conn, err := net.Dial("tcp", pAddr)
 	if err != nil {
-		return nil, fmt.Errorf("tcp connect: %w", err)
+		return nil, utils.MergeErrors(ErrCreateConnection, err)
 	}
 	return LoadConn(pSett, conn), nil
 }
@@ -106,7 +105,7 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 		[]byte{},
 	))
 	if err != nil {
-		return fmt.Errorf("send payload bytes: %w", err)
+		return utils.MergeErrors(ErrSendPayloadBytes, err)
 	}
 
 	return nil
@@ -116,12 +115,12 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan struct{}) (messag
 	// large wait read deadline => the connection has not sent anything yet
 	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
-		return nil, fmt.Errorf("receive head bytes: %w", err)
+		return nil, utils.MergeErrors(ErrReadHeaderBytes, err)
 	}
 
 	dataBytes, err := p.recvDataBytes(pCtx, encMsgSize+voidSize, p.fSettings.GetReadDeadline())
 	if err != nil {
-		return nil, fmt.Errorf("receive data bytes: %w", err)
+		return nil, utils.MergeErrors(ErrReadBodyBytes, err)
 	}
 
 	// check hash sum of received data
@@ -133,14 +132,14 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan struct{}) (messag
 		[]byte{},
 	))
 	if !bytes.Equal(newHash, gotHash) {
-		return nil, errors.New("got invalid hash")
+		return nil, ErrInvalidBodyAuthHash
 	}
 
 	// try unpack message from bytes
 	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
 	msg, err := message.LoadMessage(p.fSettings, msgBytes)
 	if err != nil {
-		return nil, fmt.Errorf("got invalid message bytes: %w", err)
+		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
 	}
 
 	return msg, nil
@@ -157,7 +156,7 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 
 			n, err := p.fSocket.Write(pBytes[:bytesPtr])
 			if err != nil {
-				return fmt.Errorf("write tcp bytes: %w", err)
+				return utils.MergeErrors(ErrWriteToSocket, err)
 			}
 
 			bytesPtr = bytesPtr - uint64(n)
@@ -211,7 +210,7 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 		var err error
 		encRecvHead, err = p.recvDataBytes(pCtx, cEncryptRecvHeadSize, pInitDeadline)
 		if err != nil {
-			chErr <- fmt.Errorf("read tcp header block: %w", err)
+			chErr <- utils.MergeErrors(ErrReadHeaderBlock, err)
 			return
 		}
 		chErr <- nil
@@ -229,7 +228,7 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 
 	recvHead := p.getCipher().DecryptBytes(encRecvHead)
 	if recvHead == nil {
-		return 0, 0, nil, errors.New("decrypt header bytes")
+		return 0, 0, nil, ErrDecryptHeaderBlock
 	}
 
 	encMsgSizeBytes := [encoding.CSizeUint64]byte{}
@@ -240,12 +239,12 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 
 	encMsgSize := encoding.BytesToUint64(encMsgSizeBytes)
 	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadOverHeadSize) {
-		return 0, 0, nil, errors.New("invalid header.encMsgSize")
+		return 0, 0, nil, ErrInvalidHeaderMsgSize
 	}
 
 	voidSize := encoding.BytesToUint64(voidSizeBytes)
 	if voidSize > p.fSettings.GetLimitVoidSize() {
-		return 0, 0, nil, errors.New("invalid header.voidSize")
+		return 0, 0, nil, ErrInvalidHeaderVoidSize
 	}
 
 	// check hash sum of received sizes
@@ -258,7 +257,7 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 		[]byte{},
 	))
 	if !bytes.Equal(newHash, gotHash) {
-		return 0, 0, nil, errors.New("invalid header.auth")
+		return 0, 0, nil, ErrInvalidHeaderAuthHash
 	}
 
 	return encMsgSize, voidSize, recvHead[firstHashIndex:secondHashIndex], nil
@@ -277,7 +276,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitDeadli
 			buffer := make([]byte, mustLen)
 			n, err := p.fSocket.Read(buffer)
 			if err != nil {
-				return nil, err
+				return nil, utils.MergeErrors(ErrReadFromSocket, err)
 			}
 
 			dataRaw = bytes.Join(

@@ -3,7 +3,6 @@ package network
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"sync"
 	"time"
@@ -53,7 +52,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 	// can't broadcast message to the network if len(connections) = 0
 	connections := p.GetConnections()
 	if len(connections) == 0 {
-		return errors.New("no connections")
+		return ErrNoConnections
 	}
 
 	// node can redirect received message
@@ -76,13 +75,19 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 
 			defer wg.Done()
 			defer func() {
-				if resErr != nil {
-					_ = p.DelConnection(a)
+				if resErr == nil {
+					return
 				}
 
+				_ = p.DelConnection(a)
+
 				mutex.Lock()
-				listErr = append(listErr, resErr)
-				mutex.Unlock()
+				defer mutex.Unlock()
+
+				listErr = append(
+					listErr,
+					utils.MergeErrors(ErrBroadcastMessage, resErr),
+				)
 			}()
 
 			select {
@@ -90,7 +95,10 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 				resErr = err // err can be = nil
 			case <-time.After(p.fSettings.GetWriteTimeout()):
 				<-chErr
-				resErr = fmt.Errorf("write timeout %s", c.GetSocket().RemoteAddr().String())
+				resErr = utils.MergeErrors(
+					ErrWriteTimeout,
+					errors.New(c.GetSocket().RemoteAddr().String()),
+				)
 			}
 		}(a, c)
 	}
@@ -105,7 +113,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 func (p *sNode) Listen(pCtx context.Context) error {
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
-		return fmt.Errorf("run node: %w", err)
+		return utils.MergeErrors(ErrCreateListener, err)
 	}
 	defer listener.Close()
 
@@ -117,7 +125,7 @@ func (p *sNode) Listen(pCtx context.Context) error {
 		default:
 			tconn, err := p.getListener().Accept()
 			if err != nil {
-				return err
+				return utils.MergeErrors(ErrListenerAccept, err)
 			}
 
 			if p.hasMaxConnSize() {
@@ -179,17 +187,17 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 // Checks the number of connections.
 func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	if p.hasMaxConnSize() {
-		return errors.New("has max connections size")
+		return ErrHasLimitConnections
 	}
 
 	if _, ok := p.getConnection(pAddress); ok {
-		return errors.New("connection already exist")
+		return ErrConnectionIsExist
 	}
 
 	sett := p.fSettings.GetConnSettings()
 	conn, err := conn.NewConn(sett, pAddress)
 	if err != nil {
-		return fmt.Errorf("add connect: %w", err)
+		return utils.MergeErrors(ErrAddConnections, err)
 	}
 
 	p.setConnection(pAddress, conn)
@@ -205,13 +213,13 @@ func (p *sNode) DelConnection(pAddress string) error {
 
 	conn, ok := p.fConnections[pAddress]
 	if !ok {
-		return errors.New("unknown connect")
+		return ErrConnectionIsNotExist
 	}
 
 	delete(p.fConnections, pAddress)
 
 	if err := conn.Close(); err != nil {
-		return fmt.Errorf("connect close: %w", err)
+		return utils.MergeErrors(ErrCloseConnection, err)
 	}
 
 	return nil

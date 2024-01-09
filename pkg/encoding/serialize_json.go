@@ -2,6 +2,8 @@ package encoding
 
 import (
 	"encoding/json"
+
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 func SerializeJSON(pData interface{}) []byte {
@@ -13,5 +15,8 @@ func SerializeJSON(pData interface{}) []byte {
 }
 
 func DeserializeJSON(pData []byte, pRes interface{}) error {
-	return json.Unmarshal(pData, pRes)
+	if err := json.Unmarshal(pData, pRes); err != nil {
+		return utils.MergeErrors(ErrDeserialize, err)
+	}
+	return nil
 }

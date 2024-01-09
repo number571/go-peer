@@ -53,23 +53,23 @@ func (p *sLogger) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sLogger) PushInfo(info ILogArg) {
+func (p *sLogger) PushInfo(pMsg ILogArg) {
 	if p.fInfoOut == nil {
 		return
 	}
-	p.fInfoOut.Println(p.fLogFunc(info))
+	p.fInfoOut.Println(p.fLogFunc(pMsg))
 }
 
-func (p *sLogger) PushWarn(warn ILogArg) {
+func (p *sLogger) PushWarn(pMsg ILogArg) {
 	if p.fWarnOut == nil {
 		return
 	}
-	p.fWarnOut.Println(p.fLogFunc(warn))
+	p.fWarnOut.Println(p.fLogFunc(pMsg))
 }
 
-func (p *sLogger) PushErro(erro ILogArg) {
+func (p *sLogger) PushErro(pMsg ILogArg) {
 	if p.fErroOut == nil {
 		return
 	}
-	p.fErroOut.Println(p.fLogFunc(erro))
+	p.fErroOut.Println(p.fLogFunc(pMsg))
 }

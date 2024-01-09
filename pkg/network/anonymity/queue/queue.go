@@ -2,8 +2,6 @@ package queue
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -13,6 +11,7 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -61,7 +60,7 @@ func (p *sMessageQueue) GetClient() client.IClient {
 
 func (p *sMessageQueue) Run(pCtx context.Context) error {
 	if err := p.fState.Enable(nil); err != nil {
-		return fmt.Errorf("queue running error: %w", err)
+		return utils.MergeErrors(ErrRunning, err)
 	}
 	defer func() {
 		if err := p.fState.Disable(nil); err != nil {
@@ -112,7 +111,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 	defer p.fMutex.Unlock()
 
 	if uint64(len(p.fQueue)) >= p.fSettings.GetMainCapacity() {
-		return errors.New("queue already full, need wait and retry")
+		return ErrQueueLimit
 	}
 
 	p.fQueue <- net_message.NewMessage(

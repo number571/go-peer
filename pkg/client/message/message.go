@@ -2,12 +2,12 @@ package message
 
 import (
 	"bytes"
-	"errors"
 	"strings"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -44,16 +44,16 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	case string:
 		recvMsg = []byte(x)
 	default:
-		return nil, errors.New("unknown type of message")
+		return nil, ErrUnknownType
 	}
 
 	i := bytes.Index(recvMsg, []byte(CSeparator))
 	if i == -1 {
-		return nil, errors.New("undefined separator")
+		return nil, ErrSeparatorNotFound
 	}
 
 	if err := encoding.DeserializeJSON(recvMsg[:i], msg); err != nil {
-		return nil, errors.New("unmarshal message")
+		return nil, utils.MergeErrors(ErrDeserializeMessage, err)
 	}
 
 	switch x := pMsg.(type) {
@@ -63,12 +63,12 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 		encStr := strings.TrimSpace(x[i+cSeparatorLen:])
 		msg.FPayload = encoding.HexDecode(encStr)
 		if msg.FPayload == nil {
-			return nil, errors.New("hex decode payload")
+			return nil, ErrDecodePayload
 		}
 	}
 
 	if !msg.IsValid(psett) {
-		return nil, errors.New("message is invalid")
+		return nil, ErrInvalidMessage
 	}
 
 	return msg, nil

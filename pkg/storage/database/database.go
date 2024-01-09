@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -11,6 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/storage"
+	"github.com/number571/go-peer/pkg/utils"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
@@ -43,10 +43,10 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 
 	db, err := leveldb.OpenFile(path, opt)
 	if err != nil {
-		openErr := fmt.Errorf("open database: %w", err)
+		openErr := utils.MergeErrors(ErrOpenDB, err)
 		db, err = tryRecover(path, opt)
 		if err != nil {
-			return nil, fmt.Errorf("%w: %w", openErr, err)
+			return nil, utils.MergeErrors(openErr, err)
 		}
 	}
 
@@ -54,12 +54,12 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 	saltValue, err := db.Get([]byte(cSaltKey), nil)
 	if err != nil {
 		if !errors.Is(err, leveldb.ErrNotFound) {
-			return nil, fmt.Errorf("read salt value: %w", err)
+			return nil, utils.MergeErrors(ErrReadSalt, err)
 		}
 		isInitSalt = true
 		saltValue = random.NewStdPRNG().GetBytes(2 * cSaltSize)
 		if err := db.Put([]byte(cSaltKey), saltValue, nil); err != nil {
-			return nil, fmt.Errorf("put salt value: %w", err)
+			return nil, utils.MergeErrors(ErrPushSalt, err)
 		}
 	}
 
@@ -74,18 +74,18 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 	if isInitSalt {
 		saltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
 		if err := db.Put([]byte(cHashKey), saltHash, nil); err != nil {
-			return nil, fmt.Errorf("put salt hash: %w", err)
+			return nil, utils.MergeErrors(ErrPushSaltHash, err)
 		}
 	}
 
 	gotSaltHash, err := db.Get([]byte(cHashKey), nil)
 	if err != nil {
-		return nil, fmt.Errorf("read salt hash: %w", err)
+		return nil, utils.MergeErrors(ErrReadSaltHash, err)
 	}
 
 	newSaltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()
 	if !bytes.Equal(gotSaltHash, newSaltHash) {
-		return nil, errors.New("incorrect salt hash")
+		return nil, ErrInvalidSaltHash
 	}
 
 	return &sKVDatabase{
@@ -106,7 +106,7 @@ func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
 
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	if err := p.fDB.Put(key, doEncrypt(p.fCipher, p.fAuthKey, pValue), nil); err != nil {
-		return fmt.Errorf("insert key/value to database: %w", err)
+		return utils.MergeErrors(ErrSetValueDB, err)
 	}
 	return nil
 }
@@ -118,7 +118,7 @@ func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	encValue, err := p.fDB.Get(key, nil)
 	if err != nil {
-		return nil, fmt.Errorf("read value by key: %w", err)
+		return nil, utils.MergeErrors(ErrGetValueDB, err)
 	}
 
 	return tryDecrypt(
@@ -134,11 +134,11 @@ func (p *sKVDatabase) Del(pKey []byte) error {
 
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	if _, err := p.fDB.Get(key, nil); err != nil {
-		return fmt.Errorf("read value by key for delete: %w", err)
+		return utils.MergeErrors(ErrGetValueDB, err)
 	}
 
 	if err := p.fDB.Delete(key, nil); err != nil {
-		return fmt.Errorf("delete value by key: %w", err)
+		return utils.MergeErrors(ErrDelValueDB, err)
 	}
 
 	return nil
@@ -149,7 +149,7 @@ func (p *sKVDatabase) Close() error {
 	defer p.fMutex.Unlock()
 
 	if err := p.fDB.Close(); err != nil {
-		return fmt.Errorf("close database: %w", err)
+		return utils.MergeErrors(ErrCloseDB, err)
 	}
 	return nil
 }
@@ -157,7 +157,7 @@ func (p *sKVDatabase) Close() error {
 func tryRecover(path string, opt *opt.Options) (*leveldb.DB, error) {
 	db, err := leveldb.RecoverFile(path, opt)
 	if err != nil {
-		return nil, fmt.Errorf("recover database: %w", err)
+		return nil, utils.MergeErrors(ErrRecoverDB, err)
 	}
 	return db, nil
 }

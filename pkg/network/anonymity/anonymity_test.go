@@ -210,15 +210,24 @@ func TestFetchPayload(t *testing.T) {
 	)
 
 	ctx := context.Background()
+	_, err := nodes[0].FetchPayload(
+		ctx,
+		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+	)
+	if err == nil {
+		t.Error("success fetch payload with large body")
+		return
+	}
 
 	msgBody := "hello, world!"
-	result, err := nodes[0].FetchPayload(
+	result, err1 := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
-	if err != nil {
-		t.Error(err)
+	if err1 != nil {
+		t.Error(err1)
 		return
 	}
 
@@ -250,15 +259,24 @@ func TestBroadcastPayload(t *testing.T) {
 	)
 
 	ctx := context.Background()
+	err := nodes[0].BroadcastPayload(
+		ctx,
+		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+	)
+	if err == nil {
+		t.Error("success broadcast payload with large body")
+		return
+	}
 
 	msgBody := "hello, world!"
-	err := nodes[0].BroadcastPayload(
+	err1 := nodes[0].BroadcastPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
 		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
 	)
-	if err != nil {
-		t.Error(err)
+	if err1 != nil {
+		t.Error(err1)
 		return
 	}
 
@@ -629,6 +647,13 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		t.Error(err)
 		return [5]INode{}, [5]context.CancelFunc{}
 	}
+
+	go func() {
+		if err := nodes[0].Run(ctx); err == nil {
+			t.Error("success twice running node")
+			return
+		}
+	}()
 
 	return nodes, cancels
 }

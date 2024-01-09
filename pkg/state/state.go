@@ -1,9 +1,9 @@
 package state
 
 import (
-	"errors"
-	"fmt"
 	"sync"
+
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -24,12 +24,12 @@ func (p *sState) Enable(f IStateF) error {
 	defer p.fMutex.Unlock()
 
 	if p.fEnabled {
-		return errors.New("state already enabled")
+		return ErrStateEnabled
 	}
 
 	if f != nil {
 		if err := f(); err != nil {
-			return fmt.Errorf("enable state error: %w", err)
+			return utils.MergeErrors(ErrFuncEnable, err)
 		}
 	}
 
@@ -42,12 +42,12 @@ func (p *sState) Disable(f IStateF) error {
 	defer p.fMutex.Unlock()
 
 	if !p.fEnabled {
-		return errors.New("state already disabled")
+		return ErrStateDisabled
 	}
 
 	if f != nil {
 		if err := f(); err != nil {
-			return fmt.Errorf("disable state error: %w", err)
+			return utils.MergeErrors(ErrFuncDisable, err)
 		}
 	}
 

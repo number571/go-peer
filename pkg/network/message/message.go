@@ -2,7 +2,6 @@ package message
 
 import (
 	"bytes"
-	"errors"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
@@ -46,11 +45,11 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	case string:
 		return LoadMessage(pSett, encoding.HexDecode(x))
 	default:
-		return nil, errors.New("unknown type of message")
+		return nil, ErrUnknownType
 	}
 
 	if len(msgBytes) < encoding.CSizeUint64+hashing.CSHA256Size {
-		return nil, errors.New("length of message bytes < size of header")
+		return nil, ErrInvalidHeaderSize
 	}
 
 	proofBytes := msgBytes[:encoding.CSizeUint64]
@@ -63,17 +62,17 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	proof := encoding.BytesToUint64(proofArray)
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(gotHash, proof) {
-		return nil, errors.New("got invalid proof of work")
+		return nil, ErrInvalidProofOfWork
 	}
 
 	if !bytes.Equal(gotHash, getHash(pSett.GetNetworkKey(), pldBytes)) {
-		return nil, errors.New("got invalid auth hash")
+		return nil, ErrInvalidAuthHash
 	}
 
 	// check Head[u64]
 	pld := payload.LoadPayload(pldBytes)
 	if pld == nil {
-		return nil, errors.New("failed to load payload")
+		return nil, ErrDecodePayload
 	}
 
 	return &sMessage{

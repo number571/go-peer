@@ -34,8 +34,7 @@ func (p *sStdPRNG) GetBytes(n uint64) []byte {
 	slice := make([]byte, n)
 	_, err := rand.Read(slice)
 	if err != nil {
-		// 'return nil' is insecure
-		panic(err)
+		panic(err) // 'return nil' is insecure
 	}
 	return slice
 }
