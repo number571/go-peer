@@ -1,5 +1,5 @@
 package gopeer
 
 const (
-	CVersion = "v1.5.27"
+	CVersion = "v1.6.0"
 )
