@@ -1,7 +1,7 @@
 CMDPATH=../../../cmd
 BINPATH=../../../bin
 
-N=10
+N=3
 PROD=1
 LIST_NODES=$(shell ls ./other_nodes | wc -l)
 

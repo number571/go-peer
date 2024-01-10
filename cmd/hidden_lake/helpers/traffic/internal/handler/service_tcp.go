@@ -57,9 +57,17 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 			return fmt.Errorf("put message to database: %w", err)
 		}
 
+		hasBroadastError := false
 		if err := pNode.BroadcastMessage(pCtx, pNetMsg); err != nil {
-			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 			// need pass error (some of connections may be closed)
+			hasBroadastError = true
+		}
+
+		switch hasBroadastError {
+		case true:
+			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
+		default:
+			pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		}
 
 		consumers := pCfg.GetConsumers()
@@ -77,14 +85,15 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 					pNetMsg.ToString(),
 				)
 				if err != nil {
-					pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
+					pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseGetResponse))
+					return
 				}
+				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseGetResponse))
 			}(cHost)
 		}
 
 		wg.Wait()
 
-		pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return nil
 	}
 }

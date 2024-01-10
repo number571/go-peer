@@ -12,16 +12,19 @@
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/messenger`: delete QR codes
-- Update `cmd/hidden_lake/messenger`: append own address in settings
-- Update `cmd/hidden_lake/messenger`: escapeOutput from JS -> html.EscapeString from Go
+- Update `cmd/hidden_lake/applications/messenger`: delete QR codes
+- Update `cmd/hidden_lake/applications/messenger`: append own address in settings
+- Update `cmd/hidden_lake/applications/messenger`: escapeOutput from JS -> html.EscapeString from Go
 - Update `examples/echo_service/default`: middle_hlt -> middle_hls
 - Update `cmd/hidden_lake/applications/messenger`: errors from Fprint -> errors with ErrorPage
+- Update `examples/echo_service/prod_test`: N=10 -> N=3
+- Update `cmd/hidden_lake/helpers/traffic`: change log broadcast, getResponse in the service_tcp.go
 
 ### BUG FIXES
 
-- Update `cmd/hidden_lake/messenger`: fix view of friends with long names
-- Update `cmd/hidden_lake/messenger`: fix view of connections with host, port inputs
+- Update `cmd/hidden_lake/applications/messenger`: fix view of friends with long names
+- Update `cmd/hidden_lake/applications/messenger`: fix view of connections with host, port inputs
+- Update `cmd/hidden_lake/applications/messenger`: fix view of address in the sent file 
 
 <!-- ... -->
 

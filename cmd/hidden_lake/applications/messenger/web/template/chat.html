@@ -141,6 +141,11 @@ Babilejo
       </p>
       <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
       {{else}}
+      <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+        <script>
+          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
+        </script>
+      </p>
       <button class="btn btn-muted text-center text-dark w-100"
         onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
         {{.FMessageInfo.FFileName}}
@@ -160,6 +165,11 @@ Babilejo
       </p>
       <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
       {{else}}
+      <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+        <script>
+          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
+        </script>
+      </p>
       <button class="btn btn-primary text-center text-white w-100"
         onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
         {{.FMessageInfo.FFileName}}
