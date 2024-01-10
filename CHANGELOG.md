@@ -6,6 +6,14 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor
+
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/messenger`: fix view of html escaped chars 
+
 <!-- ... -->
 
 ## v1.6.0

@@ -92,7 +92,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			}
 
 			senderID := myPubKey.GetHasher().ToBytes()
-			dbMsg := database.NewMessage(false, senderID, doMessageProcessor(msgBytes))
+			dbMsg := database.NewMessage(false, senderID, msgBytes)
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				ErrorPage(pLogger, pCfg, "push_message", "add message to database")(pW, pR)
 				return
@@ -130,8 +130,13 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 
 		for _, msg := range msgs {
 			res.FMessages = append(res.FMessages, sChatMessage{
-				FIsIncoming:  msg.IsIncoming(),
-				FMessageInfo: getMessageInfo(msg.GetSenderID(), msg.GetMessage(), msg.GetTimestamp()),
+				FIsIncoming: msg.IsIncoming(),
+				FMessageInfo: getMessageInfo(
+					false,
+					msg.GetSenderID(),
+					msg.GetMessage(),
+					msg.GetTimestamp(),
+				),
 			})
 		}
 

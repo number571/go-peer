@@ -42,7 +42,7 @@ func unwrapText(pBytes []byte) string {
 	if len(pBytes) == 0 { // need use first isText
 		panic("length of bytes = 0")
 	}
-	return string(pBytes[1:])
+	return utils.ReplaceTextToEmoji(string(pBytes[1:]))
 }
 
 func unwrapFile(pBytes []byte) (string, string) {

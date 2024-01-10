@@ -79,7 +79,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, senderID, doMessageProcessor(rawMsgBytes))
+		dbMsg := database.NewMessage(true, senderID, rawMsgBytes)
 
 		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
@@ -88,20 +88,18 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		gChatQueue.Push(&chat_queue.SMessage{
-			FAddress:     fPubKey.GetHasher().ToString(),
-			FMessageInfo: getMessageInfo(dbMsg.GetSenderID(), dbMsg.GetMessage(), dbMsg.GetTimestamp()),
+			FAddress: fPubKey.GetHasher().ToString(),
+			FMessageInfo: getMessageInfo(
+				true,
+				dbMsg.GetSenderID(),
+				dbMsg.GetMessage(),
+				dbMsg.GetTimestamp(),
+			),
 		})
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, hlm_settings.CTitlePattern)
 	}
-}
-
-func doMessageProcessor(msgBytes []byte) []byte {
-	if isText(msgBytes) {
-		return []byte(utils.ReplaceTextToEmoji(string(msgBytes)))
-	}
-	return msgBytes
 }
 
 func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymmetric.IPubKey, senderID, encMsgBytes []byte) ([]byte, error) {
@@ -165,16 +163,19 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
+func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes)
 		if msgData == "" {
 			panic("message data = nil")
 		}
+		if pEscape {
+			msgData = html.EscapeString(msgData)
+		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,
-			FMessage:   html.EscapeString(msgData),
+			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
 	case isFile(pRawMsgBytes):
@@ -182,9 +183,12 @@ func getMessageInfo(pSenderID string, pRawMsgBytes []byte, pTimestamp string) ut
 		if filename == "" || msgData == "" {
 			panic("filename = nil OR message data = nil")
 		}
+		if pEscape {
+			filename = html.EscapeString(filename)
+		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,
-			FFileName:  html.EscapeString(filename),
+			FFileName:  filename,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
