@@ -376,7 +376,7 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 	}
 
 	// broadcast message to network
-	if err := p.networkBroadcast(pCtx, pNetMsg); err != nil {
+	if err := p.fNetwork.BroadcastMessage(pCtx, pNetMsg); err != nil {
 		// some connections can return errors
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return true, nil
@@ -410,14 +410,6 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 	}
 
 	return true, nil
-}
-
-func (p *sNode) networkBroadcast(pCtx context.Context, pMsg net_message.IMessage) error {
-	// redirect message to another nodes
-	if err := p.fNetwork.BroadcastMessage(pCtx, pMsg); err != nil {
-		return utils.MergeErrors(ErrNetworkBroadcast, err)
-	}
-	return nil
 }
 
 func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {

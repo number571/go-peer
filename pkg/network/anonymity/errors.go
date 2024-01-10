@@ -4,7 +4,6 @@ import "errors"
 
 var (
 	ErrCloseWrapperDB         = errors.New("close wrapper database")
-	ErrNetworkBroadcast       = errors.New("network broadcast")
 	ErrSetHashIntoDB          = errors.New("set hash into database")
 	ErrNilDB                  = errors.New("database is nil")
 	ErrEnqueueMessage         = errors.New("enqueue message")
