@@ -9,11 +9,13 @@ import (
 var (
 	tgErrorn1  = errors.New("error#1")
 	tgErrorn2  = errors.New("error#2")
-	tgErrorStr = fmt.Sprintf("%s, %s", tgErrorn2.Error(), tgErrorn1.Error())
+	tgErrorn3  = errors.New("error#3")
+	tgErrorn4  = errors.New("error#4")
+	tgErrorStr = fmt.Sprintf("%s: %s: %s", tgErrorn1.Error(), tgErrorn2.Error(), tgErrorn3.Error())
 )
 
 func TestMergeErrors(t *testing.T) {
-	errList := []error{tgErrorn1, nil, tgErrorn2}
+	errList := []error{tgErrorn1, nil, tgErrorn2, tgErrorn3}
 	err := MergeErrors(errList...)
 	if err == nil {
 		t.Error("nothing errors?")
@@ -25,6 +27,14 @@ func TestMergeErrors(t *testing.T) {
 	}
 	if !errors.Is(err, tgErrorn2) {
 		t.Error("not found error#2")
+		return
+	}
+	if !errors.Is(err, tgErrorn3) {
+		t.Error("not found error#3")
+		return
+	}
+	if errors.Is(err, tgErrorn4) {
+		t.Error("found not exist error#4")
 		return
 	}
 	if err.Error() != tgErrorStr {

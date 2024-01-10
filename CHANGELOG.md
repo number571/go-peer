@@ -25,6 +25,7 @@
 - Update `cmd/hidden_lake/applications/messenger`: fix view of friends with long names
 - Update `cmd/hidden_lake/applications/messenger`: fix view of connections with host, port inputs
 - Update `cmd/hidden_lake/applications/messenger`: fix view of address in the sent file 
+- Update `pkg/utils`: fix fmt.Errorf("%w, %w", err, resErr) -> import "error-chain" (v1.16 is not supported call multi %w)
 
 <!-- ... -->
 

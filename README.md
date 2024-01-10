@@ -85,11 +85,15 @@ Some final applications are compositions of other applications. Due to this, suc
 
 ## Dependencies
 
+> [!IMPORTANT]
+> All dependencies are loaded into the go-peer project once using the "go mod vendor" command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
+
 1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
 2. Go library (used by `cmd/hidden_lake/applications/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
 3. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
 4. Go library (used by `pkg/encoding`) [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2");
-5. CSS/JS library (used by `cmd/hidden_lake/applications/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+5. Go library (used by `pkg/utils`) [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain");
+6. CSS/JS library (used by `cmd/hidden_lake/applications/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
 
 ## Theoretical works
 

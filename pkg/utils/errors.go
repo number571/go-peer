@@ -1,18 +1,19 @@
 package utils
 
-import "fmt"
+import (
+	error_chain "github.com/g8rswimmer/error-chain"
+)
 
-func MergeErrors(errors ...error) error {
-	var resErr error
-	for _, err := range errors {
+func MergeErrors(pErrors ...error) error {
+	errChain := error_chain.New()
+	for _, err := range pErrors {
 		if err == nil {
 			continue
 		}
-		if resErr == nil {
-			resErr = err
-			continue
-		}
-		resErr = fmt.Errorf("%w, %w", err, resErr)
+		errChain.Add(err)
 	}
-	return resErr
+	if len(errChain.Errors()) == 0 {
+		return nil
+	}
+	return errChain
 }
