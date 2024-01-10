@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"errors"
-	"html"
 	"io"
 	"net/http"
 	"strings"
@@ -144,7 +143,7 @@ func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymme
 func isValidMsgBytes(rawMsgBytes []byte) error {
 	switch {
 	case isText(rawMsgBytes):
-		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes))
+		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes, true))
 		if strMsg == "" {
 			return errors.New("failed: message is nil")
 		}
@@ -153,7 +152,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 		}
 		return nil
 	case isFile(rawMsgBytes):
-		filename, msgBytes := unwrapFile(rawMsgBytes)
+		filename, msgBytes := unwrapFile(rawMsgBytes, true)
 		if filename == "" || len(msgBytes) == 0 {
 			return errors.New("failed: unwrap file")
 		}
@@ -166,12 +165,9 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
 	switch {
 	case isText(pRawMsgBytes):
-		msgData := unwrapText(pRawMsgBytes)
+		msgData := unwrapText(pRawMsgBytes, pEscape)
 		if msgData == "" {
 			panic("message data = nil")
-		}
-		if pEscape {
-			msgData = html.EscapeString(msgData)
 		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,
@@ -179,12 +175,9 @@ func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimest
 			FTimestamp: pTimestamp,
 		}
 	case isFile(pRawMsgBytes):
-		filename, msgData := unwrapFile(pRawMsgBytes)
+		filename, msgData := unwrapFile(pRawMsgBytes, pEscape)
 		if filename == "" || msgData == "" {
 			panic("filename = nil OR message data = nil")
-		}
-		if pEscape {
-			filename = html.EscapeString(filename)
 		}
 		return utils.SMessageInfo{
 			FSenderID:  pSenderID,

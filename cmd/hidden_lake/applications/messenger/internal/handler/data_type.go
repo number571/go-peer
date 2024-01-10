@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/base64"
+	"html"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
@@ -38,14 +39,18 @@ func wrapFile(filename string, pBytes []byte) []byte {
 	}, []byte{})
 }
 
-func unwrapText(pBytes []byte) string {
+func unwrapText(pBytes []byte, pEscape bool) string {
 	if len(pBytes) == 0 { // need use first isText
 		panic("length of bytes = 0")
 	}
-	return utils.ReplaceTextToEmoji(string(pBytes[1:]))
+	text := utils.ReplaceTextToEmoji(string(pBytes[1:]))
+	if pEscape {
+		return html.EscapeString(text)
+	}
+	return text
 }
 
-func unwrapFile(pBytes []byte) (string, string) {
+func unwrapFile(pBytes []byte, pEscape bool) (string, string) {
 	if len(pBytes) == 0 { // need use first isFile
 		panic("length of bytes = 0")
 	}
@@ -57,9 +62,13 @@ func unwrapFile(pBytes []byte) (string, string) {
 	if utils.HasNotWritableCharacters(filename) {
 		return "", ""
 	}
-	fileBytes := bytes.Join(splited[1:], []byte{hlm_settings.CIsFile}) // in base64
+	fileBytes := bytes.Join(splited[1:], []byte{hlm_settings.CIsFile})
 	if len(fileBytes) == 0 {
 		return "", ""
 	}
-	return filename, base64.StdEncoding.EncodeToString(fileBytes)
+	base64FileBytes := base64.StdEncoding.EncodeToString(fileBytes)
+	if pEscape {
+		return html.EscapeString(filename), base64FileBytes
+	}
+	return filename, base64FileBytes
 }
