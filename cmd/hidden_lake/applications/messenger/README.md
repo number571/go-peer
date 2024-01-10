@@ -111,18 +111,6 @@ $ make
 
 ## Pages
 
-### Signup page
-
-Sign up login/password and additional private key. If field with private key is null than private key generated.
-
-<img src="_images/v2/signup.png" alt="signup.png"/>
-
-### Signin page
-
-Sign in with login/password. Authorized client identified by a private key and can push messages into database.
-
-<img src="_images/v2/signin.png" alt="signin.png"/>
-
 ### About page
 
 Base information about projects HLM and HLS with links to source.
