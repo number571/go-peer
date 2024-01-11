@@ -162,13 +162,29 @@ func TestQueue(t *testing.T) {
 
 func testQueue(queue IMessageQueue) error {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	defer func() {
+		cancel()
+		time.Sleep(100 * time.Millisecond)
+	}()
 
 	go func() {
 		if err := queue.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 			return
 		}
 	}()
+
+	client := queue.GetClient()
+	msg, err := client.EncryptPayload(
+		client.GetPubKey(),
+		payload.NewPayload(0, []byte(testutils.TcBody)),
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := queue.EnqueueMessage(msg); err != nil {
+		return err
+	}
 
 	// wait minimum one generated message
 	time.Sleep(200 * time.Millisecond)
@@ -199,8 +215,7 @@ func testQueue(queue IMessageQueue) error {
 		}
 	}
 
-	client := queue.GetClient()
-	msg, err := client.EncryptPayload(
+	msg2, err := client.EncryptPayload(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte(testutils.TcBody)),
 	)
@@ -208,9 +223,11 @@ func testQueue(queue IMessageQueue) error {
 		return err
 	}
 
-	hash := msg.GetHash()
+	hash := msg2.GetHash()
 	for i := 0; i < 3; i++ {
-		queue.EnqueueMessage(msg)
+		if err := queue.EnqueueMessage(msg2); err != nil {
+			return err
+		}
 	}
 
 	for i := 0; i < 3; i++ {

@@ -91,6 +91,8 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 			}()
 
 			select {
+			case <-pCtx.Done():
+				resErr = pCtx.Err()
 			case err := <-chErr:
 				resErr = err // err can be = nil
 			case <-time.After(p.fSettings.GetWriteTimeout()):

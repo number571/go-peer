@@ -110,7 +110,9 @@ func TestClosedConn(t *testing.T) {
 	pld := payload.NewPayload(1, []byte("aaa"))
 	msg := message.NewMessage(conn.GetSettings(), pld, 1)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	if err := conn.WriteMessage(ctx, msg); err == nil {
 		t.Error("success write payload to closed connection")
 		return
@@ -140,6 +142,18 @@ func TestClosedConn(t *testing.T) {
 
 	if _, _, _, err := sconn.recvHeadBytes(ctx, readCh2, time.Minute); err == nil {
 		t.Error("success recv head bytes from closed connection")
+		return
+	}
+
+	cancel()
+
+	if err := sconn.sendBytes(ctx, []byte("hello, world!")); err == nil {
+		t.Error("success send bytes with canceled context")
+		return
+	}
+
+	if _, err := sconn.recvDataBytes(ctx, 128, time.Second); err == nil {
+		t.Error("success recv data bytes with canceled context")
 		return
 	}
 }

@@ -37,7 +37,7 @@ const (
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	node, cancels := testNewNode(time.Minute, "", 9, 0, false)
+	node, cancels := testNewNode(time.Minute, "", 9, 0, 0, false)
 	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 9)
 
 	sett := node.GetSettings()
@@ -355,7 +355,7 @@ func TestEnqueuePayload(t *testing.T) {
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 7, 0, true)
+	_node, cancel := testNewNode(time.Minute, "", 7, 0, 0, true)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 7)
 
 	node := _node.(*sNode)
@@ -471,7 +471,7 @@ func TestHandleWrapper(t *testing.T) {
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 6, 0, false)
+	_node, cancel := testNewNode(time.Minute, "", 6, 0, 0, false)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 6)
 
 	node := _node.(*sNode)
@@ -520,7 +520,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 func TestRecvSendMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, cancel := testNewNode(time.Minute, "", 5, 0, false)
+	_node, cancel := testNewNode(time.Minute, "", 5, 0, 0, false)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 5)
 
 	node := _node.(*sNode)
@@ -569,14 +569,56 @@ func TestRecvSendMessage(t *testing.T) {
 		}
 	}
 
+	hasError := false
 	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
 		if err := node.enqueueMessage(ctx, msg); err != nil {
-			return
+			hasError = true
+			break
 		}
 	}
 
-	t.Error("success send message (push to queue) over queue capacity")
+	if !hasError {
+		t.Error("success send message (push to queue) over queue capacity")
+	}
+}
+
+func TestRetryEnqueue(t *testing.T) {
+	t.Parallel()
+
+	ctxBg, cancelBg := context.WithCancel(context.Background())
+	defer cancelBg()
+
+	_node, cancel := testNewNode(time.Minute, "", 11, 0, 3, false)
+	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 11)
+
+	node := _node.(*sNode)
+
+	client := node.fQueue.GetClient()
+	pubKey := client.GetPubKey()
+
+	msgBody := "hello, world!"
+	msg, err := client.EncryptPayload(
+		pubKey,
+		adapters.NewPayload(
+			testutils.TcHead,
+			wrapRequest([]byte(msgBody)),
+		).ToOrigin(),
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	go func() {
+		for i := 0; i < testutils.TCQueueCapacity*2; i++ {
+			_ = node.enqueueMessage(ctxBg, msg)
+		}
+	}()
+
+	time.Sleep(2 * time.Second)
+	cancelBg()
+	time.Sleep(time.Second)
 }
 
 // nodes[0], nodes[1] = clients
@@ -589,7 +631,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	addrs := [5]string{"", "", addresses[0], "", addresses[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i, false)
+		nodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i, 0, false)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running %d", i, typeDB)
 			return [5]INode{}, [5]context.CancelFunc{}
@@ -658,7 +700,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	return nodes, cancels
 }
 
-func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisabled bool) (INode, context.CancelFunc) {
+func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
@@ -677,6 +719,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 			FF2FDisabled:   f2fDisabled,
 			FNetworkMask:   networkMask,
 			FFetchTimeWait: timeWait,
+			FRetryEnqueue:  uint64(retryNum),
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),

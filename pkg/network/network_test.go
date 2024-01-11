@@ -315,6 +315,44 @@ func TestNodeSettings(t *testing.T) {
 	}
 }
 
+func TestContextCancel(t *testing.T) {
+	t.Parallel()
+
+	node1 := newTestNode(testutils.TgAddrs[60], testutils.TCMaxConnects, time.Minute)
+	node2 := newTestNode("", testutils.TCMaxConnects, time.Minute)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() { _ = node1.Listen(ctx) }()
+
+	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
+		return node2.AddConnection(ctx, testutils.TgAddrs[60])
+	})
+	if err1 != nil {
+		t.Error(err1)
+		return
+	}
+
+	headHandle := uint64(testutils.TcHead)
+	sett := node2.GetSettings().GetConnSettings()
+
+	go func() {
+		for i := 0; i < 1000; i++ {
+			pld := payload.NewPayload(
+				headHandle,
+				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
+			)
+			if err := node2.BroadcastMessage(ctx, message.NewMessage(sett, pld, 1)); err != nil {
+				return
+			}
+		}
+		t.Error("success all broadcast messages with canceled context")
+	}()
+
+	cancel()
+}
+
 func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	nodes := [5]INode{}
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}

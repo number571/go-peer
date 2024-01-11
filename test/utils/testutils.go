@@ -37,7 +37,29 @@ var (
 )
 
 var (
-	TgAddrs = [60]string{
+	TgAddrs = [80]string{
+		"localhost:8020",
+		"localhost:8021",
+		"localhost:8022",
+		"localhost:8023",
+		"localhost:8024",
+		"localhost:8025",
+		"localhost:8026",
+		"localhost:8027",
+		"localhost:8028",
+		"localhost:8029",
+
+		"localhost:8030",
+		"localhost:8031",
+		"localhost:8032",
+		"localhost:8033",
+		"localhost:8034",
+		"localhost:8035",
+		"localhost:8036",
+		"localhost:8037",
+		"localhost:8038",
+		"localhost:8039",
+
 		"localhost:8040",
 		"localhost:8041",
 		"localhost:8042",

@@ -62,11 +62,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 	if err := p.fState.Enable(nil); err != nil {
 		return utils.MergeErrors(ErrRunning, err)
 	}
-	defer func() {
-		if err := p.fState.Disable(nil); err != nil {
-			panic(err)
-		}
-	}()
+	defer func() { _ = p.fState.Disable(nil) }()
 
 	for {
 		select {

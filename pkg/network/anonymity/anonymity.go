@@ -77,9 +77,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 			p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
 			return nil
 		}
-		if err := p.fState.Disable(disableFunc); err != nil {
-			panic(err)
-		}
+		_ = p.fState.Disable(disableFunc)
 	}()
 
 	chErr := make(chan error)
@@ -174,15 +172,23 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 }
 
 func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) error {
-	for i := uint64(0); i <= p.fSettings.GetRetryEnqueue(); i++ {
-		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
-			return nil
-		}
+	retryNum := p.fSettings.GetRetryEnqueue()
+	for i := uint64(0); i <= retryNum; i++ {
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
-		case <-time.After(p.fQueue.GetSettings().GetDuration()):
-			// next iter
+		default:
+			if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
+				return nil
+			}
+			if i != retryNum {
+				select {
+				case <-pCtx.Done():
+					return pCtx.Err()
+				case <-time.After(p.fQueue.GetSettings().GetDuration()):
+					break // in the next iteration, a repetition occurs
+				}
+			}
 		}
 	}
 	return ErrEnqueueMessage
