@@ -10,6 +10,7 @@
 
 - Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor
 - Update `pkg/network`: change read messages -> messageProducer, messageConsumer
+- Update `cmd/hidden_lake/service|cmd/hidden_lake/helpers/traffic`: delete utils.MergeErrors
 
 ### BUG FIXES
 

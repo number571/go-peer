@@ -22,7 +22,6 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 	internal_types "github.com/number571/go-peer/internal/types"
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -138,14 +137,12 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 	}
 }
 func (p *sApp) stop() error {
-	err := utils.MergeErrors(
-		closer.CloseAll([]types.ICloser{
-			p.fServiceHTTP,
-			p.fServicePPROF,
-			p.fDBWrapper,
-			p.fConnKeeper.GetNetworkNode(),
-		}),
-	)
+	err := closer.CloseAll([]types.ICloser{
+		p.fServiceHTTP,
+		p.fServicePPROF,
+		p.fDBWrapper,
+		p.fConnKeeper.GetNetworkNode(),
+	})
 	if err != nil {
 		return fmt.Errorf("close/stop all: %w", err)
 	}

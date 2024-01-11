@@ -16,7 +16,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
-	"github.com/number571/go-peer/pkg/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
@@ -138,14 +137,12 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 }
 
 func (p *sApp) stop() error {
-	err := utils.MergeErrors(
-		closer.CloseAll([]types.ICloser{
-			p.fServiceHTTP,
-			p.fServicePPROF,
-			p.fNode.GetDBWrapper(),
-			p.fNode.GetNetworkNode(),
-		}),
-	)
+	err := closer.CloseAll([]types.ICloser{
+		p.fServiceHTTP,
+		p.fServicePPROF,
+		p.fNode.GetDBWrapper(),
+		p.fNode.GetNetworkNode(),
+	})
 	if err != nil {
 		return fmt.Errorf("close/stop all: %w", err)
 	}
