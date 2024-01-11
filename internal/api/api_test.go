@@ -59,6 +59,11 @@ func TestRequestResponseAPI(t *testing.T) {
 	srv := testRunServer(addr)
 	defer srv.Close()
 
+	if _, err := Request(client, http.MethodGet, "\n\t\a", nil); err == nil {
+		t.Error("success request on invalid url")
+		return
+	}
+
 	if _, err := Request(client, http.MethodPatch, testURL, nil); err == nil {
 		t.Error("PATCH: success request on method not allowed")
 		return

@@ -109,7 +109,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 	)
 
 	payloadBytes := pPld.ToBytes()
-	doublePayload := payload.NewPayload(
+	payloadWrapper := payload.NewPayload(
 		uint64(len(payloadBytes)),
 		bytes.Join(
 			[][]byte{
@@ -124,7 +124,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 		[][]byte{
 			p.GetPubKey().GetHasher().ToBytes(),
 			pRecv.GetHasher().ToBytes(),
-			doublePayload.ToBytes(),
+			payloadWrapper.ToBytes(),
 		},
 		[]byte{},
 	)).ToBytes()
@@ -136,7 +136,7 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
 		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
 		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
+		FPayload: cipher.EncryptBytes(payloadWrapper.ToBytes()), // JSON field to raw Body (no need HEX encode)
 	}
 }
 
@@ -168,10 +168,17 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt main data of message by session key.
-	doublePayloadBytes := cipher.DecryptBytes(pMsg.GetPayload())
-	doublePayload := payload.LoadPayload(doublePayloadBytes)
-	if doublePayload == nil {
-		return nil, nil, ErrDecodeDoublePayload
+	payloadWrapperBytes := cipher.DecryptBytes(pMsg.GetPayload())
+	payloadWrapper := payload.LoadPayload(payloadWrapperBytes)
+	if payloadWrapper == nil {
+		return nil, nil, ErrDecodePayloadWrapper
+	}
+
+	// Check size of payload.
+	mustLen := payloadWrapper.GetHead()
+	payloadBytes := payloadWrapper.GetBody()
+	if mustLen > uint64(len(payloadBytes)) {
+		return nil, nil, ErrInvalidPayloadSize
 	}
 
 	// Decrypt salt & hash.
@@ -183,7 +190,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		[][]byte{
 			pubKey.GetHasher().ToBytes(),
 			p.GetPubKey().GetHasher().ToBytes(),
-			doublePayload.ToBytes(),
+			payloadWrapper.ToBytes(),
 		},
 		[]byte{},
 	)).ToBytes()
@@ -199,11 +206,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Remove random bytes and get main data
-	mustLen := doublePayload.GetHead()
-	if mustLen > uint64(len(doublePayload.GetBody())) {
-		return nil, nil, ErrInvalidPayloadSize
-	}
-	pld := payload.LoadPayload(doublePayload.GetBody()[:mustLen])
+	pld := payload.LoadPayload(payloadBytes[:mustLen])
 	if pld == nil {
 		return nil, nil, ErrDecodePayload
 	}

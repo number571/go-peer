@@ -8,7 +8,7 @@ var (
 	ErrDecryptCipherKey     = errors.New("decrypt cipher key")
 	ErrDecryptPublicKey     = errors.New("decrypt public key")
 	ErrInvalidPublicKeySize = errors.New("invalid public key size")
-	ErrDecodeDoublePayload  = errors.New("decode double payload")
+	ErrDecodePayloadWrapper = errors.New("decode payload wrapper")
 	ErrInvalidDataHash      = errors.New("invalid data hash")
 	ErrInvalidHashSign      = errors.New("invalid hash sign")
 	ErrInvalidPayloadSize   = errors.New("invalid payload size")

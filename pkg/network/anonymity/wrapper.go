@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/pkg/storage/database"
-	"github.com/number571/go-peer/pkg/utils"
 	"github.com/number571/go-peer/pkg/wrapper"
 )
 
@@ -46,9 +45,8 @@ func (p *sDBWrapper) Close() error {
 		return nil
 	}
 
+	// no need merge errors,
+	// database is a third-party package
 	p.fWrapper.Set(nil)
-	if err := db.Close(); err != nil {
-		return utils.MergeErrors(ErrCloseWrapperDB, err)
-	}
-	return nil
+	return db.Close()
 }

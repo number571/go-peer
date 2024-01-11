@@ -37,18 +37,17 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]b
 	}
 
 	req.Header.Set("Content-Type", contentType)
+
 	resp, err := pClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
 	}
-
 	defer resp.Body.Close()
 
 	result, err := loadResponse(resp.StatusCode, resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("load request: %w", err)
 	}
-
 	return result, nil
 }
 

@@ -174,53 +174,6 @@ func TestBroadcast(t *testing.T) {
 	}
 }
 
-// func newListener(t *testing.T, addr string) net.Listener {
-// 	listener, err := net.Listen("tcp", addr)
-// 	if err != nil {
-// 		t.Error(err)
-// 		return nil
-// 	}
-// 	go func() {
-// 		for {
-// 			conn, err := listener.Accept()
-// 			if err != nil {
-// 				return
-// 			}
-// 			_ = conn.Close()
-// 		}
-// 	}()
-// 	return listener
-// }
-
-// func TestClosedConnection(t *testing.T) {
-// 	var (
-// 		node1    = newTestNode("", 1, time.Minute).(*sNode)
-// 		listener = newListener(t, testutils.TgAddrs[37])
-// 	)
-// 	defer testFreeNodes([]INode{node1})
-
-// 	defer func() {
-// 		if listener == nil {
-// 			return
-// 		}
-// 		listener.Close()
-// 	}()
-
-// 	if err := node1.AddConnection(testutils.TgAddrs[37]); err != nil {
-// 		t.Error(err)
-// 		return
-// 	}
-
-// 	headHandle := uint64(testutils.TcHead)
-// 	reqBytes := []byte("hello, world!")
-
-// 	pld := payload.NewPayload(headHandle, reqBytes)
-// 	if err := node1.BroadcastPayload(pld); err == nil {
-// 		t.Error("success broadcast payload with non listening server")
-// 		return
-// 	}
-// }
-
 func TestNodeConnection(t *testing.T) {
 	t.Parallel()
 

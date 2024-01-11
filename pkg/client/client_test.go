@@ -2,12 +2,17 @@ package client
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/utils"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -197,6 +202,17 @@ func TestDecrypt(t *testing.T) {
 		t.Error("success decrypt message with incorrect sign")
 		return
 	}
+
+	client1Ptr := client1.(*sClient)
+	msg3, err := client1Ptr.tInvalidEncryptPayload(client1.GetPubKey(), pl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if _, _, err := client1.DecryptMessage(msg3); err == nil {
+		t.Error("success decrypt message with incorrect payload (double)")
+		return
+	}
 }
 
 func TestMessageSize(t *testing.T) {
@@ -255,4 +271,67 @@ func testNewClient() IClient {
 		}),
 		tgPrivKey,
 	)
+}
+
+func (p *sClient) tInvalidEncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) (message.IMessage, error) {
+	var (
+		msgLimitSize = p.GetMessageLimit()
+		resultSize   = uint64(len(pPld.ToBytes()))
+	)
+
+	if resultSize > msgLimitSize {
+		return nil, utils.MergeErrors(
+			ErrLimitMessageSize,
+			fmt.Errorf(
+				"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
+				msgLimitSize,
+				resultSize,
+			),
+		)
+	}
+
+	return p.tInvalidEncryptWithParams(
+		pRecv,
+		pPld,
+		msgLimitSize-resultSize,
+	), nil
+}
+
+func (p *sClient) tInvalidEncryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pPadd uint64) message.IMessage {
+	var (
+		rand    = random.NewStdPRNG()
+		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		session = rand.GetBytes(symmetric.CAESKeySize)
+	)
+
+	payloadBytes := pPld.ToBytes()
+	doublePayload := payload.NewPayload(
+		uint64(len(payloadBytes))-1,
+		bytes.Join(
+			[][]byte{
+				payloadBytes,
+				rand.GetBytes(pPadd),
+			},
+			[]byte{},
+		),
+	)
+
+	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
+		[][]byte{
+			p.GetPubKey().GetHasher().ToBytes(),
+			pRecv.GetHasher().ToBytes(),
+			doublePayload.ToBytes(),
+		},
+		[]byte{},
+	)).ToBytes()
+
+	cipher := symmetric.NewAESCipher(session)
+	return &message.SMessage{
+		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
+		FEncKey:  encoding.HexEncode(pRecv.EncryptBytes(session)),
+		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
+		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
+		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
+		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
+	}
 }

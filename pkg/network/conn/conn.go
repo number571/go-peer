@@ -227,9 +227,6 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 	}
 
 	recvHead := p.getCipher().DecryptBytes(encRecvHead)
-	if recvHead == nil {
-		return 0, 0, nil, ErrDecryptHeaderBlock
-	}
 
 	encMsgSizeBytes := [encoding.CSizeUint64]byte{}
 	copy(encMsgSizeBytes[:], recvHead[:firstSizeIndex])
