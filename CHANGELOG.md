@@ -9,6 +9,7 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor
+- Update `pkg/network`: change read messages -> messageProducer, messageConsumer
 
 ### BUG FIXES
 

@@ -16,7 +16,7 @@ type IConn interface {
 	GetSocket() net.Conn
 
 	WriteMessage(context.Context, net_message.IMessage) error
-	ReadMessage(context.Context, chan struct{}) (net_message.IMessage, error)
+	ReadMessage(context.Context, chan<- struct{}) (net_message.IMessage, error)
 }
 
 type ISettings interface {

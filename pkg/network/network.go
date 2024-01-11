@@ -228,21 +228,51 @@ func (p *sNode) DelConnection(pAddress string) error {
 // Processes the received data from the connection.
 func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.IConn) {
 	defer p.DelConnection(pAddress)
-	for {
-		var (
-			readHeadCh = make(chan struct{})
-			readFullCh = make(chan message.IMessage)
-		)
 
-		go func() {
+	var (
+		readHeadCh = make(chan struct{})
+		readFullCh = make(chan message.IMessage)
+	)
+
+	ctx, cancel := context.WithCancel(pCtx)
+
+	go p.messageProducer(ctx, cancel, pConn, readHeadCh, readFullCh)
+	go p.messageConsumer(ctx, cancel, pConn, readHeadCh, readFullCh)
+
+	<-ctx.Done()
+}
+
+func (p *sNode) messageProducer(
+	pCtx context.Context,
+	pCancel context.CancelFunc,
+	pConn conn.IConn,
+	readHeadCh chan<- struct{},
+	readFullCh chan<- message.IMessage,
+) {
+	defer pCancel()
+	for {
+		select {
+		case <-pCtx.Done():
+			return
+		default:
 			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
 			if err != nil {
-				readFullCh <- nil
 				return
 			}
 			readFullCh <- msg
-		}()
+		}
+	}
+}
 
+func (p *sNode) messageConsumer(
+	pCtx context.Context,
+	pCancel context.CancelFunc,
+	pConn conn.IConn,
+	readHeadCh <-chan struct{},
+	readFullCh <-chan message.IMessage,
+) {
+	defer pCancel()
+	for {
 		select {
 		case <-pCtx.Done():
 			return
@@ -251,14 +281,14 @@ func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.ICo
 			case <-pCtx.Done():
 				return
 			case <-time.After(p.fSettings.GetReadTimeout()):
+				// read timeout
 				return
 			case msg := <-readFullCh:
-				if msg == nil {
-					return
-				}
 				if ok := p.handleMessage(pCtx, pConn, msg); !ok {
+					// protocol error
 					return
 				}
+				// read next
 				break
 			}
 		}

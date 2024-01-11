@@ -111,7 +111,7 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 	return nil
 }
 
-func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan struct{}) (message.IMessage, error) {
+func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (message.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
 	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
