@@ -51,17 +51,17 @@ func (p *sNode) GetSettings() ISettings {
 func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) error {
 	// can't broadcast message to the network if len(connections) = 0
 	connections := p.GetConnections()
-	if len(connections) == 0 {
+	lenConnections := len(connections)
+	if lenConnections == 0 {
 		return ErrNoConnections
 	}
 
 	// node can redirect received message
 	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
-	mutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
+	chBufErr := make(chan error, lenConnections)
 
-	listErr := make([]error, 0, p.fSettings.GetMaxConnects())
 	for a, c := range connections {
 		wg.Add(1)
 
@@ -70,42 +70,36 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 			chErr <- c.WriteMessage(pCtx, pMsg)
 		}(c)
 
-		go func(a string, c conn.IConn) {
-			var resErr error
-
+		go func(a string) {
 			defer wg.Done()
-			defer func() {
-				if resErr == nil {
-					return
-				}
 
-				_ = p.DelConnection(a)
-
-				mutex.Lock()
-				defer mutex.Unlock()
-
-				listErr = append(
-					listErr,
-					utils.MergeErrors(ErrBroadcastMessage, resErr),
-				)
-			}()
+			ticker := time.NewTicker(p.fSettings.GetWriteTimeout())
+			defer ticker.Stop()
 
 			select {
 			case <-pCtx.Done():
-				resErr = pCtx.Err()
+				chBufErr <- pCtx.Err()
+			case <-ticker.C:
+				chBufErr <- utils.MergeErrors(ErrWriteTimeout, errors.New(a))
 			case err := <-chErr:
-				resErr = err // err can be = nil
-			case <-time.After(p.fSettings.GetWriteTimeout()):
-				<-chErr
-				resErr = utils.MergeErrors(
-					ErrWriteTimeout,
-					errors.New(c.GetSocket().RemoteAddr().String()),
-				)
+				if err == nil {
+					return
+				}
+				chBufErr <- utils.MergeErrors(ErrBroadcastMessage, err)
 			}
-		}(a, c)
+
+			// if got error -> delete connection
+			_ = p.DelConnection(a)
+		}(a)
 	}
 
 	wg.Wait()
+	close(chBufErr)
+
+	listErr := make([]error, 0, lenConnections)
+	for err := range chBufErr {
+		listErr = append(listErr, err)
+	}
 	return utils.MergeErrors(listErr...)
 }
 
@@ -229,52 +223,23 @@ func (p *sNode) DelConnection(pAddress string) error {
 
 // Processes the received data from the connection.
 func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.IConn) {
-	defer p.DelConnection(pAddress)
+	defer func() { _ = p.DelConnection(pAddress) }()
 
 	var (
 		readHeadCh = make(chan struct{})
 		readFullCh = make(chan message.IMessage)
 	)
 
-	ctx, cancel := context.WithCancel(pCtx)
-
-	go p.messageProducer(ctx, cancel, pConn, readHeadCh, readFullCh)
-	go p.messageConsumer(ctx, cancel, pConn, readHeadCh, readFullCh)
-
-	<-ctx.Done()
-}
-
-func (p *sNode) messageProducer(
-	pCtx context.Context,
-	pCancel context.CancelFunc,
-	pConn conn.IConn,
-	readHeadCh chan<- struct{},
-	readFullCh chan<- message.IMessage,
-) {
-	defer pCancel()
 	for {
-		select {
-		case <-pCtx.Done():
-			return
-		default:
+		go func() {
 			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
 			if err != nil {
+				readFullCh <- nil
 				return
 			}
 			readFullCh <- msg
-		}
-	}
-}
+		}()
 
-func (p *sNode) messageConsumer(
-	pCtx context.Context,
-	pCancel context.CancelFunc,
-	pConn conn.IConn,
-	readHeadCh <-chan struct{},
-	readFullCh <-chan message.IMessage,
-) {
-	defer pCancel()
-	for {
 		select {
 		case <-pCtx.Done():
 			return
@@ -283,14 +248,14 @@ func (p *sNode) messageConsumer(
 			case <-pCtx.Done():
 				return
 			case <-time.After(p.fSettings.GetReadTimeout()):
-				// read timeout
 				return
 			case msg := <-readFullCh:
-				if ok := p.handleMessage(pCtx, pConn, msg); !ok {
-					// protocol error
+				if msg == nil {
 					return
 				}
-				// read next
+				if ok := p.handleMessage(pCtx, pConn, msg); !ok {
+					return
+				}
 				break
 			}
 		}

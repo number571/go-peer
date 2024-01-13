@@ -64,7 +64,6 @@ func TestApp(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(100 * time.Millisecond)
 	client := client.NewClient(
 		client.NewBuilder(),
 		client.NewRequester(
@@ -72,6 +71,19 @@ func TestApp(t *testing.T) {
 			&http.Client{Timeout: time.Minute},
 		),
 	)
+
+	err1 := testutils.TryN(
+		50,
+		10*time.Millisecond,
+		func() error {
+			_, err := client.GetIndex()
+			return err
+		},
+	)
+	if err1 != nil {
+		t.Error(err1)
+		return
+	}
 
 	// Check public key of node
 	pubKey, err := client.GetPubKey()
