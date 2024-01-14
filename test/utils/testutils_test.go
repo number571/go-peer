@@ -10,6 +10,8 @@ import (
 )
 
 func TestTryN(t *testing.T) {
+	t.Parallel()
+
 	if err := TryN(3, 10*time.Millisecond, func() error { return errors.New("some error") }); err != nil && err.Error() != "some error" {
 		t.Error("success tryN with error")
 		return

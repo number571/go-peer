@@ -15,6 +15,8 @@ var (
 )
 
 func TestMergeErrors(t *testing.T) {
+	t.Parallel()
+
 	errList := []error{tgErrorn1, nil, tgErrorn2, tgErrorn3}
 	err := MergeErrors(errList...)
 	if err == nil {

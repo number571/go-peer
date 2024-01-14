@@ -9,6 +9,8 @@ import (
 )
 
 func TestInit(t *testing.T) {
+	t.Parallel()
+
 	configFile := fmt.Sprintf(tcConfigFileTemplate, 6)
 	defer os.Remove(configFile)
 

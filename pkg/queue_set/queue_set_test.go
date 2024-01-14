@@ -30,6 +30,8 @@ func testSettings(t *testing.T, n int) {
 }
 
 func TestPanicQueueSet(t *testing.T) {
+	t.Parallel()
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -48,6 +50,8 @@ func TestPanicQueueSet(t *testing.T) {
 }
 
 func TestQueueSet(t *testing.T) {
+	t.Parallel()
+
 	queueSet := NewQueueSet(
 		NewSettings(&SSettings{
 			FCapacity: 3,

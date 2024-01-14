@@ -15,6 +15,8 @@ const (
 )
 
 func TestDatabase(t *testing.T) {
+	t.Parallel()
+
 	os.RemoveAll(tcPath)
 	defer os.RemoveAll(tcPath)
 

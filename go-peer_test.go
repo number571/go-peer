@@ -8,6 +8,8 @@ import (
 )
 
 func TestGoPeerVersion(t *testing.T) {
+	t.Parallel()
+
 	changelog, err := os.ReadFile("CHANGELOG.md")
 	if err != nil {
 		t.Error(err)

@@ -7,6 +7,8 @@ import (
 )
 
 func TestChatQueue(t *testing.T) {
+	t.Parallel()
+
 	chatQueue := NewChatQueue(3)
 
 	chatQueue.Init()

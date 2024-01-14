@@ -13,6 +13,8 @@ const (
 )
 
 func TestInit(t *testing.T) {
+	t.Parallel()
+
 	configFile := fmt.Sprintf(tcConfigFileTemplate, 1)
 	defer os.Remove(configFile)
 

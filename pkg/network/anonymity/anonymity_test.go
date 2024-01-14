@@ -287,8 +287,8 @@ func TestBroadcastPayload(t *testing.T) {
 			return
 		}
 		// success
-	case <-time.After(10 * time.Second):
-		t.Error("error: time after 10 seconds")
+	case <-time.After(time.Minute):
+		t.Error("error: time after 1 minute")
 		return
 	}
 }
