@@ -88,12 +88,12 @@ Some final applications are compositions of other applications. Due to this, suc
 > [!IMPORTANT]
 > All dependencies are loaded into the go-peer project once using the `go mod vendor` command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
 
-1. Go library (used by `pkg/storage/database`) [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb");
-2. Go library (used by `cmd/hidden_lake/applications/messenger`) [golang.org/x/net](https://golang.org/x/net "x/net");
-3. Go library (used by `pkg/crypto/keybuilder`) [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto");
-4. Go library (used by `pkg/encoding`) [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2");
-5. Go library (used by `pkg/utils`) [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain");
-6. CSS/JS library (used by `cmd/hidden_lake/applications/messenger`) [getbootstrap.com](https://getbootstrap.com "bootstrap")
+1. Go library [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb") (used by `pkg/storage/database`);
+2. Go library [golang.org/x/net](https://golang.org/x/net "x/net") (used by `cmd/hidden_lake/applications/messenger`);
+3. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`);
+4. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`);
+5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`);
+6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger`);
 
 ## Theoretical works
 
