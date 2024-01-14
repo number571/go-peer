@@ -34,6 +34,15 @@ func TestGoPeerVersion(t *testing.T) {
 		return
 	}
 
+	for i := 0; i < len(match); i++ {
+		for j := i + 1; j < len(match)-1; j++ {
+			if match[i][1] == match[j][1] {
+				t.Errorf("found the same versions (i=%d, j=%d)", i, j)
+				return
+			}
+		}
+	}
+
 	if bytes.Count(changelog, []byte("*??? ??, ????*")) != 1 {
 		t.Error("is there no new version or more than one new version?")
 		return
