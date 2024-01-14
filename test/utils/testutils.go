@@ -37,7 +37,8 @@ var (
 )
 
 var (
-	TgAddrs = [61]string{
+	// open indexes = [24, 37, 59]
+	TgAddrs = [60]string{
 		"localhost:8040",
 		"localhost:8041",
 		"localhost:8042",
@@ -105,7 +106,6 @@ var (
 		"localhost:8099",
 
 		"localhost:8100",
-		"localhost:8101",
 	}
 )
 

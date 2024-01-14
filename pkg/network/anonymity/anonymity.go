@@ -174,21 +174,17 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) error {
 	retryNum := p.fSettings.GetRetryEnqueue()
 	for i := uint64(0); i <= retryNum; i++ {
+		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
+			return nil
+		}
+		if i == retryNum {
+			break
+		}
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
-		default:
-			if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
-				return nil
-			}
-			if i != retryNum {
-				select {
-				case <-pCtx.Done():
-					return pCtx.Err()
-				case <-time.After(p.fQueue.GetSettings().GetDuration()):
-					break // in the next iteration, a repetition occurs
-				}
-			}
+		case <-time.After(p.fQueue.GetSettings().GetDuration()):
+			// next iter
 		}
 	}
 	return ErrEnqueueMessage
@@ -381,7 +377,7 @@ func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_lo
 		return false, err
 	}
 
-	// broadcast message to network
+	// redirect message to another nodes
 	if err := p.fNetwork.BroadcastMessage(pCtx, pNetMsg); err != nil {
 		// some connections can return errors
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))

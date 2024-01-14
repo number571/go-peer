@@ -60,11 +60,10 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
 
 	wg := sync.WaitGroup{}
+	wg.Add(lenConnections)
+
 	chBufErr := make(chan error, lenConnections)
-
 	for a, c := range connections {
-		wg.Add(1)
-
 		chErr := make(chan error)
 		go func(c conn.IConn) {
 			chErr <- c.WriteMessage(pCtx, pMsg)
@@ -225,12 +224,12 @@ func (p *sNode) DelConnection(pAddress string) error {
 func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.IConn) {
 	defer func() { _ = p.DelConnection(pAddress) }()
 
-	var (
-		readHeadCh = make(chan struct{})
-		readFullCh = make(chan message.IMessage)
-	)
-
 	for {
+		var (
+			readHeadCh = make(chan struct{})
+			readFullCh = make(chan message.IMessage)
+		)
+
 		go func() {
 			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
 			if err != nil {

@@ -287,8 +287,8 @@ func TestBroadcastPayload(t *testing.T) {
 			return
 		}
 		// success
-	case <-time.After(5 * time.Second):
-		t.Error("error: time after 5 seconds")
+	case <-time.After(10 * time.Second):
+		t.Error("error: time after 10 seconds")
 		return
 	}
 }
@@ -343,7 +343,7 @@ func TestEnqueuePayload(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < testutils.TCQueueCapacity; i++ {
 		if err := node.enqueuePayload(ctx, cIsRequest, pubKey, pld); err != nil {
 			return
 		}

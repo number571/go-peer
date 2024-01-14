@@ -318,7 +318,7 @@ func TestNodeSettings(t *testing.T) {
 func TestContextCancel(t *testing.T) {
 	t.Parallel()
 
-	node1 := newTestNode(testutils.TgAddrs[60], testutils.TCMaxConnects, time.Minute)
+	node1 := newTestNode(testutils.TgAddrs[16], testutils.TCMaxConnects, time.Minute)
 	node2 := newTestNode("", testutils.TCMaxConnects, time.Minute)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -327,7 +327,7 @@ func TestContextCancel(t *testing.T) {
 	go func() { _ = node1.Listen(ctx) }()
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
-		return node2.AddConnection(ctx, testutils.TgAddrs[60])
+		return node2.AddConnection(ctx, testutils.TgAddrs[16])
 	})
 	if err1 != nil {
 		t.Error(err1)
