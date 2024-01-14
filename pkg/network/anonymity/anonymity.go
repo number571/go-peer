@@ -90,6 +90,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 		default:
 			msg := p.fQueue.DequeueMessage(pCtx)
 			if msg == nil {
+				// context done
 				break
 			}
 

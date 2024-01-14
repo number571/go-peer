@@ -69,18 +69,9 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			if p.poolHasLimit() {
-				select {
-				case <-pCtx.Done():
-				case <-time.After(p.fSettings.GetDuration() / 2):
-				}
-				continue
+			if err := p.fillMessagePool(pCtx); err != nil {
+				return err
 			}
-			netMsg := p.newPseudoNetworkMessage(pCtx)
-			if netMsg == nil {
-				continue
-			}
-			p.fMsgPool.fQueue <- netMsg
 		}
 	}
 }
@@ -103,13 +94,9 @@ func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings ne
 }
 
 func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	if uint64(len(p.fQueue)) >= p.fSettings.GetMainCapacity() {
+	if p.queueHasLimit() {
 		return ErrQueueLimit
 	}
-
 	p.fQueue <- net_message.NewMessage(
 		p.fMsgSettings,
 		payload.NewPayload(
@@ -128,11 +115,15 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	case <-time.After(p.fSettings.GetDuration()):
 		select {
 		case x := <-p.fQueue:
+			// the main queue is checked first
 			return x
 		default:
+			// take an existing message from any ready queue
 			select {
 			case <-pCtx.Done():
 				return nil
+			case x := <-p.fQueue:
+				return x
 			case x := <-p.fMsgPool.fQueue:
 				return x
 			}
@@ -140,7 +131,16 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	}
 }
 
-func (p *sMessageQueue) newPseudoNetworkMessage(pCtx context.Context) net_message.IMessage {
+func (p *sMessageQueue) fillMessagePool(pCtx context.Context) error {
+	if p.poolHasLimit() {
+		select {
+		case <-pCtx.Done():
+			return pCtx.Err()
+		case <-time.After(p.fSettings.GetDuration() / 2):
+			return nil
+		}
+	}
+
 	p.fMutex.Lock()
 	msgSettings := p.fMsgSettings
 	networkMask := p.fNetworkMask
@@ -151,7 +151,7 @@ func (p *sMessageQueue) newPseudoNetworkMessage(pCtx context.Context) net_messag
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	chNetMsg := make(chan net_message.IMessage)
@@ -168,20 +168,27 @@ func (p *sMessageQueue) newPseudoNetworkMessage(pCtx context.Context) net_messag
 
 	select {
 	case <-pCtx.Done():
-		return nil
+		return pCtx.Err()
 	case x := <-chNetMsg:
 		p.fMutex.Lock()
-		defer p.fMutex.Unlock()
-
 		settingsChanged := networkMask != p.fNetworkMask ||
 			msgSettings.GetNetworkKey() != p.fMsgSettings.GetNetworkKey() ||
 			msgSettings.GetWorkSizeBits() != p.fMsgSettings.GetWorkSizeBits()
+		p.fMutex.Unlock()
 
-		if settingsChanged {
-			return nil
+		if !settingsChanged {
+			p.fMsgPool.fQueue <- x
 		}
-		return x
+		return nil
 	}
+}
+
+func (p *sMessageQueue) queueHasLimit() bool {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	currLen := len(p.fQueue)
+	return uint64(currLen) >= p.fSettings.GetMainCapacity()
 }
 
 func (p *sMessageQueue) poolHasLimit() bool {
