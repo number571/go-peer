@@ -33,6 +33,22 @@ var (
 	}`)
 )
 
+func TestPanicRequest(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewRequest(tcMethod, tcHost, tcPath).
+		WithHead(map[string]string{
+			settings.CHeaderRequestId: "test",
+		})
+}
+
 func TestRequest(t *testing.T) {
 	t.Parallel()
 
