@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/internal/language"
 )
 
 type sTemplate struct {
-	FLanguage utils.ILanguage
+	FLanguage language.ILanguage
 }
 
 func getTemplate(pCfg config.IConfig) *sTemplate {

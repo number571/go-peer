@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/internal/language"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -34,7 +34,7 @@ type SConfig struct {
 
 	fFilepath string
 	fMutex    sync.Mutex
-	fLanguage utils.ILanguage
+	fLanguage language.ILanguage
 	fLogging  *sLogging
 }
 
@@ -128,7 +128,7 @@ func (p *SConfig) initConfig() error {
 }
 
 func (p *SConfig) loadLanguage() error {
-	res, err := utils.ToILanguage(p.FLanguage)
+	res, err := language.ToILanguage(p.FLanguage)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (p *SConfig) loadLogging() error {
 	return nil
 }
 
-func (p *SConfig) GetLanguage() utils.ILanguage {
+func (p *SConfig) GetLanguage() language.ILanguage {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 

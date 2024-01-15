@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/internal/language"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -31,7 +31,7 @@ func newEditor(pCfg IConfig) IEditor {
 	}
 }
 
-func (p *sEditor) UpdateLanguage(pLang utils.ILanguage) error {
+func (p *sEditor) UpdateLanguage(pLang language.ILanguage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -42,7 +42,7 @@ func (p *sEditor) UpdateLanguage(pLang utils.ILanguage) error {
 	}
 
 	cfg := icfg.(*SConfig)
-	cfg.FLanguage = utils.FromILanguage(pLang)
+	cfg.FLanguage = language.FromILanguage(pLang)
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}

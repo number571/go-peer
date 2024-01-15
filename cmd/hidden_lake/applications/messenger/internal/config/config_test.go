@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/internal/language"
 )
 
 const (
@@ -86,7 +86,7 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetLanguage() != utils.CLangRUS {
+	if cfg.GetLanguage() != language.CLangRUS {
 		t.Error("language is invalid")
 		return
 	}

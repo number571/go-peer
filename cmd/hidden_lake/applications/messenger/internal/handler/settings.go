@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
+	"github.com/number571/go-peer/internal/language"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -60,8 +60,8 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 		case http.MethodPut:
-			language := strings.TrimSpace(pR.FormValue("language"))
-			res, err := utils.ToILanguage(language)
+			lang := strings.TrimSpace(pR.FormValue("language"))
+			res, err := language.ToILanguage(lang)
 			if err != nil {
 				ErrorPage(pLogger, cfg, "to_language", "load unknown language")(pW, pR)
 				return

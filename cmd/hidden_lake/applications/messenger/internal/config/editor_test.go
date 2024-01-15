@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/internal/language"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
@@ -21,7 +21,7 @@ var (
 )
 
 func (p *tsConfig) GetSettings() IConfigSettings     { return nil }
-func (p *tsConfig) GetLanguage() utils.ILanguage     { return 0 }
+func (p *tsConfig) GetLanguage() language.ILanguage  { return 0 }
 func (p *tsConfig) GetLogging() logger.ILogging      { return nil }
 func (p *tsConfig) GetShare() bool                   { return false }
 func (p *tsConfig) GetAddress() IAddress             { return nil }
@@ -73,7 +73,7 @@ func TestEditor(t *testing.T) {
 
 	config.fFilepath = random.NewStdPRNG().GetString(32)
 
-	res, err := utils.ToILanguage("RUS")
+	res, err := language.ToILanguage("RUS")
 	if err != nil {
 		t.Error(err)
 		return
@@ -109,7 +109,7 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 
 	config.fFilepath = random.NewStdPRNG().GetString(32)
 
-	res, err := utils.ToILanguage("RUS")
+	res, err := language.ToILanguage("RUS")
 	if err != nil {
 		t.Error(err)
 		return

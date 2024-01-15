@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/internal/language"
 	logger "github.com/number571/go-peer/internal/logger/std"
 )
 
@@ -11,7 +11,7 @@ type IWrapper interface {
 }
 
 type IEditor interface {
-	UpdateLanguage(utils.ILanguage) error
+	UpdateLanguage(language.ILanguage) error
 	UpdateSecretKeys(map[string]string) error
 }
 
@@ -21,7 +21,7 @@ type IConfig interface {
 	GetLogging() logger.ILogging
 	GetConnection() string
 	GetStorageKey() string
-	GetLanguage() utils.ILanguage
+	GetLanguage() language.ILanguage
 	GetSecretKeys() map[string]string
 }
 
