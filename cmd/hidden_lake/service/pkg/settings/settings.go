@@ -21,7 +21,6 @@ const (
 
 const (
 	CHeaderPublicKey    = "Hl-Service-Public-Key"
-	CHeaderRequestId    = "Hl-Service-Request-Id"
 	CHeaderResponseMode = "Hl-Service-Response-Mode"
 )
 
@@ -32,7 +31,6 @@ const (
 
 const (
 	CRequestQueueCapacity = (1 << 10) // 1024 request_ids ~= 44KiB
-	CRequestIDSize        = 44        // string chars (ASCII bytes)
 )
 
 const (

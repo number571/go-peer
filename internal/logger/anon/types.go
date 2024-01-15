@@ -26,7 +26,6 @@ var gLogMap = map[anon_logger.ILogType]string{
 	// extend
 	CLogBaseResponseModeFromService: "RSPMD",
 	CLogBaseAppendNewFriend:         "APNFR",
-	CLogInfoOnlyShareRequest:        "OSHRQ",
 	CLogInfoResponseFromService:     "RSPSR",
 	CLogInfoRequestIDAlreadyExist:   "RQIDE",
 	CLogWarnRequestToService:        "RQTSR",
@@ -43,7 +42,6 @@ const (
 	CLogBaseAppendNewFriend
 
 	// INFO
-	CLogInfoOnlyShareRequest
 	CLogInfoResponseFromService
 	CLogInfoRequestIDAlreadyExist
 

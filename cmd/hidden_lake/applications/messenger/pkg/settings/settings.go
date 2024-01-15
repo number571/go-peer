@@ -16,7 +16,12 @@ const (
 )
 
 const (
-	CHeaderSenderId = "Hl-Messenger-Sender-Id"
+	CHeaderSenderId  = "Hl-Messenger-Sender-Id"
+	CHeaderRequestId = "Hl-Messenger-Request-Id"
+)
+
+const (
+	CRequestIDSize = 32 // string chars (ASCII bytes)
 )
 
 const (
@@ -33,6 +38,7 @@ const (
 )
 
 const (
+	CDefaultShare            = false
 	CDefaultLanguage         = "ENG"
 	CDefaultMessagesCapacity = (2 << 10) // count
 )

@@ -9,8 +9,10 @@ logging:
   - warn
   - erro
 f2f_disabled: true
+address:
+  http: localhost:4572
 services:
   hidden-lake-messenger: 
-    share: true
+    host: localhost:4041
 connections:
   - localhost:4581

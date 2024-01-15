@@ -3,8 +3,6 @@ package request
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -21,14 +19,10 @@ type sRequest struct {
 }
 
 func NewRequest(pMethod, pHost, pPath string) IRequest {
-	prng := random.NewStdPRNG()
 	return &sRequest{
 		FMethod: pMethod,
 		FHost:   pHost,
 		FPath:   pPath,
-		FHead: map[string]string{
-			settings.CHeaderRequestId: prng.GetString(settings.CRequestIDSize),
-		},
 	}
 }
 
@@ -56,10 +50,8 @@ func (p *sRequest) ToString() string {
 }
 
 func (p *sRequest) WithHead(pHead map[string]string) IRequest {
+	p.FHead = make(map[string]string, len(pHead))
 	for k, v := range pHead {
-		if k == settings.CHeaderRequestId {
-			panic("an attempt to overwrite the header")
-		}
 		p.FHead[k] = v
 	}
 	return p
@@ -83,7 +75,7 @@ func (p *sRequest) GetMethod() string {
 }
 
 func (p *sRequest) GetHead() map[string]string {
-	headers := make(map[string]string)
+	headers := make(map[string]string, len(p.FHead))
 	for k, v := range p.FHead {
 		headers[k] = v
 	}

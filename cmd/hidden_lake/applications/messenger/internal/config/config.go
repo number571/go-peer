@@ -27,6 +27,7 @@ type SConfig struct {
 
 	FLogging    []string          `yaml:"logging,omitempty"`
 	FLanguage   string            `yaml:"language,omitempty"`
+	FShare      bool              `yaml:"share,omitempty"`
 	FAddress    *SAddress         `yaml:"address"`
 	FConnection string            `yaml:"connection"`
 	FStorageKey string            `yaml:"storage_key,omitempty"`
@@ -163,6 +164,10 @@ func (p *SConfig) GetLanguage() language.ILanguage {
 	defer p.fMutex.Unlock()
 
 	return p.fLanguage
+}
+
+func (p *SConfig) GetShare() bool {
+	return p.FShare
 }
 
 func (p *SConfig) GetAddress() IAddress {

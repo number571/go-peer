@@ -10,14 +10,15 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/queue_set"
 	"golang.org/x/net/websocket"
 )
 
-func (p *sApp) initIncomingServiceHTTP() {
+func (p *sApp) initIncomingServiceHTTP(pQueuePusher queue_set.IQueuePusher) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlm_settings.CPushPath,
-		handler.HandleIncomigHTTP(p.fHTTPLogger, p.fConfig, p.fDatabase),
+		handler.HandleIncomigHTTP(p.fHTTPLogger, p.fConfig, p.fDatabase, pQueuePusher),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
@@ -27,7 +28,7 @@ func (p *sApp) initIncomingServiceHTTP() {
 	}
 }
 
-func (p *sApp) initInterfaceServiceHTTP() {
+func (p *sApp) initInterfaceServiceHTTP(pQueuePusher queue_set.IQueuePusher) {
 	mux := http.NewServeMux()
 	mux.Handle(hlm_settings.CStaticPath, http.StripPrefix(
 		hlm_settings.CStaticPath,
@@ -36,13 +37,13 @@ func (p *sApp) initInterfaceServiceHTTP() {
 
 	cfgWrapper := config.NewWrapper(p.fConfig)
 
-	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))                          // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fHTTPLogger, p.fConfig))                      // GET
-	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))                          // GET
-	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))                   // GET, PATCH, PUT, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, cfgWrapper))                     // GET, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fHTTPLogger, p.fConfig, p.fDatabase)) // GET, POST, PUT
-	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fHTTPLogger, p.fConfig))          // GET
+	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))                                        // GET, POST
+	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fHTTPLogger, p.fConfig))                                    // GET
+	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))                                        // GET
+	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))                                 // GET, PATCH, PUT, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, cfgWrapper))                                   // GET, POST, DELETE
+	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fHTTPLogger, p.fConfig, p.fDatabase, pQueuePusher)) // GET, POST, PUT
+	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fHTTPLogger, p.fConfig))                        // GET
 
 	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS))
 

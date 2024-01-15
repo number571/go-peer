@@ -20,6 +20,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			},
 			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FLanguage: hlm_settings.CDefaultLanguage,
+			FShare:    hlm_settings.CDefaultShare,
 			FAddress: &SAddress{
 				FInterface: hlm_settings.CDefaultInterfaceAddress,
 				FIncoming:  hlm_settings.CDefaultIncomingAddress,

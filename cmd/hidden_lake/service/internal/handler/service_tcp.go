@@ -3,12 +3,12 @@ package handler
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -19,11 +19,11 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
 func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.IHandlerF {
+	httpClient := &http.Client{Timeout: time.Minute}
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
@@ -55,61 +55,11 @@ func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.
 			return nil, err
 		}
 
-		// get unique ID of request from the header
-		requestID, ok := getRequestID(loadReq)
-		if !ok {
-			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnInvalidRequestID))
-			return nil, errors.New("request id is invalid")
-		}
-
-		// try set request id into database
-		if ok, err := setRequestID(pMutex, pNode, requestID); err != nil {
-			if ok {
-				pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoRequestIDAlreadyExist))
-				return nil, nil
-			}
-			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroPushDatabaseType))
-			return nil, err
-		}
-
 		// get service's address by hostname
 		service, ok := cfg.GetService(loadReq.GetHost())
 		if !ok {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
 			return nil, fmt.Errorf("failed: address undefined")
-		}
-
-		// share request to all friends
-		if service.GetShare() {
-			wg := sync.WaitGroup{}
-			wg.Add(len(friends))
-
-			for _, pubKey := range friends {
-				go func(pubKey asymmetric.IPubKey) {
-					defer wg.Done()
-
-					// do not send a request to the creator of the request
-					if bytes.Equal(pubKey.ToBytes(), sender.ToBytes()) {
-						return
-					}
-
-					// redirect request to another node
-					_ = pNode.BroadcastPayload(
-						pCtx,
-						pubKey,
-						adapters.NewPayload(hls_settings.CServiceMask, reqBytes),
-					)
-				}(pubKey)
-			}
-
-			wg.Wait()
-		}
-
-		// host can be nil only if share=true
-		// this validation rule in the config
-		if service.GetHost() == "" {
-			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoOnlyShareRequest))
-			return nil, nil
 		}
 
 		// generate new request to serivce
@@ -131,7 +81,7 @@ func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.
 
 		// send request to service
 		// and receive response from service
-		resp, err := http.DefaultClient.Do(pushReq)
+		resp, err := httpClient.Do(pushReq)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
 			return nil, err
@@ -168,37 +118,6 @@ func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IP
 		return false
 	}
 	return true
-}
-
-func getRequestID(pRequest request.IRequest) (string, bool) {
-	requestID, ok := pRequest.GetHead()[hls_settings.CHeaderRequestId]
-	if !ok || len(requestID) != hls_settings.CRequestIDSize {
-		return "", false
-	}
-	return requestID, true
-}
-
-func setRequestID(pMutex *sync.Mutex, pNode anonymity.INode, pRequestID string) (bool, error) {
-	pMutex.Lock()
-	defer pMutex.Unlock()
-
-	// get database from wrapper
-	database := pNode.GetDBWrapper().Get()
-	if database == nil {
-		return false, errors.New("database is nil")
-	}
-
-	// request id already exist in the database
-	if _, err := database.Get([]byte(pRequestID)); err == nil {
-		return true, errors.New("already exist")
-	}
-
-	// try store ID of request to the queue
-	if err := database.Set([]byte(pRequestID), []byte{}); err != nil {
-		return false, err
-	}
-
-	return true, nil
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

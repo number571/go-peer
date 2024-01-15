@@ -11,17 +11,18 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
+	hlm_request "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/queue_set"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 )
@@ -42,7 +43,7 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
+func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase, pQueuePusher queue_set.IQueuePusher) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -86,7 +87,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			// secret key can be = nil
 			secretKey := pCfg.GetSecretKeys()[aliasName]
 
-			if err := sendMessage(client, myPubKey, secretKey, aliasName, msgBytes); err != nil {
+			if err := sendMessage(client, myPubKey, pQueuePusher, secretKey, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -196,7 +197,14 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	return handler.Filename, fileBytes, nil
 }
 
-func sendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKey, pAliasName string, pMsgBytes []byte) error {
+func sendMessage(
+	pClient client.IClient,
+	pMyPubKey asymmetric.IPubKey,
+	pQueuePusher queue_set.IQueuePusher,
+	pSecretKey string,
+	pAliasName string,
+	pMsgBytes []byte,
+) error {
 	msgLimit, err := getMessageLimit(pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
@@ -206,31 +214,32 @@ func sendMessage(pClient client.IClient, pMyPubKey asymmetric.IPubKey, pSecretKe
 		return fmt.Errorf("error: len message > limit: %w", err)
 	}
 
+	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
+	_ = pQueuePusher.Push([]byte(requestID), []byte{})
+
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
 
-	myAddress := pMyPubKey.GetHasher().ToBytes()
+	hash := hashing.NewHMACSHA256Hasher(
+		authKey,
+		bytes.Join(
+			[][]byte{
+				pMyPubKey.GetHasher().ToBytes(),
+				pMsgBytes,
+			},
+			[]byte{},
+		),
+	).ToBytes()
+
 	return pClient.BroadcastRequest(
 		pAliasName,
-		request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
-			WithHead(map[string]string{
-				"Content-Type":               "application/json",
-				hlm_settings.CHeaderSenderId: encoding.HexEncode(myAddress),
-			}).
-			WithBody(
-				symmetric.NewAESCipher(cipherKey).EncryptBytes(
-					bytes.Join(
-						[][]byte{
-							hashing.NewHMACSHA256Hasher(
-								authKey,
-								bytes.Join([][]byte{myAddress, pMsgBytes}, []byte{}),
-							).ToBytes(),
-							pMsgBytes,
-						},
-						[]byte{},
-					),
-				),
+		hlm_request.NewPushRequest(
+			pMyPubKey,
+			requestID,
+			symmetric.NewAESCipher(cipherKey).EncryptBytes(
+				bytes.Join([][]byte{hash, pMsgBytes}, []byte{}),
 			),
+		),
 	)
 }
 

@@ -9,6 +9,8 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/*/pkg`: all functions/methods returns errors as global variables
+- Update `cmd/hidden_lake/service`: remove 'share' option
+- Update `cmd/hidden_lake/applications/messenger`: append 'share' option
 
 ### CHANGES
 

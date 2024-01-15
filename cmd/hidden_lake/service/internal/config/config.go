@@ -47,8 +47,7 @@ type SConfig struct {
 type sLogging []bool
 
 type SService struct {
-	FHost  string `yaml:"host,omitempty"`
-	FShare bool   `yaml:"share,omitempty"`
+	FHost string `yaml:"host"`
 }
 
 type SAddress struct {
@@ -130,7 +129,7 @@ func (p *SConfig) GetSettings() IConfigSettings {
 
 func (p *SConfig) isValid() bool {
 	for _, v := range p.FServices {
-		if v.FHost == "" && !v.FShare {
+		if v.FHost == "" {
 			return false
 		}
 	}
@@ -256,10 +255,6 @@ func (p *SConfig) GetService(name string) (IService, bool) {
 
 func (p *SService) GetHost() string {
 	return p.FHost
-}
-
-func (p *SService) GetShare() bool {
-	return p.FShare
 }
 
 func (p *sLogging) HasInfo() bool {

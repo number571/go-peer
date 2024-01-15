@@ -6,11 +6,12 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/chat_queue"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	hlm_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -19,13 +20,15 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/queue_set"
+	"github.com/number571/go-peer/pkg/utils"
 
+	hlm_request "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/request"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
+func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase, pQueuePusher queue_set.IQueuePusher) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -56,8 +59,19 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			panic("public key is nil (invalid data from HLS)!")
 		}
 
-		hlsClient := getClient(pCfg)
-		rawMsgBytes, err := decryptMsgBytes(pCfg, hlsClient, fPubKey, senderID, encMsgBytes)
+		requestID := pR.Header.Get(hlm_settings.CHeaderRequestId)
+		if len(requestID) != hlm_settings.CRequestIDSize {
+			pLogger.PushWarn(logBuilder.WithMessage("request_id_size"))
+			api.Response(pW, http.StatusNotAcceptable, "failed: request id size")
+			return
+		}
+
+		if err := shareMessage(pCfg, fPubKey, pQueuePusher, requestID, encMsgBytes); err != nil {
+			pLogger.PushWarn(logBuilder.WithMessage("share_message"))
+			// continue
+		}
+
+		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, senderID, encMsgBytes)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
 			api.Response(pW, http.StatusConflict, "failed: decrypt message")
@@ -70,7 +84,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		myPubKey, err := hlsClient.GetPubKey()
+		myPubKey, err := getClient(pCfg).GetPubKey()
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
@@ -101,10 +115,60 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 	}
 }
 
-func decryptMsgBytes(pCfg config.IConfig, pClient client.IClient, pPubKey asymmetric.IPubKey, senderID, encMsgBytes []byte) ([]byte, error) {
+func shareMessage(pCfg config.IConfig, pSender asymmetric.IPubKey, pQueuePusher queue_set.IQueuePusher, pRequestID string, pBody []byte) error {
+	if !pCfg.GetShare() {
+		return nil
+	}
+
+	// request already exist in the queue
+	if ok := pQueuePusher.Push([]byte(pRequestID), []byte{}); !ok {
+		return nil
+	}
+
+	hlsClient := getClient(pCfg)
+
+	friends, err := hlsClient.GetFriends()
+	if err != nil {
+		return err
+	}
+
+	lenFriends := len(friends)
+	chBufErr := make(chan error, lenFriends)
+
+	wg := sync.WaitGroup{}
+	wg.Add(lenFriends)
+
+	for aliasName, pubKey := range friends {
+		go func(aliasName string, pubKey asymmetric.IPubKey) {
+			defer wg.Done()
+
+			// do not send a request to the creator of the request
+			if bytes.Equal(pubKey.ToBytes(), pSender.ToBytes()) {
+				return
+			}
+
+			chBufErr <- hlsClient.BroadcastRequest(
+				aliasName,
+				hlm_request.NewPushRequest(pSender, pRequestID, pBody),
+			)
+		}(aliasName, pubKey)
+	}
+
+	wg.Wait()
+	close(chBufErr)
+
+	errList := make([]error, 0, lenFriends)
+	for err := range chBufErr {
+		errList = append(errList, err)
+	}
+
+	return utils.MergeErrors(errList...)
+}
+
+func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, encMsgBytes []byte) ([]byte, error) {
 	aliasName := ""
 
-	friends, err := pClient.GetFriends()
+	friends, err := getClient(pCfg).GetFriends()
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +211,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 		if strMsg == "" {
 			return errors.New("failed: message is nil")
 		}
-		if utils.HasNotWritableCharacters(strMsg) {
+		if hlm_utils.HasNotWritableCharacters(strMsg) {
 			return errors.New("failed: message has not writable characters")
 		}
 		return nil
@@ -162,14 +226,14 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimestamp string) utils.SMessageInfo {
+func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessageInfo {
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes, pEscape)
 		if msgData == "" {
 			panic("message data = nil")
 		}
-		return utils.SMessageInfo{
+		return hlm_utils.SMessageInfo{
 			FSenderID:  pSenderID,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
@@ -179,7 +243,7 @@ func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimest
 		if filename == "" || msgData == "" {
 			panic("filename = nil OR message data = nil")
 		}
-		return utils.SMessageInfo{
+		return hlm_utils.SMessageInfo{
 			FSenderID:  pSenderID,
 			FFileName:  filename,
 			FMessage:   msgData,

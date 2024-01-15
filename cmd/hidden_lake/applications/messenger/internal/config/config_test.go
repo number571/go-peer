@@ -20,6 +20,7 @@ logging:
   - info
   - erro
 language: RUS
+share: true
 address:
   interface: '%s'
   incoming: '%s'
@@ -83,6 +84,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
+		return
+	}
+
+	if cfg.GetShare() != true {
+		t.Error("share is invalid")
 		return
 	}
 

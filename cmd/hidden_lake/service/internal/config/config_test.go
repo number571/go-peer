@@ -73,10 +73,8 @@ friends:
 services:
   %s: 
     host: %s
-    share: true
   %s: 
     host: %s
-    share: true
 `
 )
 
@@ -308,10 +306,6 @@ func TestComplexConfig(t *testing.T) {
 		}
 		if v != v1.GetHost() {
 			t.Errorf("service host is invalid '%s'", v1)
-			return
-		}
-		if !v1.GetShare() {
-			t.Error("service share is invalid")
 			return
 		}
 	}

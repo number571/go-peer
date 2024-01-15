@@ -17,6 +17,7 @@ type IEditor interface {
 
 type IConfig interface {
 	GetSettings() IConfigSettings
+	GetShare() bool
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() string

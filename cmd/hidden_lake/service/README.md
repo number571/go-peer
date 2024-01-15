@@ -260,9 +260,9 @@ logging:
 address:
   tcp: localhost:9571
   http: localhost:9572
+f2f_disabled: false
 services:
   hidden-default-service:
-    share: false 
     host: localhost:8080
 connections:
   - localhost:8571

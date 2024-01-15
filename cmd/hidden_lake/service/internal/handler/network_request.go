@@ -44,7 +44,7 @@ func HandleNetworkRequestAPI(pCtx context.Context, pMutex *sync.Mutex, pConfig c
 			return
 		}
 
-		pubKey, requestID, data, errCode := unwrapRequest(pConfig, vRequest)
+		pubKey, data, errCode := unwrapRequest(pConfig, vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
@@ -66,17 +66,6 @@ func HandleNetworkRequestAPI(pCtx context.Context, pMutex *sync.Mutex, pConfig c
 			return
 		default:
 			panic("undefined error code")
-		}
-
-		if ok, err := setRequestID(pMutex, pNode, requestID); err != nil {
-			if ok {
-				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
-				api.Response(pW, http.StatusBadGateway, "failed: request id exist")
-				return
-			}
-			pLogger.PushErro(logBuilder.WithMessage("set_request_id"))
-			api.Response(pW, http.StatusBadGateway, "failed: set request id")
-			return
 		}
 
 		switch pR.Method {
@@ -124,24 +113,18 @@ func HandleNetworkRequestAPI(pCtx context.Context, pMutex *sync.Mutex, pConfig c
 	}
 }
 
-func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, string, []byte, int) {
+func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, []byte, int) {
 	friends := pConfig.GetFriends()
 
 	pubKey, ok := friends[pRequest.FReceiver]
 	if !ok {
-		return nil, "", nil, cErrorGetFriends
+		return nil, nil, cErrorGetFriends
 	}
 
-	loadReq, err := request.LoadRequest(pRequest.FReqData)
+	_, err := request.LoadRequest(pRequest.FReqData)
 	if err != nil {
-		return nil, "", nil, cErrorLoadRequest
+		return nil, nil, cErrorLoadRequest
 	}
 
-	// get unique ID of request from the header
-	requestID, ok := getRequestID(loadReq)
-	if !ok {
-		return nil, "", nil, cErrorLoadRequestID
-	}
-
-	return pubKey, requestID, []byte(pRequest.FReqData), cErrorNone
+	return pubKey, []byte(pRequest.FReqData), cErrorNone
 }

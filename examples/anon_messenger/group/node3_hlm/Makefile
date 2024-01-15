@@ -1,4 +1,3 @@
-GC=go build
 .PHONY: default build run clean 
 default: clean build run 
 build:

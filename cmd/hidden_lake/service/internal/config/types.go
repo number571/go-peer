@@ -38,7 +38,6 @@ type IConfig interface {
 
 type IService interface {
 	GetHost() string
-	GetShare() bool
 }
 
 type IAddress interface {
