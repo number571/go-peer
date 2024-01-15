@@ -78,7 +78,7 @@ Run client#2
 $ cd examples/secure_messenger/node2
 $ python3 main.py
 > /friend Bob
-# waiting client#2
+# waiting client#1
 > [Alice]: hello
 > world!
 ```

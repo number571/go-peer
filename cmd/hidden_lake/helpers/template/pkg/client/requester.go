@@ -9,6 +9,7 @@ import (
 	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -40,12 +41,12 @@ func (p *sRequester) GetIndex() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", fmt.Errorf("get index (requester): %w", err)
+		return "", utils.MergeErrors(ErrRequest, err)
 	}
 
 	result := string(res)
 	if result != hl_t_settings.CTitlePattern {
-		return "", errors.New("incorrect title pattern")
+		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
 	}
 
 	return result, nil
@@ -59,12 +60,12 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)
 	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
-		return nil, fmt.Errorf("decode settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return cfgSettings, nil

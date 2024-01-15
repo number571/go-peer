@@ -12,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
@@ -69,7 +70,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	wg.Add(len(services))
 
 	if err := p.fState.Enable(p.enable(ctx)); err != nil {
-		return fmt.Errorf("application running error: %w", err)
+		return utils.MergeErrors(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(p.disable(cancel, wg)) }()
 
@@ -82,14 +83,14 @@ func (p *sApp) Run(pCtx context.Context) error {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case err := <-chErr:
-		return fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(ErrService, err)
 	}
 }
 
 func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
 		if err := p.initDatabase(); err != nil {
-			return fmt.Errorf("init database: %w", err)
+			return utils.MergeErrors(ErrInitDB, err)
 		}
 
 		p.initIncomingServiceHTTP()
@@ -166,7 +167,7 @@ func (p *sApp) stop() error {
 		p.fDatabase,
 	})
 	if err != nil {
-		return fmt.Errorf("close/stop all: %w", err)
+		return utils.MergeErrors(ErrClose, err)
 	}
 	return nil
 }

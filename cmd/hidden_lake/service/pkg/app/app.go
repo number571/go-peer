@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	anon_logger "github.com/number571/go-peer/internal/logger/anon"
@@ -94,7 +95,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	wg.Add(len(services))
 
 	if err := p.fState.Enable(p.enable(ctx)); err != nil {
-		return fmt.Errorf("application running error: %w", err)
+		return utils.MergeErrors(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(p.disable(cancel, wg)) }()
 
@@ -107,14 +108,14 @@ func (p *sApp) Run(pCtx context.Context) error {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case err := <-chErr:
-		return fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(ErrService, err)
 	}
 }
 
 func (p *sApp) enable(pCtx context.Context) state.IStateF {
 	return func() error {
 		if err := p.initDatabase(); err != nil {
-			return fmt.Errorf("init database: %w", err)
+			return utils.MergeErrors(ErrInitDB, err)
 		}
 
 		p.initServiceHTTP(pCtx)
@@ -144,7 +145,7 @@ func (p *sApp) stop() error {
 		p.fNode.GetNetworkNode(),
 	})
 	if err != nil {
-		return fmt.Errorf("close/stop all: %w", err)
+		return utils.MergeErrors(ErrClose, err)
 	}
 	return nil
 }

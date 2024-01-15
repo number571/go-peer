@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -47,12 +48,12 @@ func (p *sRequester) GetIndex() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", fmt.Errorf("get index (requester): %w", err)
+		return "", utils.MergeErrors(ErrRequest, err)
 	}
 
 	result := string(res)
 	if result != hle_settings.CTitlePattern {
-		return "", errors.New("incorrect title pattern")
+		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
 	}
 
 	return result, nil
@@ -69,12 +70,12 @@ func (p *sRequester) EncryptMessage(pPubKey asymmetric.IPubKey, pData []byte) (n
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("encrypt message (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	msg, err := net_message.LoadMessage(p.fParams, string(resp))
 	if err != nil {
-		return nil, fmt.Errorf("load message (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return msg, nil
@@ -88,22 +89,22 @@ func (p *sRequester) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IP
 		pNetMsg.ToString(),
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("decrypt message (requester): %w", err)
+		return nil, nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	var result hle_settings.SContainer
 	if err := encoding.DeserializeJSON(resp, &result); err != nil {
-		return nil, nil, fmt.Errorf("decode response (requester): %w", err)
+		return nil, nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(result.FPublicKey)
 	if pubKey == nil {
-		return nil, nil, errors.New("decode public key (requester)")
+		return nil, nil, utils.MergeErrors(ErrInvalidResponse, errors.New("decode public key"))
 	}
 
 	data := encoding.HexDecode(result.FHexData)
 	if data == nil {
-		return nil, nil, errors.New("decode data (requester)")
+		return nil, nil, utils.MergeErrors(ErrInvalidResponse, errors.New("decode data"))
 	}
 
 	return pubKey, data, nil
@@ -117,12 +118,12 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get public key (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(string(res))
 	if pubKey == nil {
-		return nil, errors.New("got invalid public key")
+		return nil, utils.MergeErrors(ErrDecodeResponse, errors.New("got invalid public key"))
 	}
 
 	return pubKey, nil
@@ -136,12 +137,12 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)
 	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
-		return nil, fmt.Errorf("decode settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return cfgSettings, nil

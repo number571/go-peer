@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -47,12 +48,12 @@ func (p *sRequester) GetIndex() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", fmt.Errorf("get index (requester): %w", err)
+		return "", utils.MergeErrors(ErrRequest, err)
 	}
 
 	result := string(res)
 	if result != hls_settings.CTitlePattern {
-		return "", errors.New("incorrect title pattern")
+		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
 	}
 
 	return result, nil
@@ -66,12 +67,12 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)
 	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
-		return nil, fmt.Errorf("decode settings (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return cfgSettings, nil
@@ -85,7 +86,7 @@ func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 		pNetworkKey,
 	)
 	if err != nil {
-		return fmt.Errorf("set network key (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -98,12 +99,12 @@ func (p *sRequester) FetchRequest(pRequest *hls_settings.SRequest) (response.IRe
 		pRequest,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("fetch request (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	resp, err := response.LoadResponse([]byte(res))
 	if err != nil {
-		return nil, fmt.Errorf("load fetch response (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 	return resp, nil
 }
@@ -116,7 +117,7 @@ func (p *sRequester) BroadcastRequest(pRequest *hls_settings.SRequest) error {
 		pRequest,
 	)
 	if err != nil {
-		return fmt.Errorf("broadcast request (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -129,12 +130,12 @@ func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get friends (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	var vFriends []hls_settings.SFriend
 	if err := encoding.DeserializeJSON([]byte(res), &vFriends); err != nil {
-		return nil, fmt.Errorf("deserialize friends (requeser): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	result := make(map[string]asymmetric.IPubKey, len(vFriends))
@@ -153,7 +154,7 @@ func (p *sRequester) AddFriend(pFriend *hls_settings.SFriend) error {
 		pFriend,
 	)
 	if err != nil {
-		return fmt.Errorf("add friend (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -166,7 +167,7 @@ func (p *sRequester) DelFriend(pFriend *hls_settings.SFriend) error {
 		pFriend,
 	)
 	if err != nil {
-		return fmt.Errorf("del friend (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -179,12 +180,12 @@ func (p *sRequester) GetOnlines() ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get onlines (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	var onlines []string
 	if err := encoding.DeserializeJSON([]byte(res), &onlines); err != nil {
-		return nil, fmt.Errorf("deserialize onlines (requester): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return onlines, nil
@@ -198,7 +199,7 @@ func (p *sRequester) DelOnline(pConnect string) error {
 		pConnect,
 	)
 	if err != nil {
-		return fmt.Errorf("del online (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -211,12 +212,12 @@ func (p *sRequester) GetConnections() ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get connections (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	var connects []string
 	if err := encoding.DeserializeJSON([]byte(res), &connects); err != nil {
-		return nil, fmt.Errorf("deserialize connections (requeser): %w", err)
+		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
 	return connects, nil
@@ -230,7 +231,7 @@ func (p *sRequester) AddConnection(pConnect string) error {
 		pConnect,
 	)
 	if err != nil {
-		return fmt.Errorf("add connection (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -243,7 +244,7 @@ func (p *sRequester) DelConnection(pConnect string) error {
 		pConnect,
 	)
 	if err != nil {
-		return fmt.Errorf("del connection (requester): %w", err)
+		return utils.MergeErrors(ErrRequest, err)
 	}
 	return nil
 }
@@ -256,12 +257,12 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get public key (requester): %w", err)
+		return nil, utils.MergeErrors(ErrRequest, err)
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(string(res))
 	if pubKey == nil {
-		return nil, errors.New("got invalid public key")
+		return nil, utils.MergeErrors(ErrDecodeResponse, errors.New("got invalid public key"))
 	}
 
 	return pubKey, nil

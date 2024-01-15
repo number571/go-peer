@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/*/pkg`: all functions/methods returns errors as global variables
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor

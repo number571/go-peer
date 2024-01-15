@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -66,7 +67,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	wg.Add(len(services))
 
 	if err := p.fState.Enable(p.enable(ctx)); err != nil {
-		return fmt.Errorf("application running error: %w", err)
+		return utils.MergeErrors(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(p.disable(cancel, wg)) }()
 
@@ -79,7 +80,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case err := <-chErr:
-		return fmt.Errorf("got run error: %w", err)
+		return utils.MergeErrors(ErrService, err)
 	}
 }
 
@@ -142,7 +143,7 @@ func (p *sApp) stop() error {
 		p.fServicePPROF,
 	})
 	if err != nil {
-		return fmt.Errorf("close/stop all: %w", err)
+		return utils.MergeErrors(ErrClose, err)
 	}
 	return nil
 }
