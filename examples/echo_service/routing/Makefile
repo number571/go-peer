@@ -10,10 +10,11 @@ build:
 	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	make build -C $(CMDPATH)/hidden_lake/service
 	make build -C ./recv_hls
-	# COPY HLS
+	# COPY HLT
 	cp -r $(BINPATH)/hlt ./middle_hlt_1/prog_hlt_1
 	cp -r $(BINPATH)/hlt ./middle_hlt_2/prog_hlt_2
 	cp -r $(BINPATH)/hlt ./middle_hlt_3/prog_hlt_3
+	# COPY HLS
 	cp -r $(BINPATH)/hls ./recv_hls/prog_hls1
 	cp -r $(BINPATH)/hls ./send_hls/prog_hls2
 run: 

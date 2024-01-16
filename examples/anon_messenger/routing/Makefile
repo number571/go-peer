@@ -11,7 +11,12 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/applications/messenger
+	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
 	make build -C $(CMDPATH)/hidden_lake/service
+	# COPY HLT
+	cp -r $(BINPATH)/hlt ./middle_hlt_1/prog_hlt_1
+	cp -r $(BINPATH)/hlt ./middle_hlt_2/prog_hlt_2
+	cp -r $(BINPATH)/hlt ./middle_hlt_3/prog_hlt_3
 	# COPY HLM PROGRAM
 	cp $(BINPATH)/hlm ./node2_hlm/prog_hlm2
 	cp $(BINPATH)/hlm ./node1_hlm/prog_hlm1
@@ -23,9 +28,15 @@ build:
 	make build -C node2_hlm
 run: 
 	# MAKEFILE RUN
+	make run -C ./middle_hlt_1
+	make run -C ./middle_hlt_2
+	make run -C ./middle_hlt_3
 	make run -C node2_hlm
 	make run -C node1_hlm
 clean:
 	# MAKEFILE CLEAN 
+	make clean -C ./middle_hlt_1
+	make clean -C ./middle_hlt_2
+	make clean -C ./middle_hlt_3
 	make clean -C node2_hlm
 	make clean -C node1_hlm

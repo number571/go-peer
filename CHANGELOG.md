@@ -17,6 +17,9 @@
 - Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor
 - Update `cmd/hidden_lake/applications/messenger`: append 'share' option
 - Update `pkg/network/anonymity/queue`: remove block from Enqueue method (create fillers)
+- Update `examples/echo_service/default`: remove middel_hls
+- Update `examples/anon_messenger/default`: remove middel_hls
+- Update `examples/anon_messenger/routing`: append routing example
 
 ### BUG FIXES
 

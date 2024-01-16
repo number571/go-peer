@@ -128,7 +128,6 @@ func (p *sMessageQueue) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGr
 }
 
 func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings net_message.ISettings) IMessageQueue {
-	// stop all pools
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
