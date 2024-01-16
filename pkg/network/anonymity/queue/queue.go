@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
@@ -33,13 +34,13 @@ type sMessageQueue struct {
 }
 
 type sMainPool struct {
-	fMutex    sync.Mutex
+	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
 	fRawQueue chan message.IMessage
 }
 
 type sVoidPool struct {
-	fMutex    sync.Mutex
+	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
 	fReceiver asymmetric.IPubKey
 }
@@ -129,22 +130,20 @@ func (p *sMessageQueue) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGr
 func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings net_message.ISettings) IMessageQueue {
 	// stop all pools
 	p.fMutex.Lock()
-	p.fMainPool.fMutex.Lock()
-	p.fVoidPool.fMutex.Lock()
-
 	defer p.fMutex.Unlock()
-	defer p.fMainPool.fMutex.Unlock()
-	defer p.fVoidPool.fMutex.Unlock()
 
 	// change net_message settings
 	p.fNetworkMask = pNetworkMask
 	p.fMsgSettings = pMsgSettings
 
 	// clear all old queue state
+	// not clear fMainPool.RawQueue
 	for len(p.fMainPool.fQueue) > 0 {
+		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		<-p.fMainPool.fQueue
 	}
 	for len(p.fVoidPool.fQueue) > 0 {
+		atomic.AddInt64(&p.fVoidPool.fCount, -1)
 		<-p.fVoidPool.fQueue
 	}
 
@@ -152,13 +151,11 @@ func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings ne
 }
 
 func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
-	p.fMainPool.fMutex.Lock()
-	defer p.fMainPool.fMutex.Unlock()
-
-	if p.mainPoolHasLimit() {
+	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
+	if uint64(incCount) > p.fSettings.GetMainCapacity() {
+		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
-
 	p.fMainPool.fRawQueue <- pMsg
 	return nil
 }
@@ -170,6 +167,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	case <-time.After(p.fSettings.GetDuration()):
 		select {
 		case x := <-p.fMainPool.fQueue:
+			atomic.AddInt64(&p.fMainPool.fCount, -1)
 			// the main queue is checked first
 			return x
 		default:
@@ -178,8 +176,10 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 			case <-pCtx.Done():
 				return nil
 			case x := <-p.fMainPool.fQueue:
+				atomic.AddInt64(&p.fMainPool.fCount, -1)
 				return x
 			case x := <-p.fVoidPool.fQueue:
+				atomic.AddInt64(&p.fVoidPool.fCount, -1)
 				return x
 			}
 		}
@@ -218,7 +218,9 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 }
 
 func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
-	if p.voidPoolHasLimit() {
+	incCount := atomic.AddInt64(&p.fVoidPool.fCount, 1)
+	if uint64(incCount) > p.fSettings.GetVoidCapacity() {
+		atomic.AddInt64(&p.fVoidPool.fCount, -1)
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
@@ -263,23 +265,6 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		}
 		return nil
 	}
-}
-
-func (p *sMessageQueue) mainPoolHasLimit() bool {
-	currLen1 := len(p.fMainPool.fQueue)
-	currLen2 := len(p.fMainPool.fRawQueue)
-
-	return false ||
-		uint64(currLen1) >= p.fSettings.GetMainCapacity() ||
-		uint64(currLen2) >= p.fSettings.GetMainCapacity()
-}
-
-func (p *sMessageQueue) voidPoolHasLimit() bool {
-	p.fVoidPool.fMutex.Lock()
-	defer p.fVoidPool.fMutex.Unlock()
-
-	currLen := len(p.fVoidPool.fQueue)
-	return uint64(currLen) >= p.fSettings.GetVoidCapacity()
 }
 
 func (p *sMessageQueue) getNetworkSettings() (uint64, net_message.ISettings) {
