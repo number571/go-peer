@@ -195,7 +195,7 @@ func newNode(serviceAddress, name, dbPath string) anonymity.INode {
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: (1 << 4),
-				FPoolCapacity: (1 << 4),
+				FVoidCapacity: (1 << 4),
 				FParallel:     1,
 				FDuration:     2 * time.Second,
 			}),

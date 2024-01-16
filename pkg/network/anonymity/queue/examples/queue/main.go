@@ -24,7 +24,7 @@ func main() {
 			FDuration:     time.Second,
 			FParallel:     1,
 			FMainCapacity: 1 << 5,
-			FPoolCapacity: 1 << 5,
+			FVoidCapacity: 1 << 5,
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{

@@ -206,7 +206,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: testutils.TCQueueCapacity,
-				FPoolCapacity: testutils.TCQueueCapacity,
+				FVoidCapacity: testutils.TCQueueCapacity,
 				FParallel:     1,
 				FDuration:     500 * time.Millisecond,
 			}),

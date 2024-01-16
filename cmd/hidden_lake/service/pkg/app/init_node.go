@@ -61,7 +61,7 @@ func initNode(pMutex *sync.Mutex, pCfgW config.IWrapper, pPrivKey asymmetric.IPr
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: pkg_settings.CQueueCapacity,
-				FPoolCapacity: pkg_settings.CQueuePoolCapacity,
+				FVoidCapacity: pkg_settings.CQueuePoolCapacity,
 				FParallel:     pParallel,
 				FDuration:     queueDuration,
 			}),

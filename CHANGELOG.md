@@ -15,7 +15,8 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger`: delete doMessageProcessor
-- Update `cmd/hidden_lake/service|cmd/hidden_lake/helpers/traffic`: delete utils.MergeErrors
+- Update `cmd/hidden_lake/applications/messenger`: append 'share' option
+- Update `pkg/network/anonymity/queue`: remove block from Enqueue method (create fillers)
 
 ### BUG FIXES
 

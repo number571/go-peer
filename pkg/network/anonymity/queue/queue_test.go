@@ -34,7 +34,7 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FPoolCapacity: testutils.TCQueueCapacity,
+			FVoidCapacity: testutils.TCQueueCapacity,
 			FDuration:     500 * time.Millisecond,
 			FParallel:     1,
 		})
@@ -47,13 +47,13 @@ func testSettings(t *testing.T, n int) {
 	case 2:
 		_ = NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
-			FPoolCapacity: testutils.TCQueueCapacity,
+			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
-			FPoolCapacity: testutils.TCQueueCapacity,
+			FVoidCapacity: testutils.TCQueueCapacity,
 			FDuration:     500 * time.Millisecond,
 		})
 	}
@@ -72,7 +72,7 @@ func TestRunStopQueue(t *testing.T) {
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
-			FPoolCapacity: 1,
+			FVoidCapacity: 1,
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),
@@ -117,10 +117,14 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}
 
-	if err := queue.EnqueueMessage(msg); err == nil {
-		t.Error("success enqueue message with max capacity")
-		return
+	// after full queue
+	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
+		if err := queue.EnqueueMessage(msg); err != nil {
+			return
+		}
 	}
+
+	t.Error("success enqueue message with max capacity")
 }
 
 func TestQueue(t *testing.T) {
@@ -129,7 +133,7 @@ func TestQueue(t *testing.T) {
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
-			FPoolCapacity: testutils.TCQueueCapacity,
+			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),

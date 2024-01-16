@@ -295,8 +295,8 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 				return nil
 			}
 
+			// create response and put this to the queue
 			// internal logger
-			// create the message and put this to the queue
 			_ = p.enqueuePayload(pCtx, cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
 			return nil
 

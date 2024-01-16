@@ -343,7 +343,8 @@ func TestEnqueuePayload(t *testing.T) {
 		}
 	}
 
-	for i := 0; i < testutils.TCQueueCapacity; i++ {
+	// after full queue
+	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
 		if err := node.enqueuePayload(ctx, cIsRequest, pubKey, pld); err != nil {
 			return
 		}
@@ -750,7 +751,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FMainCapacity: testutils.TCQueueCapacity,
-				FPoolCapacity: testutils.TCQueueCapacity,
+				FVoidCapacity: testutils.TCQueueCapacity,
 				FParallel:     1,
 				FDuration:     time.Second,
 			}),
