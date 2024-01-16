@@ -11,14 +11,14 @@ else
     SENT_DATA=$(echo -ne "\xbf\x13\xc0\x13\x6f\xb0\xc2\x86\xfc\x84\x1e\xc9\x7c\xa3\x6b\xe7\xf0\xc3\xfd\x15\x18\x0f\x17\x9a\xcb\x0a\x9c\x72\x4a\x8f\x3d\x0c\xe5\xc3\x1c\xd7\xdb\xad\x41\x0d\xde\xef\xa6\xff\x5e\x01\x66\xc7\x6b\x14\x21\x1d\xf4\x98\x26\x96\x0a\xf6\x47\xc5\xd5\xd2\xa3\x2c\x50\x68\xa0\x59\xea\x14\x9d\xea\x19\x11" | base64);
 fi
 
-REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 44)
+REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
 JSON_DATA='{
         "method":"POST",
         "host":"hidden-lake-messenger",
         "path":"/push",
         "head":{
             "Hl-Messenger-Sender-Id": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-            "Hl-Service-Request-Id": "'${REQUEST_ID}'",
+            "Hl-Messenger-Request-Id": "'${REQUEST_ID}'",
             "Accept": "application/json"
         },
         "body":"'${SENT_DATA}'"

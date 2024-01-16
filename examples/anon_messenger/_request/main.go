@@ -16,7 +16,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 const (
@@ -78,8 +77,8 @@ func sendMessage(pReceiver string, pMessage []byte) {
 			cJsonDataTemplate,
 			hlm_settings.CHeaderSenderId,
 			encoding.HexEncode(senderID),
-			hls_settings.CHeaderRequestId,
-			random.NewStdPRNG().GetString(hls_settings.CRequestIDSize),
+			hlm_settings.CHeaderRequestId,
+			random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize),
 			base64.StdEncoding.EncodeToString(encMessage),
 		),
 	)

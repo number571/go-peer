@@ -72,7 +72,7 @@ func TestRunStopQueue(t *testing.T) {
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: 1,
+			FVoidCapacity: 3,
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),
@@ -89,10 +89,21 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
+	err := testutils.TryN(100, 10*time.Millisecond, func() error {
+		sett := queue.GetSettings()
+		sQueue := queue.(*sMessageQueue)
+		if len(sQueue.fVoidPool.fQueue) == int(sett.GetVoidCapacity()) {
+			return nil
+		}
+		return errors.New("len(void queue) != max capacity")
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	ctx2, cancel2 := context.WithCancel(context.Background())
 	defer cancel2()
-
-	time.Sleep(100 * time.Millisecond)
 
 	go func() {
 		if err := queue.Run(ctx2); err == nil {
