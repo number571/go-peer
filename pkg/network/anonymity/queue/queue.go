@@ -167,8 +167,8 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	case <-time.After(p.fSettings.GetDuration()):
 		select {
 		case x := <-p.fMainPool.fQueue:
-			atomic.AddInt64(&p.fMainPool.fCount, -1)
 			// the main queue is checked first
+			atomic.AddInt64(&p.fMainPool.fCount, -1)
 			return x
 		default:
 			// take an existing message from any ready queue
