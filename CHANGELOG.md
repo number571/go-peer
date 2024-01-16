@@ -24,6 +24,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/applications/messenger`: fix view of html escaped chars 
+- Update `cmd/hidden_lake/applications/messenger`: append requestID to hash
 
 <!-- ... -->
 

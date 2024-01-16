@@ -20,7 +20,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/utils"
 
 	hlm_request "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/request"
@@ -28,7 +27,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase, pQueuePusher queue_set.IQueuePusher) http.HandlerFunc {
+func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeOFF)
 
@@ -66,12 +65,24 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		if err := shareMessage(pCfg, fPubKey, pQueuePusher, requestID, encMsgBytes); err != nil {
+		// request already exist in the queue
+		if ok, err := pDB.PushRequestID([]byte(requestID)); err != nil {
+			if ok {
+				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
+				api.Response(pW, http.StatusLocked, "failed: request_id already exist")
+				return
+			}
+			pLogger.PushErro(logBuilder.WithMessage("push_request_id"))
+			api.Response(pW, http.StatusServiceUnavailable, "failed: push request_id to database")
+			return
+		}
+
+		if err := shareMessage(pCfg, fPubKey, requestID, encMsgBytes); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("share_message"))
 			// continue
 		}
 
-		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, senderID, encMsgBytes)
+		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, senderID, []byte(requestID), encMsgBytes)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
 			api.Response(pW, http.StatusConflict, "failed: decrypt message")
@@ -115,13 +126,13 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 	}
 }
 
-func shareMessage(pCfg config.IConfig, pSender asymmetric.IPubKey, pQueuePusher queue_set.IQueuePusher, pRequestID string, pBody []byte) error {
+func shareMessage(
+	pCfg config.IConfig,
+	pSender asymmetric.IPubKey,
+	pRequestID string,
+	pBody []byte,
+) error {
 	if !pCfg.GetShare() {
-		return nil
-	}
-
-	// request already exist in the queue
-	if ok := pQueuePusher.Push([]byte(pRequestID), []byte{}); !ok {
 		return nil
 	}
 
@@ -165,7 +176,7 @@ func shareMessage(pCfg config.IConfig, pSender asymmetric.IPubKey, pQueuePusher 
 	return utils.MergeErrors(errList...)
 }
 
-func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, encMsgBytes []byte) ([]byte, error) {
+func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, requestID, encMsgBytes []byte) ([]byte, error) {
 	aliasName := ""
 
 	friends, err := getClient(pCfg).GetFriends()
@@ -195,7 +206,7 @@ func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, 
 
 	msgBytes := decBytes[hashing.CSHA256Size:]
 
-	authBytes := bytes.Join([][]byte{senderID, msgBytes}, []byte{})
+	authBytes := bytes.Join([][]byte{senderID, requestID, msgBytes}, []byte{})
 	newHash := hashing.NewHMACSHA256Hasher(authKey, authBytes).ToBytes()
 	if !bytes.Equal(decBytes[:hashing.CSHA256Size], newHash) {
 		return nil, errors.New("failed auth bytes")

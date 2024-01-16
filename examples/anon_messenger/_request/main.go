@@ -58,13 +58,14 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(cSecretKey)
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(cSecretKey)
 
+	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
 	senderID := encoding.HexDecode("1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
 	encMessage := symmetric.NewAESCipher(cipherKey).EncryptBytes(
 		bytes.Join(
 			[][]byte{
 				hashing.NewHMACSHA256Hasher(
 					authKey,
-					bytes.Join([][]byte{senderID, pMessage}, []byte{}),
+					bytes.Join([][]byte{senderID, []byte(requestID), pMessage}, []byte{}),
 				).ToBytes(),
 				pMessage,
 			},
@@ -72,13 +73,19 @@ func sendMessage(pReceiver string, pMessage []byte) {
 		),
 	)
 
+	// fmt.Println(requestID)
+	// for _, c := range encMessage {
+	// 	fmt.Printf("\\x%02x", c)
+	// }
+	// fmt.Println()
+
 	requestData := replacer.Replace(
 		fmt.Sprintf(
 			cJsonDataTemplate,
 			hlm_settings.CHeaderSenderId,
 			encoding.HexEncode(senderID),
 			hlm_settings.CHeaderRequestId,
-			random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize),
+			requestID,
 			base64.StdEncoding.EncodeToString(encMessage),
 		),
 	)

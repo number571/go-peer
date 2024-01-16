@@ -22,7 +22,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/queue_set"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 )
@@ -43,7 +42,7 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase, pQueuePusher queue_set.IQueuePusher) http.HandlerFunc {
+func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -87,7 +86,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			// secret key can be = nil
 			secretKey := pCfg.GetSecretKeys()[aliasName]
 
-			if err := sendMessage(client, myPubKey, pQueuePusher, secretKey, aliasName, msgBytes); err != nil {
+			if err := sendMessage(client, myPubKey, pDB, secretKey, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -200,7 +199,7 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 func sendMessage(
 	pClient client.IClient,
 	pMyPubKey asymmetric.IPubKey,
-	pQueuePusher queue_set.IQueuePusher,
+	pDB database.IKVDatabase,
 	pSecretKey string,
 	pAliasName string,
 	pMsgBytes []byte,
@@ -215,7 +214,11 @@ func sendMessage(
 	}
 
 	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
-	_ = pQueuePusher.Push([]byte(requestID), []byte{})
+	requestIDBytes := []byte(requestID)
+
+	if ok, err := pDB.PushRequestID(requestIDBytes); !ok && err != nil {
+		return err
+	}
 
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
@@ -225,6 +228,7 @@ func sendMessage(
 		bytes.Join(
 			[][]byte{
 				pMyPubKey.GetHasher().ToBytes(),
+				requestIDBytes,
 				pMsgBytes,
 			},
 			[]byte{},

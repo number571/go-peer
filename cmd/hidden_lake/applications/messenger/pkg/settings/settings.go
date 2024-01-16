@@ -21,7 +21,7 @@ const (
 )
 
 const (
-	CRequestIDSize = 32 // string chars (ASCII bytes)
+	CRequestIDSize = 44 // string chars (ASCII bytes)
 )
 
 const (

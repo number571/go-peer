@@ -7,6 +7,7 @@ import (
 
 type IKVDatabase interface {
 	types.ICloser
+	PushRequestID([]byte) (bool, error)
 
 	Size(IRelation) uint64
 	Push(IRelation, IMessage) error

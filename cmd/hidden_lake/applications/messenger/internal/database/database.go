@@ -7,22 +7,37 @@ import (
 
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/storage"
-	gp_database "github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 type sKeyValueDB struct {
 	fMutex sync.Mutex
-	fDB    *gp_database.IKVDatabase
+	fDB    database.IKVDatabase
 }
 
 func NewKeyValueDB(pSettings storage.ISettings) (IKVDatabase, error) {
-	db, err := gp_database.NewKVDatabase(pSettings)
+	db, err := database.NewKVDatabase(pSettings)
 	if err != nil {
 		return nil, fmt.Errorf("new key/value database: %w", err)
 	}
-	return &sKeyValueDB{
-		fDB: &db,
-	}, nil
+	return &sKeyValueDB{fDB: db}, nil
+}
+
+func (p *sKeyValueDB) PushRequestID(pRequestID []byte) (bool, error) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	// request id already exist in the database
+	if _, err := p.fDB.Get([]byte(pRequestID)); err == nil {
+		return true, errors.New("request_id already exist")
+	}
+
+	// try store ID of request to the queue
+	if err := p.fDB.Set([]byte(pRequestID), []byte{}); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (p *sKeyValueDB) Size(pR IRelation) uint64 {
@@ -47,7 +62,7 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 
 	res := make([]IMessage, 0, pEnd-pStart)
 	for i := pStart; i < pEnd; i++ {
-		data, err := (*p.fDB).Get(getKeyMessageByEnum(pR, i))
+		data, err := p.fDB.Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
 			return nil, fmt.Errorf("read message: %w", err)
 		}
@@ -67,11 +82,11 @@ func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 
 	size := p.getSize(pR)
 	numBytes := encoding.Uint64ToBytes(size + 1)
-	if err := (*p.fDB).Set(getKeySize(pR), numBytes[:]); err != nil {
+	if err := p.fDB.Set(getKeySize(pR), numBytes[:]); err != nil {
 		return fmt.Errorf("set size of message to database: %w", err)
 	}
 
-	if err := (*p.fDB).Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes()); err != nil {
+	if err := p.fDB.Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes()); err != nil {
 		return fmt.Errorf("set message to database: %w", err)
 	}
 
@@ -82,14 +97,14 @@ func (p *sKeyValueDB) Close() error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if err := (*p.fDB).Close(); err != nil {
+	if err := p.fDB.Close(); err != nil {
 		return fmt.Errorf("close KV database: %w", err)
 	}
 	return nil
 }
 
 func (p *sKeyValueDB) getSize(pR IRelation) uint64 {
-	data, err := (*p.fDB).Get(getKeySize(pR))
+	data, err := p.fDB.Get(getKeySize(pR))
 	if err != nil {
 		return 0
 	}
