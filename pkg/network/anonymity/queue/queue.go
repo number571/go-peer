@@ -27,11 +27,16 @@ type sMessageQueue struct {
 
 	fSettings ISettings
 	fClient   client.IClient
-	fQueue    chan net_message.IMessage
-	fMsgPool  sPool
+
+	fMainPool sMainPool
+	fVoidPool sVoidPool
 }
 
-type sPool struct {
+type sMainPool struct {
+	fQueue chan net_message.IMessage
+}
+
+type sVoidPool struct {
 	fQueue    chan net_message.IMessage
 	fReceiver asymmetric.IPubKey
 }
@@ -42,8 +47,10 @@ func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
 		fMsgSettings: net_message.NewSettings(&net_message.SSettings{}),
 		fSettings:    pSett,
 		fClient:      pClient,
-		fQueue:       make(chan net_message.IMessage, pSett.GetMainCapacity()),
-		fMsgPool: sPool{
+		fMainPool: sMainPool{
+			fQueue: make(chan net_message.IMessage, pSett.GetMainCapacity()),
+		},
+		fVoidPool: sVoidPool{
 			fQueue:    make(chan net_message.IMessage, pSett.GetPoolCapacity()),
 			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
 		},
@@ -69,7 +76,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			if err := p.fillMessagePool(pCtx); err != nil {
+			if err := p.fillVoidPool(pCtx); err != nil {
 				return err
 			}
 		}
@@ -83,28 +90,35 @@ func (p *sMessageQueue) WithNetworkSettings(pNetworkMask uint64, pMsgSettings ne
 	p.fNetworkMask = pNetworkMask
 	p.fMsgSettings = pMsgSettings
 
-	for len(p.fQueue) > 0 {
-		<-p.fQueue
+	for len(p.fMainPool.fQueue) > 0 {
+		<-p.fMainPool.fQueue
 	}
-	for len(p.fMsgPool.fQueue) > 0 {
-		<-p.fMsgPool.fQueue
+	for len(p.fVoidPool.fQueue) > 0 {
+		<-p.fVoidPool.fQueue
 	}
 
 	return p
 }
 
 func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
-	if p.queueHasLimit() {
+	if p.mainPoolHasLimit() {
 		return ErrQueueLimit
 	}
-	p.fQueue <- net_message.NewMessage(
-		p.fMsgSettings,
+
+	p.fMutex.Lock()
+	msgSettings := p.fMsgSettings
+	networkMask := p.fNetworkMask
+	p.fMutex.Unlock()
+
+	p.fMainPool.fQueue <- net_message.NewMessage(
+		msgSettings,
 		payload.NewPayload(
-			p.fNetworkMask,
+			networkMask,
 			pMsg.ToBytes(),
 		),
 		p.fSettings.GetParallel(),
 	)
+
 	return nil
 }
 
@@ -114,7 +128,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 		return nil
 	case <-time.After(p.fSettings.GetDuration()):
 		select {
-		case x := <-p.fQueue:
+		case x := <-p.fMainPool.fQueue:
 			// the main queue is checked first
 			return x
 		default:
@@ -122,17 +136,17 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 			select {
 			case <-pCtx.Done():
 				return nil
-			case x := <-p.fQueue:
+			case x := <-p.fMainPool.fQueue:
 				return x
-			case x := <-p.fMsgPool.fQueue:
+			case x := <-p.fVoidPool.fQueue:
 				return x
 			}
 		}
 	}
 }
 
-func (p *sMessageQueue) fillMessagePool(pCtx context.Context) error {
-	if p.poolHasLimit() {
+func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
+	if p.voidPoolHasLimit() {
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
@@ -147,7 +161,7 @@ func (p *sMessageQueue) fillMessagePool(pCtx context.Context) error {
 	p.fMutex.Unlock()
 
 	msg, err := p.fClient.EncryptPayload(
-		p.fMsgPool.fReceiver,
+		p.fVoidPool.fReceiver,
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
@@ -177,24 +191,24 @@ func (p *sMessageQueue) fillMessagePool(pCtx context.Context) error {
 		p.fMutex.Unlock()
 
 		if !settingsChanged {
-			p.fMsgPool.fQueue <- x
+			p.fVoidPool.fQueue <- x
 		}
 		return nil
 	}
 }
 
-func (p *sMessageQueue) queueHasLimit() bool {
+func (p *sMessageQueue) mainPoolHasLimit() bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	currLen := len(p.fQueue)
+	currLen := len(p.fMainPool.fQueue)
 	return uint64(currLen) >= p.fSettings.GetMainCapacity()
 }
 
-func (p *sMessageQueue) poolHasLimit() bool {
+func (p *sMessageQueue) voidPoolHasLimit() bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	currLen := len(p.fMsgPool.fQueue)
+	currLen := len(p.fVoidPool.fQueue)
 	return uint64(currLen) >= p.fSettings.GetPoolCapacity()
 }
