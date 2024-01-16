@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## this script only works once!
+## nodes remember the generated request_id
+
 ## node2[localhost:7070](Bob) -> node1[localhost:8080](Alice)
 
 randVal=$((RANDOM % 2))
