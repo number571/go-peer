@@ -10,78 +10,110 @@ Babilejo
 
 {{end}}
 
-{{define "main"}}
+{{define "header"}}
 <script type="text/javascript" defer>
-  window.onload = function () {
-    connectToService();
-    switchToInputField();
-  }
+    const copy_pubkey_hash = async (pub_key) => {
+        let text = pub_key;
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    }
+
+    function set_info_color(id) {
+        var element = document.getElementById(id);
+        element.className = "btn btn-primary";
+    }
 </script>
 
 <script type="text/javascript" defer>
-  function cutSenderID(senderID) {
-    let first = senderID.slice(0, 8);
-    let last = senderID.substr(senderID.length - 8);
-    return first + "..." + last;
-  }
+    function cutSenderID(senderID, n) {
+        let first = senderID.slice(0, n);
+        let last = senderID.substr(senderID.length - n);
+        return first + "..." + last;
+    }
+</script>
 
-  function downloadBase64File(contentBase64, fileName) {
-    const linkSource = `data:application/octet-stream;base64,${contentBase64}`;
-    const downloadLink = document.createElement('a');
-    document.body.appendChild(downloadLink);
+<button id="copy_pubkey_hash" type="button" class="btn btn-info"
+    onclick="copy_pubkey_hash('{{.FAddress.FPubKeyHash}}');set_info_color('copy_pubkey_hash');">
+    {{if (eq .FLanguage 0)}}
+    Hash
+    {{else if (eq .FLanguage 1)}}
+    Хеш
+    {{else if (eq .FLanguage 2)}}
+    Haŝiŝo
+    {{end}}
+</button>
+{{end}}
 
-    downloadLink.href = linkSource;
-    downloadLink.target = '_self';
-    downloadLink.download = fileName;
-    downloadLink.click();
-  }
+{{define "main"}}
+<script type="text/javascript" defer>
+    window.onload = function () {
+        connectToService();
+        switchToInputField();
+    }
+</script>
 
-  function scrollToBottom() {
-    var objDiv = document.getElementById("chat_body");
-    objDiv.scrollTop = objDiv.scrollHeight;
-  }
+<script type="text/javascript" defer>
+    function downloadBase64File(contentBase64, fileName) {
+        const linkSource = `data:application/octet-stream;base64,${contentBase64}`;
+        const downloadLink = document.createElement('a');
+        document.body.appendChild(downloadLink);
 
-  function switchToInputField() {
-    scrollToBottom();
+        downloadLink.href = linkSource;
+        downloadLink.target = '_self';
+        downloadLink.download = fileName;
+        downloadLink.click();
+    }
 
-    var input = document.getElementById('input_message');
-    input.focus();
-    input.select();
-  }
+    function scrollToBottom() {
+        var objDiv = document.getElementById("chat_body");
+        objDiv.scrollTop = objDiv.scrollHeight;
+    }
 
-  function connectToService() {
-    let s = "ws://" + window.location.host + "/friends/chat/ws";
-    let socket = new WebSocket(s);
+    function switchToInputField() {
+        scrollToBottom();
 
-    socket.onopen = () => {
-      console.log('Connection with {{.FAddress.FPubKeyHash}}');
-      socket.send(JSON.stringify({
-        address: "{{.FAddress.FPubKeyHash}}"
-      }));
-    };
+        var input = document.getElementById('input_message');
+        input.focus();
+        input.select();
+    }
 
-    socket.onmessage = (e) => {
-      let obj = JSON.parse(e.data);
-      let messageInfo = obj.message_info;
+    function connectToService() {
+        let s = "ws://" + window.location.host + "/friends/chat/ws";
+        let socket = new WebSocket(s);
 
-      var d1 = document.getElementById('chat_body');
-      var insertHTML = "";
-      if (messageInfo.filename == "") { // got text message
-        insertHTML = `
+        socket.onopen = () => {
+            console.log('Connection with {{.FAddress.FPubKeyHash}}');
+            socket.send(JSON.stringify({
+                address: "{{.FAddress.FPubKeyHash}}"
+            }));
+        };
+
+        socket.onmessage = (e) => {
+            let obj = JSON.parse(e.data);
+            let messageInfo = obj.message_info;
+
+            var d1 = document.getElementById('chat_body');
+            var insertHTML = "";
+            if (messageInfo.filename == "") { // got text message
+                insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id, 8) + `</p>
               <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + messageInfo.message + `</p>
               <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
             </div>
           </div>
         `
-      } else { // got file message
-        let filename = messageInfo.filename;
-        insertHTML = `
+            } else { // got file message
+                let filename = messageInfo.filename;
+                insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id) + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id, 8) + `</p>
               <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">
                 ` + filename + `
               </button>
@@ -89,106 +121,106 @@ Babilejo
             </div>
           </div>
         `
-      }
+            }
 
-      d1.insertAdjacentHTML('beforeend', insertHTML);
-      scrollToBottom();
-    };
+            d1.insertAdjacentHTML('beforeend', insertHTML);
+            scrollToBottom();
+        };
 
-    socket.onclose = (e) => {
-      console.warn('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-      setTimeout(function () {
-        connectToService();
-      }, 1000);
-    };
+        socket.onclose = (e) => {
+            console.warn('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+            setTimeout(function () {
+                connectToService();
+            }, 1000);
+        };
 
-    socket.onerror = (e) => {
-      console.warn('Socket encountered error: ', e.message, 'Closing socket');
-      socket.close();
-    };
+        socket.onerror = (e) => {
+            console.warn('Socket encountered error: ', e.message, 'Closing socket');
+            socket.close();
+        };
 
-    window.onbeforeunload = function () {
-      console.warn('Reloading page with socket');
-      socket.close();
-    };
-  }
+        window.onbeforeunload = function () {
+            console.warn('Reloading page with socket');
+            socket.close();
+        };
+    }
 </script>
 
 <style type="text/css" rel="stylesheet">
-  .need-break-text {
-    -ms-word-break: break-all;
-    word-break: break-all;
+    .need-break-text {
+        -ms-word-break: break-all;
+        word-break: break-all;
 
-    /* Non standard for webkit */
-    word-break: break-word;
+        /* Non standard for webkit */
+        word-break: break-word;
 
-    -webkit-hyphens: auto;
-    -moz-hyphens: auto;
-    hyphens: auto;
-  }
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        hyphens: auto;
+    }
 </style>
 
 <div id="chat_body" class="card-body" style="position: relative; height: 100%; overflow:auto;">
-  {{range .FMessages}}
-  {{if .FIsIncoming}}
-  <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
-    <div>
-      {{if (eq .FMessageInfo.FFileName "")}}
-      <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-        <script>
-          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
-        </script>
-      </p>
-      <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
-      {{else}}
-      <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-        <script>
-          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
-        </script>
-      </p>
-      <button class="btn btn-muted text-center text-dark w-100"
-        onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
-        {{.FMessageInfo.FFileName}}
-      </button>
-      {{end}}
-      <p class="small ms-3 mb-3 text-muted">{{.FMessageInfo.FTimestamp}}</p>
+    {{range .FMessages}}
+    {{if .FIsIncoming}}
+    <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
+        <div>
+            {{if (eq .FMessageInfo.FFileName "")}}
+            <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+                <script>
+                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
+                </script>
+            </p>
+            <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
+            {{else}}
+            <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+                <script>
+                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
+                </script>
+            </p>
+            <button class="btn btn-muted text-center text-dark w-100"
+                onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
+                {{.FMessageInfo.FFileName}}
+            </button>
+            {{end}}
+            <p class="small ms-3 mb-3 text-muted">{{.FMessageInfo.FTimestamp}}</p>
+        </div>
     </div>
-  </div>
-  {{else}}
-  <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
-    <div>
-      {{if (eq .FMessageInfo.FFileName "")}}
-      <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-        <script>
-          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
-        </script>
-      </p>
-      <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
-      {{else}}
-      <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-        <script>
-          document.write(cutSenderID("{{.FMessageInfo.FSenderID}}"));
-        </script>
-      </p>
-      <button class="btn btn-primary text-center text-white w-100"
-        onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
-        {{.FMessageInfo.FFileName}}
-      </button>
-      {{end}}
-      <p class="small me-3 mb-3 text-muted d-flex justify-content-end">{{.FMessageInfo.FTimestamp}}</p>
+    {{else}}
+    <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
+        <div>
+            {{if (eq .FMessageInfo.FFileName "")}}
+            <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+                <script>
+                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
+                </script>
+            </p>
+            <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
+            {{else}}
+            <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
+                <script>
+                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
+                </script>
+            </p>
+            <button class="btn btn-primary text-center text-white w-100"
+                onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
+                {{.FMessageInfo.FFileName}}
+            </button>
+            {{end}}
+            <p class="small me-3 mb-3 text-muted d-flex justify-content-end">{{.FMessageInfo.FTimestamp}}</p>
+        </div>
     </div>
-  </div>
-  {{end}}
-  {{end}}
+    {{end}}
+    {{end}}
 </div>
 
 <form class="card-footer d-flex" method="POST">
-  <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-  <input hidden name="method" value="POST">
-  <input type="text" autocomplete="off" class="form-control form-control-lg bg-dark text-white m-1" name="input_message"
-    placeholder="Type message ..." id="input_message">
-  <input type="submit" style="width:5em;" name="send" value="🗨" class="btn btn-info m-1">
-  <button type="button" style="width:5em;" class="btn btn-info m-1"
-    onclick="location.href='/friends/upload?alias_name={{.FAddress.FAliasName}}';">📂</button>
+    <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+    <input hidden name="method" value="POST">
+    <input type="text" autocomplete="off" class="form-control form-control-lg bg-dark text-white m-1"
+        name="input_message" placeholder="Type message ..." id="input_message">
+    <input type="submit" style="width:5em;" name="send" value="🗨" class="btn btn-info m-1">
+    <button type="button" style="width:5em;" class="btn btn-info m-1"
+        onclick="location.href='/friends/upload?alias_name={{.FAddress.FAliasName}}';">📂</button>
 </form>
 {{end}}

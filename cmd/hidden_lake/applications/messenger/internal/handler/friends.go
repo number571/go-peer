@@ -38,18 +38,24 @@ func FriendsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerF
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
-			aliasName := strings.TrimSpace(pR.FormValue("alias_name"))
 			pubStrKey := strings.TrimSpace(pR.FormValue("public_key"))
+			aliasName := strings.TrimSpace(pR.FormValue("alias_name")) // may be nil
 			secretKey := strings.TrimSpace(pR.FormValue("secret_key")) // may be nil
-			if aliasName == "" || pubStrKey == "" {
-				ErrorPage(pLogger, cfg, "get_alias_name", "host or port is nil")(pW, pR)
+
+			if pubStrKey == "" {
+				ErrorPage(pLogger, cfg, "public_key_nil", "public key is nil")(pW, pR)
 				return
 			}
 
 			pubKey := asymmetric.LoadRSAPubKey(pubStrKey)
 			if pubKey == nil {
-				ErrorPage(pLogger, cfg, "get_public_key", "public key is nil")(pW, pR)
+				ErrorPage(pLogger, cfg, "decode_public_key", "failed decode public key")(pW, pR)
 				return
+			}
+
+			if aliasName == "" {
+				// get hash of public key as alias_name
+				aliasName = pubKey.GetHasher().ToString()
 			}
 
 			if err := client.AddFriend(aliasName, pubKey); err != nil {

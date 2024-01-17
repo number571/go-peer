@@ -10,30 +10,38 @@ Agordoj
 
 {{end}}
 
+{{define "header"}}
+{{end}}
+
 {{define "main"}}
-<script type="text/javascript">
-    function copy_text(id) {
-        var copyText = document.getElementById(id);
-        copyText.select();
-        document.execCommand("copy");
+<script type="text/javascript" defer>
+    const copy_pubkey_hash = async () => {
+        let text = "{{.FPublicKeyHash}}";
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    }
+
+    const copy_pubkey = async () => {
+        let text = "{{.FPublicKey}}";
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
     }
 
     function set_info_color(id) {
         var element = document.getElementById(id);
-        element.className = "btn btn-info w-100";
+        element.className = "btn btn-primary w-100";
     }
 </script>
 
 <div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
-    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">
-        {{if (eq .FLanguage 0)}}
-        Configuration
-        {{else if (eq .FLanguage 1)}}
-        Конфигурация
-        {{else if (eq .FLanguage 2)}}
-        Agordo
-        {{end}}
-    </h1>
     <div class="card mb-3 bg-dark">
         <h5 class="card-header text-white bg-secondary p-2">
             {{if (eq .FLanguage 0)}}
@@ -50,18 +58,26 @@ Agordoj
                 <input hidden name="method" value="PUT">
                 <div class="row">
                     <div class="col-md-6 w-50">
-                        <input type="text" value="{{.FPublicKeyHash}}" disabled
-                            class="text-center form-control bg-dark text-info w-100">
+                        <button id="button_copy_pubkey_hash" type="button" class="btn btn-info w-100"
+                            onclick="copy_pubkey_hash();set_info_color('button_copy_pubkey_hash');">
+                            {{if (eq .FLanguage 0)}}
+                            Copy hash
+                            {{else if (eq .FLanguage 1)}}
+                            Скопировать хеш
+                            {{else if (eq .FLanguage 2)}}
+                            Kopii haŝiŝo
+                            {{end}}
+                        </button>
                     </div>
                     <div class="col-md-6 w-50">
-                        <button id="button_copy" type="button" class="btn btn-secondary w-100"
-                            onclick="copy_text('public_key');set_info_color('button_copy');">
+                        <button id="button_copy_pubkey" type="button" class="btn btn-info w-100"
+                            onclick="copy_pubkey();set_info_color('button_copy_pubkey');">
                             {{if (eq .FLanguage 0)}}
-                            Key
+                            Copy key
                             {{else if (eq .FLanguage 1)}}
-                            Ключ
+                            Скопировать ключ
                             {{else if (eq .FLanguage 2)}}
-                            Ŝlosilo
+                            Kopii ŝlosilon
                             {{end}}
                         </button>
                     </div>
@@ -85,8 +101,8 @@ Agordoj
                 <input hidden name="method" value="PUT">
                 <div class="row">
                     <div class="col-md-8 w-75">
-                        <select class="form-select form-control bg-dark bg-secondary btn btn-info w-100" name="language"
-                            aria-label="Default select example">
+                        <select class="form-select form-control bg-dark bg-secondary btn btn-light w-100 text-light"
+                            name="language" aria-label="Default select example">
                             <option {{if (eq .FLanguage 0)}} selected {{end}} value="ENG">English</option>
                             <option {{if (eq .FLanguage 1)}} selected {{end}} value="RUS">Русский</option>
                             <option {{if (eq .FLanguage 2)}} selected {{end}} value="ESP">Esperanto</option>
@@ -203,9 +219,6 @@ Agordoj
             {{end}}
             <!-- ... -->
         </div>
-    </div>
-    <div style="opacity:0">
-        <input type="text" id="public_key" value="{{.FPublicKey}}">
     </div>
 </div>
 {{end}}
