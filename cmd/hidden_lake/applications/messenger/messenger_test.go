@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestMesseng(t *testing.T) {
+func TestMessenger(t *testing.T) {
 	t.Parallel()
 
 	webBytes, err := os.ReadFile("web/web.go")
