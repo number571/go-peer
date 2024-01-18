@@ -24,6 +24,7 @@ func (p *tsConfig) GetSettings() IConfigSettings     { return nil }
 func (p *tsConfig) GetLanguage() language.ILanguage  { return 0 }
 func (p *tsConfig) GetLogging() logger.ILogging      { return nil }
 func (p *tsConfig) GetShare() bool                   { return false }
+func (p *tsConfig) GetPseudonym() string             { return "" }
 func (p *tsConfig) GetAddress() IAddress             { return nil }
 func (p *tsConfig) GetNetworkKey() string            { return "" }
 func (p *tsConfig) GetConnection() string            { return "" }
@@ -50,42 +51,6 @@ func testPanicEditor(t *testing.T, n int) {
 		_ = newEditor(nil)
 	case 1:
 		_ = newEditor(&tsConfig{})
-	}
-}
-
-func TestEditor(t *testing.T) {
-	t.Parallel()
-
-	configFile := fmt.Sprintf(tcConfigFileTemplate, 2)
-	defer os.Remove(configFile)
-
-	testConfigDefaultInit(configFile)
-	cfg, err := LoadConfig(configFile)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	wrapper := NewWrapper(cfg)
-
-	config := wrapper.GetConfig().(*SConfig)
-	editor := wrapper.GetEditor()
-
-	config.fFilepath = random.NewStdPRNG().GetString(32)
-
-	res, err := language.ToILanguage("RUS")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if err := editor.UpdateLanguage(res); err == nil {
-		t.Error("success update network key with incorrect filepath")
-		return
-	}
-
-	if err := editor.UpdateSecretKeys(map[string]string{"Alice": "123"}); err == nil {
-		t.Error("success update friends with incorrect filepath")
-		return
 	}
 }
 
@@ -116,6 +81,11 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 	}
 	if err := editor.UpdateLanguage(res); err == nil {
 		t.Error("success update network key with incorrect filepath")
+		return
+	}
+
+	if err := editor.UpdatePseudonym("test"); err == nil {
+		t.Error("success update pseudonym with incorrect filepath")
 		return
 	}
 

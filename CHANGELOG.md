@@ -12,6 +12,7 @@
 - Update `cmd/hidden_lake/service`: remove 'share' option
 - Update `cmd/hidden_lake/applications/messenger`: append 'share' option
 - Update `cmd/hidden_lake/applications/messenger`: append copy hash of chat user, copy own hash from settings 
+- Update `cmd/hidden_lake/applications/messenger`: replace senderIDs -> pseudonyms 
 
 ### CHANGES
 
@@ -22,6 +23,7 @@
 - Update `examples/anon_messenger/default`: remove middel_hls
 - Update `examples/anon_messenger/routing`: append routing example
 - Update `cmd/hidden_lake/applications/messenger`: frield 'alias_name' is now can be void
+- Update `examples`: delete _docker examples
 
 ### BUG FIXES
 

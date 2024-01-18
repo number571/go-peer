@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/language"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -28,6 +29,7 @@ type SConfig struct {
 	FLogging    []string          `yaml:"logging,omitempty"`
 	FLanguage   string            `yaml:"language,omitempty"`
 	FShare      bool              `yaml:"share,omitempty"`
+	FPseudonym  string            `yaml:"pseudonym"`
 	FAddress    *SAddress         `yaml:"address"`
 	FConnection string            `yaml:"connection"`
 	FStorageKey string            `yaml:"storage_key,omitempty"`
@@ -101,6 +103,7 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 
 func (p *SConfig) isValid() bool {
 	return true &&
+		utils.PseudonymIsValid(p.FPseudonym) &&
 		p.FSettings.FMessagesCapacity != 0
 }
 
@@ -168,6 +171,13 @@ func (p *SConfig) GetLanguage() language.ILanguage {
 
 func (p *SConfig) GetShare() bool {
 	return p.FShare
+}
+
+func (p *SConfig) GetPseudonym() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.FPseudonym
 }
 
 func (p *SConfig) GetAddress() IAddress {

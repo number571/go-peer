@@ -13,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 )
@@ -59,13 +58,13 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(cSecretKey)
 
 	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
-	senderID := encoding.HexDecode("1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
+	pseudonym := "Bob"
 	encMessage := symmetric.NewAESCipher(cipherKey).EncryptBytes(
 		bytes.Join(
 			[][]byte{
 				hashing.NewHMACSHA256Hasher(
 					authKey,
-					bytes.Join([][]byte{senderID, []byte(requestID), pMessage}, []byte{}),
+					bytes.Join([][]byte{[]byte(pseudonym), []byte(requestID), pMessage}, []byte{}),
 				).ToBytes(),
 				pMessage,
 			},
@@ -82,8 +81,8 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	requestData := replacer.Replace(
 		fmt.Sprintf(
 			cJsonDataTemplate,
-			hlm_settings.CHeaderSenderId,
-			encoding.HexEncode(senderID),
+			hlm_settings.CHeaderPseudonym,
+			pseudonym,
 			hlm_settings.CHeaderRequestId,
 			requestID,
 			base64.StdEncoding.EncodeToString(encMessage),

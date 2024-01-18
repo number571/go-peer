@@ -3,6 +3,6 @@ package utils
 type SMessageInfo struct {
 	FFileName  string `json:"filename"` // can be ""
 	FTimestamp string `json:"timestamp"`
-	FSenderID  string `json:"sender_id"`
+	FPseudonym string `json:"pseudonym"`
 	FMessage   string `json:"message"`
 }

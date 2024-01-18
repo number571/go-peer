@@ -18,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -39,10 +38,10 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		senderID := encoding.HexDecode(pR.Header.Get(hlm_settings.CHeaderSenderId))
-		if len(senderID) != hashing.CSHA256Size {
-			pLogger.PushWarn(logBuilder.WithMessage("get_sender_id"))
-			api.Response(pW, http.StatusUnauthorized, "failed: get sender id from messenger")
+		senderPseudonym := pR.Header.Get(hlm_settings.CHeaderPseudonym)
+		if !hlm_utils.PseudonymIsValid(senderPseudonym) {
+			pLogger.PushWarn(logBuilder.WithMessage("get_sender_pseudonym"))
+			api.Response(pW, http.StatusUnauthorized, "failed: get pseudonym from messenger")
 			return
 		}
 
@@ -77,12 +76,12 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		if err := shareMessage(pCfg, fPubKey, requestID, encMsgBytes); err != nil {
+		if err := shareMessage(pCfg, fPubKey, requestID, senderPseudonym, encMsgBytes); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("share_message"))
 			// continue
 		}
 
-		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, senderID, []byte(requestID), encMsgBytes)
+		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, requestID, senderPseudonym, encMsgBytes)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
 			api.Response(pW, http.StatusConflict, "failed: decrypt message")
@@ -103,7 +102,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, senderID, rawMsgBytes)
+		dbMsg := database.NewMessage(true, senderPseudonym, rawMsgBytes)
 
 		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
@@ -115,7 +114,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			FAddress: fPubKey.GetHasher().ToString(),
 			FMessageInfo: getMessageInfo(
 				true,
-				dbMsg.GetSenderID(),
+				dbMsg.GetPseudonym(),
 				dbMsg.GetMessage(),
 				dbMsg.GetTimestamp(),
 			),
@@ -130,6 +129,7 @@ func shareMessage(
 	pCfg config.IConfig,
 	pSender asymmetric.IPubKey,
 	pRequestID string,
+	senderPseudonym string,
 	pBody []byte,
 ) error {
 	if !pCfg.GetShare() {
@@ -160,7 +160,7 @@ func shareMessage(
 
 			chBufErr <- hlsClient.BroadcastRequest(
 				aliasName,
-				hlm_request.NewPushRequest(pSender, pRequestID, pBody),
+				hlm_request.NewPushRequest(pSender, pRequestID, senderPseudonym, pBody),
 			)
 		}(aliasName, pubKey)
 	}
@@ -176,7 +176,13 @@ func shareMessage(
 	return utils.MergeErrors(errList...)
 }
 
-func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, requestID, encMsgBytes []byte) ([]byte, error) {
+func decryptMsgBytes(
+	pCfg config.IConfig,
+	pPubKey asymmetric.IPubKey,
+	requestID string,
+	senderPseudonym string,
+	encMsgBytes []byte,
+) ([]byte, error) {
 	aliasName := ""
 
 	friends, err := getClient(pCfg).GetFriends()
@@ -206,7 +212,7 @@ func decryptMsgBytes(pCfg config.IConfig, pPubKey asymmetric.IPubKey, senderID, 
 
 	msgBytes := decBytes[hashing.CSHA256Size:]
 
-	authBytes := bytes.Join([][]byte{senderID, requestID, msgBytes}, []byte{})
+	authBytes := bytes.Join([][]byte{[]byte(senderPseudonym), []byte(requestID), msgBytes}, []byte{})
 	newHash := hashing.NewHMACSHA256Hasher(authKey, authBytes).ToBytes()
 	if !bytes.Equal(decBytes[:hashing.CSHA256Size], newHash) {
 		return nil, errors.New("failed auth bytes")
@@ -237,7 +243,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessageInfo {
+func getMessageInfo(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessageInfo {
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes, pEscape)
@@ -245,7 +251,7 @@ func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimest
 			panic("message data = nil")
 		}
 		return hlm_utils.SMessageInfo{
-			FSenderID:  pSenderID,
+			FPseudonym: pPseudonym,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,
 		}
@@ -255,7 +261,7 @@ func getMessageInfo(pEscape bool, pSenderID string, pRawMsgBytes []byte, pTimest
 			panic("filename = nil OR message data = nil")
 		}
 		return hlm_utils.SMessageInfo{
-			FSenderID:  pSenderID,
+			FPseudonym: pPseudonym,
 			FFileName:  filename,
 			FMessage:   msgData,
 			FTimestamp: pTimestamp,

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/internal/language"
@@ -25,6 +26,7 @@ type sConnection struct {
 
 type sSettings struct {
 	*sTemplate
+	FPseudonym     string
 	FNetworkKey    string
 	FPublicKey     string
 	FPublicKeyHash string
@@ -60,15 +62,28 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 		case http.MethodPut:
-			lang := strings.TrimSpace(pR.FormValue("language"))
-			res, err := language.ToILanguage(lang)
+			strLang := strings.TrimSpace(pR.FormValue("language"))
+			ilang, err := language.ToILanguage(strLang)
 			if err != nil {
 				ErrorPage(pLogger, cfg, "to_language", "load unknown language")(pW, pR)
 				return
 			}
-			if err := cfgEditor.UpdateLanguage(res); err != nil {
-				ErrorPage(pLogger, cfg, "update_language", "update language")(pW, pR)
+			if ilang != cfg.GetLanguage() {
+				if err := cfgEditor.UpdateLanguage(ilang); err != nil {
+					ErrorPage(pLogger, cfg, "update_language", "update language")(pW, pR)
+					return
+				}
+			}
+			pseudonym := strings.TrimSpace(pR.FormValue("pseudonym"))
+			if !utils.PseudonymIsValid(pseudonym) {
+				ErrorPage(pLogger, cfg, "read_pseudonym", "pseudonym is invalid")(pW, pR)
 				return
+			}
+			if pseudonym != cfg.GetPseudonym() {
+				if err := cfgEditor.UpdatePseudonym(pseudonym); err != nil {
+					ErrorPage(pLogger, cfg, "update_pseudonym", "update pseudonym")(pW, pR)
+					return
+				}
 			}
 		case http.MethodPost:
 			host := strings.TrimSpace(pR.FormValue("host"))
@@ -104,6 +119,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		result := new(sSettings)
 		result.sTemplate = getTemplate(cfg)
 
+		result.FPseudonym = cfg.GetPseudonym()
 		result.FPublicKey = myPubKey.ToString()
 		result.FPublicKeyHash = myPubKey.GetHasher().ToString()
 

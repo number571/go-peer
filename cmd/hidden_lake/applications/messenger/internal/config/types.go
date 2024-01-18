@@ -11,6 +11,7 @@ type IWrapper interface {
 }
 
 type IEditor interface {
+	UpdatePseudonym(string) error
 	UpdateLanguage(language.ILanguage) error
 	UpdateSecretKeys(map[string]string) error
 }
@@ -18,6 +19,7 @@ type IEditor interface {
 type IConfig interface {
 	GetSettings() IConfigSettings
 	GetShare() bool
+	GetPseudonym() string
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() string

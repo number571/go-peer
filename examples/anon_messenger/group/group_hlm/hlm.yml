@@ -9,5 +9,4 @@ address:
   interface: localhost:4040
   incoming: localhost:4041
 connection: localhost:4572
-secret_keys:
-  Group: abc
+pseudonym: "Group"

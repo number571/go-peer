@@ -86,13 +86,12 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			// secret key can be = nil
 			secretKey := pCfg.GetSecretKeys()[aliasName]
 
-			if err := sendMessage(client, myPubKey, pDB, secretKey, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCfg, client, myPubKey, pDB, secretKey, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
 
-			senderID := myPubKey.GetHasher().ToBytes()
-			dbMsg := database.NewMessage(false, senderID, msgBytes)
+			dbMsg := database.NewMessage(false, pCfg.GetPseudonym(), msgBytes)
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				ErrorPage(pLogger, pCfg, "push_message", "add message to database")(pW, pR)
 				return
@@ -133,7 +132,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				FIsIncoming: msg.IsIncoming(),
 				FMessageInfo: getMessageInfo(
 					false,
-					msg.GetSenderID(),
+					msg.GetPseudonym(),
 					msg.GetMessage(),
 					msg.GetTimestamp(),
 				),
@@ -197,6 +196,7 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 }
 
 func sendMessage(
+	pCfg config.IConfig,
 	pClient client.IClient,
 	pMyPubKey asymmetric.IPubKey,
 	pDB database.IKVDatabase,
@@ -214,32 +214,30 @@ func sendMessage(
 	}
 
 	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
-	requestIDBytes := []byte(requestID)
-
-	if ok, err := pDB.PushRequestID(requestIDBytes); !ok && err != nil {
+	if ok, err := pDB.PushRequestID([]byte(requestID)); !ok && err != nil {
 		return err
 	}
 
 	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
-	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
-
 	hash := hashing.NewHMACSHA256Hasher(
 		authKey,
 		bytes.Join(
 			[][]byte{
-				pMyPubKey.GetHasher().ToBytes(),
-				requestIDBytes,
+				[]byte(pCfg.GetPseudonym()),
+				[]byte(requestID),
 				pMsgBytes,
 			},
 			[]byte{},
 		),
 	).ToBytes()
 
+	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
 	return pClient.BroadcastRequest(
 		pAliasName,
 		hlm_request.NewPushRequest(
 			pMyPubKey,
 			requestID,
+			pCfg.GetPseudonym(),
 			symmetric.NewAESCipher(cipherKey).EncryptBytes(
 				bytes.Join([][]byte{hash, pMsgBytes}, []byte{}),
 			),

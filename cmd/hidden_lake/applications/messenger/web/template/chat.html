@@ -28,14 +28,6 @@ Babilejo
     }
 </script>
 
-<script type="text/javascript" defer>
-    function cutSenderID(senderID, n) {
-        let first = senderID.slice(0, n);
-        let last = senderID.substr(senderID.length - n);
-        return first + "..." + last;
-    }
-</script>
-
 <button id="copy_pubkey_hash" type="button" class="btn btn-info"
     onclick="copy_pubkey_hash('{{.FAddress.FPubKeyHash}}');set_info_color('copy_pubkey_hash');">
     {{if (eq .FLanguage 0)}}
@@ -102,7 +94,7 @@ Babilejo
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id, 8) + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.pseudonym + `</p>
               <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + messageInfo.message + `</p>
               <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
             </div>
@@ -113,7 +105,7 @@ Babilejo
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + cutSenderID(messageInfo.sender_id, 8) + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.pseudonym + `</p>
               <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">
                 ` + filename + `
               </button>
@@ -167,16 +159,12 @@ Babilejo
         <div>
             {{if (eq .FMessageInfo.FFileName "")}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                <script>
-                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
-                </script>
+                {{.FMessageInfo.FPseudonym}}
             </p>
             <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
             {{else}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                <script>
-                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
-                </script>
+                {{.FMessageInfo.FPseudonym}}
             </p>
             <button class="btn btn-muted text-center text-dark w-100"
                 onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
@@ -191,16 +179,12 @@ Babilejo
         <div>
             {{if (eq .FMessageInfo.FFileName "")}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                <script>
-                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
-                </script>
+                {{.FMessageInfo.FPseudonym}}
             </p>
             <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
             {{else}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                <script>
-                    document.write(cutSenderID("{{.FMessageInfo.FSenderID}}", 8));
-                </script>
+                {{.FMessageInfo.FPseudonym}}
             </p>
             <button class="btn btn-primary text-center text-white w-100"
                 onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">

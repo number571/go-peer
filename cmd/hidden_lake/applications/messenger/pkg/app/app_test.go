@@ -38,6 +38,7 @@ func TestApp(t *testing.T) {
 			FInterface: testutils.TgAddrs[57],
 			FIncoming:  testutils.TgAddrs[58],
 		},
+		FPseudonym: "test",
 	})
 	if err != nil {
 		t.Error(err)

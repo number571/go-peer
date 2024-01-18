@@ -16,11 +16,12 @@ const (
 )
 
 const (
-	CHeaderSenderId  = "Hl-Messenger-Sender-Id"
+	CHeaderPseudonym = "Hl-Messenger-Pseudonym"
 	CHeaderRequestId = "Hl-Messenger-Request-Id"
 )
 
 const (
+	CPseudonymSize = 32 // x >= 1 && x <= CPseudonymSize
 	CRequestIDSize = 44 // string chars (ASCII bytes)
 )
 

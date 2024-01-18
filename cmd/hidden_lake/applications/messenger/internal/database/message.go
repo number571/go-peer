@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
 	cIsIncomingSize = 1
 	cTimestampSize  = encoding.CSizeUint64
-	cSenderIDSize   = hashing.CSHA256Size
+	cPseudonymSize  = settings.CPseudonymSize
 )
 
 var (
@@ -21,24 +22,26 @@ var (
 type sMessage struct {
 	fIsIncoming bool
 	fTimestamp  uint64
-	fSenderID   []byte
+	fPseudonym  []byte
 	fMessage    []byte
 }
 
-func NewMessage(pIsIncoming bool, pSenderID []byte, pMessage []byte) IMessage {
-	if len(pSenderID) != cSenderIDSize {
-		panic("len(pSenderID) != cSenderIDSize")
+func NewMessage(pIsIncoming bool, pPseudonym string, pMessage []byte) IMessage {
+	if !utils.PseudonymIsValid(pPseudonym) {
+		panic("!utils.PseudonymIsValid(pPseudonym)")
 	}
+	pseudonym := make([]byte, cPseudonymSize)
+	copy(pseudonym, []byte(pPseudonym))
 	return &sMessage{
 		fIsIncoming: pIsIncoming,
 		fTimestamp:  uint64(time.Now().Unix()),
-		fSenderID:   pSenderID,
+		fPseudonym:  pseudonym,
 		fMessage:    pMessage,
 	}
 }
 
 func LoadMessage(pMsgBytes []byte) IMessage {
-	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize + cSenderIDSize) {
+	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize + cPseudonymSize) {
 		return nil
 	}
 
@@ -53,13 +56,13 @@ func LoadMessage(pMsgBytes []byte) IMessage {
 	return &sMessage{
 		fIsIncoming: isIncoming,
 		fTimestamp:  encoding.BytesToUint64(blockTimestamp),
-		fSenderID:   pMsgBytes[cIsIncomingSize+cTimestampSize : cIsIncomingSize+cTimestampSize+cSenderIDSize],
-		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize+cSenderIDSize:],
+		fPseudonym:  pMsgBytes[cIsIncomingSize+cTimestampSize : cIsIncomingSize+cTimestampSize+cPseudonymSize],
+		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize+cPseudonymSize:],
 	}
 }
 
-func (p *sMessage) GetSenderID() string {
-	return encoding.HexEncode(p.fSenderID)
+func (p *sMessage) GetPseudonym() string {
+	return string(bytes.TrimRight(p.fPseudonym, "\x00"))
 }
 
 func (p *sMessage) IsIncoming() bool {
@@ -84,7 +87,7 @@ func (p *sMessage) ToBytes() []byte {
 		[][]byte{
 			{firstByte},
 			blockTimestamp[:],
-			p.fSenderID,
+			p.fPseudonym,
 			[]byte(p.fMessage),
 		},
 		[]byte{},

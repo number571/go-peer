@@ -21,6 +21,7 @@ logging:
   - erro
 language: RUS
 share: true
+pseudonym: '%s'
 address:
   interface: '%s'
   incoming: '%s'
@@ -30,6 +31,7 @@ storage_key: '%s'`
 )
 
 const (
+	tcPseudonym         = "Alice"
 	tcAddressInterface  = "address_interface"
 	tcAddressIncoming   = "address_incoming"
 	tcAddressPPROF      = "address_pprof"
@@ -43,6 +45,7 @@ func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
 		tcMessagesCapacity,
+		tcPseudonym,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
@@ -84,6 +87,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
+		return
+	}
+
+	if cfg.GetPseudonym() != tcPseudonym {
+		t.Error("pseudonym is invalid")
 		return
 	}
 

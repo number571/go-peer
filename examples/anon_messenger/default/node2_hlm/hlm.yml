@@ -5,6 +5,7 @@ logging:
 - warn
 - erro
 language: ENG
+pseudonym: Bob
 address:
   interface: localhost:7070
   incoming: localhost:7071
