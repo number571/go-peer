@@ -144,13 +144,15 @@ func shareMessage(
 	}
 
 	lenFriends := len(friends)
-	chBufErr := make(chan error, lenFriends)
 
 	wg := sync.WaitGroup{}
 	wg.Add(lenFriends)
 
+	errList := make([]error, lenFriends)
+	i := 0
+
 	for aliasName, pubKey := range friends {
-		go func(aliasName string, pubKey asymmetric.IPubKey) {
+		go func(i int, aliasName string, pubKey asymmetric.IPubKey) {
 			defer wg.Done()
 
 			// do not send a request to the creator of the request
@@ -158,21 +160,15 @@ func shareMessage(
 				return
 			}
 
-			chBufErr <- hlsClient.BroadcastRequest(
+			errList[i] = hlsClient.BroadcastRequest(
 				aliasName,
 				hlm_request.NewPushRequest(pSender, pRequestID, senderPseudonym, pBody),
 			)
-		}(aliasName, pubKey)
+		}(i, aliasName, pubKey)
+		i++
 	}
 
 	wg.Wait()
-	close(chBufErr)
-
-	errList := make([]error, 0, lenFriends)
-	for err := range chBufErr {
-		errList = append(errList, err)
-	}
-
 	return utils.MergeErrors(errList...)
 }
 

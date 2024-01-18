@@ -49,9 +49,10 @@ func (p *sNode) GetSettings() ISettings {
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) error {
-	// can't broadcast message to the network if len(connections) = 0
 	connections := p.GetConnections()
 	lenConnections := len(connections)
+
+	// can't broadcast message to the network if len(connections) = 0
 	if lenConnections == 0 {
 		return ErrNoConnections
 	}
@@ -62,14 +63,17 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 	wg := sync.WaitGroup{}
 	wg.Add(lenConnections)
 
-	chBufErr := make(chan error, lenConnections)
+	listErr := make([]error, lenConnections)
+	i := 0
+
 	for a, c := range connections {
 		chErr := make(chan error)
+
 		go func(c conn.IConn) {
 			chErr <- c.WriteMessage(pCtx, pMsg)
 		}(c)
 
-		go func(a string) {
+		go func(i int, a string) {
 			defer wg.Done()
 
 			ticker := time.NewTicker(p.fSettings.GetWriteTimeout())
@@ -77,28 +81,24 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 
 			select {
 			case <-pCtx.Done():
-				chBufErr <- pCtx.Err()
+				listErr[i] = pCtx.Err()
 			case <-ticker.C:
-				chBufErr <- utils.MergeErrors(ErrWriteTimeout, errors.New(a))
+				listErr[i] = utils.MergeErrors(ErrWriteTimeout, errors.New(a))
 			case err := <-chErr:
 				if err == nil {
 					return
 				}
-				chBufErr <- utils.MergeErrors(ErrBroadcastMessage, err)
+				listErr[i] = utils.MergeErrors(ErrBroadcastMessage, err)
 			}
 
 			// if got error -> delete connection
 			_ = p.DelConnection(a)
-		}(a)
+		}(i, a)
+
+		i++
 	}
 
 	wg.Wait()
-	close(chBufErr)
-
-	listErr := make([]error, 0, lenConnections)
-	for err := range chBufErr {
-		listErr = append(listErr, err)
-	}
 	return utils.MergeErrors(listErr...)
 }
 
