@@ -293,6 +293,29 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 }
 
+func TestPanicEnqueuePayload(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	node, cancels := testNewNode(time.Minute, "", 12, 0, 0, false)
+	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 12)
+
+	sNode := node.(*sNode)
+
+	ctx := context.Background()
+	logBuilder := anon_logger.NewLogBuilder("test")
+
+	msgBody := "hello, world!"
+	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
+
+	pubKey := sNode.GetMessageQueue().GetClient().GetPubKey()
+	_ = sNode.enqueuePayload(ctx, logBuilder, '?', pubKey, pld)
+}
+
 func TestEnqueuePayload(t *testing.T) {
 	t.Parallel()
 
@@ -309,17 +332,14 @@ func TestEnqueuePayload(t *testing.T) {
 	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
 
 	ctx := context.Background()
+	logBuilder := anon_logger.NewLogBuilder("test")
 
 	msgBody := "hello, world!"
 	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
-	if err := node.enqueuePayload(ctx, '?', pubKey, pld); err == nil {
-		t.Error("success with undefined type of message")
-		return
-	}
 
 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
-	if err := node.enqueuePayload(ctx, cIsRequest, pubKey, overPld); err == nil {
+	if err := node.enqueuePayload(ctx, logBuilder, cIsRequest, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
 	}
@@ -345,7 +365,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := node.enqueuePayload(ctx, cIsRequest, pubKey, pld); err != nil {
+		if err := node.enqueuePayload(ctx, logBuilder, cIsRequest, pubKey, pld); err != nil {
 			return
 		}
 	}
@@ -524,8 +544,11 @@ func TestRecvSendMessage(t *testing.T) {
 	_node, cancel := testNewNode(time.Minute, "", 5, 0, 0, false)
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 5)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	node := _node.(*sNode)
-	if _, err := node.recvResponse("not_exist"); err == nil {
+	if _, err := node.recvResponse(ctx, "not_exist"); err == nil {
 		t.Error("success got action by undefined key")
 		return
 	}
@@ -537,16 +560,29 @@ func TestRecvSendMessage(t *testing.T) {
 	node.setAction(actionKey)
 	action, ok := node.getAction(actionKey)
 	if !ok {
-		t.Error("undefined created action key")
+		t.Error("undefined created action key (1)")
 		return
 	}
 
 	close(action)
-
-	if _, err := node.recvResponse(actionKey); err == nil {
+	if _, err := node.recvResponse(ctx, actionKey); err == nil {
 		t.Error("success got closed action")
 		return
 	}
+
+	node.setAction(actionKey)
+	if _, ok := node.getAction(actionKey); !ok {
+		t.Error("undefined created action key (2)")
+		return
+	}
+
+	cancel()
+	if _, err := node.recvResponse(ctx, actionKey); err == nil {
+		t.Error("success got action from canceled context")
+		return
+	}
+
+	ctx2 := context.Background()
 
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
@@ -561,10 +597,8 @@ func TestRecvSendMessage(t *testing.T) {
 		return
 	}
 
-	ctx := context.Background()
-
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.enqueueMessage(ctx, msg); err != nil {
+		if err := node.enqueueMessage(ctx2, msg); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -573,7 +607,7 @@ func TestRecvSendMessage(t *testing.T) {
 	hasError := false
 	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.enqueueMessage(ctx, msg); err != nil {
+		if err := node.enqueueMessage(ctx2, msg); err != nil {
 			hasError = true
 			break
 		}

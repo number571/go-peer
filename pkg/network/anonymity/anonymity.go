@@ -88,20 +88,20 @@ func (p *sNode) Run(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return <-chErr
 		default:
-			msg := p.fQueue.DequeueMessage(pCtx)
-			if msg == nil {
+			netMsg := p.fQueue.DequeueMessage(pCtx)
+			if netMsg == nil {
 				// context done
 				break
 			}
 
 			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
-			// enrich logger
-			logBuilder.
+			// update logger state
+			p.enrichLogger(logBuilder, netMsg).
 				WithPubKey(p.fQueue.GetClient().GetPubKey())
 
 			// internal logger
-			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, msg)
+			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
 		}
 	}
 }
@@ -138,7 +138,8 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) SendPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
-	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, pPld); err != nil {
+	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
+	if err := p.enqueuePayload(pCtx, logBuilder, cIsRequest, pRecv, pPld); err != nil {
 		// internal logger
 		return utils.MergeErrors(ErrBroadcastPayload, err)
 	}
@@ -159,12 +160,13 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, newPld); err != nil {
+	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
+	if err := p.enqueuePayload(pCtx, logBuilder, cIsRequest, pRecv, newPld); err != nil {
 		// internal logger
 		return nil, utils.MergeErrors(ErrEnqueuePayload, err)
 	}
 
-	resp, err := p.recvResponse(actionKey)
+	resp, err := p.recvResponse(pCtx, actionKey)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrFetchResponse, err)
 	}
@@ -191,12 +193,14 @@ func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) erro
 	return ErrEnqueueMessage
 }
 
-func (p *sNode) recvResponse(pActionKey string) ([]byte, error) {
+func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, error) {
 	action, ok := p.getAction(pActionKey)
 	if !ok {
 		return nil, ErrActionIsNotFound
 	}
 	select {
+	case <-pCtx.Done():
+		return nil, pCtx.Err()
 	case result, opened := <-action:
 		if !opened {
 			return nil, ErrActionIsClosed
@@ -208,29 +212,30 @@ func (p *sNode) recvResponse(pActionKey string) ([]byte, error) {
 }
 
 func (p *sNode) handleWrapper() network.IHandlerF {
-	return func(pCtx context.Context, _ network.INode, pConn conn.IConn, pMsg net_message.IMessage) error {
+	return func(pCtx context.Context, _ network.INode, pConn conn.IConn, pNetMsg net_message.IMessage) error {
 		logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
-		// enrich logger
-		logBuilder.WithConn(pConn)
+		// update logger state
+		p.enrichLogger(logBuilder, pNetMsg).
+			WithConn(pConn).
+			WithRecv(true)
+
+		// load encrypted message
+		client := p.fQueue.GetClient()
+		msg, err := message.LoadMessage(client.GetSettings(), pNetMsg.GetPayload().GetBody())
+		if err != nil {
+			// problem from sender's side
+			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
+			return utils.MergeErrors(ErrLoadMessage, err)
+		}
 
 		// try store hash of message
-		if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pMsg); !ok {
+		if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pNetMsg); !ok {
 			// internal logger
 			if err != nil {
 				return utils.MergeErrors(ErrStoreHashWithBroadcast, err)
 			}
 			return nil
-		}
-
-		client := p.fQueue.GetClient()
-
-		// load encrypted message
-		msg, err := message.LoadMessage(client.GetSettings(), pMsg.GetPayload().GetBody())
-		if err != nil {
-			// problem from sender's side
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return utils.MergeErrors(ErrLoadMessage, err)
 		}
 
 		// try decrypt message
@@ -296,24 +301,26 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			}
 
 			// create response and put this to the queue
+			_ = p.enqueuePayload(
+				pCtx,
+				logBuilder,
+				cIsResponse,
+				sender,
+				payload.NewPayload(pld.GetHead(), resp),
+			)
+
 			// internal logger
-			_ = p.enqueuePayload(pCtx, cIsResponse, sender, payload.NewPayload(pld.GetHead(), resp))
 			return nil
 
 		// undefined type of message (not request/response)
 		default:
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseMessageType))
+			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageType))
 			return nil
 		}
 	}
 }
 
-func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
-	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-
-	// enrich logger
-	logBuilder.WithPubKey(p.fQueue.GetClient().GetPubKey())
-
+func (p *sNode) enqueuePayload(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	var (
 		newBody []byte
 		logType anon_logger.ILogType
@@ -327,52 +334,53 @@ func (p *sNode) enqueuePayload(pCtx context.Context, pType iDataType, pRecv asym
 		newBody = wrapResponse(pPld.GetBody())
 		logType = anon_logger.CLogBaseEnqueueResponse
 	default:
-		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogBaseMessageType))
-		return ErrUnknownType
+		panic("got unknown type")
+	}
+
+	if pType == cIsRequest {
+		// enrich logger with raw message
+		pLogBuilder.
+			WithPubKey(p.fQueue.GetClient().GetPubKey())
 	}
 
 	newPld := payload.NewPayload(pPld.GetHead(), newBody)
 	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
 	if err != nil {
-		p.fLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroEncryptPayload))
+		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return utils.MergeErrors(ErrEncryptPayload, err)
 	}
 
-	var (
-		size = len(msg.ToBytes())
-		hash = msg.GetHash()
-	)
-
-	// enrich logger
-	logBuilder.
-		WithHash(hash).
-		WithSize(size).
-		WithType(logType)
+	if pType == cIsRequest {
+		// enrich logger with raw message
+		pLogBuilder.
+			// without hash: log only from net_message!
+			WithSize(len(msg.ToBytes()))
+	}
 
 	if err := p.enqueueMessage(pCtx, msg); err != nil {
-		p.fLogger.PushErro(logBuilder)
+		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
 		return err
 	}
 
-	p.fLogger.PushInfo(logBuilder)
+	p.fLogger.PushInfo(pLogBuilder.WithType(logType))
 	return nil
 }
 
-func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
+func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) anon_logger.ILogBuilder {
 	var (
 		size  = len(pNetMsg.GetPayload().GetBody())
 		hash  = pNetMsg.GetHash()
 		proof = pNetMsg.GetProof()
 	)
-
-	// enrich logger
-	pLogBuilder.
+	return pLogBuilder.
 		WithHash(hash).
 		WithProof(proof).
 		WithSize(size)
+}
 
+func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
 	// try push hash into database
-	hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, hash)
+	hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, pNetMsg.GetHash())
 	if err != nil || !hashIsSaved {
 		// internal logger
 		return false, err

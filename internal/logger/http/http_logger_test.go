@@ -37,7 +37,7 @@ func TestLogger(t *testing.T) {
 	logBuilder := NewLogBuilder(tcService, req).WithMessage("hello_world")
 	logFunc := GetLogFunc()
 
-	if logFunc(logBuilder) != tcFmtLog {
+	if l := logFunc(logBuilder); l != tcFmtLog {
 		t.Error("got invalid format")
 		return
 	}

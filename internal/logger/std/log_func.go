@@ -10,7 +10,6 @@ func GetLogFunc() logger.ILogFunc {
 		if !ok {
 			panic("got invalid log arg")
 		}
-
 		return log
 	}
 }

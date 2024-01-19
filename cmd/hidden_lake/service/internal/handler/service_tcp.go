@@ -30,7 +30,8 @@ func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.
 		// enrich logger
 		logBuilder.
 			WithSize(len(reqBytes)).
-			WithPubKey(sender)
+			WithPubKey(sender).
+			WithRecv(true)
 
 		cfg := pCfgW.GetConfig()
 		friends := cfg.GetFriends()

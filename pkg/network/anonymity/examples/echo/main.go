@@ -2,197 +2,66 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
-	"os"
 	"time"
 
-	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
-	"github.com/number571/go-peer/pkg/network/anonymity/queue"
-	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
-	workSize       = 10
-	keySize        = 1024
-	msgSize        = (8 << 10)
-	serviceHeader  = 0xDEADBEAF
-	serviceAddress = ":8080"
+	nodeAddress = "127.0.0.1:8080"
+	nodeRouter  = uint32(0xA557711A)
 )
-
-const (
-	dbPath1 = "database1.db"
-	dbPath2 = "database2.db"
-)
-
-func deleteDBs() {
-	os.RemoveAll(dbPath1)
-	os.RemoveAll(dbPath2)
-}
 
 func main() {
-	deleteDBs()
-	defer deleteDBs()
+	nodeService, nodeClient := runServiceNode(), runClientNode()
+	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
 
-	var (
-		service = newNode(serviceAddress, "SERVICE-1", dbPath1)
-		client  = newNode("", "SERVICE-2", dbPath2)
-	)
-
-	defer func() {
-		if err := closeNode(client); err != nil {
-			panic(err)
-		}
-		if err := closeNode(service); err != nil {
-			panic(err)
-		}
-	}()
-
-	service.HandleFunc(serviceHeader, func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
-		return []byte(fmt.Sprintf("echo: [%s]", string(reqBytes))), nil
-	})
-
-	service.GetListPubKeys().AddPubKey(client.GetMessageQueue().GetClient().GetPubKey())
-	client.GetListPubKeys().AddPubKey(service.GetMessageQueue().GetClient().GetPubKey())
-
-	ctx1, cancel1 := context.WithCancel(context.Background())
-	defer cancel1()
-
-	go func() { _ = service.Run(ctx1) }()
-	go func() {
-		err := service.GetNetworkNode().Listen(ctx1)
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			panic(err)
-		}
-	}()
-	time.Sleep(time.Second) // wait
-
-	ctx2, cancel2 := context.WithCancel(context.Background())
-	defer cancel2()
-
-	go func() { _ = client.Run(ctx2) }()
-	if err := client.GetNetworkNode().AddConnection(ctx2, serviceAddress); err != nil {
-		panic(err)
+	ctx := context.Background()
+	for {
+		resp, _ := nodeClient.FetchPayload(
+			ctx,
+			pubKeyService,
+			adapters.NewPayload(nodeRouter, []byte("hello, world!")),
+		)
+		fmt.Println(string(resp))
 	}
-
-	res, err := client.FetchPayload(
-		ctx2,
-		service.GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(serviceHeader, []byte("hello, world!")),
-	)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(res))
 }
 
-func closeNode(node anonymity.INode) error {
-	return utils.MergeErrors(
-		node.GetDBWrapper().Close(),
-		node.GetNetworkNode().Close(),
-	)
+func runClientNode() anonymity.INode {
+	ctx := context.Background()
+	node := newNode("cnode", "")
+
+	go func() { _ = node.Run(ctx) }()
+	node.GetNetworkNode().AddConnection(ctx, nodeAddress)
+
+	return node
 }
 
-func newNode(serviceAddress, name, dbPath string) anonymity.INode {
-	db, err := database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
-			FPath: dbPath,
-		}),
+func runServiceNode() anonymity.INode {
+	ctx := context.Background()
+	node := newNode("snode", nodeAddress).HandleFunc(
+		nodeRouter,
+		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
+			return []byte(fmt.Sprintf("echo: %s", string(b))), nil
+		},
 	)
-	if err != nil {
-		return nil
-	}
-	networkMask := uint64(1)
-	return anonymity.NewNode(
-		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   name,
-			FNetworkMask:   networkMask,
-			FFetchTimeWait: time.Minute,
-		}),
-		logger.NewLogger(
-			logger.NewSettings(&logger.SSettings{
-				FInfo: os.Stdout,
-				FWarn: os.Stdout,
-				FErro: os.Stderr,
-			}),
-			func(arg logger.ILogArg) string {
-				logGetterFactory, ok := arg.(anon_logger.ILogGetterFactory)
-				if !ok {
-					panic("got invalid log arg")
-				}
-				logGetter := logGetterFactory.Get()
-				return fmt.Sprintf(
-					"%s|%02xT|%XH|%dP|%dB",
-					logGetter.GetService(),
-					logGetter.GetType(),
-					logGetter.GetHash(),
-					logGetter.GetProof(),
-					logGetter.GetSize(),
-				)
-			},
-		),
-		anonymity.NewDBWrapper().Set(db),
-		network.NewNode(
-			nodeSettings(serviceAddress),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
-					FCapacity: (1 << 10),
-				}),
-			),
-		),
-		queue.NewMessageQueue(
-			queue.NewSettings(&queue.SSettings{
-				FMainCapacity: (1 << 4),
-				FVoidCapacity: (1 << 4),
-				FParallel:     1,
-				FDuration:     2 * time.Second,
-			}),
-			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: msgSize,
-					FKeySizeBits:      keySize,
-				}),
-				asymmetric.NewRSAPrivKey(keySize),
-			),
-		).WithNetworkSettings(
-			networkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: workSize,
-			}),
-		),
-		asymmetric.NewListPubKeys(),
-	)
+
+	go func() { _ = node.Run(ctx) }()
+	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
+
+	time.Sleep(time.Second) // wait listener
+	return node
 }
 
-func nodeSettings(serviceAddress string) network.ISettings {
-	return network.NewSettings(&network.SSettings{
-		FAddress:      serviceAddress,
-		FMaxConnects:  1,
-		FConnSettings: connSettings(),
-		FWriteTimeout: time.Minute,
-		FReadTimeout:  time.Minute,
-	})
-}
+func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
+	pubKey1 := node1.GetMessageQueue().GetClient().GetPubKey()
+	pubKey2 := node2.GetMessageQueue().GetClient().GetPubKey()
 
-func connSettings() conn.ISettings {
-	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:     workSize,
-		FMessageSizeBytes: msgSize,
-		FWaitReadDeadline: time.Hour,
-		FReadDeadline:     time.Minute,
-		FWriteDeadline:    time.Minute,
-	})
+	node1.GetListPubKeys().AddPubKey(pubKey2)
+	node2.GetListPubKeys().AddPubKey(pubKey1)
+
+	return pubKey1, pubKey2
 }

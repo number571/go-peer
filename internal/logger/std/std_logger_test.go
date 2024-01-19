@@ -29,10 +29,11 @@ func TestGetLogFunc(t *testing.T) {
 	t.Parallel()
 
 	f := GetLogFunc()
-	if f("string") != "string" {
+	if l := f("string"); l != "string" {
 		t.Error("incorrect logger work")
 		return
 	}
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")

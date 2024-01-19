@@ -25,11 +25,15 @@
 - Update `cmd/hidden_lake/applications/messenger`: frield 'alias_name' is now can be void
 - Update `examples`: delete _docker examples
 - Update `pkg/network/anonymity`: rename BroadcastPayload -> SendPayload
+- Update `pkg/network/anonymity/examples`: the examples is simplified
+- Update `pkg/logger`: if return string is nil -> log is not printing
+- Update `pkg/network/anonymity/logger`: append GetRecv, WithRecv methods
 
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/applications/messenger`: fix view of html escaped chars 
 - Update `cmd/hidden_lake/applications/messenger`: append requestID to hash
+- Update `pkg/network/anonymity`: fix order of check message and net_message
 
 <!-- ... -->
 

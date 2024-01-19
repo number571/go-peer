@@ -2,236 +2,85 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
-	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
 	"time"
 
-	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
-	"github.com/number571/go-peer/pkg/network/anonymity/queue"
-	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/queue_set"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
-	workSize       = 10
-	keySize        = 1024
-	msgSize        = (8 << 10)
-	serviceHeader  = 0xDEADBEAF
-	serviceAddress = ":8080"
+	nodeAddress = "127.0.0.1:8080"
+	nodeRouter  = uint32(0xA557711A)
 )
 
-const (
-	dbPath1 = "database1.db"
-	dbPath2 = "database2.db"
-)
+var (
+	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKey, b []byte) ([]byte, error) {
+		numBytes := [encoding.CSizeUint64]byte{}
+		copy(numBytes[:], b)
 
-func deleteDBs() {
-	os.RemoveAll(dbPath1)
-	os.RemoveAll(dbPath2)
-}
-
-func main() {
-	deleteDBs()
-	defer deleteDBs()
-
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-
-	var (
-		service1 = newNode(serviceAddress, "SERVICE-1", dbPath1)
-		service2 = newNode("", "SERVICE-2", dbPath2)
-	)
-
-	defer func() {
-		if err := closeNode(service1); err != nil {
-			panic(err)
-		}
-		if err := closeNode(service2); err != nil {
-			panic(err)
-		}
-	}()
-
-	service1.HandleFunc(serviceHeader, handler("#1"))
-	service2.HandleFunc(serviceHeader, handler("#2"))
-
-	service1.GetListPubKeys().AddPubKey(service2.GetMessageQueue().GetClient().GetPubKey())
-	service2.GetListPubKeys().AddPubKey(service1.GetMessageQueue().GetClient().GetPubKey())
-
-	ctx1, cancel1 := context.WithCancel(context.Background())
-	defer cancel1()
-
-	go func() { _ = service1.Run(ctx1) }()
-	go func() {
-		err := service1.GetNetworkNode().Listen(ctx1)
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			panic(err)
-		}
-	}()
-	time.Sleep(time.Second)
-
-	ctx2, cancel2 := context.WithCancel(context.Background())
-	defer cancel2()
-
-	go func() { _ = service2.Run(ctx2) }()
-	if err := service2.GetNetworkNode().AddConnection(ctx2, serviceAddress); err != nil {
-		panic(err)
-	}
-
-	err := service2.SendPayload(
-		ctx2,
-		service1.GetMessageQueue().GetClient().GetPubKey(),
-		payload.NewPayload(
-			serviceHeader,
-			[]byte("0"),
-		),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	<-shutdown
-}
-
-func handler(serviceName string) anonymity.IHandlerF {
-	return func(ctx context.Context, node anonymity.INode, pubKey asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
-		num, err := strconv.Atoi(string(reqBytes))
-		if err != nil {
-			panic(err)
-		}
-
-		val := "ping"
+		num := encoding.BytesToUint64(numBytes)
+		msg := "ping"
 		if num%2 == 1 {
-			val = "pong"
+			msg = "pong"
 		}
+		fmt.Printf("%s-%d\n", msg, num)
 
-		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
-
-		err = node.SendPayload(
+		numBytes = encoding.Uint64ToBytes(num + 1)
+		_ = n.SendPayload(
 			ctx,
 			pubKey,
-			payload.NewPayload(
-				serviceHeader,
-				[]byte(fmt.Sprintf("%d", num+1)),
-			),
+			payload.NewPayload(uint64(nodeRouter), numBytes[:]),
 		)
-		if err != nil {
-			panic(err)
-		}
-
 		return nil, nil
 	}
-}
+)
 
-func closeNode(node anonymity.INode) error {
-	return utils.MergeErrors(
-		node.GetDBWrapper().Close(),
-		node.GetNetworkNode().Close(),
+func main() {
+	nodeService, nodeClient := runServiceNode(), runClientNode()
+	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
+
+	ctx := context.Background()
+
+	numBytes := encoding.Uint64ToBytes(0)
+	_ = nodeClient.SendPayload(
+		ctx,
+		pubKeyService,
+		payload.NewPayload(uint64(nodeRouter), numBytes[:]),
 	)
+
+	select {}
 }
 
-func newNode(serviceAddress, name, dbPath string) anonymity.INode {
-	db, err := database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
-			FPath: dbPath,
-		}),
-	)
-	if err != nil {
-		return nil
-	}
-	networkMask := uint64(1)
-	return anonymity.NewNode(
-		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   name,
-			FNetworkMask:   networkMask,
-			FFetchTimeWait: time.Minute,
-		}),
-		logger.NewLogger(
-			logger.NewSettings(&logger.SSettings{
-				FInfo: os.Stdout,
-				FWarn: os.Stdout,
-				FErro: os.Stderr,
-			}),
-			func(arg logger.ILogArg) string {
-				logGetterFactory, ok := arg.(anon_logger.ILogGetterFactory)
-				if !ok {
-					panic("got invalid log arg")
-				}
-				logGetter := logGetterFactory.Get()
-				return fmt.Sprintf(
-					"%s|%02xT|%XH|%dP|%dB",
-					logGetter.GetService(),
-					logGetter.GetType(),
-					logGetter.GetHash(),
-					logGetter.GetProof(),
-					logGetter.GetSize(),
-				)
-			},
-		),
-		anonymity.NewDBWrapper().Set(db),
-		network.NewNode(
-			nodeSettings(serviceAddress),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
-					FCapacity: (1 << 10),
-				}),
-			),
-		),
-		queue.NewMessageQueue(
-			queue.NewSettings(&queue.SSettings{
-				FMainCapacity: (1 << 4),
-				FVoidCapacity: (1 << 4),
-				FParallel:     1,
-				FDuration:     2 * time.Second,
-			}),
-			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: msgSize,
-					FKeySizeBits:      keySize,
-				}),
-				asymmetric.NewRSAPrivKey(keySize),
-			),
-		).WithNetworkSettings(
-			networkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: workSize,
-			}),
-		),
-		asymmetric.NewListPubKeys(),
-	)
+func runClientNode() anonymity.INode {
+	ctx := context.Background()
+	node := newNode("cnode", "").HandleFunc(nodeRouter, handler)
+
+	go func() { _ = node.Run(ctx) }()
+	node.GetNetworkNode().AddConnection(ctx, nodeAddress)
+
+	return node
 }
 
-func nodeSettings(serviceAddress string) network.ISettings {
-	return network.NewSettings(&network.SSettings{
-		FAddress:      serviceAddress,
-		FMaxConnects:  1,
-		FConnSettings: connSettings(),
-		FWriteTimeout: time.Minute,
-		FReadTimeout:  time.Minute,
-	})
+func runServiceNode() anonymity.INode {
+	ctx := context.Background()
+	node := newNode("snode", nodeAddress).HandleFunc(nodeRouter, handler)
+
+	go func() { _ = node.Run(ctx) }()
+	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
+
+	time.Sleep(time.Second) // wait listener
+	return node
 }
 
-func connSettings() conn.ISettings {
-	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:     workSize,
-		FMessageSizeBytes: msgSize,
-		FWaitReadDeadline: time.Hour,
-		FReadDeadline:     time.Minute,
-		FWriteDeadline:    time.Minute,
-	})
+func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
+	pubKey1 := node1.GetMessageQueue().GetClient().GetPubKey()
+	pubKey2 := node2.GetMessageQueue().GetClient().GetPubKey()
+
+	node1.GetListPubKeys().AddPubKey(pubKey2)
+	node2.GetListPubKeys().AddPubKey(pubKey1)
+
+	return pubKey1, pubKey2
 }

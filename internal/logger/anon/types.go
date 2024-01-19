@@ -7,7 +7,6 @@ var gLogMap = map[anon_logger.ILogType]string{
 
 	// default
 	anon_logger.CLogBaseBroadcast:         "BRDCS",
-	anon_logger.CLogBaseMessageType:       "MTYPE",
 	anon_logger.CLogBaseEnqueueRequest:    "ENQRQ",
 	anon_logger.CLogBaseEnqueueResponse:   "ENQRS",
 	anon_logger.CLogBaseGetResponse:       "GETRS",
@@ -15,6 +14,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 	anon_logger.CLogInfoUndecryptable:     "UNDEC",
 	anon_logger.CLogInfoPassF2FOption:     "PF2FO",
 	anon_logger.CLogInfoWithoutResponse:   "WTHRS",
+	anon_logger.CLogWarnMessageType:       "MTYPE",
 	anon_logger.CLogWarnMessageNull:       "MNULL",
 	anon_logger.CLogWarnNotFriend:         "NTFRN",
 	anon_logger.CLogWarnUnknownRoute:      "UNKRT",

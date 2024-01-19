@@ -57,19 +57,31 @@ func (p *sLogger) PushInfo(pMsg ILogArg) {
 	if p.fInfoOut == nil {
 		return
 	}
-	p.fInfoOut.Println(p.fLogFunc(pMsg))
+	log := p.fLogFunc(pMsg)
+	if log == "" {
+		return
+	}
+	p.fInfoOut.Println(log)
 }
 
 func (p *sLogger) PushWarn(pMsg ILogArg) {
 	if p.fWarnOut == nil {
 		return
 	}
-	p.fWarnOut.Println(p.fLogFunc(pMsg))
+	log := p.fLogFunc(pMsg)
+	if log == "" {
+		return
+	}
+	p.fWarnOut.Println(log)
 }
 
 func (p *sLogger) PushErro(pMsg ILogArg) {
 	if p.fErroOut == nil {
 		return
 	}
-	p.fErroOut.Println(p.fLogFunc(pMsg))
+	log := p.fLogFunc(pMsg)
+	if log == "" {
+		return
+	}
+	p.fErroOut.Println(log)
 }

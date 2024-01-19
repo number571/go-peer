@@ -42,6 +42,20 @@ func TestNullLogger(t *testing.T) {
 	logger.PushErro("1") // do nothing
 	logger.PushWarn("1") // do nothing
 	logger.PushInfo("1") // do nothing
+
+	logger2 := NewLogger(
+		NewSettings(&SSettings{
+			FInfo: os.Stdout,
+			FWarn: os.Stdout,
+			FErro: os.Stdout,
+		}),
+		func(arg ILogArg) string {
+			return ""
+		},
+	)
+	logger2.PushErro("1") // do nothing
+	logger2.PushWarn("1") // do nothing
+	logger2.PushInfo("1") // do nothing
 }
 
 func TestLogger(t *testing.T) {
