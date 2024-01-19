@@ -11,4 +11,5 @@ RUN go build -o hls ./cmd/hidden_lake/service/cmd/hls
 
 ENV SERVICE_PATH="/mounted"
 ENV SERVICE_KEY="/mounted/priv.key"
-CMD ./hls -path="${SERVICE_PATH}" -key="${SERVICE_KEY}" -parallel=1
+ENV SERVICE_PARALLEL="1"
+CMD ./hls -path="${SERVICE_PATH}" -key="${SERVICE_KEY}" -parallel="${SERVICE_PARALLEL}"
