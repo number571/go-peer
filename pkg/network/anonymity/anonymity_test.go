@@ -531,9 +531,17 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
+	db := node.GetDBWrapper().Get()
 	node.GetDBWrapper().Set(nil)
 	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
 		t.Error("success use store function with null database")
+		return
+	}
+
+	node.GetDBWrapper().Set(db)
+	db.Close()
+	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
+		t.Error("success use store function with closed database")
 		return
 	}
 }
