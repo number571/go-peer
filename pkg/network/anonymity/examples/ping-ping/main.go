@@ -17,11 +17,11 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -93,10 +93,10 @@ func main() {
 		panic(err)
 	}
 
-	err := service2.BroadcastPayload(
+	err := service2.SendPayload(
 		ctx2,
 		service1.GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(
+		payload.NewPayload(
 			serviceHeader,
 			[]byte("0"),
 		),
@@ -122,10 +122,10 @@ func handler(serviceName string) anonymity.IHandlerF {
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
 
-		err = node.BroadcastPayload(
+		err = node.SendPayload(
 			ctx,
 			pubKey,
-			adapters.NewPayload(
+			payload.NewPayload(
 				serviceHeader,
 				[]byte(fmt.Sprintf("%d", num+1)),
 			),

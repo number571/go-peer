@@ -137,8 +137,8 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 }
 
 // Send message without response waiting.
-func (p *sNode) BroadcastPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) error {
-	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, pPld.ToOrigin()); err != nil {
+func (p *sNode) SendPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+	if err := p.enqueuePayload(pCtx, cIsRequest, pRecv, pPld); err != nil {
 		// internal logger
 		return utils.MergeErrors(ErrBroadcastPayload, err)
 	}

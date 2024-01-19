@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -21,14 +22,14 @@ type INode interface {
 	types.IRunner
 	HandleFunc(uint32, IHandlerF) INode
 
+	GetLogger() logger.ILogger
 	GetSettings() ISettings
 	GetDBWrapper() IDBWrapper
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
-	GetLogger() logger.ILogger
 
-	BroadcastPayload(context.Context, asymmetric.IPubKey, adapters.IPayload) error
+	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload) error
 	FetchPayload(context.Context, asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
 }
 

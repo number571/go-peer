@@ -16,14 +16,13 @@ type (
 type INode interface {
 	types.ICloser
 	Listen(context.Context) error
+	HandleFunc(uint64, IHandlerF) INode
 
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn
 
 	AddConnection(context.Context, string) error
 	DelConnection(string) error
-
-	HandleFunc(uint64, IHandlerF) INode
 	BroadcastMessage(context.Context, message.IMessage) error
 }
 

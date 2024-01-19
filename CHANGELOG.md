@@ -24,6 +24,7 @@
 - Update `examples/anon_messenger/routing`: append routing example
 - Update `cmd/hidden_lake/applications/messenger`: frield 'alias_name' is now can be void
 - Update `examples`: delete _docker examples
+- Update `pkg/network/anonymity`: rename BroadcastPayload -> SendPayload
 
 ### BUG FIXES
 

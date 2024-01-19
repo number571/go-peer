@@ -259,10 +259,10 @@ func TestBroadcastPayload(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	err := nodes[0].BroadcastPayload(
+	err := nodes[0].SendPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
 		t.Error("success broadcast payload with large body")
@@ -270,10 +270,10 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 
 	msgBody := "hello, world!"
-	err1 := nodes[0].BroadcastPayload(
+	err1 := nodes[0].SendPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(msgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)

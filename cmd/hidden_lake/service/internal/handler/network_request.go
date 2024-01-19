@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
@@ -70,39 +71,37 @@ func HandleNetworkRequestAPI(pCtx context.Context, pMutex *sync.Mutex, pConfig c
 
 		switch pR.Method {
 		case http.MethodPut:
-			err := pNode.BroadcastPayload(
+			err := pNode.SendPayload(
 				pCtx,
 				pubKey,
-				adapters.NewPayload(pkg_settings.CServiceMask, data),
+				payload.NewPayload(uint64(pkg_settings.CServiceMask), data),
 			)
-
 			if err != nil {
-				pLogger.PushWarn(logBuilder.WithMessage("broadcast_payload"))
-				api.Response(pW, http.StatusInternalServerError, "failed: broadcast message")
+				pLogger.PushWarn(logBuilder.WithMessage("send_payload"))
+				api.Response(pW, http.StatusInternalServerError, "failed: send payload")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: broadcast")
+			api.Response(pW, http.StatusOK, "success: send")
 			return
 
 		case http.MethodPost:
 			respBytes, err := pNode.FetchPayload(
 				pCtx,
 				pubKey,
-				adapters.NewPayload(pkg_settings.CServiceMask, data),
+				adapters.NewPayload(uint32(pkg_settings.CServiceMask), data),
 			)
-
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))
-				api.Response(pW, http.StatusInternalServerError, "failed: get response bytes")
+				api.Response(pW, http.StatusInternalServerError, "failed: fetch payload")
 				return
 			}
 
 			resp, err := response.LoadResponse(respBytes)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("load_response"))
-				api.Response(pW, http.StatusNotExtended, "failed: load response bytes")
+				api.Response(pW, http.StatusNotExtended, "failed: load response")
 				return
 			}
 
