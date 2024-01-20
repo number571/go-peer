@@ -33,7 +33,8 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 			WithConn(pConn).
 			WithHash(pNetMsg.GetHash()).
 			WithProof(pNetMsg.GetProof()).
-			WithSize(len(pld.GetBody()))
+			WithSize(len(pld.GetBody())).
+			WithRecv(true)
 
 		if _, err := message.LoadMessage(pCfg.GetSettings(), pld.GetBody()); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
