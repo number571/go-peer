@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/logger`: *os.File -> io.Writer
+
 <!-- ... -->
 
 ## v1.6.1

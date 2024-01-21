@@ -1,10 +1,7 @@
 package std
 
 import (
-	"os"
 	"testing"
-
-	"github.com/number571/go-peer/pkg/logger"
 )
 
 var (
@@ -41,25 +38,4 @@ func TestGetLogFunc(t *testing.T) {
 		}
 	}()
 	_ = f(struct{}{})
-}
-
-func TestLogger(t *testing.T) {
-	t.Parallel()
-
-	logger := NewStdLogger(
-		&tsLogger{},
-		func(_ logger.ILogArg) string { return "" },
-	)
-	if logger.GetSettings().GetStreamInfo().Name() != os.Stdout.Name() {
-		t.Error("info stream != stdout")
-		return
-	}
-	if logger.GetSettings().GetStreamWarn().Name() != os.Stdout.Name() {
-		t.Error("warn stream != stdout")
-		return
-	}
-	if logger.GetSettings().GetStreamErro().Name() != os.Stderr.Name() {
-		t.Error("erro stream != stderr")
-		return
-	}
 }

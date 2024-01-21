@@ -11,11 +11,11 @@ var (
 
 type sLogger struct {
 	fSettings ISettings
+	fLogFunc  ILogFunc
 
-	fLogFunc ILogFunc
-	fInfoOut *log.Logger
-	fWarnOut *log.Logger
-	fErroOut *log.Logger
+	fOutInfo *log.Logger
+	fOutWarn *log.Logger
+	fOutErro *log.Logger
 }
 
 const (
@@ -31,19 +31,19 @@ func NewLogger(pSett ISettings, pLogFunc ILogFunc) ILogger {
 		fLogFunc:  pLogFunc,
 	}
 
-	infoStream := pSett.GetStreamInfo()
-	if infoStream != nil {
-		logger.fInfoOut = log.New(infoStream, fmt.Sprintf("%s[INFO] %s", colorCyan, colorReset), log.LstdFlags)
+	outInfo := pSett.GetOutInfo()
+	if outInfo != nil {
+		logger.fOutInfo = log.New(outInfo, fmt.Sprintf("%s[INFO] %s", colorCyan, colorReset), log.LstdFlags)
 	}
 
-	warnStream := pSett.GetStreamWarn()
-	if warnStream != nil {
-		logger.fWarnOut = log.New(warnStream, fmt.Sprintf("%s[WARN] %s", colorYellow, colorReset), log.LstdFlags)
+	outWarn := pSett.GetOutWarn()
+	if outWarn != nil {
+		logger.fOutWarn = log.New(outWarn, fmt.Sprintf("%s[WARN] %s", colorYellow, colorReset), log.LstdFlags)
 	}
 
-	erroStream := pSett.GetStreamErro()
-	if erroStream != nil {
-		logger.fErroOut = log.New(erroStream, fmt.Sprintf("%s[ERRO] %s", colorRed, colorReset), log.LstdFlags)
+	outErro := pSett.GetOutErro()
+	if outErro != nil {
+		logger.fOutErro = log.New(outErro, fmt.Sprintf("%s[ERRO] %s", colorRed, colorReset), log.LstdFlags)
 	}
 
 	return logger
@@ -54,34 +54,34 @@ func (p *sLogger) GetSettings() ISettings {
 }
 
 func (p *sLogger) PushInfo(pMsg ILogArg) {
-	if p.fInfoOut == nil {
+	if p.fOutInfo == nil {
 		return
 	}
 	log := p.fLogFunc(pMsg)
 	if log == "" {
 		return
 	}
-	p.fInfoOut.Println(log)
+	p.fOutInfo.Println(log)
 }
 
 func (p *sLogger) PushWarn(pMsg ILogArg) {
-	if p.fWarnOut == nil {
+	if p.fOutWarn == nil {
 		return
 	}
 	log := p.fLogFunc(pMsg)
 	if log == "" {
 		return
 	}
-	p.fWarnOut.Println(log)
+	p.fOutWarn.Println(log)
 }
 
 func (p *sLogger) PushErro(pMsg ILogArg) {
-	if p.fErroOut == nil {
+	if p.fOutErro == nil {
 		return
 	}
 	log := p.fLogFunc(pMsg)
 	if log == "" {
 		return
 	}
-	p.fErroOut.Println(log)
+	p.fOutErro.Println(log)
 }

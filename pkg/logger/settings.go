@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"os"
+	"io"
 )
 
 var (
@@ -10,9 +10,9 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FInfo *os.File
-	FWarn *os.File
-	FErro *os.File
+	FInfo io.Writer
+	FWarn io.Writer
+	FErro io.Writer
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -28,14 +28,14 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetStreamInfo() *os.File {
+func (p *sSettings) GetOutInfo() io.Writer {
 	return p.FInfo
 }
 
-func (p *sSettings) GetStreamWarn() *os.File {
+func (p *sSettings) GetOutWarn() io.Writer {
 	return p.FWarn
 }
 
-func (p *sSettings) GetStreamErro() *os.File {
+func (p *sSettings) GetOutErro() io.Writer {
 	return p.FErro
 }

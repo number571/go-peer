@@ -1,6 +1,6 @@
 package logger
 
-import "os"
+import "io"
 
 type (
 	ILogArg  interface{}
@@ -16,7 +16,7 @@ type ILogger interface {
 }
 
 type ISettings interface {
-	GetStreamInfo() *os.File
-	GetStreamWarn() *os.File
-	GetStreamErro() *os.File
+	GetOutInfo() io.Writer
+	GetOutWarn() io.Writer
+	GetOutErro() io.Writer
 }
