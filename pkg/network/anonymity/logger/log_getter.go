@@ -23,10 +23,6 @@ func (p *sLogGetter) GetService() string {
 	return p.fLogBuilder.fService
 }
 
-func (p *sLogGetter) GetRecv() bool {
-	return p.fLogBuilder.fRecv
-}
-
 func (p *sLogGetter) GetType() ILogType {
 	return p.fLogBuilder.fType
 }

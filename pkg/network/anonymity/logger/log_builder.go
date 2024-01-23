@@ -11,7 +11,6 @@ var (
 
 type sLogBuilder struct {
 	fService string
-	fRecv    bool
 	fType    ILogType
 	fHash    []byte
 	fProof   uint64
@@ -36,11 +35,6 @@ func (p *sLogBuilder) Get() ILogGetter {
 
 func (p *sLogBuilder) WithType(pType ILogType) ILogBuilder {
 	p.fType = pType
-	return p
-}
-
-func (p *sLogBuilder) WithRecv(pRecv bool) ILogBuilder {
-	p.fRecv = pRecv
 	return p
 }
 

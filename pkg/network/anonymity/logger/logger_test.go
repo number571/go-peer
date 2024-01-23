@@ -11,7 +11,6 @@ import (
 
 const (
 	tcService = "ServiceName"
-	tcRecv    = true
 	tcHash    = "hash-example"
 	tcProof   = 3
 	tcSize    = 8192
@@ -23,7 +22,6 @@ func TestLogger(t *testing.T) {
 	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 	builder := NewLogBuilder(tcService).
 		WithConn(nil).
-		WithRecv(tcRecv).
 		WithHash([]byte(tcHash)).
 		WithProof(tcProof).
 		WithPubKey(pubKey).
@@ -33,11 +31,6 @@ func TestLogger(t *testing.T) {
 	getter := builder.Get()
 	if getter.GetService() != tcService {
 		t.Error("getter.GetService() != tcService")
-		return
-	}
-
-	if getter.GetRecv() != tcRecv {
-		t.Error("getter.GetRecv() != tcRecv")
 		return
 	}
 

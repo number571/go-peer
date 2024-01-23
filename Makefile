@@ -4,8 +4,7 @@ PPROF_NAME=_
 PPROF_PORT=_
 
 # updates in 'test-coverage-badge' block
-_COVERAGE_RAW=_ 
-_COVERAGE_VAR=_
+_COVERAGE_FLOOR=_ 
 
 _TEST_RESULT_PATH=./test/result
 
@@ -54,14 +53,13 @@ test-coverage-view:
 
 test-coverage-badge: 
 	make test-coverage-badge -C cmd/hidden_lake/
-	$(eval _COVERAGE_RAW=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -Eo '[0-9]+\.[0-9]+')
-	$(eval _COVERAGE_VAR := $(shell echo "`${_COVERAGE_RAW}`/1" | bc))
-	if [ $(_COVERAGE_VAR) -lt 60 ]; then \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-crimson" > $(_TEST_RESULT_PATH)/badge.svg; \
-	elif [ $(_COVERAGE_VAR) -gt 80 ]; then \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
+	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
+	if [ `${_COVERAGE_FLOOR}` -lt 60 ]; then \
+		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-crimson" > $(_TEST_RESULT_PATH)/badge.svg; \
+	elif [ `${_COVERAGE_FLOOR}` -gt 80 ]; then \
+		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
 	else \
-		curl "https://img.shields.io/badge/coverage-$(_COVERAGE_VAR)%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
+		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
 ### GIT

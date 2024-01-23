@@ -217,8 +217,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 
 		// update logger state
 		p.enrichLogger(logBuilder, pNetMsg).
-			WithConn(pConn).
-			WithRecv(true)
+			WithConn(pConn)
 
 		// load encrypted message
 		client := p.fQueue.GetClient()

@@ -43,7 +43,6 @@ type ILogBuilder interface {
 	ILogGetterFactory
 
 	WithType(ILogType) ILogBuilder
-	WithRecv(bool) ILogBuilder
 	WithSize(int) ILogBuilder
 	WithProof(uint64) ILogBuilder
 	WithHash([]byte) ILogBuilder
@@ -57,7 +56,6 @@ type ILogGetterFactory interface {
 
 type ILogGetter interface {
 	GetService() string
-	GetRecv() bool
 	GetType() ILogType
 	GetSize() uint64
 	GetProof() uint64
