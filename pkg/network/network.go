@@ -224,21 +224,19 @@ func (p *sNode) DelConnection(pAddress string) error {
 func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.IConn) {
 	defer func() { _ = p.DelConnection(pAddress) }()
 
+	var (
+		readHeadCh = make(chan struct{})
+		readFullCh = make(chan message.IMessage)
+	)
+
+	go p.messageReader(
+		pCtx,
+		pConn,
+		readHeadCh,
+		readFullCh,
+	)
+
 	for {
-		var (
-			readHeadCh = make(chan struct{})
-			readFullCh = make(chan message.IMessage)
-		)
-
-		go func() {
-			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
-			if err != nil {
-				readFullCh <- nil
-				return
-			}
-			readFullCh <- msg
-		}()
-
 		select {
 		case <-pCtx.Done():
 			return
@@ -257,6 +255,27 @@ func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.ICo
 				}
 				break
 			}
+		}
+	}
+}
+
+func (p *sNode) messageReader(
+	pCtx context.Context,
+	pConn conn.IConn,
+	readHeadCh chan<- struct{},
+	readFullCh chan<- message.IMessage,
+) {
+	for {
+		select {
+		case <-pCtx.Done():
+			return
+		default:
+			msg, err := pConn.ReadMessage(pCtx, readHeadCh)
+			if err != nil {
+				readFullCh <- nil
+				return
+			}
+			readFullCh <- msg
 		}
 	}
 }
