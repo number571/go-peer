@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
@@ -18,7 +17,6 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -83,10 +81,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			// secret key can be = nil
-			secretKey := pCfg.GetSecretKeys()[aliasName]
-
-			if err := sendMessage(pCfg, client, myPubKey, pDB, secretKey, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCfg, client, myPubKey, pDB, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -200,7 +195,6 @@ func sendMessage(
 	pClient client.IClient,
 	pMyPubKey asymmetric.IPubKey,
 	pDB database.IKVDatabase,
-	pSecretKey string,
 	pAliasName string,
 	pMsgBytes []byte,
 ) error {
@@ -218,29 +212,13 @@ func sendMessage(
 		return err
 	}
 
-	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(pSecretKey)
-	hash := hashing.NewHMACSHA256Hasher(
-		authKey,
-		bytes.Join(
-			[][]byte{
-				[]byte(pCfg.GetPseudonym()),
-				[]byte(requestID),
-				pMsgBytes,
-			},
-			[]byte{},
-		),
-	).ToBytes()
-
-	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(pSecretKey)
 	return pClient.BroadcastRequest(
 		pAliasName,
 		hlm_request.NewPushRequest(
 			pMyPubKey,
 			requestID,
 			pCfg.GetPseudonym(),
-			symmetric.NewAESCipher(cipherKey).EncryptBytes(
-				bytes.Join([][]byte{hash, pMsgBytes}, []byte{}),
-			),
+			pMsgBytes,
 		),
 	)
 }

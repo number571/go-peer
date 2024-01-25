@@ -9,16 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
-)
-
-const (
-	cSecretKey = "abc"
 )
 
 const (
@@ -54,29 +47,8 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
 	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(cSecretKey)
-	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(cSecretKey)
-
 	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
 	pseudonym := "Bob"
-	encMessage := symmetric.NewAESCipher(cipherKey).EncryptBytes(
-		bytes.Join(
-			[][]byte{
-				hashing.NewHMACSHA256Hasher(
-					authKey,
-					bytes.Join([][]byte{[]byte(pseudonym), []byte(requestID), pMessage}, []byte{}),
-				).ToBytes(),
-				pMessage,
-			},
-			[]byte{},
-		),
-	)
-
-	// fmt.Println(requestID)
-	// for _, c := range encMessage {
-	// 	fmt.Printf("\\x%02x", c)
-	// }
-	// fmt.Println()
 
 	requestData := replacer.Replace(
 		fmt.Sprintf(
@@ -85,7 +57,7 @@ func sendMessage(pReceiver string, pMessage []byte) {
 			pseudonym,
 			hlm_settings.CHeaderRequestId,
 			requestID,
-			base64.StdEncoding.EncodeToString(encMessage),
+			base64.StdEncoding.EncodeToString(pMessage),
 		),
 	)
 	req, err := http.NewRequest(

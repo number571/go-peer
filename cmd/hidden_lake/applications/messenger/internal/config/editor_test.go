@@ -88,9 +88,4 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 		t.Error("success update pseudonym with incorrect filepath")
 		return
 	}
-
-	if err := editor.UpdateSecretKeys(map[string]string{"Alice": "123"}); err == nil {
-		t.Error("success update friends with incorrect filepath")
-		return
-	}
 }

@@ -76,26 +76,3 @@ func (p *sEditor) UpdateLanguage(pLang language.ILanguage) error {
 	p.fConfig.fLanguage = pLang
 	return nil
 }
-
-func (p *sEditor) UpdateSecretKeys(pSecretKeys map[string]string) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	filepath := p.fConfig.fFilepath
-	icfg, err := LoadConfig(filepath)
-	if err != nil {
-		return fmt.Errorf("load config (update friends): %w", err)
-	}
-
-	cfg := icfg.(*SConfig)
-	cfg.FSecretKeys = pSecretKeys
-	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
-		return fmt.Errorf("write config (update friends): %w", err)
-	}
-
-	p.fConfig.fMutex.Lock()
-	defer p.fConfig.fMutex.Unlock()
-
-	p.fConfig.FSecretKeys = cfg.FSecretKeys
-	return nil
-}

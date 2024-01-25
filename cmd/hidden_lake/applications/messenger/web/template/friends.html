@@ -38,7 +38,7 @@ Amikoj
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="POST">
                 <div class="row">
-                    <div class="col-md-3 w-25">
+                    <div class="col-md-5 w-50">
                         {{if (eq .FLanguage 0)}}
                         <input type="text" name="alias_name" placeholder="Alias"
                             class="text-center form-control bg-dark text-white w-100">
@@ -62,19 +62,7 @@ Amikoj
                             class="text-center form-control bg-dark text-white w-100">
                         {{end}}
                     </div>
-                    <div class="col-md-3 w-25">
-                        {{if (eq .FLanguage 0)}}
-                        <input type="text" name="secret_key" placeholder="Secret"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{else if (eq .FLanguage 1)}}
-                        <input type="text" name="secret_key" placeholder="Секрет"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{else if (eq .FLanguage 2)}}
-                        <input type="text" name="secret_key" placeholder="Sekreto"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{end}}
-                    </div>
-                    <div class="col-md-3 w-25">
+                    <div class="col-md-4 w-25">
                         <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
                     </div>
                 </div>

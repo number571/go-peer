@@ -15,6 +15,7 @@
 - Update `pkg/logger`: *os.File -> io.Writer
 - Update `pkg/network/anonymity/logger`: delete GetRecv, WithRecv methods
 - Update `cmd/hidden_lake/*/_daemon`: delete from status timestamp systemd
+- Update `cmd/hidden_lake/applications/messenger`: delete secret_keys, encrypt/decrypt messages
 
 <!-- ... -->
 

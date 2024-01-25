@@ -15,9 +15,6 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -45,7 +42,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		encMsgBytes, err := io.ReadAll(pR.Body)
+		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
 			api.Response(pW, http.StatusConflict, "failed: response message")
@@ -76,16 +73,14 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		if err := shareMessage(pCfg, fPubKey, requestID, senderPseudonym, encMsgBytes); err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("share_message"))
-			// continue
-		}
-
-		rawMsgBytes, err := decryptMsgBytes(pCfg, fPubKey, requestID, senderPseudonym, encMsgBytes)
-		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
-			api.Response(pW, http.StatusConflict, "failed: decrypt message")
-			return
+		if pCfg.GetShare() {
+			err := shareMessage(pCfg, fPubKey, requestID, senderPseudonym, rawMsgBytes)
+			switch err {
+			case nil:
+				pLogger.PushInfo(logBuilder.WithMessage("share_message"))
+			default:
+				pLogger.PushWarn(logBuilder.WithMessage("share_message"))
+			}
 		}
 
 		if err := isValidMsgBytes(rawMsgBytes); err != nil {
@@ -132,10 +127,6 @@ func shareMessage(
 	senderPseudonym string,
 	pBody []byte,
 ) error {
-	if !pCfg.GetShare() {
-		return nil
-	}
-
 	hlsClient := getClient(pCfg)
 
 	friends, err := hlsClient.GetFriends()
@@ -170,51 +161,6 @@ func shareMessage(
 
 	wg.Wait()
 	return utils.MergeErrors(errList...)
-}
-
-func decryptMsgBytes(
-	pCfg config.IConfig,
-	pPubKey asymmetric.IPubKey,
-	requestID string,
-	senderPseudonym string,
-	encMsgBytes []byte,
-) ([]byte, error) {
-	aliasName := ""
-
-	friends, err := getClient(pCfg).GetFriends()
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range friends {
-		if bytes.Equal(v.ToBytes(), pPubKey.ToBytes()) {
-			aliasName = k
-			break
-		}
-	}
-	if aliasName == "" {
-		return nil, errors.New("alias name not found")
-	}
-
-	// secret key can be = nil
-	secretKey := pCfg.GetSecretKeys()[aliasName]
-
-	authKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CAuthSalt)).Build(secretKey)
-	cipherKey := keybuilder.NewKeyBuilder(1, []byte(hlm_settings.CCipherSalt)).Build(secretKey)
-
-	decBytes := symmetric.NewAESCipher(cipherKey).DecryptBytes(encMsgBytes)
-	if len(decBytes) < hashing.CSHA256Size {
-		return nil, errors.New("failed decrypt bytes")
-	}
-
-	msgBytes := decBytes[hashing.CSHA256Size:]
-
-	authBytes := bytes.Join([][]byte{[]byte(senderPseudonym), []byte(requestID), msgBytes}, []byte{})
-	newHash := hashing.NewHMACSHA256Hasher(authKey, authBytes).ToBytes()
-	if !bytes.Equal(decBytes[:hashing.CSHA256Size], newHash) {
-		return nil, errors.New("failed auth bytes")
-	}
-
-	return msgBytes, nil
 }
 
 func isValidMsgBytes(rawMsgBytes []byte) error {
