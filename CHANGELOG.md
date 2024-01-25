@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/client/examples`: append new example 'file_encrypt'
+
 ### CHANGES
 
 - Update `pkg/logger`: *os.File -> io.Writer
@@ -39,6 +43,7 @@
 - Update `pkg/network/anonymity`: rename BroadcastPayload -> SendPayload
 - Update `pkg/network/anonymity/examples`: the examples is simplified
 - Update `pkg/logger`: if return string is nil -> log is not printing
+- Update `pkg/network/anonymity/logger`: append GetRecv, WithRecv methods
 
 ### BUG FIXES
 
