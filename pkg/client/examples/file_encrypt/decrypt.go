@@ -91,7 +91,7 @@ func decryptChunks(client client.IClient, encChunks []string) string {
 			panic("index == -1")
 		}
 
-		fn := string(fileInfo[:index]) // TODO: check printable
+		fn := string(fileInfo[:index])
 		fb := fileInfo[index+1:]
 
 		if filename == "" {
