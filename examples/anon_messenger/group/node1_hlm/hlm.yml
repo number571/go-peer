@@ -9,5 +9,3 @@ address:
   incoming: localhost:8081
 connection: localhost:8572
 pseudonym: "Alice"
-secret_keys:
-  Group: abc

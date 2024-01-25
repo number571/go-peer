@@ -10,5 +10,3 @@ address:
   incoming: localhost:6061
 connection: localhost:6572
 pseudonym: "Carol"
-secret_keys:
-  Group: abc

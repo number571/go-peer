@@ -26,14 +26,13 @@ type SConfigSettings struct {
 type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
-	FLogging    []string          `yaml:"logging,omitempty"`
-	FLanguage   string            `yaml:"language,omitempty"`
-	FShare      bool              `yaml:"share,omitempty"`
-	FPseudonym  string            `yaml:"pseudonym"`
-	FAddress    *SAddress         `yaml:"address"`
-	FConnection string            `yaml:"connection"`
-	FStorageKey string            `yaml:"storage_key,omitempty"`
-	FSecretKeys map[string]string `yaml:"secret_keys,omitempty"`
+	FLogging    []string  `yaml:"logging,omitempty"`
+	FLanguage   string    `yaml:"language,omitempty"`
+	FShare      bool      `yaml:"share,omitempty"`
+	FPseudonym  string    `yaml:"pseudonym"`
+	FAddress    *SAddress `yaml:"address"`
+	FConnection string    `yaml:"connection"`
+	FStorageKey string    `yaml:"storage_key,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex
