@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
@@ -99,6 +100,9 @@ func decryptChunks(client client.IClient, encChunks []string) string {
 		if filename != fn {
 			panic("filename != fn")
 		}
+		if hasNotWritableCharacters(fn) {
+			panic("hasNotWritableCharacters(fn)")
+		}
 
 		if err := os.WriteFile(fmt.Sprintf("chunk_%d.dec", i), fb, 0644); err != nil {
 			panic(err)
@@ -132,4 +136,13 @@ func getChunks(suffix string) []string {
 		}
 	}
 	return result
+}
+
+func hasNotWritableCharacters(pS string) bool {
+	for _, c := range pS {
+		if !unicode.IsGraphic(c) {
+			return true
+		}
+	}
+	return false
 }
