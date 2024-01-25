@@ -16,12 +16,14 @@ import (
 
 func decryptFile(client client.IClient, decPrefix string) {
 	encChunks := getChunks(".enc")
-	filename := decryptChunks(client, encChunks)
-	mergeDecryptedChunks(decPrefix, filename, len(encChunks))
+	filename, hash := decryptChunks(client, encChunks)
+	mergeDecryptedChunks(decPrefix, filename, hash, len(encChunks))
 }
 
-func mergeDecryptedChunks(decPrefix, filename string, chunkCount int) {
-	outputFile, err := os.Create(decPrefix + filename)
+func mergeDecryptedChunks(decPrefix, filename string, hash []byte, chunkCount int) {
+	resultFilename := decPrefix + filename
+
+	outputFile, err := os.Create(resultFilename)
 	if err != nil {
 		panic(err)
 	}
@@ -36,9 +38,13 @@ func mergeDecryptedChunks(decPrefix, filename string, chunkCount int) {
 			panic(err)
 		}
 	}
+
+	if !bytes.Equal(getFileHash(resultFilename), hash) {
+		panic("!bytes.Equal(getFileHash(resultFilename), hash)")
+	}
 }
 
-func decryptChunks(client client.IClient, encChunks []string) string {
+func decryptChunks(client client.IClient, encChunks []string) (string, []byte) {
 	headSize := hashing.CSHA256Size + (2 * encoding.CSizeUint64) + 1 + 1
 	hashes := make([][]byte, 0, len(encChunks))
 
@@ -109,6 +115,9 @@ func decryptChunks(client client.IClient, encChunks []string) string {
 		}
 	}
 
+	if len(hashes) == 0 {
+		panic("len(hashes) == 0")
+	}
 	for i := 0; i < len(hashes); i++ {
 		for j := i + 1; j < len(hashes)-1; j++ {
 			if !bytes.Equal(hashes[i], hashes[j]) {
@@ -117,7 +126,7 @@ func decryptChunks(client client.IClient, encChunks []string) string {
 		}
 	}
 
-	return filename
+	return filename, hashes[0]
 }
 
 func getChunks(suffix string) []string {

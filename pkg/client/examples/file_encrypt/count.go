@@ -1,34 +1,15 @@
 package main
 
 import (
-	"errors"
-	"io"
+	"math"
 	"os"
 )
 
-func getFileCount(filename string, msgLimit, headSize uint64) uint64 {
-	inputFile, err := os.Open(filename)
+func getChunksCount(filename string, msgLimit, headSize uint64) uint64 {
+	stat, err := os.Stat(filename)
 	if err != nil {
 		panic(err)
 	}
-	defer inputFile.Close()
-
-	buf := make([]byte, msgLimit-headSize)
-
-	result := uint64(0)
-	for {
-		n, err := inputFile.Read(buf)
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			panic(err)
-		}
-		if n == 0 {
-			break
-		}
-		result += 1
-	}
-
-	return result
+	size := uint64(stat.Size())
+	return uint64(math.Ceil(float64(size) / float64(msgLimit-headSize)))
 }

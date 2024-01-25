@@ -32,7 +32,7 @@ func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename st
 	defer inputFile.Close()
 
 	hash := getFileHash(filename)
-	count := getFileCount(filename, msgLimit, headSize)
+	count := getChunksCount(filename, msgLimit, headSize)
 
 	buf := make([]byte, msgLimit-headSize)
 	for i := 0; ; i++ {
