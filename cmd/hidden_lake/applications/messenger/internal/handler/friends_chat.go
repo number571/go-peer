@@ -10,10 +10,10 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
-	hlm_request "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
-	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -192,7 +192,7 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 
 func sendMessage(
 	pCfg config.IConfig,
-	pClient client.IClient,
+	pClient hls_client.IClient,
 	pMyPubKey asymmetric.IPubKey,
 	pDB database.IKVDatabase,
 	pAliasName string,
@@ -212,18 +212,14 @@ func sendMessage(
 		return err
 	}
 
-	return pClient.BroadcastRequest(
-		pAliasName,
-		hlm_request.NewPushRequest(
-			pMyPubKey,
-			requestID,
-			pCfg.GetPseudonym(),
-			pMsgBytes,
-		),
+	hlmClient := hlm_client.NewClient(
+		hlm_client.NewBuilder(),
+		hlm_client.NewRequester(pClient),
 	)
+	return hlmClient.PushMessage(pAliasName, pCfg.GetPseudonym(), requestID, pMsgBytes)
 }
 
-func getReceiverPubKey(client client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {
+func getReceiverPubKey(client hls_client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {
 	friends, err := client.GetFriends()
 	if err != nil {
 		return nil, fmt.Errorf("error: read friends: %w", err)

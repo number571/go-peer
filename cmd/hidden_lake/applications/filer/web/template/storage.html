@@ -1,0 +1,91 @@
+{{define "title"}}
+
+{{if (eq .FLanguage 0)}}
+Storage
+{{else if (eq .FLanguage 1)}}
+Хранилище
+{{else if (eq .FLanguage 2)}}
+Stokado
+{{end}}
+
+{{end}}
+
+{{define "header"}}
+{{end}}
+
+{{define "main"}}
+<style>
+    .ellipsis {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Storage
+            {{else if (eq .FLanguage 1)}}
+            Хранилище
+            {{else if (eq .FLanguage 2)}}
+            Stokado
+            {{end}}
+        </h5>
+        <div class="card-body">
+            {{$page:=.FPage}}
+            {{$alias_name:=.FAliasName}}
+            {{if .FName}}
+            <div class="mb-3 w-100" class="row">
+                {{if (eq .FLanguage 0)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">File
+                    {{.FName}} was downloaded successfully</button>
+                {{else if (eq .FLanguage 1)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">Файл
+                    {{.FName}} был успешно загружен</button>
+                {{else if (eq .FLanguage 2)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">La
+                    {{.FName}} dosiero estis alŝutita sukcese</button>
+                {{end}}
+            </div>
+            <div class="mb-3 w-100" class="row">
+                {{if (eq .FLanguage 0)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">File
+                    {{.FName}} was downloaded successfully</button>
+                {{else if (eq .FLanguage 1)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">Файл
+                    {{.FName}} был успешно загружен</button>
+                {{else if (eq .FLanguage 2)}}
+                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">La
+                    {{.FName}} dosiero estis alŝutita sukcese</button>
+                {{end}}
+            </div>
+            {{end}}
+            {{range .FFilesList}}
+            <form class="mb-3" method="POST" action="/friends/storage?alias_name={{$alias_name}}&page={{$page}}">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="POST">
+                <input hidden type="text" name="file_name" value="{{.FName}}">
+                <input hidden type="text" name="file_hash" value="{{.FHash}}">
+                <input hidden type="text" name="file_size" value="{{.FSize}}">
+                <div class="row">
+                    <div class="col-md-5 w-50">
+                        <button disabled type="button" class="ellipsis w-100 btn btn-secondary"
+                        style="overflow: hidden;">{{.FName}}</button>
+                    </div>
+                    <div class="col-md-3 w-25">
+                        <button disabled type="button" class="ellipsis w-100 btn btn-secondary"
+                        style="overflow: hidden;">{{.FSize}}B</button>
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
+            {{end}}
+            <!-- ... -->
+        </div>
+    </div>
+</div>
+{{end}}

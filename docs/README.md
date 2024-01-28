@@ -37,7 +37,8 @@ Also, the composition of these works can be found in the book [The general theor
 3. HLM  = 959x
 4. HLL  = 956x
 5. HLE  = 955x
-6. HL_T = 950x
+6. HLF  = 954x
+7. HL_T = 950x
 
 ## Code style go-peer
 

@@ -18,7 +18,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/utils"
 
-	hlm_request "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/request"
+	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -129,6 +129,11 @@ func shareMessage(
 ) error {
 	hlsClient := getClient(pCfg)
 
+	hlmClient := hlm_client.NewClient(
+		hlm_client.NewBuilder(),
+		hlm_client.NewRequester(hlsClient),
+	)
+
 	friends, err := hlsClient.GetFriends()
 	if err != nil {
 		return err
@@ -151,10 +156,7 @@ func shareMessage(
 				return
 			}
 
-			errList[i] = hlsClient.BroadcastRequest(
-				aliasName,
-				hlm_request.NewPushRequest(pSender, pRequestID, senderPseudonym, pBody),
-			)
+			errList[i] = hlmClient.PushMessage(aliasName, senderPseudonym, pRequestID, pBody)
 		}(i, aliasName, pubKey)
 		i++
 	}

@@ -8,6 +8,10 @@
 6. Append errors (as traffic/database) for all interface methods
 7. Append Batch's to database
 8. Try add IWriter/IReader interfaces in the Handle functions
+9. Move pkg/client/examples/file_encrypt main logic to pkg/client/file
+10. Rename QueueSet -> Cache
+11. HLF, HLM: (interface | incoming) address can be nil
+12. HLS: custom timeout to service
 
 ### Tests
 

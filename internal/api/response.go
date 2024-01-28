@@ -16,7 +16,7 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 
 	switch x := pRes.(type) {
 	case []byte:
-		contentType = cTextPlain
+		contentType = cApplicationOctetStream
 		respBytes = x
 	case string:
 		contentType = cTextPlain

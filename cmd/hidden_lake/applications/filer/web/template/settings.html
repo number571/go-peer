@@ -1,0 +1,224 @@
+{{define "title"}}
+
+{{if (eq .FLanguage 0)}}
+Settings
+{{else if (eq .FLanguage 1)}}
+Настройки
+{{else if (eq .FLanguage 2)}}
+Agordoj
+{{end}}
+
+{{end}}
+
+{{define "header"}}
+{{end}}
+
+{{define "main"}}
+<script type="text/javascript" defer>
+    const copy_pubkey_hash = async () => {
+        let text = "{{.FPublicKeyHash}}";
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    }
+
+    const copy_pubkey = async () => {
+        let text = "{{.FPublicKey}}";
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    }
+
+    function set_info_color(id) {
+        var element = document.getElementById(id);
+        element.className = "btn btn-primary w-100";
+    }
+</script>
+
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Identifier
+            {{else if (eq .FLanguage 1)}}
+            Идентификатор
+            {{else if (eq .FLanguage 2)}}
+            Identigilo
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="PUT">
+                <div class="row">
+                    <div class="col-md-6 w-50">
+                        <button id="button_copy_pubkey_hash" type="button" class="btn btn-info w-100"
+                            onclick="copy_pubkey_hash();set_info_color('button_copy_pubkey_hash');">
+                            {{if (eq .FLanguage 0)}}
+                            Copy hash
+                            {{else if (eq .FLanguage 1)}}
+                            Скопировать хеш
+                            {{else if (eq .FLanguage 2)}}
+                            Kopii haŝiŝo
+                            {{end}}
+                        </button>
+                    </div>
+                    <div class="col-md-6 w-50">
+                        <button id="button_copy_pubkey" type="button" class="btn btn-info w-100"
+                            onclick="copy_pubkey();set_info_color('button_copy_pubkey');">
+                            {{if (eq .FLanguage 0)}}
+                            Copy key
+                            {{else if (eq .FLanguage 1)}}
+                            Скопировать ключ
+                            {{else if (eq .FLanguage 2)}}
+                            Kopii ŝlosilon
+                            {{end}}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Language
+            {{else if (eq .FLanguage 1)}}
+            Язык
+            {{else if (eq .FLanguage 2)}}
+            Lingvo
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="PUT">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        <select class="form-select form-control bg-dark bg-secondary btn btn-light w-100 text-light"
+                            name="language" aria-label="Default select example">
+                            <option {{if (eq .FLanguage 0)}} selected {{end}} value="ENG">English</option>
+                            <option {{if (eq .FLanguage 1)}} selected {{end}} value="RUS">Русский</option>
+                            <option {{if (eq .FLanguage 2)}} selected {{end}} value="ESP">Esperanto</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Network key
+            {{else if (eq .FLanguage 1)}}
+            Ключ сети
+            {{else if (eq .FLanguage 2)}}
+            Reto-ŝlosilo
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="PATCH">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="network_key" placeholder="Network key" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="network_key" placeholder="Ключ сети" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="text" name="network_key" placeholder="Reto-ŝlosilo" value="{{.FNetworkKey}}"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card mb-3 bg-dark">
+        <h5 class="card-header text-white bg-secondary p-2">
+            {{if (eq .FLanguage 0)}}
+            Connections
+            {{else if (eq .FLanguage 1)}}
+            Соединения
+            {{else if (eq .FLanguage 2)}}
+            Ligoj
+            {{end}}
+        </h5>
+        <div class="card-body">
+            <form method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="POST">
+                <div class="row mb-3">
+                    <div class="col-md-5 w-50">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="host" placeholder="Host"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="host" placeholder="Хост"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="text" name="host" placeholder="Posedanto"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
+                    </div>
+                    <div class="col-md-3 w-25">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="text" name="port" placeholder="Port"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="text" name="port" placeholder="Порт"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="text" name="port" placeholder="Haveno"
+                            class="text-center form-control bg-dark text-white w-100">
+                        {{end}}
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="is_node" value="◀" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
+            {{range .FConnections}}
+            <form class="mb-3" method="POST" action="/settings">
+                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
+                <input hidden name="method" value="DELETE">
+                <div class="row">
+                    <div class="col-md-8 w-75">
+                        <input hidden type="text" name="address" value="{{.FAddress}}"
+                            class="text-center form-control w-100">
+                        {{if .FOnline}}
+                        <input hidden name="is_node" value="true">
+                        <button disabled type="button" class="btn btn-info w-100"
+                            style="overflow: hidden;">{{.FAddress}}</button>
+                        {{else}}
+                        <input hidden name="is_node" value="true">
+                        <button disabled type="button" class="btn btn-secondary w-100"
+                            style="overflow: hidden;">{{.FAddress}}</button>
+                        {{end}}
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="✖" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
+            {{end}}
+            <!-- ... -->
+        </div>
+    </div>
+</div>
+{{end}}

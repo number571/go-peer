@@ -1,0 +1,9 @@
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: 127.0.0.1:9541
+  incoming: 127.0.0.1:9542
+connection: 127.0.0.1:9572

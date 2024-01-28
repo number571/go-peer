@@ -103,7 +103,8 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 func (p *SConfig) isValid() bool {
 	return true &&
 		utils.PseudonymIsValid(p.FPseudonym) &&
-		p.FSettings.FMessagesCapacity != 0
+		p.FSettings.FMessagesCapacity != 0 &&
+		p.FConnection != ""
 }
 
 func (p *SConfig) initConfig() error {

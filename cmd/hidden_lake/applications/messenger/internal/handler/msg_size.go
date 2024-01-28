@@ -22,7 +22,7 @@ func getMessageLimit(pHlsClient client.IClient) (uint64, error) {
 	gMutex.Lock()
 	defer gMutex.Unlock()
 
-	sett, err := pHlsClient.GetSettings()
+	sett, err := pHlsClient.GetSettings() // TODO: append to settings GetMessageLimit result
 	if err != nil {
 		return 0, fmt.Errorf("get settings from HLS (message size): %w", err)
 	}

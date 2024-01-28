@@ -11,7 +11,7 @@ JSON_DATA='{
 }';
 
 JSON_DATA=${JSON_DATA//\"/\\\"} # "method" -> \"method\", ...
-JSON_DATA=${JSON_DATA//[$'\t\r\n ']} # delete \t \r \n ' ' from string
+JSON_DATA=${JSON_DATA//[$'\t\r\n ']} # delete ['\t', '\r', '\n', ' '] from string
 
 PUSH_FORMAT='{
         "receiver":"Bob",

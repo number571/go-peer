@@ -1,0 +1,9 @@
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: 127.0.0.1:8080
+  incoming: 127.0.0.1:8081
+connection: 127.0.0.1:8572
