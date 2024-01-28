@@ -22,10 +22,9 @@
 ### Applications
 
 1. HLFR: Hidden Lake Forum
-2. HLFL: Hidden Lake Filer
-3. HLN: Hidden Lake Network
-4. HLP: Hidden Lake Publisher
-5. HLSH: Hidden Lake Shell 
+2. HLN: Hidden Lake Network
+3. HLP: Hidden Lake Publisher
+4. HLSH: Hidden Lake Shell 
 
 ### Articles -> Book
 

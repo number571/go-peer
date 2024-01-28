@@ -1,12 +1,14 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filer/pkg/settings"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_request "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -35,6 +37,11 @@ func (p *sRequester) GetListFiles(pAliasName string, pRequest hls_request.IReque
 	list := make([]hlf_settings.SFileInfo, 0, hlf_settings.CPageOffset)
 	if err := encoding.DeserializeJSON(resp.GetBody(), &list); err != nil {
 		return nil, err // TODO: create errors
+	}
+	for _, info := range list {
+		if len(encoding.HexDecode(info.FHash)) != hashing.CSHA256Size {
+			return nil, errors.New("got invalid hash value")
+		}
 	}
 	return list, nil
 }

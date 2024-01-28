@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/utils"
@@ -15,6 +14,8 @@ import (
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filer/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/web"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 )
 
@@ -60,7 +61,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 			}
 
 			fileHash := pR.FormValue("file_hash")
-			if fileHash == "" {
+			if fileHash == "" || len(encoding.HexDecode(fileHash)) != hashing.CSHA256Size {
 				ErrorPage(pLogger, pCfg, "file_hash_error", "incorrect file hash")(pW, pR)
 				return
 			}
@@ -77,24 +78,38 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 				return
 			}
 
-			baseFileName := getUniqFileName(pPathTo, fileName)
-			tempFileName := baseFileName + ".tmp"
+			baseFileName := fmt.Sprintf(
+				"%s/%s/%s_%s",
+				pPathTo,
+				hlf_settings.CPathLoadedSTG,
+				fileHash[:16],
+				fileName,
+			)
 
-			file, err := os.Create(tempFileName)
-			if err != nil {
-				ErrorPage(pLogger, pCfg, "create_file_error", "failed to create file")(pW, pR)
+			tmpFileName := baseFileName + ".tmp"
+			if _, err := os.Stat(baseFileName); !os.IsNotExist(err) {
+				ErrorPage(pLogger, pCfg, "file_already_exist", "file already loaded")(pW, pR)
 				return
 			}
-			defer func() {
-				file.Close()
-				os.Remove(tempFileName)
-			}()
 
-			gotSize := 0
+			startChunk := uint64(0)
+			tmpStat, err := os.Stat(tmpFileName)
+			if !os.IsNotExist(err) {
+				startChunk = utils.GetChunksCount(uint64(tmpStat.Size()), uint64(chunkSize))
+			}
+
+			tmpFile, err := os.OpenFile(tmpFileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+			if err != nil {
+				ErrorPage(pLogger, pCfg, "open_temp_file_error", "failed to open temp file")(pW, pR)
+				return
+			}
+			defer tmpFile.Close()
+
+			gotSize := (startChunk * chunkSize)
 			retryNum := 3
 
 			chunksCount := utils.GetChunksCount(uint64(fileSize), chunkSize)
-			for i := uint64(0); i < chunksCount; i++ {
+			for i := uint64(startChunk); i < chunksCount; i++ {
 				for j := 1; j <= retryNum; j++ {
 					chunk, err := hlfClient.LoadFileChunk(aliasName, fileName, i)
 					if err != nil {
@@ -104,7 +119,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 						}
 						continue
 					}
-					n, err := file.Write(chunk)
+					n, err := tmpFile.Write(chunk)
 					if err != nil {
 						ErrorPage(pLogger, pCfg, "write_to_file", "failed write to file")(pW, pR)
 						return
@@ -113,23 +128,25 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 						ErrorPage(pLogger, pCfg, "invalid_chunk_size", "got invalid chunk size")(pW, pR)
 						return
 					}
-					gotSize += n
+					gotSize += uint64(n)
 					break
 				}
 			}
 
-			if gotSize != fileSize {
+			defer os.Remove(tmpFileName)
+
+			if gotSize != uint64(fileSize) {
 				ErrorPage(pLogger, pCfg, "size_file", "invalid size file")(pW, pR)
 				return
 			}
 
-			if getFileHash(tempFileName) != fileHash {
+			if getFileHash(tmpFileName) != fileHash {
 				ErrorPage(pLogger, pCfg, "hash_file", "invalid hash file")(pW, pR)
 				return
 			}
 
 			// baseFile <- tempFile
-			if err := copyFile(baseFileName, tempFileName); err != nil {
+			if err := copyFile(baseFileName, tmpFileName); err != nil {
 				ErrorPage(pLogger, pCfg, "copy_file", "failed copy file")(pW, pR)
 				return
 			}
@@ -166,20 +183,6 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		t.Execute(pW, result)
 	}
-}
-
-func getUniqFileName(pPathTo, pFileName string) string {
-	origName := fmt.Sprintf("%s/%s/%s", pPathTo, hlf_settings.CPathLoadedSTG, pFileName)
-	if _, err := os.Stat(origName); os.IsNotExist(err) {
-		return origName
-	}
-	return fmt.Sprintf(
-		"%s/%s/%s_%s",
-		pPathTo,
-		hlf_settings.CPathLoadedSTG,
-		time.Now().Format("20060102150405"),
-		pFileName,
-	)
 }
 
 func copyFile(dst, src string) error {
