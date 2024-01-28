@@ -39,25 +39,13 @@ Stokado
             {{if .FName}}
             <div class="mb-3 w-100" class="row">
                 {{if (eq .FLanguage 0)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">File
+                <button disabled type="button" class="btn btn-primary w-100" style="overflow: hidden;">File
                     {{.FName}} was downloaded successfully</button>
                 {{else if (eq .FLanguage 1)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">Файл
+                <button disabled type="button" class="btn btn-primary w-100" style="overflow: hidden;">Файл
                     {{.FName}} был успешно загружен</button>
                 {{else if (eq .FLanguage 2)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">La
-                    {{.FName}} dosiero estis alŝutita sukcese</button>
-                {{end}}
-            </div>
-            <div class="mb-3 w-100" class="row">
-                {{if (eq .FLanguage 0)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">File
-                    {{.FName}} was downloaded successfully</button>
-                {{else if (eq .FLanguage 1)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">Файл
-                    {{.FName}} был успешно загружен</button>
-                {{else if (eq .FLanguage 2)}}
-                <button disabled type="button" class="btn btn-info w-100" style="overflow: hidden;">La
+                <button disabled type="button" class="btn btn-primary w-100" style="overflow: hidden;">La
                     {{.FName}} dosiero estis alŝutita sukcese</button>
                 {{end}}
             </div>

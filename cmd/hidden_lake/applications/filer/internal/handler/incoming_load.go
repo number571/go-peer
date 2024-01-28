@@ -3,13 +3,13 @@ package handler
 import (
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -60,8 +60,14 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			return
 		}
 
-		size := stat.Size()
-		chunks := uint64(math.Ceil(float64(size) / hlf_settings.CChunkSize))
+		chunkSize, err := getMessageLimit(getClient(pCfg))
+		if err != nil {
+			pLogger.PushWarn(logBuilder.WithMessage("get_chunk_size"))
+			api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")
+			return
+		}
+
+		chunks := utils.GetChunksCount(uint64(stat.Size()), chunkSize)
 		if uint64(chunk) >= chunks {
 			pLogger.PushWarn(logBuilder.WithMessage("chunk_number"))
 			api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
@@ -76,9 +82,9 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 		}
 		defer file.Close()
 
-		buf := make([]byte, hlf_settings.CChunkSize)
+		buf := make([]byte, chunkSize)
+		chunkOffset := int64(chunk) * int64(chunkSize)
 
-		chunkOffset := int64(chunk) * hlf_settings.CChunkSize
 		nS, err := file.Seek(chunkOffset, io.SeekStart)
 		if err != nil || nS != chunkOffset {
 			pLogger.PushWarn(logBuilder.WithMessage("seek_file"))
@@ -87,7 +93,7 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 		}
 
 		nR, err := file.Read(buf)
-		if err != nil || (uint64(chunk) != chunks-1 && nR != hlf_settings.CChunkSize) {
+		if err != nil || (uint64(chunk) != chunks-1 && uint64(nR) != chunkSize) {
 			pLogger.PushWarn(logBuilder.WithMessage("chunk_number"))
 			api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
 			return

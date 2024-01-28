@@ -1,7 +1,7 @@
 package api
 
 const (
-	cTextPlain              = "text/plain"
-	cApplicationJSON        = "application/json"
-	cApplicationOctetStream = "application/octet-stream"
+	CTextPlain              = "text/plain"
+	CApplicationJSON        = "application/json"
+	CApplicationOctetStream = "application/octet-stream"
 )

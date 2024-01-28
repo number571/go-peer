@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/internal/utils"
 	hlf_client "github.com/number571/go-peer/cmd/hidden_lake/applications/filer/pkg/client"
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filer/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filer/web"
@@ -71,6 +71,12 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 				return
 			}
 
+			chunkSize, err := getMessageLimit(hlsClient)
+			if err != nil {
+				ErrorPage(pLogger, pCfg, "get_chunk_size", "failed get chunk size")(pW, pR)
+				return
+			}
+
 			baseFileName := getUniqFileName(pPathTo, fileName)
 			tempFileName := baseFileName + ".tmp"
 
@@ -87,7 +93,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 			gotSize := 0
 			retryNum := 3
 
-			chunksCount := uint64(math.Ceil(float64(fileSize) / hlf_settings.CChunkSize))
+			chunksCount := utils.GetChunksCount(uint64(fileSize), chunkSize)
 			for i := uint64(0); i < chunksCount; i++ {
 				for j := 1; j <= retryNum; j++ {
 					chunk, err := hlfClient.LoadFileChunk(aliasName, fileName, i)
@@ -103,7 +109,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 						ErrorPage(pLogger, pCfg, "write_to_file", "failed write to file")(pW, pR)
 						return
 					}
-					if i != chunksCount-1 && n != hlf_settings.CChunkSize {
+					if i != chunksCount-1 && uint64(n) != chunkSize {
 						ErrorPage(pLogger, pCfg, "invalid_chunk_size", "got invalid chunk size")(pW, pR)
 						return
 					}

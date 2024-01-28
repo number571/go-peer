@@ -17,13 +17,13 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]b
 
 	switch x := pData.(type) {
 	case []byte:
-		contentType = cTextPlain
+		contentType = CTextPlain
 		reqBytes = x
 	case string:
-		contentType = cTextPlain
+		contentType = CTextPlain
 		reqBytes = []byte(x)
 	default:
-		contentType = cApplicationJSON
+		contentType = CApplicationJSON
 		reqBytes = encoding.SerializeJSON(x)
 	}
 

@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `pkg/client/examples`: append new example 'file_encrypt'
+- Update `cmd/hidden_lake`: append new service HLF (Filer)
 
 ### CHANGES
 

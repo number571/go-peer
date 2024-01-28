@@ -120,10 +120,11 @@ func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asym
 		return nil, nil, cErrorGetFriends
 	}
 
-	_, err := request.LoadRequest(pRequest.FReqData)
+	reqData := []byte(pRequest.FReqData)
+	_, err := request.LoadRequest(reqData)
 	if err != nil {
 		return nil, nil, cErrorLoadRequest
 	}
 
-	return pubKey, []byte(pRequest.FReqData), cErrorNone
+	return pubKey, reqData, cErrorNone
 }

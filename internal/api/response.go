@@ -16,13 +16,13 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 
 	switch x := pRes.(type) {
 	case []byte:
-		contentType = cApplicationOctetStream
+		contentType = CApplicationOctetStream
 		respBytes = x
 	case string:
-		contentType = cTextPlain
+		contentType = CTextPlain
 		respBytes = []byte(x)
 	default:
-		contentType = cApplicationJSON
+		contentType = CApplicationJSON
 		respBytes = encoding.SerializeJSON(x)
 	}
 
