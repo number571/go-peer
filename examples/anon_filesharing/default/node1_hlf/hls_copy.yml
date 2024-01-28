@@ -11,7 +11,7 @@ logging:
 address:
   http: localhost:8572
 services:
-  hidden-lake-filer: 
+  hidden-lake-filesharer: 
     host: localhost:8081
 connections:
 - localhost:7571

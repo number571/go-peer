@@ -10,7 +10,7 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/applications/filer
+	make build -C $(CMDPATH)/hidden_lake/applications/filesharer
 	make build -C $(CMDPATH)/hidden_lake/service
 	# COPY HLF PROGRAM
 	cp $(BINPATH)/hlf ./node2_hlf/prog_hlf2

@@ -1,0 +1,228 @@
+{{define "title"}}
+
+{{if (eq .FLanguage 0)}}
+About
+{{else if (eq .FLanguage 1)}}
+О проекте
+{{else if (eq .FLanguage 2)}}
+Pri la projekto
+{{end}}
+
+{{end}}
+
+{{define "header"}}
+{{end}}
+
+{{define "main"}}
+<div class="my-lg-4 p-3 col-md-10 mx-auto text-center">
+    <h1 class="col-md-10 mb-3 mx-auto h3 text-white">Hidden Lake Filesharer</h1>
+    <div class="card mb-3 bg-dark">
+        <ul class="nav nav-pills bg-secondary mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link rounded-0 bg-secondary text-white" id="pills-project-tab" data-toggle="pill"
+                    href="#pills-project" role="tab" aria-controls="pills-project" aria-selected="true">
+                    {{if (eq .FLanguage 0)}}
+                    Project
+                    {{else if (eq .FLanguage 1)}}
+                    Проект
+                    {{else if (eq .FLanguage 2)}}
+                    Projekto
+                    {{end}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-0 bg-secondary text-white" id="pills-theory-tab" data-toggle="pill"
+                    href="#pills-theory" role="tab" aria-controls="pills-theory" aria-selected="false">
+                    {{if (eq .FLanguage 0)}}
+                    Theory
+                    {{else if (eq .FLanguage 1)}}
+                    Теория
+                    {{else if (eq .FLanguage 2)}}
+                    Teorio
+                    {{end}}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-0 bg-secondary text-white" id="pills-source-tab" data-toggle="pill"
+                    href="#pills-source" role="tab" aria-controls="pills-source" aria-selected="false">
+                    {{if (eq .FLanguage 0)}}
+                    Source
+                    {{else if (eq .FLanguage 1)}}
+                    Исходные коды
+                    {{else if (eq .FLanguage 2)}}
+                    Fontaj kodoj
+                    {{end}}
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="p-3 tab-pane fade show active" id="pills-project" role="tabpanel"
+                aria-labelledby="pills-project-tab">
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    TODO
+                    {{else if (eq .FLanguage 1)}}
+                    TODO
+                    {{else if (eq .FLanguage 2)}}
+                    TODO
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The HLS is the core of an anonymous network with theoretically provable anonymity, built on the
+                    basis of friend-to-friend (F2F) connections. It is based on the "queues" model. In certain
+                    implementations, it may exhibit the property of "abstractness".
+                    {{else if (eq .FLanguage 1)}}
+                    HLS - это ядро анонимной сети с теоретически доказуемой анонимностью, построенной на
+                    основе соединений "друг с другом" (F2F). Ядро основано на модели "очередей". В определенных
+                    реализациях ядро HLS может обладать свойством "абстрактности".
+                    {{else if (eq .FLanguage 2)}}
+                    HLS estas la kerno de anonima reto kun teorie pruvebla anonimeco, konstruita sur
+                    la bazo de ligoj "unu kun la alia" (F2F). La kerno estas bazita sur "vico" modelo. En certaj kazoj
+                    En efektivigoj, LA hls-kerno povas havi la posedaĵon de "abstrakteco".
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The HLT is an application that emulates itself as a HLS for receiving messages from the network. It
+                    stores downloaded messages in its database for subsequent issuance. The database works as a ring
+                    structure in which old messages are overwritten with new ones. HLT can also work in
+                    relayer mode.
+                    {{else if (eq .FLanguage 1)}}
+                    HLT - это приложение, которое эмулирует себя как HLS для получения сообщений из сети. HLT
+                    сохраняет загруженные сообщения в своей базе данных для последующей выдачи. База данных работает как
+                    структура кольцо, в которой старые сообщения перезаписываются новыми. HLT может работать также в
+                    режиме ретранслятора.
+                    {{else if (eq .FLanguage 2)}}
+                    HLT estas apliko kiu kopias sin kiel hls por ricevi mesaĝojn de la reto. HLT
+                    konservas la elŝutitajn mesaĝojn en sia datumbazo por posta liberigo. La datumbazo funkcias kiel
+                    ringa strukturo en kiu malnovaj mesaĝoj estas superskribitaj per novaj. HLT ankaŭ povas funkcii en
+                    ripetila reĝimo.
+                    {{end}}
+                </p>
+            </div>
+            <div class="p-3 tab-pane fade" id="pills-theory" role="tabpanel" aria-labelledby="pills-theory-tab">
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The theory of the structure of hidden systems is a scientific and theoretical article describing the
+                    development of anonymous communications and secure applications. The analysis is based on a
+                    dialectical approach that allows us to consider the patterns of development through the sum of
+                    accumulated contradictions.
+                    {{else if (eq .FLanguage 1)}}
+                    Теория строения скрытых систем - это научно-теоретические статья, описывающая
+                    разработку анонимных коммуникаций и защищенных приложений. Анализ основан на
+                    диалектическом подходе, позволяющем рассматривать закономерности развития через сумму
+                    накопленных противоречий.
+                    {{else if (eq .FLanguage 2)}}
+                    La teorio de la strukturo de kaŝitaj sistemoj estas scienca kaj teoria artikolo priskribanta
+                    evoluo de anonimaj komunikadoj kaj sekuraj aplikoj. La analizo baziĝas sur
+                    dialektika aliro kiu permesas al ni konsideri la padronojn de evoluo tra la sumo
+                    akumulitaj kontraŭdiroj.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Theory of the structure of hidden systems:
+                    {{else if (eq .FLanguage 1)}}
+                    Теория строения скрытых систем:
+                    {{else if (eq .FLanguage 2)}}
+                    Teorio de la strukturo de kaŝitaj sistemoj:
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf"
+                        class="text-info">theory_of_the_structure_of_hidden_systems.pdf</a>;
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Monolithic cryptographic protocol is a scientific and analytical article describing the analysis
+                    a cryptographic protocol applicable in anonymous networks and secure client applications with
+                    subsequent implementation in the Go programming language.
+                    {{else if (eq .FLanguage 1)}}
+                    Монолитный криптографический протокол - это научно-аналитическая статья, описывающая анализ
+                    криптографического протокола, применимого в анонимных сетях и клиент-безопасных приложениях с
+                    последующей реализацией на языке программирования Go.
+                    {{else if (eq .FLanguage 2)}}
+                    Monolita kriptografia protokolo estas scienca kaj analiza artikolo priskribanta la analizon
+                    kriptografia protokolo uzebla en anonimaj retoj kaj klient-sekuraj aplikoj kun
+                    posta efektivigo en la programlingvo go.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Monolithic cryptographic protocol:
+                    {{else if (eq .FLanguage 1)}}
+                    Монолитный криптографический протокол:
+                    {{else if (eq .FLanguage 2)}}
+                    Monolita Kriptografia Protokolo:
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf"
+                        class="text-info">monolithic_cryptographic_protocol.pdf</a>;
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Abstract Anonymous Networks is a scientific and analytical article describing
+                    analysis of theoretically provable anonymous networks with unique characteristics of immunity to
+                    the level of centralization and the number of nodes in the network.
+                    {{else if (eq .FLanguage 1)}}
+                    Абстрактные анонимные сети - это научно-аналитическая статья, описывающая
+                    анализ теоретически доказуемых анонимных сетей с уникальными характеристиками невосприимчивости к
+                    уровню централизации и количеству узлов в сети.
+                    {{else if (eq .FLanguage 2)}}
+                    Abstraktaj anonimaj Retoj estas scienca kaj analiza artikolo priskribanta
+                    analizo de teorie pruveblaj anonimaj retoj kun unikaj karakterizaĵoj de imuneco al
+                    la nivelo de centraligo kaj la nombro de nodoj en la reto.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Abstract anonymous networks:
+                    {{else if (eq .FLanguage 1)}}
+                    Абстрактные анонимные сети:
+                    {{else if (eq .FLanguage 2)}}
+                    Abstraktaj anonimaj retoj:
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf"
+                        class="text-info">abstract_anonymous_networks.pdf</a>;
+                </p>
+            </div>
+            <div class="p-3 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    All HL (Hidden Lake) type applications are located in the cmd directory of the go-peer
+                    project/library.
+                    The go-peer library provides packages in the Go programming language for implementing secure and
+                    anonymous decentralized networks and applications.
+                    {{else if (eq .FLanguage 1)}}
+                    Все приложения типа HL (Hidden Lake) находятся в директории cmd проекта/библиотеки go-peer.
+                    Библиотека go-peer представляет пакеты на языке программирования Go для реализации безопасных и
+                    анонимных децентрализованный сетей и приложений.
+                    {{else if (eq .FLanguage 2)}}
+                    Ĉiuj HL (Hidden Lake) tipo aplikoj situas en la cmd adresaro de la go-peer projekto/biblioteko.
+                    La go-peer biblioteko disponigas pakaĵojn en La go programlingvo por efektivigi secure kaj
+                    anonimaj malcentralizitaj retoj kaj aplikoj.
+                    {{end}}
+                </p>
+                <ol>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service"
+                                class="text-info">Hidden Lake Service</a>;
+                        </p>
+                    </li>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer"
+                                class="text-info">Hidden Lake Filesharer</a>;
+                        </p>
+                    </li>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic"
+                                class="text-info">Hidden Lake Traffic</a>;
+                        </p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
