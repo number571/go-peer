@@ -428,7 +428,6 @@ $ make
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger/_images "Path to HLM images")
 
-
 ## 3. Hidden Lake Filesharer
 
 > [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer "HLF");
@@ -469,7 +468,7 @@ $ make run # run ./bin/hlf
 
 Open ports `9541` (HTTP, interface) and `9542` (HTTP, incoming).
 Creates `./hlf.yml` or `./_mounted/hlf.yml` file (docker) and `./hlf.stg` or `./_mounted/hlf.stg` (docker) directory.
-The directory `hlm.stg` stores all shared/loaded files. 
+The directory `hlf.stg` stores all shared/loaded files. 
 
 Default config `hlf.yml`
 
@@ -505,7 +504,7 @@ The example will involve (as well as in HLS) two nodes `node1_hlf and node2_hlf`
 
 Build and run nodes
 ```bash
-$ cd examples/anon_filesharing
+$ cd examples/anon_filesharing/default
 $ make
 ```
 
@@ -514,7 +513,7 @@ Than open browser on `localhost:8080`. It is a `node1_hlf`. This node is a Alice
 <p align="center"><img src="cmd/hidden_lake/applications/filesharer/_images/hlf_about.png" alt="hlf_about.png"/></p>
 <p align="center">Figure 10. Home page of the HLF application.</p>
 
-To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Bob.
+To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlf`. This node will be Bob.
 
 > More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
 
