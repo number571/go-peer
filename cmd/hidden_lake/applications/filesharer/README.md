@@ -96,4 +96,4 @@ Than open browser on `localhost:8080`. It is a `node1_hlf`. This node is a Alice
 
 To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Bob.
 
-> More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
+> More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")

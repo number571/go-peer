@@ -118,11 +118,11 @@ Also, the composition of these works can be found in the book `The general theor
 
 1. [Hidden Lake Service](#1-hidden-lake-service) 
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
-3. [Hidden Lake Filesharer](#2-hidden-lake-filesharer) 
-4. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
-5. [Hidden Lake Loader](#4-hidden-lake-loader) 
-6. [Hidden Lake Encryptor](#5-hidden-lake-encryptor) 
-7. [Hidden Lake Adapters](#6-hidden-lake-adapters) 
+3. [Hidden Lake Filesharer](#3-hidden-lake-filesharer) 
+4. [Hidden Lake Traffic](#4-hidden-lake-traffic) 
+5. [Hidden Lake Loader](#5-hidden-lake-loader) 
+6. [Hidden Lake Encryptor](#6-hidden-lake-encryptor) 
+7. [Hidden Lake Adapters](#7-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
@@ -516,7 +516,7 @@ Than open browser on `localhost:8080`. It is a `node1_hlf`. This node is a Alice
 
 To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Bob.
 
-> More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
+> More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
 
 ## 4. Hidden Lake Traffic
 
