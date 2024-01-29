@@ -1,0 +1,9 @@
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: 127.0.0.1:7070
+  incoming: 127.0.0.1:7071
+connection: 127.0.0.1:7572
