@@ -12,18 +12,13 @@ const (
 )
 
 const (
-	CPageOffset = 10
-	CChunkSize  = 3000 // bytes
-)
-
-// TODO: delete
-// 4752 = message limit
-// 4105 = response size (3000 bytes = 4000 base64 bytes)
-// 105 = header bytes
-
-const (
 	CDefaultInterfaceAddress = "127.0.0.1:9541"
 	CDefaultIncomingAddress  = "127.0.0.1:9542"
+)
+
+const (
+	CDefaultRetryNum   = 2
+	CDefaultPageOffset = 10
 )
 
 const (

@@ -118,10 +118,11 @@ Also, the composition of these works can be found in the book `The general theor
 
 1. [Hidden Lake Service](#1-hidden-lake-service) 
 2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
-3. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
-4. [Hidden Lake Loader](#4-hidden-lake-loader) 
-5. [Hidden Lake Encryptor](#5-hidden-lake-encryptor) 
-6. [Hidden Lake Adapters](#6-hidden-lake-adapters) 
+3. [Hidden Lake Filesharer](#2-hidden-lake-filesharer) 
+4. [Hidden Lake Traffic](#3-hidden-lake-traffic) 
+5. [Hidden Lake Loader](#4-hidden-lake-loader) 
+6. [Hidden Lake Encryptor](#5-hidden-lake-encryptor) 
+7. [Hidden Lake Adapters](#6-hidden-lake-adapters) 
 
 ## 1. Hidden Lake Service
 
@@ -427,7 +428,97 @@ $ make
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger/_images "Path to HLM images")
 
-## 3. Hidden Lake Traffic
+
+## 3. Hidden Lake Filesharer
+
+> [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer "HLF");
+
+<img src="cmd/hidden_lake/applications/filesharer/_images/hlf_logo.png" alt="hlf_logo.png"/>
+
+The `Hidden Lake Filesharer` is a file sharing service based on the Anonymous Network Core (HLS) with theoretically provable anonymity. A feature of this file sharing service is the anonymity of the fact of transactions (file downloads), taking into account the existence of a global observer.
+
+HLF is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com/. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
+
+### How it works
+
+Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
+
+<p align="center"><img src="cmd/hidden_lake/applications/filesharer/_images/hlf_download.gif" alt="hlf_download.gif"/></p>
+<p align="center">Figure 9. Example of download file in HLF (x2 speed).</p>
+
+Unlike applications such as HLS, HLT, and HLM, the HLF application does not have a database. Instead, the storage is used, represented by the usual `hlf.stg` directory.
+
+### Supported platforms
+
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
+
+### Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/applications/filesharer
+$ make build # create hlf, hlf_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hlf
+
+> [INFO] 2023/06/03 15:30:31 HLF is running...
+> ...
+```
+
+Open ports `9541` (HTTP, interface) and `9542` (HTTP, incoming).
+Creates `./hlf.yml` or `./_mounted/hlf.yml` file (docker) and `./hlf.stg` or `./_mounted/hlf.stg` (docker) directory.
+The directory `hlm.stg` stores all shared/loaded files. 
+
+Default config `hlf.yml`
+
+```yaml
+settings:
+  retry_num: 2
+  page_offset: 10
+logging:
+- info
+- warn
+- erro
+language: ENG
+address:
+  interface: 127.0.0.1:9541
+  incoming: 127.0.0.1:9542
+connection: 127.0.0.1:9572
+```
+
+Build and run with docker
+
+```bash 
+$ cd ./cmd/hidden_lake/applications/filesharer
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/06/03 08:35:50 HLF is running...
+> ...
+```
+
+### Example
+
+The example will involve (as well as in HLS) two nodes `node1_hlf and node2_hlf`. Both nodes are a combination of HLS and HLF, where HLF plays the role of an application and services (as shown in `Figure 3` of the HLS readme).
+
+Build and run nodes
+```bash
+$ cd examples/anon_filesharing
+$ make
+```
+
+Than open browser on `localhost:8080`. It is a `node1_hlf`. This node is a Alice.
+
+<p align="center"><img src="cmd/hidden_lake/applications/filesharer/_images/hlf_about.png" alt="hlf_about.png"/></p>
+<p align="center">Figure 10. Home page of the HLF application.</p>
+
+To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Bob.
+
+> More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
+
+## 4. Hidden Lake Traffic
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic "HLT");
 
@@ -442,7 +533,7 @@ The `Hidden Lake Traffic` is an application that saves traffic passed through HL
 HLT emulates HLS to receive messages. In this scenario, HLT has only the functions of accepting messages, without the ability to generate or send them via HLS or independently.
 
 <p align="center"><img src="cmd/hidden_lake/helpers/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
-<p align="center">Figure 9. Example of running HLT client.</p>
+<p align="center">Figure 11. Example of running HLT client.</p>
 
 ### Supported platforms
 
@@ -520,7 +611,7 @@ $ go run ./main.go h
 $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
 ```
 
-## 4. Hidden Lake Loader
+## 5. Hidden Lake Loader
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/loader "HLL")
 
@@ -533,7 +624,7 @@ The `Hidden Lake Loader` is a smallest service of the Hidden Lake network applic
 HLL uses the HLT service interface to download and upload messages. This property is necessary to redirect multiple messages to HLT once, and then to HLS services.
 
 <p align="center"><img src="cmd/hidden_lake/helpers/loader/_images/hll_arch.png" alt="hll_arch.png"/></p>
-<p align="center">Figure 10. Architecture of HLL.</p>
+<p align="center">Figure 12. Architecture of HLL.</p>
 
 ### Build and run
 
@@ -581,7 +672,7 @@ $ make docker-run
 In the example, two HLT services are created, where one is a message producer, the other a consumer. First, messages are entered into the manufacturer, then the HLL (message transportation) function is turned on, and at the end, the delivery of all previously entered messages is checked, but already on the consumer's side.
 
 <p align="center"><img src="cmd/hidden_lake/helpers/loader/_images/hll_logger.png" alt="hll_logger.png"/></p>
-<p align="center">Figure 11. Example of running HLL service.</p>
+<p align="center">Figure 13. Example of running HLL service.</p>
 
 Build and run HLT services
 ```bash
@@ -600,7 +691,7 @@ Get valid response
 messages have been successfully transported
 ```
 
-## 5. Hidden Lake Encryptor
+## 6. Hidden Lake Encryptor
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor "HLE")
 
@@ -671,7 +762,7 @@ $ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07
 > hello, world
 ```
 
-## 6. Hidden Lake Adapters
+## 7. Hidden Lake Adapters
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/adapters "HLA")
 
@@ -687,7 +778,7 @@ Adapters in their full execution represent one design template - "Flyweight". Th
 Adapters adapt to the interfaces of the service for reading/writing data and, thanks to this, are able to conduct anonymizing traffic through the service.
 
 <p align="center"><img src="cmd/hidden_lake/helpers/adapters/_images/hla_arch.jpg" alt="hla_arch.jpg"/></p>
-<p align="center">Figure 12. Architecture of HLA.</p>
+<p align="center">Figure 14. Architecture of HLA.</p>
 
 ### Example 
 
@@ -719,7 +810,7 @@ Request took 8 seconds
 There are no external differences, but there are internal ones. While the original model assumed the presence of a middle_hls node through which all traffic was broadcast, there is no such intermediate node in the model based on secret communication channels, there is a service that performs its own logical functions that are in no way tied to traffic anonymization. And, thus, adapters use a third-party service in order to pass traffic through it.
 
 <p align="center"><img src="cmd/hidden_lake/helpers/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
-<p align="center">Figure 13. Example of running HLA client.</p>
+<p align="center">Figure 15. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 

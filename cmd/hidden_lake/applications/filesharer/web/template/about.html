@@ -60,11 +60,20 @@ Pri la projekto
                 aria-labelledby="pills-project-tab">
                 <p class="text-left">
                     {{if (eq .FLanguage 0)}}
-                    TODO
+                    The HLF is a file sharing service based on the Anonymous Network Core (HLS) with theoretically
+                    provable anonymity.
+                    A feature of this file sharing service is the anonymity of the fact of transactions (file
+                    downloads), taking into account the existence of a global observer.
                     {{else if (eq .FLanguage 1)}}
-                    TODO
+                    HLM - это мессенджер, основанный на ядре анонимной сети (HLS) с теоретически доказуемой
+                    анонимностью.
+                    Особенностью данного файлообменника становится анонимность факта совершения транзакций (скачивания
+                    файлов) с учётом существования глобального наблюдателя.
                     {{else if (eq .FLanguage 2)}}
-                    TODO
+                    HLF estas dosierpartumado servo bazita sur La Anonima Reto Kerno (hls) kun teorie pruvebla
+                    anonimeco.
+                    Karakterizaĵo de ĉi tiu dosierpartuma servo estas la anonimeco de la fakto de transakcioj (dosieraj
+                    elŝutoj), konsiderante la ekziston de tutmonda observanto.
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -80,24 +89,6 @@ Pri la projekto
                     HLS estas la kerno de anonima reto kun teorie pruvebla anonimeco, konstruita sur
                     la bazo de ligoj "unu kun la alia" (F2F). La kerno estas bazita sur "vico" modelo. En certaj kazoj
                     En efektivigoj, LA hls-kerno povas havi la posedaĵon de "abstrakteco".
-                    {{end}}
-                </p>
-                <p class="text-left">
-                    {{if (eq .FLanguage 0)}}
-                    The HLT is an application that emulates itself as a HLS for receiving messages from the network. It
-                    stores downloaded messages in its database for subsequent issuance. The database works as a ring
-                    structure in which old messages are overwritten with new ones. HLT can also work in
-                    relayer mode.
-                    {{else if (eq .FLanguage 1)}}
-                    HLT - это приложение, которое эмулирует себя как HLS для получения сообщений из сети. HLT
-                    сохраняет загруженные сообщения в своей базе данных для последующей выдачи. База данных работает как
-                    структура кольцо, в которой старые сообщения перезаписываются новыми. HLT может работать также в
-                    режиме ретранслятора.
-                    {{else if (eq .FLanguage 2)}}
-                    HLT estas apliko kiu kopias sin kiel hls por ricevi mesaĝojn de la reto. HLT
-                    konservas la elŝutitajn mesaĝojn en sia datumbazo por posta liberigo. La datumbazo funkcias kiel
-                    ringa strukturo en kiu malnovaj mesaĝoj estas superskribitaj per novaj. HLT ankaŭ povas funkcii en
-                    ripetila reĝimo.
                     {{end}}
                 </p>
             </div>
@@ -183,6 +174,29 @@ Pri la projekto
                     <a href="https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf"
                         class="text-info">abstract_anonymous_networks.pdf</a>;
                 </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The Decentralized Key Exchange Protocol is a scientific and analytical article describing secure
+                    ways to transfer keys without using trusted certification authorities.
+                    {{else if (eq .FLanguage 1)}}
+                    Децентрализованный протокол обмена ключами - это научно-аналитическая статья, описывающая
+                    безопасные способы передачи ключей без использования доверенных центров сертификации.
+                    {{else if (eq .FLanguage 2)}}
+                    La Protokolo De Malcentra Ŝlosila Interŝanĝo estas scienca kaj analiza artikolo priskribanta sekuraj
+                    manieroj transdoni ŝlosilojn sen uzi fidindajn atestajn aŭtoritatojn.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    Decentralized key exchange protocol:
+                    {{else if (eq .FLanguage 1)}}
+                    Децентрализованный протокол обмена ключами:
+                    {{else if (eq .FLanguage 2)}}
+                    Malcentra ŝlosila interŝanĝa protokolo:
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf"
+                        class="text-info">decentralized_key_exchange_protocol.pdf</a>;
+                </p>
             </div>
             <div class="p-3 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">
                 <p class="text-left">
@@ -210,14 +224,32 @@ Pri la projekto
                     </li>
                     <li>
                         <p class="text-left">
-                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer"
-                                class="text-info">Hidden Lake Filesharer</a>;
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic"
+                                class="text-info">Hidden Lake Traffic</a>;
                         </p>
                     </li>
                     <li>
                         <p class="text-left">
-                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic"
-                                class="text-info">Hidden Lake Traffic</a>;
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor"
+                                class="text-info">Hidden Lake Encryptor</a>;
+                        </p>
+                    </li>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/loader"
+                                class="text-info">Hidden Lake Loader</a>;
+                        </p>
+                    </li>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger"
+                                class="text-info">Hidden Lake Messenger</a>;
+                        </p>
+                    </li>
+                    <li>
+                        <p class="text-left">
+                            <a href="https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer"
+                                class="text-info">Hidden Lake Filesharer</a>;
                         </p>
                     </li>
                 </ol>

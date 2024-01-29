@@ -36,6 +36,26 @@ Stokado
         <div class="card-body">
             {{$page:=.FPage}}
             {{$alias_name:=.FAliasName}}
+            <form method="GET" action="/friends/storage">
+                <input hidden name="alias_name" value="{{$alias_name}}">
+                <div class="row mb-3">
+                    <div class="col-md-8 w-75">
+                        {{if (eq .FLanguage 0)}}
+                        <input type="number" name="page" placeholder="Page" value="{{$page}}"
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                        {{else if (eq .FLanguage 1)}}
+                        <input type="number" name="page" placeholder="Страница" value="{{$page}}"
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                        {{else if (eq .FLanguage 2)}}
+                        <input type="number" name="page" placeholder="Paĝo" value="{{$page}}"
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                        {{end}}
+                    </div>
+                    <div class="col-md-4 w-25">
+                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
+                    </div>
+                </div>
+            </form>
             {{if .FName}}
             <div class="mb-3 w-100" class="row">
                 {{if (eq .FLanguage 0)}}
@@ -63,7 +83,7 @@ Stokado
                         style="overflow: hidden;">{{.FName}}</button>
                     </div>
                     <div class="col-md-3 w-25">
-                        <button disabled type="button" class="ellipsis w-100 btn btn-secondary"
+                        <button disabled type="button" class="w-100 btn btn-secondary"
                         style="overflow: hidden;">{{.FSize}}B</button>
                     </div>
                     <div class="col-md-4 w-25">

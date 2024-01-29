@@ -15,6 +15,10 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	}
 	if initCfg == nil {
 		initCfg = &SConfig{
+			FSettings: &SConfigSettings{
+				FRetryNum:   hlf_settings.CDefaultRetryNum,
+				FPageOffset: hlf_settings.CDefaultPageOffset,
+			},
 			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FLanguage: hlf_settings.CDefaultLanguage,
 			FAddress: &SAddress{

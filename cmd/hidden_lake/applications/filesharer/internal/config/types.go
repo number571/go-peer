@@ -23,7 +23,8 @@ type IConfig interface {
 }
 
 type IConfigSettings interface {
-	GetWorkSizeBits() uint64
+	GetRetryNum() uint64
+	GetPageOffset() uint64
 }
 
 type IAddress interface {

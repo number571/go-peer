@@ -106,11 +106,11 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 			defer tmpFile.Close()
 
 			gotSize := (startChunk * chunkSize)
-			retryNum := 3
+			retryNum := pCfg.GetSettings().GetRetryNum()
 
 			chunksCount := utils.GetChunksCount(uint64(fileSize), chunkSize)
 			for i := uint64(startChunk); i < chunksCount; i++ {
-				for j := 1; j <= retryNum; j++ {
+				for j := uint64(0); j <= retryNum; j++ {
 					chunk, err := hlfClient.LoadFileChunk(aliasName, fileName, i)
 					if err != nil {
 						if j == retryNum {

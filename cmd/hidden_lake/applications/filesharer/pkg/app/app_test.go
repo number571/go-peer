@@ -31,7 +31,7 @@ func TestApp(t *testing.T) {
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
 		FSettings: &config.SConfigSettings{
-			FWorkSizeBits: testutils.TCWorkSize,
+			FPageOffset: 10,
 		},
 		FAddress: &config.SAddress{
 			FInterface: testutils.TgAddrs[57],

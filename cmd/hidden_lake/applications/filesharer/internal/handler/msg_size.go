@@ -36,5 +36,5 @@ func getMessageLimit(pHlsClient hls_client.IClient) (uint64, error) {
 	}
 
 	msgLimitBytes := msgLimitOrig - gRespSize
-	return base64.GetSizeInBase64(msgLimitBytes), nil
+	return base64.GetSizeInBase64(msgLimitBytes)
 }

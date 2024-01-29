@@ -43,7 +43,7 @@ func HandleIncomigListHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			return
 		}
 
-		result, err := getListFileInfo(pCfg, pPathTo, page)
+		result, err := getListFileInfo(pCfg, pPathTo, uint64(page))
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("open storage"))
 			api.Response(pW, http.StatusInternalServerError, "failed: open storage")
@@ -55,18 +55,22 @@ func HandleIncomigListHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 	}
 }
 
-func getListFileInfo(pCfg config.IConfig, pPathTo string, pPage int) ([]hlf_settings.SFileInfo, error) {
+func getListFileInfo(pCfg config.IConfig, pPathTo string, pPage uint64) ([]hlf_settings.SFileInfo, error) {
+	pageOffset := pCfg.GetSettings().GetPageOffset()
+
 	entries, err := os.ReadDir(hlf_settings.CPathSTG)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]hlf_settings.SFileInfo, 0, len(entries))
-	for i := (pPage * hlf_settings.CPageOffset); i < len(entries); i++ {
+	lenEntries := uint64(len(entries))
+
+	result := make([]hlf_settings.SFileInfo, 0, lenEntries)
+	for i := (pPage * pageOffset); i < lenEntries; i++ {
 		e := entries[i]
 		if e.IsDir() {
 			continue
 		}
-		if i != (pPage*hlf_settings.CPageOffset) && i%hlf_settings.CPageOffset == 0 {
+		if i != (pPage*pageOffset) && i%pageOffset == 0 {
 			break
 		}
 		fullPath := fmt.Sprintf("%s/%s/%s", pPathTo, hlf_settings.CPathSTG, e.Name())

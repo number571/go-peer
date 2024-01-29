@@ -18,7 +18,8 @@ var (
 )
 
 type SConfigSettings struct {
-	FWorkSizeBits uint64 `yaml:"work_size_bits,omitempty"`
+	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
+	FPageOffset uint64 `yaml:"page_offset"`
 }
 
 type SConfig struct {
@@ -87,13 +88,20 @@ func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
 }
 
-func (p *SConfigSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
+func (p *SConfigSettings) GetRetryNum() uint64 {
+	return p.FRetryNum
+}
+
+func (p *SConfigSettings) GetPageOffset() uint64 {
+	return p.FPageOffset
 }
 
 func (p *SConfig) isValid() bool {
 	return true &&
-		p.FConnection != ""
+		p.FConnection != "" &&
+		p.FAddress.FInterface != "" &&
+		p.FAddress.FIncoming != "" &&
+		p.FSettings.FPageOffset != 0
 }
 
 func (p *SConfig) initConfig() error {

@@ -15,42 +15,38 @@ const (
 
 const (
 	tcConfigTemplate = `settings:
-  messages_capacity: %d
+  page_offset: %d
+  retry_num: %d
 logging:
   - info
   - erro
 language: RUS
-share: true
-pseudonym: '%s'
 address:
   interface: '%s'
   incoming: '%s'
   pprof: '%s'
-connection: '%s'
-storage_key: '%s'`
+connection: '%s'`
 )
 
 const (
-	tcPseudonym         = "Alice"
 	tcAddressInterface  = "address_interface"
 	tcAddressIncoming   = "address_incoming"
 	tcAddressPPROF      = "address_pprof"
 	tcConnectionService = "connection_service"
-	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
-	tcMessagesCapacity  = 1000
+	tcPageOffset        = 10
+	tcRetryNum          = 2
 )
 
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
-		tcMessagesCapacity,
-		tcPseudonym,
+		tcPageOffset,
+		tcRetryNum,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
 		tcConnectionService,
-		tcStorageKey,
 	)
 }
 
@@ -107,6 +103,16 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetConnection() != tcConnectionService {
 		t.Error("connection.service is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetPageOffset() != tcPageOffset {
+		t.Error("settings.page_offset is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetRetryNum() != tcRetryNum {
+		t.Error("settings.retry_num is invalid")
 		return
 	}
 }
