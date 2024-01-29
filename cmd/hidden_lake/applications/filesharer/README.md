@@ -18,10 +18,12 @@ $ go install github.com/number571/go-peer/cmd/hidden_lake/applications/fileshare
 
 Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
 
+Unlike applications such as HLS, HLT, and HLM, the HLF application does not have a database. Instead, the storage is used, represented by the usual `hlf.stg` directory.
+
 <p align="center"><img src="_images/hlf_download.gif" alt="hlf_download.gif"/></p>
 <p align="center">Figure 1. Example of download file in HLF (x2 speed).</p>
 
-Unlike applications such as HLS, HLT, and HLM, the HLF application does not have a database. Instead, the storage is used, represented by the usual `hlf.stg` directory.
+File transfer is limited by the bandwidth of HLS itself. If we take into account that the packet generation period is `5 seconds`, then it will take about 10 seconds to complete the request-response cycle. HLS also limits the size of transmitted packets. If we assume that the limit is `8KiB`, taking into account the existing ~4KiB headers, then the transfer rate is defined as `4KiB/10s` or `410B/1s`.
 
 ## Supported platforms
 
