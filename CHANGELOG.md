@@ -17,6 +17,8 @@
 - Update `pkg/network/anonymity/logger`: delete GetRecv, WithRecv methods
 - Update `cmd/hidden_lake/*/_daemon`: delete from status timestamp systemd
 - Update `cmd/hidden_lake/applications/messenger`: delete secret_keys, encrypt/decrypt messages
+- Update `cmd/hidden_lake`: rename share -> share_enabled, storage -> storage_enabled
+- Update `cmd/hidden_lake`: move enabled/disabled options to settings block
 
 <!-- ... -->
 

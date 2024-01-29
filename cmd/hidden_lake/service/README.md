@@ -253,6 +253,7 @@ settings:
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
   network_key: hls-network-key
+  f2f_disabled: false
 logging:
   - info
   - warn
@@ -260,7 +261,6 @@ logging:
 address:
   tcp: localhost:9571
   http: localhost:9572
-f2f_disabled: false
 services:
   hidden-default-service:
     host: localhost:8080

@@ -1,10 +1,10 @@
 settings:
   messages_capacity: 2048
+  share_enabled: true
 logging:
 - info
 - warn
 - erro
-share: true
 address:
   interface: localhost:4040
   incoming: localhost:4041

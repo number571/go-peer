@@ -56,6 +56,7 @@ const (
   queue_period_ms: %d
   limit_void_size_bytes: %d
   network_key: %s
+  f2f_disabled: true
 logging:
   - info
   - erro
@@ -63,7 +64,6 @@ address:
   tcp: %s
   http: %s
   pprof: %s
-f2f_disabled: true
 connections:
   - %s
   - %s
@@ -247,6 +247,11 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
+	if !cfg.GetSettings().GetF2FDisabled() {
+		t.Error("settings f2f disabled is invalid")
+		return
+	}
+
 	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
@@ -279,11 +284,6 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetAddress().GetPPROF() != tcAddressPPROF {
 		t.Error("address_pprof is invalid")
-		return
-	}
-
-	if !cfg.GetF2FDisabled() {
-		t.Error("f2f_disabled is invalid")
 		return
 	}
 

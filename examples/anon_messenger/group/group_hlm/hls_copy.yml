@@ -4,11 +4,11 @@ settings:
   key_size_bits: 4096
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
+  f2f_disabled: true
 logging:
   - info
   - warn
   - erro
-f2f_disabled: true
 address:
   http: localhost:4572
 services:

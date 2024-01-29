@@ -36,7 +36,7 @@ func HandleServiceTCP(pMutex *sync.Mutex, pCfgW config.IWrapper, pLogger logger.
 		friends := cfg.GetFriends()
 
 		// append public key to list of friends if f2f option is disabled
-		if cfg.GetF2FDisabled() && !inFriendsList(friends, sender) {
+		if cfg.GetSettings().GetF2FDisabled() && !inFriendsList(friends, sender) {
 			// update config state with new friend
 			friends[sender.GetHasher().ToString()] = sender
 			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {

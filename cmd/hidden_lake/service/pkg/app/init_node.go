@@ -27,7 +27,7 @@ func initNode(pMutex *sync.Mutex, pCfgW config.IWrapper, pPrivKey asymmetric.IPr
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
-			FF2FDisabled:   cfg.GetF2FDisabled(),
+			FF2FDisabled:   cfgSettings.GetF2FDisabled(),
 			FNetworkMask:   pkg_settings.CNetworkMask,
 			FRetryEnqueue:  pkg_settings.CRetryEnqueue,
 			FFetchTimeWait: pkg_settings.CFetchTimeout,

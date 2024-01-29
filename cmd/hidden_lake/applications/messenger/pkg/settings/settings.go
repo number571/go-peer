@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	CDefaultShare            = false
+	CDefaultShareEnabled     = false
 	CDefaultLanguage         = "ENG"
 	CDefaultMessagesCapacity = (2 << 10) // count
 )

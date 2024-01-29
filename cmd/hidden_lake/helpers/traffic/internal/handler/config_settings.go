@@ -31,6 +31,7 @@ func HandleConfigSettingsAPI(pCfg config.IConfig, pLogger logger.ILogger) http.H
 			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
 			FMessagesCapacity:   sett.GetMessagesCapacity(),
 			FNetworkKey:         sett.GetNetworkKey(),
+			FStorageEnabled:     sett.GetStorageEnabled(),
 		})
 	}
 }

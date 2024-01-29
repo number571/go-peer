@@ -18,10 +18,10 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
+				FShareEnabled:     hlm_settings.CDefaultShareEnabled,
 			},
 			FLogging:   []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FLanguage:  hlm_settings.CDefaultLanguage,
-			FShare:     hlm_settings.CDefaultShare,
 			FPseudonym: random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 			FAddress: &SAddress{
 				FInterface: hlm_settings.CDefaultInterfaceAddress,

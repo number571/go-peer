@@ -24,6 +24,10 @@ const (
 )
 
 const (
+	CDefaultStorageEnabled = false
+)
+
+const (
 	CDefaultTCPAddress  = "127.0.0.1:9581"
 	CDefaultHTTPAddress = "127.0.0.1:9582"
 )

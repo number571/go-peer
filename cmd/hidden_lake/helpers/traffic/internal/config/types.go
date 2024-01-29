@@ -10,7 +10,6 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
-	GetStorage() bool
 	GetConnections() []string
 	GetConsumers() []string
 }
@@ -22,6 +21,7 @@ type IConfigSettings interface {
 	GetQueuePeriodMS() uint64
 	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64
+	GetStorageEnabled() bool
 }
 
 type IAddress interface {

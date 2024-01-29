@@ -16,11 +16,11 @@ const (
 const (
 	tcConfigTemplate = `settings:
   messages_capacity: %d
+  share_enabled: true
 logging:
   - info
   - erro
 language: RUS
-share: true
 pseudonym: '%s'
 address:
   interface: '%s'
@@ -71,7 +71,12 @@ func TestConfig(t *testing.T) {
 	}
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
-		t.Error("settings key size is invalid")
+		t.Error("settings message capacity size is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetShareEnabled() != true {
+		t.Error("settings share is invalid")
 		return
 	}
 
@@ -92,11 +97,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetPseudonym() != tcPseudonym {
 		t.Error("pseudonym is invalid")
-		return
-	}
-
-	if cfg.GetShare() != true {
-		t.Error("share is invalid")
 		return
 	}
 

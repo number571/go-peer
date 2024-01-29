@@ -23,7 +23,7 @@ func (p *sApp) initDatabase() error {
 	)
 
 	switch {
-	case p.fConfig.GetStorage():
+	case p.fConfig.GetSettings().GetStorageEnabled():
 		db, err = database.NewDatabase(sett)
 	default:
 		db, err = database.NewInMemoryDatabase(sett)

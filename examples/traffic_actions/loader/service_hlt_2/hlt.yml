@@ -4,7 +4,7 @@ settings:
   work_size_bits: 10
   messages_capacity: 2048
   network_key: some-network-key
-storage: true
+  storage_enabled: true
 logging:
   - info
   - warn

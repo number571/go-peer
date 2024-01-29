@@ -17,7 +17,6 @@ type IEditor interface {
 
 type IConfig interface {
 	GetSettings() IConfigSettings
-	GetShare() bool
 	GetPseudonym() string
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
@@ -29,6 +28,7 @@ type IConfig interface {
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
 	GetWorkSizeBits() uint64
+	GetShareEnabled() bool
 }
 
 type IAddress interface {

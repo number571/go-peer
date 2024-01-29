@@ -24,13 +24,13 @@ type IConfigSettings interface {
 
 	GetQueuePeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64
+	GetF2FDisabled() bool
 }
 
 type IConfig interface {
 	GetSettings() IConfigSettings
 	GetLogging() logger.ILogging
 	GetAddress() IAddress
-	GetF2FDisabled() bool
 	GetFriends() map[string]asymmetric.IPubKey
 	GetConnections() []string
 	GetService(string) (IService, bool)

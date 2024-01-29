@@ -26,6 +26,7 @@ type SConfigSettings struct {
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FF2FDisabled        bool   `json:"f2f_disabled,omitempty" yaml:"f2f_disabled,omitempty"`
 }
 
 type SConfig struct {
@@ -33,7 +34,6 @@ type SConfig struct {
 
 	FLogging     []string             `yaml:"logging,omitempty"`
 	FAddress     *SAddress            `yaml:"address,omitempty"`
-	FF2FDisabled bool                 `yaml:"f2f_disabled,omitempty"`
 	FServices    map[string]*SService `yaml:"services,omitempty"`
 	FConnections []string             `yaml:"connections,omitempty"`
 	FFriends     map[string]string    `yaml:"friends,omitempty"`
@@ -121,6 +121,10 @@ func (p *SConfigSettings) GetNetworkKey() string {
 	defer p.fMutex.Unlock()
 
 	return p.FNetworkKey
+}
+
+func (p *SConfigSettings) GetF2FDisabled() bool {
+	return p.FF2FDisabled
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {
@@ -224,10 +228,6 @@ func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
 		result[k] = v
 	}
 	return result
-}
-
-func (p *SConfig) GetF2FDisabled() bool {
-	return p.FF2FDisabled
 }
 
 func (p *SConfig) GetLogging() logger.ILogging {

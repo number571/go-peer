@@ -25,13 +25,13 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FKeySizeBits:        hls_settings.CDefaultKeySize,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+				FF2FDisabled:        hls_settings.CDefaultF2FDisabled,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
 				FTCP:  hls_settings.CDefaultTCPAddress,
 				FHTTP: hls_settings.CDefaultHTTPAddress,
 			},
-			FF2FDisabled: hls_settings.CDefaultF2FDisabled,
 			FServices: map[string]*SService{
 				hlm_settings.CTitlePattern: {FHost: hls_settings.CDefaultServiceHLMAddress},
 			},

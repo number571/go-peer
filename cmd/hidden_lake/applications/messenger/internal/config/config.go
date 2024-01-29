@@ -21,6 +21,7 @@ var (
 type SConfigSettings struct {
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
+	FShareEnabled     bool   `yaml:"share_enabled,omitempty"`
 }
 
 type SConfig struct {
@@ -28,7 +29,6 @@ type SConfig struct {
 
 	FLogging    []string  `yaml:"logging,omitempty"`
 	FLanguage   string    `yaml:"language,omitempty"`
-	FShare      bool      `yaml:"share,omitempty"`
 	FPseudonym  string    `yaml:"pseudonym"`
 	FAddress    *SAddress `yaml:"address"`
 	FConnection string    `yaml:"connection"`
@@ -100,6 +100,10 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
 }
 
+func (p *SConfigSettings) GetShareEnabled() bool {
+	return p.FShareEnabled
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
 		utils.PseudonymIsValid(p.FPseudonym) &&
@@ -169,10 +173,6 @@ func (p *SConfig) GetLanguage() language.ILanguage {
 	defer p.fMutex.Unlock()
 
 	return p.fLanguage
-}
-
-func (p *SConfig) GetShare() bool {
-	return p.FShare
 }
 
 func (p *SConfig) GetPseudonym() string {

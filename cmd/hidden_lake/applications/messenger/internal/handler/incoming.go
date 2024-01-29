@@ -73,7 +73,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		if pCfg.GetShare() {
+		if pCfg.GetSettings().GetShareEnabled() {
 			err := shareMessage(pCfg, fPubKey, requestID, senderPseudonym, rawMsgBytes)
 			switch err {
 			case nil:

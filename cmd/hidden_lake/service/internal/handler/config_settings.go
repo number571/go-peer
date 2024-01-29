@@ -36,6 +36,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 					FKeySizeBits:        sett.GetKeySizeBits(),
 					FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
 					FNetworkKey:         sett.GetNetworkKey(),
+					FF2FDisabled:        sett.GetF2FDisabled(),
 				},
 				FLimitMessageSizeBytes: pNode.GetMessageQueue().GetClient().GetMessageLimit(),
 			})
