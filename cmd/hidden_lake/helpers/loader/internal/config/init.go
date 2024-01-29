@@ -18,11 +18,15 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlt_settings.CDefaultMessagesCapacity,
 				FWorkSizeBits:     hls_settings.CDefaultWorkSize,
+				FNetworkKey:       hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FHTTP: hll_settings.CDefaultHTTPAddress,
+				FHTTP:  hll_settings.CDefaultHTTPAddress,
+				FPPROF: "",
 			},
+			FProducers: []string{},
+			FConsumers: []string{},
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

@@ -1,10 +1,10 @@
 settings:
   message_size_bytes: 8192
-  work_size_bits: 22
   queue_period_ms: 5000
   key_size_bits: 4096
+  work_size_bits: 22
   limit_void_size_bytes: 4096
-  f2f_disabled: false
+  network_key: default
 logging:
 - info
 - warn
@@ -13,7 +13,7 @@ address:
   tcp: 127.0.0.1:9571
   http: 127.0.0.1:9572
 services:
-  hidden-lake-messenger:
-    host: 127.0.0.1:9592
   hidden-lake-filesharer:
     host: 127.0.0.1:9542
+  hidden-lake-messenger:
+    host: 127.0.0.1:9592

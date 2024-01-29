@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	logger "github.com/number571/go-peer/internal/logger/std"
@@ -25,6 +26,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FKeySizeBits:        hls_settings.CDefaultKeySize,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
+				FNetworkKey:         hls_settings.CDefaultNetworkKey,
 				FF2FDisabled:        hls_settings.CDefaultF2FDisabled,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
@@ -33,8 +35,15 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FHTTP: hls_settings.CDefaultHTTPAddress,
 			},
 			FServices: map[string]*SService{
-				hlm_settings.CTitlePattern: {FHost: hls_settings.CDefaultServiceHLMAddress},
+				hlm_settings.CTitlePattern: {
+					FHost: hlm_settings.CDefaultIncomingAddress,
+				},
+				hlf_settings.CTitlePattern: {
+					FHost: hlf_settings.CDefaultIncomingAddress,
+				},
 			},
+			FConnections: []string{},
+			FFriends:     map[string]string{},
 		}
 	}
 	cfg, err := BuildConfig(cfgPath, initCfg)

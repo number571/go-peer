@@ -18,6 +18,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
+				FWorkSizeBits:     hlm_settings.CDefaultWorkSizeBits,
 				FShareEnabled:     hlm_settings.CDefaultShareEnabled,
 			},
 			FLogging:   []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
@@ -26,8 +27,10 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FAddress: &SAddress{
 				FInterface: hlm_settings.CDefaultInterfaceAddress,
 				FIncoming:  hlm_settings.CDefaultIncomingAddress,
+				FPPROF:     "",
 			},
 			FConnection: hls_settings.CDefaultHTTPAddress,
+			FStorageKey: random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

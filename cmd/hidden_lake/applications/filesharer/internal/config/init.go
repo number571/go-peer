@@ -24,6 +24,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FAddress: &SAddress{
 				FInterface: hlf_settings.CDefaultInterfaceAddress,
 				FIncoming:  hlf_settings.CDefaultIncomingAddress,
+				FPPROF:     "",
 			},
 			FConnection: hls_settings.CDefaultHTTPAddress,
 		}

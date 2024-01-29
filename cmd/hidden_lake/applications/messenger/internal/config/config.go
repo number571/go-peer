@@ -30,9 +30,9 @@ type SConfig struct {
 	FLogging    []string  `yaml:"logging,omitempty"`
 	FLanguage   string    `yaml:"language,omitempty"`
 	FPseudonym  string    `yaml:"pseudonym"`
+	FStorageKey string    `yaml:"storage_key,omitempty"`
 	FAddress    *SAddress `yaml:"address"`
 	FConnection string    `yaml:"connection"`
-	FStorageKey string    `yaml:"storage_key,omitempty"`
 
 	fFilepath string
 	fMutex    sync.Mutex

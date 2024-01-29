@@ -34,6 +34,7 @@ const (
 	CDefaultShareEnabled     = false
 	CDefaultLanguage         = "ENG"
 	CDefaultMessagesCapacity = (2 << 10) // count
+	CDefaultWorkSizeBits     = 20
 )
 
 const (

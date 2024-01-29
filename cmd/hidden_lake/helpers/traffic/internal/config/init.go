@@ -28,15 +28,18 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				FMessagesCapacity:   hlt_settings.CDefaultMessagesCapacity,
 				FStorageEnabled:     hlt_settings.CDefaultStorageEnabled,
+				FNetworkKey:         hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FTCP:  hlt_settings.CDefaultTCPAddress,
-				FHTTP: hlt_settings.CDefaultHTTPAddress,
+				FTCP:   hlt_settings.CDefaultTCPAddress,
+				FHTTP:  hlt_settings.CDefaultHTTPAddress,
+				FPPROF: "",
 			},
 			FConnections: []string{
 				hlt_settings.CDefaultConnectionAddress,
 			},
+			FConsumers: []string{},
 		}
 	}
 	cfg, err := BuildConfig(cfgPath, initCfg)

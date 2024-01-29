@@ -45,16 +45,12 @@ const (
 	CDefaultQueuePeriod   = 5000      // 5 seconds
 	CDefaultLimitVoidSize = (4 << 10) // 4KiB
 	CDefaultF2FDisabled   = false     // friend-to-friend
+	CDefaultNetworkKey    = "default"
 )
 
 const (
 	CDefaultTCPAddress  = "127.0.0.1:9571"
 	CDefaultHTTPAddress = "127.0.0.1:9572"
-)
-
-const (
-	CDefaultServiceHLTAddress = "127.0.0.1:9582"
-	CDefaultServiceHLMAddress = "127.0.0.1:9592"
 )
 
 const (

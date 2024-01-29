@@ -1,7 +1,8 @@
 settings:
   message_size_bytes: 8192
-  work_size_bits: 22
   key_size_bits: 4096
+  work_size_bits: 22
+  network_key: default
 logging:
 - info
 - warn

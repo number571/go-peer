@@ -13,6 +13,8 @@ address:
   tcp: 127.0.0.1:9571
   http: 127.0.0.1:9572
 services:
+  hidden-lake-filesharer:
+    host: 127.0.0.1:9542
   hidden-lake-messenger:
     host: 127.0.0.1:9592
 connections:

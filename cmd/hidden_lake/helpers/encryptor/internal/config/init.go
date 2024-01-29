@@ -18,10 +18,12 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FMessageSizeBytes: hls_settings.CDefaultMessageSize,
 				FWorkSizeBits:     hls_settings.CDefaultWorkSize,
 				FKeySizeBits:      hls_settings.CDefaultKeySize,
+				FNetworkKey:       hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
-				FHTTP: hle_settings.CDefaultHTTPAddress,
+				FHTTP:  hle_settings.CDefaultHTTPAddress,
+				FPPROF: "",
 			},
 		}
 	}
