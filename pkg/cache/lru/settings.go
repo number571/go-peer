@@ -1,4 +1,4 @@
-package queue_set
+package lru
 
 var (
 	_ ISettings = &sSettings{}

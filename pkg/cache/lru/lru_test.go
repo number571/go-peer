@@ -1,4 +1,4 @@
-package queue_set
+package lru
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
-func TestPanicQueueSet(t *testing.T) {
+func TestPanicLRUCache(t *testing.T) {
 	t.Parallel()
 
 	defer func() {
@@ -39,43 +39,43 @@ func TestPanicQueueSet(t *testing.T) {
 		}
 	}()
 
-	queueSet := NewQueueSet(
+	lruCache := NewLRUCache(
 		NewSettings(&SSettings{
 			FCapacity: 3,
 		}),
-	).(*sQueueSet)
+	).(*sLRUCache)
 
-	queueSet.fQueue[0] = "abc"
-	_, _ = queueSet.GetKey(0)
+	lruCache.fQueue[0] = "abc"
+	_, _ = lruCache.GetKey(0)
 }
 
-func TestQueueSet(t *testing.T) {
+func TestLRUCache(t *testing.T) {
 	t.Parallel()
 
-	queueSet := NewQueueSet(
+	lruCache := NewLRUCache(
 		NewSettings(&SSettings{
 			FCapacity: 3,
 		}),
 	)
 
-	sett := queueSet.GetSettings()
+	sett := lruCache.GetSettings()
 	if sett.GetCapacity() != 3 {
 		t.Error("got invalid value from settings")
 		return
 	}
 
-	if _, ok := queueSet.Load([]byte("unknown-key")); ok {
+	if _, ok := lruCache.Get([]byte("unknown-key")); ok {
 		t.Error("success load unknown key")
 		return
 	}
 
 	for i := 0; i < 3; i++ {
 		key := encoding.Uint64ToBytes(uint64(i))
-		if ok := queueSet.Push(key[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
+		if ok := lruCache.Set(key[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
 			t.Errorf("failed push %d", i)
 			return
 		}
-		if queueSet.GetIndex() != uint64((i+1)%3) {
+		if lruCache.GetIndex() != uint64((i+1)%3) {
 			t.Error("got invalid index")
 			return
 		}
@@ -83,7 +83,7 @@ func TestQueueSet(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		key := encoding.Uint64ToBytes(uint64(i))
-		val, ok := queueSet.Load(
+		val, ok := lruCache.Get(
 			key[:],
 		)
 		if !ok {
@@ -97,7 +97,7 @@ func TestQueueSet(t *testing.T) {
 	}
 
 	for i := uint64(0); ; i++ {
-		k, ok := queueSet.GetKey(i)
+		k, ok := lruCache.GetKey(i)
 		if !ok {
 			break
 		}
@@ -109,7 +109,7 @@ func TestQueueSet(t *testing.T) {
 	}
 
 	key1 := encoding.Uint64ToBytes(1)
-	if ok := queueSet.Push(key1[:], []byte(fmt.Sprintf("_%d_", 1))); ok {
+	if ok := lruCache.Set(key1[:], []byte(fmt.Sprintf("_%d_", 1))); ok {
 		t.Error("success push already exist value")
 		return
 	}
@@ -117,7 +117,7 @@ func TestQueueSet(t *testing.T) {
 	// start cycle of queue
 	i := uint64(4)
 	key2 := encoding.Uint64ToBytes(i)
-	if ok := queueSet.Push(key2[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
+	if ok := lruCache.Set(key2[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
 		t.Errorf("failed push %d", i)
 		return
 	}
@@ -125,7 +125,7 @@ func TestQueueSet(t *testing.T) {
 	// try load init value
 	i = 0
 	key3 := encoding.Uint64ToBytes(i)
-	if _, ok := queueSet.Load(key3[:]); ok {
+	if _, ok := lruCache.Get(key3[:]); ok {
 		t.Errorf("success load rewrited value %d", i)
 		return
 	}

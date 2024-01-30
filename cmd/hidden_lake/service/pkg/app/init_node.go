@@ -6,6 +6,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -14,7 +15,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
@@ -52,8 +52,8 @@ func initNode(pMutex *sync.Mutex, pCfgW config.IWrapper, pPrivKey asymmetric.IPr
 					FWriteDeadline:    queueDuration,
 				}),
 			}),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
+			lru.NewLRUCache(
+				lru.NewSettings(&lru.SSettings{
 					FCapacity: pkg_settings.CNetworkQueueCapacity,
 				}),
 			),

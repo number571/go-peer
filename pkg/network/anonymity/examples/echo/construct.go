@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -15,7 +16,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -81,8 +81,8 @@ func newNode(serviceName, address string) anonymity.INode {
 				FWriteTimeout: time.Minute,
 				FConnSettings: newConnSettings(msgSize, workSize, networkKey),
 			}),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
+			lru.NewLRUCache(
+				lru.NewSettings(&lru.SSettings{
 					FCapacity: 1024,
 				}),
 			),

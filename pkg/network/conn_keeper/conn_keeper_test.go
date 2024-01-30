@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/queue_set"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -126,8 +126,8 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 					FWriteDeadline:    time.Minute,
 				}),
 			}),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
+			lru.NewLRUCache(
+				lru.NewSettings(&lru.SSettings{
 					FCapacity: testutils.TCCapacity,
 				}),
 			),

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
 )
 
 var (
@@ -15,14 +15,14 @@ var (
 
 type sInMemoryDatabase struct {
 	fSettings ISettings
-	fQueueSet queue_set.IQueueSet
+	fLRUCache lru.ILRUCache
 }
 
 func NewInMemoryDatabase(pSett ISettings) (IDatabase, error) {
 	return &sInMemoryDatabase{
 		fSettings: pSett,
-		fQueueSet: queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		fLRUCache: lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: pSett.GetMessagesCapacity(),
 			}),
 		),
@@ -34,11 +34,11 @@ func (p *sInMemoryDatabase) Settings() ISettings {
 }
 
 func (p *sInMemoryDatabase) Pointer() uint64 {
-	return p.fQueueSet.GetIndex()
+	return p.fLRUCache.GetIndex()
 }
 
 func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
-	key, ok := p.fQueueSet.GetKey(i)
+	key, ok := p.fLRUCache.GetKey(i)
 	if !ok {
 		return nil, GErrMessageIsNotExist
 	}
@@ -50,7 +50,7 @@ func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
 		return errors.New("got message with diff settings")
 	}
 
-	if ok := p.fQueueSet.Push(pMsg.GetHash(), pMsg.ToBytes()); !ok {
+	if ok := p.fLRUCache.Set(pMsg.GetHash(), pMsg.ToBytes()); !ok {
 		return GErrMessageIsExist
 	}
 
@@ -62,7 +62,7 @@ func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 		return nil, errors.New("key size invalid")
 	}
 
-	msgBytes, ok := p.fQueueSet.Load(pHash)
+	msgBytes, ok := p.fLRUCache.Get(pHash)
 	if !ok {
 		return nil, GErrMessageIsNotExist
 	}

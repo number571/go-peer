@@ -1,4 +1,4 @@
-package queue_set
+package lru
 
 import (
 	"sync"
@@ -7,39 +7,39 @@ import (
 )
 
 var (
-	_ IQueueSet = &sQueueSet{}
+	_ ILRUCache = &sLRUCache{}
 )
 
-type sQueueSet struct {
+type sLRUCache struct {
 	fSettings ISettings
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fMap      map[string][]byte
 	fQueue    []string
 	fIndex    uint64
 }
 
-func NewQueueSet(pSettings ISettings) IQueueSet {
-	return &sQueueSet{
+func NewLRUCache(pSettings ISettings) ILRUCache {
+	return &sLRUCache{
 		fSettings: pSettings,
 		fQueue:    make([]string, pSettings.GetCapacity()),
 		fMap:      make(map[string][]byte, pSettings.GetCapacity()),
 	}
 }
 
-func (p *sQueueSet) GetSettings() ISettings {
+func (p *sLRUCache) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sQueueSet) GetIndex() uint64 {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sLRUCache) GetIndex() uint64 {
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fIndex
 }
 
-func (p *sQueueSet) GetKey(i uint64) ([]byte, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sLRUCache) GetKey(i uint64) ([]byte, bool) {
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	queueLen := uint64(len(p.fQueue))
 	if queueLen <= i {
@@ -54,7 +54,7 @@ func (p *sQueueSet) GetKey(i uint64) ([]byte, bool) {
 	return hash, true
 }
 
-func (p *sQueueSet) Push(pKey, pValue []byte) bool {
+func (p *sLRUCache) Set(pKey, pValue []byte) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -76,9 +76,9 @@ func (p *sQueueSet) Push(pKey, pValue []byte) bool {
 	return true
 }
 
-func (p *sQueueSet) Load(pKey []byte) ([]byte, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+func (p *sLRUCache) Get(pKey []byte) ([]byte, bool) {
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	val, ok := p.fMap[encoding.HexEncode(pKey)]
 	return val, ok

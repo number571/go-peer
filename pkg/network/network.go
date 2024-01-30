@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
@@ -25,7 +25,7 @@ type sNode struct {
 	fMutex        sync.Mutex
 	fListener     net.Listener
 	fSettings     ISettings
-	fQueuePusher  queue_set.IQueuePusher
+	fCacheSetter  cache.ICacheSetter
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
 }
@@ -33,10 +33,10 @@ type sNode struct {
 // Creating a node object managed by connections with multiple nodes.
 // Saves hashes of received messages to a buffer to prevent network cycling.
 // Redirects messages to handle routers by keys.
-func NewNode(pSett ISettings, pQueuePusher queue_set.IQueuePusher) INode {
+func NewNode(pSett ISettings, pCacheSetter cache.ICacheSetter) INode {
 	return &sNode{
 		fSettings:     pSett,
-		fQueuePusher:  pQueuePusher,
+		fCacheSetter:  pCacheSetter,
 		fConnections:  make(map[string]conn.IConn, pSett.GetMaxConnects()),
 		fHandleRoutes: make(map[uint64]IHandlerF, cHandleRoutesSize),
 	}
@@ -58,7 +58,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 	}
 
 	// node can redirect received message
-	_ = p.fQueuePusher.Push(pMsg.GetHash(), []byte{})
+	_ = p.fCacheSetter.Set(pMsg.GetHash(), []byte{})
 
 	wg := sync.WaitGroup{}
 	wg.Add(lenConnections)
@@ -285,7 +285,7 @@ func (p *sNode) messageReader(
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg message.IMessage) bool {
 	// hash of message already in queue
-	if !p.fQueuePusher.Push(pMsg.GetHash(), []byte{}) {
+	if !p.fCacheSetter.Set(pMsg.GetHash(), []byte{}) {
 		return true
 	}
 

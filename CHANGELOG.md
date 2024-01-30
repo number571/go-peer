@@ -20,6 +20,7 @@
 - Update `cmd/hidden_lake`: rename share -> share_enabled, storage -> storage_enabled
 - Update `cmd/hidden_lake`: move enabled/disabled options to settings block
 - Update `cmd/hidden_lake/applications/messenger`: refactoring & rename chat_queue -> receiver 
+- Update `pkg/queue_set`: rename -> pkg/cache/lru
 
 <!-- ... -->
 

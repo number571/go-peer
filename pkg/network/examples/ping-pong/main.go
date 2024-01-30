@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/queue_set"
 )
 
 const (
@@ -101,8 +101,8 @@ func newNode(serviceAddress string) network.INode {
 			FWriteTimeout: time.Minute,
 			FReadTimeout:  time.Minute,
 		}),
-		queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: (1 << 10),
 			}),
 		),

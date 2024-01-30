@@ -13,6 +13,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -21,7 +22,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/conn_keeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -130,8 +130,8 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
-		queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),
@@ -188,8 +188,8 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteDeadline:    time.Minute,
 			}),
 		}),
-		queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),

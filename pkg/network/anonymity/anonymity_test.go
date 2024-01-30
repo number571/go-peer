@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -18,7 +19,6 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/queue_set"
 	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -784,8 +784,8 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 					FWriteDeadline:    time.Minute,
 				}),
 			}),
-			queue_set.NewQueueSet(
-				queue_set.NewSettings(&queue_set.SSettings{
+			lru.NewLRUCache(
+				lru.NewSettings(&lru.SSettings{
 					FCapacity: testutils.TCCapacity,
 				}),
 			),

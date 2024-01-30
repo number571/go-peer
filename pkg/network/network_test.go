@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/queue_set"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -412,8 +412,8 @@ func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
 				FWriteDeadline:    timeout,
 			}),
 		}),
-		queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: testutils.TCCapacity,
 			}),
 		),

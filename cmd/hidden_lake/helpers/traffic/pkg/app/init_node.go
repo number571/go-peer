@@ -6,10 +6,10 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/handler"
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/queue_set"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -39,8 +39,8 @@ func initNode(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logge
 				FWriteDeadline:    queueDuration,
 			}),
 		}),
-		queue_set.NewQueueSet(
-			queue_set.NewSettings(&queue_set.SSettings{
+		lru.NewLRUCache(
+			lru.NewSettings(&lru.SSettings{
 				FCapacity: hls_settings.CNetworkQueueCapacity,
 			}),
 		),
