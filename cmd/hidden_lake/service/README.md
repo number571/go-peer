@@ -131,7 +131,7 @@ $ ./hls -path=/root -key=/root/priv.key -parallel=1
 
 ## Example
 
-There are three nodes in the network `send_hls`, `recv_hls` and `middle_hls`. The `send_his` and `recv_hls` nodes connects to `middle_hls`. As a result, a link of the form `send_his <-> middle_hls <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hls` node does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. All nodes, including the `middle_hls` node, set periods and adhere to the protocol of constant message generation.
+There are five nodes in the network `send_hls`, `recv_hls` and `middle_hlt_1`, `middle_hlt_2`, `middle_hlt_3`. The `send_his` and `recv_hls` nodes connects to `middle_hlt_1`, `middle_hlt_3`. As a result, a link of the form `send_his <-> middle_hlt_1 <-> middle_hlt_2 <-> middle_hlt_3 <-> recv_hls` is created. Due to the specifics of HLS, the centralized `middle_hlt` nodes does not violate the security and anonymity of the `send_hls` and `recv_hls` subjects in any way. 
 
 The `recv_hls` node contains its `echo_service`, which performs the role of redirecting the request body back to the client as a response. Access to this service is carried out by its alias `hidden-echo-service`, put forward by the recv_hls node.
 
@@ -179,14 +179,14 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service/default
+$ cd examples/echo_service/routing
 $ make
 ```
 
-Logs from `middle_hls` node. When sending requests and receiving responses, `middle_hls` does not see the action. For him, all actions and moments of inaction are equivalent.
+Logs from one another connected node. When sending requests and receiving responses, another node does not see the action. For him, all actions and moments of inaction are equivalent.
 
 <p align="center"><img src="_images/hls_logger.gif" alt="hls_logger.gif"/></p>
-<p align="center">Figure 4. Output of all actions and all received traffic from the middle_hls node.</p>
+<p align="center">Figure 4. Output of all actions and all received traffic from the another node.</p>
 
 Send request
 ```bash
