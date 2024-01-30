@@ -504,11 +504,11 @@ $ make docker-run
 
 ### Example
 
-The example will involve (as well as in HLS) two nodes `node1_hlf and node2_hlf`. Both nodes are a combination of HLS and HLF, where HLF plays the role of an application and services (as shown in `Figure 3` of the HLS readme).
+The example will involve three nodes `node1_hlf, node2_hlf` and `middle_hlt_1, middle_hlt_2, middle_hlt3_`. Both nodes are a combination of HLS and HLF, where HLF plays the role of an application and services (as shown in `Figure 3` of the HLS readme). The three remaining nodes are used only for the successful connection of the two main nodes. In other words, HLT nodes are traffic relay nodes.
 
 Build and run nodes
 ```bash
-$ cd examples/anon_filesharing/default
+$ cd examples/anon_filesharing/routing
 $ make
 ```
 
