@@ -24,7 +24,7 @@ test:
 	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
 clean:
 	rm -f $(BINPATH)/hlm $(BINPATH)/hlf_*
-	rm -rf hlf.yml hlf.db 
+	rm -rf hlf.yml hlf.stg 
 
 docker-default: docker-build docker-run
 docker-build: docker-configs
