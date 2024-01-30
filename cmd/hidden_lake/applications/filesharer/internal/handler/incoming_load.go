@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
@@ -45,11 +44,6 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			pLogger.PushWarn(logBuilder.WithMessage("incorrect_chunk"))
 			api.Response(pW, http.StatusBadRequest, "failed: incorrect chunk")
 			return
-		}
-
-		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
-		if fPubKey == nil {
-			panic("public key is nil (invalid data from HLS)!")
 		}
 
 		fullPath := fmt.Sprintf("%s/%s/%s", pPathTo, hlf_settings.CPathSTG, name)

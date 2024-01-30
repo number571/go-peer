@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -29,11 +28,6 @@ func HandleIncomigListHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
-		}
-
-		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
-		if fPubKey == nil {
-			panic("public key is nil (invalid data from HLS)!")
 		}
 
 		page, err := strconv.Atoi(pR.URL.Query().Get("page"))
