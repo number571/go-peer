@@ -1,4 +1,4 @@
-package chat_queue
+package receiver
 
 import "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 
@@ -7,8 +7,8 @@ type SMessage struct {
 	FMessageInfo utils.SMessageInfo `json:"message_info"`
 }
 
-type IChatQueue interface {
-	Init()
-	Push(*SMessage)
-	Load(string) (*SMessage, bool)
+type IMessageReceiver interface {
+	Init(string) IMessageReceiver
+	Send(*SMessage)
+	Recv() (*SMessage, bool)
 }

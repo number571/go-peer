@@ -1,4 +1,4 @@
-package chat_queue
+package receiver
 
 import (
 	"testing"
@@ -6,18 +6,16 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 )
 
-func TestChatQueue(t *testing.T) {
+func TestMessageReceiver(t *testing.T) {
 	t.Parallel()
-
-	chatQueue := NewChatQueue(3)
-
-	chatQueue.Init()
 
 	addr := "address"
 	msgInfo := "msg_info"
 
+	msgReceiver := NewMessageReceiver().Init(addr)
+
 	go func() {
-		chatQueue.Push(&SMessage{
+		msgReceiver.Send(&SMessage{
 			FAddress: addr,
 			FMessageInfo: utils.SMessageInfo{
 				FMessage: msgInfo,
@@ -25,9 +23,9 @@ func TestChatQueue(t *testing.T) {
 		})
 	}()
 
-	msg, ok := chatQueue.Load(addr)
+	msg, ok := msgReceiver.Recv()
 	if !ok {
-		t.Error("got not ok load")
+		t.Error("got not ok recv")
 		return
 	}
 

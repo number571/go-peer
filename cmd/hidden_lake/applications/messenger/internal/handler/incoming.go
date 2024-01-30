@@ -8,9 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/chat_queue"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/receiver"
 	hlm_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -105,7 +105,7 @@ func HandleIncomigHTTP(pLogger logger.ILogger, pCfg config.IConfig, pDB database
 			return
 		}
 
-		gChatQueue.Push(&chat_queue.SMessage{
+		gReceiver.Send(&receiver.SMessage{
 			FAddress: fPubKey.GetHasher().ToString(),
 			FMessageInfo: getMessageInfo(
 				true,

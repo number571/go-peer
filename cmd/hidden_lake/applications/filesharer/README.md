@@ -8,6 +8,8 @@ The `Hidden Lake Filesharer` is a file sharing service based on the Anonymous Ne
 
 HLF is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com/. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
+> More information about HLF in the [habr.com/ru/articles/789968](https://habr.com/ru/articles/789968/ "Habr HLF")
+
 ## Installation
 
 ```bash

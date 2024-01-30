@@ -1,25 +1,25 @@
 package handler
 
 import (
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/chat_queue"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/receiver"
 	"golang.org/x/net/websocket"
 )
 
 var (
-	gChatQueue = chat_queue.NewChatQueue(1)
+	gReceiver = receiver.NewMessageReceiver()
 )
 
 func FriendsChatWS(pWS *websocket.Conn) {
 	defer pWS.Close()
 
-	subscribe := new(chat_queue.SMessage)
+	subscribe := new(receiver.SMessage)
 	if err := websocket.JSON.Receive(pWS, subscribe); err != nil {
 		return
 	}
 
-	gChatQueue.Init()
+	gReceiver.Init(subscribe.FAddress)
 	for {
-		msg, ok := gChatQueue.Load(subscribe.FAddress)
+		msg, ok := gReceiver.Recv()
 		if !ok {
 			return
 		}
