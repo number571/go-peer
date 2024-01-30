@@ -21,6 +21,7 @@ _GO_TEST_LIST=\
 default: test-run
 
 clean:
+	make -C ./bin clean 
 	make -C ./cmd clean 
 	make -C ./examples clean
 
