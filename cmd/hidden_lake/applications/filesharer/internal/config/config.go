@@ -20,19 +20,20 @@ var (
 type SConfigSettings struct {
 	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
 	FPageOffset uint64 `yaml:"page_offset"`
+	FLanguage   string `yaml:"language,omitempty"`
+
+	fMutex    sync.Mutex
+	fLanguage language.ILanguage
 }
 
 type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
 	FLogging    []string  `yaml:"logging,omitempty"`
-	FLanguage   string    `yaml:"language,omitempty"`
 	FAddress    *SAddress `yaml:"address"`
 	FConnection string    `yaml:"connection"`
 
 	fFilepath string
-	fMutex    sync.Mutex
-	fLanguage language.ILanguage
 	fLogging  *sLogging
 }
 
@@ -96,6 +97,22 @@ func (p *SConfigSettings) GetPageOffset() uint64 {
 	return p.FPageOffset
 }
 
+func (p *SConfigSettings) GetLanguage() language.ILanguage {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fLanguage
+}
+
+func (p *SConfigSettings) loadLanguage() error {
+	res, err := language.ToILanguage(p.FLanguage)
+	if err != nil {
+		return err
+	}
+	p.fLanguage = res
+	return nil
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FConnection != "" &&
@@ -121,19 +138,10 @@ func (p *SConfig) initConfig() error {
 		return fmt.Errorf("load logging: %w", err)
 	}
 
-	if err := p.loadLanguage(); err != nil {
+	if err := p.FSettings.loadLanguage(); err != nil {
 		return fmt.Errorf("load language: %w", err)
 	}
 
-	return nil
-}
-
-func (p *SConfig) loadLanguage() error {
-	res, err := language.ToILanguage(p.FLanguage)
-	if err != nil {
-		return err
-	}
-	p.fLanguage = res
 	return nil
 }
 
@@ -157,13 +165,6 @@ func (p *SConfig) loadLogging() error {
 
 	p.fLogging = &logging
 	return nil
-}
-
-func (p *SConfig) GetLanguage() language.ILanguage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fLanguage
 }
 
 func (p *SConfig) GetAddress() IAddress {

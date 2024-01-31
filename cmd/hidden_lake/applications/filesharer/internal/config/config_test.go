@@ -17,10 +17,10 @@ const (
 	tcConfigTemplate = `settings:
   page_offset: %d
   retry_num: %d
+  language: RUS
 logging:
   - info
   - erro
-language: RUS
 address:
   interface: '%s'
   incoming: '%s'
@@ -81,11 +81,6 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetLanguage() != language.CLangRUS {
-		t.Error("language is invalid")
-		return
-	}
-
 	if cfg.GetAddress().GetInterface() != tcAddressInterface {
 		t.Error("address.interface is invalid")
 		return
@@ -113,6 +108,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetRetryNum() != tcRetryNum {
 		t.Error("settings.retry_num is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetLanguage() != language.CLangRUS {
+		t.Error("settings language is invalid")
 		return
 	}
 }

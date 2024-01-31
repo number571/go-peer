@@ -22,13 +22,16 @@ type SConfigSettings struct {
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
 	FShareEnabled     bool   `yaml:"share_enabled,omitempty"`
+	FLanguage         string `yaml:"language,omitempty"`
+
+	fMutex    sync.Mutex
+	fLanguage language.ILanguage
 }
 
 type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
 	FLogging    []string  `yaml:"logging,omitempty"`
-	FLanguage   string    `yaml:"language,omitempty"`
 	FPseudonym  string    `yaml:"pseudonym"`
 	FStorageKey string    `yaml:"storage_key,omitempty"`
 	FAddress    *SAddress `yaml:"address"`
@@ -36,7 +39,6 @@ type SConfig struct {
 
 	fFilepath string
 	fMutex    sync.Mutex
-	fLanguage language.ILanguage
 	fLogging  *sLogging
 }
 
@@ -104,6 +106,22 @@ func (p *SConfigSettings) GetShareEnabled() bool {
 	return p.FShareEnabled
 }
 
+func (p *SConfigSettings) GetLanguage() language.ILanguage {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fLanguage
+}
+
+func (p *SConfigSettings) loadLanguage() error {
+	res, err := language.ToILanguage(p.FLanguage)
+	if err != nil {
+		return err
+	}
+	p.fLanguage = res
+	return nil
+}
+
 func (p *SConfig) isValid() bool {
 	return true &&
 		utils.PseudonymIsValid(p.FPseudonym) &&
@@ -130,19 +148,10 @@ func (p *SConfig) initConfig() error {
 		return fmt.Errorf("load logging: %w", err)
 	}
 
-	if err := p.loadLanguage(); err != nil {
+	if err := p.FSettings.loadLanguage(); err != nil {
 		return fmt.Errorf("load language: %w", err)
 	}
 
-	return nil
-}
-
-func (p *SConfig) loadLanguage() error {
-	res, err := language.ToILanguage(p.FLanguage)
-	if err != nil {
-		return err
-	}
-	p.fLanguage = res
 	return nil
 }
 
@@ -166,13 +175,6 @@ func (p *SConfig) loadLogging() error {
 
 	p.fLogging = &logging
 	return nil
-}
-
-func (p *SConfig) GetLanguage() language.ILanguage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.fLanguage
 }
 
 func (p *SConfig) GetPseudonym() string {

@@ -54,11 +54,11 @@ Default config `hlm.yml`
 settings:
   messages_capacity: 2048
   share_enabled: false
+  language: ENG
 logging:
   - info
   - warn
   - erro
-language: ENG
 address:
   interface: 127.0.0.1:9591
   incoming: 127.0.0.1:9592

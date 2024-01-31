@@ -61,6 +61,16 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
 				return
 			}
+		case http.MethodHead:
+			pseudonym := strings.TrimSpace(pR.FormValue("pseudonym"))
+			if !utils.PseudonymIsValid(pseudonym) {
+				ErrorPage(pLogger, cfg, "read_pseudonym", "pseudonym is invalid")(pW, pR)
+				return
+			}
+			if err := cfgEditor.UpdatePseudonym(pseudonym); err != nil {
+				ErrorPage(pLogger, cfg, "update_pseudonym", "update pseudonym")(pW, pR)
+				return
+			}
 		case http.MethodPut:
 			strLang := strings.TrimSpace(pR.FormValue("language"))
 			ilang, err := language.ToILanguage(strLang)
@@ -68,22 +78,9 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				ErrorPage(pLogger, cfg, "to_language", "load unknown language")(pW, pR)
 				return
 			}
-			if ilang != cfg.GetLanguage() {
-				if err := cfgEditor.UpdateLanguage(ilang); err != nil {
-					ErrorPage(pLogger, cfg, "update_language", "update language")(pW, pR)
-					return
-				}
-			}
-			pseudonym := strings.TrimSpace(pR.FormValue("pseudonym"))
-			if !utils.PseudonymIsValid(pseudonym) {
-				ErrorPage(pLogger, cfg, "read_pseudonym", "pseudonym is invalid")(pW, pR)
+			if err := cfgEditor.UpdateLanguage(ilang); err != nil {
+				ErrorPage(pLogger, cfg, "update_language", "update language")(pW, pR)
 				return
-			}
-			if pseudonym != cfg.GetPseudonym() {
-				if err := cfgEditor.UpdatePseudonym(pseudonym); err != nil {
-					ErrorPage(pLogger, cfg, "update_pseudonym", "update pseudonym")(pW, pR)
-					return
-				}
 			}
 		case http.MethodPost:
 			host := strings.TrimSpace(pR.FormValue("host"))

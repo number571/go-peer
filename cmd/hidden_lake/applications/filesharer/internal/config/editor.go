@@ -42,14 +42,14 @@ func (p *sEditor) UpdateLanguage(pLang language.ILanguage) error {
 	}
 
 	cfg := icfg.(*SConfig)
-	cfg.FLanguage = language.FromILanguage(pLang)
+	cfg.FSettings.FLanguage = language.FromILanguage(pLang)
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}
 
-	p.fConfig.fMutex.Lock()
-	defer p.fConfig.fMutex.Unlock()
+	p.fConfig.FSettings.fMutex.Lock()
+	defer p.fConfig.FSettings.fMutex.Unlock()
 
-	p.fConfig.fLanguage = pLang
+	p.fConfig.FSettings.fLanguage = pLang
 	return nil
 }

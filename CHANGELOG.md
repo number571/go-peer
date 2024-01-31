@@ -6,6 +6,14 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/messenger|filesharer`: move config option 'language' to settings
+
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/messenger`: fix change language
+
 <!-- ... -->
 
 ## v1.6.2

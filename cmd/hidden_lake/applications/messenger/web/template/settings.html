@@ -55,7 +55,7 @@ Agordoj
         <div class="card-body">
             <form method="POST" action="/settings">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-                <input hidden name="method" value="PUT">
+                <input hidden name="method" value="HEAD">
                 <div class="row mb-3">
                     <div class="col-md-8 w-75">
                         {{if (eq .FLanguage 0)}}

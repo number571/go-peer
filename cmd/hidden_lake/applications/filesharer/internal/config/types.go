@@ -19,12 +19,12 @@ type IConfig interface {
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() string
-	GetLanguage() language.ILanguage
 }
 
 type IConfigSettings interface {
 	GetRetryNum() uint64
 	GetPageOffset() uint64
+	GetLanguage() language.ILanguage
 }
 
 type IAddress interface {

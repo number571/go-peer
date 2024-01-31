@@ -1,7 +1,8 @@
 settings:
   messages_capacity: 2048
+  language: ENG
+pseudonym: Alice
 address:
   interface: localhost:8080
   incoming: localhost:8081
 connection: localhost:8572
-pseudonym: "Alice"

@@ -22,13 +22,13 @@ type IConfig interface {
 	GetLogging() logger.ILogging
 	GetConnection() string
 	GetStorageKey() string
-	GetLanguage() language.ILanguage
 }
 
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
 	GetWorkSizeBits() uint64
 	GetShareEnabled() bool
+	GetLanguage() language.ILanguage
 }
 
 type IAddress interface {

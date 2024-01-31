@@ -377,11 +377,12 @@ Default config `hlm.yml`
 ```yaml
 settings:
   messages_capacity: 2048
+  work_size_bits: 20
+  language: ENG
 logging:
   - info
   - warn
   - erro
-language: ENG
 address:
   interface: 127.0.0.1:9591
   incoming: 127.0.0.1:9592
@@ -480,11 +481,11 @@ Default config `hlf.yml`
 settings:
   retry_num: 2
   page_offset: 10
+  language: ENG
 logging:
 - info
 - warn
 - erro
-language: ENG
 address:
   interface: 127.0.0.1:9541
   incoming: 127.0.0.1:9542

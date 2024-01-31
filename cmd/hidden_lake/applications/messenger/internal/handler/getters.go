@@ -16,7 +16,7 @@ type sTemplate struct {
 
 func getTemplate(pCfg config.IConfig) *sTemplate {
 	return &sTemplate{
-		FLanguage: pCfg.GetLanguage(),
+		FLanguage: pCfg.GetSettings().GetLanguage(),
 	}
 }
 

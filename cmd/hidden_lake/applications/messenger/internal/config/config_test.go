@@ -17,10 +17,10 @@ const (
 	tcConfigTemplate = `settings:
   messages_capacity: %d
   share_enabled: true
+  language: RUS
 logging:
   - info
   - erro
-language: RUS
 pseudonym: '%s'
 address:
   interface: '%s'
@@ -80,6 +80,11 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
+	if cfg.GetSettings().GetLanguage() != language.CLangRUS {
+		t.Error("settings language is invalid")
+		return
+	}
+
 	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
@@ -97,11 +102,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetPseudonym() != tcPseudonym {
 		t.Error("pseudonym is invalid")
-		return
-	}
-
-	if cfg.GetLanguage() != language.CLangRUS {
-		t.Error("language is invalid")
 		return
 	}
 
