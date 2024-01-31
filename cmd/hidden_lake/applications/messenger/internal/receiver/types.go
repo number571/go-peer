@@ -8,7 +8,7 @@ type SMessage struct {
 }
 
 type IMessageReceiver interface {
-	Init(string) IMessageReceiver
+	Init() IMessageReceiver
 	Send(*SMessage)
-	Recv() (*SMessage, bool)
+	Recv(string) (*SMessage, bool)
 }

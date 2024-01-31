@@ -1,15 +1,16 @@
 package receiver
 
-import "sync"
+import (
+	"sync"
+)
 
 var (
 	_ IMessageReceiver = &sMessageReceiver{}
 )
 
 type sMessageReceiver struct {
-	fMutex   sync.Mutex
-	fQueue   chan *SMessage
-	fAddress string
+	fMutex sync.Mutex
+	fQueue chan *SMessage
 }
 
 func NewMessageReceiver() IMessageReceiver {
@@ -18,30 +19,27 @@ func NewMessageReceiver() IMessageReceiver {
 	}
 }
 
-func (p *sMessageReceiver) Init(pAddress string) IMessageReceiver {
+func (p *sMessageReceiver) Init() IMessageReceiver {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fAddress = pAddress
+	close(p.fQueue)
+	p.fQueue = make(chan *SMessage)
 	return p
 }
 
-func (p *sMessageReceiver) Recv() (*SMessage, bool) {
+func (p *sMessageReceiver) Recv(pAddress string) (*SMessage, bool) {
 	msg, ok := <-p.fQueue
-	if !ok {
-		return nil, false
-	}
 
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if msg.FAddress != p.fAddress {
-		return nil, false
-	}
-
-	return msg, true
+	return msg, ok && msg.FAddress == pAddress
 }
 
 func (p *sMessageReceiver) Send(msg *SMessage) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
 	p.fQueue <- msg
 }

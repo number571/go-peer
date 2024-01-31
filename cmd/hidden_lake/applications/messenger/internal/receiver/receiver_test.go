@@ -12,7 +12,7 @@ func TestMessageReceiver(t *testing.T) {
 	addr := "address"
 	msgInfo := "msg_info"
 
-	msgReceiver := NewMessageReceiver().Init(addr)
+	msgReceiver := NewMessageReceiver().Init()
 
 	go func() {
 		msgReceiver.Send(&SMessage{
@@ -23,7 +23,7 @@ func TestMessageReceiver(t *testing.T) {
 		})
 	}()
 
-	msg, ok := msgReceiver.Recv()
+	msg, ok := msgReceiver.Recv(addr)
 	if !ok {
 		t.Error("got not ok recv")
 		return

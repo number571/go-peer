@@ -5,26 +5,24 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var (
-	gReceiver = receiver.NewMessageReceiver()
-)
+func FriendsChatWS(pReceiver receiver.IMessageReceiver) func(pWS *websocket.Conn) {
+	return func(pWS *websocket.Conn) {
+		defer pWS.Close()
 
-func FriendsChatWS(pWS *websocket.Conn) {
-	defer pWS.Close()
-
-	subscribe := new(receiver.SMessage)
-	if err := websocket.JSON.Receive(pWS, subscribe); err != nil {
-		return
-	}
-
-	gReceiver.Init(subscribe.FAddress)
-	for {
-		msg, ok := gReceiver.Recv()
-		if !ok {
+		subscribe := new(receiver.SMessage)
+		if err := websocket.JSON.Receive(pWS, subscribe); err != nil {
 			return
 		}
-		if err := websocket.JSON.Send(pWS, msg); err != nil {
-			return
+
+		pReceiver.Init()
+		for {
+			msg, ok := pReceiver.Recv(subscribe.FAddress)
+			if !ok {
+				return
+			}
+			if err := websocket.JSON.Send(pWS, msg); err != nil {
+				return
+			}
 		}
 	}
 }
