@@ -271,7 +271,6 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			actionKey := newActionKey(sender, head.getAction())
 			action, ok := p.getAction(actionKey)
 			if !ok {
-				fmt.Println(actionKey)
 				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseGetResponse))
 				return nil
 			}
