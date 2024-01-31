@@ -1,5 +1,6 @@
 settings:
   messages_capacity: 2048
+  pseudonym: "Group"
   share_enabled: true
 logging:
 - info
@@ -9,4 +10,3 @@ address:
   interface: localhost:4040
   incoming: localhost:4041
 connection: localhost:4572
-pseudonym: "Group"

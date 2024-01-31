@@ -86,7 +86,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			dbMsg := database.NewMessage(false, pCfg.GetPseudonym(), msgBytes)
+			dbMsg := database.NewMessage(false, pCfg.GetSettings().GetPseudonym(), msgBytes)
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				ErrorPage(pLogger, pCfg, "push_message", "add message to database")(pW, pR)
 				return
@@ -216,7 +216,7 @@ func sendMessage(
 		hlm_client.NewBuilder(),
 		hlm_client.NewRequester(pClient),
 	)
-	return hlmClient.PushMessage(pAliasName, pCfg.GetPseudonym(), requestID, pMsgBytes)
+	return hlmClient.PushMessage(pAliasName, pCfg.GetSettings().GetPseudonym(), requestID, pMsgBytes)
 }
 
 func getReceiverPubKey(client hls_client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {

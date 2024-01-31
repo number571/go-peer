@@ -33,13 +33,13 @@ func TestApp(t *testing.T) {
 		FSettings: &config.SConfigSettings{
 			FMessagesCapacity: testutils.TCCapacity,
 			FWorkSizeBits:     testutils.TCWorkSize,
+			FPseudonym:        "test_pseudonym",
 		},
 		FAddress: &config.SAddress{
 			FInterface: testutils.TgAddrs[57],
 			FIncoming:  testutils.TgAddrs[58],
 		},
 		FConnection: "test_connection",
-		FPseudonym:  "test_pseudonym",
 	})
 	if err != nil {
 		t.Error(err)

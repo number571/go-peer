@@ -42,15 +42,15 @@ func (p *sEditor) UpdatePseudonym(pPseudonym string) error {
 	}
 
 	cfg := icfg.(*SConfig)
-	cfg.FPseudonym = pPseudonym
+	cfg.FSettings.FPseudonym = pPseudonym
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}
 
-	p.fConfig.fMutex.Lock()
-	defer p.fConfig.fMutex.Unlock()
+	p.fConfig.FSettings.fMutex.Lock()
+	defer p.fConfig.FSettings.fMutex.Unlock()
 
-	p.fConfig.FPseudonym = pPseudonym
+	p.fConfig.FSettings.FPseudonym = pPseudonym
 	return nil
 }
 

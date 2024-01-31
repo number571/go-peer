@@ -18,16 +18,16 @@ const (
   messages_capacity: %d
   share_enabled: true
   language: RUS
+  pseudonym: '%s'
+  storage_key: '%s'
 logging:
   - info
   - erro
-pseudonym: '%s'
 address:
   interface: '%s'
   incoming: '%s'
   pprof: '%s'
-connection: '%s'
-storage_key: '%s'`
+connection: '%s'`
 )
 
 const (
@@ -46,11 +46,11 @@ func testNewConfigString() string {
 		tcConfigTemplate,
 		tcMessagesCapacity,
 		tcPseudonym,
+		tcStorageKey,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
 		tcConnectionService,
-		tcStorageKey,
 	)
 }
 
@@ -85,6 +85,16 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
+	if cfg.GetSettings().GetStorageKey() != tcStorageKey {
+		t.Error("settings storage_key is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetPseudonym() != tcPseudonym {
+		t.Error("settings pseudonym is invalid")
+		return
+	}
+
 	if cfg.GetLogging().HasInfo() != tcLogging {
 		t.Error("logging.info is invalid")
 		return
@@ -97,11 +107,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetLogging().HasWarn() == tcLogging {
 		t.Error("logging.warn is invalid")
-		return
-	}
-
-	if cfg.GetPseudonym() != tcPseudonym {
-		t.Error("pseudonym is invalid")
 		return
 	}
 
@@ -125,8 +130,4 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetStorageKey() != tcStorageKey {
-		t.Error("storage_key is invalid")
-		return
-	}
 }

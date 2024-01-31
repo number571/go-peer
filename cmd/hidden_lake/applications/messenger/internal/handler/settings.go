@@ -116,7 +116,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		result := new(sSettings)
 		result.sTemplate = getTemplate(cfg)
 
-		result.FPseudonym = cfg.GetPseudonym()
+		result.FPseudonym = cfg.GetSettings().GetPseudonym()
 		result.FPublicKey = myPubKey.ToString()
 		result.FPublicKeyHash = myPubKey.GetHasher().ToString()
 

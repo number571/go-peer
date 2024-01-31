@@ -55,6 +55,8 @@ settings:
   messages_capacity: 2048
   share_enabled: false
   language: ENG
+  pseudonym: i4sRNRXw_qoCv-RCBF_VjZy8nnOKYafI
+  storage_key: u4Dz9PvNzn3DOItsrSWMODIrUwK5tmsw
 logging:
   - info
   - warn

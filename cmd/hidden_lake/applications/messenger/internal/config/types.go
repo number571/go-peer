@@ -17,17 +17,17 @@ type IEditor interface {
 
 type IConfig interface {
 	GetSettings() IConfigSettings
-	GetPseudonym() string
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
 	GetConnection() string
-	GetStorageKey() string
 }
 
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
 	GetWorkSizeBits() uint64
 	GetShareEnabled() bool
+	GetPseudonym() string
+	GetStorageKey() string
 	GetLanguage() language.ILanguage
 }
 

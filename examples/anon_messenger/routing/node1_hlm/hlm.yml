@@ -1,5 +1,6 @@
 settings:
   messages_capacity: 2048
+  pseudonym: "Alice"
 logging:
 - info
 - warn
@@ -8,4 +9,4 @@ address:
   interface: localhost:8080
   incoming: localhost:8081
 connection: localhost:8572
-pseudonym: "Alice"
+

@@ -1,11 +1,11 @@
 settings:
   messages_capacity: 2048
+  pseudonym: Bob
   language: ENG
 logging:
 - info
 - warn
 - erro
-pseudonym: Bob
 address:
   interface: localhost:7070
   incoming: localhost:7071

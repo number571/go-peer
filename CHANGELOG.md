@@ -9,6 +9,7 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger|filesharer`: move config option 'language' to settings
+- Update `cmd/hidden_lake/applications/messenger`: move config options 'pseudonym', 'storage_key' to settings
 
 ### BUG FIXES
 

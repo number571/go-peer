@@ -13,7 +13,7 @@ func (p *sApp) initDatabase() error {
 	sett := storage.NewSettings(&storage.SSettings{
 		FPath:     fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
 		FWorkSize: p.fConfig.GetSettings().GetWorkSizeBits(),
-		FPassword: p.fConfig.GetStorageKey(),
+		FPassword: p.fConfig.GetSettings().GetStorageKey(),
 	})
 	db, err := database.NewKeyValueDB(sett)
 	if err != nil {

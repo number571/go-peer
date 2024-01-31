@@ -20,17 +20,17 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
 				FWorkSizeBits:     hlm_settings.CDefaultWorkSizeBits,
 				FShareEnabled:     hlm_settings.CDefaultShareEnabled,
+				FPseudonym:        random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
+				FStorageKey:       random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 				FLanguage:         hlm_settings.CDefaultLanguage,
 			},
-			FLogging:   []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
-			FPseudonym: random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
+			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{
 				FInterface: hlm_settings.CDefaultInterfaceAddress,
 				FIncoming:  hlm_settings.CDefaultIncomingAddress,
 				FPPROF:     "",
 			},
 			FConnection: hls_settings.CDefaultHTTPAddress,
-			FStorageKey: random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

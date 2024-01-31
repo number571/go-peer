@@ -1,5 +1,6 @@
 settings:
   messages_capacity: 2048
+  pseudonym: "Carol"
   language: ENG
 logging:
 - info
@@ -9,4 +10,3 @@ address:
   interface: localhost:6060
   incoming: localhost:6061
 connection: localhost:6572
-pseudonym: "Carol"

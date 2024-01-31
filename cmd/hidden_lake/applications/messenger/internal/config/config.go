@@ -22,6 +22,8 @@ type SConfigSettings struct {
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
 	FShareEnabled     bool   `yaml:"share_enabled,omitempty"`
+	FPseudonym        string `yaml:"pseudonym"`
+	FStorageKey       string `yaml:"storage_key,omitempty"`
 	FLanguage         string `yaml:"language,omitempty"`
 
 	fMutex    sync.Mutex
@@ -32,13 +34,10 @@ type SConfig struct {
 	FSettings *SConfigSettings `yaml:"settings"`
 
 	FLogging    []string  `yaml:"logging,omitempty"`
-	FPseudonym  string    `yaml:"pseudonym"`
-	FStorageKey string    `yaml:"storage_key,omitempty"`
 	FAddress    *SAddress `yaml:"address"`
 	FConnection string    `yaml:"connection"`
 
 	fFilepath string
-	fMutex    sync.Mutex
 	fLogging  *sLogging
 }
 
@@ -106,6 +105,17 @@ func (p *SConfigSettings) GetShareEnabled() bool {
 	return p.FShareEnabled
 }
 
+func (p *SConfigSettings) GetPseudonym() string {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.FPseudonym
+}
+
+func (p *SConfigSettings) GetStorageKey() string {
+	return p.FStorageKey
+}
+
 func (p *SConfigSettings) GetLanguage() language.ILanguage {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
@@ -124,7 +134,7 @@ func (p *SConfigSettings) loadLanguage() error {
 
 func (p *SConfig) isValid() bool {
 	return true &&
-		utils.PseudonymIsValid(p.FPseudonym) &&
+		utils.PseudonymIsValid(p.FSettings.FPseudonym) &&
 		p.FConnection != "" &&
 		p.FAddress.FInterface != "" &&
 		p.FAddress.FIncoming != "" &&
@@ -177,23 +187,12 @@ func (p *SConfig) loadLogging() error {
 	return nil
 }
 
-func (p *SConfig) GetPseudonym() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	return p.FPseudonym
-}
-
 func (p *SConfig) GetAddress() IAddress {
 	return p.FAddress
 }
 
 func (p *SConfig) GetConnection() string {
 	return p.FConnection
-}
-
-func (p *SConfig) GetStorageKey() string {
-	return p.FStorageKey
 }
 
 func (p *SAddress) GetInterface() string {

@@ -1,7 +1,7 @@
 settings:
   messages_capacity: 2048
+  pseudonym: Bob
   language: ENG
-pseudonym: Bob
 address:
   interface: localhost:7070
   incoming: localhost:7071
