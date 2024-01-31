@@ -1,6 +1,6 @@
 settings:
   messages_capacity: 2048
-  pseudonym: Alice
+  pseudonym: 222Alice
   language: ENG
 address:
   interface: localhost:8080
