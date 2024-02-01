@@ -75,12 +75,3 @@ $ ./hlc -path=/root -key=/root/priv.key -parallel=1
 "logging"  Enable loggins in/out actions in the network
 "services" Names of Hidden Lake services 
 ```
-
-```yaml
-logging:
-- info
-- warn
-- erro
-services:
-- hidden-lake-service
-```
