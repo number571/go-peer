@@ -14,7 +14,7 @@ func TestPanicFlagValue(t *testing.T) {
 	argsSlice := []string{
 		"--key",
 	}
-	_ = getFlagValueBySlice(argsSlice, "key", "_")
+	_ = GetFlagValue(argsSlice, "key", "_")
 }
 
 func TestBoolFlagValue(t *testing.T) {
@@ -26,32 +26,32 @@ func TestBoolFlagValue(t *testing.T) {
 		"value", "571",
 	}
 
-	if !getBoolFlagValueBySlice(argsSlice, "key") {
+	if !GetBoolFlagValue(argsSlice, "key") {
 		t.Error("!key")
 		return
 	}
 
-	if !getBoolFlagValueBySlice(argsSlice, "123") {
+	if !GetBoolFlagValue(argsSlice, "123") {
 		t.Error("!123")
 		return
 	}
 
-	if !getBoolFlagValueBySlice(argsSlice, "name") {
+	if !GetBoolFlagValue(argsSlice, "name") {
 		t.Error("!name")
 		return
 	}
 
-	if !getBoolFlagValueBySlice(argsSlice, "value") {
+	if !GetBoolFlagValue(argsSlice, "value") {
 		t.Error("!value")
 		return
 	}
 
-	if !getBoolFlagValueBySlice(argsSlice, "571") {
+	if !GetBoolFlagValue(argsSlice, "571") {
 		t.Error("!571")
 		return
 	}
 
-	if getBoolFlagValueBySlice(argsSlice, "undefined") {
+	if GetBoolFlagValue(argsSlice, "undefined") {
 		t.Error("success get undefined value")
 		return
 	}
@@ -70,37 +70,37 @@ func TestFlagValue(t *testing.T) {
 		"--zxcvb=!@#$%",
 	}
 
-	if getFlagValueBySlice(argsSlice, "key", "1") != "123" {
+	if GetFlagValue(argsSlice, "key", "1") != "123" {
 		t.Error("key != 123")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "name", "2") != "number" {
+	if GetFlagValue(argsSlice, "name", "2") != "number" {
 		t.Error("name != number")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "value", "3") != "571" {
+	if GetFlagValue(argsSlice, "value", "3") != "571" {
 		t.Error("value != 571")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "asdfg", "4") != "12345" {
+	if GetFlagValue(argsSlice, "asdfg", "4") != "12345" {
 		t.Error("asdfg != 12345")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "qwerty", "5") != "67890" {
+	if GetFlagValue(argsSlice, "qwerty", "5") != "67890" {
 		t.Error("qwerty != 67890")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "zxcvb", "6") != "!@#$%" {
+	if GetFlagValue(argsSlice, "zxcvb", "6") != "!@#$%" {
 		t.Error("zxcvb != !@#$%")
 		return
 	}
 
-	if getFlagValueBySlice(argsSlice, "unknown", "7") != "7" {
+	if GetFlagValue(argsSlice, "unknown", "7") != "7" {
 		t.Error("unknown != 7")
 		return
 	}

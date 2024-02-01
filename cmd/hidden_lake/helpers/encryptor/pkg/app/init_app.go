@@ -15,8 +15,8 @@ import (
 )
 
 // initApp work with the raw data = read files, read args
-func InitApp(pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
-	strParallel := flag.GetFlagValue("parallel", fmt.Sprintf("%d", pParallel))
+func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
+	strParallel := flag.GetFlagValue(pArgs, "parallel", fmt.Sprintf("%d", pParallel))
 	setParallel, err := strconv.Atoi(strParallel)
 	if err != nil {
 		return nil, fmt.Errorf("set parallel: %w", err)
@@ -25,8 +25,8 @@ func InitApp(pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner,
 		return nil, errors.New("set parallel = 0")
 	}
 
-	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
-	inputKey := flag.GetFlagValue("key", pDefaultKey)
+	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
+	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
 
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathYML), nil)
 	if err != nil {

@@ -15,12 +15,14 @@ import (
 )
 
 func main() {
-	if flag.GetBoolFlagValue("version") {
+	args := os.Args[1:]
+
+	if flag.GetBoolFlagValue(args, "version") {
 		fmt.Println(gopeer.CVersion)
 		return
 	}
 
-	app, err := app.InitApp(".")
+	app, err := app.InitApp(args, ".")
 	if err != nil {
 		panic(err)
 	}

@@ -27,14 +27,14 @@ const (
 	servicesCount = 6
 )
 
-func InitApp(pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
-	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
+func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
+	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	runners, err := getRunners(cfg, pDefaultPath, pDefaultKey, pParallel)
+	runners, err := getRunners(cfg, pArgs, pDefaultPath, pDefaultKey, pParallel)
 	if err != nil {
 		return nil, fmt.Errorf("get runners: %w", err)
 	}
@@ -42,7 +42,7 @@ func InitApp(pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner,
 	return NewApp(cfg, runners), nil
 }
 
-func getRunners(pCfg config.IConfig, pDefaultPath, pDefaultKey string, pParallel uint64) ([]types.IRunner, error) {
+func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) ([]types.IRunner, error) {
 	runners := make([]types.IRunner, 0, servicesCount)
 
 	var (
@@ -53,17 +53,17 @@ func getRunners(pCfg config.IConfig, pDefaultPath, pDefaultKey string, pParallel
 	for _, sName := range pCfg.GetServices() {
 		switch sName {
 		case hls_settings.CTitlePattern:
-			runner, err = hls_app.InitApp(pDefaultPath, pDefaultKey, pParallel)
+			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
 		case hlt_settings.CTitlePattern:
-			runner, err = hlt_app.InitApp(pDefaultPath)
+			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
 		case hle_settings.CTitlePattern:
-			runner, err = hle_app.InitApp(pDefaultPath, pDefaultKey, pParallel)
+			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
 		case hll_settings.CTitlePattern:
-			runner, err = hll_app.InitApp(pDefaultPath)
+			runner, err = hll_app.InitApp(pArgs, pDefaultPath)
 		case hlm_settings.CTitlePattern:
-			runner, err = hlm_app.InitApp(pDefaultPath)
+			runner, err = hlm_app.InitApp(pArgs, pDefaultPath)
 		case hlf_settings.CTitlePattern:
-			runner, err = hlf_app.InitApp(pDefaultPath)
+			runner, err = hlf_app.InitApp(pArgs, pDefaultPath)
 		default:
 			return nil, fmt.Errorf("unknown service %s", sName)
 		}

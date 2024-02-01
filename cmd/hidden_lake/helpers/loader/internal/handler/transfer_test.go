@@ -38,7 +38,7 @@ func testCreateHLT(netMsgSettings net_message.ISettings, path, addr string) (typ
 		return nil, cancel, nil, err
 	}
 
-	app1, err := hls_app.InitApp(path)
+	app1, err := hls_app.InitApp([]string{}, path)
 	if err != nil {
 		return nil, cancel, nil, err
 	}

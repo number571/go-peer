@@ -9,6 +9,8 @@
 7. Append Batch's to database
 8. Config logging structure -> move to internal/
 9. HLC: append ports to dockerfile
+10. Rewrite some examples into HLC implementation
+11. Custom Unmarshal with fields 
 
 ### Tests
 

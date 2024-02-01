@@ -15,12 +15,14 @@ import (
 )
 
 func main() {
-	if flag.GetBoolFlagValue("version") {
+	args := os.Args[1:]
+
+	if flag.GetBoolFlagValue(args, "version") {
 		fmt.Println(gopeer.CVersion)
 		return
 	}
 
-	app, err := app.InitApp(".", "./priv.key", 1)
+	app, err := app.InitApp(args, ".", "./priv.key", 1)
 	if err != nil {
 		panic(err)
 	}
