@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/composites`: rewriting composites -> composite
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger|filesharer`: move config option 'language' to settings
