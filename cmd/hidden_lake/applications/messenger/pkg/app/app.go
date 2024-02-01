@@ -107,11 +107,10 @@ func (p *sApp) enable(_ context.Context) state.IStateF {
 
 func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IStateF {
 	return func() error {
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlm_settings.CServiceName))
-
 		pCancel()
 		pWg.Wait() // wait canceled context
 
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlm_settings.CServiceName))
 		return p.stop()
 	}
 }

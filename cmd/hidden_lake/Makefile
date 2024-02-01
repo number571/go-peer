@@ -18,12 +18,12 @@ _TEST_PPROF_PATH=./_test/pprof
 default: build 
 build:
 	make -C ./service build
-	make -C ./composites build
+	make -C ./composite build
 	make -C ./applications build
 	make -C ./helpers build
 clean:
 	make -C ./service clean
-	make -C ./composites clean
+	make -C ./composite clean
 	make -C ./applications clean
 	make -C ./helpers clean
 

@@ -76,12 +76,11 @@ $ go get github.com/number571/go-peer
 
 All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `darwin`} OS as pattern = `appname_arch_os`. In total, one application is compiled into six versions. The entire list of releases can be found here: [github.com/number571/go-peer/releases](https://github.com/number571/go-peer/releases "releases"). 
 
-Some final applications are compositions of other applications. Due to this, such applications are named in a slightly different way. Designation of abbreviations:
+## Supported platforms
 
-1. `hlc` - Hidden Lake Composites
-2. `hlc_sm` - Composite of HLS (service) + HLM (messenger)
-3. `hlc_st` - Composite of HLS + HLT (traffic)
-4. `hlc_stm` - Composite of HLS + HLT + HLM
+- Windows (x86_64, arm64)
+- Linux (x86_64, arm64)
+- MacOS (x86_64, arm64)
 
 ## Dependencies
 
@@ -123,6 +122,7 @@ Also, the composition of these works can be found in the book `The general theor
 5. [Hidden Lake Loader](#5-hidden-lake-loader) 
 6. [Hidden Lake Encryptor](#6-hidden-lake-encryptor) 
 7. [Hidden Lake Adapters](#7-hidden-lake-adapters) 
+8. [Hidden Lake Composite](#8-hidden-lake-composite) 
 
 ## 1. Hidden Lake Service
 
@@ -165,12 +165,6 @@ Data exchange between network participants is carried out using application serv
 <p align="center">Figure 3. Interaction of third-party services with the traffic anonymization service.</p>
 
 As shown in the figure above, HLS acts as an anonymizer and handlers of incoming and outgoing traffic. The remaining parts in the form of applications and services depend on third-party components (as an example, `HLM`).
-
-### Supported platforms
-
-- Windows (x86_64, arm64)
-- Linux (x86_64, arm64)
-- MacOS (x86_64, arm64)
 
 ### Minimum system requirements
 
@@ -349,12 +343,6 @@ Most of the code is a call to API functions from the HLS kernel. Thanks to this 
 
 However, there are additional features aimed at the security of the HLM application itself. All messages are stored in a local database in encrypted form with a key formed from `storage_key` param.
 
-### Supported platforms
-
-- Windows (x86_64, arm64)
-- Linux (x86_64, arm64)
-- MacOS (x86_64, arm64)
-
 ### Build and run
 
 Default build and run
@@ -454,12 +442,6 @@ Unlike applications such as HLS, HLT, and HLM, the HLF application does not have
 
 File transfer is limited by the bandwidth of HLS itself. If we take into account that the packet generation period is `5 seconds`, then it will take about 10 seconds to complete the request-response cycle. HLS also limits the size of transmitted packets. If we assume that the limit is `8KiB`, taking into account the existing ~4KiB headers, then the transfer rate is defined as `4KiB/10s` or `410B/1s`.
 
-### Supported platforms
-
-- Windows (x86_64, arm64)
-- Linux (x86_64, arm64)
-- MacOS (x86_64, arm64)
-
 ### Build and run
 
 Default build and run
@@ -540,12 +522,6 @@ HLT emulates HLS to receive messages. In this scenario, HLT has only the functio
 
 <p align="center"><img src="cmd/hidden_lake/helpers/traffic/_images/hlt_client.gif" alt="hlt_client.gif"/></p>
 <p align="center">Figure 11. Example of running HLT client.</p>
-
-### Supported platforms
-
-- Windows (x86_64, arm64)
-- Linux (x86_64, arm64)
-- MacOS (x86_64, arm64)
 
 ### Minimum system requirements
 
@@ -819,6 +795,55 @@ There are no external differences, but there are internal ones. While the origin
 <p align="center">Figure 15. Example of running HLA client.</p>
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
+
+## 8. Hidden Lake Composite
+
+> [github.com/number571/go-peer/cmd/hidden_lake/composite](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/composite "HLC")
+
+<img src="cmd/hidden_lake/composite/_images/hlc_logo.png" alt="hlc_logo.png"/>
+
+The `Hidden Lake Composite` combines several HL type's services into one application using startup config.
+
+### How it works
+
+The application HLC includes the download of all Hidden Lake services, and runs only the configurations selected by names in the file. The exact names of the services can be found in their `pkg/settings/settings.go` configuration files.
+
+### Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/composite
+$ make build # create hlc, hlc_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hlc
+
+> [INFO] 2023/12/03 02:12:51 HLC is running...
+> ...
+```
+
+Creates `./hlc.yml` or `./_mounted/hlc.yml` (docker) file.
+
+Default config `hlc.yml`
+
+```yaml
+logging:
+- info
+- warn
+- erro
+services:
+- hidden-lake-service
+```
+
+Build and run with docker
+
+```bash 
+$ cd ./cmd/hidden_lake/composite
+$ make docker-build 
+$ make docker-run
+
+> [INFO] 2023/12/02 19:15:44 HLC is running...
+> ...
+```
 
 ## Deprecated applications
 

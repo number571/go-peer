@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	app, err := app.InitApp(".", "./priv.key")
+	app, err := app.InitApp(".", "./priv.key", 1)
 	if err != nil {
 		panic(err)
 	}

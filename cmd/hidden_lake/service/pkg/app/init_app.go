@@ -11,13 +11,13 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/types"
 
-	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 // initApp work with the raw data = read files, read args
-func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
-	strParallel := flag.GetFlagValue("parallel", "1")
+func InitApp(pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
+	strParallel := flag.GetFlagValue("parallel", fmt.Sprintf("%d", pParallel))
 	setParallel, err := strconv.Atoi(strParallel)
 	if err != nil {
 		return nil, fmt.Errorf("set parallel: %w", err)
@@ -29,7 +29,7 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue("path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue("key", pDefaultKey)
 
-	cfg, err := pkg_config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathYML), nil)
+	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
@@ -46,7 +46,7 @@ func InitApp(pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 	return NewApp(cfg, privKey, inputPath, uint64(setParallel)), nil
 }
 
-func getPrivKey(pCfg pkg_config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
+func getPrivKey(pCfg config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
 	if _, err := os.Stat(pKeyPath); os.IsNotExist(err) {
 		privKey := asymmetric.NewRSAPrivKey(pCfg.GetSettings().GetKeySizeBits())
 		if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o600); err != nil {
