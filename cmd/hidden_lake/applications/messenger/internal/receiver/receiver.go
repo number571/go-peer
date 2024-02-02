@@ -15,7 +15,7 @@ type sMessageReceiver struct {
 
 func NewMessageReceiver() IMessageReceiver {
 	return &sMessageReceiver{
-		fQueue: make(chan *SMessage),
+		fQueue: make(chan *SMessage, 1),
 	}
 }
 
@@ -24,7 +24,7 @@ func (p *sMessageReceiver) Init() IMessageReceiver {
 	defer p.fMutex.Unlock()
 
 	close(p.fQueue)
-	p.fQueue = make(chan *SMessage)
+	p.fQueue = make(chan *SMessage, 1)
 	return p
 }
 
