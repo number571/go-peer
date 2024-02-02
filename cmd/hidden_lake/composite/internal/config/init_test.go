@@ -70,7 +70,7 @@ func TestInit(t *testing.T) {
 		return
 	}
 
-	if config3.GetServices()[0] != hls_settings.CTitlePattern {
+	if config3.GetServices()[0] != hls_settings.CServiceFullName {
 		t.Error("got invalid field with exist config (3)")
 		return
 	}

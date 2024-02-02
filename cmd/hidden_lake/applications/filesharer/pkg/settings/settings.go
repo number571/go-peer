@@ -1,8 +1,8 @@
 package settings
 
 const (
-	CServiceName  = "HLF"
-	CTitlePattern = "hidden-lake-filesharer"
+	CServiceName     = "HLF"
+	CServiceFullName = "hidden-lake-filesharer"
 )
 
 const (

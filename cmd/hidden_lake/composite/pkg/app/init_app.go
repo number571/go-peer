@@ -52,17 +52,17 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 
 	for _, sName := range pCfg.GetServices() {
 		switch sName {
-		case hls_settings.CTitlePattern:
+		case hls_settings.CServiceFullName:
 			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
-		case hlt_settings.CTitlePattern:
+		case hlt_settings.CServiceFullName:
 			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
-		case hle_settings.CTitlePattern:
+		case hle_settings.CServiceFullName:
 			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
-		case hll_settings.CTitlePattern:
+		case hll_settings.CServiceFullName:
 			runner, err = hll_app.InitApp(pArgs, pDefaultPath)
-		case hlm_settings.CTitlePattern:
+		case hlm_settings.CServiceFullName:
 			runner, err = hlm_app.InitApp(pArgs, pDefaultPath)
-		case hlf_settings.CTitlePattern:
+		case hlf_settings.CServiceFullName:
 			runner, err = hlf_app.InitApp(pArgs, pDefaultPath)
 		default:
 			return nil, fmt.Errorf("unknown service %s", sName)

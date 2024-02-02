@@ -19,7 +19,7 @@ func NewBuilder() IBuilder {
 }
 
 func (p *sBuilder) PushMessage(pPseudonym, pRequestID string, pBody []byte) hls_request.IRequest {
-	return hls_request.NewRequest(http.MethodPost, hlm_settings.CTitlePattern, hlm_settings.CPushPath).
+	return hls_request.NewRequest(http.MethodPost, hlm_settings.CServiceFullName, hlm_settings.CPushPath).
 		WithHead(map[string]string{
 			"Content-Type":                "application/json",
 			hlm_settings.CHeaderPseudonym: pPseudonym,

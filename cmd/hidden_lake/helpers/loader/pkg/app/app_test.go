@@ -71,7 +71,7 @@ func TestApp(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if index != pkg_settings.CTitlePattern {
+	if index != pkg_settings.CServiceFullName {
 		t.Errorf("public keys are not equals")
 		return
 	}

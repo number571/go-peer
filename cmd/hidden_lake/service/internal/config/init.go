@@ -35,10 +35,10 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FHTTP: hls_settings.CDefaultHTTPAddress,
 			},
 			FServices: map[string]*SService{
-				hlm_settings.CTitlePattern: {
+				hlm_settings.CServiceFullName: {
 					FHost: hlm_settings.CDefaultIncomingAddress,
 				},
-				hlf_settings.CTitlePattern: {
+				hlf_settings.CServiceFullName: {
 					FHost: hlf_settings.CDefaultIncomingAddress,
 				},
 			},

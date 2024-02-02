@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	CServiceName  = "HLS"
-	CTitlePattern = "hidden-lake-service"
+	CServiceName     = "HLS"
+	CServiceFullName = "hidden-lake-service"
 )
 
 const (

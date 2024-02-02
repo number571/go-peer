@@ -1,8 +1,8 @@
 package settings
 
 const (
-	CServiceName  = "HLC"
-	CTitlePattern = "hidden-lake-composite"
+	CServiceName     = "HLC"
+	CServiceFullName = "hidden-lake-composite"
 )
 
 const (

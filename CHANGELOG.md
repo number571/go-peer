@@ -17,6 +17,7 @@
 - Update `cmd/hidden_lake/applications/messenger`: move config options 'pseudonym', 'storage_key' to settings
 - Update `internal/flag`: delete os.Args implementations
 - Update `pkg/network/conn_keeper`: rename to connkeeper
+- Update `cmd/hidden_lake`: rename CTitlePattern -> CServiceFullName
 
 ### BUG FIXES
 

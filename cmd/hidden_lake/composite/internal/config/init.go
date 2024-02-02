@@ -14,7 +14,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FLogging:  []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
-			FServices: []string{hls_settings.CTitlePattern},
+			FServices: []string{hls_settings.CServiceFullName},
 		}
 	}
 	return BuildConfig(cfgPath, initCfg)

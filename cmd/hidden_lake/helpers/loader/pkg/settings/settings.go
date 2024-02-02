@@ -1,8 +1,8 @@
 package settings
 
 const (
-	CServiceName  = "HLL"
-	CTitlePattern = "hidden-lake-loader"
+	CServiceName     = "HLL"
+	CServiceFullName = "hidden-lake-loader"
 )
 
 const (

@@ -1,8 +1,8 @@
 package settings
 
 const (
-	CServiceName  = "HLT"
-	CTitlePattern = "hidden-lake-traffic"
+	CServiceName     = "HLT"
+	CServiceFullName = "hidden-lake-traffic"
 )
 
 const (

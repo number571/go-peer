@@ -1,8 +1,8 @@
 package settings
 
 const (
-	CServiceName  = "HLE"
-	CTitlePattern = "hidden-lake-encryptor"
+	CServiceName     = "HLE"
+	CServiceFullName = "hidden-lake-encryptor"
 )
 
 const (

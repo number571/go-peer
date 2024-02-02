@@ -52,7 +52,7 @@ func (p *sRequester) GetIndex() (string, error) {
 	}
 
 	result := string(res)
-	if result != hls_settings.CTitlePattern {
+	if result != hls_settings.CServiceFullName {
 		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
 	}
 

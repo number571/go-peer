@@ -85,7 +85,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	if title != hlt_settings.CTitlePattern {
+	if title != hlt_settings.CServiceFullName {
 		t.Error("title is incorrect")
 		return
 	}

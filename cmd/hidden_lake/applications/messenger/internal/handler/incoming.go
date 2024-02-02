@@ -121,7 +121,7 @@ func HandleIncomigHTTP(
 		})
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, hlm_settings.CTitlePattern)
+		api.Response(pW, http.StatusOK, hlm_settings.CServiceFullName)
 	}
 }
 
