@@ -1,7 +1,6 @@
 package utils
 
 import (
-	_ "embed"
 	"encoding/json"
 	"strings"
 	"unicode"

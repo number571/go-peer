@@ -33,14 +33,14 @@ func (p *tsConn) ReadMessage(context.Context, chan<- struct{}) (net_message.IMes
 
 type tsNetConn struct{}
 
-func (p *tsNetConn) Read(b []byte) (n int, err error)   { return 0, nil }
-func (p *tsNetConn) Write(b []byte) (n int, err error)  { return 0, nil }
+func (p *tsNetConn) Read(_ []byte) (n int, err error)   { return 0, nil }
+func (p *tsNetConn) Write(_ []byte) (n int, err error)  { return 0, nil }
 func (p *tsNetConn) Close() error                       { return nil }
 func (p *tsNetConn) LocalAddr() net.Addr                { return &tsAddr{} }
 func (p *tsNetConn) RemoteAddr() net.Addr               { return &tsAddr{} }
-func (p *tsNetConn) SetDeadline(t time.Time) error      { return nil }
-func (p *tsNetConn) SetReadDeadline(t time.Time) error  { return nil }
-func (p *tsNetConn) SetWriteDeadline(t time.Time) error { return nil }
+func (p *tsNetConn) SetDeadline(_ time.Time) error      { return nil }
+func (p *tsNetConn) SetReadDeadline(_ time.Time) error  { return nil }
+func (p *tsNetConn) SetWriteDeadline(_ time.Time) error { return nil }
 
 type tsAddr struct{}
 

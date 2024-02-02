@@ -57,7 +57,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	pldBytes := msgBytes[encoding.CSizeUint64+hashing.CSHA256Size:]
 
 	proofArray := [encoding.CSizeUint64]byte{}
-	copy(proofArray[:], proofBytes[:])
+	copy(proofArray[:], proofBytes)
 
 	proof := encoding.BytesToUint64(proofArray)
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())

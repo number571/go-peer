@@ -13,7 +13,7 @@ func TestSHA256(t *testing.T) {
 		return
 	}
 
-	msg[3] = msg[3] ^ 8
+	msg[3] ^= 8
 	if hash == NewSHA256Hasher(msg).ToString() {
 		t.Error("bit didn't change the result ")
 		return
@@ -32,7 +32,7 @@ func TestHMACSHA256(t *testing.T) {
 		return
 	}
 
-	msg[3] = msg[3] ^ 8
+	msg[3] ^= 8
 	if hash == NewHMACSHA256Hasher(key, msg).ToString() {
 		t.Error("bit didn't change the result")
 		return

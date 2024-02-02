@@ -34,7 +34,7 @@ func (p *sListPubKeys) GetPubKeys() []IPubKey {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	var list []IPubKey
+	list := make([]IPubKey, 0, len(p.fMapping))
 	for _, pub := range p.fMapping {
 		list = append(list, pub)
 	}

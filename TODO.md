@@ -11,7 +11,8 @@
 9. HLC: append ports to dockerfile
 10. Rewrite some examples into HLC implementation
 11. Custom Unmarshal with fields 
-12. golangci-lint run --help
+12. Rename conn_keeper -> connkeeper
+13. golint: "errcheck,errorlint,goerr113,wrapcheck", "cyclop,funlen,gocognit,gocyclo,maintidx,nestif", 
 
 ### Tests
 

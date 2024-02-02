@@ -117,7 +117,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		result.FNetworkKey = gotSettings.GetNetworkKey()
 
 		// append HLS connections to backup connections
-		allConns, err := getAllConnections(cfg, client)
+		allConns, err := getAllConnections(client)
 		if err != nil {
 			ErrorPage(pLogger, cfg, "get_all_connections", "get online connections")(pW, pR)
 			return
@@ -138,9 +138,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 	}
 }
 
-func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sConnection, error) {
-	var connections []sConnection
-
+func getAllConnections(pClient hls_client.IClient) ([]sConnection, error) {
 	conns, err := pClient.GetConnections()
 	if err != nil {
 		return nil, fmt.Errorf("error: read connections")
@@ -151,6 +149,7 @@ func getAllConnections(pConfig config.IConfig, pClient hls_client.IClient) ([]sC
 		return nil, fmt.Errorf("error: read online connections")
 	}
 
+	connections := make([]sConnection, 0, len(conns))
 	for _, c := range conns {
 		connections = append(
 			connections,

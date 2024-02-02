@@ -1,4 +1,4 @@
-package conn_keeper
+package conn_keeper // nolint: revive
 
 import "errors"
 

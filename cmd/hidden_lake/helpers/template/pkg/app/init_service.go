@@ -11,7 +11,6 @@ import (
 func (p *sApp) initServiceHTTP() {
 	mux := http.NewServeMux()
 
-	// TODO: need implementation
 	mux.HandleFunc(hl_t_settings.CHandleIndexPath, handler.HandleIndexAPI(p.fHTTPLogger))
 	mux.HandleFunc(hl_t_settings.CHandleConfigSettingsPath, handler.HandleConfigSettingsAPI(p.fConfig, p.fHTTPLogger))
 

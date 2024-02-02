@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -27,7 +26,12 @@ const (
 	cErrorLoadRequestID
 )
 
-func HandleNetworkRequestAPI(pCtx context.Context, pMutex *sync.Mutex, pConfig config.IConfig, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleNetworkRequestAPI(
+	pCtx context.Context,
+	pConfig config.IConfig,
+	pLogger logger.ILogger,
+	pNode anonymity.INode,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 

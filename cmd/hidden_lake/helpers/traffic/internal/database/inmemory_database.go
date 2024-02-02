@@ -40,7 +40,7 @@ func (p *sInMemoryDatabase) Pointer() uint64 {
 func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
 	key, ok := p.fLRUCache.GetKey(i)
 	if !ok {
-		return nil, GErrMessageIsNotExist
+		return nil, ErrMessageIsNotExist
 	}
 	return key, nil
 }
@@ -51,7 +51,7 @@ func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
 	}
 
 	if ok := p.fLRUCache.Set(pMsg.GetHash(), pMsg.ToBytes()); !ok {
-		return GErrMessageIsExist
+		return ErrMessageIsExist
 	}
 
 	return nil
@@ -64,7 +64,7 @@ func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 
 	msgBytes, ok := p.fLRUCache.Get(pHash)
 	if !ok {
-		return nil, GErrMessageIsNotExist
+		return nil, ErrMessageIsNotExist
 	}
 
 	msg, err := net_message.LoadMessage(p.fSettings, msgBytes)

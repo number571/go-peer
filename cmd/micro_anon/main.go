@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -109,7 +110,12 @@ func runQueue() {
 		encBytes := <-getQueue()
 		for _, conn := range connects {
 			go func(conn string) {
-				req, err := http.NewRequest(http.MethodPost, conn, bytes.NewBuffer(encBytes))
+				req, err := http.NewRequestWithContext(
+					context.Background(),
+					http.MethodPost,
+					conn,
+					bytes.NewBuffer(encBytes),
+				)
 				if err != nil {
 					panic(err)
 				}

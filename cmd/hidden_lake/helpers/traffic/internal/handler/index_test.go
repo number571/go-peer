@@ -67,8 +67,8 @@ func TestHandleIndexAPI(t *testing.T) {
 	addr := testutils.TgAddrs[21]
 	os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 
-	srv, connKeeper, cancel, db, hltClient := testAllRun(addr, "")
-	defer testAllFree(addr, srv, connKeeper, cancel, db)
+	srv, cancel, db, hltClient := testAllRun(addr)
+	defer testAllFree(addr, srv, cancel, db)
 
 	title, err := hltClient.GetIndex()
 	if err != nil {

@@ -17,7 +17,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -31,16 +30,20 @@ const (
 	tcNameHLT2 = tcTestData + "/hlt_2"
 )
 
-func testCreateHLT(netMsgSettings net_message.ISettings, path, addr string) (types.IRunner, context.CancelFunc, hlt_client.IClient, error) {
+func testCreateHLT(
+	netMsgSettings net_message.ISettings,
+	path string,
+	addr string,
+) (context.CancelFunc, hlt_client.IClient, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	if err := copyWithPaste(path, addr); err != nil {
-		return nil, cancel, nil, err
+		return cancel, nil, err
 	}
 
 	app1, err := hls_app.InitApp([]string{}, path)
 	if err != nil {
-		return nil, cancel, nil, err
+		return cancel, nil, err
 	}
 
 	go func() { _ = app1.Run(ctx) }()
@@ -55,7 +58,7 @@ func testCreateHLT(netMsgSettings net_message.ISettings, path, addr string) (typ
 		),
 	)
 
-	return app1, cancel, hltClient1, nil
+	return cancel, hltClient1, nil
 }
 
 func testInitTransfer() {
@@ -82,14 +85,14 @@ func TestHandleTransferAPI(t *testing.T) {
 		FNetworkKey:   testutils.TCNetworkKey,
 	})
 
-	_, cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)
+	cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer cancel1()
 
-	_, cancel2, hltClient2, err := testCreateHLT(netMsgSettings, tcNameHLT2, tgConsumer)
+	cancel2, hltClient2, err := testCreateHLT(netMsgSettings, tcNameHLT2, tgConsumer)
 	if err != nil {
 		t.Error(err)
 		return

@@ -25,8 +25,7 @@ func HandleConfigConnectsAPI(pCtx context.Context, pWrapper config.IWrapper, pLo
 			return
 		}
 
-		switch pR.Method {
-		case http.MethodGet:
+		if pR.Method == http.MethodGet {
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, pWrapper.GetConfig().GetConnections())
 			return

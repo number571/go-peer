@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -39,7 +40,7 @@ func initDB() database.IKVDatabase {
 	if _, err := db.Get([]byte(dataCountKey)); err == nil {
 		return db
 	}
-	if err := db.Set([]byte(dataCountKey), []byte(fmt.Sprintf("%d", 0))); err != nil {
+	if err := db.Set([]byte(dataCountKey), []byte(strconv.Itoa(0))); err != nil {
 		panic(err)
 	}
 	return db
@@ -125,7 +126,8 @@ func transferTraffic(db database.IKVDatabase, portService, portHLT int, hasLog b
 
 func loadMessageFromService(portService int, id uint64) (net_message.IMessage, error) {
 	// build request to service
-	req, err := http.NewRequest(
+	req, err := http.NewRequestWithContext(
+		context.Background(),
 		http.MethodGet,
 		fmt.Sprintf("%s:%d/load?data_id=%d", common.HostService, portService, id),
 		nil,
@@ -165,7 +167,8 @@ func loadMessageFromService(portService int, id uint64) (net_message.IMessage, e
 
 func loadCountFromService(portService int) (uint64, error) {
 	// build request to service
-	req, err := http.NewRequest(
+	req, err := http.NewRequestWithContext(
+		context.Background(),
 		http.MethodGet,
 		fmt.Sprintf("%s:%d/size", common.HostService, portService),
 		nil,
@@ -221,7 +224,7 @@ func incrementCountInDB(db database.IKVDatabase) error {
 		return err
 	}
 
-	if err := db.Set([]byte(dataCountKey), []byte(fmt.Sprintf("%d", count+1))); err != nil {
+	if err := db.Set([]byte(dataCountKey), []byte(strconv.FormatUint(count+1, 10))); err != nil {
 		return err
 	}
 

@@ -60,7 +60,7 @@ func (p *sDatabase) Hash(i uint64) ([]byte, error) {
 	messagesCapacity := p.Settings().GetMessagesCapacity()
 	hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
 	if err != nil {
-		return nil, GErrMessageIsNotExist
+		return nil, ErrMessageIsNotExist
 	}
 
 	return hash, nil
@@ -76,7 +76,7 @@ func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 
 	msgHash := pMsg.GetHash()
 	if _, err := p.fDB.Get(getKeyMessage(msgHash)); err == nil {
-		return GErrMessageIsExist
+		return ErrMessageIsExist
 	}
 
 	keyHash := getKeyHash(p.getPointer())
@@ -118,7 +118,7 @@ func (p *sDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 
 	data, err := p.fDB.Get(getKeyMessage(pHash))
 	if err != nil {
-		return nil, GErrMessageIsNotExist
+		return nil, ErrMessageIsNotExist
 	}
 
 	msg, err := net_message.LoadMessage(p.Settings(), data)

@@ -54,7 +54,7 @@ const (
 )
 ```
 
-The name of the global variables must begin with the prefix 'g' or 'G'.
+The name of the global variables must begin with the prefix 'g' or 'G'. The exception is errors with the prefix 'err' or 'Err'.
 ```go
 var (
     gInternalVariable = 1

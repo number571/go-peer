@@ -35,12 +35,12 @@ func (p *sSettings) GetPath() string {
 	return p.FPath
 }
 
-func (s *sSettings) GetMessagesCapacity() uint64 {
-	return s.FMessagesCapacity
+func (p *sSettings) GetMessagesCapacity() uint64 {
+	return p.FMessagesCapacity
 }
 
-func (s *sSettings) GetNetworkKey() string {
-	return s.FNetworkKey
+func (p *sSettings) GetNetworkKey() string {
+	return p.FNetworkKey
 }
 
 func (p *sSettings) GetWorkSizeBits() uint64 {

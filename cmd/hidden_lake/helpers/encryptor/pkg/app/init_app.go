@@ -16,7 +16,7 @@ import (
 
 // initApp work with the raw data = read files, read args
 func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
-	strParallel := flag.GetFlagValue(pArgs, "parallel", fmt.Sprintf("%d", pParallel))
+	strParallel := flag.GetFlagValue(pArgs, "parallel", strconv.FormatUint(pParallel, 10))
 	setParallel, err := strconv.Atoi(strParallel)
 	if err != nil {
 		return nil, fmt.Errorf("set parallel: %w", err)
@@ -42,7 +42,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64)
 		return nil, errors.New("size of private key is invalid")
 	}
 
-	return NewApp(cfg, privKey, inputPath, uint64(setParallel)), nil
+	return NewApp(cfg, privKey, uint64(setParallel)), nil
 }
 
 func getPrivKey(pCfg config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {

@@ -41,7 +41,6 @@ type sApp struct {
 func NewApp(
 	pCfg config.IConfig,
 	pPrivKey asymmetric.IPrivKey,
-	pPathTo string,
 	pParallel uint64,
 ) types.IRunner {
 	logging := pCfg.GetLogging()

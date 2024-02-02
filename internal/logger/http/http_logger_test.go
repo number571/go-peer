@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"testing"
 )
@@ -27,7 +28,12 @@ func TestPanicLogger(t *testing.T) {
 func TestLogger(t *testing.T) {
 	t.Parallel()
 
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/api/index", nil)
+	req, err := http.NewRequestWithContext(
+		context.Background(),
+		http.MethodGet,
+		"http://localhost:8080/api/index",
+		nil,
+	)
 	if err != nil {
 		t.Error(err)
 		return

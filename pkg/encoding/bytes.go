@@ -23,7 +23,7 @@ func Uint64ToBytes(pNum uint64) [cSizeUint64]byte {
 		panic(err)
 	}
 
-	copy(res[:], data.Bytes()[:])
+	copy(res[:], data.Bytes())
 	return res
 }
 

@@ -15,7 +15,7 @@
 - Update `cmd/hidden_lake/applications/messenger|filesharer`: move config option 'language' to settings
 - Update `cmd/hidden_lake/applications/messenger`: move config options 'pseudonym', 'storage_key' to settings
 - Update `internal/flag`: delete os.Args implementations
-- Update `go-peer`: fix all warning 'golangci-lint run'
+- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck"', 
 
 ### BUG FIXES
 

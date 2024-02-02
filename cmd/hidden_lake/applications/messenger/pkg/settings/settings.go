@@ -17,7 +17,7 @@ const (
 
 const (
 	CHeaderPseudonym = "Hl-Messenger-Pseudonym"
-	CHeaderRequestId = "Hl-Messenger-Request-Id"
+	CHeaderRequestId = "Hl-Messenger-Request-Id" // nolint: revive
 )
 
 const (

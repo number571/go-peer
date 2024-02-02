@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -52,7 +53,8 @@ func trafficPage(portService int) func(w http.ResponseWriter, r *http.Request) {
 
 func pushMessageToService(portService int, msgStringAsBytes []byte) (int, string) {
 	// build request to service
-	req, err := http.NewRequest(
+	req, err := http.NewRequestWithContext(
+		context.Background(),
 		http.MethodPost,
 		fmt.Sprintf("%s:%d/push", common.HostService, portService),
 		bytes.NewBuffer(msgStringAsBytes),

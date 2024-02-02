@@ -26,8 +26,7 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 			return
 		}
 
-		switch pR.Method {
-		case http.MethodGet:
+		if pR.Method == http.MethodGet {
 			friends := pWrapper.GetConfig().GetFriends()
 
 			listFriends := make([]pkg_settings.SFriend, 0, len(friends))

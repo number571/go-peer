@@ -13,7 +13,7 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	GetValue() string
-	// TODO: need implementation
+	// ...
 }
 
 type IAddress interface {

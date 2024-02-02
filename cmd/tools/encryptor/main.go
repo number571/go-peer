@@ -48,7 +48,7 @@ func main() {
 		}
 		keySize = privKey.GetSize()
 	default:
-		panic("unkown mode")
+		panic("unknown mode")
 	}
 
 	// TODO: dynamic size of message

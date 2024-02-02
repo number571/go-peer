@@ -157,7 +157,7 @@ func countOfDataInDB() (uint64, error) {
 }
 
 func loadDataFromDB(dataID uint64) ([]byte, error) {
-	data, err := db.Get([]byte(fmt.Sprintf("%d", dataID)))
+	data, err := db.Get([]byte(strconv.FormatUint(dataID, 10)))
 	if err != nil {
 		return nil, err
 	}
@@ -174,11 +174,11 @@ func pushDataToDB(data []byte) error {
 		return err
 	}
 
-	if err := db.Set([]byte(fmt.Sprintf("%d", count)), data); err != nil {
+	if err := db.Set([]byte(strconv.FormatUint(count, 10)), data); err != nil {
 		return err
 	}
 
-	if err := db.Set([]byte(dataCountKey), []byte(fmt.Sprintf("%d", count+1))); err != nil {
+	if err := db.Set([]byte(dataCountKey), []byte(strconv.FormatUint(count+1, 10))); err != nil {
 		return err
 	}
 

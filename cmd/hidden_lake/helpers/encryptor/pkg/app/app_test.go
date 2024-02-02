@@ -49,7 +49,7 @@ func TestApp(t *testing.T) {
 	}
 
 	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
-	app := NewApp(cfg, privKey, ".", 1)
+	app := NewApp(cfg, privKey, 1)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

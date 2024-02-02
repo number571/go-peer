@@ -37,7 +37,7 @@ func testNetworkMessageSettings() net_message.ISettings {
 	})
 }
 
-func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc, database.IDBWrapper, hlt_client.IClient) {
+func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDBWrapper, hlt_client.IClient) {
 	db, err := database.NewDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
@@ -47,11 +47,11 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, c
 		}),
 	)
 	if err != nil {
-		return nil, nil, nil, nil, nil
+		return nil, nil, nil, nil
 	}
 
 	wDB := database.NewDBWrapper().Set(db)
-	srv, connKeeper, cancel := testRunService(wDB, addr, addrNode)
+	srv, _, cancel := testRunService(wDB, addr, "")
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -63,10 +63,10 @@ func testAllRun(addr, addrNode string) (*http.Server, conn_keeper.IConnKeeper, c
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, connKeeper, cancel, wDB, hltClient
+	return srv, cancel, wDB, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeeper, cancel context.CancelFunc, wDB database.IDBWrapper) {
+func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, wDB database.IDBWrapper) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()

@@ -12,7 +12,6 @@ import (
 func testRunService(addr string) *http.Server {
 	mux := http.NewServeMux()
 
-	// TODO: need implementation
 	cfg := &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FValue: "TODO",

@@ -65,7 +65,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			return
 		}
 
-		recvPubKey, err := getReceiverPubKey(client, myPubKey, aliasName)
+		recvPubKey, err := getReceiverPubKey(client, aliasName)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_receiver", "get receiver by public key")(pW, pR)
 			return
@@ -81,7 +81,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			if err := sendMessage(pCfg, client, myPubKey, pDB, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCfg, client, pDB, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -193,7 +193,6 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 func sendMessage(
 	pCfg config.IConfig,
 	pClient hls_client.IClient,
-	pMyPubKey asymmetric.IPubKey,
 	pDB database.IKVDatabase,
 	pAliasName string,
 	pMsgBytes []byte,
@@ -219,7 +218,7 @@ func sendMessage(
 	return hlmClient.PushMessage(pAliasName, pCfg.GetSettings().GetPseudonym(), requestID, pMsgBytes)
 }
 
-func getReceiverPubKey(client hls_client.IClient, myPubKey asymmetric.IPubKey, aliasName string) (asymmetric.IPubKey, error) {
+func getReceiverPubKey(client hls_client.IClient, aliasName string) (asymmetric.IPubKey, error) {
 	friends, err := client.GetFriends()
 	if err != nil {
 		return nil, fmt.Errorf("error: read friends: %w", err)

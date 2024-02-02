@@ -37,7 +37,6 @@ type sApp struct {
 
 func NewApp(
 	pCfg config.IConfig,
-	pPathTo string,
 ) types.IRunner {
 	logging := pCfg.GetLogging()
 

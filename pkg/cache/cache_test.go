@@ -2,4 +2,4 @@ package cache
 
 import "testing"
 
-func TestNothing(t *testing.T) {}
+func TestNothing(_ *testing.T) {}

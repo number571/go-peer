@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
@@ -29,6 +29,6 @@ func HandlePointerAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) ht
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, fmt.Sprintf("%d", database.Pointer()))
+		api.Response(pW, http.StatusOK, strconv.FormatUint(database.Pointer(), 10))
 	}
 }

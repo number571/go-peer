@@ -49,7 +49,7 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 
 		// check message from in database queue
 		if err := hltDB.Push(pNetMsg); err != nil {
-			if errors.Is(err, database.GErrMessageIsExist) {
+			if errors.Is(err, database.ErrMessageIsExist) {
 				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
 				return nil
 			}

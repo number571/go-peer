@@ -18,5 +18,5 @@ func InitApp(pArgs []string, pDefaultPath string) (types.IRunner, error) {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	return NewApp(cfg, inputPath), nil
+	return NewApp(cfg), nil
 }

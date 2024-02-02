@@ -45,7 +45,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	app := NewApp(cfg, ".")
+	app := NewApp(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

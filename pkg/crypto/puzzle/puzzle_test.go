@@ -42,7 +42,7 @@ func TestPuzzle(t *testing.T) {
 		return
 	}
 
-	hash[3] = hash[3] ^ 8
+	hash[3] ^= 8
 	if puzzle.VerifyBytes(hash, proof) {
 		t.Error("proof is correct?")
 		return

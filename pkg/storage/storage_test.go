@@ -37,6 +37,7 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{})
+	default:
 	}
 }
 

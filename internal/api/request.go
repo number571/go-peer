@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,7 +28,8 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]b
 		reqBytes = encoding.SerializeJSON(x)
 	}
 
-	req, err := http.NewRequest(
+	req, err := http.NewRequestWithContext(
+		context.Background(),
 		pMethod,
 		pURL,
 		bytes.NewBuffer(reqBytes),

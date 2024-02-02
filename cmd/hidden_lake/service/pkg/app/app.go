@@ -33,7 +33,6 @@ type sApp struct {
 	fState  state.IState
 	fPathTo string
 
-	fMutex      *sync.Mutex
 	fCfgW       config.IWrapper
 	fNode       anonymity.INode
 	fConnKeeper conn_keeper.IConnKeeper
@@ -53,7 +52,6 @@ func NewApp(
 	pPathTo string,
 	pParallel uint64,
 ) types.IRunner {
-	mtx := &sync.Mutex{}
 	logging := pCfg.GetLogging()
 
 	var (
@@ -63,12 +61,11 @@ func NewApp(
 	)
 
 	cfgWrapper := config.NewWrapper(pCfg)
-	node := initNode(mtx, cfgWrapper, pPrivKey, anonLogger, pParallel)
+	node := initNode(cfgWrapper, pPrivKey, anonLogger, pParallel)
 
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fPathTo:     pPathTo,
-		fMutex:      mtx,
 		fCfgW:       cfgWrapper,
 		fNode:       node,
 		fConnKeeper: initConnKeeper(pCfg, node),

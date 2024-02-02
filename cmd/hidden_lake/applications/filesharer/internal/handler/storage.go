@@ -52,8 +52,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 		fileName := ""
 		_ = pR.ParseForm()
 
-		switch pR.FormValue("method") {
-		case http.MethodPost:
+		if pR.FormValue("method") == http.MethodPost {
 			fileName = pR.FormValue("file_name")
 			if fileName == "" {
 				ErrorPage(pLogger, pCfg, "file_name_error", "incorrect file name")(pW, pR)

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client"
@@ -108,7 +109,7 @@ func testDatabaseLoad(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 		return
 	}
 
-	if !errors.Is(errLoad, GErrMessageIsNotExist) {
+	if !errors.Is(errLoad, ErrMessageIsNotExist) {
 		t.Error("got incorrect error type (load)")
 		return
 	}
@@ -172,7 +173,7 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 
 	pushHashes := make([][]byte, 0, messagesCapacity+1)
 	for i := 0; i < messagesCapacity+1; i++ {
-		msg, err := newNetworkMessageWithData(cl, testutils.TCNetworkKey, fmt.Sprintf("%d", i))
+		msg, err := newNetworkMessageWithData(cl, testutils.TCNetworkKey, strconv.Itoa(i))
 		if err != nil {
 			t.Error(err)
 			return
@@ -276,7 +277,7 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 		return
 	}
 
-	if !errors.Is(errPush, GErrMessageIsExist) {
+	if !errors.Is(errPush, ErrMessageIsExist) {
 		t.Error("got incorrect error type (push)")
 		return
 	}

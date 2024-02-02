@@ -159,7 +159,7 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 				return utils.MergeErrors(ErrWriteToSocket, err)
 			}
 
-			bytesPtr = bytesPtr - uint64(n)
+			bytesPtr -= uint64(n)
 			pBytes = pBytes[:bytesPtr]
 		}
 	}

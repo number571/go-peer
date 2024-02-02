@@ -180,9 +180,9 @@ func TestNodeConnection(t *testing.T) {
 	t.Parallel()
 
 	var (
-		node1 = newTestNode("", 2, time.Minute).(*sNode)
-		node2 = newTestNode(testutils.TgAddrs[27], 1, time.Minute)
-		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects, time.Minute)
+		node1 = newTestNode("", 2).(*sNode)
+		node2 = newTestNode(testutils.TgAddrs[27], 1)
+		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects)
 	)
 	defer testFreeNodes([]INode{node1, node2, node3})
 
@@ -276,7 +276,7 @@ func TestNodeConnection(t *testing.T) {
 func TestHandleMessage(t *testing.T) {
 	t.Parallel()
 
-	node := newTestNode("", testutils.TCMaxConnects, time.Minute).(*sNode)
+	node := newTestNode("", testutils.TCMaxConnects).(*sNode)
 	defer testFreeNodes([]INode{node})
 
 	sett := node.GetSettings().GetConnSettings()
@@ -311,7 +311,7 @@ func TestHandleMessage(t *testing.T) {
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	gotSett := newTestNode("", testutils.TCMaxConnects, time.Minute).GetSettings()
+	gotSett := newTestNode("", testutils.TCMaxConnects).GetSettings()
 	if gotSett.GetMaxConnects() != testutils.TCMaxConnects {
 		t.Error("invalid setting's value")
 	}
@@ -320,8 +320,8 @@ func TestNodeSettings(t *testing.T) {
 func TestContextCancel(t *testing.T) {
 	t.Parallel()
 
-	node1 := newTestNode(testutils.TgAddrs[16], testutils.TCMaxConnects, time.Minute)
-	node2 := newTestNode("", testutils.TCMaxConnects, time.Minute)
+	node1 := newTestNode(testutils.TgAddrs[16], testutils.TCMaxConnects)
+	node2 := newTestNode("", testutils.TCMaxConnects)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -360,7 +360,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects, time.Minute)
+		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects)
 	}
 
 	ctx := context.Background()
@@ -399,7 +399,8 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	return nodes, mapp, nil
 }
 
-func newTestNode(pAddr string, pMaxConns uint64, timeout time.Duration) INode {
+func newTestNode(pAddr string, pMaxConns uint64) INode {
+	timeout := time.Minute
 	return NewNode(
 		NewSettings(&SSettings{
 			FAddress:      pAddr,

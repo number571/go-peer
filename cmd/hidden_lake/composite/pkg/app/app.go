@@ -68,7 +68,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
-func (p *sApp) enable(pCtx context.Context) state.IStateF {
+func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlc_settings.CServiceName))
 		return nil

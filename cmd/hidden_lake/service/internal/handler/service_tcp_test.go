@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -43,7 +42,7 @@ func TestHLS(t *testing.T) {
 	defer srv.Close()
 
 	// service
-	nodeService, nodeCancel, err := testStartNodeHLS(t)
+	nodeService, nodeCancel, err := testStartNodeHLS()
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,7 +72,7 @@ func TestHLS(t *testing.T) {
 
 // HLS
 
-func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error) {
+func testStartNodeHLS() (anonymity.INode, context.CancelFunc, error) {
 	rawCFG := &config.SConfig{
 		FServices: map[string]*config.SService{
 			tcServiceAddressInHLS: {FHost: testutils.TgAddrs[5]},
@@ -99,7 +98,6 @@ func testStartNodeHLS(t *testing.T) (anonymity.INode, context.CancelFunc, error)
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(
-			&sync.Mutex{},
 			config.NewWrapper(cfg),
 			logger.NewLogger(
 				logger.NewSettings(&logger.SSettings{}),

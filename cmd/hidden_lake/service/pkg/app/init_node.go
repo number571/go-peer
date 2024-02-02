@@ -1,7 +1,6 @@
 package app
 
 import (
-	"sync"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -20,7 +19,12 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 )
 
-func initNode(pMutex *sync.Mutex, pCfgW config.IWrapper, pPrivKey asymmetric.IPrivKey, pLogger logger.ILogger, pParallel uint64) anonymity.INode {
+func initNode(
+	pCfgW config.IWrapper,
+	pPrivKey asymmetric.IPrivKey,
+	pLogger logger.ILogger,
+	pParallel uint64,
+) anonymity.INode {
 	cfg := pCfgW.GetConfig()
 	cfgSettings := cfg.GetSettings()
 	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
@@ -88,6 +92,6 @@ func initNode(pMutex *sync.Mutex, pCfgW config.IWrapper, pPrivKey asymmetric.IPr
 		}(),
 	).HandleFunc(
 		pkg_settings.CServiceMask,
-		handler.HandleServiceTCP(pMutex, pCfgW, pLogger),
+		handler.HandleServiceTCP(pCfgW, pLogger),
 	)
 }
