@@ -17,11 +17,15 @@ func main() {
 		Type:  "PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privKey),
 	}
-	os.WriteFile("priv.key", pem.EncodeToMemory(privateKeyBlock), 0644)
+	if err := os.WriteFile("priv.key", pem.EncodeToMemory(privateKeyBlock), 0644); err != nil {
+		panic(err)
+	}
 
 	publicKeyBlock := &pem.Block{
 		Type:  "PUBLIC KEY",
 		Bytes: x509.MarshalPKCS1PublicKey(&privKey.PublicKey),
 	}
-	os.WriteFile("pub.key", pem.EncodeToMemory(publicKeyBlock), 0644)
+	if err := os.WriteFile("pub.key", pem.EncodeToMemory(publicKeyBlock), 0644); err != nil {
+		panic(err)
+	}
 }

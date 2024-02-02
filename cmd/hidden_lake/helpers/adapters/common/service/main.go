@@ -68,7 +68,7 @@ func main() {
 	http.HandleFunc("/push", pushPage)
 	http.HandleFunc("/load", loadPage)
 
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	_ = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +139,7 @@ func loadPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(bytes.Join([][]byte{[]byte("."), data}, []byte{}))
+	_, _ = w.Write(bytes.Join([][]byte{[]byte("."), data}, []byte{}))
 }
 
 func countOfDataInDB() (uint64, error) {

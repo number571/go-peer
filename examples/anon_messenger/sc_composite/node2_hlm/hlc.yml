@@ -1,0 +1,8 @@
+logging:
+  - info
+  - warn
+  - erro
+services:
+  - hidden-lake-service
+  - hidden-lake-traffic
+  - hidden-lake-messenger

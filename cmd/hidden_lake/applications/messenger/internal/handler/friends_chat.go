@@ -49,8 +49,8 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 			return
 		}
 
-		pR.ParseForm()
-		pR.ParseMultipartForm(10 << 20) // default value
+		_ = pR.ParseForm()
+		_ = pR.ParseMultipartForm(10 << 20) // default value
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {
@@ -144,7 +144,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, res)
+		_ = t.Execute(pW, res)
 	}
 }
 

@@ -50,7 +50,7 @@ func TestHLS(t *testing.T) {
 	}
 	defer func() {
 		nodeCancel()
-		closer.CloseAll([]types.ICloser{
+		_ = closer.CloseAll([]types.ICloser{
 			nodeService.GetDBWrapper(),
 			nodeService.GetNetworkNode(),
 		})
@@ -64,7 +64,7 @@ func TestHLS(t *testing.T) {
 	}
 	defer func() {
 		clientCancel()
-		closer.CloseAll([]types.ICloser{
+		_ = closer.CloseAll([]types.ICloser{
 			nodeClient.GetDBWrapper(),
 			nodeClient.GetNetworkNode(),
 		})

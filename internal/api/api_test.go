@@ -152,10 +152,7 @@ func testRunServer(addr string) *http.Server {
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
-	go func() {
-		srv.ListenAndServe()
-	}()
-
+	go func() { _ = srv.ListenAndServe() }()
 	time.Sleep(200 * time.Millisecond)
 	return srv
 }

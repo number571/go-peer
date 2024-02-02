@@ -101,7 +101,7 @@ func TestTempCryptoStorage(t *testing.T) {
 	}
 
 	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
-	store.Set([]byte("KEY"), secret1)
+	_ = store.Set([]byte("KEY"), secret1)
 
 	secret2, err := store.Get([]byte("KEY"))
 	if err != nil {

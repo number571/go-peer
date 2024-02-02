@@ -76,7 +76,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		io.Copy(os.Stdout, bytes.NewBuffer(pld.GetBody()))
+		if _, err := io.Copy(os.Stdout, bytes.NewBuffer(pld.GetBody())); err != nil {
+			panic(err)
+		}
 	}
 }
 

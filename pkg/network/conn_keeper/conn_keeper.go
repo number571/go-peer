@@ -66,7 +66,7 @@ func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
 			if _, ok := mapConns[addr]; ok {
 				return
 			}
-			p.fNode.AddConnection(pCtx, addr)
+			_ = p.fNode.AddConnection(pCtx, addr)
 		}(addr)
 	}
 

@@ -78,9 +78,7 @@ func testStartServerHTTP(addr string) *http.Server {
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
-	go func() {
-		srv.ListenAndServe()
-	}()
+	go func() { _ = srv.ListenAndServe() }()
 
 	return srv
 }
@@ -100,12 +98,12 @@ func testEchoPage(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		resp.FError = 1
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 		return
 	}
 
 	resp.FEcho = req.FMessage
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func testAllCreate(cfgPath, dbPath, srvAddr string) (config.IWrapper, anonymity.INode, context.Context, context.CancelFunc, *http.Server) {
@@ -122,7 +120,7 @@ func testAllFree(node anonymity.INode, cancel context.CancelFunc, srv *http.Serv
 		os.RemoveAll(pathCfg)
 	}()
 	cancel()
-	closer.CloseAll([]types.ICloser{
+	_ = closer.CloseAll([]types.ICloser{
 		srv,
 		node.GetDBWrapper(),
 		node.GetNetworkNode(),
@@ -154,15 +152,12 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
-	go func() {
-		srv.ListenAndServe()
-	}()
-
+	go func() { _ = srv.ListenAndServe() }()
 	return srv
 }
 
 func testNewWrapper(cfgPath string) config.IWrapper {
-	os.WriteFile(cfgPath, []byte(tcConfig), 0o644)
+	_ = os.WriteFile(cfgPath, []byte(tcConfig), 0o644)
 	cfg, err := config.LoadConfig(cfgPath)
 	if err != nil {
 		panic(err)

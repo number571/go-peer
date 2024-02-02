@@ -87,7 +87,10 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
-		p.initStorage()
+		if err := p.initStorage(); err != nil {
+			return utils.MergeErrors(ErrInitSTG, err)
+		}
+
 		p.initServicePPROF()
 		p.initIncomingServiceHTTP()
 		p.initInterfaceServiceHTTP()

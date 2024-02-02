@@ -46,7 +46,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		io.Copy(os.Stdout, bytes.NewBuffer(data))
+		if _, err := io.Copy(os.Stdout, bytes.NewBuffer(data)); err != nil {
+			panic(err)
+		}
 	case "SET":
 		if _, err := stg.Get(dateKey); err == nil {
 			panic("data-key already exist")

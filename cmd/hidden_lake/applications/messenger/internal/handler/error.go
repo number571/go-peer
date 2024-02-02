@@ -33,7 +33,7 @@ func ErrorPage(pLogger logger.ILogger, pCfg config.IConfig, pTitle, pMessage str
 		}
 
 		pLogger.PushWarn(logBuilder.WithMessage(pTitle))
-		t.Execute(pW, &sError{
+		_ = t.Execute(pW, &sError{
 			sTemplate: getTemplate(pCfg),
 			FTitle:    pTitle,
 			FMessage:  pMessage,

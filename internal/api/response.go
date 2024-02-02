@@ -10,7 +10,7 @@ import (
 
 func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 	var (
-		contentType = ""
+		contentType string
 		respBytes   []byte
 	)
 
@@ -28,5 +28,5 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 
 	pW.Header().Set("Content-Type", contentType)
 	pW.WriteHeader(pRet)
-	io.Copy(pW, bytes.NewBuffer(respBytes))
+	_, _ = io.Copy(pW, bytes.NewBuffer(respBytes))
 }

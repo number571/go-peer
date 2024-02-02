@@ -104,7 +104,10 @@ func transferTraffic(db database.IKVDatabase, portService, portHLT int, hasLog b
 		}
 
 		for i := countDB; i < countService; i++ {
-			incrementCountInDB(db)
+			if err := incrementCountInDB(db); err != nil {
+				printLog(hasLog, err)
+				continue
+			}
 
 			msg, err := loadMessageFromService(portService, i)
 			if err != nil {

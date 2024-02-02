@@ -104,7 +104,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
+	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
 }
 
 func TestBuildConfig(t *testing.T) {
@@ -340,7 +340,7 @@ func TestWrapper(t *testing.T) {
 	}
 
 	wrapper := NewWrapper(cfg)
-	wrapper.GetEditor().UpdateFriends(nil)
+	_ = wrapper.GetEditor().UpdateFriends(nil)
 
 	if len(cfg.GetFriends()) != 0 {
 		t.Error("friends is not nil for current config")

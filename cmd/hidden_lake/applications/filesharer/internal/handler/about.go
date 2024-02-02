@@ -31,6 +31,6 @@ func AboutPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, getTemplate(pCfg))
+		_ = t.Execute(pW, getTemplate(pCfg))
 	}
 }

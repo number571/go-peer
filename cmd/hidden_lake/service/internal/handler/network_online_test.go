@@ -40,7 +40,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[13])
+	_ = node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[13])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	testGetOnlines(t, client, node)
@@ -103,7 +103,7 @@ func testAllOnlineFree(node anonymity.INode, cancel context.CancelFunc, pathCfg,
 		os.RemoveAll(pathDB + "_push2")
 	}()
 	cancel()
-	closer.CloseAll([]types.ICloser{
+	_ = closer.CloseAll([]types.ICloser{
 		node.GetDBWrapper(),
 		node.GetNetworkNode(),
 	})

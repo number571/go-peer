@@ -28,7 +28,7 @@ func main() {
 	}
 
 	http.HandleFunc("/traffic", trafficPage(portService))
-	http.ListenAndServe(fmt.Sprintf(":%d", portIncoming), nil)
+	_ = http.ListenAndServe(fmt.Sprintf(":%d", portIncoming), nil)
 }
 
 func trafficPage(portService int) func(w http.ResponseWriter, r *http.Request) {

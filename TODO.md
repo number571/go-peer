@@ -11,6 +11,7 @@
 9. HLC: append ports to dockerfile
 10. Rewrite some examples into HLC implementation
 11. Custom Unmarshal with fields 
+12. golangci-lint run --help
 
 ### Tests
 

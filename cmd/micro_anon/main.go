@@ -100,7 +100,7 @@ func runService() {
 		msg = bytes.TrimPrefix(msg, []byte(authBytes))
 		fmt.Printf("\n%s\n%s", string(msg), startInput)
 	})
-	http.ListenAndServe(os.Args[2], nil)
+	_ = http.ListenAndServe(os.Args[2], nil)
 }
 
 func runQueue() {
@@ -114,7 +114,11 @@ func runQueue() {
 					panic(err)
 				}
 				client := &http.Client{Timeout: 5 * time.Second}
-				_, _ = client.Do(req)
+				resp, err := client.Do(req)
+				if err != nil {
+					panic(err)
+				}
+				defer resp.Body.Close()
 			}(conn)
 		}
 	}

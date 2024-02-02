@@ -28,7 +28,7 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 			return
 		}
 
-		pR.ParseForm()
+		_ = pR.ParseForm()
 
 		client := getClient(pCfg)
 
@@ -98,6 +98,6 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, result)
+		_ = t.Execute(pW, result)
 	}
 }

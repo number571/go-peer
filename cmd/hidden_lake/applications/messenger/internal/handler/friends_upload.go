@@ -55,6 +55,6 @@ func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.Handler
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, res)
+		_ = t.Execute(pW, res)
 	}
 }

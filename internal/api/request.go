@@ -11,7 +11,7 @@ import (
 
 func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]byte, error) {
 	var (
-		contentType = ""
+		contentType string
 		reqBytes    []byte
 	)
 

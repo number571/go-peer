@@ -45,7 +45,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			return
 		}
 
-		pR.ParseForm()
+		_ = pR.ParseForm()
 
 		client := getClient(cfg)
 		myPubKey, err := client.GetPubKey()
@@ -146,7 +146,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, result)
+		_ = t.Execute(pW, result)
 	}
 }
 

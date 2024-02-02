@@ -5,6 +5,6 @@ import "errors"
 var (
 	ErrRunning = errors.New("app running")
 	ErrService = errors.New("service")
-	ErrInitDB  = errors.New("init database")
+	ErrInitSTG = errors.New("init storage")
 	ErrClose   = errors.New("close")
 )

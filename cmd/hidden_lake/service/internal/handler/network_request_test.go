@@ -41,7 +41,7 @@ func TestHandleRequestAPI(t *testing.T) {
 		),
 	)
 
-	node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[11])
+	_ = node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[11])
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 
 	testBroadcast(t, client)
@@ -104,7 +104,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 		os.RemoveAll(pathDB + "_push1")
 	}()
 	cancel()
-	closer.CloseAll([]types.ICloser{
+	_ = closer.CloseAll([]types.ICloser{
 		srv,
 		node.GetDBWrapper(),
 		node.GetNetworkNode(),

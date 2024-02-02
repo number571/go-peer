@@ -71,7 +71,7 @@ func testAllFree(addr string, srv *http.Server, connKeeper conn_keeper.IConnKeep
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
 	cancel()
-	closer.CloseAll([]types.ICloser{srv, wDB})
+	_ = closer.CloseAll([]types.ICloser{srv, wDB})
 }
 
 func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {
@@ -154,9 +154,7 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
 	}
 
-	go func() {
-		srv.ListenAndServe()
-	}()
+	go func() { _ = srv.ListenAndServe() }()
 
 	return srv, connKeeper, cancel
 }

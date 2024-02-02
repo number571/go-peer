@@ -14,13 +14,13 @@ func TestStdPRNG(t *testing.T) {
 		t.Error("bytes in random equals")
 	}
 
-	//lint:ignore SA4000 is random strings
-	if r.GetString(8) == r.GetString(8) {
+	x := r.GetString(8)
+	if x == r.GetString(8) {
 		t.Error("strings in random equals")
 	}
 
-	//lint:ignore SA4000 is random numbers
-	if r.GetUint64() == r.GetUint64() {
+	y := r.GetUint64()
+	if y == r.GetUint64() {
 		t.Error("numbers in random equals")
 	}
 }

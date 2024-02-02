@@ -62,8 +62,8 @@ func testInitTransfer() {
 	os.RemoveAll(tcNameHLT1)
 	os.RemoveAll(tcNameHLT2)
 
-	os.Mkdir(tcNameHLT1, 0o777)
-	os.Mkdir(tcNameHLT2, 0o777)
+	_ = os.Mkdir(tcNameHLT1, 0o777)
+	_ = os.Mkdir(tcNameHLT2, 0o777)
 }
 
 func TestHandleTransferAPI(t *testing.T) {

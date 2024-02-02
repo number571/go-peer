@@ -50,7 +50,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 		}
 
 		fileName := ""
-		pR.ParseForm()
+		_ = pR.ParseForm()
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
@@ -181,7 +181,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) ht
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		t.Execute(pW, result)
+		_ = t.Execute(pW, result)
 	}
 }
 

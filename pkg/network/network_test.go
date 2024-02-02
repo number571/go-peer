@@ -100,8 +100,10 @@ func TestBroadcast(t *testing.T) {
 
 	headHandle := uint64(testutils.TcHead)
 	handleF := func(pCtx context.Context, node INode, conn conn.IConn, pMsg message.IMessage) error {
-		defer wg.Done()
-		defer node.BroadcastMessage(pCtx, pMsg)
+		defer func() {
+			_ = node.BroadcastMessage(pCtx, pMsg)
+			wg.Done()
+		}()
 
 		tcMutex.Lock()
 		defer tcMutex.Unlock()
@@ -137,7 +139,7 @@ func TestBroadcast(t *testing.T) {
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
 			sett := nodes[0].GetSettings().GetConnSettings()
-			nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld, 1))
+			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld, 1))
 		}(i)
 	}
 
@@ -379,8 +381,8 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 		return [5]INode{}, nil, err2
 	}
 
-	nodes[3].AddConnection(ctx, testutils.TgAddrs[0])
-	nodes[3].AddConnection(ctx, testutils.TgAddrs[1])
+	_ = nodes[3].AddConnection(ctx, testutils.TgAddrs[0])
+	_ = nodes[3].AddConnection(ctx, testutils.TgAddrs[1])
 
 	mapp := make(map[INode]map[string]bool)
 	for _, node := range nodes {
