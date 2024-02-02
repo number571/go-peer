@@ -33,7 +33,7 @@ docker-configs:
 	mkdir ./_mounted | true 
 	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
 docker-run:
-	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9581:9581 hl_traffic
+	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9581:9581 -p 9582:9582 hl_traffic
 docker-clean:
 	rm -rf ./_mounted/hlt.*
 	docker rmi hl_traffic

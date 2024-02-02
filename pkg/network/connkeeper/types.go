@@ -1,4 +1,4 @@
-package conn_keeper // nolint: revive
+package connkeeper
 
 import (
 	"time"

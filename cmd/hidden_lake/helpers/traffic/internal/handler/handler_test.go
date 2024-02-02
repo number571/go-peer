@@ -20,7 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/network/connkeeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -74,10 +74,10 @@ func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, wDB d
 	_ = closer.CloseAll([]types.ICloser{srv, wDB})
 }
 
-func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*http.Server, conn_keeper.IConnKeeper, context.CancelFunc) {
+func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*http.Server, connkeeper.IConnKeeper, context.CancelFunc) {
 	mux := http.NewServeMux()
 
-	connKeeperSettings := &conn_keeper.SSettings{
+	connKeeperSettings := &connkeeper.SSettings{
 		FDuration: time.Minute,
 		FConnections: func() []string {
 			return nil
@@ -90,8 +90,8 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 		}
 	}
 
-	connKeeper := conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(connKeeperSettings),
+	connKeeper := connkeeper.NewConnKeeper(
+		connkeeper.NewSettings(connKeeperSettings),
 		testNewNetworkNode("").HandleFunc(
 			1, // default value
 			func(_ context.Context, _ network.INode, _ conn.IConn, _ net_message.IMessage) error {

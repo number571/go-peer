@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/network/connkeeper"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
@@ -35,7 +35,7 @@ type sApp struct {
 
 	fCfgW       config.IWrapper
 	fNode       anonymity.INode
-	fConnKeeper conn_keeper.IConnKeeper
+	fConnKeeper connkeeper.IConnKeeper
 	fPrivKey    asymmetric.IPrivKey
 
 	fAnonLogger logger.ILogger

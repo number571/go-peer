@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/network/connkeeper"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
@@ -36,7 +36,7 @@ type sApp struct {
 	fConfig     config.IConfig
 	fDBWrapper  database.IDBWrapper
 	fNode       network.INode
-	fConnKeeper conn_keeper.IConnKeeper
+	fConnKeeper connkeeper.IConnKeeper
 
 	fAnonLogger logger.ILogger
 	fHTTPLogger logger.ILogger

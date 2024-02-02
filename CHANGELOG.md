@@ -9,13 +9,14 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/composites`: rewriting composites -> composite
+- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck"'
 
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger|filesharer`: move config option 'language' to settings
 - Update `cmd/hidden_lake/applications/messenger`: move config options 'pseudonym', 'storage_key' to settings
 - Update `internal/flag`: delete os.Args implementations
-- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck"', 
+- Update `pkg/network/conn_keeper`: rename to connkeeper
 
 ### BUG FIXES
 
@@ -580,7 +581,7 @@
 
 - Makefiles `cmd`: change CGO_ENABLED=1 -> CGO_ENABLED=0
 - Tests `make test`: replace race modifier from test-run to test-race
-- Package `conn_keeper`: tryConnectToAll "for range map" -> "_, ok := map by key-address"
+- Package `connkeeper`: tryConnectToAll "for range map" -> "_, ok := map by key-address"
 - Package `network/conn`: append wait read deadline method
 - Docs `README.md`: Append 'Calling functions/methods' to code style go-peer
 - Package `storage`: Change ISettings, delete ISettings from storage/database

@@ -3,14 +3,14 @@ package app
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/conn_keeper"
+	"github.com/number571/go-peer/pkg/network/connkeeper"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func initConnKeeper(pCfg config.IConfig, pNode anonymity.INode) conn_keeper.IConnKeeper {
-	return conn_keeper.NewConnKeeper(
-		conn_keeper.NewSettings(&conn_keeper.SSettings{
+func initConnKeeper(pCfg config.IConfig, pNode anonymity.INode) connkeeper.IConnKeeper {
+	return connkeeper.NewConnKeeper(
+		connkeeper.NewSettings(&connkeeper.SSettings{
 			FConnections: func() []string { return pCfg.GetConnections() },
 			FDuration:    pkg_settings.CConnKeeperDuration,
 		}),
