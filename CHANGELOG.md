@@ -9,7 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/composites`: rewriting composites -> composite
-- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck"'
+- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx,gocognit"'
 
 ### CHANGES
 

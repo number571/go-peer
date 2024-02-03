@@ -9,7 +9,7 @@
 7. Append Batch's to database
 8. Config logging structure -> move to internal/
 9. Custom Unmarshal with fields 
-10. golint: "errcheck,errorlint,goerr113,wrapcheck", "cyclop,funlen,gocognit,gocyclo,maintidx,nestif", 
+10. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo", 
 
 ### Tests
 
