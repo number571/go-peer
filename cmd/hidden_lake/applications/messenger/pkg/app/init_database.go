@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
 	"github.com/number571/go-peer/pkg/storage"
@@ -11,7 +12,7 @@ import (
 
 func (p *sApp) initDatabase() error {
 	sett := storage.NewSettings(&storage.SSettings{
-		FPath:     fmt.Sprintf("%s/%s", p.fPathTo, hlm_settings.CPathDB),
+		FPath:     filepath.Join(p.fPathTo, hlm_settings.CPathDB),
 		FWorkSize: p.fConfig.GetSettings().GetWorkSizeBits(),
 		FPassword: p.fConfig.GetSettings().GetStorageKey(),
 	})

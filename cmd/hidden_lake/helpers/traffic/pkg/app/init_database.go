@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 
@@ -10,8 +11,9 @@ import (
 
 func (p *sApp) initDatabase() error {
 	cfgSettings := p.fConfig.GetSettings()
+
 	sett := database.NewSettings(&database.SSettings{
-		FPath:             fmt.Sprintf("%s/%s", p.fPathTo, hlt_settings.CPathDB),
+		FPath:             filepath.Join(p.fPathTo, hlt_settings.CPathDB),
 		FNetworkKey:       cfgSettings.GetNetworkKey(),
 		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),

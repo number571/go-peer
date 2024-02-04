@@ -2,10 +2,10 @@ package handler
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
@@ -67,7 +67,7 @@ func getListFileInfo(pCfg config.IConfig, pPathTo string, pPage uint64) ([]hlf_s
 		if i != (pPage*pageOffset) && i%pageOffset == 0 {
 			break
 		}
-		fullPath := fmt.Sprintf("%s/%s/%s", pPathTo, hlf_settings.CPathSTG, e.Name())
+		fullPath := filepath.Join(pPathTo, hlf_settings.CPathSTG, e.Name())
 		result = append(result, hlf_settings.SFileInfo{
 			FName: e.Name(),
 			FHash: getFileHash(fullPath),

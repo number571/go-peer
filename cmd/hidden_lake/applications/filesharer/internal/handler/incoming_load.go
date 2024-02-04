@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -46,7 +45,7 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			return
 		}
 
-		fullPath := fmt.Sprintf("%s/%s/%s", pPathTo, hlf_settings.CPathSTG, name)
+		fullPath := filepath.Join(pPathTo, hlf_settings.CPathSTG, name)
 		stat, err := os.Stat(fullPath)
 		if os.IsNotExist(err) || stat.IsDir() {
 			pLogger.PushWarn(logBuilder.WithMessage("file_not_found"))

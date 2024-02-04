@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"path/filepath"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/storage"
@@ -11,7 +12,7 @@ import (
 func (p *sApp) initDatabase() error {
 	db, err := database.NewKVDatabase(
 		storage.NewSettings(&storage.SSettings{
-			FPath: fmt.Sprintf("%s/%s", p.fPathTo, pkg_settings.CPathDB),
+			FPath: filepath.Join(p.fPathTo, pkg_settings.CPathDB),
 		}),
 	)
 	if err != nil {

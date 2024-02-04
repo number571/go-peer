@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -29,7 +30,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64)
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
 
-	cfg, err := config.InitConfig(fmt.Sprintf("%s/%s", inputPath, pkg_settings.CPathYML), nil)
+	cfg, err := config.InitConfig(filepath.Join(inputPath, pkg_settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
