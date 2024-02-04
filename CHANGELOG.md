@@ -9,7 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/composites`: rewriting composites -> composite
-- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx,gocognit"'
+- Update `go-peer`: fix all warning with 'golangci-lint run -E "ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"'
 
 ### CHANGES
 
@@ -18,6 +18,7 @@
 - Update `internal/flag`: delete os.Args implementations
 - Update `pkg/network/conn_keeper`: rename to connkeeper
 - Update `cmd/hidden_lake`: rename CTitlePattern -> CServiceFullName
+- Update `cmd/hidden_lake/applications/filesharer`: change download to stream/ServeContent implementation
 
 ### BUG FIXES
 

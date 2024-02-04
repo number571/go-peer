@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
@@ -42,7 +43,7 @@ func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.Handler
 			panic("can't load hmtl files")
 		}
 
-		msgLimit, err := getMessageLimit(getClient(pCfg))
+		msgLimit, err := utils.GetMessageLimit(getClient(pCfg))
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_message_size", "get message size (limit)")(pW, pR)
 			return

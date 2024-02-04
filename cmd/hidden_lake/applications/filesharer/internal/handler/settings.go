@@ -25,7 +25,6 @@ type sConnection struct {
 
 type sSettings struct {
 	*sTemplate
-	FPseudonym     string
 	FNetworkKey    string
 	FPublicKey     string
 	FPublicKeyHash string
@@ -45,18 +44,12 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		}
 
 		_ = pR.ParseForm()
-
-		client := getClient(cfg)
-		myPubKey, err := client.GetPubKey()
-		if err != nil {
-			ErrorPage(pLogger, cfg, "get_public_key", "read public key")(pW, pR)
-			return
-		}
+		hlsClient := getHLSClient(cfg)
 
 		switch pR.FormValue("method") {
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
-			if err := client.SetNetworkKey(networkKey); err != nil {
+			if err := hlsClient.SetNetworkKey(networkKey); err != nil {
 				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
 				return
 			}
@@ -85,7 +78,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
-			if err := client.AddConnection(connect); err != nil {
+			if err := hlsClient.AddConnection(connect); err != nil {
 				ErrorPage(pLogger, cfg, "add_connection", "add connection")(pW, pR)
 				return
 			}
@@ -96,34 +89,18 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 
-			if err := client.DelConnection(connect); err != nil {
+			if err := hlsClient.DelConnection(connect); err != nil {
 				ErrorPage(pLogger, cfg, "del_connection", "delete connection")(pW, pR)
 				return
 			}
 		}
 
-		result := new(sSettings)
-		result.sTemplate = getTemplate(cfg)
-
-		result.FPublicKey = myPubKey.ToString()
-		result.FPublicKeyHash = myPubKey.GetHasher().ToString()
-
-		gotSettings, err := client.GetSettings()
+		result, err := getSettings(cfg, hlsClient)
 		if err != nil {
-			ErrorPage(pLogger, cfg, "get_network_key", "read network key")(pW, pR)
+			ErrorPage(pLogger, cfg, "get_settings", "get settings")(pW, pR)
 			return
 		}
 
-		result.FNetworkKey = gotSettings.GetNetworkKey()
-
-		// append HLS connections to backup connections
-		allConns, err := getAllConnections(client)
-		if err != nil {
-			ErrorPage(pLogger, cfg, "get_all_connections", "get online connections")(pW, pR)
-			return
-		}
-
-		result.FConnections = allConns
 		t, err := template.ParseFS(
 			web.GetTemplatePath(),
 			"index.html",
@@ -136,6 +113,33 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		_ = t.Execute(pW, result)
 	}
+}
+
+func getSettings(pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings, error) {
+	result := new(sSettings)
+	result.sTemplate = getTemplate(pCfg)
+
+	myPubKey, err := pHlsClient.GetPubKey()
+	if err != nil {
+		return nil, err
+	}
+
+	result.FPublicKey = myPubKey.ToString()
+	result.FPublicKeyHash = myPubKey.GetHasher().ToString()
+
+	gotSettings, err := pHlsClient.GetSettings()
+	if err != nil {
+		return nil, err
+	}
+	result.FNetworkKey = gotSettings.GetNetworkKey()
+
+	allConns, err := getAllConnections(pHlsClient)
+	if err != nil {
+		return nil, err
+	}
+	result.FConnections = allConns
+
+	return result, nil
 }
 
 func getAllConnections(pClient hls_client.IClient) ([]sConnection, error) {

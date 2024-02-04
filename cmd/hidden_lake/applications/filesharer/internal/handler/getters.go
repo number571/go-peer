@@ -20,7 +20,7 @@ func getTemplate(pCfg config.IConfig) *sTemplate {
 	}
 }
 
-func getClient(pCfg config.IConfig) hls_client.IClient {
+func getHLSClient(pCfg config.IConfig) hls_client.IClient {
 	return hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(

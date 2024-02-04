@@ -30,7 +30,7 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 
 		_ = pR.ParseForm()
 
-		client := getClient(pCfg)
+		hlsClient := getHLSClient(pCfg)
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
@@ -53,7 +53,7 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 				aliasName = pubKey.GetHasher().ToString()
 			}
 
-			if err := client.AddFriend(aliasName, pubKey); err != nil {
+			if err := hlsClient.AddFriend(aliasName, pubKey); err != nil {
 				ErrorPage(pLogger, pCfg, "add_friend", "add friend")(pW, pR)
 				return
 			}
@@ -64,13 +64,13 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 				return
 			}
 
-			if err := client.DelFriend(aliasName); err != nil {
+			if err := hlsClient.DelFriend(aliasName); err != nil {
 				ErrorPage(pLogger, pCfg, "del_friend", "delete friend")(pW, pR)
 				return
 			}
 		}
 
-		friends, err := client.GetFriends()
+		friends, err := hlsClient.GetFriends()
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_friends", "read friends")(pW, pR)
 			return

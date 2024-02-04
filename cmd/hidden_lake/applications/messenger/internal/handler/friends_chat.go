@@ -197,7 +197,7 @@ func sendMessage(
 	pAliasName string,
 	pMsgBytes []byte,
 ) error {
-	msgLimit, err := getMessageLimit(pClient)
+	msgLimit, err := utils.GetMessageLimit(pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
 	}

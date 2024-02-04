@@ -54,7 +54,7 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			return
 		}
 
-		chunkSize, err := getMessageLimit(getClient(pCfg))
+		chunkSize, err := utils.GetMessageLimit(getHLSClient(pCfg))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_chunk_size"))
 			api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")

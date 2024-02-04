@@ -1,12 +1,9 @@
 package app
 
 import (
-	"fmt"
 	"os"
-
-	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 )
 
 func (p *sApp) initStorage() error {
-	return os.MkdirAll(fmt.Sprintf("%s/%s", p.fPathTo, hlf_settings.CPathLoadedSTG), 0o777)
+	return os.MkdirAll(p.fPathTo, 0o777)
 }

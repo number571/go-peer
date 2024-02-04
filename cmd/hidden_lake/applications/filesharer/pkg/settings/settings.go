@@ -6,9 +6,8 @@ const (
 )
 
 const (
-	CPathYML       = "hlf.yml"
-	CPathSTG       = "hlf.stg"
-	CPathLoadedSTG = "hlf.stg/loaded"
+	CPathYML = "hlf.yml"
+	CPathSTG = "hlf.stg"
 )
 
 const (

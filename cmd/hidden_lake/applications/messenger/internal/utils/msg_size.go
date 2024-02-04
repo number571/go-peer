@@ -1,23 +1,25 @@
-package handler
+package utils
 
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/internal/base64"
 )
 
 var (
 	gReqSize = uint64(len(hlm_client.NewBuilder().PushMessage(
-		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-		"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+		strings.Repeat("-", settings.CPseudonymSize),
+		strings.Repeat("-", settings.CRequestIDSize),
 		[]byte{},
 	).GetBody()))
 )
 
-func getMessageLimit(pHlsClient client.IClient) (uint64, error) {
+func GetMessageLimit(pHlsClient client.IClient) (uint64, error) {
 	sett, err := pHlsClient.GetSettings()
 	if err != nil {
 		return 0, fmt.Errorf("get settings from HLS (message size): %w", err)
