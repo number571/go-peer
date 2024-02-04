@@ -7,9 +7,8 @@
 5. Append example of use functions (godoc)
 6. Append errors (as traffic/database) for all interface methods
 7. Append Batch's to database
-8. Config logging structure -> move to internal/
-9. Custom Unmarshal with fields 
-10. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
+8. Custom Unmarshal with fields 
+9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
 
 ### Tests
 
