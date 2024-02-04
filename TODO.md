@@ -10,7 +10,6 @@
 8. Config logging structure -> move to internal/
 9. Custom Unmarshal with fields 
 10. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
-11. HLF: progress bar download
 
 ### Tests
 

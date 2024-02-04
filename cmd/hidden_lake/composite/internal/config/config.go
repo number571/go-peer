@@ -17,10 +17,8 @@ type SConfig struct {
 	FLogging  []string `yaml:"logging,omitempty"`
 	FServices []string `yaml:"services"`
 
-	fLogging *sLogging
+	fLogging logger.ILogging
 }
-
-type sLogging []bool
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); !os.IsNotExist(err) {
@@ -78,24 +76,11 @@ func (p *SConfig) initConfig() error {
 }
 
 func (p *SConfig) loadLogging() error {
-	// [info, warn, erro]
-	logging := sLogging(make([]bool, 3))
-
-	mapping := map[string]int{
-		"info": 0,
-		"warn": 1,
-		"erro": 2,
+	result, err := logger.LoadLogging(p.FLogging)
+	if err != nil {
+		return err
 	}
-
-	for _, v := range p.FLogging {
-		logType, ok := mapping[v]
-		if !ok {
-			return fmt.Errorf("undefined log type '%s'", v)
-		}
-		logging[logType] = true
-	}
-
-	p.fLogging = &logging
+	p.fLogging = result
 	return nil
 }
 
@@ -105,16 +90,4 @@ func (p *SConfig) GetServices() []string {
 
 func (p *SConfig) GetLogging() logger.ILogging {
 	return p.fLogging
-}
-
-func (p *sLogging) HasInfo() bool {
-	return (*p)[0]
-}
-
-func (p *sLogging) HasWarn() bool {
-	return (*p)[1]
-}
-
-func (p *sLogging) HasErro() bool {
-	return (*p)[2]
 }

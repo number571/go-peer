@@ -15,7 +15,6 @@ var (
 	_ IConfigSettings = &SConfigSettings{}
 	_ IConfig         = &SConfig{}
 	_ IAddress        = &SAddress{}
-	_ logger.ILogging = &sLogging{}
 )
 
 type SConfigSettings struct {
@@ -40,11 +39,9 @@ type SConfig struct {
 
 	fFilepath string
 	fMutex    sync.Mutex
-	fLogging  *sLogging
+	fLogging  logger.ILogging
 	fFriends  map[string]asymmetric.IPubKey
 }
-
-type sLogging []bool
 
 type SService struct {
 	FHost string `yaml:"host"`
@@ -174,24 +171,11 @@ func (p *SConfig) initConfig() error {
 }
 
 func (p *SConfig) loadLogging() error {
-	// [info, warn, erro]
-	logging := sLogging(make([]bool, 3))
-
-	mapping := map[string]int{
-		"info": 0,
-		"warn": 1,
-		"erro": 2,
+	result, err := logger.LoadLogging(p.FLogging)
+	if err != nil {
+		return err
 	}
-
-	for _, v := range p.FLogging {
-		logType, ok := mapping[v]
-		if !ok {
-			return fmt.Errorf("undefined log type '%s'", v)
-		}
-		logging[logType] = true
-	}
-
-	p.fLogging = &logging
+	p.fLogging = result
 	return nil
 }
 
@@ -255,18 +239,6 @@ func (p *SConfig) GetService(name string) (IService, bool) {
 
 func (p *SService) GetHost() string {
 	return p.FHost
-}
-
-func (p *sLogging) HasInfo() bool {
-	return (*p)[0]
-}
-
-func (p *sLogging) HasWarn() bool {
-	return (*p)[1]
-}
-
-func (p *sLogging) HasErro() bool {
-	return (*p)[2]
 }
 
 func (p *SAddress) GetTCP() string {
