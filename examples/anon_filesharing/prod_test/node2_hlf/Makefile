@@ -10,4 +10,4 @@ clean:
 	pkill -15 prog_hlf2 || true
 	pkill -15 prog_hls2 || true
 	rm -rf prog_hls2 hls.db hls.yml
-	rm -rf prog_hlf2
+	rm -rf prog_hlf2 hlf.stg

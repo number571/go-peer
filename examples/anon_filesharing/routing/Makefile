@@ -3,6 +3,7 @@
 # middle used for transport messages among nodes
 CMDPATH=../../../cmd
 BINPATH=../../../bin
+STGPATH=../_storage
 .PHONY: default init build run clean
 default: init clean build run
 init: 
@@ -23,6 +24,9 @@ build:
 	# COPY HLS PROGRAM
 	cp $(BINPATH)/hls ./node2_hlf/prog_hls2
 	cp $(BINPATH)/hls ./node1_hlf/prog_hls1
+	# COPY STORAGE 
+	mkdir ./node2_hlf/hlf.stg
+	cp $(STGPATH)/* ./node2_hlf/hlf.stg
 	# BUILD HLS, HLF CONFIGS
 	make build -C node1_hlf
 	make build -C node2_hlf

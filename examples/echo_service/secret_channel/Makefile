@@ -7,25 +7,22 @@ init:
 	pkill -15 --version
 build: 
 	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/service
-	make build -C $(CMDPATH)/hidden_lake/helpers/traffic
+	make build -C $(CMDPATH)/hidden_lake/composite
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/send
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/recv
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service
-	make build -C ./recv_hls
-	# COPY HLS PROGRAM
-	cp -r $(BINPATH)/hls ./recv_hls/prog_hls1
-	cp -r $(BINPATH)/hls ./send_hls/prog_hls2
-	# COPY HLT PROGRAM
-	cp -r $(BINPATH)/hlt ./recv_hls/prog_hlt1
-	cp -r $(BINPATH)/hlt ./send_hls/prog_hlt2
-	# COPY SERVICE 
-	cp $(BINPATH)/common_service ./service/prog_service
+	# COPY HLC PROGRAM
+	cp -r $(BINPATH)/hlc ./recv_hls/prog_hlc1
+	cp -r $(BINPATH)/hlc ./send_hls/prog_hlc2
 	# COPY ADAPTERS 
+	cp $(BINPATH)/common_service ./service/prog_service
 	cp $(BINPATH)/common_send ./recv_hls/prog_send1
 	cp $(BINPATH)/common_send ./send_hls/prog_send2
 	cp $(BINPATH)/common_recv ./recv_hls/prog_recv1
 	cp $(BINPATH)/common_recv ./send_hls/prog_recv2
+	# BUILD HLS CONFIGS
+	make build -C recv_hls
+	make build -C send_hls
 run: 
 	# MAKEFILE RUN
 	make run -C ./service
