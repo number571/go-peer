@@ -9,7 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/receiver"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/msgbroker"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
@@ -94,11 +94,11 @@ func (p *sApp) enable(_ context.Context) state.IStateF {
 			return utils.MergeErrors(ErrInitDB, err)
 		}
 
-		msgReceiver := receiver.NewMessageReceiver()
+		msgBroker := msgbroker.NewMessageBroker()
 
 		p.initServicePPROF()
-		p.initIncomingServiceHTTP(msgReceiver)
-		p.initInterfaceServiceHTTP(msgReceiver)
+		p.initIncomingServiceHTTP(msgBroker)
+		p.initInterfaceServiceHTTP(msgBroker)
 
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlm_settings.CServiceName))
 		return nil

@@ -23,6 +23,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/applications/messenger`: fix change language
+- Update `cmd/hidden_lake/applications/messenger`: fix chat WS
 
 <!-- ... -->
 

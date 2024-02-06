@@ -10,7 +10,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/receiver"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/msgbroker"
 	hlm_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -27,7 +27,7 @@ func HandleIncomigHTTP(
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
 	pDB database.IKVDatabase,
-	pMsgReceiver receiver.IMessageReceiver,
+	pBroker msgbroker.IMessageBroker,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeOFF)
@@ -110,15 +110,15 @@ func HandleIncomigHTTP(
 			return
 		}
 
-		pMsgReceiver.Send(&receiver.SMessage{
-			FAddress: fPubKey.GetHasher().ToString(),
-			FMessageInfo: getMessageInfo(
+		pBroker.Produce(
+			fPubKey.GetHasher().ToString(),
+			getMessage(
 				true,
 				dbMsg.GetPseudonym(),
 				dbMsg.GetMessage(),
 				dbMsg.GetTimestamp(),
 			),
-		})
+		)
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, hlm_settings.CServiceFullName)
@@ -192,28 +192,28 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessageInfo(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessageInfo {
+func getMessage(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessage {
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes, pEscape)
 		if msgData == "" {
 			panic("message data = nil")
 		}
-		return hlm_utils.SMessageInfo{
+		return hlm_utils.SMessage{
 			FPseudonym: pPseudonym,
-			FMessage:   msgData,
 			FTimestamp: pTimestamp,
+			FMainData:  msgData,
 		}
 	case isFile(pRawMsgBytes):
 		filename, msgData := unwrapFile(pRawMsgBytes, pEscape)
 		if filename == "" || msgData == "" {
 			panic("filename = nil OR message data = nil")
 		}
-		return hlm_utils.SMessageInfo{
+		return hlm_utils.SMessage{
 			FPseudonym: pPseudonym,
 			FFileName:  filename,
-			FMessage:   msgData,
 			FTimestamp: pTimestamp,
+			FMainData:  msgData,
 		}
 	default:
 		panic("got unknown message type")

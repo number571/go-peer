@@ -7,18 +7,18 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/handler"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/receiver"
+	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/msgbroker"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/pkg/logger"
 	"golang.org/x/net/websocket"
 )
 
-func (p *sApp) initIncomingServiceHTTP(pMsgReceiver receiver.IMessageReceiver) {
+func (p *sApp) initIncomingServiceHTTP(pMsgBroker msgbroker.IMessageBroker) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlm_settings.CPushPath,
-		handler.HandleIncomigHTTP(p.fHTTPLogger, p.fConfig, p.fDatabase, pMsgReceiver),
+		handler.HandleIncomigHTTP(p.fHTTPLogger, p.fConfig, p.fDatabase, pMsgBroker),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
@@ -28,7 +28,7 @@ func (p *sApp) initIncomingServiceHTTP(pMsgReceiver receiver.IMessageReceiver) {
 	}
 }
 
-func (p *sApp) initInterfaceServiceHTTP(pMsgReceiver receiver.IMessageReceiver) {
+func (p *sApp) initInterfaceServiceHTTP(pMsgBroker msgbroker.IMessageBroker) {
 	mux := http.NewServeMux()
 	mux.Handle(hlm_settings.CStaticPath, http.StripPrefix(
 		hlm_settings.CStaticPath,
@@ -45,7 +45,7 @@ func (p *sApp) initInterfaceServiceHTTP(pMsgReceiver receiver.IMessageReceiver) 
 	mux.HandleFunc(hlm_settings.CHandleFriendsChatPath, handler.FriendsChatPage(p.fHTTPLogger, p.fConfig, p.fDatabase)) // GET, POST, PUT
 	mux.HandleFunc(hlm_settings.CHandleFriendsUploadPath, handler.FriendsUploadPage(p.fHTTPLogger, p.fConfig))          // GET
 
-	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS(pMsgReceiver)))
+	mux.Handle(hlm_settings.CHandleFriendsChatWSPath, websocket.Handler(handler.FriendsChatWS(pMsgBroker)))
 
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),

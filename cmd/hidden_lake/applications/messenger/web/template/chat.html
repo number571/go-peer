@@ -86,30 +86,29 @@ Babilejo
 
         socket.onmessage = (e) => {
             let obj = JSON.parse(e.data);
-            let messageInfo = obj.message_info;
 
             var d1 = document.getElementById('chat_body');
             var insertHTML = "";
-            if (messageInfo.filename == "") { // got text message
+            if (obj.filename == "") { // got text message
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.pseudonym + `</p>
-              <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + messageInfo.message + `</p>
-              <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + obj.pseudonym + `</p>
+              <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + obj.maindata + `</p>
+              <p class="small ms-3 mb-3 text-muted">` + obj.timestamp + `</p>
             </div>
           </div>
         `
             } else { // got file message
-                let filename = messageInfo.filename;
+                let filename = obj.filename;
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + messageInfo.pseudonym + `</p>
-              <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + messageInfo.message + `', '` + filename + `')">
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + obj.pseudonym + `</p>
+              <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + obj.maindata + `', '` + filename + `')">
                 ` + filename + `
               </button>
-              <p class="small ms-3 mb-3 text-muted">` + messageInfo.timestamp + `</p>
+              <p class="small ms-3 mb-3 text-muted">` + obj.timestamp + `</p>
             </div>
           </div>
         `
@@ -157,41 +156,41 @@ Babilejo
     {{if .FIsIncoming}}
     <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
         <div>
-            {{if (eq .FMessageInfo.FFileName "")}}
+            {{if (eq .FFileName "")}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FMessageInfo.FPseudonym}}
+                {{.FPseudonym}}
             </p>
-            <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMessageInfo.FMessage}}</p>
+            <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMainData}}</p>
             {{else}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FMessageInfo.FPseudonym}}
+                {{.FPseudonym}}
             </p>
             <button class="btn btn-muted text-center text-dark w-100"
-                onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
-                {{.FMessageInfo.FFileName}}
+                onclick="downloadBase64File('{{.FMainData}}', '{{.FFileName}}')">
+                {{.FFileName}}
             </button>
             {{end}}
-            <p class="small ms-3 mb-3 text-muted">{{.FMessageInfo.FTimestamp}}</p>
+            <p class="small ms-3 mb-3 text-muted">{{.FTimestamp}}</p>
         </div>
     </div>
     {{else}}
     <div class="need-break-text d-flex flex-row justify-content-end mb-2 pt-1">
         <div>
-            {{if (eq .FMessageInfo.FFileName "")}}
+            {{if (eq .FFileName "")}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FMessageInfo.FPseudonym}}
+                {{.FPseudonym}}
             </p>
-            <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMessageInfo.FMessage}}</p>
+            <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMainData}}</p>
             {{else}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FMessageInfo.FPseudonym}}
+                {{.FPseudonym}}
             </p>
             <button class="btn btn-primary text-center text-white w-100"
-                onclick="downloadBase64File('{{.FMessageInfo.FMessage}}', '{{.FMessageInfo.FFileName}}')">
-                {{.FMessageInfo.FFileName}}
+                onclick="downloadBase64File('{{.FMainData}}', '{{.FFileName}}')">
+                {{.FFileName}}
             </button>
             {{end}}
-            <p class="small me-3 mb-3 text-muted d-flex justify-content-end">{{.FMessageInfo.FTimestamp}}</p>
+            <p class="small me-3 mb-3 text-muted d-flex justify-content-end">{{.FTimestamp}}</p>
         </div>
     </div>
     {{end}}

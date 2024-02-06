@@ -25,8 +25,8 @@ import (
 )
 
 type sChatMessage struct {
-	FIsIncoming  bool
-	FMessageInfo utils.SMessageInfo
+	FIsIncoming bool
+	utils.SMessage
 }
 
 type sChatAddress struct {
@@ -125,7 +125,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		for _, msg := range msgs {
 			res.FMessages = append(res.FMessages, sChatMessage{
 				FIsIncoming: msg.IsIncoming(),
-				FMessageInfo: getMessageInfo(
+				SMessage: getMessage(
 					false,
 					msg.GetPseudonym(),
 					msg.GetMessage(),
