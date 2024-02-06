@@ -18,10 +18,7 @@ func Uint64ToBytes(pNum uint64) [cSizeUint64]byte {
 	res := [CSizeUint64]byte{}
 
 	var data = new(bytes.Buffer)
-	err := binary.Write(data, binary.BigEndian, pNum)
-	if err != nil {
-		panic(err)
-	}
+	_ = binary.Write(data, binary.BigEndian, pNum)
 
 	copy(res[:], data.Bytes())
 	return res

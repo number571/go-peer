@@ -6,10 +6,7 @@ import (
 )
 
 func SerializeYAML(pData interface{}) []byte {
-	res, err := yaml.Marshal(pData)
-	if err != nil {
-		return nil
-	}
+	res, _ := yaml.Marshal(pData)
 	return res
 }
 

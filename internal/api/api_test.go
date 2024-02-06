@@ -17,10 +17,24 @@ type tsResponse struct {
 	FMessage string `json:"message"`
 }
 
+type tsReadCloser struct {
+	io.ReadCloser
+}
+
+func (p *tsReadCloser) Read(_ []byte) (n int, err error) { return 0, fmt.Errorf("some error") }
+func (p *tsReadCloser) Close() error                     { return nil }
+
 const (
 	tcMessage          = "hello, world!"
 	tcMethodNotAllowed = "method not allowed"
 )
+
+func TestLoadResponse(t *testing.T) {
+	if _, err := loadResponse(0, &tsReadCloser{}); err == nil {
+		t.Error("success load response with invalid readCloser")
+		return
+	}
+}
 
 func TestErrorsAPI(t *testing.T) {
 	t.Parallel()

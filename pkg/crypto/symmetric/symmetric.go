@@ -24,10 +24,7 @@ func NewAESCipher(pKey []byte) ICipher {
 	if len(pKey) != CAESKeySize {
 		panic("len(pKey) != CAESKeySize")
 	}
-	block, err := aes.NewCipher(pKey)
-	if err != nil {
-		panic("got error from NewCipher")
-	}
+	block, _ := aes.NewCipher(pKey)
 	return &sAESCipher{
 		fBlock: block,
 	}

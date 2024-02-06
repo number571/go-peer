@@ -7,10 +7,7 @@ import (
 )
 
 func SerializeJSON(pData interface{}) []byte {
-	res, err := json.Marshal(pData)
-	if err != nil {
-		return nil
-	}
+	res, _ := json.Marshal(pData)
 	return res
 }
 
