@@ -76,13 +76,13 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 		go func(i int, a string) {
 			defer wg.Done()
 
-			ticker := time.NewTicker(p.fSettings.GetWriteTimeout())
-			defer ticker.Stop()
+			timer := time.NewTimer(p.fSettings.GetWriteTimeout())
+			defer timer.Stop()
 
 			select {
 			case <-pCtx.Done():
 				listErr[i] = pCtx.Err()
-			case <-ticker.C:
+			case <-timer.C:
 				listErr[i] = utils.MergeErrors(ErrWriteTimeout, errors.New(a))
 			case err := <-chErr:
 				if err == nil {
