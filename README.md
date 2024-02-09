@@ -320,6 +320,8 @@ $ make
 
 > Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/examples "Package anonymity");
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 2. Hidden Lake Messenger
 
 > [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger "HLM");
@@ -417,6 +419,8 @@ $ make
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger/_images "Path to HLM images")
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 3. Hidden Lake Filesharer
 
 > [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer "HLF");
@@ -503,6 +507,8 @@ Than open browser on `localhost:8080`. It is a `node1_hlf`. This node is a Alice
 To see the another side of communication, you need to do all the same operations, but with `localhost:7070` as `node2_hlf`. This node will be Bob.
 
 > More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
+
+**[⬆ back to top](#library-based-applications)**
 
 ## 4. Hidden Lake Traffic
 
@@ -591,6 +597,8 @@ $ go run ./main.go h
 $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
 ```
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 5. Hidden Lake Loader
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/loader "HLL")
@@ -671,6 +679,8 @@ Get valid response
 messages have been successfully transported
 ```
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 6. Hidden Lake Encryptor
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor "HLE")
@@ -742,6 +752,8 @@ $ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07
 > hello, world
 ```
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 7. Hidden Lake Adapters
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/adapters "HLA")
@@ -794,6 +806,8 @@ There are no external differences, but there are internal ones. While the origin
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 
+**[⬆ back to top](#library-based-applications)**
+
 ## 8. Hidden Lake Composite
 
 > [github.com/number571/go-peer/cmd/hidden_lake/composite](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/composite "HLC")
@@ -843,6 +857,8 @@ $ make docker-run
 > ...
 ```
 
+**[⬆ back to top](#library-based-applications)**
+
 ## Deprecated applications
 
 Previously, some applications (such as HL, HLS, HES) were developed separately from the go-peer platform. Currently, these applications are outdated because they did not keep up with go-peer updates and were based on poor architectural solutions.
@@ -856,6 +872,8 @@ The difference between the old version of Hidden Lake and the new one is in the 
 2. The old version was a monolith, incorporating both transport logic, anonymizing, and applied. The new version is already based on the micro service architecture
 3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library.
 4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all.
+
+**[⬆ back to top](#library-based-applications)**
 
 ## License
 
