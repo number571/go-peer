@@ -115,14 +115,12 @@ Also, the composition of these works can be found in the book `The general theor
 
 ## Library based applications
 
-1. [Hidden Lake Service](#1-hidden-lake-service) 
-2. [Hidden Lake Messenger](#2-hidden-lake-messenger) 
-3. [Hidden Lake Filesharer](#3-hidden-lake-filesharer) 
-4. [Hidden Lake Traffic](#4-hidden-lake-traffic) 
-5. [Hidden Lake Loader](#5-hidden-lake-loader) 
-6. [Hidden Lake Encryptor](#6-hidden-lake-encryptor) 
-7. [Hidden Lake Adapters](#7-hidden-lake-adapters) 
-8. [Hidden Lake Composite](#8-hidden-lake-composite) 
+Basic | Applied | Helpers
+:-----------------------------:|:-----------------------------:|:------------------------------:
+[Hidden Lake Service](#1-hidden-lake-service) | [Hidden Lake Messenger](#2-hidden-lake-messenger) | [Hidden Lake Traffic](#4-hidden-lake-traffic)
+[Hidden Lake Composite](#8-hidden-lake-composite) | [Hidden Lake Filesharer](#3-hidden-lake-filesharer) | [Hidden Lake Adapters](#7-hidden-lake-adapters)
+_ | _ | [Hidden Lake Loader](#5-hidden-lake-loader)
+_ | _ | [Hidden Lake Encryptor](#6-hidden-lake-encryptor)
 
 ## 1. Hidden Lake Service
 
@@ -847,9 +845,17 @@ $ make docker-run
 
 ## Deprecated applications
 
-* Hidden Lake (can be used as HLS+HLM+HLT+...): [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL");
-* Hidden Email Service (HLT can be used as HES): [github.com/number571/hes](https://github.com/number571/hes "HES");
-* Hidden Lake Service (new release = HLS): [github.com/number571/hls](https://github.com/number571/hls "HLS");
+Previously, some applications (such as HL, HLS, HES) were developed separately from the go-peer platform. Currently, these applications are outdated because they did not keep up with go-peer updates and were based on poor architectural solutions.
+
+* [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL"); New version in the [cmd/hidden_lake](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake)
+* [github.com/number571/hls](https://github.com/number571/hls "HLS"); New version in the [cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service)
+* [github.com/number571/hes](https://github.com/number571/hes "HES"); It can be implemented using [HLT](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic)
+
+The difference between the old version of Hidden Lake and the new one is in the following details:
+1. The new version is based on a model of theoretically provable anonymity (QB networks), while the old version was based on onion routing
+2. The old version was a monolith, incorporating both transport logic, anonymizing, and applied. The new version is already based on the micro service architecture
+3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library.
+4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all.
 
 ## License
 
