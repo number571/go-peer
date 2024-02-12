@@ -117,10 +117,10 @@ Also, the composition of these works can be found in the book `The general theor
 
 Basic | Applied | Helpers
 :-----------------------------:|:-----------------------------:|:------------------------------:
-[Hidden Lake Service](#1-hidden-lake-service) | [Hidden Lake Messenger](#2-hidden-lake-messenger) | [Hidden Lake Traffic](#4-hidden-lake-traffic)
-[Hidden Lake Composite](#8-hidden-lake-composite) | [Hidden Lake Filesharer](#3-hidden-lake-filesharer) | [Hidden Lake Adapters](#7-hidden-lake-adapters)
-_ | _ | [Hidden Lake Loader](#5-hidden-lake-loader)
-_ | _ | [Hidden Lake Encryptor](#6-hidden-lake-encryptor)
+[HL Service](#1-hidden-lake-service) | [HL Messenger](#2-hidden-lake-messenger) | [HL Traffic](#4-hidden-lake-traffic)
+[HL Composite](#8-hidden-lake-composite) | [HL Filesharer](#3-hidden-lake-filesharer) | [HL Adapters](#7-hidden-lake-adapters)
+_ | _ | [HL Loader](#5-hidden-lake-loader)
+_ | _ | [HL Encryptor](#6-hidden-lake-encryptor)
 
 ## 1. Hidden Lake Service
 
@@ -320,7 +320,7 @@ $ make
 
 > Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/examples "Package anonymity");
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 2. Hidden Lake Messenger
 
@@ -419,7 +419,7 @@ $ make
 
 > More example images about HLM pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/messenger/_images "Path to HLM images")
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 3. Hidden Lake Filesharer
 
@@ -508,7 +508,7 @@ To see the another side of communication, you need to do all the same operations
 
 > More example images about HLF pages in the [github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/_images](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/filesharer/_images "Path to HLF images")
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 4. Hidden Lake Traffic
 
@@ -597,7 +597,7 @@ $ go run ./main.go h
 $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af9297be4 # hash get by 'h' option
 ```
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 5. Hidden Lake Loader
 
@@ -679,7 +679,7 @@ Get valid response
 messages have been successfully transported
 ```
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 6. Hidden Lake Encryptor
 
@@ -752,7 +752,7 @@ $ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07
 > hello, world
 ```
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 7. Hidden Lake Adapters
 
@@ -806,7 +806,7 @@ There are no external differences, but there are internal ones. While the origin
 
 Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## 8. Hidden Lake Composite
 
@@ -857,7 +857,7 @@ $ make docker-run
 > ...
 ```
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## Deprecated applications
 
@@ -873,7 +873,7 @@ The difference between the old version of Hidden Lake and the new one is in the 
 3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library.
 4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all.
 
-**[⬆ back to top](#library-based-applications)**
+**[⬆ back to top](#installation)**
 
 ## License
 
