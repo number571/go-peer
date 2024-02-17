@@ -40,11 +40,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
 	}
-	if p.FRandDuration == 0 {
-		// randDuration=0 == randDuration=1
-		// randDuration is a mod of calculation
-		p.FRandDuration = 1
-	}
+	// p.FRandDuration can be = 0
 	return p
 }
 
