@@ -83,20 +83,15 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 	encMsgBytes := state.fCipher.EncryptBytes(pMsg.ToBytes())
 	err := p.sendBytes(pCtx, bytes.Join(
 		[][]byte{
+			cipherSalt,
+			authSalt,
 			p.getHeadBytes(
 				state,
-				cipherSalt,
-				authSalt,
 				encMsgBytes,
 				voidBytes,
 			),
-			bytes.Join(
-				[][]byte{
-					encMsgBytes,
-					voidBytes,
-				},
-				[]byte{},
-			),
+			encMsgBytes,
+			voidBytes,
 		},
 		[]byte{},
 	))
@@ -167,15 +162,13 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 
 func (p *sConn) getHeadBytes(
 	pState *sState,
-	pCipherSalt []byte,
-	pAuthSalt []byte,
 	pEncMsgBytes []byte,
 	pVoidBytes []byte,
 ) []byte {
 	encMsgSizeBytes := encoding.Uint64ToBytes(uint64(len(pEncMsgBytes)))
 	voidSizeBytes := encoding.Uint64ToBytes(uint64(len(pVoidBytes)))
 
-	encHeadPart := pState.fCipher.EncryptBytes(bytes.Join(
+	return pState.fCipher.EncryptBytes(bytes.Join(
 		[][]byte{
 			encMsgSizeBytes[:],
 			voidSizeBytes[:],
@@ -202,15 +195,6 @@ func (p *sConn) getHeadBytes(
 		},
 		[]byte{},
 	))
-
-	return bytes.Join(
-		[][]byte{
-			pCipherSalt,
-			pAuthSalt,
-			encHeadPart,
-		},
-		[]byte{},
-	)
 }
 
 func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pInitDeadline time.Duration) (uint64, uint64, *sState, []byte, error) {
