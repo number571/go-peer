@@ -2,7 +2,6 @@ package message
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -21,7 +20,6 @@ const (
 	tcHead       = 12345
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key_1"
-	tcProof      = 1359
 )
 
 type sInvalidPayload struct{}
@@ -53,7 +51,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(msg.GetHash(), getHash(tcNetworkKey, pld.ToBytes())) {
+	if !bytes.Equal(msg.GetHash(), getHash(tcNetworkKey, msg.GetSalt(), pld.ToBytes())) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -63,10 +61,21 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	if msg.GetProof() != tcProof {
-		fmt.Println(msg.GetProof())
-		t.Error("got invalid proof")
-		return
+	for i := 0; i < 10; i++ {
+		msgN := NewMessage(sett, pld, 1)
+		if msgN.GetProof() == 0 {
+			continue
+		}
+		msgL, err := LoadMessage(sett, msgN.ToBytes())
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if msgN.GetProof() != msgL.GetProof() {
+			t.Error("got invalid proof")
+			return
+		}
+		break
 	}
 
 	msg1, err := LoadMessage(sett, msg.ToBytes())
@@ -128,7 +137,7 @@ func TestMessage(t *testing.T) {
 	msgBytes := bytes.Join(
 		[][]byte{
 			{}, // pass payload
-			getHash("_", []byte{}),
+			getHash("_", []byte{}, []byte{}),
 		},
 		[]byte{},
 	)

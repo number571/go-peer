@@ -147,6 +147,7 @@ func TestQueue(t *testing.T) {
 			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
+			FRandDuration: 100 * time.Millisecond,
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
@@ -179,7 +180,7 @@ func testQueue(queue IMessageQueue) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}()
 
 	go func() {
@@ -202,7 +203,7 @@ func testQueue(queue IMessageQueue) error {
 	}
 
 	// wait minimum one generated message
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	// clear old messages
 	queue.WithNetworkSettings(

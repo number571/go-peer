@@ -25,9 +25,17 @@ func initNode(
 	pLogger logger.ILogger,
 	pParallel uint64,
 ) anonymity.INode {
-	cfg := pCfgW.GetConfig()
-	cfgSettings := cfg.GetSettings()
-	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
+	var (
+		cfg         = pCfgW.GetConfig()
+		cfgSettings = cfg.GetSettings()
+	)
+
+	var (
+		queueDuration     = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
+		queueRandDuration = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
+		queueMaxDuration  = queueDuration + queueRandDuration
+	)
+
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:   pkg_settings.CServiceName,
@@ -44,16 +52,16 @@ func initNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      cfg.GetAddress().GetTCP(),
 				FMaxConnects:  pkg_settings.CNetworkMaxConns,
-				FReadTimeout:  queueDuration,
-				FWriteTimeout: queueDuration,
+				FReadTimeout:  queueMaxDuration,
+				FWriteTimeout: queueMaxDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FNetworkKey:       cfgSettings.GetNetworkKey(),
 					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
 					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
-					FReadDeadline:     queueDuration,
-					FWriteDeadline:    queueDuration,
+					FReadDeadline:     queueMaxDuration,
+					FWriteDeadline:    queueMaxDuration,
 				}),
 			}),
 			lru.NewLRUCache(
@@ -68,6 +76,7 @@ func initNode(
 				FVoidCapacity: pkg_settings.CQueuePoolCapacity,
 				FParallel:     pParallel,
 				FDuration:     queueDuration,
+				FRandDuration: queueRandDuration,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{

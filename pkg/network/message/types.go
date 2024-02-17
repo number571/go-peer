@@ -9,6 +9,7 @@ type IMessage interface {
 	types.IConverter
 
 	GetProof() uint64
+	GetSalt() []byte
 	GetHash() []byte
 	GetPayload() payload.IPayload
 }

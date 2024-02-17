@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
@@ -160,10 +161,14 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 }
 
 func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessage {
+	randDuration := time.Duration(
+		random.NewStdPRNG().GetUint64() % uint64(p.fSettings.GetRandDuration()),
+	)
+
 	select {
 	case <-pCtx.Done():
 		return nil
-	case <-time.After(p.fSettings.GetDuration()):
+	case <-time.After(p.fSettings.GetDuration() + randDuration):
 		select {
 		case x := <-p.fMainPool.fQueue:
 			// the main queue is checked first

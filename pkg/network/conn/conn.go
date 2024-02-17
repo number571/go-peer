@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	// IV + Hash + PayloadHead + Proof
-	cPayloadOverHeadSize = symmetric.CAESBlockSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
+	// IV + Salt + Hash + PayloadHead + Proof
+	cPayloadOverHeadSize = symmetric.CAESBlockSize + message.CSaltSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
 
 	// IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
 	cEncryptRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
@@ -28,7 +28,7 @@ const (
 	// first digits of PI
 	cAuthSalt = "1415926535_8979323846_2643383279_5028841971_6939937510"
 
-	// seconds digits of PI
+	// second digits of PI
 	cCipherSalt = "5820974944_5923078164_0628620899_8628034825_3421170679"
 )
 

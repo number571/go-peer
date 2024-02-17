@@ -6,6 +6,15 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/network/anonymity/queue`: append random duration
+
+### CHANGES
+
+- Update `cmd/hidden_lake/applications`: delete FaviconPage, change favicon.ico -> favicon.gif
+- Update `pkg/network/message`: static salt -> dynamic salt
+
 <!-- ... -->
 
 ## v1.6.3

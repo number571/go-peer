@@ -9,6 +9,7 @@
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
+10. Dynamic cryptographic salt (cAuthSalt, cCipherSalt) in network/conn
 
 ### Tests
 

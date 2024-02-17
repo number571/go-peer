@@ -14,6 +14,7 @@ type sSettings struct {
 	FVoidCapacity uint64
 	FParallel     uint64
 	FDuration     time.Duration
+	FRandDuration time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -22,6 +23,7 @@ func NewSettings(pSett *SSettings) ISettings {
 		FVoidCapacity: pSett.FVoidCapacity,
 		FParallel:     pSett.FParallel,
 		FDuration:     pSett.FDuration,
+		FRandDuration: pSett.FRandDuration,
 	}).mustNotNull()
 }
 
@@ -37,6 +39,11 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
+	}
+	if p.FRandDuration == 0 {
+		// randDuration=0 == randDuration=1
+		// randDuration is a mod of calculation
+		p.FRandDuration = 1
 	}
 	return p
 }
@@ -55,4 +62,8 @@ func (p *sSettings) GetVoidCapacity() uint64 {
 
 func (p *sSettings) GetDuration() time.Duration {
 	return p.FDuration
+}
+
+func (p *sSettings) GetRandDuration() time.Duration {
+	return p.FRandDuration
 }

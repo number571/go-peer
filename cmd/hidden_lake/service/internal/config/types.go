@@ -23,6 +23,8 @@ type IConfigSettings interface {
 	net_message.ISettings
 
 	GetQueuePeriodMS() uint64
+	GetQueueRandPeriodMS() uint64
+
 	GetLimitVoidSizeBytes() uint64
 	GetF2FDisabled() bool
 }

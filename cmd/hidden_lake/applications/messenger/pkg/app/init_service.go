@@ -38,7 +38,6 @@ func (p *sApp) initInterfaceServiceHTTP(pMsgBroker msgbroker.IMessageBroker) {
 	cfgWrapper := config.NewWrapper(p.fConfig)
 
 	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))                          // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleFaviconPath, handler.FaviconPage(p.fHTTPLogger, p.fConfig))                      // GET
 	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))                          // GET
 	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))                   // GET, PATCH, PUT, POST, DELETE
 	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, p.fConfig))                      // GET, POST, DELETE

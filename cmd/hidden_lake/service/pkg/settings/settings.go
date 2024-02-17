@@ -39,13 +39,14 @@ const (
 )
 
 const (
-	CDefaultMessageSize   = (8 << 10) // 8KiB
-	CDefaultWorkSize      = 22        // bits
-	CDefaultKeySize       = 4096      // bits
-	CDefaultQueuePeriod   = 5000      // 5 seconds
-	CDefaultLimitVoidSize = (4 << 10) // 4KiB
-	CDefaultF2FDisabled   = false     // friend-to-friend
-	CDefaultNetworkKey    = "default"
+	CDefaultMessageSize     = (8 << 10) // 8KiB
+	CDefaultWorkSize        = 22        // bits
+	CDefaultKeySize         = 4096      // bits
+	CDefaultQueuePeriod     = 5000      // 5 seconds
+	CDefaultQueueRandPeriod = 0         // 0 seconds
+	CDefaultLimitVoidSize   = (4 << 10) // 4KiB
+	CDefaultF2FDisabled     = false     // friend-to-friend
+	CDefaultNetworkKey      = "default"
 )
 
 const (

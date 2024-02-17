@@ -33,6 +33,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 					FMessageSizeBytes:   sett.GetMessageSizeBytes(),
 					FWorkSizeBits:       sett.GetWorkSizeBits(),
 					FQueuePeriodMS:      sett.GetQueuePeriodMS(),
+					FQueueRandPeriodMS:  sett.GetQueueRandPeriodMS(),
 					FKeySizeBits:        sett.GetKeySizeBits(),
 					FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
 					FNetworkKey:         sett.GetNetworkKey(),

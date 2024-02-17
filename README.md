@@ -870,8 +870,8 @@ Previously, some applications (such as HL, HLS, HES) were developed separately f
 The difference between the old version of Hidden Lake and the new one is in the following details:
 1. The new version is based on a model of theoretically provable anonymity (QB networks), while the old version was based on onion routing
 2. The old version was a monolith, incorporating both transport logic, anonymizing, and applied. The new version is already based on the micro service architecture
-3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library.
-4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all.
+3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library
+4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all
 
 **[⬆ back to top](#installation)**
 
