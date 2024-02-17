@@ -140,7 +140,7 @@ func TestClosedConn(t *testing.T) {
 	readCh2 := make(chan struct{})
 	go func() { <-readCh2 }()
 
-	if _, _, _, err := sconn.recvHeadBytes(ctx, readCh2, time.Minute); err == nil {
+	if _, _, _, _, err := sconn.recvHeadBytes(ctx, readCh2, time.Minute); err == nil {
 		t.Error("success recv head bytes from closed connection")
 		return
 	}

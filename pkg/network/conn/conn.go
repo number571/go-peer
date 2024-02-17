@@ -17,19 +17,13 @@ import (
 )
 
 const (
-	// IV + Salt + Hash + PayloadHead + Proof
-	cPayloadOverHeadSize = symmetric.CAESBlockSize + message.CSaltSize + hashing.CSHA256Size + 2*encoding.CSizeUint64
+	cSaltSize = 16
 
-	// IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
-	cEncryptRecvHeadSize = symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
-)
+	// IV + Proof + Salt + Hash + PayloadHead
+	cEncryptMessageHeadSize = symmetric.CAESBlockSize + encoding.CSizeUint64 + message.CSaltSize + hashing.CSHA256Size + encoding.CSizeUint64
 
-const (
-	// first digits of PI
-	cAuthSalt = "1415926535_8979323846_2643383279_5028841971_6939937510"
-
-	// second digits of PI
-	cCipherSalt = "5820974944_5923078164_0628620899_8628034825_3421170679"
+	// Salt(cipher) + Salt(auth) + IV + Uint64(encMsgSize) + Uint64(voidSize) + HMAC(encMsgSize || voidSize) + HMAC(msgBytes || voidBytes)
+	cEncryptRecvHeadSize = 2*cSaltSize + symmetric.CAESBlockSize + 2*encoding.CSizeUint64 + 2*hashing.CSHA256Size
 )
 
 var (
@@ -38,14 +32,13 @@ var (
 
 type sConn struct {
 	fMutex    sync.Mutex
-	fKeyMutex sync.Mutex
-
 	fSocket   net.Conn
 	fSettings ISettings
+}
 
-	fNetworkKey string
-	fAuthKey    []byte
-	fCipher     symmetric.ICipher
+type sState struct {
+	fAuthKey []byte
+	fCipher  symmetric.ICipher
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
@@ -57,15 +50,9 @@ func NewConn(pSett ISettings, pAddr string) (IConn, error) {
 }
 
 func LoadConn(pSett ISettings, pConn net.Conn) IConn {
-	networkKey := pSett.GetNetworkKey()
-	cipher, authKey := buildState(networkKey)
-
 	return &sConn{
-		fSettings:   pSett,
-		fSocket:     pConn,
-		fNetworkKey: networkKey,
-		fAuthKey:    authKey,
-		fCipher:     cipher,
+		fSettings: pSett,
+		fSocket:   pConn,
 	}
 }
 
@@ -86,14 +73,23 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 	defer p.fMutex.Unlock()
 
 	prng := random.NewStdPRNG()
+
+	cipherSalt, authSalt := prng.GetBytes(cSaltSize), prng.GetBytes(cSaltSize)
+	state := p.buildState(cipherSalt, authSalt)
+
 	randVoidSize := prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1)
-
 	voidBytes := prng.GetBytes(randVoidSize)
-	encMsgBytes := p.getCipher().EncryptBytes(pMsg.ToBytes())
 
+	encMsgBytes := state.fCipher.EncryptBytes(pMsg.ToBytes())
 	err := p.sendBytes(pCtx, bytes.Join(
 		[][]byte{
-			p.getHeadBytes(encMsgBytes, voidBytes),
+			p.getHeadBytes(
+				state,
+				cipherSalt,
+				authSalt,
+				encMsgBytes,
+				voidBytes,
+			),
 			bytes.Join(
 				[][]byte{
 					encMsgBytes,
@@ -113,7 +109,7 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 
 func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (message.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
-	encMsgSize, voidSize, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadDeadline())
+	encMsgSize, voidSize, state, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadDeadline())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrReadHeaderBytes, err)
 	}
@@ -124,19 +120,22 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (mess
 	}
 
 	// check hash sum of received data
-	newHash := p.getAuthData(bytes.Join(
-		[][]byte{
-			dataBytes[:encMsgSize],
-			dataBytes[encMsgSize:],
-		},
-		[]byte{},
-	))
+	newHash := hashing.NewHMACSHA256Hasher(
+		state.fAuthKey,
+		bytes.Join(
+			[][]byte{
+				dataBytes[:encMsgSize],
+				dataBytes[encMsgSize:],
+			},
+			[]byte{},
+		),
+	).ToBytes()
 	if !bytes.Equal(newHash, gotHash) {
 		return nil, ErrInvalidBodyAuthHash
 	}
 
 	// try unpack message from bytes
-	msgBytes := p.getCipher().DecryptBytes(dataBytes[:encMsgSize])
+	msgBytes := state.fCipher.DecryptBytes(dataBytes[:encMsgSize])
 	msg, err := message.LoadMessage(p.fSettings, msgBytes)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
@@ -166,34 +165,55 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 	return nil
 }
 
-func (p *sConn) getHeadBytes(pEncMsgBytes, pVoidBytes []byte) []byte {
+func (p *sConn) getHeadBytes(
+	pState *sState,
+	pCipherSalt []byte,
+	pAuthSalt []byte,
+	pEncMsgBytes []byte,
+	pVoidBytes []byte,
+) []byte {
 	encMsgSizeBytes := encoding.Uint64ToBytes(uint64(len(pEncMsgBytes)))
 	voidSizeBytes := encoding.Uint64ToBytes(uint64(len(pVoidBytes)))
 
-	return p.getCipher().EncryptBytes(bytes.Join(
+	encHeadPart := pState.fCipher.EncryptBytes(bytes.Join(
 		[][]byte{
 			encMsgSizeBytes[:],
 			voidSizeBytes[:],
-			p.getAuthData(bytes.Join(
-				[][]byte{
-					encMsgSizeBytes[:],
-					voidSizeBytes[:],
-				},
-				[]byte{},
-			)),
-			p.getAuthData(bytes.Join(
-				[][]byte{
-					pEncMsgBytes,
-					pVoidBytes,
-				},
-				[]byte{},
-			)),
+			hashing.NewHMACSHA256Hasher(
+				pState.fAuthKey,
+				bytes.Join(
+					[][]byte{
+						encMsgSizeBytes[:],
+						voidSizeBytes[:],
+					},
+					[]byte{},
+				),
+			).ToBytes(),
+			hashing.NewHMACSHA256Hasher(
+				pState.fAuthKey,
+				bytes.Join(
+					[][]byte{
+						pEncMsgBytes,
+						pVoidBytes,
+					},
+					[]byte{},
+				),
+			).ToBytes(),
 		},
 		[]byte{},
 	))
+
+	return bytes.Join(
+		[][]byte{
+			pCipherSalt,
+			pAuthSalt,
+			encHeadPart,
+		},
+		[]byte{},
+	)
 }
 
-func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pInitDeadline time.Duration) (uint64, uint64, []byte, error) {
+func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pInitDeadline time.Duration) (uint64, uint64, *sState, []byte, error) {
 	defer func() { pChRead <- struct{}{} }()
 
 	const (
@@ -218,15 +238,16 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 
 	select {
 	case <-pCtx.Done():
-		return 0, 0, nil, pCtx.Err()
+		return 0, 0, nil, nil, pCtx.Err()
 	case err := <-chErr:
 		if err != nil {
-			return 0, 0, nil, err
+			return 0, 0, nil, nil, err
 		}
 		break
 	}
 
-	recvHead := p.getCipher().DecryptBytes(encRecvHead)
+	state := p.buildState(encRecvHead[:cSaltSize], encRecvHead[cSaltSize:2*cSaltSize])
+	recvHead := state.fCipher.DecryptBytes(encRecvHead[2*cSaltSize:])
 
 	encMsgSizeBytes := [encoding.CSizeUint64]byte{}
 	copy(encMsgSizeBytes[:], recvHead[:firstSizeIndex])
@@ -235,29 +256,32 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 	copy(voidSizeBytes[:], recvHead[firstSizeIndex:secondSizeIndex])
 
 	encMsgSize := encoding.BytesToUint64(encMsgSizeBytes)
-	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cPayloadOverHeadSize) {
-		return 0, 0, nil, ErrInvalidHeaderMsgSize
+	if encMsgSize > (p.fSettings.GetMessageSizeBytes() + cEncryptMessageHeadSize) {
+		return 0, 0, nil, nil, ErrInvalidHeaderMsgSize
 	}
 
 	voidSize := encoding.BytesToUint64(voidSizeBytes)
 	if voidSize > p.fSettings.GetLimitVoidSize() {
-		return 0, 0, nil, ErrInvalidHeaderVoidSize
+		return 0, 0, nil, nil, ErrInvalidHeaderVoidSize
 	}
 
 	// check hash sum of received sizes
 	gotHash := recvHead[secondSizeIndex:firstHashIndex]
-	newHash := p.getAuthData(bytes.Join(
-		[][]byte{
-			encMsgSizeBytes[:],
-			voidSizeBytes[:],
-		},
-		[]byte{},
-	))
+	newHash := hashing.NewHMACSHA256Hasher(
+		state.fAuthKey,
+		bytes.Join(
+			[][]byte{
+				encMsgSizeBytes[:],
+				voidSizeBytes[:],
+			},
+			[]byte{},
+		),
+	).ToBytes()
 	if !bytes.Equal(newHash, gotHash) {
-		return 0, 0, nil, ErrInvalidHeaderAuthHash
+		return 0, 0, nil, nil, ErrInvalidHeaderAuthHash
 	}
 
-	return encMsgSize, voidSize, recvHead[firstHashIndex:secondHashIndex], nil
+	return encMsgSize, voidSize, state, recvHead[firstHashIndex:secondHashIndex], nil
 }
 
 func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitDeadline time.Duration) ([]byte, error) {
@@ -292,33 +316,12 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitDeadli
 	return dataRaw, nil
 }
 
-func (p *sConn) getCipher() symmetric.ICipher {
-	p.autoUpdateState()
-	return p.fCipher
-}
-
-func (p *sConn) getAuthData(pData []byte) []byte {
-	p.autoUpdateState()
-	return hashing.NewHMACSHA256Hasher(p.fAuthKey, pData).ToBytes()
-}
-
-func (p *sConn) autoUpdateState() {
-	p.fKeyMutex.Lock()
-	defer p.fKeyMutex.Unlock()
-
-	// networkKey can be updated from fSettings
+func (p *sConn) buildState(pCipherSalt, pAuthSalt []byte) *sState {
 	networkKey := p.fSettings.GetNetworkKey()
-	if p.fNetworkKey == networkKey {
-		return
+	cipherKeyBuilder := keybuilder.NewKeyBuilder(1, pCipherSalt)
+	authKeyBuilder := keybuilder.NewKeyBuilder(1, pAuthSalt)
+	return &sState{
+		fAuthKey: authKeyBuilder.Build(networkKey),
+		fCipher:  symmetric.NewAESCipher(cipherKeyBuilder.Build(networkKey)),
 	}
-
-	// rewrite sConn fields
-	p.fNetworkKey = networkKey
-	p.fCipher, p.fAuthKey = buildState(p.fNetworkKey)
-}
-
-func buildState(pNetworkKey string) (symmetric.ICipher, []byte) {
-	cipherKeyBuilder := keybuilder.NewKeyBuilder(1, []byte(cCipherSalt))
-	authKeyBuilder := keybuilder.NewKeyBuilder(1, []byte(cAuthSalt))
-	return symmetric.NewAESCipher(cipherKeyBuilder.Build(pNetworkKey)), authKeyBuilder.Build(pNetworkKey)
 }

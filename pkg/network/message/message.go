@@ -28,7 +28,7 @@ type sMessage struct {
 
 func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel uint64) IMessage {
 	salt := random.NewStdPRNG().GetBytes(CSaltSize)
-	hash := getHash(pSett.GetNetworkKey(), salt, pPld.ToBytes())
+	hash := getAuthHash(pSett.GetNetworkKey(), salt, pPld.ToBytes())
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 
 	return &sMessage{
@@ -69,7 +69,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	if !bytes.Equal(gotHash, getHash(pSett.GetNetworkKey(), gotSalt, pldBytes)) {
+	if !bytes.Equal(gotHash, getAuthHash(pSett.GetNetworkKey(), gotSalt, pldBytes)) {
 		return nil, ErrInvalidAuthHash
 	}
 
@@ -120,7 +120,7 @@ func (p *sMessage) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
 }
 
-func getHash(networkKey string, pAuthSalt, pBytes []byte) []byte {
+func getAuthHash(networkKey string, pAuthSalt, pBytes []byte) []byte {
 	authKey := keybuilder.NewKeyBuilder(1, []byte(pAuthSalt)).Build(networkKey)
 	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
 }

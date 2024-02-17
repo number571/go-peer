@@ -51,7 +51,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(msg.GetHash(), getHash(tcNetworkKey, msg.GetSalt(), pld.ToBytes())) {
+	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, msg.GetSalt(), pld.ToBytes())) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -137,7 +137,7 @@ func TestMessage(t *testing.T) {
 	msgBytes := bytes.Join(
 		[][]byte{
 			{}, // pass payload
-			getHash("_", []byte{}, []byte{}),
+			getAuthHash("_", []byte{}, []byte{}),
 		},
 		[]byte{},
 	)
