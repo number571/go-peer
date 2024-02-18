@@ -12,12 +12,6 @@ const (
 	charList     = `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-`
 )
 
-func init() {
-	if len(charList) != charListSize {
-		panic("len(charList) != charListSize")
-	}
-}
-
 var (
 	_ IPRNG = &sStdPRNG{}
 )

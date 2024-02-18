@@ -8,8 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/utils"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -84,7 +86,7 @@ func testSettings(t *testing.T, n int) {
 func TestClosedConn(t *testing.T) {
 	t.Parallel()
 
-	listener := testNewService(t, testutils.TgAddrs[30], "")
+	listener := testNewService(t, testutils.TgAddrs[30], "", 0)
 	defer testFreeService(listener)
 
 	conn, err := NewConn(
@@ -181,11 +183,21 @@ func TestConnWithNetworkKey(t *testing.T) {
 	t.Parallel()
 
 	testConn(t, testutils.TgAddrs[17], "")
-	testConn(t, testutils.TgAddrs[29], "hello, world!")
+	testConn(t, testutils.TgAddrs[17], "hello, world!")
+}
+
+func TestConnWithInvalidWrite(t *testing.T) {
+	t.Parallel()
+
+	testInvalidWrite(t, testutils.TgAddrs[24], "", 1)
+	testInvalidWrite(t, testutils.TgAddrs[24], "", 2)
+	testInvalidWrite(t, testutils.TgAddrs[24], "", 3)
+	testInvalidWrite(t, testutils.TgAddrs[24], "", 4)
+	testInvalidWrite(t, testutils.TgAddrs[24], "", 5)
 }
 
 func testConn(t *testing.T, pAddr, pNetworkKey string) {
-	listener := testNewService(t, pAddr, pNetworkKey)
+	listener := testNewService(t, pAddr, pNetworkKey, 0)
 	defer testFreeService(listener)
 
 	conn, err := NewConn(
@@ -235,7 +247,110 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	}
 }
 
-func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
+func testInvalidWrite(t *testing.T, pAddr, pNetworkKey string, pInvalidWriteType int) {
+	listener := testNewService(t, pAddr, pNetworkKey, pInvalidWriteType)
+	defer testFreeService(listener)
+
+	conn, err := NewConn(
+		NewSettings(&SSettings{
+			FWorkSizeBits:     testutils.TCWorkSize,
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadDeadline: time.Hour,
+			FReadDeadline:     time.Minute,
+			FWriteDeadline:    time.Minute,
+		}),
+		pAddr,
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	socket := conn.GetSocket()
+	remoteAddr := strings.ReplaceAll(pAddr, "localhost", "127.0.0.1")
+	if socket.RemoteAddr().String() != remoteAddr {
+		t.Error("got incorrect remote address")
+		return
+	}
+
+	conn.GetSettings().SetNetworkKey(pNetworkKey)
+
+	pld := payload.NewPayload(tcHead, []byte(tcBody))
+	msg := message.NewMessage(conn.GetSettings(), pld, 1)
+	ctx := context.Background()
+
+	if err := conn.WriteMessage(ctx, msg); err != nil {
+		t.Error(err)
+		return
+	}
+
+	readCh := make(chan struct{})
+	go func() { <-readCh }()
+
+	if _, err := conn.ReadMessage(ctx, readCh); err == nil {
+		t.Error("success read invalid message")
+		return
+	}
+}
+
+func (p *sConn) testWriteInvalidMessage(pCtx context.Context, pMsg message.IMessage, pInvalidWriteType int) error {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	prng := random.NewStdPRNG()
+
+	cipherSalt, authSalt := prng.GetBytes(cSaltSize), prng.GetBytes(cSaltSize)
+	state := p.buildState(cipherSalt, authSalt)
+
+	randVoidSize := prng.GetUint64() % (p.fSettings.GetLimitVoidSize() + 1)
+	voidBytes := prng.GetBytes(randVoidSize)
+
+	encMsgBytes := state.fCipher.EncryptBytes(pMsg.ToBytes())
+	if pInvalidWriteType == 2 {
+		encMsgBytes = prng.GetBytes(uint64(len(encMsgBytes)))
+	}
+
+	invEncMsgBytes := make([]byte, len(encMsgBytes))
+	copy(invEncMsgBytes[:], encMsgBytes[:])
+
+	if pInvalidWriteType == 1 {
+		invEncMsgBytes[0] ^= 1
+	}
+
+	if pInvalidWriteType == 3 {
+		authSalt = prng.GetBytes(uint64(len(authSalt)))
+	}
+
+	if pInvalidWriteType == 4 {
+		encMsgBytes = prng.GetBytes(testutils.TCMessageSize + 256)
+	}
+
+	if pInvalidWriteType == 5 {
+		voidBytes = prng.GetBytes(256)
+	}
+
+	err := p.sendBytes(pCtx, bytes.Join(
+		[][]byte{
+			cipherSalt,
+			authSalt,
+			p.getHeadBytes(
+				state,
+				encMsgBytes,
+				voidBytes,
+			),
+			invEncMsgBytes,
+			voidBytes,
+		},
+		[]byte{},
+	))
+	if err != nil {
+		return utils.MergeErrors(ErrSendPayloadBytes, err)
+	}
+
+	return nil
+}
+
+func testNewService(t *testing.T, pAddr, pNetworkKey string, pInvalidWriteType int) net.Listener {
 	listener, err := net.Listen("tcp", pAddr)
 	if err != nil {
 		t.Error(err)
@@ -274,6 +389,9 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 
 			ok := func() bool {
 				defer conn.Close()
+				if pInvalidWriteType != 0 {
+					return conn.(*sConn).testWriteInvalidMessage(ctx, msg, pInvalidWriteType) == nil
+				}
 				return conn.WriteMessage(ctx, msg) == nil
 			}()
 
