@@ -145,4 +145,11 @@ func TestMessage(t *testing.T) {
 		t.Error("success load incorrect payload")
 		return
 	}
+
+	msg2Bytes := msg.ToBytes()
+	msg2Bytes[0] ^= (1 << 7)
+	if _, err := LoadMessage(sett, msg2Bytes); err == nil {
+		t.Error("success load incorrect proof")
+		return
+	}
 }
