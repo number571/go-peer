@@ -37,11 +37,14 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		fPrivKey:  pPrivKey,
 	}
 
-	encMsg := client.encryptWithParams(
+	encMsg, err := client.encryptWithParams(
 		client.GetPubKey(),
 		payload.NewPayload(0, []byte{}),
 		0,
 	)
+	if err != nil {
+		panic(err)
+	}
 
 	client.fStructSize = uint64(len(encMsg.ToBytes()))
 	if limit := client.GetMessageLimit(); limit == 0 {
@@ -98,10 +101,10 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 		pRecv,
 		pPld,
 		msgLimitSize-resultSize,
-	), nil
+	)
 }
 
-func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pPadd uint64) message.IMessage {
+func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pPadd uint64) (message.IMessage, error) {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
@@ -129,15 +132,20 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 		[]byte{},
 	)).ToBytes()
 
+	encKey := pRecv.EncryptBytes(session)
+	if encKey == nil {
+		return nil, ErrEncryptSymmetricKey
+	}
+
 	cipher := symmetric.NewAESCipher(session)
 	return &message.SMessage{
 		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-		FEncKey:  encoding.HexEncode(pRecv.EncryptBytes(session)),
+		FEncKey:  encoding.HexEncode(encKey),
 		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
 		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
 		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
 		FPayload: cipher.EncryptBytes(payloadWrapper.ToBytes()), // JSON field to raw Body (no need HEX encode)
-	}
+	}, nil
 }
 
 // Decrypt message with private key of receiver.

@@ -193,6 +193,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage) error {
 	oldNetworkMask, oldMsgSettings := p.getNetworkSettings()
 	chNetMsg := make(chan net_message.IMessage)
+
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			oldMsgSettings,
@@ -238,7 +239,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		payload.NewPayload(0, []byte{1}),
 	)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	oldNetworkMask, oldMsgSettings := p.getNetworkSettings()

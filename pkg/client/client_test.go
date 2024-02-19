@@ -78,6 +78,11 @@ func TestClientPanicWithMessageSize(t *testing.T) {
 func TestClientPanicWithKeySize(t *testing.T) {
 	t.Parallel()
 
+	testDiffKeySize(t)
+	testLittleKeySize(t)
+}
+
+func testDiffKeySize(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
@@ -90,6 +95,22 @@ func TestClientPanicWithKeySize(t *testing.T) {
 			FKeySizeBits:      4096,
 		}),
 		tgPrivKey,
+	)
+}
+
+func testLittleKeySize(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	_ = NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: tcMessageSize,
+			FKeySizeBits:      128,
+		}),
+		asymmetric.NewRSAPrivKey(128),
 	)
 }
 

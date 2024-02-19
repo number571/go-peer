@@ -13,4 +13,5 @@ var (
 	ErrInvalidHashSign      = errors.New("invalid hash sign")
 	ErrInvalidPayloadSize   = errors.New("invalid payload size")
 	ErrDecodePayload        = errors.New("decode payload")
+	ErrEncryptSymmetricKey  = errors.New("encrypt symmetric key")
 )
