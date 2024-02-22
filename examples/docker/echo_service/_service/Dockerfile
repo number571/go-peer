@@ -7,6 +7,6 @@ RUN wget https://go.dev/dl/go1.16.linux-amd64.tar.gz && \
 WORKDIR /go-peer
 ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
-RUN go build -o service ./examples/echo_service/default/recv_hls/service
+RUN go build -o service ./examples/echo_service/_service
 
 CMD ./service

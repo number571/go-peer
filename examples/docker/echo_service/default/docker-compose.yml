@@ -3,7 +3,7 @@ services:
   recv_hls_service:
     build:
       context: ./../../../../
-      dockerfile: examples/docker/echo_service/default/recv_hls/service/Dockerfile
+      dockerfile: examples/docker/echo_service/_service/Dockerfile
     networks:
       - local-network
   recv_hls:
