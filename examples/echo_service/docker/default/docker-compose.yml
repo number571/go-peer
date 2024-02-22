@@ -3,7 +3,7 @@ services:
   recv_hls_service:
     build:
       context: ./../../../../
-      dockerfile: examples/docker/echo_service/_service/Dockerfile
+      dockerfile: examples/echo_service/docker/_service/Dockerfile
     networks:
       - local-network
   recv_hls:
@@ -11,7 +11,7 @@ services:
       context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
-      - SERVICE_PATH=examples/docker/echo_service/default/recv_hls
+      - SERVICE_PATH=examples/echo_service/docker/default/recv_hls
       - SERVICE_KEY=examples/echo_service/default/recv_hls/priv.key
     networks:
       - local-network
@@ -21,7 +21,7 @@ services:
       context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
-      - SERVICE_PATH=examples/docker/echo_service/default/send_hls
+      - SERVICE_PATH=examples/echo_service/docker/default/send_hls
       - SERVICE_KEY=examples/echo_service/default/send_hls/priv.key
     ports:
       - 7572:7572
