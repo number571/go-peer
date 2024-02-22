@@ -11,7 +11,6 @@ _TEST_RESULT_PATH=./_test/result
 _TEST_PPROF_PATH=./_test/pprof
 
 .PHONY: default build clean \
-	docker-default docker-build docker-run docker-clean \
 	test-run test-coverage test-coverage-view \
 	pprof-run
 
@@ -26,23 +25,6 @@ clean:
 	make -C ./composite clean
 	make -C ./applications clean
 	make -C ./helpers clean
-
-docker-default: docker-build docker-run
-docker-build: docker-configs
-	docker-compose build
-docker-configs:
-	cp ./_configs/docker/* ./_mounted
-docker-run: 
-	docker-compose up
-docker-clean:
-	rm -rf ./_mounted/*.yml ./_mounted/*.db ./_mounted/*.key
-	docker-compose down 
-	docker-compose rm -f
-
-build-main:
-	make -C ./service build
-	make -C ./helpers/traffic build
-	make -C ./applications/messenger build
 
 ### TEST COVERAGE
 

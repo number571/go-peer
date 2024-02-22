@@ -15,6 +15,8 @@
 - Update `cmd/hidden_lake/applications`: delete FaviconPage, change favicon.ico -> favicon.gif
 - Update `pkg/network/message`: static salt -> dynamic salt
 - Update `pkg/network/conn`: static salt -> dynamic salt
+- Update `cmd/hidden_lake`: delete docker-compose
+- Update `.vscode`: deleted
 
 <!-- ... -->
 
