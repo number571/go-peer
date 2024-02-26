@@ -133,9 +133,10 @@ The `Hidden Lake Service` is a core of an anonymous network with theoretically p
 Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networks (1^stage)
 :-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
 Theoretical provability  |  +  |  +  |  + |
+Anonymity has a cumulative effect   |  -  |  +  |  - |
 Ease of software implementation  |  +  |  -  |  - |
 Polymorphism of information  |  -  |  +  |  + |
-Static communication delay  |  +  |  -  |  + |
+Static communication delay  |  +/-  |  -  |  + |
 Sending parallel messages  |  -  |  +  |  - |
 Network scales easily  |  -  |  -  |  - |
 

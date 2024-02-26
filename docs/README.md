@@ -25,10 +25,12 @@ Also, the composition of these works can be found in the book [The general theor
 5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
+8. [Hidden Lake Filesharer](https://habr.com/ru/articles/789968/ "Habr HLF")
 
 ### 4. Videos
 
 1. [Hidden Lake Messenger](https://www.youtube.com/watch?v=o2J6ewvBKmg "Video HLM")
+1. [Create node in the Hidden Lake](https://www.youtube.com/watch?v=GBmQfy16AuA&t=18s "Video HL")
 
 ## Default applications ports
 
