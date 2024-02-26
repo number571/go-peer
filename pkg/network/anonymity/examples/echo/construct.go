@@ -40,9 +40,9 @@ func newNode(serviceName, address string) anonymity.INode {
 
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   serviceName,
-			FNetworkMask:   networkMask,
-			FFetchTimeWait: time.Minute,
+			FServiceName:  serviceName,
+			FNetworkMask:  networkMask,
+			FFetchTimeout: time.Minute,
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{
@@ -118,8 +118,9 @@ func newConnSettings(mSize, wSize uint64, nKey string) conn.ISettings {
 		FWorkSizeBits:     wSize,
 		FMessageSizeBytes: mSize,
 		FLimitVoidSize:    8192,
-		FWaitReadDeadline: time.Hour,
-		FReadDeadline:     time.Minute,
-		FWriteDeadline:    time.Minute,
+		FWaitReadTimeout:  time.Hour,
+		FDialTimeout:      time.Minute,
+		FReadTimeout:      time.Minute,
+		FWriteTimeout:     time.Minute,
 	})
 }

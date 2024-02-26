@@ -38,7 +38,7 @@ type ISettings interface {
 	GetF2FDisabled() bool
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
-	GetFetchTimeWait() time.Duration
+	GetFetchTimeout() time.Duration
 }
 
 type IDBWrapper interface {

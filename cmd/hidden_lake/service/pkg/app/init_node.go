@@ -38,11 +38,11 @@ func initNode(
 
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   pkg_settings.CServiceName,
-			FF2FDisabled:   cfgSettings.GetF2FDisabled(),
-			FNetworkMask:   pkg_settings.CNetworkMask,
-			FRetryEnqueue:  pkg_settings.CRetryEnqueue,
-			FFetchTimeWait: pkg_settings.CFetchTimeout,
+			FServiceName:  pkg_settings.CServiceName,
+			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
+			FNetworkMask:  pkg_settings.CNetworkMask,
+			FRetryEnqueue: pkg_settings.CRetryEnqueue,
+			FFetchTimeout: pkg_settings.CFetchTimeout,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -59,9 +59,10 @@ func initNode(
 					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
-					FWaitReadDeadline: pkg_settings.CConnWaitReadDeadline,
-					FReadDeadline:     queueMaxDuration,
-					FWriteDeadline:    queueMaxDuration,
+					FWaitReadTimeout:  pkg_settings.CConnWaitReadTimeout,
+					FDialTimeout:      pkg_settings.CConnDialTimeout,
+					FReadTimeout:      queueMaxDuration,
+					FWriteTimeout:     queueMaxDuration,
 				}),
 			}),
 			lru.NewLRUCache(

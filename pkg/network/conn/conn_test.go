@@ -23,7 +23,7 @@ const (
 func TestSettingsNetworkKey(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 5; i++ {
 		testSettings(t, i)
 	}
 }
@@ -34,9 +34,10 @@ func TestSettings(t *testing.T) {
 	sett := NewSettings(&SSettings{
 		FWorkSizeBits:     testutils.TCWorkSize,
 		FMessageSizeBytes: testutils.TCMessageSize,
-		FWaitReadDeadline: time.Hour,
-		FReadDeadline:     time.Minute,
-		FWriteDeadline:    time.Minute,
+		FWaitReadTimeout:  time.Hour,
+		FDialTimeout:      time.Minute,
+		FReadTimeout:      time.Minute,
+		FWriteTimeout:     time.Minute,
 	})
 
 	networkKey := "hello, world!"
@@ -58,27 +59,38 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout: time.Hour,
+			FDialTimeout:     time.Minute,
+			FReadTimeout:     time.Minute,
+			FWriteTimeout:    time.Minute,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+		})
+	case 4:
+		_ = NewSettings(&SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:  time.Hour,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		})
 	}
 }
@@ -93,9 +105,10 @@ func TestClosedConn(t *testing.T) {
 		NewSettings(&SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		}),
 		testutils.TgAddrs[30],
 	)
@@ -167,9 +180,10 @@ func TestInvalidConn(t *testing.T) {
 		NewSettings(&SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		}),
 		"INVALID_ADDRESS",
 	)
@@ -204,9 +218,10 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		NewSettings(&SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		}),
 		pAddr,
 	)
@@ -255,9 +270,10 @@ func testInvalidWrite(t *testing.T, pAddr, pNetworkKey string, pInvalidWriteType
 		NewSettings(&SSettings{
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FWaitReadDeadline: time.Hour,
-			FReadDeadline:     time.Minute,
-			FWriteDeadline:    time.Minute,
+			FWaitReadTimeout:  time.Hour,
+			FDialTimeout:      time.Minute,
+			FReadTimeout:      time.Minute,
+			FWriteTimeout:     time.Minute,
 		}),
 		pAddr,
 	)
@@ -368,9 +384,10 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string, pInvalidWriteType i
 				NewSettings(&SSettings{
 					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FWaitReadDeadline: time.Hour,
-					FReadDeadline:     time.Minute,
-					FWriteDeadline:    time.Minute,
+					FWaitReadTimeout:  time.Hour,
+					FDialTimeout:      time.Minute,
+					FReadTimeout:      time.Minute,
+					FWriteTimeout:     time.Minute,
 				}),
 				aconn,
 			)

@@ -41,8 +41,8 @@ func TestNodeSettings(t *testing.T) {
 	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 9)
 
 	sett := node.GetSettings()
-	if sett.GetFetchTimeWait() != time.Minute {
-		t.Error("sett.GetFetchTimeWait() != time.Minute")
+	if sett.GetFetchTimeout() != time.Minute {
+		t.Error("sett.GetFetchTimeout() != time.Minute")
 		return
 	}
 	_ = node.GetLogger()
@@ -66,15 +66,15 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FRetryEnqueue:  0,
-			FNetworkMask:   1,
-			FFetchTimeWait: time.Second,
+			FRetryEnqueue: 0,
+			FNetworkMask:  1,
+			FFetchTimeout: time.Second,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FServiceName:   "TEST",
-			FRetryEnqueue:  0,
-			FFetchTimeWait: time.Second,
+			FServiceName:  "TEST",
+			FRetryEnqueue: 0,
+			FFetchTimeout: time.Second,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
@@ -758,11 +758,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 	networkKey := "old_network_key"
 	node := NewNode(
 		NewSettings(&SSettings{
-			FServiceName:   "TEST",
-			FF2FDisabled:   f2fDisabled,
-			FNetworkMask:   networkMask,
-			FFetchTimeWait: timeWait,
-			FRetryEnqueue:  uint64(retryNum),
+			FServiceName:  "TEST",
+			FF2FDisabled:  f2fDisabled,
+			FNetworkMask:  networkMask,
+			FFetchTimeout: timeWait,
+			FRetryEnqueue: uint64(retryNum),
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
@@ -779,9 +779,10 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 					FNetworkKey:       networkKey,
 					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FWaitReadDeadline: time.Hour,
-					FReadDeadline:     time.Minute,
-					FWriteDeadline:    time.Minute,
+					FWaitReadTimeout:  time.Hour,
+					FDialTimeout:      time.Minute,
+					FReadTimeout:      time.Minute,
+					FWriteTimeout:     time.Minute,
 				}),
 			}),
 			lru.NewLRUCache(

@@ -17,6 +17,8 @@
 - Update `pkg/network/conn`: static salt -> dynamic salt
 - Update `cmd/hidden_lake`: delete docker-compose
 - Update `.vscode`: deleted
+- Update `pkg/network/conn`: append dial timeout, rename deadline settings -> timeout
+- Update `pkg/network/anonymity`: rename timeWait settings -> timeout
 
 <!-- ... -->
 

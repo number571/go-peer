@@ -44,9 +44,10 @@ func testSettings(t *testing.T, n int) {
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
+				FWaitReadTimeout:  time.Hour,
+				FDialTimeout:      time.Minute,
+				FReadTimeout:      time.Minute,
+				FWriteTimeout:     time.Minute,
 			}),
 		})
 	case 1:
@@ -56,9 +57,10 @@ func testSettings(t *testing.T, n int) {
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
+				FWaitReadTimeout:  time.Hour,
+				FDialTimeout:      time.Minute,
+				FReadTimeout:      time.Minute,
+				FWriteTimeout:     time.Minute,
 			}),
 		})
 	case 2:
@@ -68,9 +70,10 @@ func testSettings(t *testing.T, n int) {
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
+				FWaitReadTimeout:  time.Hour,
+				FDialTimeout:      time.Minute,
+				FReadTimeout:      time.Minute,
+				FWriteTimeout:     time.Minute,
 			}),
 		})
 	case 3:
@@ -410,9 +413,10 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     timeout,
-				FWriteDeadline:    timeout,
+				FWaitReadTimeout:  time.Hour,
+				FDialTimeout:      time.Minute,
+				FReadTimeout:      timeout,
+				FWriteTimeout:     timeout,
 			}),
 		}),
 		lru.NewLRUCache(

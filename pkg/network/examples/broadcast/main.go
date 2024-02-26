@@ -104,8 +104,9 @@ func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
 		FWorkSizeBits:     10,
 		FMessageSizeBytes: (1 << 10),
-		FWaitReadDeadline: time.Hour,
-		FReadDeadline:     time.Minute,
-		FWriteDeadline:    time.Minute,
+		FWaitReadTimeout:  time.Hour,
+		FDialTimeout:      time.Minute,
+		FReadTimeout:      time.Minute,
+		FWriteTimeout:     time.Minute,
 	})
 }

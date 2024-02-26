@@ -42,7 +42,8 @@ type sState struct {
 }
 
 func NewConn(pSett ISettings, pAddr string) (IConn, error) {
-	conn, err := net.Dial("tcp", pAddr)
+	dialer := &net.Dialer{Timeout: pSett.GetDialTimeout()}
+	conn, err := dialer.Dial("tcp", pAddr)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrCreateConnection, err)
 	}
@@ -104,12 +105,12 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg message.IMessage) error 
 
 func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (message.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
-	encMsgSize, voidSize, state, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadDeadline())
+	encMsgSize, voidSize, state, gotHash, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadTimeout())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrReadHeaderBytes, err)
 	}
 
-	dataBytes, err := p.recvDataBytes(pCtx, encMsgSize+voidSize, p.fSettings.GetReadDeadline())
+	dataBytes, err := p.recvDataBytes(pCtx, encMsgSize+voidSize, p.fSettings.GetReadTimeout())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrReadBodyBytes, err)
 	}
@@ -146,7 +147,7 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			_ = p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteDeadline()))
+			_ = p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteTimeout()))
 
 			n, err := p.fSocket.Write(pBytes[:bytesPtr])
 			if err != nil {
@@ -197,7 +198,7 @@ func (p *sConn) getHeadBytes(
 	))
 }
 
-func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pInitDeadline time.Duration) (uint64, uint64, *sState, []byte, error) {
+func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pInitTimeout time.Duration) (uint64, uint64, *sState, []byte, error) {
 	defer func() { pChRead <- struct{}{} }()
 
 	const (
@@ -212,7 +213,7 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 
 	go func() {
 		var err error
-		encRecvHead, err = p.recvDataBytes(pCtx, cEncryptRecvHeadSize, pInitDeadline)
+		encRecvHead, err = p.recvDataBytes(pCtx, cEncryptRecvHeadSize, pInitTimeout)
 		if err != nil {
 			chErr <- utils.MergeErrors(ErrReadHeaderBlock, err)
 			return
@@ -268,10 +269,10 @@ func (p *sConn) recvHeadBytes(pCtx context.Context, pChRead chan<- struct{}, pIn
 	return encMsgSize, voidSize, state, recvHead[firstHashIndex:secondHashIndex], nil
 }
 
-func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitDeadline time.Duration) ([]byte, error) {
+func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitTimeout time.Duration) ([]byte, error) {
 	dataRaw := make([]byte, 0, pMustLen)
 
-	_ = p.fSocket.SetReadDeadline(time.Now().Add(pInitDeadline))
+	_ = p.fSocket.SetReadDeadline(time.Now().Add(pInitTimeout))
 	mustLen := pMustLen
 	for mustLen != 0 {
 		select {
@@ -293,7 +294,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitDeadli
 			)
 
 			mustLen -= uint64(n)
-			_ = p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadDeadline()))
+			_ = p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout()))
 		}
 	}
 

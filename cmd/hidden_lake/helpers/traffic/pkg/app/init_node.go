@@ -34,9 +34,10 @@ func initNode(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logge
 				FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 				FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 				FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
-				FWaitReadDeadline: hls_settings.CConnWaitReadDeadline,
-				FReadDeadline:     queueDuration,
-				FWriteDeadline:    queueDuration,
+				FWaitReadTimeout:  hls_settings.CConnWaitReadTimeout,
+				FDialTimeout:      hls_settings.CConnDialTimeout,
+				FReadTimeout:      queueDuration,
+				FWriteTimeout:     queueDuration,
 			}),
 		}),
 		lru.NewLRUCache(

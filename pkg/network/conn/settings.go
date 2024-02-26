@@ -17,9 +17,10 @@ type sSettings struct {
 	FWorkSizeBits     uint64
 	FMessageSizeBytes uint64
 	FLimitVoidSize    uint64
-	FWaitReadDeadline time.Duration
-	FReadDeadline     time.Duration
-	FWriteDeadline    time.Duration
+	FWaitReadTimeout  time.Duration
+	FDialTimeout      time.Duration
+	FReadTimeout      time.Duration
+	FWriteTimeout     time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -28,9 +29,10 @@ func NewSettings(pSett *SSettings) ISettings {
 		FWorkSizeBits:     pSett.FWorkSizeBits,
 		FMessageSizeBytes: pSett.FMessageSizeBytes,
 		FLimitVoidSize:    pSett.FLimitVoidSize,
-		FWaitReadDeadline: pSett.FWaitReadDeadline,
-		FReadDeadline:     pSett.FReadDeadline,
-		FWriteDeadline:    pSett.FWriteDeadline,
+		FWaitReadTimeout:  pSett.FWaitReadTimeout,
+		FDialTimeout:      pSett.FDialTimeout,
+		FReadTimeout:      pSett.FReadTimeout,
+		FWriteTimeout:     pSett.FWriteTimeout,
 	}).mustNotNull()
 }
 
@@ -38,14 +40,17 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FMessageSizeBytes == 0 {
 		panic(`p.FMessageSizeBytes == 0`)
 	}
-	if p.FWaitReadDeadline == 0 {
-		panic(`p.FWaitReadDeadline == 0`)
+	if p.FWaitReadTimeout == 0 {
+		panic(`p.FWaitReadTimeout == 0`)
 	}
-	if p.FReadDeadline == 0 {
-		panic(`p.FReadDeadline == 0`)
+	if p.FDialTimeout == 0 {
+		panic(`p.FDialTimeout == 0`)
 	}
-	if p.FWriteDeadline == 0 {
-		panic(`p.FWriteDeadline == 0`)
+	if p.FReadTimeout == 0 {
+		panic(`p.FReadTimeout == 0`)
+	}
+	if p.FWriteTimeout == 0 {
+		panic(`p.FWriteTimeout == 0`)
 	}
 	return p
 }
@@ -76,14 +81,18 @@ func (p *sSettings) GetLimitVoidSize() uint64 {
 	return p.FLimitVoidSize
 }
 
-func (p *sSettings) GetWaitReadDeadline() time.Duration {
-	return p.FWaitReadDeadline
+func (p *sSettings) GetWaitReadTimeout() time.Duration {
+	return p.FWaitReadTimeout
 }
 
-func (p *sSettings) GetReadDeadline() time.Duration {
-	return p.FReadDeadline
+func (p *sSettings) GetDialTimeout() time.Duration {
+	return p.FDialTimeout
 }
 
-func (p *sSettings) GetWriteDeadline() time.Duration {
-	return p.FWriteDeadline
+func (p *sSettings) GetReadTimeout() time.Duration {
+	return p.FReadTimeout
+}
+
+func (p *sSettings) GetWriteTimeout() time.Duration {
+	return p.FWriteTimeout
 }

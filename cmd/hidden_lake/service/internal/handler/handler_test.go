@@ -185,10 +185,10 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 	networkMask := uint64(1)
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:   "TEST",
-			FRetryEnqueue:  0,
-			FNetworkMask:   networkMask,
-			FFetchTimeWait: time.Minute,
+			FServiceName:  "TEST",
+			FRetryEnqueue: 0,
+			FNetworkMask:  networkMask,
+			FFetchTimeout: time.Minute,
 		}),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
@@ -231,9 +231,10 @@ func testNewNetworkNode(addr string) network.INode {
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FWorkSizeBits:     testutils.TCWorkSize,
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadDeadline: time.Hour,
-				FReadDeadline:     time.Minute,
-				FWriteDeadline:    time.Minute,
+				FWaitReadTimeout:  time.Hour,
+				FDialTimeout:      time.Minute,
+				FReadTimeout:      time.Minute,
+				FWriteTimeout:     time.Minute,
 			}),
 		}),
 		lru.NewLRUCache(

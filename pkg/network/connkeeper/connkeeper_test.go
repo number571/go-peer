@@ -121,9 +121,10 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FWorkSizeBits:     testutils.TCWorkSize,
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FWaitReadDeadline: time.Hour,
-					FReadDeadline:     time.Minute,
-					FWriteDeadline:    time.Minute,
+					FWaitReadTimeout:  time.Hour,
+					FDialTimeout:      time.Minute,
+					FReadTimeout:      time.Minute,
+					FWriteTimeout:     time.Minute,
 				}),
 			}),
 			lru.NewLRUCache(

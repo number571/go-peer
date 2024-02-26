@@ -54,21 +54,30 @@ func (p *sConnKeeper) Run(pCtx context.Context) error {
 }
 
 func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
-	connList := p.fSettings.GetConnections()
-	mapConns := p.fNode.GetConnections()
+	chConnected := make(chan struct{})
+	go func() {
+		connList := p.fSettings.GetConnections()
+		mapConns := p.fNode.GetConnections()
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(connList))
+		wg := sync.WaitGroup{}
+		wg.Add(len(connList))
 
-	for _, addr := range connList {
-		go func(addr string) {
-			defer wg.Done()
-			if _, ok := mapConns[addr]; ok {
-				return
-			}
-			_ = p.fNode.AddConnection(pCtx, addr)
-		}(addr)
+		for _, addr := range connList {
+			go func(addr string) {
+				defer wg.Done()
+				if _, ok := mapConns[addr]; ok {
+					return
+				}
+				_ = p.fNode.AddConnection(pCtx, addr)
+			}(addr)
+		}
+
+		wg.Wait()
+		chConnected <- struct{}{}
+	}()
+
+	select {
+	case <-pCtx.Done():
+	case <-chConnected:
 	}
-
-	wg.Wait()
 }

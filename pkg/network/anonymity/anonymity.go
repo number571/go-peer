@@ -206,7 +206,7 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 			return nil, ErrActionIsClosed
 		}
 		return result, nil
-	case <-time.After(p.fSettings.GetFetchTimeWait()):
+	case <-time.After(p.fSettings.GetFetchTimeout()):
 		return nil, ErrActionTimeout
 	}
 }
