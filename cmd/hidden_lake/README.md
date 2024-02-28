@@ -25,6 +25,9 @@
         <a href="https://github.com/number571/go-peer">
         	<img src="https://github.com/number571/go-peer/blob/master/images/go-peer_badge.png" alt="Go-Peer" />
 		</a>
+        <a href="https://github.com/croqaz/awesome-decentralized">
+        	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome" />
+		</a>
 	</p>
 	About project
 </h2>
