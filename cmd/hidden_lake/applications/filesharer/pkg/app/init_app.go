@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -17,6 +18,10 @@ func InitApp(pArgs []string, pDefaultPath string) (types.IRunner, error) {
 	cfg, err := config.InitConfig(filepath.Join(inputPath, settings.CPathYML), nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
+	}
+
+	if err := os.MkdirAll(settings.CPathSTG, 0o777); err != nil {
+		return nil, fmt.Errorf("init storage: %w", err)
 	}
 
 	return NewApp(cfg, inputPath), nil

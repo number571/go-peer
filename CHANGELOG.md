@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/filesharer`: fix creating hlf.stg
+- Update `cmd/hidden_lake/applications/filesharer|messenger`: fix tests with same ports
+
 <!-- ... -->
 
 ## v1.6.4
