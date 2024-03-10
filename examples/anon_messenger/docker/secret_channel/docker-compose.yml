@@ -19,6 +19,7 @@ services:
       - LOG_ENABLED=true
     networks:
       - hidden-lake
+      - node1-local-network
   node1_consumer:
     build:
       context: ./../../../../
@@ -29,6 +30,7 @@ services:
       - LOG_ENABLED=true
     networks:
       - hidden-lake
+      - node1-local-network
   node1_hlc:
     build:
       context: ./../../../../
@@ -39,7 +41,7 @@ services:
     ports:
       - 8080:8080
     networks:
-      - hidden-lake
+      - node1-local-network
   node2_producer:
     build:
       context: ./../../../../
@@ -50,6 +52,7 @@ services:
       - LOG_ENABLED=true
     networks:
       - hidden-lake
+      - node2-local-network
   node2_consumer:
     build:
       context: ./../../../../
@@ -60,6 +63,7 @@ services:
       - LOG_ENABLED=true
     networks:
       - hidden-lake
+      - node2-local-network
   node2_hlc:
     build:
       context: ./../../../../
@@ -70,11 +74,11 @@ services:
     ports:
       - 7070:7070
     networks:
-      - hidden-lake
+      - node2-local-network
 networks:
-  # node1-local-network:
-  #   driver: bridge
-  # node2-local-network:
-  #   driver: bridge
+  node1-local-network:
+    driver: bridge
+  node2-local-network:
+    driver: bridge
   hidden-lake:
     driver: bridge

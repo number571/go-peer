@@ -1,0 +1,84 @@
+version: "3"
+services:
+  service:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/helpers/adapters/common/service/Dockerfile
+    environment:
+      - SERVICE_ADDR=:6060
+      - LOG_ENABLED=false
+    networks:
+      - hidden-lake
+  node1_producer:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/helpers/adapters/common/producer/Dockerfile
+    environment:
+      - SERVICE_ADDR=service:6060
+      - INCOMING_ADDR=:8082
+      - LOG_ENABLED=true
+    networks:
+      - hidden-lake
+      - node1-local-network
+  node1_consumer:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/helpers/adapters/common/consumer/Dockerfile
+    environment:
+      - SERVICE_ADDR=service:6060
+      - TRAFFIC_ADDR=node1_hlc:8582
+      - LOG_ENABLED=true
+    networks:
+      - hidden-lake
+      - node1-local-network
+  node1_hlc:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_filesharing/docker/secret_channel/node1_hlf
+      - SERVICE_KEY=examples/anon_filesharing/secret_channel/node1_hlf/priv.key
+    ports:
+      - 8080:8080
+    networks:
+      - node1-local-network
+  node2_producer:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/helpers/adapters/common/producer/Dockerfile
+    environment:
+      - SERVICE_ADDR=service:6060
+      - INCOMING_ADDR=:7072
+      - LOG_ENABLED=true
+    networks:
+      - hidden-lake
+      - node2-local-network
+  node2_consumer:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/helpers/adapters/common/consumer/Dockerfile
+    environment:
+      - SERVICE_ADDR=service:6060
+      - TRAFFIC_ADDR=node2_hlc:7582
+      - LOG_ENABLED=true
+    networks:
+      - hidden-lake
+      - node2-local-network
+  node2_hlc:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_filesharing/docker/secret_channel/node2_hlf
+      - SERVICE_KEY=examples/anon_filesharing/secret_channel/node2_hlf/priv.key
+    ports:
+      - 7070:7070
+    networks:
+      - node2-local-network
+networks:
+  node1-local-network:
+    driver: bridge
+  node2-local-network:
+    driver: bridge
+  hidden-lake:
+    driver: bridge
