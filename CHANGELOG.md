@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `examples/echo_service`: append examples with docker-compose
+- Update `examples/anon_messenger`: append examples with docker-compose
 
 ### BUG FIXES
 

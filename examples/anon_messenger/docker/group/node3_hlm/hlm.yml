@@ -1,0 +1,12 @@
+settings:
+  messages_capacity: 2048
+  pseudonym: Carol
+  language: ENG
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :6060
+  incoming: :6061
+connection: node3_hlc:6572

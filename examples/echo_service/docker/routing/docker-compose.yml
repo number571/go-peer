@@ -11,8 +11,8 @@ services:
       context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
-      - SERVICE_PATH=examples/echo_service/docker/default/recv_hls
-      - SERVICE_KEY=examples/echo_service/default/recv_hls/priv.key
+      - SERVICE_PATH=examples/echo_service/docker/routing/recv_hls
+      - SERVICE_KEY=examples/echo_service/routing/recv_hls/priv.key
     networks:
       - local-network
       - hidden-lake
@@ -21,8 +21,8 @@ services:
       context: ./../../../../
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
-      - SERVICE_PATH=examples/echo_service/docker/default/send_hls
-      - SERVICE_KEY=examples/echo_service/default/send_hls/priv.key
+      - SERVICE_PATH=examples/echo_service/docker/routing/send_hls
+      - SERVICE_KEY=examples/echo_service/routing/send_hls/priv.key
     ports:
       - 7572:7572
     networks:

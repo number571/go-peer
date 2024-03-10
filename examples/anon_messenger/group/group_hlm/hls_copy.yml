@@ -10,9 +10,8 @@ logging:
   - warn
   - erro
 address:
+  tcp: localhost:4571
   http: localhost:4572
 services:
   hidden-lake-messenger: 
     host: localhost:4041
-connections:
-  - localhost:4581

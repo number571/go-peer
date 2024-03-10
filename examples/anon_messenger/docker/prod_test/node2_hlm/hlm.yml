@@ -1,0 +1,12 @@
+settings:
+  messages_capacity: 2048
+  pseudonym: Bob
+  language: ENG
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :7070
+  incoming: :7071
+connection: node2_hlc:7572

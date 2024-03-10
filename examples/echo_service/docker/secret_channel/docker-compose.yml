@@ -43,7 +43,7 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/docker/secret_channel/recv_hls
-      - SERVICE_KEY=examples/echo_service/default/recv_hls/priv.key
+      - SERVICE_KEY=examples/echo_service/secret_channel/recv_hls/priv.key
     networks:
       - recv-local-network
   send_producer:
@@ -74,7 +74,7 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/docker/secret_channel/send_hls
-      - SERVICE_KEY=examples/echo_service/default/send_hls/priv.key
+      - SERVICE_KEY=examples/echo_service/secret_channel/send_hls/priv.key
     ports:
       - 7572:7572
     networks:

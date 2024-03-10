@@ -1,0 +1,12 @@
+settings:
+  messages_capacity: 2048
+  pseudonym: "Group"
+  share_enabled: true
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :4040
+  incoming: :4041
+connection: group_hlc:4572
