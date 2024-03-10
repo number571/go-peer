@@ -1,10 +1,14 @@
 # CHANGELOG
 
+## v1.6.6
+
+*??? ??, ????*
+
 <!-- ... -->
 
 ## v1.6.5
 
-*??? ??, ????*
+*March 10, 2024*
 
 ### IMPROVEMENTS
 
@@ -17,7 +21,7 @@
 - Update `cmd/hidden_lake/applications/filesharer`: fix creating hlf.stg
 - Update `cmd/hidden_lake/applications/filesharer|messenger`: fix tests with same ports
 - Update `cmd/hidden_lake/helpers/adapters/common`: fix print log
-- Update `cmd/hidden_lake/applications/filesharer`: fix dockerfile, storage path
+- Update `cmd/hidden_lake/applications/filesharer`: fix dockerfile
 
 <!-- ... -->
 
