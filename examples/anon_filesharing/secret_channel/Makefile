@@ -14,8 +14,8 @@ build:
 	make build -C $(CMDPATH)/hidden_lake/composite
 	# MAKEFILE BUILD ADAPTERS
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service 
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/send 
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/recv 
+	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/producer 
+	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/consumer 
 	# COPY HLC PROGRAM
 	cp $(BINPATH)/hlc ./node1_hlf/prog_hlc1
 	cp $(BINPATH)/hlc ./node2_hlf/prog_hlc2
@@ -24,10 +24,10 @@ build:
 	cp $(STGPATH)/* ./node2_hlf/hlf.stg
 	# COPY ADAPTERS 
 	cp $(BINPATH)/common_service ./service/prog_service
-	cp $(BINPATH)/common_send ./node1_hlf/prog_send1
-	cp $(BINPATH)/common_send ./node2_hlf/prog_send2
-	cp $(BINPATH)/common_recv ./node1_hlf/prog_recv1
-	cp $(BINPATH)/common_recv ./node2_hlf/prog_recv2
+	cp $(BINPATH)/common_producer ./node1_hlf/prog_producer1
+	cp $(BINPATH)/common_producer ./node2_hlf/prog_producer2
+	cp $(BINPATH)/common_consumer ./node1_hlf/prog_consumer1
+	cp $(BINPATH)/common_consumer ./node2_hlf/prog_consumer2
 	# BUILD HLS, HLF CONFIGS
 	make build -C node1_hlf
 	make build -C node2_hlf
