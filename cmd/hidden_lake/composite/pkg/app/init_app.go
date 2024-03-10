@@ -28,7 +28,7 @@ const (
 	servicesCount = 6
 )
 
-func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) (types.IRunner, error) {
+func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel uint64) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 
 	cfg, err := config.InitConfig(filepath.Join(inputPath, settings.CPathYML), nil)
@@ -36,7 +36,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64)
 		return nil, fmt.Errorf("init config: %w", err)
 	}
 
-	runners, err := getRunners(cfg, pArgs, pDefaultPath, pDefaultKey, pParallel)
+	runners, err := getRunners(cfg, pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
 	if err != nil {
 		return nil, fmt.Errorf("get runners: %w", err)
 	}
@@ -44,7 +44,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64)
 	return NewApp(cfg, runners), nil
 }
 
-func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey string, pParallel uint64) ([]types.IRunner, error) {
+func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel uint64) ([]types.IRunner, error) {
 	runners := make([]types.IRunner, 0, servicesCount)
 
 	var (
@@ -55,11 +55,11 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 	for _, sName := range pCfg.GetServices() {
 		switch sName {
 		case hls_settings.CServiceFullName:
-			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
+			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
 		case hlt_settings.CServiceFullName:
 			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
 		case hle_settings.CServiceFullName:
-			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pParallel)
+			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
 		case hll_settings.CServiceFullName:
 			runner, err = hll_app.InitApp(pArgs, pDefaultPath)
 		case hlm_settings.CServiceFullName:
