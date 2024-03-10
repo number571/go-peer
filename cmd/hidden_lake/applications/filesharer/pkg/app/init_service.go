@@ -7,7 +7,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/handler"
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/web"
 	"github.com/number571/go-peer/pkg/logger"
 )
@@ -15,13 +15,13 @@ import (
 func (p *sApp) initIncomingServiceHTTP() {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
-		hlm_settings.CLoadPath,
-		handler.HandleIncomigLoadHTTP(p.fHTTPLogger, p.fConfig, p.fPathTo),
+		hlf_settings.CLoadPath,
+		handler.HandleIncomigLoadHTTP(p.fHTTPLogger, p.fConfig, p.fStgPath),
 	) // POST
 
 	mux.HandleFunc(
-		hlm_settings.CListPath,
-		handler.HandleIncomigListHTTP(p.fHTTPLogger, p.fConfig, p.fPathTo),
+		hlf_settings.CListPath,
+		handler.HandleIncomigListHTTP(p.fHTTPLogger, p.fConfig, p.fStgPath),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
@@ -33,18 +33,18 @@ func (p *sApp) initIncomingServiceHTTP() {
 
 func (p *sApp) initInterfaceServiceHTTP() {
 	mux := http.NewServeMux()
-	mux.Handle(hlm_settings.CStaticPath, http.StripPrefix(
-		hlm_settings.CStaticPath,
+	mux.Handle(hlf_settings.CStaticPath, http.StripPrefix(
+		hlf_settings.CStaticPath,
 		handleFileServer(p.fHTTPLogger, p.fConfig, http.FS(web.GetStaticPath()))),
 	)
 
 	cfgWrapper := config.NewWrapper(p.fConfig)
 
-	mux.HandleFunc(hlm_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))            // GET, POST
-	mux.HandleFunc(hlm_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))            // GET
-	mux.HandleFunc(hlm_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))     // GET, PATCH, PUT, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, p.fConfig))        // GET, POST, DELETE
-	mux.HandleFunc(hlm_settings.CHandleFriendsStoragePath, handler.StoragePage(p.fHTTPLogger, p.fConfig)) // GET, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))            // GET, POST
+	mux.HandleFunc(hlf_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))            // GET
+	mux.HandleFunc(hlf_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))     // GET, PATCH, PUT, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, p.fConfig))        // GET, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleFriendsStoragePath, handler.StoragePage(p.fHTTPLogger, p.fConfig)) // GET, POST, DELETE
 
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),

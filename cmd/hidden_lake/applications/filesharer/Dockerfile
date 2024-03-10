@@ -7,7 +7,7 @@ RUN wget https://go.dev/dl/go1.16.linux-amd64.tar.gz && \
 WORKDIR /go-peer
 ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
-RUN go build -o hlm ./cmd/hidden_lake/applications/filesharer/cmd/hlf
+RUN go build -o hlf ./cmd/hidden_lake/applications/filesharer/cmd/hlf
 
 ENV SERVICE_PATH="/mounted"
 CMD ./hlf -path="${SERVICE_PATH}"

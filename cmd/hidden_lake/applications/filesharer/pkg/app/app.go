@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
@@ -13,7 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -27,8 +28,8 @@ var (
 type sApp struct {
 	fState state.IState
 
-	fConfig config.IConfig
-	fPathTo string
+	fConfig  config.IConfig
+	fStgPath string
 
 	fIntServiceHTTP *http.Server
 	fIncServiceHTTP *http.Server
@@ -48,7 +49,7 @@ func NewApp(
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fConfig:     pCfg,
-		fPathTo:     pPathTo,
+		fStgPath:    filepath.Join(pPathTo, hlf_settings.CPathSTG),
 		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,
 	}
@@ -95,7 +96,7 @@ func (p *sApp) enable(_ context.Context) state.IStateF {
 		p.initIncomingServiceHTTP()
 		p.initInterfaceServiceHTTP()
 
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlm_settings.CServiceName))
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlf_settings.CServiceName))
 		return nil
 	}
 }
@@ -105,7 +106,7 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 		pCancel()
 		pWg.Wait() // wait canceled context
 
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlm_settings.CServiceName))
+		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlf_settings.CServiceName))
 		return p.stop()
 	}
 }

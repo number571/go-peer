@@ -10,6 +10,8 @@
 8. Custom Unmarshal with fields 
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
 10. Add more docker-compose files into examples (like echo_service/docker)
+11. Example anon_messenger/docker/secret_channel: change networks in docker-compose
+11. Example anon_filesharing: do hls_copy.yml
 
 ### Tests
 

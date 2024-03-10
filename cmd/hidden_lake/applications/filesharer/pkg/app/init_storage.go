@@ -5,5 +5,5 @@ import (
 )
 
 func (p *sApp) initStorage() error {
-	return os.MkdirAll(p.fPathTo, 0o777)
+	return os.MkdirAll(p.fStgPath, 0o777)
 }

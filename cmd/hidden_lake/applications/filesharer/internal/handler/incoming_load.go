@@ -17,7 +17,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo string) http.HandlerFunc {
+func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pStgPath string) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeON)
 
@@ -45,7 +45,7 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pPathTo 
 			return
 		}
 
-		fullPath := filepath.Join(pPathTo, hlf_settings.CPathSTG, name)
+		fullPath := filepath.Join(pStgPath, name)
 		stat, err := os.Stat(fullPath)
 		if os.IsNotExist(err) || stat.IsDir() {
 			pLogger.PushWarn(logBuilder.WithMessage("file_not_found"))
