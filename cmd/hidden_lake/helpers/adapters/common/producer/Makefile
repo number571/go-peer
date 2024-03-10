@@ -1,0 +1,10 @@
+GC=go build
+BINPATH=../../../../../../bin
+.PHONY: default build run clean
+default: build run
+build:
+	$(GC) -o $(BINPATH)/common_producer .
+run:
+	$(BINPATH)/common_producer
+clean:
+	rm -f $(BINPATH)/common_producer

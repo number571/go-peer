@@ -49,26 +49,17 @@ func main() {
 	defer db.Close()
 
 	if len(os.Args) != 3 {
-		panic("./service [port] [logger]")
+		panic("./service [addr] [logger]")
 	}
 
-	port, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		panic(err)
-	}
-
-	logger, err := strconv.Atoi(os.Args[2])
-	if err != nil {
-		panic(err)
-	}
-
-	hasLogger = (logger == 1)
+	addr := os.Args[1]
+	hasLogger = (os.Args[2] == "true")
 
 	http.HandleFunc("/size", sizePage)
 	http.HandleFunc("/push", pushPage)
 	http.HandleFunc("/load", loadPage)
 
-	_ = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	_ = http.ListenAndServe(addr, nil)
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {
