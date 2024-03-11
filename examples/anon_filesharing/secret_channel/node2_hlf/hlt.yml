@@ -9,4 +9,4 @@ address:
   tcp: localhost:7581
   http: localhost:7582
 consumers:
-  - localhost:7072/traffic
+  - localhost:7072/adapter

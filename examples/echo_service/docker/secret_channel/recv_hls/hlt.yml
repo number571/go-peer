@@ -9,4 +9,4 @@ address:
   tcp: :8581
   http: :8582
 consumers:
-  - recv_producer:8082/traffic
+  - recv_producer:8082/adapter

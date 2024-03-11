@@ -9,4 +9,4 @@ address:
   tcp: :7581
   http: :7582
 consumers:
-  - node2_producer:7072/traffic
+  - node2_producer:7072/adapter

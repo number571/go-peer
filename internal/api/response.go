@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
-func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
+func Response(pW http.ResponseWriter, pRet int, pRes interface{}) error {
 	var (
 		contentType string
 		respBytes   []byte
@@ -28,5 +28,7 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) {
 
 	pW.Header().Set("Content-Type", contentType)
 	pW.WriteHeader(pRet)
-	_, _ = io.Copy(pW, bytes.NewBuffer(respBytes))
+
+	_, err := io.Copy(pW, bytes.NewBuffer(respBytes))
+	return err
 }

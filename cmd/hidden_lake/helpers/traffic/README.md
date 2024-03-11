@@ -132,7 +132,7 @@ address:
 connections:
   - service:9571
 consumers:
-  - localhost:8082/traffic
+  - localhost:8082/adapter
 ```
 
 ## Response structure from HLT API

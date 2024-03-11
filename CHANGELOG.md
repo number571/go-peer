@@ -4,6 +4,14 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/helpers/adapters`: append interfaces and processors
+
+### CHANGES
+
+- Update `cmd/hidden_lake/helpers/adapters`: change http route "/traffic" -> "/adapter"
+
 <!-- ... -->
 
 ## v1.6.5
