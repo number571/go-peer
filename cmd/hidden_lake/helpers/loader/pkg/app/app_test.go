@@ -66,7 +66,7 @@ func TestApp(t *testing.T) {
 	)
 
 	// Check public key of node
-	index, err := client.GetIndex()
+	index, err := client.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

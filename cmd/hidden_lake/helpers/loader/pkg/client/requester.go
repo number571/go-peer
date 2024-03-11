@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -34,8 +35,9 @@ func NewRequester(pHost string, pClient *http.Client) IRequester {
 	}
 }
 
-func (p *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
@@ -53,8 +55,9 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) RunTransfer() error {
+func (p *sRequester) RunTransfer(pCtx context.Context) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleNetworkTransferTemplate, p.fHost),
@@ -66,8 +69,9 @@ func (p *sRequester) RunTransfer() error {
 	return nil
 }
 
-func (p *sRequester) StopTransfer() error {
+func (p *sRequester) StopTransfer(pCtx context.Context) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(cHandleNetworkTransferTemplate, p.fHost),
@@ -79,8 +83,9 @@ func (p *sRequester) StopTransfer() error {
 	return nil
 }
 
-func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),

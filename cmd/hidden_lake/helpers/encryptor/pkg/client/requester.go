@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -40,8 +41,9 @@ func NewRequester(pHost string, pClient *http.Client, pParams net_message.ISetti
 	}
 }
 
-func (p *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
@@ -59,8 +61,9 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) EncryptMessage(pPubKey asymmetric.IPubKey, pData []byte) (net_message.IMessage, error) {
+func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pData []byte) (net_message.IMessage, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleMessageEncryptTemplate, p.fHost),
@@ -81,8 +84,9 @@ func (p *sRequester) EncryptMessage(pPubKey asymmetric.IPubKey, pData []byte) (n
 	return msg, nil
 }
 
-func (p *sRequester) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IPubKey, []byte, error) {
+func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, []byte, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleMessageDecryptTemplate, p.fHost),
@@ -110,8 +114,9 @@ func (p *sRequester) DecryptMessage(pNetMsg net_message.IMessage) (asymmetric.IP
 	return pubKey, data, nil
 }
 
-func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
+func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleServicePubKeyTemplate, p.fHost),
@@ -129,8 +134,9 @@ func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
 	return pubKey, nil
 }
 
-func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -36,7 +37,7 @@ func TestHandleFriendsAPI(t *testing.T) {
 }
 
 func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig) {
-	friends, err := client.GetFriends()
+	friends, err := client.GetFriends(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -62,6 +63,7 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 
 func testAddFriend(t *testing.T, client hls_client.IClient, aliasName string) {
 	err := client.AddFriend(
+		context.Background(),
 		aliasName,
 		asymmetric.LoadRSAPubKey(testutils.TgPubKeys[3]),
 	)
@@ -70,7 +72,7 @@ func testAddFriend(t *testing.T, client hls_client.IClient, aliasName string) {
 		return
 	}
 
-	friends, err := client.GetFriends()
+	friends, err := client.GetFriends(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -83,13 +85,13 @@ func testAddFriend(t *testing.T, client hls_client.IClient, aliasName string) {
 }
 
 func testDelFriend(t *testing.T, client hls_client.IClient, aliasName string) {
-	err := client.DelFriend(aliasName)
+	err := client.DelFriend(context.Background(), aliasName)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	friends, err := client.GetFriends()
+	friends, err := client.GetFriends(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

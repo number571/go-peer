@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -40,8 +41,9 @@ func NewRequester(pHost string, pClient *http.Client) IRequester {
 	}
 }
 
-func (p *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
@@ -59,8 +61,9 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
@@ -78,8 +81,9 @@ func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
 	return cfgSettings, nil
 }
 
-func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
+func (p *sRequester) SetNetworkKey(pCtx context.Context, pNetworkKey string) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
@@ -91,8 +95,9 @@ func (p *sRequester) SetNetworkKey(pNetworkKey string) error {
 	return nil
 }
 
-func (p *sRequester) FetchRequest(pRequest *hls_settings.SRequest) (response.IResponse, error) {
+func (p *sRequester) FetchRequest(pCtx context.Context, pRequest *hls_settings.SRequest) (response.IResponse, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleNetworkRequestTemplate, p.fHost),
@@ -109,8 +114,9 @@ func (p *sRequester) FetchRequest(pRequest *hls_settings.SRequest) (response.IRe
 	return resp, nil
 }
 
-func (p *sRequester) BroadcastRequest(pRequest *hls_settings.SRequest) error {
+func (p *sRequester) BroadcastRequest(pCtx context.Context, pRequest *hls_settings.SRequest) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPut,
 		fmt.Sprintf(cHandleNetworkRequestTemplate, p.fHost),
@@ -122,8 +128,9 @@ func (p *sRequester) BroadcastRequest(pRequest *hls_settings.SRequest) error {
 	return nil
 }
 
-func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
+func (p *sRequester) GetFriends(pCtx context.Context) (map[string]asymmetric.IPubKey, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
@@ -146,8 +153,9 @@ func (p *sRequester) GetFriends() (map[string]asymmetric.IPubKey, error) {
 	return result, nil
 }
 
-func (p *sRequester) AddFriend(pFriend *hls_settings.SFriend) error {
+func (p *sRequester) AddFriend(pCtx context.Context, pFriend *hls_settings.SFriend) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
@@ -159,8 +167,9 @@ func (p *sRequester) AddFriend(pFriend *hls_settings.SFriend) error {
 	return nil
 }
 
-func (p *sRequester) DelFriend(pFriend *hls_settings.SFriend) error {
+func (p *sRequester) DelFriend(pCtx context.Context, pFriend *hls_settings.SFriend) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(cHandleConfigFriendsTemplate, p.fHost),
@@ -172,8 +181,9 @@ func (p *sRequester) DelFriend(pFriend *hls_settings.SFriend) error {
 	return nil
 }
 
-func (p *sRequester) GetOnlines() ([]string, error) {
+func (p *sRequester) GetOnlines(pCtx context.Context) ([]string, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleNetworkOnlineTemplate, p.fHost),
@@ -191,8 +201,9 @@ func (p *sRequester) GetOnlines() ([]string, error) {
 	return onlines, nil
 }
 
-func (p *sRequester) DelOnline(pConnect string) error {
+func (p *sRequester) DelOnline(pCtx context.Context, pConnect string) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(cHandleNetworkOnlineTemplate, p.fHost),
@@ -204,8 +215,9 @@ func (p *sRequester) DelOnline(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) GetConnections() ([]string, error) {
+func (p *sRequester) GetConnections(pCtx context.Context) ([]string, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
@@ -223,8 +235,9 @@ func (p *sRequester) GetConnections() ([]string, error) {
 	return connects, nil
 }
 
-func (p *sRequester) AddConnection(pConnect string) error {
+func (p *sRequester) AddConnection(pCtx context.Context, pConnect string) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
@@ -236,8 +249,9 @@ func (p *sRequester) AddConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) DelConnection(pConnect string) error {
+func (p *sRequester) DelConnection(pCtx context.Context, pConnect string) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodDelete,
 		fmt.Sprintf(cHandleConfigConnectsTemplate, p.fHost),
@@ -249,8 +263,9 @@ func (p *sRequester) DelConnection(pConnect string) error {
 	return nil
 }
 
-func (p *sRequester) GetPubKey() (asymmetric.IPubKey, error) {
+func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleNetworkPubKeyTemplate, p.fHost),

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -37,13 +38,13 @@ func TestHandleMessageAPI(t *testing.T) {
 		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
 		1,
 	)
-	if err := hltClient.PutMessage(netMsg); err != nil {
+	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
 	strHash := encoding.HexEncode(netMsg.GetHash())
-	gotNetMsg, err := hltClient.GetMessage(strHash)
+	gotNetMsg, err := hltClient.GetMessage(context.Background(), strHash)
 	if err != nil {
 		t.Error(err)
 		return

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"time"
@@ -12,11 +13,11 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func (p *sApp) initIncomingServiceHTTP() {
+func (p *sApp) initIncomingServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlf_settings.CLoadPath,
-		handler.HandleIncomigLoadHTTP(p.fHTTPLogger, p.fConfig, p.fStgPath),
+		handler.HandleIncomigLoadHTTP(pCtx, p.fHTTPLogger, p.fConfig, p.fStgPath),
 	) // POST
 
 	mux.HandleFunc(
@@ -31,7 +32,7 @@ func (p *sApp) initIncomingServiceHTTP() {
 	}
 }
 
-func (p *sApp) initInterfaceServiceHTTP() {
+func (p *sApp) initInterfaceServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 	mux.Handle(hlf_settings.CStaticPath, http.StripPrefix(
 		hlf_settings.CStaticPath,
@@ -40,11 +41,11 @@ func (p *sApp) initInterfaceServiceHTTP() {
 
 	cfgWrapper := config.NewWrapper(p.fConfig)
 
-	mux.HandleFunc(hlf_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))            // GET, POST
-	mux.HandleFunc(hlf_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))            // GET
-	mux.HandleFunc(hlf_settings.CHandleSettingsPath, handler.SettingsPage(p.fHTTPLogger, cfgWrapper))     // GET, PATCH, PUT, POST, DELETE
-	mux.HandleFunc(hlf_settings.CHandleFriendsPath, handler.FriendsPage(p.fHTTPLogger, p.fConfig))        // GET, POST, DELETE
-	mux.HandleFunc(hlf_settings.CHandleFriendsStoragePath, handler.StoragePage(p.fHTTPLogger, p.fConfig)) // GET, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleIndexPath, handler.IndexPage(p.fHTTPLogger, p.fConfig))                  // GET, POST
+	mux.HandleFunc(hlf_settings.CHandleAboutPath, handler.AboutPage(p.fHTTPLogger, p.fConfig))                  // GET
+	mux.HandleFunc(hlf_settings.CHandleSettingsPath, handler.SettingsPage(pCtx, p.fHTTPLogger, cfgWrapper))     // GET, PATCH, PUT, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleFriendsPath, handler.FriendsPage(pCtx, p.fHTTPLogger, p.fConfig))        // GET, POST, DELETE
+	mux.HandleFunc(hlf_settings.CHandleFriendsStoragePath, handler.StoragePage(pCtx, p.fHTTPLogger, p.fConfig)) // GET, POST, DELETE
 
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -18,7 +19,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 	srv, cancel, db, hltClient := testAllRun(addr)
 	defer testAllFree(addr, srv, cancel, db)
 
-	settings, err := hltClient.GetSettings()
+	settings, err := hltClient.GetSettings(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

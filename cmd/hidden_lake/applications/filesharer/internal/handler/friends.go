@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"html/template"
 	"net/http"
 	"sort"
@@ -19,7 +20,11 @@ type sFriends struct {
 	FFriends []string
 }
 
-func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+func FriendsPage(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pCfg config.IConfig,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlf_settings.CServiceName, pR)
 
@@ -53,7 +58,7 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 				aliasName = pubKey.GetHasher().ToString()
 			}
 
-			if err := hlsClient.AddFriend(aliasName, pubKey); err != nil {
+			if err := hlsClient.AddFriend(pCtx, aliasName, pubKey); err != nil {
 				ErrorPage(pLogger, pCfg, "add_friend", "add friend")(pW, pR)
 				return
 			}
@@ -64,13 +69,13 @@ func FriendsPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 				return
 			}
 
-			if err := hlsClient.DelFriend(aliasName); err != nil {
+			if err := hlsClient.DelFriend(pCtx, aliasName); err != nil {
 				ErrorPage(pLogger, pCfg, "del_friend", "delete friend")(pW, pR)
 				return
 			}
 		}
 
-		friends, err := hlsClient.GetFriends()
+		friends, err := hlsClient.GetFriends(pCtx)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_friends", "read friends")(pW, pR)
 			return

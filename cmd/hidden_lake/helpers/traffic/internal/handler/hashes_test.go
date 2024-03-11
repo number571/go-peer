@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -50,12 +51,12 @@ func TestHandleHashesAPI(t *testing.T) {
 		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
 		1,
 	)
-	if err := hltClient.PutMessage(netMsg); err != nil {
+	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
-	hash, err := hltClient.GetHash(0)
+	hash, err := hltClient.GetHash(context.Background(), 0)
 	if err != nil {
 		t.Error(err)
 		return

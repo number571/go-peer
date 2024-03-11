@@ -1,15 +1,17 @@
 package client
 
 import (
+	"context"
+
 	hls_request "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 )
 
 type IClient interface {
-	PushMessage(string, string, string, []byte) error
+	PushMessage(context.Context, string, string, string, []byte) error
 }
 
 type IRequester interface {
-	PushMessage(string, hls_request.IRequest) error
+	PushMessage(context.Context, string, hls_request.IRequest) error
 }
 
 type IBuilder interface {

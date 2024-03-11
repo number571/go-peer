@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		),
 	)
 
-	settings, err := hllClient.GetSettings()
+	settings, err := hllClient.GetSettings(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

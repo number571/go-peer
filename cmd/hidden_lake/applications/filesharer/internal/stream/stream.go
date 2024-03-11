@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"context"
 	"crypto/sha256"
 	"errors"
 	"hash"
@@ -21,6 +22,7 @@ var (
 )
 
 type sStream struct {
+	fContext   context.Context
 	fHlfClient hlf_client.IClient
 
 	fBuffer   []byte
@@ -36,19 +38,22 @@ type sStream struct {
 	fChunkSize uint64
 }
 
-func NewStream(
+func BuildStream(
+	pCtx context.Context,
 	pHlsClient hls_client.IClient,
 	pAliasName string,
 	pFileName string,
 	pFileHash string,
 	pFileSize uint64,
 ) IReadSeeker {
-	chunkSize, err := utils.GetMessageLimit(pHlsClient)
+	chunkSize, err := utils.GetMessageLimit(pCtx, pHlsClient)
 	if err != nil {
 		return nil
 	}
 
 	return &sStream{
+		fContext: pCtx,
+
 		fHlfClient: hlf_client.NewClient(
 			hlf_client.NewBuilder(),
 			hlf_client.NewRequester(pHlsClient),
@@ -67,7 +72,7 @@ func NewStream(
 
 func (p *sStream) Read(b []byte) (int, error) {
 	if len(p.fBuffer) == 0 {
-		chunk, err := p.loadFileChunk()
+		chunk, err := p.loadFileChunk(p.fContext)
 		if err != nil {
 			return 0, err
 		}
@@ -113,10 +118,11 @@ func (p *sStream) Seek(offset int64, whence int) (int64, error) {
 	return pos, nil
 }
 
-func (p *sStream) loadFileChunk() ([]byte, error) {
+func (p *sStream) loadFileChunk(pCtx context.Context) ([]byte, error) {
 	var lastErr error
 	for i := 0; i <= cRetryNum; i++ {
 		chunk, err := p.fHlfClient.LoadFileChunk(
+			pCtx,
 			p.fAliasName,
 			p.fFileName,
 			p.fPosition/p.fChunkSize,

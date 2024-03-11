@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -35,12 +36,12 @@ func TestHandlePointerAPI(t *testing.T) {
 		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
 		1,
 	)
-	if err := hltClient.PutMessage(netMsg); err != nil {
+	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)
 		return
 	}
 
-	pointer, err := hltClient.GetPointer()
+	pointer, err := hltClient.GetPointer(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

@@ -56,7 +56,7 @@ func ConsumeProcessor(
 			pLogger.PushInfo("no new messages")
 			continue
 		}
-		if err := pHltClient.PutMessage(msg); err != nil {
+		if err := pHltClient.PutMessage(pCtx, msg); err != nil {
 			pLogger.PushWarn(err.Error())
 			continue
 		}

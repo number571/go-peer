@@ -10,7 +10,6 @@
 8. Custom Unmarshal with fields 
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
 10. Add more docker-compose files into examples (like echo_service/docker)
-11. Add context to: func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]byte, error)
 
 ### Tests
 

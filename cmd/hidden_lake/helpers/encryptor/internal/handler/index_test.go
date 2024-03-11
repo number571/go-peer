@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ func TestErrorsAPI(t *testing.T) {
 		),
 	)
 
-	if _, err := client.EncryptMessage(asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]), []byte{123}); err == nil {
+	if _, err := client.EncryptMessage(context.Background(), asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]), []byte{123}); err == nil {
 		t.Error("success encrypt message with unknown host")
 		return
 	}
@@ -33,22 +34,22 @@ func TestErrorsAPI(t *testing.T) {
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
-	if _, _, err := client.DecryptMessage(message.NewMessage(sett, pld, 1)); err == nil {
+	if _, _, err := client.DecryptMessage(context.Background(), message.NewMessage(sett, pld, 1)); err == nil {
 		t.Error("success decrypt message with unknown host")
 		return
 	}
 
-	if _, err := client.GetIndex(); err == nil {
+	if _, err := client.GetIndex(context.Background()); err == nil {
 		t.Error("success get index with unknown host")
 		return
 	}
 
-	if _, err := client.GetSettings(); err == nil {
+	if _, err := client.GetSettings(context.Background()); err == nil {
 		t.Error("success get settings with unknown host")
 		return
 	}
 
-	if _, err := client.GetPubKey(); err == nil {
+	if _, err := client.GetPubKey(context.Background()); err == nil {
 		t.Error("success get pub key with unknown host")
 		return
 	}
@@ -69,7 +70,7 @@ func TestHandleIndexAPI(t *testing.T) {
 		),
 	)
 
-	title, err := hleClient.GetIndex()
+	title, err := hleClient.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

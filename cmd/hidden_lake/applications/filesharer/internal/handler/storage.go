@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -25,7 +26,11 @@ type sStorage struct {
 	FFilesList []hlf_settings.SFileInfo
 }
 
-func StoragePage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+func StoragePage(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pCfg config.IConfig,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlf_settings.CServiceName, pR)
 
@@ -43,7 +48,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 
 		hlsClient := getHLSClient(pCfg)
 		if fileName := query.Get("file_name"); fileName != "" {
-			downloadFile(pLogger, pCfg, pW, pR, hlsClient)
+			downloadFile(pCtx, pLogger, pCfg, pW, pR, hlsClient)
 			return
 		}
 
@@ -57,7 +62,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 			hlf_client.NewRequester(hlsClient),
 		)
 
-		filesList, err := hlfClient.GetListFiles(aliasName, uint64(page))
+		filesList, err := hlfClient.GetListFiles(pCtx, aliasName, uint64(page))
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_files_list", "failed get list of files")(pW, pR)
 			return
@@ -85,6 +90,7 @@ func StoragePage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
 }
 
 func downloadFile(
+	pCtx context.Context,
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
 	pW http.ResponseWriter,
@@ -112,6 +118,6 @@ func downloadFile(
 	pW.Header().Set("Content-Disposition", "attachment; filename="+strconv.Quote(fileName))
 	pW.Header().Set("Content-Length", strconv.FormatUint(fileSize, 10))
 
-	stream := stream.NewStream(pHlsClient, aliasName, fileName, fileHash, fileSize)
+	stream := stream.BuildStream(pCtx, pHlsClient, aliasName, fileName, fileHash, fileSize)
 	http.ServeContent(pW, pR, fileName, time.Now(), stream)
 }

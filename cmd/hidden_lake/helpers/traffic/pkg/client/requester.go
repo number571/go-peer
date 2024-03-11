@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -42,8 +43,9 @@ func NewRequester(pHost string, pClient *http.Client, pParams net_message.ISetti
 	}
 }
 
-func (p *sRequester) GetIndex() (string, error) {
+func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleIndexTemplate, p.fHost),
@@ -61,8 +63,9 @@ func (p *sRequester) GetIndex() (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) GetPointer() (uint64, error) {
+func (p *sRequester) GetPointer(pCtx context.Context) (uint64, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleStoragePointerTemplate, p.fHost),
@@ -80,8 +83,9 @@ func (p *sRequester) GetPointer() (uint64, error) {
 	return uint64(pointer), nil
 }
 
-func (p *sRequester) GetHash(i uint64) (string, error) {
+func (p *sRequester) GetHash(pCtx context.Context, i uint64) (string, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleStorageHashesTemplate, p.fHost, i),
@@ -99,8 +103,9 @@ func (p *sRequester) GetHash(i uint64) (string, error) {
 	return string(resp), nil
 }
 
-func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
+func (p *sRequester) GetMessage(pCtx context.Context, pHash string) (net_message.IMessage, error) {
 	resp, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleNetworkMessageTemplate+"?hash=%s", p.fHost, pHash),
@@ -122,8 +127,9 @@ func (p *sRequester) GetMessage(pHash string) (net_message.IMessage, error) {
 	return msg, nil
 }
 
-func (p *sRequester) PutMessage(pRequest string) error {
+func (p *sRequester) PutMessage(pCtx context.Context, pRequest string) error {
 	_, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodPost,
 		fmt.Sprintf(cHandleNetworkMessageTemplate, p.fHost),
@@ -135,8 +141,9 @@ func (p *sRequester) PutMessage(pRequest string) error {
 	return nil
 }
 
-func (p *sRequester) GetSettings() (config.IConfigSettings, error) {
+func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, error) {
 	res, err := api.Request(
+		pCtx,
 		p.fClient,
 		http.MethodGet,
 		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,6 +17,8 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+
 	if len(os.Args) != 3 {
 		panic("len(os.Args) != 3")
 	}
@@ -41,7 +44,7 @@ func main() {
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(string(readPubKey))
-		netMsg, err := hleClient.EncryptMessage(pubKey, []byte(os.Args[2]))
+		netMsg, err := hleClient.EncryptMessage(ctx, pubKey, []byte(os.Args[2]))
 		if err != nil {
 			panic(err)
 		}
@@ -53,7 +56,7 @@ func main() {
 			panic(err)
 		}
 
-		_, data, err := hleClient.DecryptMessage(netMsg)
+		_, data, err := hleClient.DecryptMessage(ctx, netMsg)
 		if err != nil {
 			panic(err)
 		}

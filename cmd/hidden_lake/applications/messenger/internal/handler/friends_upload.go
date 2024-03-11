@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"html/template"
 	"net/http"
 
@@ -19,7 +20,11 @@ type sUploadFile struct {
 	FMessageLimit uint64
 }
 
-func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.HandlerFunc {
+func FriendsUploadPage(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pCfg config.IConfig,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -43,7 +48,7 @@ func FriendsUploadPage(pLogger logger.ILogger, pCfg config.IConfig) http.Handler
 			panic("can't load hmtl files")
 		}
 
-		msgLimit, err := utils.GetMessageLimit(getClient(pCfg))
+		msgLimit, err := utils.GetMessageLimit(pCtx, getClient(pCfg))
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_message_size", "get message size (limit)")(pW, pR)
 			return

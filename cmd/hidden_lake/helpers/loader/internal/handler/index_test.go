@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -20,22 +21,22 @@ func TestErrorsAPI(t *testing.T) {
 		),
 	)
 
-	if err := client.RunTransfer(); err == nil {
+	if err := client.RunTransfer(context.Background()); err == nil {
 		t.Error("success run transfer with unknown host")
 		return
 	}
 
-	if err := client.StopTransfer(); err == nil {
+	if err := client.StopTransfer(context.Background()); err == nil {
 		t.Error("success stop transfer with unknown host")
 		return
 	}
 
-	if _, err := client.GetIndex(); err == nil {
+	if _, err := client.GetIndex(context.Background()); err == nil {
 		t.Error("success get index with unknown host")
 		return
 	}
 
-	if _, err := client.GetSettings(); err == nil {
+	if _, err := client.GetSettings(context.Background()); err == nil {
 		t.Error("success get settings with unknown host")
 		return
 	}
@@ -55,7 +56,7 @@ func TestHandleIndexAPI(t *testing.T) {
 		),
 	)
 
-	title, err := hllClient.GetIndex()
+	title, err := hllClient.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

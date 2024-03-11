@@ -1,6 +1,8 @@
 package pprof
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPprof(t *testing.T) {
 	t.Parallel()

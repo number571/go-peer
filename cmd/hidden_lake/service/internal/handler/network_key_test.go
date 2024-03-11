@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -33,7 +34,7 @@ func TestHandleNetworkKeyAPI(t *testing.T) {
 }
 
 func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
-	settings, err := client.GetSettings()
+	settings, err := client.GetSettings(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -46,7 +47,7 @@ func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey strin
 }
 
 func testSetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
-	if err := client.SetNetworkKey(networkKey); err != nil {
+	if err := client.SetNetworkKey(context.Background(), networkKey); err != nil {
 		t.Error(err)
 		return
 	}

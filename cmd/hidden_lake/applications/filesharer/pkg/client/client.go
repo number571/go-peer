@@ -1,6 +1,10 @@
 package client
 
-import hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+import (
+	"context"
+
+	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+)
 
 var (
 	_ IClient = &sClient{}
@@ -18,10 +22,10 @@ func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 	}
 }
 
-func (p *sClient) GetListFiles(pAliasName string, pPage uint64) ([]hlf_settings.SFileInfo, error) {
-	return p.fRequester.GetListFiles(pAliasName, p.fBuilder.GetListFiles(pPage))
+func (p *sClient) GetListFiles(pCtx context.Context, pAliasName string, pPage uint64) ([]hlf_settings.SFileInfo, error) {
+	return p.fRequester.GetListFiles(pCtx, pAliasName, p.fBuilder.GetListFiles(pPage))
 }
 
-func (p *sClient) LoadFileChunk(pAliasName, pName string, pChunk uint64) ([]byte, error) {
-	return p.fRequester.LoadFileChunk(pAliasName, p.fBuilder.LoadFileChunk(pName, pChunk))
+func (p *sClient) LoadFileChunk(pCtx context.Context, pAliasName, pName string, pChunk uint64) ([]byte, error) {
+	return p.fRequester.LoadFileChunk(pCtx, pAliasName, p.fBuilder.LoadFileChunk(pName, pChunk))
 }

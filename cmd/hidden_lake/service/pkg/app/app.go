@@ -115,8 +115,8 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 			return utils.MergeErrors(ErrInitDB, err)
 		}
 
-		p.initServiceHTTP(pCtx)
 		p.initServicePPROF()
+		p.initServiceHTTP(pCtx)
 
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hls_settings.CServiceName))
 		return nil

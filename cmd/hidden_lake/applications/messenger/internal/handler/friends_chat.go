@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -40,7 +41,12 @@ type sChatMessages struct {
 	FMessages []sChatMessage
 }
 
-func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.IKVDatabase) http.HandlerFunc {
+func FriendsChatPage(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pCfg config.IConfig,
+	pDB database.IKVDatabase,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -59,13 +65,13 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 		}
 
 		client := getClient(pCfg)
-		myPubKey, err := client.GetPubKey()
+		myPubKey, err := client.GetPubKey(pCtx)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_public_key", "read public key")(pW, pR)
 			return
 		}
 
-		recvPubKey, err := getReceiverPubKey(client, aliasName)
+		recvPubKey, err := getReceiverPubKey(pCtx, client, aliasName)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_receiver", "get receiver by public key")(pW, pR)
 			return
@@ -81,7 +87,7 @@ func FriendsChatPage(pLogger logger.ILogger, pCfg config.IConfig, pDB database.I
 				return
 			}
 
-			if err := sendMessage(pCfg, client, pDB, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCtx, pCfg, client, pDB, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -191,13 +197,14 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 }
 
 func sendMessage(
+	pCtx context.Context,
 	pCfg config.IConfig,
 	pClient hls_client.IClient,
 	pDB database.IKVDatabase,
 	pAliasName string,
 	pMsgBytes []byte,
 ) error {
-	msgLimit, err := utils.GetMessageLimit(pClient)
+	msgLimit, err := utils.GetMessageLimit(pCtx, pClient)
 	if err != nil {
 		return fmt.Errorf("error: try send message: %w", err)
 	}
@@ -215,11 +222,15 @@ func sendMessage(
 		hlm_client.NewBuilder(),
 		hlm_client.NewRequester(pClient),
 	)
-	return hlmClient.PushMessage(pAliasName, pCfg.GetSettings().GetPseudonym(), requestID, pMsgBytes)
+	return hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), requestID, pMsgBytes)
 }
 
-func getReceiverPubKey(client hls_client.IClient, aliasName string) (asymmetric.IPubKey, error) {
-	friends, err := client.GetFriends()
+func getReceiverPubKey(
+	pCtx context.Context,
+	client hls_client.IClient,
+	aliasName string,
+) (asymmetric.IPubKey, error) {
+	friends, err := client.GetFriends(pCtx)
 	if err != nil {
 		return nil, fmt.Errorf("error: read friends: %w", err)
 	}

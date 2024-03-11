@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -27,8 +28,8 @@ func NewRequester(pHLSClient hls_client.IClient) IRequester {
 	}
 }
 
-func (p *sRequester) GetListFiles(pAliasName string, pRequest hls_request.IRequest) ([]hlf_settings.SFileInfo, error) {
-	resp, err := p.fHLSClient.FetchRequest(pAliasName, pRequest)
+func (p *sRequester) GetListFiles(pCtx context.Context, pAliasName string, pRequest hls_request.IRequest) ([]hlf_settings.SFileInfo, error) {
+	resp, err := p.fHLSClient.FetchRequest(pCtx, pAliasName, pRequest)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrRequest, err)
 	}
@@ -57,8 +58,8 @@ func (p *sRequester) GetListFiles(pAliasName string, pRequest hls_request.IReque
 	return list, nil
 }
 
-func (p *sRequester) LoadFileChunk(pAliasName string, pRequest hls_request.IRequest) ([]byte, error) {
-	resp, err := p.fHLSClient.FetchRequest(pAliasName, pRequest)
+func (p *sRequester) LoadFileChunk(pCtx context.Context, pAliasName string, pRequest hls_request.IRequest) ([]byte, error) {
+	resp, err := p.fHLSClient.FetchRequest(pCtx, pAliasName, pRequest)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrRequest, err)
 	}

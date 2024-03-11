@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,32 +31,32 @@ func TestErrorsAPI(t *testing.T) {
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
-	if err := client.PutMessage(message.NewMessage(sett, pld, 1)); err == nil {
+	if err := client.PutMessage(context.Background(), message.NewMessage(sett, pld, 1)); err == nil {
 		t.Error("success put message with unknown host")
 		return
 	}
 
-	if _, err := client.GetIndex(); err == nil {
+	if _, err := client.GetIndex(context.Background()); err == nil {
 		t.Error("success get index with unknown host")
 		return
 	}
 
-	if _, err := client.GetHash(0); err == nil {
+	if _, err := client.GetHash(context.Background(), 0); err == nil {
 		t.Error("success get hash with unknown host")
 		return
 	}
 
-	if _, err := client.GetMessage(""); err == nil {
+	if _, err := client.GetMessage(context.Background(), ""); err == nil {
 		t.Error("success get message with unknown host")
 		return
 	}
 
-	if _, err := client.GetPointer(); err == nil {
+	if _, err := client.GetPointer(context.Background()); err == nil {
 		t.Error("success get pointer with unknown host")
 		return
 	}
 
-	if _, err := client.GetSettings(); err == nil {
+	if _, err := client.GetSettings(context.Background()); err == nil {
 		t.Error("success get settings with unknown host")
 		return
 	}
@@ -70,7 +71,7 @@ func TestHandleIndexAPI(t *testing.T) {
 	srv, cancel, db, hltClient := testAllRun(addr)
 	defer testAllFree(addr, srv, cancel, db)
 
-	title, err := hltClient.GetIndex()
+	title, err := hltClient.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

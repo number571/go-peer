@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -35,7 +36,7 @@ func TestHandleConnectsAPI(t *testing.T) {
 }
 
 func testGetConnects(t *testing.T, client hls_client.IClient, cfg config.IConfig) {
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -55,13 +56,13 @@ func testGetConnects(t *testing.T, client hls_client.IClient, cfg config.IConfig
 }
 
 func testAddConnect(t *testing.T, client hls_client.IClient, connect string) {
-	err := client.AddConnection(connect)
+	err := client.AddConnection(context.Background(), connect)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -76,13 +77,13 @@ func testAddConnect(t *testing.T, client hls_client.IClient, connect string) {
 }
 
 func testDelConnect(t *testing.T, client hls_client.IClient, connect string) {
-	err := client.DelConnection(connect)
+	err := client.DelConnection(context.Background(), connect)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	connects, err := client.GetConnections()
+	connects, err := client.GetConnections(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

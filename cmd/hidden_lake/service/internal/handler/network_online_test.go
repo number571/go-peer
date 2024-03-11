@@ -47,7 +47,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 }
 
 func testGetOnlines(t *testing.T, client hls_client.IClient, node anonymity.INode) {
-	onlines, err := client.GetOnlines()
+	onlines, err := client.GetOnlines(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
@@ -65,13 +65,13 @@ func testGetOnlines(t *testing.T, client hls_client.IClient, node anonymity.INod
 }
 
 func testDelOnline(t *testing.T, client hls_client.IClient, addr string) {
-	err := client.DelOnline(addr)
+	err := client.DelOnline(context.Background(), addr)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	onlines, err := client.GetOnlines()
+	onlines, err := client.GetOnlines(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

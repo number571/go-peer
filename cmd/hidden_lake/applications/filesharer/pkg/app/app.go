@@ -86,15 +86,15 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
-func (p *sApp) enable(_ context.Context) state.IStateF {
+func (p *sApp) enable(pCtx context.Context) state.IStateF {
 	return func() error {
 		if err := p.initStorage(); err != nil {
 			return utils.MergeErrors(ErrInitSTG, err)
 		}
 
 		p.initServicePPROF()
-		p.initIncomingServiceHTTP()
-		p.initInterfaceServiceHTTP()
+		p.initIncomingServiceHTTP(pCtx)
+		p.initInterfaceServiceHTTP(pCtx)
 
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlf_settings.CServiceName))
 		return nil

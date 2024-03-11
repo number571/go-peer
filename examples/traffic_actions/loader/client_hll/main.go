@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -59,7 +60,8 @@ func main() {
 		FKeySizeBits:      keySize,
 	})
 
-	if err := pushMessages(netMsgSettings, msgSettings); err != nil {
+	ctx := context.Background()
+	if err := pushMessages(ctx, netMsgSettings, msgSettings); err != nil {
 		panic(err)
 	}
 
@@ -69,20 +71,21 @@ func main() {
 			&http.Client{Timeout: time.Minute / 2},
 		),
 	)
-	if err := hllClient.RunTransfer(); err != nil {
+
+	if err := hllClient.RunTransfer(ctx); err != nil {
 		panic(err)
 	}
 
 	time.Sleep(time.Second)
 
-	if err := checkMessages(netMsgSettings, msgSettings); err != nil {
+	if err := checkMessages(ctx, netMsgSettings, msgSettings); err != nil {
 		panic(err)
 	}
 
 	fmt.Println("messages have been successfully transported")
 }
 
-func pushMessages(netMsgSettings net_message.ISettings, msgSettings message.ISettings) error {
+func pushMessages(ctx context.Context, netMsgSettings net_message.ISettings, msgSettings message.ISettings) error {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -108,7 +111,7 @@ func pushMessages(netMsgSettings net_message.ISettings, msgSettings message.ISet
 			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
 			1,
 		)
-		if err := hltClient.PutMessage(netMsg); err != nil {
+		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			return err
 		}
 
@@ -118,7 +121,7 @@ func pushMessages(netMsgSettings net_message.ISettings, msgSettings message.ISet
 	return nil
 }
 
-func checkMessages(netMsgSettings net_message.ISettings, msgSettings message.ISettings) error {
+func checkMessages(ctx context.Context, netMsgSettings net_message.ISettings, msgSettings message.ISettings) error {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -132,7 +135,7 @@ func checkMessages(netMsgSettings net_message.ISettings, msgSettings message.ISe
 
 	hashes := make([]string, 0, messageCount)
 	for i := uint64(0); ; i++ {
-		hash, err := hltClient.GetHash(i)
+		hash, err := hltClient.GetHash(ctx, i)
 		if err != nil {
 			break
 		}
@@ -146,7 +149,7 @@ func checkMessages(netMsgSettings net_message.ISettings, msgSettings message.ISe
 	}
 
 	for _, h := range hashes {
-		netMsg, err := hltClient.GetMessage(h)
+		netMsg, err := hltClient.GetMessage(ctx, h)
 		if err != nil {
 			return err
 		}

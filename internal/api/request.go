@@ -10,7 +10,12 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
-func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]byte, error) {
+func Request(
+	pCtx context.Context,
+	pClient *http.Client,
+	pMethod, pURL string,
+	pData interface{},
+) ([]byte, error) {
 	var (
 		contentType string
 		reqBytes    []byte
@@ -29,7 +34,7 @@ func Request(pClient *http.Client, pMethod, pURL string, pData interface{}) ([]b
 	}
 
 	req, err := http.NewRequestWithContext(
-		context.Background(),
+		pCtx,
 		pMethod,
 		pURL,
 		bytes.NewBuffer(reqBytes),

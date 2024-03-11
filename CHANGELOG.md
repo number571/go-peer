@@ -7,6 +7,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/helpers/adapters`: append interfaces and processors
+- Update `cmd/hidden_lake`: append context to client api functions
 
 ### CHANGES
 

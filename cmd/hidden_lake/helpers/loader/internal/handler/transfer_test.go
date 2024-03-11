@@ -141,7 +141,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			),
 			1,
 		)
-		err = hltClient1.PutMessage(netMsg)
+		err = hltClient1.PutMessage(context.Background(), netMsg)
 		if err != nil {
 			t.Error(err)
 			return
@@ -150,7 +150,7 @@ func TestHandleTransferAPI(t *testing.T) {
 
 	// TRANSFER MESSAGES
 
-	if err := hllClient.RunTransfer(); err != nil {
+	if err := hllClient.RunTransfer(context.Background()); err != nil {
 		t.Error(err)
 		return
 	}
@@ -160,7 +160,7 @@ func TestHandleTransferAPI(t *testing.T) {
 	// LOAD MESSAGES
 
 	for i := uint64(0); ; i++ {
-		h, err := hltClient2.GetHash(i)
+		h, err := hltClient2.GetHash(context.Background(), i)
 		if err != nil {
 			if i != 5 {
 				t.Error(i, err)
@@ -168,7 +168,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			return
 		}
 
-		netMsg, err := hltClient2.GetMessage(h)
+		netMsg, err := hltClient2.GetMessage(context.Background(), h)
 		if err != nil {
 			t.Error(err)
 			return

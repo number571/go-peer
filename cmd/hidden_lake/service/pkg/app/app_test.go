@@ -76,7 +76,7 @@ func TestApp(t *testing.T) {
 		50,
 		10*time.Millisecond,
 		func() error {
-			_, err := client.GetIndex()
+			_, err := client.GetIndex(context.Background())
 			return err
 		},
 	)
@@ -86,7 +86,7 @@ func TestApp(t *testing.T) {
 	}
 
 	// Check public key of node
-	pubKey, err := client.GetPubKey()
+	pubKey, err := client.GetPubKey(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -27,7 +28,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		),
 	)
 
-	pubKey, err := client.GetPubKey()
+	pubKey, err := client.GetPubKey(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

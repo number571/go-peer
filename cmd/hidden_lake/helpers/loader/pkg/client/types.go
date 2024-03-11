@@ -1,19 +1,23 @@
 package client
 
-import "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/config"
+import (
+	"context"
+
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/config"
+)
 
 type IClient interface {
-	GetIndex() (string, error)
-	GetSettings() (config.IConfigSettings, error)
+	GetIndex(context.Context) (string, error)
+	GetSettings(context.Context) (config.IConfigSettings, error)
 
-	RunTransfer() error
-	StopTransfer() error
+	RunTransfer(context.Context) error
+	StopTransfer(context.Context) error
 }
 
 type IRequester interface {
-	GetIndex() (string, error)
-	GetSettings() (config.IConfigSettings, error)
+	GetIndex(context.Context) (string, error)
+	GetSettings(context.Context) (config.IConfigSettings, error)
 
-	RunTransfer() error
-	StopTransfer() error
+	RunTransfer(context.Context) error
+	StopTransfer(context.Context) error
 }

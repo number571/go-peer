@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,6 +26,8 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+
 	sett := message.NewSettings(&message.SSettings{
 		FMessageSizeBytes: (8 << 10),
 		FKeySizeBits:      4096,
@@ -87,7 +90,7 @@ func main() {
 			1,
 		)
 
-		if err := hltClient.PutMessage(netMsg); err != nil {
+		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			panic(err)
 		}
 
@@ -97,7 +100,7 @@ func main() {
 			panic("len read.args != 2")
 		}
 
-		netMsg, err := hltClient.GetMessage(args[1])
+		netMsg, err := hltClient.GetMessage(ctx, args[1])
 		if err != nil {
 			panic(err)
 		}
@@ -123,7 +126,7 @@ func main() {
 		fmt.Println(string(pld.GetBody()))
 	case "h", "hashes":
 		for i := uint64(0); ; i++ {
-			hash, err := hltClient.GetHash(i)
+			hash, err := hltClient.GetHash(ctx, i)
 			if err != nil {
 				return
 			}

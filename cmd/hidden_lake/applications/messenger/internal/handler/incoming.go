@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -24,6 +25,7 @@ import (
 )
 
 func HandleIncomigHTTP(
+	pCtx context.Context,
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
 	pDB database.IKVDatabase,
@@ -79,7 +81,7 @@ func HandleIncomigHTTP(
 		}
 
 		if pCfg.GetSettings().GetShareEnabled() {
-			err := shareMessage(pCfg, fPubKey, requestID, senderPseudonym, rawMsgBytes)
+			err := shareMessage(pCtx, pCfg, fPubKey, requestID, senderPseudonym, rawMsgBytes)
 			switch err {
 			case nil:
 				pLogger.PushInfo(logBuilder.WithMessage("share_message"))
@@ -94,7 +96,7 @@ func HandleIncomigHTTP(
 			return
 		}
 
-		myPubKey, err := getClient(pCfg).GetPubKey()
+		myPubKey, err := getClient(pCfg).GetPubKey(pCtx)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
@@ -126,6 +128,7 @@ func HandleIncomigHTTP(
 }
 
 func shareMessage(
+	pCtx context.Context,
 	pCfg config.IConfig,
 	pSender asymmetric.IPubKey,
 	pRequestID string,
@@ -139,7 +142,7 @@ func shareMessage(
 		hlm_client.NewRequester(hlsClient),
 	)
 
-	friends, err := hlsClient.GetFriends()
+	friends, err := hlsClient.GetFriends(pCtx)
 	if err != nil {
 		return err
 	}
@@ -161,7 +164,7 @@ func shareMessage(
 				return
 			}
 
-			errList[i] = hlmClient.PushMessage(aliasName, senderPseudonym, pRequestID, pBody)
+			errList[i] = hlmClient.PushMessage(pCtx, aliasName, senderPseudonym, pRequestID, pBody)
 		}(i, aliasName, pubKey)
 		i++
 	}

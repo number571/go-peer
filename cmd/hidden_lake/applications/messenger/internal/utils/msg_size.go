@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -19,8 +20,8 @@ var (
 	).GetBody()))
 )
 
-func GetMessageLimit(pHlsClient client.IClient) (uint64, error) {
-	sett, err := pHlsClient.GetSettings()
+func GetMessageLimit(pCtx context.Context, pHlsClient client.IClient) (uint64, error) {
+	sett, err := pHlsClient.GetSettings(pCtx)
 	if err != nil {
 		return 0, fmt.Errorf("get settings from HLS (message size): %w", err)
 	}

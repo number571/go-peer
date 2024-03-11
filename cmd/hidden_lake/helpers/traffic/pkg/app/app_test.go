@@ -79,7 +79,7 @@ func TestApp(t *testing.T) {
 		),
 	)
 
-	title, err := hltClient.GetIndex()
+	title, err := hltClient.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

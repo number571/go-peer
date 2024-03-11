@@ -88,7 +88,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 }
 
-func (p *sApp) enable(_ context.Context) state.IStateF {
+func (p *sApp) enable(pCtx context.Context) state.IStateF {
 	return func() error {
 		if err := p.initDatabase(); err != nil {
 			return utils.MergeErrors(ErrInitDB, err)
@@ -97,8 +97,8 @@ func (p *sApp) enable(_ context.Context) state.IStateF {
 		msgBroker := msgbroker.NewMessageBroker()
 
 		p.initServicePPROF()
-		p.initIncomingServiceHTTP(msgBroker)
-		p.initInterfaceServiceHTTP(msgBroker)
+		p.initIncomingServiceHTTP(pCtx, msgBroker)
+		p.initInterfaceServiceHTTP(pCtx, msgBroker)
 
 		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlm_settings.CServiceName))
 		return nil

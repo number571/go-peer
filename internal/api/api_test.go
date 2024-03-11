@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -49,12 +50,12 @@ func TestErrorsAPI(t *testing.T) {
 	srv := testRunServer(addr)
 	defer srv.Close()
 
-	if _, err := Request(client, http.MethodGet, addr, nil); err == nil {
+	if _, err := Request(context.Background(), client, http.MethodGet, addr, nil); err == nil {
 		t.Error("success request on incorrect url address")
 		return
 	}
 
-	if _, err := Request(client, http.MethodGet, unknownURL, nil); err == nil {
+	if _, err := Request(context.Background(), client, http.MethodGet, unknownURL, nil); err == nil {
 		t.Error("success request on unknown url address")
 		return
 	}
@@ -73,17 +74,17 @@ func TestRequestResponseAPI(t *testing.T) {
 	srv := testRunServer(addr)
 	defer srv.Close()
 
-	if _, err := Request(client, http.MethodGet, "\n\t\a", nil); err == nil {
+	if _, err := Request(context.Background(), client, http.MethodGet, "\n\t\a", nil); err == nil {
 		t.Error("success request on invalid url")
 		return
 	}
 
-	if _, err := Request(client, http.MethodPatch, testURL, nil); err == nil {
+	if _, err := Request(context.Background(), client, http.MethodPatch, testURL, nil); err == nil {
 		t.Error("PATCH: success request on method not allowed")
 		return
 	}
 
-	respGET, err := Request(client, http.MethodGet, testURL, nil)
+	respGET, err := Request(context.Background(), client, http.MethodGet, testURL, nil)
 	if err != nil {
 		t.Error(err)
 		return
@@ -101,7 +102,7 @@ func TestRequestResponseAPI(t *testing.T) {
 	}
 
 	// bytes
-	respPOST1, err := Request(client, http.MethodPost, testURL, []byte(tcMessage))
+	respPOST1, err := Request(context.Background(), client, http.MethodPost, testURL, []byte(tcMessage))
 	if err != nil {
 		t.Error(err)
 		return
@@ -113,7 +114,7 @@ func TestRequestResponseAPI(t *testing.T) {
 	}
 
 	// string
-	respPOST2, err := Request(client, http.MethodPost, testURL, tcMessage)
+	respPOST2, err := Request(context.Background(), client, http.MethodPost, testURL, tcMessage)
 	if err != nil {
 		t.Error(err)
 		return
@@ -125,7 +126,7 @@ func TestRequestResponseAPI(t *testing.T) {
 	}
 
 	// struct
-	respPOST3, err := Request(client, http.MethodPost, testURL, tsRequest{FMessage: tcMessage})
+	respPOST3, err := Request(context.Background(), client, http.MethodPost, testURL, tsRequest{FMessage: tcMessage})
 	if err != nil {
 		t.Error(err)
 		return

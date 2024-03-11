@@ -49,6 +49,7 @@ func TestHandleRequestAPI(t *testing.T) {
 
 func testBroadcast(t *testing.T, client hls_client.IClient) {
 	err := client.BroadcastRequest(
+		context.Background(),
 		"test_recvr",
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{
@@ -64,6 +65,7 @@ func testBroadcast(t *testing.T, client hls_client.IClient) {
 
 func testFetch(t *testing.T, client hls_client.IClient) {
 	res, err := client.FetchRequest(
+		context.Background(),
 		"test_recvr",
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{

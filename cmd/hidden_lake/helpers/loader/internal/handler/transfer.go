@@ -115,7 +115,7 @@ func transferToConsumers(pCtx context.Context, pCfg config.IConfig, pProducer hl
 	}
 
 	for i := uint64(0); i < pCfg.GetSettings().GetMessagesCapacity(); i++ {
-		hash, err := pProducer.GetHash(i)
+		hash, err := pProducer.GetHash(pCtx, i)
 		if err != nil {
 			return
 		}
@@ -127,7 +127,7 @@ func transferToConsumers(pCtx context.Context, pCfg config.IConfig, pProducer hl
 				break
 			}
 
-			msg, err := pProducer.GetMessage(hash)
+			msg, err := pProducer.GetMessage(pCtx, hash)
 			if err != nil {
 				continue
 			}
@@ -142,7 +142,7 @@ func transferToConsumers(pCtx context.Context, pCfg config.IConfig, pProducer hl
 			for _, consumer := range consumerClients {
 				go func(c hlt_client.IClient) {
 					defer wg.Done()
-					_ = c.PutMessage(msg)
+					_ = c.PutMessage(pCtx, msg)
 				}(consumer)
 			}
 			wg.Wait()

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"os"
@@ -17,7 +18,12 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pStgPath string) http.HandlerFunc {
+func HandleIncomigLoadHTTP(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pCfg config.IConfig,
+	pStgPath string,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeON)
 
@@ -53,7 +59,7 @@ func HandleIncomigLoadHTTP(pLogger logger.ILogger, pCfg config.IConfig, pStgPath
 			return
 		}
 
-		chunkSize, err := utils.GetMessageLimit(getHLSClient(pCfg))
+		chunkSize, err := utils.GetMessageLimit(pCtx, getHLSClient(pCfg))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_chunk_size"))
 			api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -33,7 +34,7 @@ type sSettings struct {
 	FConnections   []sConnection
 }
 
-func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
+func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -51,7 +52,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 		switch pR.FormValue("method") {
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
-			if err := hlsClient.SetNetworkKey(networkKey); err != nil {
+			if err := hlsClient.SetNetworkKey(pCtx, networkKey); err != nil {
 				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
 				return
 			}
@@ -90,7 +91,7 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
-			if err := hlsClient.AddConnection(connect); err != nil {
+			if err := hlsClient.AddConnection(pCtx, connect); err != nil {
 				ErrorPage(pLogger, cfg, "add_connection", "add connection")(pW, pR)
 				return
 			}
@@ -101,13 +102,13 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 				return
 			}
 
-			if err := hlsClient.DelConnection(connect); err != nil {
+			if err := hlsClient.DelConnection(pCtx, connect); err != nil {
 				ErrorPage(pLogger, cfg, "del_connection", "delete connection")(pW, pR)
 				return
 			}
 		}
 
-		result, err := getSettings(cfg, hlsClient)
+		result, err := getSettings(pCtx, cfg, hlsClient)
 		if err != nil {
 			ErrorPage(pLogger, cfg, "get_settings", "get settings")(pW, pR)
 			return
@@ -127,12 +128,12 @@ func SettingsPage(pLogger logger.ILogger, pWrapper config.IWrapper) http.Handler
 	}
 }
 
-func getSettings(pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings, error) {
+func getSettings(pCtx context.Context, pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings, error) {
 	result := new(sSettings)
 	result.sTemplate = getTemplate(pCfg)
 	result.FPseudonym = pCfg.GetSettings().GetPseudonym()
 
-	myPubKey, err := pHlsClient.GetPubKey()
+	myPubKey, err := pHlsClient.GetPubKey(pCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -140,13 +141,13 @@ func getSettings(pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings
 	result.FPublicKey = myPubKey.ToString()
 	result.FPublicKeyHash = myPubKey.GetHasher().ToString()
 
-	gotSettings, err := pHlsClient.GetSettings()
+	gotSettings, err := pHlsClient.GetSettings(pCtx)
 	if err != nil {
 		return nil, err
 	}
 	result.FNetworkKey = gotSettings.GetNetworkKey()
 
-	allConns, err := getAllConnections(pHlsClient)
+	allConns, err := getAllConnections(pCtx, pHlsClient)
 	if err != nil {
 		return nil, err
 	}
@@ -155,13 +156,13 @@ func getSettings(pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings
 	return result, nil
 }
 
-func getAllConnections(pClient hls_client.IClient) ([]sConnection, error) {
-	conns, err := pClient.GetConnections()
+func getAllConnections(pCtx context.Context, pClient hls_client.IClient) ([]sConnection, error) {
+	conns, err := pClient.GetConnections(pCtx)
 	if err != nil {
 		return nil, fmt.Errorf("error: read connections")
 	}
 
-	onlines, err := pClient.GetOnlines()
+	onlines, err := pClient.GetOnlines(pCtx)
 	if err != nil {
 		return nil, fmt.Errorf("error: read online connections")
 	}

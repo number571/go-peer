@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -32,13 +33,13 @@ func TestHandleEncryptDecryptAPI(t *testing.T) {
 
 	data := []byte("hello, world!")
 
-	netMsg, err := hleClient.EncryptMessage(pubKey, data)
+	netMsg, err := hleClient.EncryptMessage(context.Background(), pubKey, data)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	gotPubKey, gotData, err := hleClient.DecryptMessage(netMsg)
+	gotPubKey, gotData, err := hleClient.DecryptMessage(context.Background(), netMsg)
 	if err != nil {
 		t.Error(err)
 		return

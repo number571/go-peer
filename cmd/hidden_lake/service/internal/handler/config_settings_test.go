@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -28,7 +29,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		),
 	)
 
-	sett, err := client.GetSettings()
+	sett, err := client.GetSettings(context.Background())
 	if err != nil {
 		t.Error(err)
 		return

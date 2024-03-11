@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/config"
@@ -10,47 +12,47 @@ import (
 )
 
 type IClient interface {
-	GetIndex() (string, error)
-	GetSettings() (config.IConfigSettings, error)
+	GetIndex(context.Context) (string, error)
+	GetSettings(context.Context) (config.IConfigSettings, error)
 
-	SetNetworkKey(string) error
-	GetPubKey() (asymmetric.IPubKey, error)
+	SetNetworkKey(context.Context, string) error
+	GetPubKey(context.Context) (asymmetric.IPubKey, error)
 
-	GetOnlines() ([]string, error)
-	DelOnline(string) error
+	GetOnlines(context.Context) ([]string, error)
+	DelOnline(context.Context, string) error
 
-	GetFriends() (map[string]asymmetric.IPubKey, error)
-	AddFriend(string, asymmetric.IPubKey) error
-	DelFriend(string) error
+	GetFriends(context.Context) (map[string]asymmetric.IPubKey, error)
+	AddFriend(context.Context, string, asymmetric.IPubKey) error
+	DelFriend(context.Context, string) error
 
-	GetConnections() ([]string, error)
-	AddConnection(string) error
-	DelConnection(string) error
+	GetConnections(context.Context) ([]string, error)
+	AddConnection(context.Context, string) error
+	DelConnection(context.Context, string) error
 
-	BroadcastRequest(string, request.IRequest) error
-	FetchRequest(string, request.IRequest) (response.IResponse, error)
+	BroadcastRequest(context.Context, string, request.IRequest) error
+	FetchRequest(context.Context, string, request.IRequest) (response.IResponse, error)
 }
 
 type IRequester interface {
-	GetIndex() (string, error)
-	GetSettings() (config.IConfigSettings, error)
+	GetIndex(context.Context) (string, error)
+	GetSettings(context.Context) (config.IConfigSettings, error)
 
-	SetNetworkKey(string) error
-	GetPubKey() (asymmetric.IPubKey, error)
+	SetNetworkKey(context.Context, string) error
+	GetPubKey(context.Context) (asymmetric.IPubKey, error)
 
-	GetOnlines() ([]string, error)
-	DelOnline(string) error
+	GetOnlines(context.Context) ([]string, error)
+	DelOnline(context.Context, string) error
 
-	GetFriends() (map[string]asymmetric.IPubKey, error)
-	AddFriend(*pkg_settings.SFriend) error
-	DelFriend(*pkg_settings.SFriend) error
+	GetFriends(context.Context) (map[string]asymmetric.IPubKey, error)
+	AddFriend(context.Context, *pkg_settings.SFriend) error
+	DelFriend(context.Context, *pkg_settings.SFriend) error
 
-	GetConnections() ([]string, error)
-	AddConnection(string) error
-	DelConnection(string) error
+	GetConnections(context.Context) ([]string, error)
+	AddConnection(context.Context, string) error
+	DelConnection(context.Context, string) error
 
-	BroadcastRequest(*pkg_settings.SRequest) error
-	FetchRequest(*pkg_settings.SRequest) (response.IResponse, error)
+	BroadcastRequest(context.Context, *pkg_settings.SRequest) error
+	FetchRequest(context.Context, *pkg_settings.SRequest) (response.IResponse, error)
 }
 
 type IBuilder interface {

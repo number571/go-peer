@@ -79,6 +79,7 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 			go func(cHost string) {
 				defer wg.Done()
 				_, err := api.Request(
+					pCtx,
 					httpClient,
 					http.MethodPost,
 					fmt.Sprintf("http://%s", cHost),
