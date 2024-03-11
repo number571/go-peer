@@ -72,7 +72,7 @@ func BuildStream(
 
 func (p *sStream) Read(b []byte) (int, error) {
 	if len(p.fBuffer) == 0 {
-		chunk, err := p.loadFileChunk(p.fContext)
+		chunk, err := p.loadFileChunk()
 		if err != nil {
 			return 0, err
 		}
@@ -118,11 +118,11 @@ func (p *sStream) Seek(offset int64, whence int) (int64, error) {
 	return pos, nil
 }
 
-func (p *sStream) loadFileChunk(pCtx context.Context) ([]byte, error) {
+func (p *sStream) loadFileChunk() ([]byte, error) {
 	var lastErr error
 	for i := 0; i <= cRetryNum; i++ {
 		chunk, err := p.fHlfClient.LoadFileChunk(
-			pCtx,
+			p.fContext,
 			p.fAliasName,
 			p.fFileName,
 			p.fPosition/p.fChunkSize,
