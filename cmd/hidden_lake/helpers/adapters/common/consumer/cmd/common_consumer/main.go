@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	gopeer "github.com/number571/go-peer"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/consumer/pkg/app"
 	"github.com/number571/go-peer/internal/flag"
 )
 
@@ -21,7 +22,7 @@ func main() {
 		return
 	}
 
-	app, err := initApp(args)
+	app, err := app.InitApp(args, ".")
 	if err != nil {
 		panic(err)
 	}

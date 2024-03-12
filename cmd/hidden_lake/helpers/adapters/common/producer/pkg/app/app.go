@@ -1,11 +1,11 @@
-package main
+package app
 
 import (
 	"context"
-	"errors"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/producer/internal/adapted"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/producer/internal/config"
 	"github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -25,39 +25,13 @@ type sApp struct {
 	fIncomingAddr string
 }
 
-func initApp(pArgs []string) (types.IRunner, error) {
-	if len(pArgs) != 3 {
-		return nil, errors.New("./producer [incoming-addr] [service-addr] [logger]")
-	}
-
-	incomingAddr := pArgs[0]
-	serviceAddr := pArgs[1]
-	logEnabled := pArgs[2]
-
-	logList := []string{}
-	if logEnabled == "true" {
-		logList = []string{"info", "warn", "erro"}
-	}
-
-	logging, err := std.LoadLogging(logList)
-	if err != nil {
-		return nil, err
-	}
-
-	return newApp(logging, serviceAddr, incomingAddr), nil
-}
-
-func newApp(
-	pLogging std.ILogging,
-	pServiceAddr string,
-	pIncomingAddr string,
-) types.IRunner {
+func NewApp(pCfg config.IConfig) types.IRunner {
 	return &sApp{
 		fState:        state.NewBoolState(),
-		fStdfLogger:   std.NewStdLogger(pLogging, std.GetLogFunc()),
-		fSettings:     common.GetMessageSettings(),
-		fServiceAddr:  pServiceAddr,
-		fIncomingAddr: pIncomingAddr,
+		fStdfLogger:   std.NewStdLogger(pCfg.GetLogging(), std.GetLogFunc()),
+		fServiceAddr:  pCfg.GetConnection().GetSrvHost(),
+		fIncomingAddr: pCfg.GetAddress(),
+		fSettings:     pCfg.GetSettings(),
 	}
 }
 
@@ -69,7 +43,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	return adapters.ProduceProcessor(
 		pCtx,
-		newAdaptedProducer(p.fServiceAddr),
+		adapted.NewAdaptedProducer(p.fServiceAddr),
 		p.fStdfLogger,
 		p.fSettings,
 		p.fIncomingAddr,

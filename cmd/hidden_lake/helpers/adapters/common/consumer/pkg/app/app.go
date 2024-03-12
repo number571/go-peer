@@ -1,14 +1,14 @@
-package main
+package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/consumer/internal/adapted"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/consumer/internal/config"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/logger"
@@ -35,39 +35,13 @@ type sApp struct {
 	fServiceAddr string
 }
 
-func initApp(pArgs []string) (types.IRunner, error) {
-	if len(pArgs) != 3 {
-		return nil, errors.New("./consumer [service-addr] [hlt-addr] [logger]")
-	}
-
-	serviceAddr := pArgs[0]
-	hltAddr := pArgs[1]
-	logEnabled := pArgs[2]
-
-	logList := []string{}
-	if logEnabled == "true" {
-		logList = []string{"info", "warn", "erro"}
-	}
-
-	logging, err := std.LoadLogging(logList)
-	if err != nil {
-		return nil, err
-	}
-
-	return newApp(logging, serviceAddr, hltAddr), nil
-}
-
-func newApp(
-	pLogging std.ILogging,
-	pServiceAddr string,
-	pHltAddr string,
-) types.IRunner {
+func NewApp(pCfg config.IConfig) types.IRunner {
 	return &sApp{
 		fState:       state.NewBoolState(),
-		fStdfLogger:  std.NewStdLogger(pLogging, std.GetLogFunc()),
-		fHltAddr:     pHltAddr,
-		fSettings:    common.GetMessageSettings(),
-		fServiceAddr: pServiceAddr,
+		fStdfLogger:  std.NewStdLogger(pCfg.GetLogging(), std.GetLogFunc()),
+		fHltAddr:     pCfg.GetConnection().GetHLTHost(),
+		fServiceAddr: pCfg.GetConnection().GetSrvHost(),
+		fSettings:    pCfg.GetSettings(),
 	}
 }
 
@@ -89,7 +63,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	return adapters.ConsumeProcessor(
 		pCtx,
-		newAdaptedConsumer(p.fServiceAddr, p.fSettings, kvDB),
+		adapted.NewAdaptedConsumer(p.fServiceAddr, p.fSettings, kvDB),
 		p.fStdfLogger,
 		hlt_client.NewClient(
 			hlt_client.NewBuilder(),

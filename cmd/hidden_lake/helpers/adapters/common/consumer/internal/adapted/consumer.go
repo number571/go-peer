@@ -1,4 +1,4 @@
-package main
+package adapted
 
 import (
 	"context"
@@ -29,7 +29,7 @@ type sAdaptedConsumer struct {
 	fKVDatabase  database.IKVDatabase
 }
 
-func newAdaptedConsumer(
+func NewAdaptedConsumer(
 	pServiceAddr string,
 	pSettings net_message.ISettings,
 	pKVDatabase database.IKVDatabase,

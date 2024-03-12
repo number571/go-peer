@@ -7,9 +7,7 @@ RUN wget https://go.dev/dl/go1.16.linux-amd64.tar.gz && \
 WORKDIR /go-peer
 ENV PATH="${PATH}:/opt/go/bin"
 COPY ./ ./
-RUN go build -o producer ./cmd/hidden_lake/helpers/adapters/common/producer
+RUN go build -o common_producer ./cmd/hidden_lake/helpers/adapters/common/producer/cmd/common_producer
 
-ENV INCOMING_ADDR=""
-ENV SERVICE_ADDR=""
-ENV LOG_ENABLED=""
-CMD ./producer "${INCOMING_ADDR}" "${SERVICE_ADDR}" "${LOG_ENABLED}"
+ENV SERVICE_PATH="/mounted"
+CMD ./common_producer -path="${SERVICE_PATH}"

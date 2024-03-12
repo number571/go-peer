@@ -1,6 +1,9 @@
 package config
 
-import logger "github.com/number571/go-peer/internal/logger/std"
+import (
+	logger "github.com/number571/go-peer/internal/logger/std"
+	net_message "github.com/number571/go-peer/pkg/network/message"
+)
 
 type IConfig interface {
 	GetLogging() logger.ILogging
@@ -12,8 +15,7 @@ type IConfig interface {
 }
 
 type IConfigSettings interface {
-	GetNetworkKey() string
-	GetWorkSizeBits() uint64
+	net_message.ISettings
 	GetMessagesCapacity() uint64
 }
 

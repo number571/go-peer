@@ -8,18 +8,12 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/composite
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/producer
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/consumer
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service
 	# COPY HLC PROGRAM
 	cp -r $(BINPATH)/hlc ./recv_hls/prog_hlc1
 	cp -r $(BINPATH)/hlc ./send_hls/prog_hlc2
-	# COPY ADAPTERS 
+	# COPY ADAPTED SERVICE 
 	cp $(BINPATH)/common_service ./service/prog_service
-	cp $(BINPATH)/common_producer ./recv_hls/prog_producer1
-	cp $(BINPATH)/common_producer ./send_hls/prog_producer2
-	cp $(BINPATH)/common_consumer ./recv_hls/prog_consumer1
-	cp $(BINPATH)/common_consumer ./send_hls/prog_consumer2
 	# BUILD HLS CONFIGS
 	make build -C recv_hls
 	make build -C send_hls

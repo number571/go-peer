@@ -14,6 +14,10 @@ import (
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/composite/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/composite/pkg/settings"
+	hla_common_consumer_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/consumer/pkg/app"
+	hla_common_consumer_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/consumer/pkg/settings"
+	hla_common_producer_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/producer/pkg/app"
+	hla_common_producer_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/adapters/common/producer/pkg/settings"
 	hle_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/app"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
 	hll_app "github.com/number571/go-peer/cmd/hidden_lake/helpers/loader/pkg/app"
@@ -66,6 +70,10 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 			runner, err = hlm_app.InitApp(pArgs, pDefaultPath)
 		case hlf_settings.CServiceFullName:
 			runner, err = hlf_app.InitApp(pArgs, pDefaultPath)
+		case hla_common_consumer_settings.CServiceFullName:
+			runner, err = hla_common_consumer_app.InitApp(pArgs, pDefaultPath)
+		case hla_common_producer_settings.CServiceFullName:
+			runner, err = hla_common_producer_app.InitApp(pArgs, pDefaultPath)
 		default:
 			return nil, fmt.Errorf("unknown service %s", sName)
 		}

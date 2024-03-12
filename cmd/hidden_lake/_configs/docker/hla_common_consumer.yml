@@ -1,0 +1,10 @@
+settings:
+  work_size_bits: 22
+  network_key: default
+logging:
+- info
+- warn
+- erro
+connection:
+  hlt_host: traffic:9582
+  srv_host: server:6060

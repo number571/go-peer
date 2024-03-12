@@ -1,0 +1,9 @@
+settings:
+  work_size_bits: 22
+logging:
+- info
+- warn
+- erro
+address: :8082
+connection:
+  srv_host: service:6060

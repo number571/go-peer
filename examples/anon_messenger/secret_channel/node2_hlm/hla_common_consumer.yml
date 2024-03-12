@@ -1,0 +1,9 @@
+settings:
+  work_size_bits: 22
+logging:
+- info
+- warn
+- erro
+connection:
+  hlt_host: localhost:7582
+  srv_host: localhost:6060

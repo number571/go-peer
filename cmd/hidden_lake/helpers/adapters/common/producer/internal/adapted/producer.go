@@ -1,4 +1,4 @@
-package main
+package adapted
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ type sAdaptedProducer struct {
 	fServiceAddr string
 }
 
-func newAdaptedProducer(pServiceAddr string) adapters.IAdaptedProducer {
+func NewAdaptedProducer(pServiceAddr string) adapters.IAdaptedProducer {
 	return &sAdaptedProducer{
 		fServiceAddr: pServiceAddr,
 	}

@@ -13,17 +13,11 @@ build:
 	make build -C $(CMDPATH)/hidden_lake/composite
 	# MAKEFILE BUILD ADAPTERS
 	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service 
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/producer 
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/consumer 
 	# COPY HLC PROGRAM
 	cp $(BINPATH)/hlc ./node1_hlm/prog_hlc1
 	cp $(BINPATH)/hlc ./node2_hlm/prog_hlc2
-	# COPY ADAPTERS 
+	# COPY ADAPTED SERVICE
 	cp $(BINPATH)/common_service ./service/prog_service
-	cp $(BINPATH)/common_producer ./node1_hlm/prog_producer1
-	cp $(BINPATH)/common_producer ./node2_hlm/prog_producer2
-	cp $(BINPATH)/common_consumer ./node1_hlm/prog_consumer1
-	cp $(BINPATH)/common_consumer ./node2_hlm/prog_consumer2
 	# BUILD HLS, HLM CONFIGS
 	make build -C node1_hlm
 	make build -C node2_hlm

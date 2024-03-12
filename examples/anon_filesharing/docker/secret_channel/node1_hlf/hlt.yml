@@ -9,4 +9,4 @@ address:
   tcp: :8581
   http: :8582
 consumers:
-  - node1_producer:8082/adapter
+  - node1_hlc:8082/adapter

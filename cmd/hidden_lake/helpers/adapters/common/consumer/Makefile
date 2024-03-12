@@ -3,7 +3,7 @@ BINPATH=../../../../../../bin
 .PHONY: default build run clean
 default: build run
 build:
-	$(GC) -o $(BINPATH)/common_consumer .
+	$(GC) -o $(BINPATH)/common_consumer ./cmd/common_consumer
 run:
 	./$(BINPATH)/common_consumer
 clean:

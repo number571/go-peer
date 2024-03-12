@@ -1,0 +1,9 @@
+settings:
+  work_size_bits: 22
+logging:
+- info
+- warn
+- erro
+connection:
+  hlt_host: recv_hlc:8582
+  srv_host: service:6060
