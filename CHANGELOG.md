@@ -9,6 +9,7 @@
 - Update `cmd/hidden_lake/helpers/adapters`: append interfaces and processors
 - Update `cmd/hidden_lake`: append context to client api functions
 - Update `cmd/hidden_lake/composite`: append common adapters
+- Update `cmd/hidden_lake/composite`: append _daemon directory
 
 ### CHANGES
 
