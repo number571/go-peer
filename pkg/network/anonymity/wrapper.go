@@ -3,7 +3,7 @@ package anonymity
 import (
 	"sync"
 
-	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/wrapper"
 )
 

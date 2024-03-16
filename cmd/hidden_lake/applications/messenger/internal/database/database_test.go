@@ -8,7 +8,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/storage"
+	"github.com/number571/go-peer/pkg/database"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -22,7 +22,7 @@ func TestDatabase(t *testing.T) {
 	os.RemoveAll(tcPath)
 	defer os.RemoveAll(tcPath)
 
-	db, err := NewKeyValueDB(storage.NewSettings(&storage.SSettings{
+	db, err := NewKeyValueDB(database.NewSettings(&database.SSettings{
 		FPath: tcPath,
 	}))
 	if err != nil {

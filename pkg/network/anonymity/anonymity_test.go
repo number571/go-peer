@@ -15,12 +15,11 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/utils"
 
 	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
@@ -745,7 +744,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
+		database.NewSettings(&database.SSettings{
 			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
 			FWorkSize: testutils.TCWorkSize,
 			FPassword: "CIPHER",

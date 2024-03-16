@@ -1,6 +1,11 @@
-package storage
+package database
 
-type IKVStorage interface {
+import (
+	"github.com/number571/go-peer/pkg/types"
+)
+
+type IKVDatabase interface {
+	types.ICloser
 	GetSettings() ISettings
 
 	Set([]byte, []byte) error

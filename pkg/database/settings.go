@@ -1,4 +1,4 @@
-package storage
+package database
 
 var (
 	_ ISettings = &sSettings{}

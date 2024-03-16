@@ -5,13 +5,12 @@ import (
 	"path/filepath"
 
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/database"
 )
 
 func (p *sApp) initDatabase() error {
 	db, err := database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
+		database.NewSettings(&database.SSettings{
 			FPath: filepath.Join(p.fPathTo, pkg_settings.CPathDB),
 		}),
 	)

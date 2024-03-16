@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	workSize = 22
+	cWorkSize = 22
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		login   = []byte(os.Args[2])
 	)
 
-	keyBuilder := keybuilder.NewKeyBuilder(1<<workSize, login)
+	keyBuilder := keybuilder.NewKeyBuilder(1<<cWorkSize, login)
 	extendedKey := keyBuilder.Build(readUntilEOF("> "))
 
 	passBytes := hashing.NewHMACSHA256Hasher(extendedKey, service).ToBytes()

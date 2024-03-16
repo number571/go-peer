@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 type sKeyValueDB struct {
@@ -15,7 +14,7 @@ type sKeyValueDB struct {
 	fDB    database.IKVDatabase
 }
 
-func NewKeyValueDB(pSettings storage.ISettings) (IKVDatabase, error) {
+func NewKeyValueDB(pSettings database.ISettings) (IKVDatabase, error) {
 	db, err := database.NewKVDatabase(pSettings)
 	if err != nil {
 		return nil, fmt.Errorf("new key/value database: %w", err)

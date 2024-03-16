@@ -6,10 +6,9 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 var (
@@ -26,7 +25,7 @@ type sDatabase struct {
 
 func NewDatabase(pSett ISettings) (IDatabase, error) {
 	kvDB, err := database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
+		database.NewSettings(&database.SSettings{
 			FPath: pSett.GetPath(),
 		}),
 	)

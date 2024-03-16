@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/storage"
 	"github.com/number571/go-peer/pkg/utils"
 
 	"github.com/syndtr/goleveldb/leveldb"
@@ -29,12 +28,12 @@ const (
 type sKVDatabase struct {
 	fMutex    sync.Mutex
 	fDB       *leveldb.DB
-	fSettings storage.ISettings
+	fSettings ISettings
 	fCipher   symmetric.ICipher
 	fAuthKey  []byte
 }
 
-func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
+func NewKVDatabase(pSett ISettings) (IKVDatabase, error) {
 	path := pSett.GetPath()
 	opt := &opt.Options{
 		DisableBlockCache: true,
@@ -96,7 +95,7 @@ func NewKVDatabase(pSett storage.ISettings) (IKVDatabase, error) {
 	}, nil
 }
 
-func (p *sKVDatabase) GetSettings() storage.ISettings {
+func (p *sKVDatabase) GetSettings() ISettings {
 	return p.fSettings
 }
 

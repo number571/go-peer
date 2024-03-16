@@ -10,8 +10,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/number571/go-peer/pkg/storage"
-	"github.com/number571/go-peer/pkg/storage/database"
+	"github.com/number571/go-peer/pkg/database"
 )
 
 const (
@@ -28,7 +27,7 @@ var (
 func initDB() database.IKVDatabase {
 	var err error
 	db, err = database.NewKVDatabase(
-		storage.NewSettings(&storage.SSettings{
+		database.NewSettings(&database.SSettings{
 			FPath: databasePath,
 		}),
 	)

@@ -15,6 +15,9 @@
 
 - Update `cmd/hidden_lake/adapters`: change http route "/traffic" -> "/adapter"
 - Update `cmd/hidden_lake/adapters`: move "helpers/adapters" -> "adapters"
+- Update `cmd/tools/storage`: deleted
+- Update `cmd/tools/encryptor`: deleted
+- Update `pkg/storage`: move interface to pkg/database
 
 <!-- ... -->
 
