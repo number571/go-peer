@@ -12,7 +12,7 @@ build:
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/composite
 	# MAKEFILE BUILD ADAPTERS
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service 
+	make build -C $(CMDPATH)/hidden_lake/adapters/common/service 
 	# COPY HLC PROGRAM
 	cp $(BINPATH)/hlc ./node1_hlm/prog_hlc1
 	cp $(BINPATH)/hlc ./node2_hlm/prog_hlc2

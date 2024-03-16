@@ -3,7 +3,7 @@ services:
   service:
     build:
       context: ./../../../../
-      dockerfile: cmd/hidden_lake/helpers/adapters/common/service/Dockerfile
+      dockerfile: cmd/hidden_lake/adapters/common/service/Dockerfile
     environment:
       - SERVICE_ADDR=:6060
       - LOG_ENABLED=false

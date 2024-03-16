@@ -20,11 +20,13 @@ build:
 	make -C ./composite build
 	make -C ./applications build
 	make -C ./helpers build
+	make -C ./adapters build
 clean:
 	make -C ./service clean
 	make -C ./composite clean
 	make -C ./applications clean
 	make -C ./helpers clean
+	make -C ./adapters clean
 
 ### TEST COVERAGE
 

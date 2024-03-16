@@ -8,7 +8,7 @@ init:
 build: 
 	# MAKEFILE BUILD
 	make build -C $(CMDPATH)/hidden_lake/composite
-	make build -C $(CMDPATH)/hidden_lake/helpers/adapters/common/service
+	make build -C $(CMDPATH)/hidden_lake/adapters/common/service
 	# COPY HLC PROGRAM
 	cp -r $(BINPATH)/hlc ./recv_hls/prog_hlc1
 	cp -r $(BINPATH)/hlc ./send_hls/prog_hlc2

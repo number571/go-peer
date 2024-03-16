@@ -6,14 +6,15 @@
 
 ### IMPROVEMENTS
 
-- Update `cmd/hidden_lake/helpers/adapters`: append interfaces and processors
+- Update `cmd/hidden_lake/adapters`: append interfaces and processors
 - Update `cmd/hidden_lake`: append context to client api functions
 - Update `cmd/hidden_lake/composite`: append common adapters
 - Update `cmd/hidden_lake/composite`: append _daemon directory
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/helpers/adapters`: change http route "/traffic" -> "/adapter"
+- Update `cmd/hidden_lake/adapters`: change http route "/traffic" -> "/adapter"
+- Update `cmd/hidden_lake/adapters`: move "helpers/adapters" -> "adapters"
 
 <!-- ... -->
 
@@ -31,7 +32,7 @@
 
 - Update `cmd/hidden_lake/applications/filesharer`: fix creating hlf.stg
 - Update `cmd/hidden_lake/applications/filesharer|messenger`: fix tests with same ports
-- Update `cmd/hidden_lake/helpers/adapters/common`: fix print log
+- Update `cmd/hidden_lake/adapters/common`: fix print log
 - Update `cmd/hidden_lake/applications/filesharer`: fix dockerfile
 
 <!-- ... -->
@@ -611,7 +612,7 @@
 - Update `hidden_lake/helpers/traffic`: delete redirect message to nodes from HTTP handler
 - Update `hidden_lake/helpers/traffic`: append redirect message to nodes from TCP handler
 - Change `examples`: replace middle_hls to middle_hlt
-- Change `hidden_lake/helpers/adapters`: change recv: hlt-port -> hls-port
+- Change `hidden_lake/adapters`: change recv: hlt-port -> hls-port
 - Update `theory_of_the_structure_of_hidden_systems`: Append link to economic reasons
 
 ### BUG FIXES
