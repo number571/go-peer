@@ -7,5 +7,5 @@ build:
 run:
 	./$(BINPATH)/common_consumer
 clean:
-	rm -f $(BINPATH)/common_consumer
+	rm -f hla_common_consumer.yml $(BINPATH)/common_consumer
 	rm -rf common_consumer.db

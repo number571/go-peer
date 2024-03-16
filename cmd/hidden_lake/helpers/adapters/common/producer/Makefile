@@ -7,4 +7,4 @@ build:
 run:
 	$(BINPATH)/common_producer
 clean:
-	rm -f $(BINPATH)/common_producer
+	rm -f hla_common_producer.yml $(BINPATH)/common_producer
