@@ -11,4 +11,5 @@ const (
 
 const (
 	CDefaultSrvAddress = "127.0.0.1:6060"
+	CDefaultWaitTimeMS = 1_000 // 1 second
 )

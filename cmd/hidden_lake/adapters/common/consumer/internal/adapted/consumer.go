@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/pkg/database"
@@ -42,8 +41,6 @@ func NewAdaptedConsumer(
 }
 
 func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, error) {
-	time.Sleep(time.Second)
-
 	countService, err := p.loadCountFromService(pCtx)
 	if err != nil {
 		return nil, err
@@ -71,7 +68,6 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 }
 
 func (p *sAdaptedConsumer) loadMessageFromService(ctx context.Context, id uint64) (net_message.IMessage, error) {
-	// build request to service
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
@@ -82,20 +78,17 @@ func (p *sAdaptedConsumer) loadMessageFromService(ctx context.Context, id uint64
 		return nil, fmt.Errorf("failed: build request")
 	}
 
-	// send request to service
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed: bad request")
 	}
 	defer resp.Body.Close()
 
-	// read response from service
 	msgStringAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed: read body from service")
 	}
 
-	// read body of response
 	if len(msgStringAsBytes) <= 1 || msgStringAsBytes[0] == '!' {
 		return nil, fmt.Errorf("failed: incorrect response from service")
 	}
@@ -109,7 +102,6 @@ func (p *sAdaptedConsumer) loadMessageFromService(ctx context.Context, id uint64
 }
 
 func (p *sAdaptedConsumer) loadCountFromService(ctx context.Context) (uint64, error) {
-	// build request to service
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
@@ -120,20 +112,17 @@ func (p *sAdaptedConsumer) loadCountFromService(ctx context.Context) (uint64, er
 		return 0, fmt.Errorf("failed: build request")
 	}
 
-	// send request to service
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return 0, fmt.Errorf("failed: bad request")
 	}
 	defer resp.Body.Close()
 
-	// read response from service
 	bytesCount, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return 0, fmt.Errorf("failed: read body from service")
 	}
 
-	// read body of response
 	if len(bytesCount) <= 1 || bytesCount[0] == '!' {
 		return 0, fmt.Errorf("failed: incorrect response from service")
 	}

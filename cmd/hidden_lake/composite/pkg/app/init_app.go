@@ -8,10 +8,15 @@ import (
 	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/types"
 
+	hla_chatingar_consumer_app "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/app"
+	hla_chatingar_consumer_settings "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/settings"
+	hla_chatingar_producer_app "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/producer/pkg/app"
+	hla_chatingar_producer_settings "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/producer/pkg/settings"
 	hla_common_consumer_app "github.com/number571/go-peer/cmd/hidden_lake/adapters/common/consumer/pkg/app"
 	hla_common_consumer_settings "github.com/number571/go-peer/cmd/hidden_lake/adapters/common/consumer/pkg/settings"
 	hla_common_producer_app "github.com/number571/go-peer/cmd/hidden_lake/adapters/common/producer/pkg/app"
 	hla_common_producer_settings "github.com/number571/go-peer/cmd/hidden_lake/adapters/common/producer/pkg/settings"
+
 	hlf_app "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/app"
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 	hlm_app "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/app"
@@ -74,6 +79,10 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 			runner, err = hla_common_consumer_app.InitApp(pArgs, pDefaultPath)
 		case hla_common_producer_settings.CServiceFullName:
 			runner, err = hla_common_producer_app.InitApp(pArgs, pDefaultPath)
+		case hla_chatingar_consumer_settings.CServiceFullName:
+			runner, err = hla_chatingar_consumer_app.InitApp(pArgs, pDefaultPath)
+		case hla_chatingar_producer_settings.CServiceFullName:
+			runner, err = hla_chatingar_producer_app.InitApp(pArgs, pDefaultPath)
 		default:
 			return nil, fmt.Errorf("unknown service %s", sName)
 		}

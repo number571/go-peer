@@ -1,9 +1,0 @@
-settings:
-  work_size_bits: 22
-logging:
-- info
-- warn
-- erro
-connection:
-  hlt_host: send_hlc:7582
-  srv_host: service:6060

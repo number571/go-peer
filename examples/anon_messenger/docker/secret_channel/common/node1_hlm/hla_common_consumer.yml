@@ -1,0 +1,10 @@
+settings:
+  work_size_bits: 22
+  wait_time_ms: 1_000
+logging:
+- info
+- warn
+- erro
+connection:
+  hlt_host: node1_hlc:8582
+  srv_host: service:6060

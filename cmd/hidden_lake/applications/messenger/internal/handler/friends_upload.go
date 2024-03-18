@@ -48,7 +48,7 @@ func FriendsUploadPage(
 			panic("can't load hmtl files")
 		}
 
-		msgLimit, err := utils.GetMessageLimit(pCtx, getClient(pCfg))
+		msgLimit, err := utils.GetMessageLimit(pCtx, getHLSClient(pCfg))
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_message_size", "get message size (limit)")(pW, pR)
 			return

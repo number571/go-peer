@@ -64,7 +64,7 @@ func FriendsChatPage(
 			return
 		}
 
-		client := getClient(pCfg)
+		client := getHLSClient(pCfg)
 		myPubKey, err := client.GetPubKey(pCtx)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_public_key", "read public key")(pW, pR)

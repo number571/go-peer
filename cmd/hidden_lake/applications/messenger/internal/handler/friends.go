@@ -35,7 +35,7 @@ func FriendsPage(
 
 		_ = pR.ParseForm()
 
-		client := getClient(pCfg)
+		client := getHLSClient(pCfg)
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:

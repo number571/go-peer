@@ -96,7 +96,7 @@ func HandleIncomigHTTP(
 			return
 		}
 
-		myPubKey, err := getClient(pCfg).GetPubKey(pCtx)
+		myPubKey, err := getHLSClient(pCfg).GetPubKey(pCtx)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
@@ -135,7 +135,7 @@ func shareMessage(
 	senderPseudonym string,
 	pBody []byte,
 ) error {
-	hlsClient := getClient(pCfg)
+	hlsClient := getHLSClient(pCfg)
 
 	hlmClient := hlm_client.NewClient(
 		hlm_client.NewBuilder(),

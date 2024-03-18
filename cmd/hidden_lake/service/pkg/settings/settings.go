@@ -34,8 +34,8 @@ const (
 )
 
 const (
-	CRetryEnqueue = 2
-	CFetchTimeout = time.Minute
+	CRetryEnqueue   = 2
+	CFetchTimeRatio = 10
 )
 
 const (

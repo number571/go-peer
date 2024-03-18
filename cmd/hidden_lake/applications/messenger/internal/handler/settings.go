@@ -47,7 +47,7 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 		}
 
 		_ = pR.ParseForm()
-		hlsClient := getClient(cfg)
+		hlsClient := getHLSClient(cfg)
 
 		switch pR.FormValue("method") {
 		case http.MethodPatch:

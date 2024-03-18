@@ -18,6 +18,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FSettings: &SConfigSettings{
 				FWorkSizeBits: hls_settings.CDefaultWorkSize,
 				FNetworkKey:   hls_settings.CDefaultNetworkKey,
+				FWaitTimeMS:   hla_settings.CDefaultWaitTimeMS,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FConnection: &SConnection{

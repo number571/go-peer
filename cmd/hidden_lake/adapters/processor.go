@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/api"
@@ -40,6 +41,7 @@ func ConsumeProcessor(
 	pConsumer IAdaptedConsumer,
 	pLogger logger.ILogger,
 	pHltClient hlt_client.IClient,
+	pWaitTimeout time.Duration,
 ) error {
 	for {
 		select {
@@ -49,18 +51,28 @@ func ConsumeProcessor(
 		}
 		msg, err := pConsumer.Consume(pCtx)
 		if err != nil {
+			wait(pCtx, pWaitTimeout)
 			pLogger.PushWarn(err.Error())
 			continue
 		}
 		if msg == nil {
+			wait(pCtx, pWaitTimeout)
 			pLogger.PushInfo("no new messages")
 			continue
 		}
 		if err := pHltClient.PutMessage(pCtx, msg); err != nil {
+			wait(pCtx, pWaitTimeout)
 			pLogger.PushWarn(err.Error())
 			continue
 		}
 		pLogger.PushInfo(fmt.Sprintf("message %X consumed", msg.GetHash()))
+	}
+}
+
+func wait(pCtx context.Context, pWaitTimeout time.Duration) {
+	select {
+	case <-pCtx.Done():
+	case <-time.After(pWaitTimeout):
 	}
 }
 

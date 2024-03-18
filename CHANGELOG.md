@@ -10,6 +10,7 @@
 - Update `cmd/hidden_lake`: append context to client api functions
 - Update `cmd/hidden_lake/composite`: append common adapters
 - Update `cmd/hidden_lake/composite`: append _daemon directory
+- Update `cmd/hidden_lake/adapters`: append chatignar adapter
 
 ### CHANGES
 

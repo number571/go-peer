@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -20,8 +21,12 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-func HandleServiceTCP(pCfgW config.IWrapper, pLogger logger.ILogger) anonymity.IHandlerF {
-	httpClient := &http.Client{Timeout: hls_settings.CFetchTimeout}
+func HandleServiceTCP(
+	pCfgW config.IWrapper,
+	pLogger logger.ILogger,
+	pFetchTimeout time.Duration,
+) anonymity.IHandlerF {
+	httpClient := &http.Client{Timeout: pFetchTimeout}
 
 	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)

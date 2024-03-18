@@ -32,6 +32,7 @@ type sApp struct {
 	fSettings    net_message.ISettings
 	fHltAddr     string
 	fServiceAddr string
+	fWaitTime    time.Duration
 }
 
 func NewApp(pCfg config.IConfig) types.IRunner {
@@ -41,6 +42,7 @@ func NewApp(pCfg config.IConfig) types.IRunner {
 		fHltAddr:     pCfg.GetConnection().GetHLTHost(),
 		fServiceAddr: pCfg.GetConnection().GetSrvHost(),
 		fSettings:    pCfg.GetSettings(),
+		fWaitTime:    time.Duration(pCfg.GetSettings().GetWaitTimeMS()) * time.Millisecond,
 	}
 }
 
@@ -72,6 +74,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 				p.fSettings,
 			),
 		),
+		p.fWaitTime,
 	)
 }
 

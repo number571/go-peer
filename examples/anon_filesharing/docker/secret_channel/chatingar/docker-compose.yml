@@ -1,0 +1,27 @@
+version: "3"
+services:
+  node1_hlc:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_filesharing/docker/secret_channel/chatingar/node1_hlf
+      - SERVICE_KEY=examples/anon_filesharing/secret_channel/node1_hlf/priv.key
+    ports:
+      - 8080:8080
+    networks:
+      - hidden-lake
+  node2_hlc:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_filesharing/docker/secret_channel/chatingar/node2_hlf
+      - SERVICE_KEY=examples/anon_filesharing/secret_channel/node2_hlf/priv.key
+    ports:
+      - 7070:7070
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

@@ -17,6 +17,7 @@ var (
 type SConfigSettings struct {
 	FWorkSizeBits uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FNetworkKey   string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FWaitTimeMS   uint64 `json:"wait_time_ms" yaml:"wait_time_ms"`
 }
 
 type SConfig struct {
@@ -74,7 +75,8 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FConnection.FHLTHost != "" &&
-		p.FConnection.FSrvHost != ""
+		p.FConnection.FSrvHost != "" &&
+		p.FSettings.FWaitTimeMS != 0
 }
 
 func (p *SConfig) initConfig() error {
@@ -112,6 +114,10 @@ func (p *SConfig) GetSettings() IConfigSettings {
 
 func (p *SConfig) GetLogging() logger.ILogging {
 	return p.fLogging
+}
+
+func (p *SConfigSettings) GetWaitTimeMS() uint64 {
+	return p.FWaitTimeMS
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {

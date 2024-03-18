@@ -42,7 +42,7 @@ func main() {
 }
 
 func sendMessage(pReceiver string, pMessage []byte) {
-	httpClient := http.Client{Timeout: time.Minute}
+	httpClient := http.Client{Timeout: (10 * time.Minute)}
 	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
 	requestData := replacer.Replace(

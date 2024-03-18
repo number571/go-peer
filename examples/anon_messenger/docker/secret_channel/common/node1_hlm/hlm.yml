@@ -1,0 +1,11 @@
+settings:
+  messages_capacity: 2048
+  pseudonym: "Alice"
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :8080
+  incoming: :8081
+connection: node1_hlc:8572

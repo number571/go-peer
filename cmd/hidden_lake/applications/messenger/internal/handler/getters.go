@@ -20,12 +20,12 @@ func getTemplate(pCfg config.IConfig) *sTemplate {
 	}
 }
 
-func getClient(pCfg config.IConfig) hls_client.IClient {
+func getHLSClient(pCfg config.IConfig) hls_client.IClient {
 	return hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(
 			fmt.Sprintf("http://%s", pCfg.GetConnection()),
-			&http.Client{Timeout: time.Minute},
+			&http.Client{Timeout: (10 * time.Minute)},
 		),
 	)
 }

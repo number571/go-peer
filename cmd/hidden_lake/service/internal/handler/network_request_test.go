@@ -139,6 +139,7 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 				logger.NewSettings(&logger.SSettings{}),
 				func(_ logger.ILogArg) string { return "" },
 			),
+			time.Minute,
 		),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())

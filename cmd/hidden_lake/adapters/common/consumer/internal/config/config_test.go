@@ -9,6 +9,7 @@ const (
 	tcConfigFile   = "config_test.txt"
 	tcLogging      = true
 	tcWorkSizeBits = 20
+	tcWaitTimeMS   = 1_000
 	tcNetworkKey   = "network_key"
 	tcAddress1     = "test_address1"
 	tcAddress2     = "test_address2"
@@ -19,6 +20,7 @@ func testConfigDefaultInit(configPath string) {
 		FSettings: &SConfigSettings{
 			FWorkSizeBits: tcWorkSizeBits,
 			FNetworkKey:   tcNetworkKey,
+			FWaitTimeMS:   tcWaitTimeMS,
 		},
 		FLogging: []string{"info", "erro"},
 		FConnection: &SConnection{
@@ -37,6 +39,11 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	if cfg.GetSettings().GetWaitTimeMS() != tcWaitTimeMS {
+		t.Error("settings wait_time_ms is invalid")
 		return
 	}
 

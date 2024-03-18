@@ -1,0 +1,10 @@
+logging:
+  - info
+  - warn
+  - erro
+services:
+  - hidden-lake-service
+  - hidden-lake-traffic
+  - hidden-lake-filesharer
+  - hidden-lake-adapter=chatingar_consumer
+  - hidden-lake-adapter=chatingar_producer

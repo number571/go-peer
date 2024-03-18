@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 
-	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
+	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
 )
 
@@ -34,15 +34,16 @@ func initNode(
 		queueDuration     = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
 		queueRandDuration = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
 		queueMaxDuration  = queueDuration + queueRandDuration
+		fetchTimeout      = queueMaxDuration * hls_settings.CFetchTimeRatio
 	)
 
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
-			FServiceName:  pkg_settings.CServiceName,
+			FServiceName:  hls_settings.CServiceName,
 			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
-			FNetworkMask:  pkg_settings.CNetworkMask,
-			FRetryEnqueue: pkg_settings.CRetryEnqueue,
-			FFetchTimeout: pkg_settings.CFetchTimeout,
+			FNetworkMask:  hls_settings.CNetworkMask,
+			FRetryEnqueue: hls_settings.CRetryEnqueue,
+			FFetchTimeout: fetchTimeout,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -51,7 +52,7 @@ func initNode(
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      cfg.GetAddress().GetTCP(),
-				FMaxConnects:  pkg_settings.CNetworkMaxConns,
+				FMaxConnects:  hls_settings.CNetworkMaxConns,
 				FReadTimeout:  queueMaxDuration,
 				FWriteTimeout: queueMaxDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
@@ -59,22 +60,22 @@ func initNode(
 					FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSize:    cfgSettings.GetLimitVoidSizeBytes(),
-					FWaitReadTimeout:  pkg_settings.CConnWaitReadTimeout,
-					FDialTimeout:      pkg_settings.CConnDialTimeout,
+					FWaitReadTimeout:  hls_settings.CConnWaitReadTimeout,
+					FDialTimeout:      hls_settings.CConnDialTimeout,
 					FReadTimeout:      queueMaxDuration,
 					FWriteTimeout:     queueMaxDuration,
 				}),
 			}),
 			lru.NewLRUCache(
 				lru.NewSettings(&lru.SSettings{
-					FCapacity: pkg_settings.CNetworkQueueCapacity,
+					FCapacity: hls_settings.CNetworkQueueCapacity,
 				}),
 			),
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FMainCapacity: pkg_settings.CQueueCapacity,
-				FVoidCapacity: pkg_settings.CQueuePoolCapacity,
+				FMainCapacity: hls_settings.CQueueCapacity,
+				FVoidCapacity: hls_settings.CQueuePoolCapacity,
 				FParallel:     pParallel,
 				FDuration:     queueDuration,
 				FRandDuration: queueRandDuration,
@@ -87,7 +88,7 @@ func initNode(
 				pPrivKey,
 			),
 		).WithNetworkSettings(
-			pkg_settings.CNetworkMask,
+			hls_settings.CNetworkMask,
 			net_message.NewSettings(&net_message.SSettings{
 				FNetworkKey:   cfgSettings.GetNetworkKey(),
 				FWorkSizeBits: cfgSettings.GetWorkSizeBits(),
@@ -101,7 +102,7 @@ func initNode(
 			return f2f
 		}(),
 	).HandleFunc(
-		pkg_settings.CServiceMask,
-		handler.HandleServiceTCP(pCfgW, pLogger),
+		hls_settings.CServiceMask,
+		handler.HandleServiceTCP(pCfgW, pLogger, fetchTimeout),
 	)
 }
