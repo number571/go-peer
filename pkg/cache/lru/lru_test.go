@@ -30,26 +30,6 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
-func TestPanicLRUCache(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	lruCache := NewLRUCache(
-		NewSettings(&SSettings{
-			FCapacity: 3,
-		}),
-	).(*sLRUCache)
-
-	lruCache.fQueue[0] = "abc"
-	_, _ = lruCache.GetKey(0)
-}
-
 func TestLRUCache(t *testing.T) {
 	t.Parallel()
 

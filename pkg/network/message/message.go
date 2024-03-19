@@ -7,12 +7,18 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
-	CSaltSize = 32
+	// Salt(cipher) + Salt(auth) + IV + Hash + Proof + PayloadSize + PayloadHead
+	cSaltSize        = 16
+	CMessageHeadSize = 2*cSaltSize +
+		symmetric.CAESBlockSize +
+		hashing.CSHA256Size +
+		3*encoding.CSizeUint64
 )
 
 var (
@@ -20,27 +26,72 @@ var (
 )
 
 type sMessage struct {
-	fProof   uint64
-	fSalt    []byte
+	fSalt    [2][]byte // cipher_salt+auth_salt
+	fEncPPHP []byte    // enc(proof_psize_hash_payload)
+
+	// not used in LoadMessage(), ToBytes(), ToString()
+	// used only in GetProof(), GetHash(), GetPayload()
 	fHash    []byte
+	fProof   uint64
 	fPayload payload.IPayload
 }
 
-func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel uint64) IMessage {
-	salt := random.NewStdPRNG().GetBytes(CSaltSize)
-	hash := getAuthHash(pSett.GetNetworkKey(), salt, pPld.ToBytes())
+func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSize uint64) IMessage {
+	payloadBytes := pPld.ToBytes()
+	payloadSize := encoding.Uint64ToBytes(uint64(len(payloadBytes)))
+
+	prng := random.NewStdPRNG()
+
+	randVoidSize := prng.GetUint64() % (pLimitVoidSize + 1)
+	payloadRandBytes := bytes.Join(
+		[][]byte{
+			payloadBytes,
+			prng.GetBytes(randVoidSize),
+		},
+		[]byte{},
+	)
+
+	authSalt := prng.GetBytes(cSaltSize)
+	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, payloadRandBytes)
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 
+	cipherSalt := prng.GetBytes(cSaltSize)
+	cipher := getCipher(pSett.GetNetworkKey(), cipherSalt)
+	proofBytes := encoding.Uint64ToBytes(proof)
+
 	return &sMessage{
-		fProof:   proof,
-		fSalt:    salt,
+		fSalt: [2][]byte{
+			cipherSalt,
+			authSalt,
+		},
+		fEncPPHP: cipher.EncryptBytes(bytes.Join(
+			[][]byte{
+				proofBytes[:],
+				payloadSize[:],
+				hash,
+				payloadRandBytes,
+			},
+			[]byte{},
+		)),
 		fHash:    hash,
+		fProof:   proof,
 		fPayload: pPld,
 	}
 }
 
 func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	var msgBytes []byte
+
+	const (
+		cipherSaltIndex = cSaltSize
+		authSaltIndex   = cipherSaltIndex + cSaltSize
+	)
+
+	const (
+		proofIndex  = encoding.CSizeUint64
+		pldLenIndex = proofIndex + encoding.CSizeUint64
+		hashIndex   = pldLenIndex + hashing.CSHA256Size
+	)
 
 	switch x := pData.(type) {
 	case []byte:
@@ -51,39 +102,56 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrUnknownType
 	}
 
-	if len(msgBytes) < encoding.CSizeUint64+CSaltSize+hashing.CSHA256Size {
+	if len(msgBytes) < CMessageHeadSize {
 		return nil, ErrInvalidHeaderSize
 	}
 
-	proofBytes := msgBytes[:encoding.CSizeUint64]
-	gotSalt := msgBytes[encoding.CSizeUint64 : encoding.CSizeUint64+CSaltSize]
-	gotHash := msgBytes[encoding.CSizeUint64+CSaltSize : encoding.CSizeUint64+CSaltSize+hashing.CSHA256Size]
-	pldBytes := msgBytes[encoding.CSizeUint64+CSaltSize+hashing.CSHA256Size:]
+	cipherSaltBytes := msgBytes[:cipherSaltIndex]
+	authSaltBytes := msgBytes[cipherSaltIndex:authSaltIndex]
+	encPPHPBytes := msgBytes[authSaltIndex:]
 
-	proofArray := [encoding.CSizeUint64]byte{}
-	copy(proofArray[:], proofBytes)
+	cipher := getCipher(pSett.GetNetworkKey(), cipherSaltBytes)
+	pphpBytes := cipher.DecryptBytes(encPPHPBytes)
 
-	proof := encoding.BytesToUint64(proofArray)
+	proofArr := [encoding.CSizeUint64]byte{}
+	copy(proofArr[:], pphpBytes[:proofIndex])
+	proof := encoding.BytesToUint64(proofArr)
+
+	payloadSizeArr := [encoding.CSizeUint64]byte{}
+	copy(payloadSizeArr[:], pphpBytes[proofIndex:pldLenIndex])
+	payloadLength := encoding.BytesToUint64(payloadSizeArr)
+
+	hash := pphpBytes[pldLenIndex:hashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
-	if !puzzle.VerifyBytes(gotHash, proof) {
+	if !puzzle.VerifyBytes(hash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	if !bytes.Equal(gotHash, getAuthHash(pSett.GetNetworkKey(), gotSalt, pldBytes)) {
+	payloadRandBytes := pphpBytes[hashIndex:]
+	if len(payloadRandBytes) < int(payloadLength) {
+		return nil, ErrInvalidPayloadSize
+	}
+
+	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, payloadRandBytes)
+	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	// check Head[u64]
-	pld := payload.LoadPayload(pldBytes)
-	if pld == nil {
+	payloadBytes := payloadRandBytes[:payloadLength]
+	payload := payload.LoadPayload(payloadBytes)
+	if payload == nil {
 		return nil, ErrDecodePayload
 	}
 
 	return &sMessage{
+		fSalt: [2][]byte{
+			cipherSaltBytes,
+			authSaltBytes,
+		},
+		fEncPPHP: encPPHPBytes,
+		fHash:    hash,
 		fProof:   proof,
-		fSalt:    gotSalt,
-		fHash:    gotHash,
-		fPayload: pld,
+		fPayload: payload,
 	}, nil
 }
 
@@ -91,7 +159,7 @@ func (p *sMessage) GetProof() uint64 {
 	return p.fProof
 }
 
-func (p *sMessage) GetSalt() []byte {
+func (p *sMessage) GetSalt() [2][]byte {
 	return p.fSalt
 }
 
@@ -104,13 +172,11 @@ func (p *sMessage) GetPayload() payload.IPayload {
 }
 
 func (p *sMessage) ToBytes() []byte {
-	proofBytes := encoding.Uint64ToBytes(p.fProof)
 	return bytes.Join(
 		[][]byte{
-			proofBytes[:],
-			p.fSalt,
-			p.fHash,
-			p.fPayload.ToBytes(),
+			p.fSalt[0],
+			p.fSalt[1],
+			p.fEncPPHP,
 		},
 		[]byte{},
 	)
@@ -123,4 +189,9 @@ func (p *sMessage) ToString() string {
 func getAuthHash(networkKey string, pAuthSalt, pBytes []byte) []byte {
 	authKey := keybuilder.NewKeyBuilder(1, []byte(pAuthSalt)).Build(networkKey)
 	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
+}
+
+func getCipher(networkKey string, pCipherSalt []byte) symmetric.ICipher {
+	cipherKey := keybuilder.NewKeyBuilder(1, []byte(pCipherSalt)).Build(networkKey)
+	return symmetric.NewAESCipher(cipherKey)
 }

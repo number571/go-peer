@@ -742,6 +742,25 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	return nodes, cancels
 }
 
+/*
+import (
+	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
+	internal_std_logger "github.com/number571/go-peer/internal/logger/std"
+)
+
+type stLogging struct{}
+
+func (p *stLogging) HasInfo() bool {
+	return true
+}
+func (p *stLogging) HasWarn() bool {
+	return true
+}
+func (p *stLogging) HasErro() bool {
+	return true
+}
+*/
+
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
@@ -753,8 +772,10 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 	if err != nil {
 		return nil, nil
 	}
+	parallel := uint64(1)
 	networkMask := uint64(1)
 	networkKey := "old_network_key"
+	limitVoidSize := uint64(10_000)
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:  "TEST",
@@ -763,6 +784,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 			FFetchTimeout: timeWait,
 			FRetryEnqueue: uint64(retryNum),
 		}),
+		// internal_std_logger.NewStdLogger(&stLogging{}, internal_anon_logger.GetLogFunc()),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
@@ -775,13 +797,14 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:       networkKey,
-					FWorkSizeBits:     testutils.TCWorkSize,
-					FMessageSizeBytes: testutils.TCMessageSize,
-					FWaitReadTimeout:  time.Hour,
-					FDialTimeout:      time.Minute,
-					FReadTimeout:      time.Minute,
-					FWriteTimeout:     time.Minute,
+					FNetworkKey:         networkKey,
+					FWorkSizeBits:       testutils.TCWorkSize,
+					FMessageSizeBytes:   testutils.TCMessageSize,
+					FLimitVoidSizeBytes: limitVoidSize,
+					FWaitReadTimeout:    time.Hour,
+					FDialTimeout:        time.Minute,
+					FReadTimeout:        time.Minute,
+					FWriteTimeout:       time.Minute,
 				}),
 			}),
 			lru.NewLRUCache(
@@ -792,10 +815,11 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FMainCapacity: testutils.TCQueueCapacity,
-				FVoidCapacity: testutils.TCQueueCapacity,
-				FParallel:     1,
-				FDuration:     time.Second,
+				FMainCapacity:       testutils.TCQueueCapacity,
+				FVoidCapacity:       testutils.TCQueueCapacity,
+				FParallel:           parallel,
+				FLimitVoidSizeBytes: limitVoidSize,
+				FDuration:           time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
@@ -841,5 +865,6 @@ func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsgBytes []b
 			pMsgBytes,
 		),
 		1,
+		0,
 	)
 }

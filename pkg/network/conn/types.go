@@ -22,11 +22,11 @@ type IConn interface {
 type ISettings interface {
 	net_message.ISettings
 
-	GetMessageSizeBytes() uint64
-	GetLimitVoidSize() uint64
-
 	// for subsequent inheritance on multiple connections
 	SetNetworkKey(string)
+
+	GetMessageSizeBytes() uint64
+	GetLimitVoidSizeBytes() uint64
 
 	GetDialTimeout() time.Duration
 	GetReadTimeout() time.Duration

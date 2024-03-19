@@ -140,6 +140,7 @@ func TestHandleTransferAPI(t *testing.T) {
 				encMsg.ToBytes(),
 			),
 			1,
+			0,
 		)
 		err = hltClient1.PutMessage(context.Background(), netMsg)
 		if err != nil {

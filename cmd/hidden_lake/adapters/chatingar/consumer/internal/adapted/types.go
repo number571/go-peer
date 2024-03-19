@@ -7,7 +7,10 @@ type sCountDTO struct {
 }
 
 type sMessagesDTO struct {
-	Comments []struct {
-		Body string `json:"body"`
-	} `json:"comments"`
+	Comments []sCommentBlock `json:"comments"`
+}
+
+type sCommentBlock struct {
+	Body      string `json:"body"`
+	Timestamp string `json:"timestamp"`
 }

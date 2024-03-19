@@ -27,4 +27,5 @@ type ISettings interface {
 	GetParallel() uint64
 	GetDuration() time.Duration
 	GetRandDuration() time.Duration
+	GetLimitVoidSizeBytes() uint64
 }

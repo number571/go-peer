@@ -202,6 +202,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 				pMsg.ToBytes(),
 			),
 			p.fSettings.GetParallel(),
+			0,
 		)
 	}()
 
@@ -252,6 +253,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 				msg.ToBytes(),
 			),
 			p.fSettings.GetParallel(),
+			p.fSettings.GetLimitVoidSizeBytes(),
 		)
 	}()
 

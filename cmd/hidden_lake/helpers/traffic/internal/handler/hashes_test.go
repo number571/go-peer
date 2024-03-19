@@ -50,6 +50,7 @@ func TestHandleHashesAPI(t *testing.T) {
 		testNetworkMessageSettings(),
 		payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
 		1,
+		0,
 	)
 	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)

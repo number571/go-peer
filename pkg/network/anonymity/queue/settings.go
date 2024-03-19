@@ -10,20 +10,22 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FMainCapacity uint64
-	FVoidCapacity uint64
-	FParallel     uint64
-	FDuration     time.Duration
-	FRandDuration time.Duration
+	FMainCapacity       uint64
+	FVoidCapacity       uint64
+	FParallel           uint64
+	FLimitVoidSizeBytes uint64
+	FDuration           time.Duration
+	FRandDuration       time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FMainCapacity: pSett.FMainCapacity,
-		FVoidCapacity: pSett.FVoidCapacity,
-		FParallel:     pSett.FParallel,
-		FDuration:     pSett.FDuration,
-		FRandDuration: pSett.FRandDuration,
+		FMainCapacity:       pSett.FMainCapacity,
+		FVoidCapacity:       pSett.FVoidCapacity,
+		FParallel:           pSett.FParallel,
+		FLimitVoidSizeBytes: pSett.FLimitVoidSizeBytes,
+		FDuration:           pSett.FDuration,
+		FRandDuration:       pSett.FRandDuration,
 	}).mustNotNull()
 }
 
@@ -40,7 +42,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
 	}
-	// p.FRandDuration can be = 0
+	// p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
 	return p
 }
 
@@ -62,4 +64,8 @@ func (p *sSettings) GetDuration() time.Duration {
 
 func (p *sSettings) GetRandDuration() time.Duration {
 	return p.FRandDuration
+}
+
+func (p *sSettings) GetLimitVoidSizeBytes() uint64 {
+	return p.FLimitVoidSizeBytes
 }

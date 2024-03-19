@@ -11,6 +11,8 @@
 - Update `cmd/hidden_lake/composite`: append common adapters
 - Update `cmd/hidden_lake/composite`: append _daemon directory
 - Update `cmd/hidden_lake/adapters`: append chatignar adapter
+- Update `pkg/network/message`: append void size param, encryption
+- Update `pkg/network/conn`: delete encryption functions
 
 ### CHANGES
 

@@ -47,11 +47,7 @@ func (p *sLRUCache) GetKey(i uint64) ([]byte, bool) {
 	}
 
 	hash := encoding.HexDecode(p.fQueue[i])
-	if hash == nil {
-		panic("got invalid hex encoded hash")
-	}
-
-	return hash, true
+	return hash, hash != nil
 }
 
 func (p *sLRUCache) Set(pKey, pValue []byte) bool {
