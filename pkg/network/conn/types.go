@@ -25,7 +25,7 @@ type ISettings interface {
 	// for subsequent inheritance on multiple connections
 	SetNetworkKey(string)
 
-	GetMessageSizeBytes() uint64
+	GetLimitMessageSizeBytes() uint64
 	GetLimitVoidSizeBytes() uint64
 
 	GetDialTimeout() time.Duration

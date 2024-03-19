@@ -43,11 +43,11 @@ func testSettings(t *testing.T, n int) {
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:  time.Hour,
-				FDialTimeout:      time.Minute,
-				FReadTimeout:      time.Minute,
-				FWriteTimeout:     time.Minute,
+				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           time.Minute,
+				FWriteTimeout:          time.Minute,
 			}),
 		})
 	case 1:
@@ -56,11 +56,11 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:  time.Hour,
-				FDialTimeout:      time.Minute,
-				FReadTimeout:      time.Minute,
-				FWriteTimeout:     time.Minute,
+				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           time.Minute,
+				FWriteTimeout:          time.Minute,
 			}),
 		})
 	case 2:
@@ -69,11 +69,11 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects: testutils.TCMaxConnects,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:  time.Hour,
-				FDialTimeout:      time.Minute,
-				FReadTimeout:      time.Minute,
-				FWriteTimeout:     time.Minute,
+				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           time.Minute,
+				FWriteTimeout:          time.Minute,
 			}),
 		})
 	case 3:
@@ -411,12 +411,12 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 			FReadTimeout:  timeout,
 			FWriteTimeout: timeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:     testutils.TCWorkSize,
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:  time.Hour,
-				FDialTimeout:      time.Minute,
-				FReadTimeout:      timeout,
-				FWriteTimeout:     timeout,
+				FWorkSizeBits:          testutils.TCWorkSize,
+				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           timeout,
+				FWriteTimeout:          timeout,
 			}),
 		}),
 		lru.NewLRUCache(

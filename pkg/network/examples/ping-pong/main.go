@@ -113,11 +113,11 @@ func newNode(serviceAddress string) network.INode {
 
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:     10,
-		FMessageSizeBytes: (1 << 10),
-		FWaitReadTimeout:  time.Hour,
-		FDialTimeout:      time.Minute,
-		FReadTimeout:      time.Minute,
-		FWriteTimeout:     time.Minute,
+		FWorkSizeBits:          10,
+		FLimitMessageSizeBytes: (1 << 10),
+		FWaitReadTimeout:       time.Hour,
+		FDialTimeout:           time.Minute,
+		FReadTimeout:           time.Minute,
+		FWriteTimeout:          time.Minute,
 	})
 }

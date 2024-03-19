@@ -113,13 +113,13 @@ func newNode(serviceName, address string) anonymity.INode {
 
 func newConnSettings(mSize, wSize uint64, nKey string) conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FNetworkKey:         nKey,
-		FWorkSizeBits:       wSize,
-		FMessageSizeBytes:   mSize,
-		FLimitVoidSizeBytes: 8192,
-		FWaitReadTimeout:    time.Hour,
-		FDialTimeout:        time.Minute,
-		FReadTimeout:        time.Minute,
-		FWriteTimeout:       time.Minute,
+		FNetworkKey:            nKey,
+		FWorkSizeBits:          wSize,
+		FLimitMessageSizeBytes: mSize,
+		FLimitVoidSizeBytes:    8192,
+		FWaitReadTimeout:       time.Hour,
+		FDialTimeout:           time.Minute,
+		FReadTimeout:           time.Minute,
+		FWriteTimeout:          time.Minute,
 	})
 }

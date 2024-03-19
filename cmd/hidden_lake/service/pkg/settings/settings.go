@@ -55,8 +55,8 @@ const (
 )
 
 const (
-	CQueueCapacity     = (1 << 8) // 256 messages ~= 2MiB
-	CQueuePoolCapacity = (1 << 5) //  32 messages ~= 256KiB
+	CQueueMainCapacity = (1 << 8) // 256 messages ~= 2MiB
+	CQueueVoidCapacity = (1 << 5) //  32 messages ~= 256KiB
 )
 
 const (

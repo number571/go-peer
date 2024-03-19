@@ -228,12 +228,12 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:     testutils.TCWorkSize,
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:  time.Hour,
-				FDialTimeout:      time.Minute,
-				FReadTimeout:      time.Minute,
-				FWriteTimeout:     time.Minute,
+				FWorkSizeBits:          testutils.TCWorkSize,
+				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           time.Minute,
+				FWriteTimeout:          time.Minute,
 			}),
 		}),
 		lru.NewLRUCache(

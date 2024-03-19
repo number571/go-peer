@@ -50,19 +50,10 @@ func NewApp(
 	pCfg config.IConfig,
 	pPathTo string,
 ) types.IRunner {
-	anonLogger := std_logger.NewStdLogger(
-		pCfg.GetLogging(),
-		anon_logger.GetLogFunc(),
-	)
-
-	httpLogger := std_logger.NewStdLogger(
-		pCfg.GetLogging(),
-		http_logger.GetLogFunc(),
-	)
-
-	stdfLogger := std_logger.NewStdLogger(
-		pCfg.GetLogging(),
-		std_logger.GetLogFunc(),
+	var (
+		anonLogger = std_logger.NewStdLogger(pCfg.GetLogging(), anon_logger.GetLogFunc())
+		httpLogger = std_logger.NewStdLogger(pCfg.GetLogging(), http_logger.GetLogFunc())
+		stdfLogger = std_logger.NewStdLogger(pCfg.GetLogging(), std_logger.GetLogFunc())
 	)
 
 	dbWrapper := database.NewDBWrapper()

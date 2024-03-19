@@ -13,32 +13,32 @@ type SSettings sSettings
 type sSettings struct {
 	fMutex sync.Mutex
 
-	FNetworkKey         string
-	FWorkSizeBits       uint64
-	FMessageSizeBytes   uint64
-	FLimitVoidSizeBytes uint64
-	FWaitReadTimeout    time.Duration
-	FDialTimeout        time.Duration
-	FReadTimeout        time.Duration
-	FWriteTimeout       time.Duration
+	FNetworkKey            string
+	FWorkSizeBits          uint64
+	FLimitMessageSizeBytes uint64
+	FLimitVoidSizeBytes    uint64
+	FWaitReadTimeout       time.Duration
+	FDialTimeout           time.Duration
+	FReadTimeout           time.Duration
+	FWriteTimeout          time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkKey:         pSett.FNetworkKey,
-		FWorkSizeBits:       pSett.FWorkSizeBits,
-		FMessageSizeBytes:   pSett.FMessageSizeBytes,
-		FLimitVoidSizeBytes: pSett.FLimitVoidSizeBytes,
-		FWaitReadTimeout:    pSett.FWaitReadTimeout,
-		FDialTimeout:        pSett.FDialTimeout,
-		FReadTimeout:        pSett.FReadTimeout,
-		FWriteTimeout:       pSett.FWriteTimeout,
+		FNetworkKey:            pSett.FNetworkKey,
+		FWorkSizeBits:          pSett.FWorkSizeBits,
+		FLimitMessageSizeBytes: pSett.FLimitMessageSizeBytes,
+		FLimitVoidSizeBytes:    pSett.FLimitVoidSizeBytes,
+		FWaitReadTimeout:       pSett.FWaitReadTimeout,
+		FDialTimeout:           pSett.FDialTimeout,
+		FReadTimeout:           pSett.FReadTimeout,
+		FWriteTimeout:          pSett.FWriteTimeout,
 	}).mustNotNull()
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FMessageSizeBytes == 0 {
-		panic(`p.FMessageSizeBytes == 0`)
+	if p.FLimitMessageSizeBytes == 0 {
+		panic(`p.FLimitMessageSizeBytes == 0`)
 	}
 	if p.FWaitReadTimeout == 0 {
 		panic(`p.FWaitReadTimeout == 0`)
@@ -73,8 +73,8 @@ func (p *sSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
 }
 
-func (p *sSettings) GetMessageSizeBytes() uint64 {
-	return p.FMessageSizeBytes
+func (p *sSettings) GetLimitMessageSizeBytes() uint64 {
+	return p.FLimitMessageSizeBytes
 }
 
 func (p *sSettings) GetLimitVoidSizeBytes() uint64 {

@@ -56,14 +56,14 @@ func initNode(
 				FReadTimeout:  queueMaxDuration,
 				FWriteTimeout: queueMaxDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:         cfgSettings.GetNetworkKey(),
-					FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
-					FMessageSizeBytes:   cfgSettings.GetMessageSizeBytes(),
-					FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
-					FWaitReadTimeout:    hls_settings.CConnWaitReadTimeout,
-					FDialTimeout:        hls_settings.CConnDialTimeout,
-					FReadTimeout:        queueMaxDuration,
-					FWriteTimeout:       queueMaxDuration,
+					FNetworkKey:            cfgSettings.GetNetworkKey(),
+					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
+					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
+					FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
+					FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
+					FDialTimeout:           hls_settings.CConnDialTimeout,
+					FReadTimeout:           queueMaxDuration,
+					FWriteTimeout:          queueMaxDuration,
 				}),
 			}),
 			lru.NewLRUCache(
@@ -74,8 +74,8 @@ func initNode(
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FMainCapacity:       hls_settings.CQueueCapacity,
-				FVoidCapacity:       hls_settings.CQueuePoolCapacity,
+				FMainCapacity:       hls_settings.CQueueMainCapacity,
+				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
 				FParallel:           pParallel,
 				FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
 				FDuration:           queueDuration,

@@ -154,7 +154,7 @@ func (p *sConn) recvHeadBytes(
 	copy(msgSizeBytes[:], sizeHead[:sizeIndex])
 
 	gotMsgSize := encoding.BytesToUint64(msgSizeBytes)
-	fullMsgSize := p.fSettings.GetMessageSizeBytes() + net_message.CMessageHeadSize
+	fullMsgSize := p.fSettings.GetLimitMessageSizeBytes() + net_message.CMessageHeadSize
 
 	switch {
 	case gotMsgSize < net_message.CMessageHeadSize:
