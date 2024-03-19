@@ -50,7 +50,7 @@ func (p *sApp) initInterfaceServiceHTTP(pCtx context.Context) {
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),
 		ReadTimeout: (5 * time.Second),
-		Handler:     http.TimeoutHandler(mux, (10 * time.Minute), "timeout"),
+		Handler:     mux, // http.TimeoutHandler returns bug with progress bar of file downloading
 	}
 }
 
