@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar"
@@ -19,6 +20,7 @@ import (
 
 const (
 	cPageOffet  = 5
+	cLimitMsgs  = 256
 	cDBCountKey = "db_count_key"
 )
 
@@ -43,7 +45,7 @@ func NewAdaptedConsumer(
 		fPostID:     pPostID,
 		fSettings:   pSettings,
 		fKVDatabase: pKVDatabase,
-		fMessages:   make(chan net_message.IMessage, cPageOffet),
+		fMessages:   make(chan net_message.IMessage, cLimitMsgs),
 	}
 }
 
@@ -69,17 +71,16 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 		return nil, nil
 	}
 
-	countPagesDB, err := p.getCountPagesDB()
+	currPage, err := p.getCountPagesDB()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(countPagesDB, countPages)
-	if countPagesDB >= countPages {
+	if currPage >= countPages {
 		return nil, nil
 	}
 
-	return p.loadMessage(pCtx, countPagesDB)
+	return p.loadMessage(pCtx, currPage)
 }
 
 // curl 'https://api.chatingar.com/api/comment/65f7214f5b65dcbdedcca3fb?page=1' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
@@ -98,7 +99,8 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 		return nil, fmt.Errorf("failed: build request")
 	}
 
-	resp, err := http.DefaultClient.Do(chatingar.EnrichRequest(req))
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
 		return nil, fmt.Errorf("failed: bad request")
 	}
@@ -107,6 +109,10 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 	var messagesDTO sMessagesDTO
 	if err := json.NewDecoder(resp.Body).Decode(&messagesDTO); err != nil {
 		return nil, err
+	}
+
+	if len(messagesDTO.Comments) >= cLimitMsgs {
+		return nil, errors.New("has limit messages")
 	}
 
 	for _, v := range messagesDTO.Comments {
@@ -135,7 +141,8 @@ func (p *sAdaptedConsumer) loadCountComments(ctx context.Context) (uint64, error
 		return 0, fmt.Errorf("failed: build request")
 	}
 
-	resp, err := http.DefaultClient.Do(chatingar.EnrichRequest(req))
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
 		return 0, fmt.Errorf("failed: bad request")
 	}

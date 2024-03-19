@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar"
@@ -43,7 +44,8 @@ func (p *sAdaptedProducer) Produce(pCtx context.Context, pMsg net_message.IMessa
 		return err
 	}
 
-	resp, err := http.DefaultClient.Do(chatingar.EnrichRequest(req))
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
 		return err
 	}
