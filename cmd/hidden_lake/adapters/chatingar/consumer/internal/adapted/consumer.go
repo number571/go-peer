@@ -20,7 +20,6 @@ import (
 
 const (
 	cPageOffet  = 5
-	cLimitMsgs  = 256
 	cDBCountKey = "db_count_key"
 )
 
@@ -45,7 +44,7 @@ func NewAdaptedConsumer(
 		fPostID:     pPostID,
 		fSettings:   pSettings,
 		fKVDatabase: pKVDatabase,
-		fMessages:   make(chan net_message.IMessage, cLimitMsgs),
+		fMessages:   make(chan net_message.IMessage, cPageOffet),
 	}
 }
 
@@ -56,14 +55,12 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 	default:
 	}
 
-	countComments, err := p.loadCountComments(pCtx)
-	if err != nil {
-		return nil, err
-	}
-
-	// start read from last
-	countPages := (countComments / cPageOffet) + 1
 	if !p.fEnabled {
+		countComments, err := p.loadCountComments(pCtx)
+		if err != nil {
+			return nil, err
+		}
+		countPages := (countComments / cPageOffet) + 1
 		if err := p.setCountPagesDB(countPages); err != nil {
 			return nil, err
 		}
@@ -74,10 +71,6 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 	currPage, err := p.getCountPagesDB()
 	if err != nil {
 		return nil, err
-	}
-
-	if currPage >= countPages {
-		return nil, nil
 	}
 
 	return p.loadMessage(pCtx, currPage)
@@ -111,8 +104,14 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 		return nil, err
 	}
 
-	if len(messagesDTO.Comments) >= cLimitMsgs {
-		return nil, errors.New("has limit messages")
+	sizeComments := len(messagesDTO.Comments)
+	if sizeComments > cPageOffet {
+		return nil, errors.New("has limit pages")
+	}
+	if sizeComments == cPageOffet {
+		if err := p.incCountPagesDB(); err != nil {
+			return nil, err
+		}
 	}
 
 	for _, v := range messagesDTO.Comments {
@@ -126,7 +125,7 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 		p.fMessages <- msg
 	}
 
-	return nil, p.incCountPagesDB()
+	return nil, nil
 }
 
 // curl 'https://api.chatingar.com/api/post/65f7214f5b65dcbdedcca3fb' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
