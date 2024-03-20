@@ -9,6 +9,7 @@ import (
 
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -70,9 +71,12 @@ func ConsumeProcessor(
 }
 
 func wait(pCtx context.Context, pWaitTimeout time.Duration) {
+	randDuration := time.Duration(
+		random.NewStdPRNG().GetUint64() % uint64(pWaitTimeout+1),
+	)
 	select {
 	case <-pCtx.Done():
-	case <-time.After(pWaitTimeout):
+	case <-time.After(pWaitTimeout + randDuration):
 	}
 }
 

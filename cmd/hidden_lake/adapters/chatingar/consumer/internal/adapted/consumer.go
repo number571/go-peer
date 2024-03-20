@@ -60,10 +60,12 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 		if err != nil {
 			return nil, err
 		}
+
 		countPages := (countComments / cPageOffet) + 1
 		if err := p.setCountPagesDB(countPages); err != nil {
 			return nil, err
 		}
+
 		p.fEnabled = true
 		return nil, nil
 	}
