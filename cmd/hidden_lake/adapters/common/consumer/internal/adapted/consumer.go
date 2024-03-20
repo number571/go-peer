@@ -67,11 +67,11 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 	return msg, nil
 }
 
-func (p *sAdaptedConsumer) loadMessageFromService(ctx context.Context, id uint64) (net_message.IMessage, error) {
+func (p *sAdaptedConsumer) loadMessageFromService(pCtx context.Context, pID uint64) (net_message.IMessage, error) {
 	req, err := http.NewRequestWithContext(
-		ctx,
+		pCtx,
 		http.MethodGet,
-		fmt.Sprintf("http://%s/load?data_id=%d", p.fServiceAddr, id),
+		fmt.Sprintf("http://%s/load?data_id=%d", p.fServiceAddr, pID),
 		nil,
 	)
 	if err != nil {
@@ -101,9 +101,9 @@ func (p *sAdaptedConsumer) loadMessageFromService(ctx context.Context, id uint64
 	return msg, nil
 }
 
-func (p *sAdaptedConsumer) loadCountFromService(ctx context.Context) (uint64, error) {
+func (p *sAdaptedConsumer) loadCountFromService(pCtx context.Context) (uint64, error) {
 	req, err := http.NewRequestWithContext(
-		ctx,
+		pCtx,
 		http.MethodGet,
 		fmt.Sprintf("http://%s/size", p.fServiceAddr),
 		nil,

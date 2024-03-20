@@ -1,7 +1,6 @@
 package adapted
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -79,14 +78,14 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 }
 
 // curl 'https://api.chatingar.com/api/comment/65f7214f5b65dcbdedcca3fb?page=1' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
-func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_message.IMessage, error) {
+func (p *sAdaptedConsumer) loadMessage(pCtx context.Context, pPage uint64) (net_message.IMessage, error) {
 	req, err := http.NewRequestWithContext(
-		ctx,
+		pCtx,
 		http.MethodGet,
 		fmt.Sprintf(
 			"https://api.chatingar.com/api/comment/%s?page=%d",
 			p.fPostID,
-			page,
+			pPage,
 		),
 		nil,
 	)
@@ -117,11 +116,11 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 	}
 
 	for _, v := range messagesDTO.Comments {
-		if err := p.setCommentHash(v); err != nil {
-			continue
-		}
 		msg, err := net_message.LoadMessage(p.fSettings, v.Body)
 		if err != nil {
+			continue
+		}
+		if err := p.rememberMessage(msg); err != nil {
 			continue
 		}
 		p.fMessages <- msg
@@ -131,9 +130,9 @@ func (p *sAdaptedConsumer) loadMessage(ctx context.Context, page uint64) (net_me
 }
 
 // curl 'https://api.chatingar.com/api/post/65f7214f5b65dcbdedcca3fb' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
-func (p *sAdaptedConsumer) loadCountComments(ctx context.Context) (uint64, error) {
+func (p *sAdaptedConsumer) loadCountComments(pCtx context.Context) (uint64, error) {
 	req, err := http.NewRequestWithContext(
-		ctx,
+		pCtx,
 		http.MethodGet,
 		fmt.Sprintf("https://api.chatingar.com/api/post/%s", p.fPostID),
 		nil,
@@ -188,18 +187,15 @@ func (p *sAdaptedConsumer) incCountPagesDB() error {
 	return p.setCountPagesDB(count + 1)
 }
 
-func (p *sAdaptedConsumer) setCountPagesDB(n uint64) error {
+func (p *sAdaptedConsumer) setCountPagesDB(pN uint64) error {
 	return p.fKVDatabase.Set(
 		[]byte(cDBCountKey),
-		[]byte(strconv.FormatUint(n, 10)),
+		[]byte(strconv.FormatUint(pN, 10)),
 	)
 }
 
-func (p *sAdaptedConsumer) setCommentHash(b sCommentBlock) error {
-	hash := hashing.NewSHA256Hasher(bytes.Join(
-		[][]byte{[]byte(b.Body), []byte(b.Timestamp)},
-		[]byte{},
-	)).ToBytes()
+func (p *sAdaptedConsumer) rememberMessage(pMsg net_message.IMessage) error {
+	hash := hashing.NewSHA256Hasher(pMsg.GetHash()).ToBytes()
 	if _, err := p.fKVDatabase.Get(hash); err == nil {
 		return errors.New("hash already exist")
 	}

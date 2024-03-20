@@ -11,6 +11,5 @@ type sMessagesDTO struct {
 }
 
 type sCommentBlock struct {
-	Body      string `json:"body"`
-	Timestamp string `json:"timestamp"`
+	Body string `json:"body"`
 }
