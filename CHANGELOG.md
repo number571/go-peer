@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## v1.6.6
+## v1.6.7
 
 *??? ??, ????*
+
+## v1.6.6
+
+*March 20, 2024*
 
 ### IMPROVEMENTS
 
