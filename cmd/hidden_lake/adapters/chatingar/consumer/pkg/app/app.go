@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/internal/adapted"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/database"
@@ -16,10 +17,6 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
-)
-
-const (
-	cDBPath = "chatingar_consumer.db"
 )
 
 var (
@@ -54,7 +51,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 	kvDB, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
-			FPath: cDBPath,
+			FPath: settings.CPathDB,
 		}),
 	)
 	if err != nil {

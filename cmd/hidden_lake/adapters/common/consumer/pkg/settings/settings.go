@@ -7,6 +7,7 @@ const (
 
 const (
 	CPathYML = "hla_common_consumer.yml"
+	CPathDB  = "hla_common_consumer.db"
 )
 
 const (
