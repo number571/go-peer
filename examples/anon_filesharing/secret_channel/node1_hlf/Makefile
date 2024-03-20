@@ -7,4 +7,4 @@ run:
 	./prog_hlc1 &
 clean:
 	pkill -15 prog_hlc1 || true
-	rm -rf prog_hlc1 hls.db hls.yml hlt.db hlf.stg common_consumer.db 
+	rm -rf prog_hlc1 hls.db hls.yml hlt.db hlf.stg hla_common_consumer.db 

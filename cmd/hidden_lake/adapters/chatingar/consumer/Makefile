@@ -8,4 +8,4 @@ run:
 	./$(BINPATH)/chatingar_consumer
 clean:
 	rm -f hla_chatingar_consumer.yml $(BINPATH)/chatingar_consumer
-	rm -rf chatingar_consumer.db
+	rm -rf hla_chatingar_consumer.db

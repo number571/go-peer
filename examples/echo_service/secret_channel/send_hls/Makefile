@@ -6,4 +6,4 @@ run:
 	./prog_hlc2 --key priv.key &
 clean:
 	pkill -15 prog_hlc2 || true
-	rm -rf prog_hlc2 hls.db hlt.db common_consumer.db
+	rm -rf prog_hlc2 hls.db hlt.db hla_common_consumer.db
