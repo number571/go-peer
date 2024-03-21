@@ -21,7 +21,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -197,6 +196,8 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		testNewNetworkNode(addr),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
+				FNetworkMask:  networkMask,
+				FWorkSizeBits: testutils.TCWorkSize,
 				FMainCapacity: testutils.TCQueueCapacity,
 				FVoidCapacity: testutils.TCQueueCapacity,
 				FParallel:     1,
@@ -209,11 +210,6 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
-		).WithNetworkSettings(
-			networkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
-			}),
 		),
 		asymmetric.NewListPubKeys(),
 	)

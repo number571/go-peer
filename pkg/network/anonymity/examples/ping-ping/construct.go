@@ -16,7 +16,6 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 const (
@@ -88,6 +87,9 @@ func newNode(serviceName, address string) anonymity.INode {
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
+				FNetworkMask:  networkMask,
+				FNetworkKey:   networkKey,
+				FWorkSizeBits: workSize,
 				FDuration:     2 * time.Second,
 				FParallel:     1,
 				FMainCapacity: 32,
@@ -100,12 +102,6 @@ func newNode(serviceName, address string) anonymity.INode {
 				}),
 				asymmetric.NewRSAPrivKey(keySize),
 			),
-		).WithNetworkSettings(
-			networkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: workSize,
-				FNetworkKey:   networkKey,
-			}),
 		),
 		asymmetric.NewListPubKeys(),
 	)

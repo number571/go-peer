@@ -815,6 +815,9 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
+				FNetworkMask:        networkMask,
+				FNetworkKey:         networkKey,
+				FWorkSizeBits:       testutils.TCWorkSize,
 				FMainCapacity:       testutils.TCQueueCapacity,
 				FVoidCapacity:       testutils.TCQueueCapacity,
 				FParallel:           parallel,
@@ -828,12 +831,6 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
-		).WithNetworkSettings(
-			networkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FNetworkKey:   networkKey,
-				FWorkSizeBits: testutils.TCWorkSize,
-			}),
 		),
 		asymmetric.NewListPubKeys(),
 	)

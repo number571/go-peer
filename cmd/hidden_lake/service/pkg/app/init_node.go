@@ -13,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
@@ -74,6 +73,9 @@ func initNode(
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
+				FNetworkMask:        hls_settings.CNetworkMask,
+				FNetworkKey:         cfgSettings.GetNetworkKey(),
+				FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
 				FMainCapacity:       hls_settings.CQueueMainCapacity,
 				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
 				FParallel:           pParallel,
@@ -88,12 +90,6 @@ func initNode(
 				}),
 				pPrivKey,
 			),
-		).WithNetworkSettings(
-			hls_settings.CNetworkMask,
-			net_message.NewSettings(&net_message.SSettings{
-				FNetworkKey:   cfgSettings.GetNetworkKey(),
-				FWorkSizeBits: cfgSettings.GetWorkSizeBits(),
-			}),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

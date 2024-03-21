@@ -143,6 +143,9 @@ func TestQueue(t *testing.T) {
 
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
+			FNetworkMask:  1,
+			FNetworkKey:   "old_network_key",
+			FWorkSizeBits: 10,
 			FMainCapacity: testutils.TCQueueCapacity,
 			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
@@ -156,12 +159,6 @@ func TestQueue(t *testing.T) {
 			}),
 			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 		),
-	).WithNetworkSettings(
-		uint64(1),
-		net_message.NewSettings(&net_message.SSettings{
-			FNetworkKey:   "old_network_key",
-			FWorkSizeBits: 10,
-		}),
 	)
 
 	sett := queue.GetSettings()
@@ -206,13 +203,7 @@ func testQueue(queue IMessageQueue) error {
 	time.Sleep(300 * time.Millisecond)
 
 	// clear old messages
-	queue.WithNetworkSettings(
-		uint64(3),
-		net_message.NewSettings(&net_message.SSettings{
-			FNetworkKey:   "new_network_key",
-			FWorkSizeBits: 1,
-		}),
-	)
+	queue.SetNetworkSettings(3, "new_network_key")
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {

@@ -11,7 +11,7 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	fMutex sync.Mutex
+	fMutex sync.RWMutex
 
 	FNetworkKey            string
 	FWorkSizeBits          uint64
@@ -56,8 +56,8 @@ func (p *sSettings) mustNotNull() ISettings {
 }
 
 func (p *sSettings) GetNetworkKey() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.FNetworkKey
 }

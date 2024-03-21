@@ -22,9 +22,6 @@ type IConn interface {
 type ISettings interface {
 	net_message.ISettings
 
-	// for subsequent inheritance on multiple connections
-	SetNetworkKey(string)
-
 	GetLimitMessageSizeBytes() uint64
 	GetLimitVoidSizeBytes() uint64
 
@@ -32,4 +29,7 @@ type ISettings interface {
 	GetReadTimeout() time.Duration
 	GetWriteTimeout() time.Duration
 	GetWaitReadTimeout() time.Duration
+
+	// for subsequent inheritance on multiple connections
+	SetNetworkKey(string)
 }

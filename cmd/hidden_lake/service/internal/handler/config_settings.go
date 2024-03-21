@@ -58,9 +58,8 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			connSettings := pNode.GetNetworkNode().GetSettings().GetConnSettings()
-			connSettings.SetNetworkKey(networkKey)
-			pNode.GetMessageQueue().WithNetworkSettings(pkg_settings.CNetworkMask, connSettings)
+			pNode.GetNetworkNode().GetSettings().GetConnSettings().SetNetworkKey(networkKey)
+			pNode.GetMessageQueue().SetNetworkSettings(pkg_settings.CNetworkMask, networkKey)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: set network key")
