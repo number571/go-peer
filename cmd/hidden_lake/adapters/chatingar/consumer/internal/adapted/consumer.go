@@ -89,6 +89,10 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessa
 	}
 	defer resp.Body.Close()
 
+	if code := resp.StatusCode; code != http.StatusOK {
+		return nil, fmt.Errorf("got status code = %d", code)
+	}
+
 	var messagesDTO sMessagesDTO
 	if err := json.NewDecoder(resp.Body).Decode(&messagesDTO); err != nil {
 		return nil, err
