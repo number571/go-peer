@@ -194,13 +194,16 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			p.fSettings,
+			net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
+				FNetworkKey:   oldNetworkKey,
+			}),
 			payload.NewPayload(
 				oldNetworkMask,
 				pMsg.ToBytes(),
 			),
 			p.fSettings.GetParallel(),
-			0,
+			p.fSettings.GetLimitVoidSizeBytes(),
 		)
 	}()
 
@@ -243,7 +246,10 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			p.fSettings,
+			net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
+				FNetworkKey:   oldNetworkKey,
+			}),
 			payload.NewPayload(
 				oldNetworkMask,
 				msg.ToBytes(),

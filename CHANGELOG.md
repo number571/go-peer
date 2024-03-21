@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/network/anonymity/queue`: WithNetworkSettings -> SetNetworkSettings
+
 ## v1.6.6
 
 *March 20, 2024*
