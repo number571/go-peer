@@ -6,20 +6,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar"
+	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/database"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
-	cPageOffet  = 5
-	cDBCountKey = "db_count_key"
+	cPageOffet = 5
 )
 
 var (
@@ -27,65 +24,57 @@ var (
 )
 
 type sAdaptedConsumer struct {
-	fEnabled    bool
-	fPostID     string
-	fSettings   net_message.ISettings
-	fKVDatabase database.IKVDatabase
-	fMessages   chan net_message.IMessage
+	fEnabled     bool
+	fPostID      string
+	fSettings    net_message.ISettings
+	fMessages    chan net_message.IMessage
+	fCacheSetter cache.ICacheSetter
+	fCurrPage    uint64
 }
 
 func NewAdaptedConsumer(
 	pPostID string,
 	pSettings net_message.ISettings,
-	pKVDatabase database.IKVDatabase,
+	pCacheSetter cache.ICacheSetter,
 ) adapters.IAdaptedConsumer {
 	return &sAdaptedConsumer{
-		fPostID:     pPostID,
-		fSettings:   pSettings,
-		fKVDatabase: pKVDatabase,
-		fMessages:   make(chan net_message.IMessage, cPageOffet),
+		fPostID:      pPostID,
+		fSettings:    pSettings,
+		fCacheSetter: pCacheSetter,
+		fMessages:    make(chan net_message.IMessage, cPageOffet),
 	}
 }
 
 func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, error) {
-	select {
-	case msg := <-p.fMessages:
-		return msg, nil
-	default:
-	}
-
 	if !p.fEnabled {
 		countComments, err := p.loadCountComments(pCtx)
 		if err != nil {
 			return nil, err
 		}
 
-		countPages := (countComments / cPageOffet) + 1
-		if err := p.setCountPagesDB(countPages); err != nil {
-			return nil, err
-		}
-
+		p.fCurrPage = (countComments / cPageOffet) + 1
 		p.fEnabled = true
-		return nil, nil
 	}
 
-	currPage, err := p.getCountPagesDB()
-	if err != nil {
-		return nil, err
-	}
-
-	return p.loadMessage(pCtx, currPage)
+	return p.loadMessage(pCtx)
 }
 
 // curl 'https://api.chatingar.com/api/comment/65f7214f5b65dcbdedcca3fb?page=1' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
-func (p *sAdaptedConsumer) loadMessage(pCtx context.Context, pPage uint64) (net_message.IMessage, error) {
+func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessage, error) {
+	select {
+	case msg := <-p.fMessages:
+		return msg, nil
+	default:
+		// do request
+	}
+
 	req, err := http.NewRequestWithContext(
 		pCtx,
 		http.MethodGet,
 		fmt.Sprintf(
 			"https://api.chatingar.com/api/comment/%s?page=%d",
 			p.fPostID,
-			pPage,
+			p.fCurrPage,
 		),
 		nil,
 	)
@@ -110,9 +99,7 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context, pPage uint64) (net_
 		return nil, errors.New("has limit pages")
 	}
 	if sizeComments == cPageOffet {
-		if err := p.incCountPagesDB(); err != nil {
-			return nil, err
-		}
+		p.fCurrPage++
 	}
 
 	for _, v := range messagesDTO.Comments {
@@ -120,13 +107,18 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context, pPage uint64) (net_
 		if err != nil {
 			continue
 		}
-		if err := p.rememberMessage(msg); err != nil {
+		if ok := p.rememberMessage(msg); !ok {
 			continue
 		}
 		p.fMessages <- msg
 	}
 
-	return nil, nil
+	select {
+	case msg := <-p.fMessages:
+		return msg, nil
+	default:
+		return nil, nil
+	}
 }
 
 // curl 'https://api.chatingar.com/api/post/65f7214f5b65dcbdedcca3fb' -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br' -H 'Referer: https://chatingar.com/' -H 'Origin: https://chatingar.com' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-site'
@@ -165,39 +157,7 @@ func (p *sAdaptedConsumer) loadCountComments(pCtx context.Context) (uint64, erro
 	return uint64(result), nil
 }
 
-func (p *sAdaptedConsumer) getCountPagesDB() (uint64, error) {
-	res, err := p.fKVDatabase.Get([]byte(cDBCountKey))
-	if err != nil {
-		if !errors.Is(err, leveldb.ErrNotFound) {
-			return 0, err
-		}
-		res = []byte(strconv.Itoa(0))
-		if err := p.fKVDatabase.Set([]byte(cDBCountKey), res); err != nil {
-			return 0, err
-		}
-	}
-	return strconv.ParseUint(string(res), 10, 64)
-}
-
-func (p *sAdaptedConsumer) incCountPagesDB() error {
-	count, err := p.getCountPagesDB()
-	if err != nil {
-		return err
-	}
-	return p.setCountPagesDB(count + 1)
-}
-
-func (p *sAdaptedConsumer) setCountPagesDB(pN uint64) error {
-	return p.fKVDatabase.Set(
-		[]byte(cDBCountKey),
-		[]byte(strconv.FormatUint(pN, 10)),
-	)
-}
-
-func (p *sAdaptedConsumer) rememberMessage(pMsg net_message.IMessage) error {
+func (p *sAdaptedConsumer) rememberMessage(pMsg net_message.IMessage) bool {
 	hash := hashing.NewSHA256Hasher(pMsg.GetHash()).ToBytes()
-	if _, err := p.fKVDatabase.Get(hash); err == nil {
-		return errors.New("hash already exist")
-	}
-	return p.fKVDatabase.Set(hash, []byte{})
+	return p.fCacheSetter.Set(hash, []byte{})
 }

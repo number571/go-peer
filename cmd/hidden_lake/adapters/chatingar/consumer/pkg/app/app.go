@@ -9,10 +9,9 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/internal/adapted"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/database"
+	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/state"
@@ -49,19 +48,17 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 	defer func() { _ = p.fState.Disable(p.disable()) }()
 
-	kvDB, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: settings.CPathDB,
-		}),
-	)
-	if err != nil {
-		return err
-	}
-	defer kvDB.Close()
-
 	return adapters.ConsumeProcessor(
 		pCtx,
-		adapted.NewAdaptedConsumer(p.fPostID, p.fSettings, kvDB),
+		adapted.NewAdaptedConsumer(
+			p.fPostID,
+			p.fSettings,
+			lru.NewLRUCache(
+				lru.NewSettings(&lru.SSettings{
+					FCapacity: (1 << 10),
+				}),
+			),
+		),
 		p.fStdfLogger,
 		hlt_client.NewClient(
 			hlt_client.NewBuilder(),

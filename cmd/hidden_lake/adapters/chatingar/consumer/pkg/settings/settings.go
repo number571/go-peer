@@ -7,7 +7,6 @@ const (
 
 const (
 	CPathYML = "hla_chatingar_consumer.yml"
-	CPathDB  = "hla_chatingar_consumer.db"
 )
 
 const (
