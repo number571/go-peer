@@ -30,8 +30,9 @@ type sMessage struct {
 	fEncPPHP []byte    // enc(proof_psize_hash_payload)
 
 	// not used in LoadMessage(), ToBytes(), ToString()
-	// used only in GetProof(), GetHash(), GetPayload()
+	// used only in GetVoid(), GetHash(), in GetProof(), GetPayload()
 	fHash    []byte
+	fVoid    []byte
 	fProof   uint64
 	fPayload payload.IPayload
 }
@@ -43,16 +44,15 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 	prng := random.NewStdPRNG()
 
 	randVoidSize := prng.GetUint64() % (pLimitVoidSize + 1)
-	payloadRandBytes := bytes.Join(
-		[][]byte{
-			payloadBytes,
-			prng.GetBytes(randVoidSize),
-		},
+	voidBytes := prng.GetBytes(randVoidSize)
+
+	payloadVoidBytes := bytes.Join(
+		[][]byte{payloadBytes, voidBytes},
 		[]byte{},
 	)
 
 	authSalt := prng.GetBytes(cSaltSize)
-	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, payloadRandBytes)
+	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, payloadVoidBytes)
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 
 	cipherSalt := prng.GetBytes(cSaltSize)
@@ -69,11 +69,12 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 				proofBytes[:],
 				payloadSize[:],
 				hash,
-				payloadRandBytes,
+				payloadVoidBytes,
 			},
 			[]byte{},
 		)),
 		fHash:    hash,
+		fVoid:    voidBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}
@@ -127,17 +128,17 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	payloadRandBytes := pphpBytes[hashIndex:]
-	if len(payloadRandBytes) < int(payloadLength) {
+	payloadVoidBytes := pphpBytes[hashIndex:]
+	if len(payloadVoidBytes) < int(payloadLength) {
 		return nil, ErrInvalidPayloadSize
 	}
 
-	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, payloadRandBytes)
+	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, payloadVoidBytes)
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payloadBytes := payloadRandBytes[:payloadLength]
+	payloadBytes := payloadVoidBytes[:payloadLength]
 	payload := payload.LoadPayload(payloadBytes)
 	if payload == nil {
 		return nil, ErrDecodePayload
@@ -150,6 +151,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		},
 		fEncPPHP: encPPHPBytes,
 		fHash:    hash,
+		fVoid:    payloadVoidBytes[payloadLength:],
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -165,6 +167,10 @@ func (p *sMessage) GetSalt() [2][]byte {
 
 func (p *sMessage) GetHash() []byte {
 	return p.fHash
+}
+
+func (p *sMessage) GetVoid() []byte {
+	return p.fVoid
 }
 
 func (p *sMessage) GetPayload() payload.IPayload {

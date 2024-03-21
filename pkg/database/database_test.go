@@ -18,6 +18,27 @@ const (
 	tcPathDBTemplate = "database_test_%d.db"
 )
 
+func TestSettings(t *testing.T) {
+	t.Parallel()
+
+	for i := 0; i < 1; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	switch n {
+	case 0:
+		_ = NewSettings(&SSettings{})
+	}
+}
+
 func TestTryRecover(t *testing.T) {
 	t.Parallel()
 

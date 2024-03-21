@@ -16,6 +16,7 @@ var (
 )
 
 const (
+	tcLimitVoid  = 128
 	tcHead       = 12345
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key_1"
@@ -43,17 +44,27 @@ func TestMessage(t *testing.T) {
 		FWorkSizeBits: testutils.TCWorkSize,
 		FNetworkKey:   tcNetworkKey,
 	})
-	msg := NewMessage(sett, pld, 1, 0)
 
+	msg := NewMessage(sett, pld, 1, tcLimitVoid)
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
 		return
 	}
 
-	// if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, msg.GetSalt()[0], pld.ToBytes())) {
-	// 	t.Error("payload hash not equal hash of message")
-	// 	return
-	// }
+	voidBytes := msg.GetVoid()
+	if len(voidBytes) > tcLimitVoid {
+		t.Error("got length void bytes > limit")
+		return
+	}
+
+	payloadRandBytes := bytes.Join(
+		[][]byte{pld.ToBytes(), voidBytes},
+		[]byte{},
+	)
+	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, msg.GetSalt()[1], payloadRandBytes)) {
+		t.Error("payload hash not equal hash of message")
+		return
+	}
 
 	if msg.GetPayload().GetHead() != tcHead {
 		t.Error("payload head not equal head in message")
@@ -97,17 +108,17 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	// msg3 := NewMessage(sett, pld, 1).(*sMessage)
-	// msg3.fHash = random.NewStdPRNG().GetBytes(hashing.CSHA256Size)
-	// msg3.fProof = puzzle.NewPoWPuzzle(testutils.TCWorkSize).ProofBytes(msg3.fHash, 1)
-	// if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
-	// 	t.Error("success load with invalid hash")
-	// 	return
-	// }
+	msg3 := NewMessage(sett, pld, 1, 0).(*sMessage)
+	msg3.fEncPPHP[0] ^= 1
+	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
+		t.Error("success load with invalid pphp")
+		return
+	}
 
-	msg4 := NewMessage(sett, &sInvalidPayload{}, 1, 0)
-	if _, err := LoadMessage(sett, msg4.ToBytes()); err == nil {
-		t.Error("success load with invalid payload")
+	msg4 := NewMessage(sett, pld, 1, 0).(*sMessage)
+	msg4.fEncPPHP[0] ^= 1
+	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
+		t.Error("success load with invalid pphp")
 		return
 	}
 

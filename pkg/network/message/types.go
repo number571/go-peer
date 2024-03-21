@@ -8,9 +8,10 @@ import (
 type IMessage interface {
 	types.IConverter
 
-	GetProof() uint64
 	GetHash() []byte
+	GetVoid() []byte
 	GetSalt() [2][]byte
+	GetProof() uint64
 	GetPayload() payload.IPayload
 }
 
