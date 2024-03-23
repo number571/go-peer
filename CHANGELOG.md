@@ -8,6 +8,10 @@
 
 - Update `pkg/network/anonymity/queue`: WithNetworkSettings -> SetNetworkSettings
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/composite`: fix install_hlc.sh
+
 ## v1.6.6
 
 *March 20, 2024*

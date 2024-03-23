@@ -4,8 +4,7 @@ _COVERAGE_FLOOR=_
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
 _GO_TEST_LIST=\
 	go list ./... | \
-	grep -vsE '/cmd/hidden_lake/.*/cmd/' | \
-	grep -vsE '/cmd/hidden_lake/.*/adapters/common/'
+	grep -vsE '/cmd/hidden_lake/.*/cmd/' 
 
 _TEST_RESULT_PATH=./_test/result
 _TEST_PPROF_PATH=./_test/pprof
