@@ -81,23 +81,9 @@ Since the anonymous Hidden Lake network is formed due to the microservice archit
 
 ## Build and run
 
-Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are three ways to run HLS: through `docker`, through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
+Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are two ways to run HLS: through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
 
-### 1. Running from docker
-
-```bash
-$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
-$ cd go-peer/cmd/hidden_lake/service
-$ make docker-default
-...
-> [INFO] 2023/12/29 16:27:40 HLS is running...
-> [INFO] 2023/12/29 16:27:45 service=HLS type=BRDCS hash=FF59D8F9...1D2EAF8D addr=23FDFF8A...FE95F5E0 proof=0000160292 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 16:27:50 service=HLS type=BRDCS hash=ACE23689...CA39CB6D addr=23FDFF8A...FE95F5E0 proof=0001491994 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 16:27:55 service=HLS type=BRDCS hash=0C6EC76D...FB83729D addr=23FDFF8A...FE95F5E0 proof=0001762328 size=8192B conn=127.0.0.1:
-...
-```
-
-### 2. Running from source code
+### 1. Running from source code
 
 ```bash
 $ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
@@ -123,7 +109,7 @@ $ hls
 ...
 ```
 
-### 3. Running from release version
+### 2. Running from release version
 
 When starting from the release version, you must specify the processor architecture and platform used. Available architectures: `amd64`, `arm64`. Available platforms: `windows`, `darwin`, `linux`.
 
@@ -287,12 +273,9 @@ The HLS node is easy to connect to a production environment. To do this, it is s
 
 ```bash
 $ cd cmd/hidden_lake/service
+$ yes | cp ../_configs/prod/1/hls.yml .
 
-# [From docker]: $ yes | cp ../_configs/prod/1/hls.yml ./_mounted
-$ yes | cp ../_configs/prod/1/hls.yml . # [From source | release]
-
-# [From docker]:  $ make docker-run
-# [From source]:  $ make run
+# $ make run # [From source]
 $ ./hls_<arch-name>_<platform-name> # [From release]
 ...
 > [INFO] 2023/12/29 23:49:26 HLS is running...

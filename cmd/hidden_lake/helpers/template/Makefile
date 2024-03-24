@@ -3,8 +3,7 @@ GC=go build
 ROOPATH=../../../..
 BINPATH=$(ROOPATH)/bin
 
-.PHONY: default build run test clean \
-	docker-default docker-build docker-run docker-clean 
+.PHONY: default build run test clean
 
 default: build run
 default-config: 
@@ -25,15 +24,3 @@ test:
 clean:
 	rm -f $(BINPATH)/hl_t $(BINPATH)/hl_t_*
 	rm -rf hl_t.yml
-
-docker-default: docker-build docker-run
-docker-build: docker-configs
-	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl__template
-docker-configs:
-	mkdir ./_mounted | true 
-	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
-docker-run:
-	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9501:9501 hl__template
-docker-clean:
-	rm -rf ./_mounted/hl_t.*
-	docker rmi hl__template

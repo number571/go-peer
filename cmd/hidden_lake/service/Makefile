@@ -3,8 +3,7 @@ GC=go build
 ROOPATH=../../..
 BINPATH=$(ROOPATH)/bin
 
-.PHONY: default build run test clean \
-	docker-default docker-build docker-run docker-clean 
+.PHONY: default build run test clean
 
 default: build run
 default-config: 
@@ -25,15 +24,3 @@ test:
 clean:
 	rm -f $(BINPATH)/hls $(BINPATH)/hls_*
 	rm -rf hls.yml hls.db priv.key
-
-docker-default: docker-build docker-run
-docker-build: docker-configs
-	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_service
-docker-configs:
-	mkdir ./_mounted | true 
-	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
-docker-run:
-	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9571:9571 -p 9572:9572 hl_service
-docker-clean:
-	rm -rf ./_mounted/hls.*
-	docker rmi hl_service

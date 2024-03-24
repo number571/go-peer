@@ -8,6 +8,7 @@
 
 - Update `pkg/network/anonymity/queue`: WithNetworkSettings -> SetNetworkSettings
 - Update `examles`: delete not docker examples in anon_filesharing, anon_messenger, echo_service
+- Update `cmd/hidden_lake`: delete docker run from makefiles
 
 ### BUG FIXES
 

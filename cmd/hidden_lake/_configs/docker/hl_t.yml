@@ -1,8 +1,0 @@
-settings:
-  value: TODO
-logging:
-- info
-- warn
-- erro
-address:
-  http: :9501

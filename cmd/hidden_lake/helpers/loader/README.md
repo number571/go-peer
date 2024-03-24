@@ -39,7 +39,7 @@ $ make run # run ./bin/hll
 ```
 
 Open ports `9561` (HTTP).
-Creates `./hll.yml` or `./_mounted/hll.yml` (docker) file.
+Creates `./hll.yml` file.
 
 Default config `hll.yml`
 
@@ -53,17 +53,6 @@ logging:
 - erro
 address:
   http: 127.0.0.1:9561
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/loader
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/02 19:15:44 HLL is running...
-> ...
 ```
 
 ## Running options

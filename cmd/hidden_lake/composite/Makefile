@@ -21,26 +21,3 @@ run:
 clean:
 	rm -f $(BINPATH)/hlc $(BINPATH)/hlc_*
 	rm -rf hl?.* priv.key
-
-docker-default: docker-build docker-run
-docker-build: docker-configs
-	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_composite
-docker-configs:
-	mkdir ./_mounted | true 
-	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
-docker-run:
-	docker run -it --rm -v $$(pwd)/_mounted:/mounted \
-		-p 9571:9571 \
-		-p 9572:9572 \
-		-p 9551:9551 \
-		-p 9541:9541 \
-		-p 9542:9542 \
-		-p 9561:9561 \
-		-p 9591:9591 \
-		-p 9592:9592 \
-		-p 9581:9581 \
-		-p 9582:9582 \
-		hl_composite
-docker-clean:
-	rm -rf ./_mounted/hl?.* priv.key
-	docker rmi hl_composite

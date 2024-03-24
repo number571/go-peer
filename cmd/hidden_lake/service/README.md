@@ -82,7 +82,7 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.yml` or `./_mounted/hls.yml` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
+Creates `./hls.yml` and `./hls.db` files. 
 The file `hls.db` stores hashes of sent/received messages.
 
 Default config `hls.yml`
@@ -104,20 +104,6 @@ address:
 services:
   hidden-lake-messenger: 
     host: 127.0.0.1:9592
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/service
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 07:36:49 HLS is running...
-> [INFO] 2023/06/03 07:36:51 service=HLS type=BRDCS hash=AF90439F...9F29A036 addr=BB58A8A2...B64D62C2 proof=0000000000479155 conn=127.0.0.1:
-> [INFO] 2023/06/03 07:36:56 service=HLS type=BRDCS hash=2C4CE60A...E55BF9C4 addr=BB58A8A2...B64D62C2 proof=0000000000521434 conn=127.0.0.1:
-> [INFO] 2023/06/03 07:37:01 service=HLS type=BRDCS hash=A9285F98...F96DB93D addr=BB58A8A2...B64D62C2 proof=0000000001256786 conn=127.0.0.1:
-> ...
 ```
 
 ## Running options
@@ -215,12 +201,6 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 
 <p align="center"><img src="_images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
-
-Also you can run example with docker-compose. In this example, all nodes have logging enabled
-```bash
-$ cd examples/echo_service/_docker/default
-$ make
-```
 
 > Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/examples "Package anonymity");
 

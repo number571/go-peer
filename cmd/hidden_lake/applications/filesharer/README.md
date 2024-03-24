@@ -47,7 +47,7 @@ $ make run # run ./bin/hlf
 ```
 
 Open ports `9541` (HTTP, interface) and `9542` (HTTP, incoming).
-Creates `./hlf.yml` or `./_mounted/hlf.yml` file (docker) and `./hlf.stg` or `./_mounted/hlf.stg` (docker) directory.
+Creates `./hlf.yml` and `./hlf.stg` files.
 The directory `hlf.stg` stores all shared/loaded files. 
 
 Default config `hlf.yml`
@@ -67,16 +67,7 @@ address:
 connection: 127.0.0.1:9572
 ```
 
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/applications/filesharer
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:35:50 HLF is running...
-> ...
-```
+## Running options
 
 ```bash
 $ ./hlf -path=/root

@@ -3,8 +3,7 @@ GC=go build
 ROOPATH=../../../..
 BINPATH=$(ROOPATH)/bin
 
-.PHONY: default build run test clean \
-	docker-default docker-build docker-run docker-clean 
+.PHONY: default build run test clean
 
 default: build run
 default-config: 
@@ -25,15 +24,3 @@ test:
 clean:
 	rm -f $(BINPATH)/hle $(BINPATH)/hle_*
 	rm -rf hle.yml priv.key
-
-docker-default: docker-build docker-run
-docker-build: docker-configs
-	docker build -f ./Dockerfile $(ROOPATH)/ --tag hl_encryptor
-docker-configs:
-	mkdir ./_mounted | true 
-	cp $(ROOPATH)/cmd/hidden_lake/_configs/docker/* ./_mounted
-docker-run:
-	docker run -it --rm -v $$(pwd)/_mounted:/mounted -p 9551:9551 hl_encryptor
-docker-clean:
-	rm -rf ./_mounted/hle.*
-	docker rmi hl_encryptor

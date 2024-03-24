@@ -35,7 +35,7 @@ $ make run # run ./bin/hlc
 > ...
 ```
 
-Creates `./hlc.yml` or `./_mounted/hlc.yml` (docker) file.
+Creates `./hlc.yml` file.
 
 Default config `hlc.yml`
 
@@ -48,17 +48,6 @@ services:
 - hidden-lake-service
 ```
 
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/composite
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/02 19:15:44 HLC is running...
-> ...
-```
-
 ## Running options
 
 ```bash
@@ -67,7 +56,6 @@ $ ./hlc -path=/root -key=/root/priv.key -parallel=1
 # key      = path to private key file
 # parallel = num of parallel functions for PoW algorithm
 ```
-
 
 ## Config structure
 

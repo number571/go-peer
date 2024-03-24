@@ -47,7 +47,7 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581`, `9582` (TCP, HTTP).
-Creates `./hlt.yml` or `./_mounted/hlt.yml` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
+Creates `./hlt.yml`, `./hlt.db` files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
 Default config `hlt.yml`
@@ -71,16 +71,7 @@ connections:
   - 127.0.0.1:9571
 ```
 
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/traffic
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:44:14 HLT is running...
-> ...
-```
+## Running options
 
 ```bash
 $ ./hlt -path=/root

@@ -45,7 +45,7 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.yml` or `./_mounted/hlm.yml` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
+Creates `./hlm.yml` and `./hlm.db` files.
 The file `hlm.db` stores all sent/received messages in encrypted view. 
 
 Default config `hlm.yml`
@@ -67,16 +67,7 @@ address:
 connection: 127.0.0.1:9572
 ```
 
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/applications/messenger
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:35:50 HLM is running...
-> ...
-```
+## Running options
 
 ```bash
 $ ./hlm -path=/root
@@ -100,12 +91,6 @@ Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 <p align="center">Figure 2. Home page of the HLM application.</p>
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
-
-Also you can run example with docker-compose. In this example, all nodes have logging enabled
-```bash
-$ cd examples/anon_messenger/_docker/default
-$ make
-```
 
 <p align="center"><img src="_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 3. Log of the three nodes with request/response actions.</p>

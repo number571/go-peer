@@ -36,7 +36,7 @@ $ make run # run ./bin/hle
 ```
 
 Open ports `9551` (HTTP).
-Creates `./hle.yml` or `./_mounted/hle.yml` (docker) file.
+Creates `./hle.yml` file.
 
 Default config `hle.yml`
 
@@ -51,17 +51,6 @@ logging:
 - erro
 address:
   http: 127.0.0.1:9551
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/encryptor
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/22 04:32:08 HLE is running...
-> ...
 ```
 
 ## Running options

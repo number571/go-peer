@@ -187,7 +187,7 @@ $ make run # run ./bin/hls
 ```
 
 Service was running with random private key. Open ports `9571` (TCP, traffic) and `9572` (HTTP, interface).
-Creates `./hls.yml` or `./_mounted/hls.yml` (docker) and `./hls.db` or `./_mounted/hls.db` (docker) files. 
+Creates `./hls.yml` and `./hls.db` files. 
 The file `hls.db` stores hashes of sent/received messages.
 
 Default config `hls.yml`
@@ -209,20 +209,6 @@ address:
 services:
   hidden-lake-messenger: 
     host: 127.0.0.1:9592
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/service
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 07:36:49 HLS is running...
-> [INFO] 2023/06/03 07:36:51 service=HLS type=BRDCS hash=AF90439F...9F29A036 addr=BB58A8A2...B64D62C2 proof=0000000000479155 conn=127.0.0.1:
-> [INFO] 2023/06/03 07:36:56 service=HLS type=BRDCS hash=2C4CE60A...E55BF9C4 addr=BB58A8A2...B64D62C2 proof=0000000000521434 conn=127.0.0.1:
-> [INFO] 2023/06/03 07:37:01 service=HLS type=BRDCS hash=A9285F98...F96DB93D addr=BB58A8A2...B64D62C2 proof=0000000001256786 conn=127.0.0.1:
-> ...
 ```
 
 ### Example
@@ -312,12 +298,6 @@ echo "eyJlY2hvIjoiaGVsbG8sIHdvcmxkISIsInJldHVybiI6MX0K" | base64 -d
 <p align="center"><img src="cmd/hidden_lake/service/_images/hls_request.gif" alt="hls_request.gif"/></p>
 <p align="center">Figure 5. Example of running HLS with internal service.</p>
 
-Also you can run example with docker-compose. In this example, all nodes have logging enabled
-```bash
-$ cd examples/echo_service/_docker/default
-$ make
-```
-
 > Simple examples of the `anonymity` package in the directory [github.com/number571/go-peer/pkg/network/anonymity/examples](https://github.com/number571/go-peer/tree/master/pkg/network/anonymity/examples "Package anonymity");
 
 **[⬆ back to top](#installation)**
@@ -357,7 +337,7 @@ $ make run # run ./bin/hlm
 ```
 
 Open ports `9591` (HTTP, interface) and `9592` (HTTP, incoming).
-Creates `./hlm.yml` or `./_mounted/hlm.yml` (docker) and `./hlm.db` or `./_mounted/hlm.db` (docker) files.
+Creates `./hlm.yml` and `./hlm.db` files.
 The file `hlm.db` stores all sent/received messages in encrypted view. 
 
 Default config `hlm.yml`
@@ -379,17 +359,6 @@ address:
 connection: 127.0.0.1:9572
 ```
 
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/applications/messenger
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:35:50 HLM is running...
-> ...
-```
-
 ### Example
 
 The example will involve (as well as in HLS) five nodes `node1_hlm, node2_hlm` and `middle_hlt_1, middle_hlt_2, middle_hlt_3`. The three HLT nodes are only needed for communication between `node1_hlm` and `node2_hlm` nodes. Each of the remaining ones is a combination of HLS and HLM, where HLM plays the role of an application and services (as it was depicted in `Figure 3` HLS readme).
@@ -407,12 +376,6 @@ Than open browser on `localhost:8080`. It is a `node1_hlm`. This node is a Bob.
 <p align="center">Figure 7. Home page of the HLM application.</p>
 
 To see the success of sending and receiving messages, you need to do all the same operations, but with `localhost:7070` as `node2_hlm`. This node will be Alice.
-
-Also you can run example with docker-compose. In this example, all nodes have logging enabled
-```bash
-$ cd examples/anon_messenger/_docker/default
-$ make
-```
 
 <p align="center"><img src="cmd/hidden_lake/applications/messenger/_images/hlm_logger.png" alt="hlm_logger.png"/></p>
 <p align="center">Figure 8. Log of the three nodes with request/response actions.</p>
@@ -458,7 +421,7 @@ $ make run # run ./bin/hlf
 ```
 
 Open ports `9541` (HTTP, interface) and `9542` (HTTP, incoming).
-Creates `./hlf.yml` or `./_mounted/hlf.yml` file (docker) and `./hlf.stg` or `./_mounted/hlf.stg` (docker) directory.
+Creates `./hlf.yml` and `./hlf.stg` files.
 The directory `hlf.stg` stores all shared/loaded files. 
 
 Default config `hlf.yml`
@@ -476,17 +439,6 @@ address:
   interface: 127.0.0.1:9541
   incoming: 127.0.0.1:9542
 connection: 127.0.0.1:9572
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/applications/filesharer
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:35:50 HLF is running...
-> ...
 ```
 
 ### Example
@@ -547,7 +499,7 @@ $ make run # run ./bin/hlt
 ```
 
 Open ports `9581` (HTTP, interface).
-Creates `./hlt.yml` or `./_mounted/hlt.yml` (docker), `./hlt.db` or `./_mounted/hlt.db` (docker) files.
+Creates `./hlt.yml` and `./hlt.db` files.
 The file `hlm.db` stores all sent/received messages as structure `ring` from network HL. 
 
 Default config `hlt.yml`
@@ -568,17 +520,6 @@ address:
   http: 127.0.0.1:9582
 connections:
   - 127.0.0.1:9571
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/traffic
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/06/03 08:44:14 HLT is running...
-> ...
 ```
 
 ### Example 
@@ -628,7 +569,7 @@ $ make run # run ./bin/hll
 ```
 
 Open ports `9561` (HTTP).
-Creates `./hll.yml` or `./_mounted/hll.yml` (docker) file.
+Creates `./hll.yml` file.
 
 Default config `hll.yml`
 
@@ -642,17 +583,6 @@ logging:
 - erro
 address:
   http: 127.0.0.1:9561
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/loader
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/02 19:15:44 HLL is running...
-> ...
 ```
 
 ### Example 
@@ -707,7 +637,7 @@ $ make run # run ./bin/hle
 ```
 
 Open ports `9551` (HTTP).
-Creates `./hle.yml` or `./_mounted/hle.yml` (docker) file.
+Creates `./hle.yml` file.
 
 Default config `hle.yml`
 
@@ -722,17 +652,6 @@ logging:
 - erro
 address:
   http: 127.0.0.1:9551
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/helpers/encryptor
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/22 04:32:08 HLE is running...
-> ...
 ```
 
 ## Example 
@@ -833,7 +752,7 @@ $ make run # run ./bin/hlc
 > ...
 ```
 
-Creates `./hlc.yml` or `./_mounted/hlc.yml` (docker) file.
+Creates `./hlc.yml` file.
 
 Default config `hlc.yml`
 
@@ -844,17 +763,6 @@ logging:
 - erro
 services:
 - hidden-lake-service
-```
-
-Build and run with docker
-
-```bash 
-$ cd ./cmd/hidden_lake/composite
-$ make docker-build 
-$ make docker-run
-
-> [INFO] 2023/12/02 19:15:44 HLC is running...
-> ...
 ```
 
 **[⬆ back to top](#installation)**
