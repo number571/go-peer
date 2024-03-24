@@ -10,4 +10,4 @@ logging:
   - warn
   - erro
 address:
-  tcp: localhost:6581
+  tcp: :6581

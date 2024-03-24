@@ -10,11 +10,11 @@ logging:
 - warn
 - erro
 address:
-  tcp: localhost:7571
-  http: localhost:7572
+  tcp: :7571
+  http: :7572
 services:
   hidden-lake-filesharer: 
-    host: localhost:7071
+    host: node2_hlc:7071
 connections:
   - 195.133.1.126:9581
 friends:

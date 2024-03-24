@@ -7,6 +7,6 @@ logging:
 - warn
 - erro
 address:
-  interface: 127.0.0.1:7070
-  incoming: 127.0.0.1:7071
-connection: 127.0.0.1:7572
+  interface: :7070
+  incoming: :7071
+connection: node2_hlc:7572

@@ -1,28 +1,11 @@
-CMDPATH=../../../cmd
-BINPATH=../../../bin
-.PHONY: default init build run clean
-default: init clean build run
-init: 
-	# CHECK PROGRAMS
-	pkill -15 --version
-build: 
-	# MAKEFILE BUILD
-	make build -C $(CMDPATH)/hidden_lake/applications/messenger
-	make build -C $(CMDPATH)/hidden_lake/service
-	# COPY HLM PROGRAM
-	cp $(BINPATH)/hlm ./node1_hlm/prog_hlm1
-	cp $(BINPATH)/hlm ./node2_hlm/prog_hlm2
-	# COPY HLS PROGRAM
-	cp $(BINPATH)/hls ./node1_hlm/prog_hls1
-	cp $(BINPATH)/hls ./node2_hlm/prog_hls2
-	# BUILD HLS, HLM CONFIGS
-	make build -C node1_hlm
-	make build -C node2_hlm
-run: 
-	# MAKEFILE RUN
-	make run -C node1_hlm
-	make run -C node2_hlm
+.PHONY: default run clean
+default: run 
+run:
+	cp node1_hlm/hls_copy.yml node1_hlm/hls.yml 
+	cp node2_hlm/hls_copy.yml node2_hlm/hls.yml 
+	docker-compose build
+	docker-compose up
 clean:
-	# MAKEFILE CLEAN 
-	make clean -C node1_hlm
-	make clean -C node2_hlm
+	rm -f node1_hlm/hls.yml node2_hlm/hls.yml
+	docker-compose down 
+	docker-compose rm -f

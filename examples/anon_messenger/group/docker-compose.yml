@@ -1,0 +1,47 @@
+version: "3"
+services:
+  group_hlc:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_messenger/group/group_hlm
+      - SERVICE_KEY=examples/anon_messenger/_keys/4096/priv_group.key
+    networks:
+      - hidden-lake
+  node1_hlc:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_messenger/group/node1_hlm
+      - SERVICE_KEY=examples/anon_messenger/_keys/4096/priv_node1.key
+    ports:
+      - 8080:8080
+    networks:
+      - hidden-lake
+  node2_hlc:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_messenger/group/node2_hlm
+      - SERVICE_KEY=examples/anon_messenger/_keys/4096/priv_node2.key
+    ports:
+      - 7070:7070
+    networks:
+      - hidden-lake
+  node3_hlc:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anon_messenger/group/node3_hlm
+      - SERVICE_KEY=examples/anon_messenger/_keys/4096/priv_node3.key
+    ports:
+      - 6060:6060
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

@@ -10,10 +10,10 @@ logging:
 - warn
 - erro
 address:
-  http: localhost:8572
+  http: :8572
 services:
   hidden-lake-filesharer: 
-    host: localhost:8081
+    host: node1_hlc:8081
 connections:
   - 94.103.91.81:9581
 friends:

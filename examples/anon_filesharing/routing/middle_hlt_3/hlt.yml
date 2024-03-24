@@ -10,6 +10,6 @@ logging:
   - warn
   - erro
 address:
-  tcp: localhost:6583
+  tcp: :6583
 connections:
-  - localhost:6582
+  - middle_hlt_2:6582

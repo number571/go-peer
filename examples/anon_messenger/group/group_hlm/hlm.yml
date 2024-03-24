@@ -7,6 +7,6 @@ logging:
 - warn
 - erro
 address:
-  interface: localhost:4040
-  incoming: localhost:4041
-connection: localhost:4572
+  interface: :4040
+  incoming: :4041
+connection: group_hlc:4572

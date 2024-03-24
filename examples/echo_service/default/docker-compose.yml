@@ -1,0 +1,34 @@
+version: "3"
+services:
+  recv_hls_service:
+    build:
+      context: ./../../../
+      dockerfile: examples/echo_service/_service/Dockerfile
+    networks:
+      - local-network
+  recv_hls:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/echo_service/default/recv_hls
+      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_recv.key
+    networks:
+      - local-network
+      - hidden-lake
+  send_hls:
+    build:
+      context: ./../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/echo_service/default/send_hls
+      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_send.key
+    ports:
+      - 7572:7572
+    networks:
+      - hidden-lake
+networks:
+  local-network:
+    driver: bridge
+  hidden-lake:
+    driver: bridge

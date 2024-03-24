@@ -6,12 +6,12 @@ settings:
   limit_void_size_bytes: 4096
   f2f_disabled: true
 logging:
-  - info
-  - warn
-  - erro
+- info
+- warn
+- erro
 address:
-  tcp: localhost:4571
-  http: localhost:4572
+  tcp: :4571
+  http: :4572
 services:
   hidden-lake-messenger: 
-    host: localhost:4041
+    host: group_hlc:4041

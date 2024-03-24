@@ -7,6 +7,6 @@ logging:
 - warn
 - erro
 address:
-  interface: localhost:7070
-  incoming: localhost:7071
-connection: localhost:7572
+  interface: :7070
+  incoming: :7071
+connection: node2_hlc:7572
