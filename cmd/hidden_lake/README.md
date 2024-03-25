@@ -79,6 +79,16 @@ Since the anonymous Hidden Lake network is formed due to the microservice archit
 > [layer-4](_images/hl_layer4_body.jpg).
 > All schemes can be found in the [hidden_lake_message_layers.svg](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_message_layers.svg) file.
 
+## Possible ways of application
+
+The anonymous Hidden Lake network is similar in the way it is used to client-secure applications such as `RetroShare` or `Bitmessage`. The main difference from the last two applications is the existence of an anonymizing property, which makes HL also related to existing closed anonymous p2p networks of the `I2P` type. However, the Hidden Lake network is not an ordinary composition of two ideas in the face of combining traffic anonymization and client-secure application architecture, because among other things, it is also an `abstract` anonymous network. As a result, HL network, for successful anonymization of traffic, criteria such as the level of centralization, the number of nodes in the network, the location and connection of nodes among themselves become irrelevant.
+
+On the basis of this characteristic, methods of possible application also begin to be built:
+
+1. Due to the property of abstracting from network communications, the anonymous Hidden Lake network can be `integrated` into any other network (including a centralized one) where group communication is possible. In such a case, the HL software implementation provides for the essence of [adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters) that must be able to adapt to a specific execution environment, hiding and obscuring the generated parasitic traffic.
+2. Due to the `theoretically provable anonymity` and independence of nodes among themselves in choosing the period of packet generation, the network can be used in military affairs, ensuring not only the confidentiality of transmitted data, but also the confidentiality of metadata in the face of the activity of actions.
+3. The Hidden Lake network can be used as a `communication platform` for applications that are heterogeneous in nature. This is made possible by the go-peer protocol, which does not define any application use. As a result, you can create your own applications at several levels: either at the go-peer library level or at the HL services level ([example](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat)).
+
 ## Build and run
 
 Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are two ways to run HLS: through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).

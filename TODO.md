@@ -12,6 +12,7 @@
 10. Add more docker-compose files into examples (like echo_service/docker)
 11. config _ms -> yaml ms
 12. conn.NewConn(sett, pNetworkKey, pAddress)
+13. Update HL scheme
 
 ### Tests
 
