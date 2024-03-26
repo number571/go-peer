@@ -13,16 +13,12 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-const (
-	cHandleRoutesSize = 128
-)
-
 var (
 	_ INode = &sNode{}
 )
 
 type sNode struct {
-	fMutex        sync.Mutex
+	fMutex        sync.RWMutex
 	fSettings     ISettings
 	fVSettings    conn.IVSettings
 	fListener     net.Listener
@@ -44,7 +40,7 @@ func NewNode(
 		fVSettings:    pVSettings,
 		fCacheSetter:  pCacheSetter,
 		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
-		fHandleRoutes: make(map[uint64]IHandlerF, cHandleRoutesSize),
+		fHandleRoutes: make(map[uint64]IHandlerF, 256),
 	}
 }
 
@@ -189,8 +185,8 @@ func (p *sNode) HandleFunc(pHead uint64, pHandle IHandlerF) INode {
 
 // Retrieves the entire list of connections with addresses.
 func (p *sNode) GetConnections() map[string]conn.IConn {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	var mapping = make(map[string]conn.IConn, len(p.fConnections))
 	for addr, conn := range p.fConnections {
@@ -321,8 +317,8 @@ func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg messa
 
 // Checks the current number of connections with the limit.
 func (p *sNode) hasMaxConnSize() bool {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	maxConns := p.fSettings.GetMaxConnects()
 	return uint64(len(p.fConnections)) >= maxConns
@@ -330,8 +326,8 @@ func (p *sNode) hasMaxConnSize() bool {
 
 // Saves the connection to the map.
 func (p *sNode) getConnection(pAddress string) (conn.IConn, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	conn, ok := p.fConnections[pAddress]
 	return conn, ok
@@ -347,8 +343,8 @@ func (p *sNode) setConnection(pAddress string, pConn conn.IConn) {
 
 // Gets the handler function by key.
 func (p *sNode) getFunction(pHead uint64) (IHandlerF, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	f, ok := p.fHandleRoutes[pHead]
 	return f, ok
@@ -364,15 +360,15 @@ func (p *sNode) setListener(pListener net.Listener) {
 
 // Gets the listener.
 func (p *sNode) getListener() net.Listener {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fListener
 }
 
 func (p *sNode) getVSettings() conn.IVSettings {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fVSettings
 }

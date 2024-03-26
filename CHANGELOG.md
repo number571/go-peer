@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake`: delete docker run from makefiles
 - Update `pkg/network`: delete conn.settings.SetNetworkKey, append conn.SetVSettings
 - Update `pkg/network/anonymity/queue`: move networkMask, networkKey params to IVSettings
+- Update `go-peer`: update some mutexs -> rwMutexs
 
 ### BUG FIXES
 

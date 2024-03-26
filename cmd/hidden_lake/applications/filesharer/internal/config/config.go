@@ -22,7 +22,7 @@ type SConfigSettings struct {
 	FPageOffset uint64 `yaml:"page_offset"`
 	FLanguage   string `yaml:"language,omitempty"`
 
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fLanguage language.ILanguage
 }
 
@@ -96,8 +96,8 @@ func (p *SConfigSettings) GetPageOffset() uint64 {
 }
 
 func (p *SConfigSettings) GetLanguage() language.ILanguage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fLanguage
 }

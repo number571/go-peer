@@ -9,7 +9,7 @@ var (
 )
 
 type sWrapper struct {
-	fMutex sync.Mutex
+	fMutex sync.RWMutex
 	fValue *interface{}
 }
 
@@ -19,8 +19,8 @@ func NewWrapper() IWrapper {
 }
 
 func (p *sWrapper) Get() interface{} {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return (*p.fValue)
 }

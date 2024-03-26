@@ -11,9 +11,7 @@
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
 10. Add more docker-compose files into examples (like echo_service/docker)
 11. config _ms -> yaml ms
-12. conn.NewConn(sett, pNetworkKey, pAddress)
-13. Update HL scheme
-14. pkg: RWMutex
+12. Update HL scheme
 
 ### Tests
 

@@ -26,7 +26,7 @@ type SConfigSettings struct {
 	FStorageKey       string `yaml:"storage_key,omitempty"`
 	FLanguage         string `yaml:"language,omitempty"`
 
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fLanguage language.ILanguage
 }
 
@@ -104,8 +104,8 @@ func (p *SConfigSettings) GetShareEnabled() bool {
 }
 
 func (p *SConfigSettings) GetPseudonym() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.FPseudonym
 }
@@ -115,8 +115,8 @@ func (p *SConfigSettings) GetStorageKey() string {
 }
 
 func (p *SConfigSettings) GetLanguage() language.ILanguage {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.fLanguage
 }

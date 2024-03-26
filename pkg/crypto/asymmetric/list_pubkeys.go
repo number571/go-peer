@@ -10,7 +10,7 @@ var (
 
 // F2F connection mode.
 type sListPubKeys struct {
-	fMutex   sync.Mutex
+	fMutex   sync.RWMutex
 	fMapping map[string]IPubKey
 }
 
@@ -22,8 +22,8 @@ func NewListPubKeys() IListPubKeys {
 
 // Check the existence of a friend in the list by the public key.
 func (p *sListPubKeys) InPubKeys(pPubKey IPubKey) bool {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	_, ok := p.fMapping[pPubKey.GetHasher().ToString()]
 	return ok
@@ -31,8 +31,8 @@ func (p *sListPubKeys) InPubKeys(pPubKey IPubKey) bool {
 
 // Get a list of friends public keys.
 func (p *sListPubKeys) GetPubKeys() []IPubKey {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	list := make([]IPubKey, 0, len(p.fMapping))
 	for _, pub := range p.fMapping {

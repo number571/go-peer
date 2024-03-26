@@ -18,7 +18,7 @@ var (
 )
 
 type SConfigSettings struct {
-	fMutex              sync.Mutex
+	fMutex              sync.RWMutex
 	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
 	FQueueRandPeriodMS  uint64 `json:"queue_rand_period_ms" yaml:"queue_rand_period_ms,omitempty"`
@@ -39,7 +39,7 @@ type SConfig struct {
 	FFriends     map[string]string    `yaml:"friends,omitempty"`
 
 	fFilepath string
-	fMutex    sync.Mutex
+	fMutex    sync.RWMutex
 	fLogging  logger.ILogging
 	fFriends  map[string]asymmetric.IPubKey
 }
@@ -119,8 +119,8 @@ func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.FNetworkKey
 }
@@ -209,8 +209,8 @@ func (p *SConfig) loadPubKeys() error {
 }
 
 func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	result := make(map[string]asymmetric.IPubKey)
 	for k, v := range p.fFriends {
@@ -228,15 +228,15 @@ func (p *SConfig) GetAddress() IAddress {
 }
 
 func (p *SConfig) GetConnections() []string {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	return p.FConnections
 }
 
 func (p *SConfig) GetService(name string) (IService, bool) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
 
 	service, ok := p.FServices[name]
 	return service, ok
