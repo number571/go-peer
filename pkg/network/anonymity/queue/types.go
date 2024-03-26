@@ -12,7 +12,9 @@ import (
 
 type IMessageQueue interface {
 	types.IRunner
-	SetNetworkSettings(uint64, string)
+
+	SetVSettings(IVSettings)
+	GetVSettings() IVSettings
 
 	GetSettings() ISettings
 	GetClient() client.IClient
@@ -22,13 +24,16 @@ type IMessageQueue interface {
 }
 
 type ISettings interface {
-	net_message.ISettings
 	GetNetworkMask() uint64
-
+	GetWorkSizeBits() uint64
 	GetMainCapacity() uint64
 	GetVoidCapacity() uint64
 	GetParallel() uint64
 	GetDuration() time.Duration
 	GetRandDuration() time.Duration
 	GetLimitVoidSizeBytes() uint64
+}
+
+type IVSettings interface {
+	GetNetworkKey() string
 }

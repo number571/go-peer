@@ -24,11 +24,9 @@ type sMessageQueue struct {
 	fMutex sync.RWMutex
 	fState state.IState
 
-	fSettings ISettings
-	fClient   client.IClient
-
-	fNetworkMask uint64
-	fNetworkKey  string
+	fSettings  ISettings
+	fVSettings IVSettings
+	fClient    client.IClient
 
 	fMainPool *sMainPool
 	fVoidPool *sVoidPool
@@ -46,19 +44,18 @@ type sVoidPool struct {
 	fReceiver asymmetric.IPubKey
 }
 
-func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
+func NewMessageQueue(pSettings ISettings, pVSettings IVSettings, pClient client.IClient) IMessageQueue {
 	return &sMessageQueue{
-		fState:       state.NewBoolState(),
-		fSettings:    pSett,
-		fClient:      pClient,
-		fNetworkMask: pSett.GetNetworkMask(),
-		fNetworkKey:  pSett.GetNetworkKey(),
+		fState:     state.NewBoolState(),
+		fSettings:  pSettings,
+		fVSettings: pVSettings,
+		fClient:    pClient,
 		fMainPool: &sMainPool{
-			fQueue:    make(chan net_message.IMessage, pSett.GetMainCapacity()),
-			fRawQueue: make(chan message.IMessage, pSett.GetMainCapacity()),
+			fQueue:    make(chan net_message.IMessage, pSettings.GetMainCapacity()),
+			fRawQueue: make(chan message.IMessage, pSettings.GetMainCapacity()),
 		},
 		fVoidPool: &sVoidPool{
-			fQueue:    make(chan net_message.IMessage, pSett.GetVoidCapacity()),
+			fQueue:    make(chan net_message.IMessage, pSettings.GetVoidCapacity()),
 			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
 		},
 	}
@@ -66,6 +63,10 @@ func NewMessageQueue(pSett ISettings, pClient client.IClient) IMessageQueue {
 
 func (p *sMessageQueue) GetSettings() ISettings {
 	return p.fSettings
+}
+
+func (p *sMessageQueue) GetVSettings() IVSettings {
+	return p.getVSettings()
 }
 
 func (p *sMessageQueue) GetClient() client.IClient {
@@ -129,12 +130,11 @@ func (p *sMessageQueue) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGr
 	}
 }
 
-func (p *sMessageQueue) SetNetworkSettings(pNetworkMask uint64, pNetworkKey string) {
+func (p *sMessageQueue) SetVSettings(pVSettings IVSettings) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fNetworkMask = pNetworkMask
-	p.fNetworkKey = pNetworkKey
+	p.fVSettings = pVSettings
 
 	// clear all old queue state
 	// not clear fMainPool.RawQueue
@@ -189,17 +189,17 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 }
 
 func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage) error {
-	oldNetworkMask, oldNetworkKey := p.getNetworkSettings()
+	oldNSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldNetworkKey,
+				FNetworkKey:   oldNSettings.GetNetworkKey(),
 			}),
 			payload.NewPayload(
-				oldNetworkMask,
+				p.fSettings.GetNetworkMask(),
 				pMsg.ToBytes(),
 			),
 			p.fSettings.GetParallel(),
@@ -212,10 +212,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 		return pCtx.Err()
 
 	case netMsg := <-chNetMsg:
-		newNetworkMask, newNetworkKey := p.getNetworkSettings()
-		settingsChanged := (newNetworkMask != oldNetworkMask) || (newNetworkKey != oldNetworkKey)
-
-		if !settingsChanged {
+		if p.nSettingsNotChanged(oldNSettings) {
 			p.fMainPool.fQueue <- netMsg
 		}
 		return nil
@@ -242,16 +239,16 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		panic(err)
 	}
 
-	oldNetworkMask, oldNetworkKey := p.getNetworkSettings()
+	oldNSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldNetworkKey,
+				FNetworkKey:   oldNSettings.GetNetworkKey(),
 			}),
 			payload.NewPayload(
-				oldNetworkMask,
+				p.fSettings.GetNetworkMask(),
 				msg.ToBytes(),
 			),
 			p.fSettings.GetParallel(),
@@ -264,19 +261,21 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		return pCtx.Err()
 
 	case netMsg := <-chNetMsg:
-		newNetworkMask, newNetworkKey := p.getNetworkSettings()
-		settingsChanged := (newNetworkMask != oldNetworkMask) || (newNetworkKey != oldNetworkKey)
-
-		if !settingsChanged {
+		if p.nSettingsNotChanged(oldNSettings) {
 			p.fVoidPool.fQueue <- netMsg
 		}
 		return nil
 	}
 }
 
-func (p *sMessageQueue) getNetworkSettings() (uint64, string) {
+func (p *sMessageQueue) getVSettings() IVSettings {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	return p.fNetworkMask, p.fNetworkKey
+	return p.fVSettings
+}
+
+func (p *sMessageQueue) nSettingsNotChanged(oldNSettings IVSettings) bool {
+	currNSettings := p.getVSettings()
+	return currNSettings.GetNetworkKey() == oldNSettings.GetNetworkKey()
 }

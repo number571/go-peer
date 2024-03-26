@@ -25,6 +25,8 @@ type tsConn struct{}
 
 func (p *tsConn) Close() error                                             { return nil }
 func (p *tsConn) GetSettings() conn.ISettings                              { return nil }
+func (p *tsConn) GetVSettings() conn.IVSettings                            { return nil }
+func (p *tsConn) SetVSettings(conn.IVSettings)                             {}
 func (p *tsConn) GetSocket() net.Conn                                      { return &tsNetConn{} }
 func (p *tsConn) WriteMessage(context.Context, net_message.IMessage) error { return nil }
 func (p *tsConn) ReadMessage(context.Context, chan<- struct{}) (net_message.IMessage, error) {

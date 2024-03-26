@@ -129,7 +129,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	}
 
 	payloadVoidBytes := pphpBytes[hashIndex:]
-	if len(payloadVoidBytes) < int(payloadLength) {
+	if payloadLength > uint64(len(payloadVoidBytes)) {
 		return nil, ErrInvalidPayloadSize
 	}
 

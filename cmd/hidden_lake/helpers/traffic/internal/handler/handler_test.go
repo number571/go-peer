@@ -122,7 +122,6 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FNetworkKey:            testutils.TCNetworkKey,
 				FWorkSizeBits:          testutils.TCWorkSize,
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
@@ -130,6 +129,9 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 				FReadTimeout:           time.Minute,
 				FWriteTimeout:          time.Minute,
 			}),
+		}),
+		conn.NewVSettings(&conn.SVSettings{
+			FNetworkKey: testutils.TCNetworkKey,
 		}),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{
@@ -179,7 +181,6 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FNetworkKey:            testutils.TCNetworkKey,
 				FWorkSizeBits:          testutils.TCWorkSize,
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
@@ -187,6 +188,9 @@ func testNewNetworkNode(addr string) network.INode {
 				FReadTimeout:           time.Minute,
 				FWriteTimeout:          time.Minute,
 			}),
+		}),
+		conn.NewVSettings(&conn.SVSettings{
+			FNetworkKey: testutils.TCNetworkKey,
 		}),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{

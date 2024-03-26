@@ -9,10 +9,13 @@
 - Update `pkg/network/anonymity/queue`: WithNetworkSettings -> SetNetworkSettings
 - Update `examles`: delete not docker examples in anon_filesharing, anon_messenger, echo_service
 - Update `cmd/hidden_lake`: delete docker run from makefiles
+- Update `pkg/network`: delete conn.settings.SetNetworkKey, append conn.SetVSettings
+- Update `pkg/network/anonymity/queue`: move networkMask, networkKey params to IVSettings
 
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/composite`: fix install_hlc.sh
+- Update `pkg/network/message`: fix payloadLength
 
 ## v1.6.6
 

@@ -18,32 +18,11 @@ const (
 	tcBody = "hello, world!"
 )
 
-func TestSettingsNetworkKey(t *testing.T) {
+func TestSettings(t *testing.T) {
 	t.Parallel()
 
 	for i := 0; i < 5; i++ {
 		testSettings(t, i)
-	}
-}
-
-func TestSettings(t *testing.T) {
-	t.Parallel()
-
-	sett := NewSettings(&SSettings{
-		FWorkSizeBits:          testutils.TCWorkSize,
-		FLimitMessageSizeBytes: testutils.TCMessageSize,
-		FWaitReadTimeout:       time.Hour,
-		FDialTimeout:           time.Minute,
-		FReadTimeout:           time.Minute,
-		FWriteTimeout:          time.Minute,
-	})
-
-	networkKey := "hello, world!"
-	sett.SetNetworkKey(networkKey)
-
-	if sett.GetNetworkKey() != networkKey {
-		t.Error("got invalid network key")
-		return
 	}
 }
 
@@ -108,6 +87,7 @@ func TestClosedConn(t *testing.T) {
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
+		NewVSettings(&SVSettings{}),
 		testutils.TgAddrs[30],
 	)
 	if err != nil {
@@ -120,8 +100,13 @@ func TestClosedConn(t *testing.T) {
 		return
 	}
 
+	sett := message.NewSettings(&message.SSettings{
+		FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
+		FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
+	})
+
 	pld := payload.NewPayload(1, []byte("aaa"))
-	msg := message.NewMessage(conn.GetSettings(), pld, 1, 0)
+	msg := message.NewMessage(sett, pld, 1, 0)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -163,6 +148,7 @@ func TestInvalidConn(t *testing.T) {
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
+		NewVSettings(&SVSettings{}),
 		"INVALID_ADDRESS",
 	)
 	if err == nil {
@@ -191,6 +177,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
+		NewVSettings(&SVSettings{}),
 		pAddr,
 	)
 	if err != nil {
@@ -205,10 +192,13 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		return
 	}
 
-	conn.GetSettings().SetNetworkKey(pNetworkKey)
+	sett := message.NewSettings(&message.SSettings{
+		FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
+		FNetworkKey:   pNetworkKey,
+	})
 
 	pld := payload.NewPayload(tcHead, []byte(tcBody))
-	msg := message.NewMessage(conn.GetSettings(), pld, 1, 0)
+	msg := message.NewMessage(sett, pld, 1, 0)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
 		t.Error(err)
@@ -253,10 +243,13 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
+				NewVSettings(&SVSettings{}),
 				aconn,
 			)
 
-			conn.GetSettings().SetNetworkKey(pNetworkKey)
+			conn.SetVSettings(NewVSettings(&SVSettings{
+				FNetworkKey: pNetworkKey,
+			}))
 
 			readCh := make(chan struct{})
 			go func() { <-readCh }()

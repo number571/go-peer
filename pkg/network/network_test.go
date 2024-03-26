@@ -141,7 +141,10 @@ func TestBroadcast(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
-			sett := nodes[0].GetSettings().GetConnSettings()
+			sett := message.NewSettings(&message.SSettings{
+				FNetworkKey:   nodes[0].GetVSettings().GetNetworkKey(),
+				FWorkSizeBits: nodes[0].GetSettings().GetConnSettings().GetWorkSizeBits(),
+			})
 			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld, 1, 0))
 		}(i)
 	}
@@ -261,12 +264,17 @@ func TestNodeConnection(t *testing.T) {
 		return
 	}
 
-	for _, c := range node1.GetConnections() {
-		c.Close()
-	}
+	node1.SetVSettings(conn.NewVSettings(&conn.SVSettings{
+		FNetworkKey: "set_another_network_key",
+	}))
 
 	if err := node1.DelConnection(testutils.TgAddrs[27]); err == nil {
 		t.Error("success delete already closed connection")
+		return
+	}
+
+	if len(node1.GetConnections()) != 0 {
+		t.Error("set message settings should close all connections")
 		return
 	}
 
@@ -282,8 +290,23 @@ func TestHandleMessage(t *testing.T) {
 	node := newTestNode("", testutils.TCMaxConnects).(*sNode)
 	defer testFreeNodes([]INode{node})
 
-	sett := node.GetSettings().GetConnSettings()
+	newNetworkKey := "handle_message_network_key"
+	node.SetVSettings(conn.NewVSettings(&conn.SVSettings{
+		FNetworkKey: newNetworkKey,
+	}))
+
 	ctx := context.Background()
+	vsett := node.GetVSettings()
+
+	if vsett.GetNetworkKey() != newNetworkKey {
+		t.Error("incorrect set variable settings")
+		return
+	}
+
+	sett := message.NewSettings(&message.SSettings{
+		FNetworkKey:   vsett.GetNetworkKey(),
+		FWorkSizeBits: node.GetSettings().GetConnSettings().GetWorkSizeBits(),
+	})
 
 	node.HandleFunc(1, nil)
 	msg1 := message.NewMessage(sett, payload.NewPayload(1, []byte{1}), 1, 0)
@@ -340,7 +363,10 @@ func TestContextCancel(t *testing.T) {
 	}
 
 	headHandle := uint64(testutils.TcHead)
-	sett := node2.GetSettings().GetConnSettings()
+	sett := message.NewSettings(&message.SSettings{
+		FNetworkKey:   node2.GetVSettings().GetNetworkKey(),
+		FWorkSizeBits: node2.GetSettings().GetConnSettings().GetWorkSizeBits(),
+	})
 
 	go func() {
 		for i := 0; i < 1000; i++ {
@@ -419,6 +445,7 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 				FWriteTimeout:          timeout,
 			}),
 		}),
+		conn.NewVSettings(&conn.SVSettings{}),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{
 				FCapacity: testutils.TCCapacity,

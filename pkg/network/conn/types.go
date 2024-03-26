@@ -15,21 +15,24 @@ type IConn interface {
 	GetSettings() ISettings
 	GetSocket() net.Conn
 
+	GetVSettings() IVSettings
+	SetVSettings(IVSettings)
+
 	WriteMessage(context.Context, net_message.IMessage) error
 	ReadMessage(context.Context, chan<- struct{}) (net_message.IMessage, error)
 }
 
 type ISettings interface {
-	net_message.ISettings
-
 	GetLimitMessageSizeBytes() uint64
 	GetLimitVoidSizeBytes() uint64
+	GetWorkSizeBits() uint64
 
 	GetDialTimeout() time.Duration
 	GetReadTimeout() time.Duration
 	GetWriteTimeout() time.Duration
 	GetWaitReadTimeout() time.Duration
+}
 
-	// for subsequent inheritance on multiple connections
-	SetNetworkKey(string)
+type IVSettings interface {
+	GetNetworkKey() string
 }

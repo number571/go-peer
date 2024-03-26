@@ -127,6 +127,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
+			conn.NewVSettings(&conn.SVSettings{}),
 			lru.NewLRUCache(
 				lru.NewSettings(&lru.SSettings{
 					FCapacity: testutils.TCCapacity,

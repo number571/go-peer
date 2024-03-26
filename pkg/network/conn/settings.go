@@ -1,7 +1,6 @@
 package conn
 
 import (
-	"sync"
 	"time"
 )
 
@@ -11,8 +10,6 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	fMutex sync.RWMutex
-
 	FNetworkKey            string
 	FWorkSizeBits          uint64
 	FLimitMessageSizeBytes uint64
@@ -53,20 +50,6 @@ func (p *sSettings) mustNotNull() ISettings {
 		panic(`p.FWriteTimeout == 0`)
 	}
 	return p
-}
-
-func (p *sSettings) GetNetworkKey() string {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	return p.FNetworkKey
-}
-
-func (p *sSettings) SetNetworkKey(pNetworkKey string) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.FNetworkKey = pNetworkKey
 }
 
 func (p *sSettings) GetWorkSizeBits() uint64 {

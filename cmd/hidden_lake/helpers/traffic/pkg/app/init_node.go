@@ -30,7 +30,6 @@ func initNode(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logge
 			FReadTimeout:  queueDuration,
 			FWriteTimeout: queueDuration,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FNetworkKey:            cfgSettings.GetNetworkKey(),
 				FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 				FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 				FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
@@ -39,6 +38,9 @@ func initNode(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogger logge
 				FReadTimeout:           queueDuration,
 				FWriteTimeout:          queueDuration,
 			}),
+		}),
+		conn.NewVSettings(&conn.SVSettings{
+			FNetworkKey: cfgSettings.GetNetworkKey(),
 		}),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{

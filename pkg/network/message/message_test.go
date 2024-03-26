@@ -115,13 +115,6 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg4 := NewMessage(sett, pld, 1, 0).(*sMessage)
-	msg4.fEncPPHP[0] ^= 1
-	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
-		t.Error("success load with invalid pphp")
-		return
-	}
-
 	if _, err := LoadMessage(sett, struct{}{}); err == nil {
 		t.Error("success load with unknown type of message")
 		return

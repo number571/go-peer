@@ -11,6 +11,8 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/queue"
+	"github.com/number571/go-peer/pkg/network/conn"
 )
 
 func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
@@ -58,8 +60,12 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 				return
 			}
 
-			pNode.GetNetworkNode().GetSettings().GetConnSettings().SetNetworkKey(networkKey)
-			pNode.GetMessageQueue().SetNetworkSettings(pkg_settings.CNetworkMask, networkKey)
+			pNode.GetNetworkNode().SetVSettings(
+				conn.NewVSettings(&conn.SVSettings{FNetworkKey: networkKey}),
+			)
+			pNode.GetMessageQueue().SetVSettings(
+				queue.NewVSettings(&queue.SVSettings{FNetworkKey: networkKey}),
+			)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			api.Response(pW, http.StatusOK, "success: set network key")

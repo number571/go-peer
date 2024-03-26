@@ -77,8 +77,9 @@ func newNode(serviceName, address string) anonymity.INode {
 				FMaxConnects:  256,
 				FReadTimeout:  time.Minute,
 				FWriteTimeout: time.Minute,
-				FConnSettings: newConnSettings(msgSize, workSize, networkKey),
+				FConnSettings: newConnSettings(workSize, msgSize),
 			}),
+			newVSettings(networkKey),
 			lru.NewLRUCache(
 				lru.NewSettings(&lru.SSettings{
 					FCapacity: 1024,
@@ -88,12 +89,14 @@ func newNode(serviceName, address string) anonymity.INode {
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:  networkMask,
-				FNetworkKey:   networkKey,
 				FWorkSizeBits: workSize,
 				FDuration:     2 * time.Second,
 				FParallel:     1,
 				FMainCapacity: 32,
 				FVoidCapacity: 32,
+			}),
+			queue.NewVSettings(&queue.SVSettings{
+				FNetworkKey: networkKey,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
@@ -107,9 +110,14 @@ func newNode(serviceName, address string) anonymity.INode {
 	)
 }
 
-func newConnSettings(mSize, wSize uint64, nKey string) conn.ISettings {
+func newVSettings(nKey string) conn.IVSettings {
+	return conn.NewVSettings(&conn.SVSettings{
+		FNetworkKey: nKey,
+	})
+}
+
+func newConnSettings(wSize uint64, mSize uint64) conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FNetworkKey:            nKey,
 		FWorkSizeBits:          wSize,
 		FLimitMessageSizeBytes: mSize,
 		FLimitVoidSizeBytes:    8192,

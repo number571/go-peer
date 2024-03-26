@@ -76,6 +76,7 @@ func TestRunStopQueue(t *testing.T) {
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 		}),
+		NewVSettings(&SVSettings{}),
 		client,
 	)
 
@@ -144,13 +145,15 @@ func TestQueue(t *testing.T) {
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FNetworkMask:  1,
-			FNetworkKey:   "old_network_key",
 			FWorkSizeBits: 10,
 			FMainCapacity: testutils.TCQueueCapacity,
 			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
 			FDuration:     100 * time.Millisecond,
 			FRandDuration: 100 * time.Millisecond,
+		}),
+		NewVSettings(&SVSettings{
+			FNetworkKey: "old_network_key",
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
@@ -203,15 +206,19 @@ func testQueue(queue IMessageQueue) error {
 	time.Sleep(300 * time.Millisecond)
 
 	// clear old messages
-	queue.SetNetworkSettings(3, "new_network_key")
+	newNetworkKey := "new_network_key"
+	queue.SetVSettings(NewVSettings(&SVSettings{
+		FNetworkKey: newNetworkKey,
+	}))
+
+	nVSettings := queue.GetVSettings()
+	if nVSettings.GetNetworkKey() != newNetworkKey {
+		return errors.New("incorrect set variable settings")
+	}
 
 	msgs := make([]net_message.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
-		msg := queue.DequeueMessage(ctx)
-		if msg.GetPayload().GetHead() != 3 {
-			return errors.New("got invalid header")
-		}
-		msgs = append(msgs, msg)
+		msgs = append(msgs, queue.DequeueMessage(ctx))
 	}
 
 	for i := 0; i < len(msgs)-1; i++ {

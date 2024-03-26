@@ -203,6 +203,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 				FParallel:     1,
 				FDuration:     500 * time.Millisecond,
 			}),
+			queue.NewVSettings(&queue.SVSettings{}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
@@ -232,6 +233,7 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
+		conn.NewVSettings(&conn.SVSettings{}),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{
 				FCapacity: testutils.TCCapacity,

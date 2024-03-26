@@ -23,8 +23,9 @@ var (
 
 type sNode struct {
 	fMutex        sync.Mutex
-	fListener     net.Listener
 	fSettings     ISettings
+	fVSettings    conn.IVSettings
+	fListener     net.Listener
 	fCacheSetter  cache.ICacheSetter
 	fConnections  map[string]conn.IConn
 	fHandleRoutes map[uint64]IHandlerF
@@ -33,11 +34,16 @@ type sNode struct {
 // Creating a node object managed by connections with multiple nodes.
 // Saves hashes of received messages to a buffer to prevent network cycling.
 // Redirects messages to handle routers by keys.
-func NewNode(pSett ISettings, pCacheSetter cache.ICacheSetter) INode {
+func NewNode(
+	pSettings ISettings,
+	pVSettings conn.IVSettings,
+	pCacheSetter cache.ICacheSetter,
+) INode {
 	return &sNode{
-		fSettings:     pSett,
+		fSettings:     pSettings,
+		fVSettings:    pVSettings,
 		fCacheSetter:  pCacheSetter,
-		fConnections:  make(map[string]conn.IConn, pSett.GetMaxConnects()),
+		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
 		fHandleRoutes: make(map[uint64]IHandlerF, cHandleRoutesSize),
 	}
 }
@@ -45,6 +51,22 @@ func NewNode(pSett ISettings, pCacheSetter cache.ICacheSetter) INode {
 // Return settings interface.
 func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
+}
+
+func (p *sNode) GetVSettings() conn.IVSettings {
+	return p.getVSettings()
+}
+
+func (p *sNode) SetVSettings(pVSettings conn.IVSettings) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	for id, conn := range p.fConnections {
+		delete(p.fConnections, id)
+		_ = conn.Close()
+	}
+
+	p.fVSettings = pVSettings
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
@@ -129,7 +151,7 @@ func (p *sNode) Listen(pCtx context.Context) error {
 			}
 
 			sett := p.fSettings.GetConnSettings()
-			conn := conn.LoadConn(sett, tconn)
+			conn := conn.LoadConn(sett, p.getVSettings(), tconn)
 			address := tconn.RemoteAddr().String()
 
 			p.setConnection(address, conn)
@@ -190,7 +212,7 @@ func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	}
 
 	sett := p.fSettings.GetConnSettings()
-	conn, err := conn.NewConn(sett, pAddress)
+	conn, err := conn.NewConn(sett, p.getVSettings(), pAddress)
 	if err != nil {
 		return utils.MergeErrors(ErrAddConnections, err)
 	}
@@ -284,25 +306,17 @@ func (p *sNode) messageReader(
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg message.IMessage) bool {
-	// hash of message already in queue
 	if !p.fCacheSetter.Set(pMsg.GetHash(), []byte{}) {
-		return true
+		return true // hash of message already in queue
 	}
 
-	// get function by head
-	pld := pMsg.GetPayload()
-	f, ok := p.getFunction(pld.GetHead())
+	f, ok := p.getFunction(pMsg.GetPayload().GetHead())
 	if !ok || f == nil {
-		// function is not found = protocol error
-		return false
+		return false // function is not found = protocol error
 	}
 
-	if err := f(pCtx, p, pConn, pMsg); err != nil {
-		// function error = protocol error
-		return false
-	}
-
-	return true
+	err := f(pCtx, p, pConn, pMsg)
+	return err == nil // function error = protocol error
 }
 
 // Checks the current number of connections with the limit.
@@ -354,4 +368,11 @@ func (p *sNode) getListener() net.Listener {
 	defer p.fMutex.Unlock()
 
 	return p.fListener
+}
+
+func (p *sNode) getVSettings() conn.IVSettings {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	return p.fVSettings
 }

@@ -797,7 +797,6 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:            networkKey,
 					FWorkSizeBits:          testutils.TCWorkSize,
 					FLimitMessageSizeBytes: testutils.TCMessageSize,
 					FLimitVoidSizeBytes:    limitVoidSize,
@@ -806,6 +805,9 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
+			}),
+			conn.NewVSettings(&conn.SVSettings{
+				FNetworkKey: networkKey,
 			}),
 			lru.NewLRUCache(
 				lru.NewSettings(&lru.SSettings{
@@ -816,13 +818,15 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:        networkMask,
-				FNetworkKey:         networkKey,
 				FWorkSizeBits:       testutils.TCWorkSize,
 				FMainCapacity:       testutils.TCQueueCapacity,
 				FVoidCapacity:       testutils.TCQueueCapacity,
 				FParallel:           parallel,
 				FLimitVoidSizeBytes: limitVoidSize,
 				FDuration:           time.Second,
+			}),
+			queue.NewVSettings(&queue.SVSettings{
+				FNetworkKey: networkKey,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{

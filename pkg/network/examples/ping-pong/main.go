@@ -52,7 +52,10 @@ func main() {
 	}
 
 	msg := message.NewMessage(
-		service2.GetSettings().GetConnSettings(),
+		message.NewSettings(&message.SSettings{
+			FNetworkKey:   service2.GetVSettings().GetNetworkKey(),
+			FWorkSizeBits: service2.GetSettings().GetConnSettings().GetWorkSizeBits(),
+		}),
 		payload.NewPayload(
 			serviceHeader,
 			[]byte("0"),
@@ -80,15 +83,21 @@ func handler(serviceName string) network.IHandlerF {
 		}
 
 		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
-		n.BroadcastMessage(ctx, message.NewMessage(
-			n.GetSettings().GetConnSettings(),
-			payload.NewPayload(
-				serviceHeader,
-				[]byte(fmt.Sprintf("%d", num+1)),
+		n.BroadcastMessage(
+			ctx,
+			message.NewMessage(
+				message.NewSettings(&message.SSettings{
+					FNetworkKey:   n.GetVSettings().GetNetworkKey(),
+					FWorkSizeBits: n.GetSettings().GetConnSettings().GetWorkSizeBits(),
+				}),
+				payload.NewPayload(
+					serviceHeader,
+					[]byte(fmt.Sprintf("%d", num+1)),
+				),
+				1,
+				0,
 			),
-			1,
-			0,
-		))
+		)
 
 		return nil
 	}
@@ -103,6 +112,7 @@ func newNode(serviceAddress string) network.INode {
 			FWriteTimeout: time.Minute,
 			FReadTimeout:  time.Minute,
 		}),
+		vSettings(),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{
 				FCapacity: (1 << 10),
@@ -111,9 +121,12 @@ func newNode(serviceAddress string) network.INode {
 	)
 }
 
+func vSettings() conn.IVSettings {
+	return conn.NewVSettings(&conn.SVSettings{})
+}
+
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:          10,
 		FLimitMessageSizeBytes: (1 << 10),
 		FWaitReadTimeout:       time.Hour,
 		FDialTimeout:           time.Minute,

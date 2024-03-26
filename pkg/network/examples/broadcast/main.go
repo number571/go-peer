@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 
-	conn, err := conn.NewConn(connSettings(), serviceAddress)
+	conn, err := conn.NewConn(connSettings(), vSettings(), serviceAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -60,15 +60,21 @@ func main() {
 		}
 	}()
 
-	err = conn.WriteMessage(ctx, message.NewMessage(
-		conn.GetSettings(),
-		payload.NewPayload(
-			serviceHeader,
-			[]byte("hello, world!"),
+	err = conn.WriteMessage(
+		ctx,
+		message.NewMessage(
+			message.NewSettings(&message.SSettings{
+				FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
+				FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
+			}),
+			payload.NewPayload(
+				serviceHeader,
+				[]byte("hello, world!"),
+			),
+			1,
+			0,
 		),
-		1,
-		0,
-	))
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -93,6 +99,7 @@ func newNode(serviceAddress string) network.INode {
 			FWriteTimeout: time.Minute,
 			FReadTimeout:  time.Minute,
 		}),
+		vSettings(),
 		lru.NewLRUCache(
 			lru.NewSettings(&lru.SSettings{
 				FCapacity: (1 << 10),
@@ -101,9 +108,12 @@ func newNode(serviceAddress string) network.INode {
 	)
 }
 
+func vSettings() conn.IVSettings {
+	return conn.NewVSettings(&conn.SVSettings{})
+}
+
 func connSettings() conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
-		FWorkSizeBits:          10,
 		FLimitMessageSizeBytes: (1 << 10),
 		FWaitReadTimeout:       time.Hour,
 		FDialTimeout:           time.Minute,

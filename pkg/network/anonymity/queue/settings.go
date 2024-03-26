@@ -11,7 +11,6 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FNetworkMask        uint64
-	FNetworkKey         string
 	FWorkSizeBits       uint64
 	FMainCapacity       uint64
 	FVoidCapacity       uint64
@@ -24,7 +23,6 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FNetworkMask:        pSett.FNetworkMask,
-		FNetworkKey:         pSett.FNetworkKey,
 		FWorkSizeBits:       pSett.FWorkSizeBits,
 		FMainCapacity:       pSett.FMainCapacity,
 		FVoidCapacity:       pSett.FVoidCapacity,
@@ -48,17 +46,12 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
 	}
-	// pFNetworkMask, p.FNetworkKey, FWorkSizeBits.FWorkSizeBits,
-	// p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
+	// p.FNetworkMask, p.FWorkSizeBits, p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
 	return p
 }
 
 func (p *sSettings) GetNetworkMask() uint64 {
 	return p.FNetworkMask
-}
-
-func (p *sSettings) GetNetworkKey() string {
-	return p.FNetworkKey
 }
 
 func (p *sSettings) GetWorkSizeBits() uint64 {

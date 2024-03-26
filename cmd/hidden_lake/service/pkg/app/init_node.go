@@ -55,7 +55,6 @@ func initNode(
 				FReadTimeout:  queueMaxDuration,
 				FWriteTimeout: queueMaxDuration,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FNetworkKey:            cfgSettings.GetNetworkKey(),
 					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
@@ -64,6 +63,9 @@ func initNode(
 					FReadTimeout:           queueMaxDuration,
 					FWriteTimeout:          queueMaxDuration,
 				}),
+			}),
+			conn.NewVSettings(&conn.SVSettings{
+				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
 			lru.NewLRUCache(
 				lru.NewSettings(&lru.SSettings{
@@ -74,7 +76,6 @@ func initNode(
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:        hls_settings.CNetworkMask,
-				FNetworkKey:         cfgSettings.GetNetworkKey(),
 				FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
 				FMainCapacity:       hls_settings.CQueueMainCapacity,
 				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
@@ -82,6 +83,9 @@ func initNode(
 				FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
 				FDuration:           queueDuration,
 				FRandDuration:       queueRandDuration,
+			}),
+			queue.NewVSettings(&queue.SVSettings{
+				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
