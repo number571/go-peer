@@ -129,7 +129,7 @@ _ | _ | [HL Encryptor](#6-hidden-lake-encryptor)
 
 The `Hidden Lake Service` is a core of an anonymous network with theoretically provable anonymity. HLS is based on the `fifth^ stage` of anonymity and is an implementation of an `abstract` anonymous network based on `queues`. It is a `peer-to-peer` network communication with trusted `friend-to-friend` participants. All transmitted and received messages are in the form of `end-to-end` encryption.
 
-Features / Anonymity networks |  Queue-networks (5^stage)               |  Entropy-networks (6stage)              |  DC-networks (1^stage)
+Features / Anonymity networks |  QB-networks (5^stage)               |  EI-networks (6stage)              |  DC-networks (1^stage)
 :-----------------------------:|:-----------------------------:|:------------------------------:|:------------------------------:
 Theoretical provability  |  +  |  +  |  + |
 Anonymity has a cumulative effect   |  -  |  +  |  - |
