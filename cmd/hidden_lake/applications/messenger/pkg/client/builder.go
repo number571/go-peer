@@ -18,12 +18,10 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) PushMessage(pPseudonym, pRequestID string, pBody []byte) hls_request.IRequest {
+func (p *sBuilder) PushMessage(pPseudonym string, pBody []byte) hls_request.IRequest {
 	return hls_request.NewRequest(http.MethodPost, hlm_settings.CServiceFullName, hlm_settings.CPushPath).
 		WithHead(map[string]string{
-			"Content-Type":                "application/json",
 			hlm_settings.CHeaderPseudonym: pPseudonym,
-			hlm_settings.CHeaderRequestId: pRequestID,
 		}).
 		WithBody(pBody)
 }

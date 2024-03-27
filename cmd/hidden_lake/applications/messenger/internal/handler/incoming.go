@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
@@ -17,9 +15,7 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/utils"
 
-	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
@@ -61,35 +57,6 @@ func HandleIncomigHTTP(
 			panic("public key is nil (invalid data from HLS)!")
 		}
 
-		requestID := pR.Header.Get(hlm_settings.CHeaderRequestId)
-		if len(requestID) != hlm_settings.CRequestIDSize {
-			pLogger.PushWarn(logBuilder.WithMessage("request_id_size"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: request id size")
-			return
-		}
-
-		// request already exist in the queue
-		if ok, err := pDB.PushRequestID([]byte(requestID)); err != nil {
-			if ok {
-				pLogger.PushWarn(logBuilder.WithMessage("request_id_exist"))
-				api.Response(pW, http.StatusLocked, "failed: request_id already exist")
-				return
-			}
-			pLogger.PushErro(logBuilder.WithMessage("push_request_id"))
-			api.Response(pW, http.StatusServiceUnavailable, "failed: push request_id to database")
-			return
-		}
-
-		if pCfg.GetSettings().GetShareEnabled() {
-			err := shareMessage(pCtx, pCfg, fPubKey, requestID, senderPseudonym, rawMsgBytes)
-			switch err {
-			case nil:
-				pLogger.PushInfo(logBuilder.WithMessage("share_message"))
-			default:
-				pLogger.PushWarn(logBuilder.WithMessage("share_message"))
-			}
-		}
-
 		if err := isValidMsgBytes(rawMsgBytes); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("recv_message"))
 			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
@@ -125,52 +92,6 @@ func HandleIncomigHTTP(
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		api.Response(pW, http.StatusOK, hlm_settings.CServiceFullName)
 	}
-}
-
-func shareMessage(
-	pCtx context.Context,
-	pCfg config.IConfig,
-	pSender asymmetric.IPubKey,
-	pRequestID string,
-	senderPseudonym string,
-	pBody []byte,
-) error {
-	hlsClient := getHLSClient(pCfg)
-
-	hlmClient := hlm_client.NewClient(
-		hlm_client.NewBuilder(),
-		hlm_client.NewRequester(hlsClient),
-	)
-
-	friends, err := hlsClient.GetFriends(pCtx)
-	if err != nil {
-		return err
-	}
-
-	lenFriends := len(friends)
-
-	wg := sync.WaitGroup{}
-	wg.Add(lenFriends)
-
-	errList := make([]error, lenFriends)
-	i := 0
-
-	for aliasName, pubKey := range friends {
-		go func(i int, aliasName string, pubKey asymmetric.IPubKey) {
-			defer wg.Done()
-
-			// do not send a request to the creator of the request
-			if bytes.Equal(pubKey.ToBytes(), pSender.ToBytes()) {
-				return
-			}
-
-			errList[i] = hlmClient.PushMessage(pCtx, aliasName, senderPseudonym, pRequestID, pBody)
-		}(i, aliasName, pubKey)
-		i++
-	}
-
-	wg.Wait()
-	return utils.MergeErrors(errList...)
 }
 
 func isValidMsgBytes(rawMsgBytes []byte) error {

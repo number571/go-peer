@@ -16,7 +16,6 @@ const (
 const (
 	tcConfigTemplate = `settings:
   messages_capacity: %d
-  share_enabled: true
   language: RUS
   pseudonym: '%s'
   storage_key: '%s'
@@ -72,11 +71,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcMessagesCapacity {
 		t.Error("settings message capacity size is invalid")
-		return
-	}
-
-	if cfg.GetSettings().GetShareEnabled() != true {
-		t.Error("settings share is invalid")
 		return
 	}
 

@@ -18,3 +18,4 @@ services:
       - SERVICE_KEY=examples/anon_messenger/_keys/4096/priv_node2.key
     ports:
       - 7070:7070
+      - 7572:7572

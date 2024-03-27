@@ -4,6 +4,11 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/messenger`: delete share_enabled option, requestID
+- Update `examples/anon_messenger/group`: change group chat to use one private key
+
 <!-- ... -->
 
 ## v1.6.7

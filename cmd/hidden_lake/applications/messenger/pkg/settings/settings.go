@@ -16,13 +16,8 @@ const (
 )
 
 const (
+	CPseudonymSize   = 32 // x >= 1 && x <= CPseudonymSize
 	CHeaderPseudonym = "Hl-Messenger-Pseudonym"
-	CHeaderRequestId = "Hl-Messenger-Request-Id" // nolint: revive
-)
-
-const (
-	CPseudonymSize = 32 // x >= 1 && x <= CPseudonymSize
-	CRequestIDSize = 44 // string chars (ASCII bytes)
 )
 
 const (
@@ -31,7 +26,6 @@ const (
 )
 
 const (
-	CDefaultShareEnabled     = false
 	CDefaultLanguage         = "ENG"
 	CDefaultMessagesCapacity = (2 << 10) // count
 	CDefaultWorkSizeBits     = 20

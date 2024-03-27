@@ -22,23 +22,6 @@ func NewKeyValueDB(pSettings database.ISettings) (IKVDatabase, error) {
 	return &sKeyValueDB{fDB: db}, nil
 }
 
-func (p *sKeyValueDB) PushRequestID(pRequestID []byte) (bool, error) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	// request id already exist in the database
-	if _, err := p.fDB.Get([]byte(pRequestID)); err == nil {
-		return true, errors.New("request_id already exist")
-	}
-
-	// try store ID of request to the queue
-	if err := p.fDB.Set([]byte(pRequestID), []byte{}); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
 func (p *sKeyValueDB) Size(pR IRelation) uint64 {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

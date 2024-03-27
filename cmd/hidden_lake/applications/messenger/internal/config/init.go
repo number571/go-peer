@@ -19,7 +19,6 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
 				FWorkSizeBits:     hlm_settings.CDefaultWorkSizeBits,
-				FShareEnabled:     hlm_settings.CDefaultShareEnabled,
 				FPseudonym:        random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 				FStorageKey:       random.NewStdPRNG().GetString(hlm_settings.CPseudonymSize),
 				FLanguage:         hlm_settings.CDefaultLanguage,

@@ -18,7 +18,6 @@ import (
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
 
@@ -213,16 +212,11 @@ func sendMessage(
 		return fmt.Errorf("error: len message > limit: %w", err)
 	}
 
-	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
-	if ok, err := pDB.PushRequestID([]byte(requestID)); !ok && err != nil {
-		return err
-	}
-
 	hlmClient := hlm_client.NewClient(
 		hlm_client.NewBuilder(),
 		hlm_client.NewRequester(pClient),
 	)
-	return hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), requestID, pMsgBytes)
+	return hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), pMsgBytes)
 }
 
 func getReceiverPubKey(

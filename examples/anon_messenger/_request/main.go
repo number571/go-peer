@@ -25,9 +25,7 @@ const (
         "host":"hidden-lake-messenger",
         "path":"/push",
         "head":{
-			"%s": "%s",
-			"%s": "%s",
-            "Accept": "application/json"
+			"%s": "%s"
         },
         "body":"%s"
 	}`
@@ -47,19 +45,16 @@ func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
 	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	requestID := random.NewStdPRNG().GetString(hlm_settings.CRequestIDSize)
 	pseudonym := "Bob"
-
 	requestData := replacer.Replace(
 		fmt.Sprintf(
 			cJsonDataTemplate,
 			hlm_settings.CHeaderPseudonym,
 			pseudonym,
-			hlm_settings.CHeaderRequestId,
-			requestID,
 			base64.StdEncoding.EncodeToString(pMessage),
 		),
 	)
+
 	req, err := http.NewRequest(
 		http.MethodPut,
 		"http://localhost:7572/api/network/request",

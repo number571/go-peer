@@ -21,7 +21,6 @@ var (
 type SConfigSettings struct {
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
-	FShareEnabled     bool   `yaml:"share_enabled,omitempty"`
 	FPseudonym        string `yaml:"pseudonym"`
 	FStorageKey       string `yaml:"storage_key,omitempty"`
 	FLanguage         string `yaml:"language,omitempty"`
@@ -97,10 +96,6 @@ func (p *SConfigSettings) GetMessagesCapacity() uint64 {
 
 func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
-}
-
-func (p *SConfigSettings) GetShareEnabled() bool {
-	return p.FShareEnabled
 }
 
 func (p *SConfigSettings) GetPseudonym() string {

@@ -11,15 +11,12 @@ else
     SENT_DATA=$(echo -ne "\x02example.txt\x02hello, world!" | base64);
 fi
 
-REQUEST_ID=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 44)
 JSON_DATA='{
         "method":"POST",
         "host":"hidden-lake-messenger",
         "path":"/push",
         "head":{
-            "Hl-Messenger-Pseudonym": "Bob",
-            "Hl-Messenger-Request-Id": "'${REQUEST_ID}'",
-            "Accept": "application/json"
+            "Hl-Messenger-Pseudonym": "Bob"
         },
         "body":"'${SENT_DATA}'"
 }';

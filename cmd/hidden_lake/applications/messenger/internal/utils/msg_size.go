@@ -15,7 +15,6 @@ import (
 var (
 	gReqSize = uint64(len(hlm_client.NewBuilder().PushMessage(
 		strings.Repeat("-", settings.CPseudonymSize),
-		strings.Repeat("-", settings.CRequestIDSize),
 		[]byte{},
 	).GetBody()))
 )

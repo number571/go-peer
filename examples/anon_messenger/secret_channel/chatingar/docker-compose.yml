@@ -20,6 +20,7 @@ services:
       - SERVICE_KEY=examples/anon_messenger/_keys/2048/priv_node2.key
     ports:
       - 7070:7070
+      - 7572:7572
     networks:
       - hidden-lake
 networks:
