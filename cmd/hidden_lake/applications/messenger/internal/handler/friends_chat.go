@@ -86,7 +86,7 @@ func FriendsChatPage(
 				return
 			}
 
-			if err := sendMessage(pCtx, pCfg, client, pDB, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCtx, pCfg, client, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
@@ -199,7 +199,6 @@ func sendMessage(
 	pCtx context.Context,
 	pCfg config.IConfig,
 	pClient hls_client.IClient,
-	pDB database.IKVDatabase,
 	pAliasName string,
 	pMsgBytes []byte,
 ) error {
