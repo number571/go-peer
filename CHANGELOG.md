@@ -1,8 +1,14 @@
 # CHANGELOG
 
-## v1.6.7
+## v1.6.8
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.6.7
+
+*March 27, 2024*
 
 ### CHANGES
 
@@ -17,6 +23,8 @@
 
 - Update `cmd/hidden_lake/composite`: fix install_hlc.sh
 - Update `pkg/network/message`: fix payloadLength
+
+<!-- ... -->
 
 ## v1.6.6
 
