@@ -189,14 +189,14 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 }
 
 func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage) error {
-	oldNSettings := p.getVSettings()
+	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldNSettings.GetNetworkKey(),
+				FNetworkKey:   oldVSettings.GetNetworkKey(),
 			}),
 			payload.NewPayload(
 				p.fSettings.GetNetworkMask(),
@@ -212,7 +212,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 		return pCtx.Err()
 
 	case netMsg := <-chNetMsg:
-		if p.nSettingsNotChanged(oldNSettings) {
+		if p.vSettingsNotChanged(oldVSettings) {
 			p.fMainPool.fQueue <- netMsg
 		}
 		return nil
@@ -239,13 +239,13 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		panic(err)
 	}
 
-	oldNSettings := p.getVSettings()
+	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldNSettings.GetNetworkKey(),
+				FNetworkKey:   oldVSettings.GetNetworkKey(),
 			}),
 			payload.NewPayload(
 				p.fSettings.GetNetworkMask(),
@@ -261,7 +261,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		return pCtx.Err()
 
 	case netMsg := <-chNetMsg:
-		if p.nSettingsNotChanged(oldNSettings) {
+		if p.vSettingsNotChanged(oldVSettings) {
 			p.fVoidPool.fQueue <- netMsg
 		}
 		return nil
@@ -275,7 +275,7 @@ func (p *sMessageQueue) getVSettings() IVSettings {
 	return p.fVSettings
 }
 
-func (p *sMessageQueue) nSettingsNotChanged(oldNSettings IVSettings) bool {
+func (p *sMessageQueue) vSettingsNotChanged(oldNSettings IVSettings) bool {
 	currNSettings := p.getVSettings()
 	return currNSettings.GetNetworkKey() == oldNSettings.GetNetworkKey()
 }
