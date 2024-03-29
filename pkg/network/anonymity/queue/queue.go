@@ -275,7 +275,7 @@ func (p *sMessageQueue) getVSettings() IVSettings {
 	return p.fVSettings
 }
 
-func (p *sMessageQueue) vSettingsNotChanged(oldNSettings IVSettings) bool {
-	currNSettings := p.getVSettings()
-	return currNSettings.GetNetworkKey() == oldNSettings.GetNetworkKey()
+func (p *sMessageQueue) vSettingsNotChanged(oldVSettings IVSettings) bool {
+	currVSettings := p.getVSettings()
+	return currVSettings.GetNetworkKey() == oldVSettings.GetNetworkKey()
 }
