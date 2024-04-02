@@ -89,6 +89,25 @@ On the basis of this characteristic, methods of possible application also begin 
 2. Due to the `theoretically provable anonymity` and independence of nodes among themselves in choosing the period of packet generation, the network can be used in military affairs, ensuring not only the confidentiality of transmitted data, but also the confidentiality of metadata in the face of the activity of actions.
 3. The Hidden Lake network can be used as a `communication platform` for applications that are heterogeneous in nature. This is made possible by the go-peer protocol, which does not define any application use. As a result, you can create your own applications at several levels: either at the go-peer library level or at the HL services level ([example](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat)).
 
+## Possible launch modes
+
+The anonymous Hidden Lake network has different launch modes depending on the environment in which it is located.
+
+1. Classic direct communication. In this communication mode, the nodes are connected to each other directly. This method is convenient only if at least one of the nodes has a public IP address that goes beyond NAT. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/default).
+
+<p align="center"><img src="_images/launch_mode_1.jpg" alt="launch_mode_1.jpg"/></p>
+<p align="center">Figure 4. The direct communication launch mode.</p>
+
+2. Communication via a relayer. In this startup mode, nodes are connected to each other using separate relay nodes. In this concept, relayers become TURN servers that redirect traffic to all connected nodes, including other relayers. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/routing).
+
+<p align="center"><img src="_images/launch_mode_2.jpg" alt="launch_mode_2.jpg"/></p>
+<p align="center">Figure 5. The relayer communication launch mode.</p>
+
+3. Communication through a secret communication channel. In this mode, communication begins to adapt to a communication platform other than the primary Hidden Lake network. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/secret_channel).
+
+<p align="center"><img src="_images/launch_mode_3.jpg" alt="launch_mode_3.jpg"/></p>
+<p align="center">Figure 6. The secret channel communication launch mode.</p>
+
 ## Build and run
 
 Launching an anonymous network is primarily the launch of an anonymizing HLS service. There are two ways to run HLS: through `source code`, and through the `release version`. It is recommended to run applications with the available release version, [tag](https://github.com/number571/go-peer/tags).
