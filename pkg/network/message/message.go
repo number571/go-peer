@@ -47,7 +47,11 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 	voidBytes := prng.GetBytes(randVoidSize)
 
 	payloadVoidBytes := bytes.Join(
-		[][]byte{payloadBytes, voidBytes},
+		[][]byte{
+			payloadSize[:],
+			payloadBytes,
+			voidBytes,
+		},
 		[]byte{},
 	)
 
@@ -67,7 +71,6 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 		fEncPPHP: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
-				payloadSize[:],
 				hash,
 				payloadVoidBytes,
 			},
@@ -90,8 +93,8 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 
 	const (
 		proofIndex  = encoding.CSizeUint64
-		pldLenIndex = proofIndex + encoding.CSizeUint64
-		hashIndex   = pldLenIndex + hashing.CSHA256Size
+		hashIndex   = proofIndex + hashing.CSHA256Size
+		pldLenIndex = hashIndex + encoding.CSizeUint64
 	)
 
 	switch x := pData.(type) {
@@ -119,17 +122,17 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	proof := encoding.BytesToUint64(proofArr)
 
 	payloadSizeArr := [encoding.CSizeUint64]byte{}
-	copy(payloadSizeArr[:], pphpBytes[proofIndex:pldLenIndex])
+	copy(payloadSizeArr[:], pphpBytes[hashIndex:pldLenIndex])
 	payloadLength := encoding.BytesToUint64(payloadSizeArr)
 
-	hash := pphpBytes[pldLenIndex:hashIndex]
+	hash := pphpBytes[proofIndex:hashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(hash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
 	payloadVoidBytes := pphpBytes[hashIndex:]
-	if payloadLength > uint64(len(payloadVoidBytes)) {
+	if (payloadLength + encoding.CSizeUint64) > uint64(len(payloadVoidBytes)) {
 		return nil, ErrInvalidPayloadSize
 	}
 
@@ -138,7 +141,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payloadBytes := payloadVoidBytes[:payloadLength]
+	payloadBytes := payloadVoidBytes[encoding.CSizeUint64:][:payloadLength]
 	payload := payload.LoadPayload(payloadBytes)
 	if payload == nil {
 		return nil, ErrDecodePayload

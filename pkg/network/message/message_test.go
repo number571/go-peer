@@ -57,8 +57,9 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
+	payloadSize := encoding.Uint64ToBytes(uint64(len(pld.ToBytes())))
 	payloadRandBytes := bytes.Join(
-		[][]byte{pld.ToBytes(), voidBytes},
+		[][]byte{payloadSize[:], pld.ToBytes(), voidBytes},
 		[]byte{},
 	)
 	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, msg.GetSalt()[1], payloadRandBytes)) {

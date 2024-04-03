@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.6.8
+## v1.6.8~
 
 *??? ??, ????*
 
@@ -8,6 +8,10 @@
 
 - Update `cmd/hidden_lake/applications/messenger`: delete share_enabled option, requestID
 - Update `examples/anon_messenger/group`: change group chat to use one private key
+
+### BUG FIXES
+
+- Update `pkg/network/message`: move payloadLength to HMAC function
 
 <!-- ... -->
 
