@@ -16,14 +16,14 @@ func HandleConfigSettingsAPI(pCfg config.IConfig, pLogger logger.ILogger) http.H
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 
 		sett := pCfg.GetSettings()
-		api.Response(pW, http.StatusOK, config.SConfigSettings{
+		_ = api.Response(pW, http.StatusOK, config.SConfigSettings{
 			FMessageSizeBytes: sett.GetMessageSizeBytes(),
 			FKeySizeBits:      sett.GetKeySizeBits(),
 			FWorkSizeBits:     sett.GetWorkSizeBits(),

@@ -21,7 +21,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -30,7 +30,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 
 			sett := pWrapper.GetConfig().GetSettings()
-			api.Response(pW, http.StatusOK, pkg_config.SConfigSettings{
+			_ = api.Response(pW, http.StatusOK, pkg_config.SConfigSettings{
 				SConfigSettings: config.SConfigSettings{
 					FMessageSizeBytes:   sett.GetMessageSizeBytes(),
 					FWorkSizeBits:       sett.GetWorkSizeBits(),
@@ -49,14 +49,14 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			networkKeyBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-				api.Response(pW, http.StatusConflict, "failed: read network key bytes")
+				_ = api.Response(pW, http.StatusConflict, "failed: read network key bytes")
 				return
 			}
 
 			networkKey := string(networkKeyBytes)
 			if err := pWrapper.GetEditor().UpdateNetworkKey(networkKey); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("update_key"))
-				api.Response(pW, http.StatusInternalServerError, "failed: update network key")
+				_ = api.Response(pW, http.StatusInternalServerError, "failed: update network key")
 				return
 			}
 
@@ -68,7 +68,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 			)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: set network key")
+			_ = api.Response(pW, http.StatusOK, "success: set network key")
 			return
 		}
 	}

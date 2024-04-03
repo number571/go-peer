@@ -18,7 +18,7 @@ func HandleNetworkOnlineAPI(pLogger logger.ILogger, pNode anonymity.INode) http.
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodDelete {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -35,23 +35,23 @@ func HandleNetworkOnlineAPI(pLogger logger.ILogger, pNode anonymity.INode) http.
 			})
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, inOnline)
+			_ = api.Response(pW, http.StatusOK, inOnline)
 		case http.MethodDelete:
 			connectBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-				api.Response(pW, http.StatusConflict, "failed: read connect bytes")
+				_ = api.Response(pW, http.StatusConflict, "failed: read connect bytes")
 				return
 			}
 
 			if err := pNode.GetNetworkNode().DelConnection(string(connectBytes)); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("del_connection"))
-				api.Response(pW, http.StatusInternalServerError, "failed: delete online connection")
+				_ = api.Response(pW, http.StatusInternalServerError, "failed: delete online connection")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: delete online connection")
+			_ = api.Response(pW, http.StatusOK, "success: delete online connection")
 		}
 	}
 }

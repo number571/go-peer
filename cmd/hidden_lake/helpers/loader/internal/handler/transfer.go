@@ -34,7 +34,7 @@ func HandleNetworkTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) ht
 
 		if pR.Method != http.MethodPost && pR.Method != http.MethodDelete {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -42,23 +42,23 @@ func HandleNetworkTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) ht
 		case http.MethodPost:
 			if err := transfer.run(); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("already_running"))
-				api.Response(pW, http.StatusOK, "failed: already running")
+				_ = api.Response(pW, http.StatusOK, "failed: already running")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: run transfer")
+			_ = api.Response(pW, http.StatusOK, "success: run transfer")
 			return
 
 		case http.MethodDelete:
 			if err := transfer.stop(); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("already_stopped"))
-				api.Response(pW, http.StatusOK, "failed: already atopped")
+				_ = api.Response(pW, http.StatusOK, "failed: already atopped")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: stop transfer")
+			_ = api.Response(pW, http.StatusOK, "success: stop transfer")
 			return
 		}
 	}

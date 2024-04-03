@@ -32,27 +32,27 @@ func HandleMessageEncryptAPI(
 
 		if pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if err := json.NewDecoder(pR.Body).Decode(&vContainer); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-			api.Response(pW, http.StatusConflict, "failed: decode request")
+			_ = api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(vContainer.FPublicKey)
 		if pubKey == nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decode_pubkey"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: decode public key")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: decode public key")
 			return
 		}
 
 		bodyData := encoding.HexDecode(vContainer.FHexData)
 		if bodyData == nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decode_hex_data"))
-			api.Response(pW, http.StatusTeapot, "failed: decode hex data")
+			_ = api.Response(pW, http.StatusTeapot, "failed: decode hex data")
 			return
 		}
 
@@ -62,7 +62,7 @@ func HandleMessageEncryptAPI(
 		)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("encrypt_payload"))
-			api.Response(pW, http.StatusBadRequest, "failed: encrypt payload")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: encrypt payload")
 			return
 		}
 
@@ -74,6 +74,6 @@ func HandleMessageEncryptAPI(
 		)
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, netMsg.ToString())
+		_ = api.Response(pW, http.StatusOK, netMsg.ToString())
 	}
 }

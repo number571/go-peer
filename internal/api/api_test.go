@@ -144,12 +144,12 @@ func testRunServer(addr string) *http.Server {
 
 	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
-			Response(w, http.StatusMethodNotAllowed, tcMethodNotAllowed)
+			_ = Response(w, http.StatusMethodNotAllowed, tcMethodNotAllowed)
 			return
 		}
 
 		if r.Method == http.MethodGet {
-			Response(w, http.StatusOK, tsResponse{FMessage: tcMessage})
+			_ = Response(w, http.StatusOK, tsResponse{FMessage: tcMessage})
 			return
 		}
 
@@ -158,7 +158,7 @@ func testRunServer(addr string) *http.Server {
 			panic(err)
 		}
 
-		Response(w, http.StatusOK, bytes.Join([][]byte{[]byte("echo"), data}, []byte{1}))
+		_ = Response(w, http.StatusOK, bytes.Join([][]byte{[]byte("echo"), data}, []byte{1}))
 	})
 
 	srv := &http.Server{

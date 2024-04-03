@@ -34,21 +34,21 @@ func HandleIncomigHTTP(
 
 		if pR.Method != http.MethodPost {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		senderPseudonym := pR.Header.Get(hlm_settings.CHeaderPseudonym)
 		if !hlm_utils.PseudonymIsValid(senderPseudonym) {
 			pLogger.PushWarn(logBuilder.WithMessage("get_sender_pseudonym"))
-			api.Response(pW, http.StatusUnauthorized, "failed: get pseudonym from messenger")
+			_ = api.Response(pW, http.StatusUnauthorized, "failed: get pseudonym from messenger")
 			return
 		}
 
 		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-			api.Response(pW, http.StatusConflict, "failed: response message")
+			_ = api.Response(pW, http.StatusConflict, "failed: response message")
 			return
 		}
 
@@ -59,14 +59,14 @@ func HandleIncomigHTTP(
 
 		if err := isValidMsgBytes(rawMsgBytes); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("recv_message"))
-			api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: get message bytes")
 			return
 		}
 
 		myPubKey, err := getHLSClient(pCfg).GetPubKey(pCtx)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
-			api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
+			_ = api.Response(pW, http.StatusBadGateway, "failed: get public key from service")
 			return
 		}
 
@@ -75,7 +75,7 @@ func HandleIncomigHTTP(
 
 		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
-			api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
+			_ = api.Response(pW, http.StatusInternalServerError, "failed: push message to database")
 			return
 		}
 
@@ -90,7 +90,7 @@ func HandleIncomigHTTP(
 		)
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, hlm_settings.CServiceFullName)
+		_ = api.Response(pW, http.StatusOK, hlm_settings.CServiceFullName)
 	}
 }
 

@@ -39,13 +39,13 @@ func HandleNetworkRequestAPI(
 
 		if pR.Method != http.MethodPost && pR.Method != http.MethodPut {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		if err := json.NewDecoder(pR.Body).Decode(&vRequest); err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-			api.Response(pW, http.StatusConflict, "failed: decode request")
+			_ = api.Response(pW, http.StatusConflict, "failed: decode request")
 			return
 		}
 
@@ -55,19 +55,19 @@ func HandleNetworkRequestAPI(
 			// pass
 		case cErrorGetFriends:
 			pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
-			api.Response(pW, http.StatusBadRequest, "failed: load public key")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: load public key")
 			return
 		case cErrorDecodeData:
 			pLogger.PushWarn(logBuilder.WithMessage("decode_data"))
-			api.Response(pW, http.StatusTeapot, "failed: decode hex format data")
+			_ = api.Response(pW, http.StatusTeapot, "failed: decode hex format data")
 			return
 		case cErrorLoadRequest:
 			pLogger.PushWarn(logBuilder.WithMessage("load_request"))
-			api.Response(pW, http.StatusForbidden, "failed: decode request")
+			_ = api.Response(pW, http.StatusForbidden, "failed: decode request")
 			return
 		case cErrorLoadRequestID:
 			pLogger.PushWarn(logBuilder.WithMessage("load_request_id"))
-			api.Response(pW, http.StatusForbidden, "failed: decode request id")
+			_ = api.Response(pW, http.StatusForbidden, "failed: decode request id")
 			return
 		default:
 			panic("undefined error code")
@@ -82,12 +82,12 @@ func HandleNetworkRequestAPI(
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_payload"))
-				api.Response(pW, http.StatusInternalServerError, "failed: send payload")
+				_ = api.Response(pW, http.StatusInternalServerError, "failed: send payload")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: send")
+			_ = api.Response(pW, http.StatusOK, "success: send")
 			return
 
 		case http.MethodPost:
@@ -98,19 +98,19 @@ func HandleNetworkRequestAPI(
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))
-				api.Response(pW, http.StatusInternalServerError, "failed: fetch payload")
+				_ = api.Response(pW, http.StatusInternalServerError, "failed: fetch payload")
 				return
 			}
 
 			resp, err := response.LoadResponse(respBytes)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("load_response"))
-				api.Response(pW, http.StatusNotExtended, "failed: load response")
+				_ = api.Response(pW, http.StatusNotExtended, "failed: load response")
 				return
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, resp)
+			_ = api.Response(pW, http.StatusOK, resp)
 			return
 		}
 	}

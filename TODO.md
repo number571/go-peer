@@ -9,9 +9,7 @@
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
-10. Add more docker-compose files into examples (like echo_service/docker)
-11. config _ms -> yaml ms
-12. Update HL scheme
+10. Add Err values to all packages, projects
 
 ### Tests
 

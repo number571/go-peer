@@ -89,7 +89,7 @@ func produceHandler(
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			pLogger.PushWarn("got method != post")
-			api.Response(w, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(w, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -97,24 +97,24 @@ func produceHandler(
 		msgStrAsBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			pLogger.PushWarn(err.Error())
-			api.Response(w, http.StatusConflict, "failed: read body")
+			_ = api.Response(w, http.StatusConflict, "failed: read body")
 			return
 		}
 
 		msg, err := net_message.LoadMessage(pSettings, string(msgStrAsBytes))
 		if err != nil {
 			pLogger.PushWarn(err.Error())
-			api.Response(w, http.StatusConflict, "failed: read message")
+			_ = api.Response(w, http.StatusConflict, "failed: read message")
 			return
 		}
 
 		if err := pProducer.Produce(pCtx, msg); err != nil {
 			pLogger.PushWarn(err.Error())
-			api.Response(w, http.StatusConflict, "failed: produce message")
+			_ = api.Response(w, http.StatusConflict, "failed: produce message")
 			return
 		}
 
 		pLogger.PushInfo(fmt.Sprintf("message %X produced", msg.GetHash()))
-		api.Response(w, http.StatusOK, "success: produce message")
+		_ = api.Response(w, http.StatusOK, "success: produce message")
 	}
 }

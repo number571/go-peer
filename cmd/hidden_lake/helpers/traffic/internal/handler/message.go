@@ -25,14 +25,14 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper data
 
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		database := pDBWrapper.Get()
 		if database == nil {
 			pHTTPLogger.PushErro(logBuilder.WithMessage("get_database"))
-			api.Response(pW, http.StatusInternalServerError, "failed: get database")
+			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
@@ -43,26 +43,26 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper data
 			hash := encoding.HexDecode(query.Get("hash"))
 			if hash == nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-				api.Response(pW, http.StatusNotFound, "failed: decode message")
+				_ = api.Response(pW, http.StatusNotFound, "failed: decode message")
 				return
 			}
 
 			msg, err := database.Load(hash)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("load_hash"))
-				api.Response(pW, http.StatusNotFound, "failed: load message")
+				_ = api.Response(pW, http.StatusNotFound, "failed: load message")
 				return
 			}
 
 			pHTTPLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, msg.ToString())
+			_ = api.Response(pW, http.StatusOK, msg.ToString())
 			return
 
 		case http.MethodPost:
 			msgStringAsBytes, err := io.ReadAll(pR.Body)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-				api.Response(pW, http.StatusConflict, "failed: decode request")
+				_ = api.Response(pW, http.StatusConflict, "failed: decode request")
 				return
 			}
 
@@ -75,24 +75,24 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper data
 			)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("decode_message"))
-				api.Response(pW, http.StatusTeapot, "failed: decode message")
+				_ = api.Response(pW, http.StatusTeapot, "failed: decode message")
 				return
 			}
 
 			if netMsg.GetPayload().GetHead() != hls_settings.CNetworkMask {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("network_mask"))
-				api.Response(pW, http.StatusLocked, "failed: network mask")
+				_ = api.Response(pW, http.StatusLocked, "failed: network mask")
 				return
 			}
 
 			if err := tcpHandler(pCtx, pNode, nil, netMsg); err != nil {
 				// internal logger
-				api.Response(pW, http.StatusBadRequest, "failed: handle message")
+				_ = api.Response(pW, http.StatusBadRequest, "failed: handle message")
 				return
 			}
 
 			pHTTPLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			api.Response(pW, http.StatusOK, "success: handle message")
+			_ = api.Response(pW, http.StatusOK, "success: handle message")
 			return
 		}
 	}

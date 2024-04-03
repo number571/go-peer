@@ -26,26 +26,26 @@ func HandleIncomigListHTTP(pLogger logger.ILogger, pCfg config.IConfig, pStgPath
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		page, err := strconv.Atoi(pR.URL.Query().Get("page"))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("incorrect_page"))
-			api.Response(pW, http.StatusBadRequest, "failed: incorrect page")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: incorrect page")
 			return
 		}
 
 		result, err := getListFileInfo(pCfg, pStgPath, uint64(page))
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("open storage"))
-			api.Response(pW, http.StatusInternalServerError, "failed: open storage")
+			_ = api.Response(pW, http.StatusInternalServerError, "failed: open storage")
 			return
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, result)
+		_ = api.Response(pW, http.StatusOK, result)
 	}
 }
 

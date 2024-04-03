@@ -18,14 +18,14 @@ func HandleHashesAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) htt
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		database := pDBWrapper.Get()
 		if database == nil {
 			pLogger.PushErro(logBuilder.WithMessage("get_database"))
-			api.Response(pW, http.StatusInternalServerError, "failed: get database")
+			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
@@ -33,18 +33,18 @@ func HandleHashesAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) htt
 		id, err := strconv.Atoi(query.Get("id"))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_id"))
-			api.Response(pW, http.StatusBadRequest, "failed: get id")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: get id")
 			return
 		}
 
 		hash, err := database.Hash(uint64(id))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_hashes"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: load size from DB")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: load size from DB")
 			return
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, encoding.HexEncode(hash))
+		_ = api.Response(pW, http.StatusOK, encoding.HexEncode(hash))
 	}
 }

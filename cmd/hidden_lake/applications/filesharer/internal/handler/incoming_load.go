@@ -31,7 +31,7 @@ func HandleIncomigLoadHTTP(
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
@@ -40,14 +40,14 @@ func HandleIncomigLoadHTTP(
 		name := filepath.Base(query.Get("name"))
 		if name != query.Get("name") {
 			pLogger.PushWarn(logBuilder.WithMessage("got_another_name"))
-			api.Response(pW, http.StatusConflict, "failed: got another name")
+			_ = api.Response(pW, http.StatusConflict, "failed: got another name")
 			return
 		}
 
 		chunk, err := strconv.Atoi(query.Get("chunk"))
 		if err != nil || chunk < 0 {
 			pLogger.PushWarn(logBuilder.WithMessage("incorrect_chunk"))
-			api.Response(pW, http.StatusBadRequest, "failed: incorrect chunk")
+			_ = api.Response(pW, http.StatusBadRequest, "failed: incorrect chunk")
 			return
 		}
 
@@ -55,28 +55,28 @@ func HandleIncomigLoadHTTP(
 		stat, err := os.Stat(fullPath)
 		if os.IsNotExist(err) || stat.IsDir() {
 			pLogger.PushWarn(logBuilder.WithMessage("file_not_found"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: file not found")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: file not found")
 			return
 		}
 
 		chunkSize, err := utils.GetMessageLimit(pCtx, getHLSClient(pCfg))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_chunk_size"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")
 			return
 		}
 
 		chunks := utils.GetChunksCount(uint64(stat.Size()), chunkSize)
 		if uint64(chunk) >= chunks {
 			pLogger.PushWarn(logBuilder.WithMessage("chunk_number"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
 			return
 		}
 
 		file, err := os.Open(fullPath)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("open_file"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: open file")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: open file")
 			return
 		}
 		defer file.Close()
@@ -87,18 +87,18 @@ func HandleIncomigLoadHTTP(
 		nS, err := file.Seek(chunkOffset, io.SeekStart)
 		if err != nil || nS != chunkOffset {
 			pLogger.PushWarn(logBuilder.WithMessage("seek_file"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: seek file")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: seek file")
 			return
 		}
 
 		nR, err := file.Read(buf)
 		if err != nil || (uint64(chunk) != chunks-1 && uint64(nR) != chunkSize) {
 			pLogger.PushWarn(logBuilder.WithMessage("chunk_number"))
-			api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
+			_ = api.Response(pW, http.StatusNotAcceptable, "failed: chunk number")
 			return
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, buf[:nR])
+		_ = api.Response(pW, http.StatusOK, buf[:nR])
 	}
 }

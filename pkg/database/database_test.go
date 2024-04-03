@@ -33,7 +33,7 @@ func testSettings(t *testing.T, n int) {
 			return
 		}
 	}()
-	switch n {
+	switch n { // nolint: gocritic
 	case 0:
 		_ = NewSettings(&SSettings{})
 	}

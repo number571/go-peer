@@ -17,18 +17,18 @@ func HandlePointerAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) ht
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
-			api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
+			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
 			return
 		}
 
 		database := pDBWrapper.Get()
 		if database == nil {
 			pLogger.PushErro(logBuilder.WithMessage("get_database"))
-			api.Response(pW, http.StatusInternalServerError, "failed: get database")
+			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		api.Response(pW, http.StatusOK, strconv.FormatUint(database.Pointer(), 10))
+		_ = api.Response(pW, http.StatusOK, strconv.FormatUint(database.Pointer(), 10))
 	}
 }
