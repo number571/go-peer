@@ -76,7 +76,6 @@ Since the anonymous Hidden Lake network is formed due to the microservice archit
 > [layer-1](https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg), 
 > [layer-2](https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg), 
 > [layer-3](_images/hl_layer3_request.jpg), 
-> [layer-4](_images/hl_layer4_body.jpg).
 > All schemes can be found in the [hidden_lake_message_layers.svg](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_message_layers.svg) file.
 
 ## Possible ways of application
