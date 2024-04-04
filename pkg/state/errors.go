@@ -1,14 +1,18 @@
 package state
 
-import "errors"
-
 const (
 	errPrefix = "pkg/state = "
 )
 
+type SStateError struct {
+	str string
+}
+
+func (err *SStateError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrStateEnabled  = errors.New(errPrefix + "state already enabled")
-	ErrStateDisabled = errors.New(errPrefix + "state already disabled")
-	ErrFuncEnable    = errors.New(errPrefix + "enable state function")
-	ErrFuncDisable   = errors.New(errPrefix + "disable state function")
+	ErrStateEnabled  = &SStateError{"state already enabled"}
+	ErrStateDisabled = &SStateError{"state already disabled"}
+	ErrFuncEnable    = &SStateError{"enable state function"}
+	ErrFuncDisable   = &SStateError{"disable state function"}
 )

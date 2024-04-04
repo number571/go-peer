@@ -12,6 +12,7 @@
 
 - Update `cmd/hidden_lake/applications/messenger`: delete share_enabled option, requestID
 - Update `examples/anon_messenger/group`: change group chat to use one private key
+- Update `go-peer`: all packages with custom errors now have errors.go file
 
 ### BUG FIXES
 

@@ -1,11 +1,15 @@
 package connkeeper
 
-import "errors"
-
 const (
 	errPrefix = "pkg/network/connkeeper = "
 )
 
+type SConnKeeperError struct {
+	str string
+}
+
+func (err *SConnKeeperError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrRunning = errors.New(errPrefix + "connkeeper running")
+	ErrRunning = &SConnKeeperError{"connkeeper running"}
 )

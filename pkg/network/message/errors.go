@@ -1,16 +1,20 @@
 package message
 
-import "errors"
-
 const (
 	errPrefix = "pkg/network/message = "
 )
 
+type SMessageError struct {
+	str string
+}
+
+func (err *SMessageError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrUnknownType        = errors.New(errPrefix + "unknown type")
-	ErrInvalidHeaderSize  = errors.New(errPrefix + "length of message bytes < size of header")
-	ErrInvalidProofOfWork = errors.New(errPrefix + "got invalid proof of work")
-	ErrInvalidPayloadSize = errors.New(errPrefix + "got invalid payload size")
-	ErrInvalidAuthHash    = errors.New(errPrefix + "got invalid auth hash")
-	ErrDecodePayload      = errors.New(errPrefix + "decode payload")
+	ErrUnknownType        = &SMessageError{"unknown type"}
+	ErrInvalidHeaderSize  = &SMessageError{"length of message bytes < size of header"}
+	ErrInvalidProofOfWork = &SMessageError{"got invalid proof of work"}
+	ErrInvalidPayloadSize = &SMessageError{"got invalid payload size"}
+	ErrInvalidAuthHash    = &SMessageError{"got invalid auth hash"}
+	ErrDecodePayload      = &SMessageError{"decode payload"}
 )

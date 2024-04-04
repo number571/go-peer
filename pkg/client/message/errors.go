@@ -1,15 +1,19 @@
 package message
 
-import "errors"
-
 const (
 	errPrefix = "pkg/client/message = "
 )
 
+type SMessageError struct {
+	str string
+}
+
+func (err *SMessageError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrUnknownType        = errors.New(errPrefix + "unknown type of message")
-	ErrSeparatorNotFound  = errors.New(errPrefix + "separator is not found")
-	ErrDeserializeMessage = errors.New(errPrefix + "deserialize message")
-	ErrDecodePayload      = errors.New(errPrefix + "decode hex payload")
-	ErrInvalidMessage     = errors.New(errPrefix + "invalid message")
+	ErrUnknownType        = &SMessageError{"unknown type of message"}
+	ErrSeparatorNotFound  = &SMessageError{"separator is not found"}
+	ErrDeserializeMessage = &SMessageError{"deserialize message"}
+	ErrDecodePayload      = &SMessageError{"decode hex payload"}
+	ErrInvalidMessage     = &SMessageError{"invalid message"}
 )

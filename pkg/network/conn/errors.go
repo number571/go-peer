@@ -1,19 +1,23 @@
 package conn
 
-import "errors"
-
 const (
 	errPrefix = "pkg/network/conn = "
 )
 
+type SConnError struct {
+	str string
+}
+
+func (err *SConnError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrReadFromSocket      = errors.New(errPrefix + "read from socket")
-	ErrWriteToSocket       = errors.New(errPrefix + "write to socket")
-	ErrReadHeaderBlock     = errors.New(errPrefix + "read header block")
-	ErrInvalidMsgSize      = errors.New(errPrefix + "invalid msgSize")
-	ErrReadHeaderBytes     = errors.New(errPrefix + "read header bytes")
-	ErrReadBodyBytes       = errors.New(errPrefix + "read body bytes")
-	ErrInvalidMessageBytes = errors.New(errPrefix + "invalid message bytes")
-	ErrSendPayloadBytes    = errors.New(errPrefix + "send payload bytes")
-	ErrCreateConnection    = errors.New(errPrefix + "create connection")
+	ErrReadFromSocket      = &SConnError{"read from socket"}
+	ErrWriteToSocket       = &SConnError{"write to socket"}
+	ErrReadHeaderBlock     = &SConnError{"read header block"}
+	ErrInvalidMsgSize      = &SConnError{"invalid msgSize"}
+	ErrReadHeaderBytes     = &SConnError{"read header bytes"}
+	ErrReadBodyBytes       = &SConnError{"read body bytes"}
+	ErrInvalidMessageBytes = &SConnError{"invalid message bytes"}
+	ErrSendPayloadBytes    = &SConnError{"send payload bytes"}
+	ErrCreateConnection    = &SConnError{"create connection"}
 )

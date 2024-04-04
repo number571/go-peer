@@ -1,11 +1,15 @@
 package encoding
 
-import "errors"
-
 const (
 	errPrefix = "pkg/encoding = "
 )
 
+type SEncodingError struct {
+	str string
+}
+
+func (err *SEncodingError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrDeserialize = errors.New(errPrefix + "deserialize bytes")
+	ErrDeserialize = &SEncodingError{"deserialize bytes"}
 )

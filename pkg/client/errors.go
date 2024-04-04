@@ -1,21 +1,25 @@
 package client
 
-import "errors"
-
 const (
 	errPrefix = "pkg/client = "
 )
 
+type SClientError struct {
+	str string
+}
+
+func (err *SClientError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrLimitMessageSize     = errors.New(errPrefix + "limit message size")
-	ErrInitCheckMessage     = errors.New(errPrefix + "init check message")
-	ErrDecryptCipherKey     = errors.New(errPrefix + "decrypt cipher key")
-	ErrDecryptPublicKey     = errors.New(errPrefix + "decrypt public key")
-	ErrInvalidPublicKeySize = errors.New(errPrefix + "invalid public key size")
-	ErrDecodePayloadWrapper = errors.New(errPrefix + "decode payload wrapper")
-	ErrInvalidDataHash      = errors.New(errPrefix + "invalid data hash")
-	ErrInvalidHashSign      = errors.New(errPrefix + "invalid hash sign")
-	ErrInvalidPayloadSize   = errors.New(errPrefix + "invalid payload size")
-	ErrDecodePayload        = errors.New(errPrefix + "decode payload")
-	ErrEncryptSymmetricKey  = errors.New(errPrefix + "encrypt symmetric key")
+	ErrLimitMessageSize     = &SClientError{"limit message size"}
+	ErrInitCheckMessage     = &SClientError{"init check message"}
+	ErrDecryptCipherKey     = &SClientError{"decrypt cipher key"}
+	ErrDecryptPublicKey     = &SClientError{"decrypt public key"}
+	ErrInvalidPublicKeySize = &SClientError{"invalid public key size"}
+	ErrDecodePayloadWrapper = &SClientError{"decode payload wrapper"}
+	ErrInvalidDataHash      = &SClientError{"invalid data hash"}
+	ErrInvalidHashSign      = &SClientError{"invalid hash sign"}
+	ErrInvalidPayloadSize   = &SClientError{"invalid payload size"}
+	ErrDecodePayload        = &SClientError{"decode payload"}
+	ErrEncryptSymmetricKey  = &SClientError{"encrypt symmetric key"}
 )
