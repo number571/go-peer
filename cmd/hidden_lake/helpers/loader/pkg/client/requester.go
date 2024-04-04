@@ -43,7 +43,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", utils.MergeErrors(ErrRequest, err)
+		return "", utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	result := string(res)
@@ -63,7 +63,7 @@ func (p *sRequester) RunTransfer(pCtx context.Context) error {
 		nil,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -77,7 +77,7 @@ func (p *sRequester) StopTransfer(pCtx context.Context) error {
 		nil,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -91,7 +91,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)

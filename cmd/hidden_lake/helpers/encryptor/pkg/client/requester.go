@@ -49,7 +49,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", utils.MergeErrors(ErrRequest, err)
+		return "", utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	result := string(res)
@@ -72,7 +72,7 @@ func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPu
 		},
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	msg, err := net_message.LoadMessage(p.fParams, string(resp))
@@ -92,7 +92,7 @@ func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IM
 		pNetMsg.ToString(),
 	)
 	if err != nil {
-		return nil, nil, utils.MergeErrors(ErrRequest, err)
+		return nil, nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	var result hle_settings.SContainer
@@ -122,7 +122,7 @@ func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error)
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(string(res))
@@ -142,7 +142,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)

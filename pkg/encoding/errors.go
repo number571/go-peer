@@ -2,6 +2,10 @@ package encoding
 
 import "errors"
 
+const (
+	errPrefix = "pkg/encoding = "
+)
+
 var (
-	ErrDeserialize = errors.New("deserialize bytes")
+	ErrDeserialize = errors.New(errPrefix + "deserialize bytes")
 )

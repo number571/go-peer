@@ -2,13 +2,17 @@ package database
 
 import "errors"
 
+const (
+	errPrefix = "cmd/hidden_lake/applications/messenger/internal/database = "
+)
+
 var (
-	ErrLoadMessage    = errors.New("load message")
-	ErrGetMessage     = errors.New("get message")
-	ErrSetMessage     = errors.New("set message")
-	ErrSetSizeMessage = errors.New("set size message")
-	ErrCloseDB        = errors.New("close db")
-	ErrEndGtSize      = errors.New("end > size")
-	ErrStartGtEnd     = errors.New("start > end")
-	ErrCreateDB       = errors.New("create db")
+	ErrLoadMessage    = errors.New(errPrefix + "load message")
+	ErrGetMessage     = errors.New(errPrefix + "get message")
+	ErrSetMessage     = errors.New(errPrefix + "set message")
+	ErrSetSizeMessage = errors.New(errPrefix + "set size message")
+	ErrCloseDB        = errors.New(errPrefix + "close db")
+	ErrEndGtSize      = errors.New(errPrefix + "end > size")
+	ErrStartGtEnd     = errors.New(errPrefix + "start > end")
+	ErrCreateDB       = errors.New(errPrefix + "create db")
 )

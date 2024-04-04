@@ -66,7 +66,7 @@ test-coverage-badge:
 
 ### LINT
 lint-run:
-	golangci-lint run -E "goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+	golangci-lint run -E "gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
 
 ### GIT
 

@@ -51,7 +51,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", utils.MergeErrors(ErrRequest, err)
+		return "", utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	result := string(resp)
@@ -71,7 +71,7 @@ func (p *sRequester) GetPointer(pCtx context.Context) (uint64, error) {
 		nil,
 	)
 	if err != nil {
-		return 0, utils.MergeErrors(ErrRequest, err)
+		return 0, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	pointer, err := strconv.ParseUint(string(resp), 10, 64)
@@ -91,7 +91,7 @@ func (p *sRequester) GetHash(pCtx context.Context, i uint64) (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", utils.MergeErrors(ErrRequest, err)
+		return "", utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	// response in hex encoding
@@ -111,7 +111,7 @@ func (p *sRequester) GetMessage(pCtx context.Context, pHash string) (net_message
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	msg, err := net_message.LoadMessage(p.fParams, string(resp))
@@ -135,7 +135,7 @@ func (p *sRequester) PutMessage(pCtx context.Context, pRequest string) error {
 		pRequest,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -149,7 +149,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)

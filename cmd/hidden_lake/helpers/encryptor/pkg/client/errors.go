@@ -7,7 +7,7 @@ const (
 )
 
 var (
-	ErrRequest          = errors.New(errPrefix + "request")
+	ErrBadRequest       = errors.New(errPrefix + "bad request")
 	ErrDecodeResponse   = errors.New(errPrefix + "decode response")
 	ErrInvalidHexFormat = errors.New(errPrefix + "invalid hex format")
 	ErrInvalidPublicKey = errors.New(errPrefix + "invalid public key")

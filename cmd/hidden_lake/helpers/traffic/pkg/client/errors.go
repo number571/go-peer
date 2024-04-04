@@ -2,11 +2,15 @@ package client
 
 import "errors"
 
+const (
+	errPrefix = "cmd/hidden_lake/helpers/traffic/pkg/client = "
+)
+
 var (
-	ErrRequest          = errors.New("request")
-	ErrDecodeResponse   = errors.New("decode response")
-	ErrInvalidResponse  = errors.New("invalid response")
-	ErrInvalidHexFormat = errors.New("invalid hex format")
-	ErrInvalidTitle     = errors.New("invalid title")
-	ErrDecodeMessage    = errors.New("decode message")
+	ErrBadRequest       = errors.New(errPrefix + "bad request")
+	ErrDecodeResponse   = errors.New(errPrefix + "decode response")
+	ErrInvalidResponse  = errors.New(errPrefix + "invalid response")
+	ErrInvalidHexFormat = errors.New(errPrefix + "invalid hex format")
+	ErrInvalidTitle     = errors.New(errPrefix + "invalid title")
+	ErrDecodeMessage    = errors.New(errPrefix + "decode message")
 )

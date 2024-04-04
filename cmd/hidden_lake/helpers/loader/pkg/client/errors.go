@@ -2,8 +2,12 @@ package client
 
 import "errors"
 
+const (
+	errPrefix = "cmd/hidden_lake/helpers/loader/pkg/client = "
+)
+
 var (
-	ErrRequest        = errors.New("request")
-	ErrDecodeResponse = errors.New("decode response")
-	ErrInvalidTitle   = errors.New("invalid title")
+	ErrBadRequest     = errors.New(errPrefix + "bad request")
+	ErrDecodeResponse = errors.New(errPrefix + "decode response")
+	ErrInvalidTitle   = errors.New(errPrefix + "invalid title")
 )
