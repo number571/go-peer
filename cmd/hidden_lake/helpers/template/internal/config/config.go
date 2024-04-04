@@ -1,12 +1,11 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"os"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -35,15 +34,15 @@ type SAddress struct {
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); !os.IsNotExist(err) {
-		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
+		return nil, utils.MergeErrors(ErrConfigAlreadyExist, err)
 	}
 
 	if err := pCfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("init config: %w", err)
+		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
 	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
-		return nil, fmt.Errorf("write config: %w", err)
+		return nil, utils.MergeErrors(ErrWriteConfig, err)
 	}
 
 	return pCfg, nil
@@ -51,21 +50,21 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 
 func LoadConfig(pFilepath string) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("config file '%s' does not exist", pFilepath)
+		return nil, utils.MergeErrors(ErrConfigNotExist, err)
 	}
 
 	bytes, err := os.ReadFile(pFilepath)
 	if err != nil {
-		return nil, fmt.Errorf("read config: %w", err)
+		return nil, utils.MergeErrors(ErrReadConfig, err)
 	}
 
 	cfg := new(SConfig)
 	if err := encoding.DeserializeYAML(bytes, cfg); err != nil {
-		return nil, fmt.Errorf("deserialize config: %w", err)
+		return nil, utils.MergeErrors(ErrDeserializeConfig, err)
 	}
 
 	if err := cfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("internal init config: %w", err)
+		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
 	return cfg, nil
@@ -86,11 +85,11 @@ func (p *SConfig) initConfig() error {
 	}
 
 	if !p.isValid() {
-		return errors.New("load config settings")
+		return ErrInvalidConfig
 	}
 
 	if err := p.loadLogging(); err != nil {
-		return fmt.Errorf("load logging: %w", err)
+		return utils.MergeErrors(ErrLoadLogging, err)
 	}
 
 	return nil
@@ -99,7 +98,7 @@ func (p *SConfig) initConfig() error {
 func (p *SConfig) loadLogging() error {
 	result, err := logger.LoadLogging(p.FLogging)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrLoadLogging, err)
 	}
 	p.fLogging = result
 	return nil

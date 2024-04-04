@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -11,7 +9,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	internal_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
@@ -20,13 +18,14 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 )
 
 type sChatMessage struct {
 	FIsIncoming bool
-	utils.SMessage
+	internal_utils.SMessage
 }
 
 type sChatAddress struct {
@@ -99,7 +98,7 @@ func FriendsChatPage(
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogRedirect))
 			http.Redirect(pW, pR,
-				fmt.Sprintf("/friends/chat?alias_name=%s", aliasName),
+				"/friends/chat?alias_name="+aliasName,
 				http.StatusSeeOther)
 			return
 		}
@@ -158,16 +157,16 @@ func getMessageBytes(pR *http.Request) ([]byte, error) {
 	case http.MethodPost:
 		strMsg := strings.TrimSpace(pR.FormValue("input_message"))
 		if strMsg == "" {
-			return nil, errors.New("error: message is nil")
+			return nil, ErrMessageNull
 		}
-		if utils.HasNotWritableCharacters(strMsg) {
-			return nil, errors.New("error: message has not writable characters")
+		if internal_utils.HasNotWritableCharacters(strMsg) {
+			return nil, ErrHasNotWritableChars
 		}
 		return wrapText(strMsg), nil
 	case http.MethodPut:
 		filename, fileBytes, err := getUploadFile(pR)
 		if err != nil {
-			return nil, fmt.Errorf("error: upload file: %w", err)
+			return nil, utils.MergeErrors(ErrUploadFile, err)
 		}
 		return wrapFile(filename, fileBytes), nil
 	default:
@@ -179,17 +178,17 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 	// Get handler for filename, size and headers
 	file, handler, err := pR.FormFile("input_file")
 	if err != nil {
-		return "", nil, fmt.Errorf("error: receive file: %w", err)
+		return "", nil, utils.MergeErrors(ErrGetFormFile, err)
 	}
 	defer file.Close()
 
 	if handler.Size == 0 {
-		return "", nil, errors.New("error: file size is nil")
+		return "", nil, ErrReadFileSize
 	}
 
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		return "", nil, fmt.Errorf("error: read file bytes: %w", err)
+		return "", nil, utils.MergeErrors(ErrReadFile, err)
 	}
 
 	return handler.Filename, fileBytes, nil
@@ -202,20 +201,25 @@ func sendMessage(
 	pAliasName string,
 	pMsgBytes []byte,
 ) error {
-	msgLimit, err := utils.GetMessageLimit(pCtx, pClient)
+	msgLimit, err := internal_utils.GetMessageLimit(pCtx, pClient)
 	if err != nil {
-		return fmt.Errorf("error: try send message: %w", err)
+		return utils.MergeErrors(ErrGetMessageLimit, err)
 	}
 
 	if uint64(len(pMsgBytes)) > (msgLimit + symmetric.CAESBlockSize + hashing.CSHA256Size) {
-		return fmt.Errorf("error: len message > limit: %w", err)
+		return ErrLenMessageGtLimit
 	}
 
 	hlmClient := hlm_client.NewClient(
 		hlm_client.NewBuilder(),
 		hlm_client.NewRequester(pClient),
 	)
-	return hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), pMsgBytes)
+	err = hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), pMsgBytes)
+	if err != nil {
+		return utils.MergeErrors(ErrPushMessage, err)
+	}
+
+	return nil
 }
 
 func getReceiverPubKey(
@@ -225,12 +229,12 @@ func getReceiverPubKey(
 ) (asymmetric.IPubKey, error) {
 	friends, err := client.GetFriends(pCtx)
 	if err != nil {
-		return nil, fmt.Errorf("error: read friends: %w", err)
+		return nil, utils.MergeErrors(ErrGetFriends, err)
 	}
 
 	friendPubKey, ok := friends[aliasName]
 	if !ok {
-		return nil, errors.New("undefined public key by alias name")
+		return nil, ErrUndefinedPublicKey
 	}
 
 	return friendPubKey, nil

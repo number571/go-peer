@@ -15,10 +15,11 @@ _GO_TEST_LIST=\
 	grep -v /cmd/
 
 .PHONY: default clean \
-	test-run test-coverage test-coverage-view \
+	lint-run test-run \
+	test-coverage test-coverage-view \
 	git-status git-push 
 
-default: test-run
+default: lint-run test-run
 
 clean:
 	make -C ./bin clean 
@@ -63,9 +64,13 @@ test-coverage-badge:
 		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
+### LINT
+lint-run:
+	golangci-lint run -E "goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+
 ### GIT
 
-git-status: test-coverage test-coverage-badge
+git-status: lint-run test-coverage test-coverage-badge
 	go fmt ./...
 	git add .
 	git status 

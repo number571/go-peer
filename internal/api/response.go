@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 func Response(pW http.ResponseWriter, pRet int, pRes interface{}) error {
@@ -30,5 +31,9 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) error {
 	pW.WriteHeader(pRet)
 
 	_, err := io.Copy(pW, bytes.NewBuffer(respBytes))
-	return err
+	if err != nil {
+		return utils.MergeErrors(ErrCopyBytes, err)
+	}
+
+	return nil
 }

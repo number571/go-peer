@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -100,7 +99,7 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 		p.initIncomingServiceHTTP(pCtx, msgBroker)
 		p.initInterfaceServiceHTTP(pCtx, msgBroker)
 
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlm_settings.CServiceName))
+		p.fStdfLogger.PushInfo(hlm_settings.CServiceName + " is running...")
 		return nil
 	}
 }
@@ -110,7 +109,7 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 		pCancel()
 		pWg.Wait() // wait canceled context
 
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlm_settings.CServiceName))
+		p.fStdfLogger.PushInfo(hlm_settings.CServiceName + " is shutting down...")
 		return p.stop()
 	}
 }

@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -50,12 +49,12 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", utils.MergeErrors(ErrRequest, err)
+		return "", utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	result := string(res)
 	if result != hls_settings.CServiceFullName {
-		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
+		return "", ErrInvalidTitle
 	}
 
 	return result, nil
@@ -70,7 +69,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	cfgSettings := new(config.SConfigSettings)
@@ -90,7 +89,7 @@ func (p *sRequester) SetNetworkKey(pCtx context.Context, pNetworkKey string) err
 		pNetworkKey,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -104,7 +103,7 @@ func (p *sRequester) FetchRequest(pCtx context.Context, pRequest *hls_settings.S
 		pRequest,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	resp, err := response.LoadResponse([]byte(res))
@@ -123,7 +122,7 @@ func (p *sRequester) BroadcastRequest(pCtx context.Context, pRequest *hls_settin
 		pRequest,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -137,7 +136,7 @@ func (p *sRequester) GetFriends(pCtx context.Context) (map[string]asymmetric.IPu
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	var vFriends []hls_settings.SFriend
@@ -162,7 +161,7 @@ func (p *sRequester) AddFriend(pCtx context.Context, pFriend *hls_settings.SFrie
 		pFriend,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -176,7 +175,7 @@ func (p *sRequester) DelFriend(pCtx context.Context, pFriend *hls_settings.SFrie
 		pFriend,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -190,7 +189,7 @@ func (p *sRequester) GetOnlines(pCtx context.Context) ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	var onlines []string
@@ -210,7 +209,7 @@ func (p *sRequester) DelOnline(pCtx context.Context, pConnect string) error {
 		pConnect,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -224,7 +223,7 @@ func (p *sRequester) GetConnections(pCtx context.Context) ([]string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	var connects []string
@@ -244,7 +243,7 @@ func (p *sRequester) AddConnection(pCtx context.Context, pConnect string) error 
 		pConnect,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -258,7 +257,7 @@ func (p *sRequester) DelConnection(pCtx context.Context, pConnect string) error 
 		pConnect,
 	)
 	if err != nil {
-		return utils.MergeErrors(ErrRequest, err)
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
 }
@@ -272,12 +271,12 @@ func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error)
 		nil,
 	)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrRequest, err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
 	pubKey := asymmetric.LoadRSAPubKey(string(res))
 	if pubKey == nil {
-		return nil, utils.MergeErrors(ErrDecodeResponse, errors.New("got invalid public key"))
+		return nil, ErrInvalidPublicKey
 	}
 
 	return pubKey, nil

@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -49,7 +48,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 
 	result := string(res)
 	if result != hll_settings.CServiceFullName {
-		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
+		return "", ErrInvalidTitle
 	}
 
 	return result, nil

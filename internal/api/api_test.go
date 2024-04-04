@@ -1,8 +1,10 @@
+// nolint: goerr113
 package api
 
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,7 +24,7 @@ type tsReadCloser struct {
 	io.ReadCloser
 }
 
-func (p *tsReadCloser) Read(_ []byte) (n int, err error) { return 0, fmt.Errorf("some error") }
+func (p *tsReadCloser) Read(_ []byte) (n int, err error) { return 0, errors.New("some error") }
 func (p *tsReadCloser) Close() error                     { return nil }
 
 const (

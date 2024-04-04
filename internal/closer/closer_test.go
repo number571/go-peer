@@ -1,7 +1,8 @@
+// nolint: goerr113
 package closer
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/types"
@@ -36,7 +37,7 @@ func testNewCloser(flag bool) types.ICloser {
 
 func (c *tsCloser) Close() error {
 	if c.fFlag {
-		return fmt.Errorf("some error")
+		return errors.New("some error")
 	}
 	return nil
 }

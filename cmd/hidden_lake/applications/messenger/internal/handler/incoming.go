@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -99,20 +98,20 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	case isText(rawMsgBytes):
 		strMsg := strings.TrimSpace(unwrapText(rawMsgBytes, true))
 		if strMsg == "" {
-			return errors.New("failed: message is nil")
+			return ErrMessageNull
 		}
 		if hlm_utils.HasNotWritableCharacters(strMsg) {
-			return errors.New("failed: message has not writable characters")
+			return ErrHasNotWritableChars
 		}
 		return nil
 	case isFile(rawMsgBytes):
 		filename, msgBytes := unwrapFile(rawMsgBytes, true)
 		if filename == "" || len(msgBytes) == 0 {
-			return errors.New("failed: unwrap file")
+			return ErrUnwrapFile
 		}
 		return nil
 	default:
-		return errors.New("failed: unknown message type")
+		return ErrUnknownMessageType
 	}
 }
 

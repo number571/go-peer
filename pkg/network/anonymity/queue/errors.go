@@ -2,7 +2,11 @@ package queue
 
 import "errors"
 
+const (
+	errPrefix = "pkg/network/anonymity/queue = "
+)
+
 var (
-	ErrRunning    = errors.New("queue running")
-	ErrQueueLimit = errors.New("queue limit")
+	ErrRunning    = errors.New(errPrefix + "queue running")
+	ErrQueueLimit = errors.New(errPrefix + "queue limit")
 )

@@ -1,12 +1,12 @@
 package app
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/number571/go-peer/internal/flag"
 	"github.com/number571/go-peer/pkg/types"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hla_chatingar_consumer_app "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/app"
 	hla_chatingar_consumer_settings "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/consumer/pkg/settings"
@@ -33,28 +33,24 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-const (
-	servicesCount = 6
-)
-
 func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel uint64) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 
 	cfg, err := config.InitConfig(filepath.Join(inputPath, settings.CPathYML), nil)
 	if err != nil {
-		return nil, fmt.Errorf("init config: %w", err)
+		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
 	runners, err := getRunners(cfg, pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
 	if err != nil {
-		return nil, fmt.Errorf("get runners: %w", err)
+		return nil, utils.MergeErrors(ErrGetRunners, err)
 	}
 
 	return NewApp(cfg, runners), nil
 }
 
 func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel uint64) ([]types.IRunner, error) {
-	runners := make([]types.IRunner, 0, servicesCount)
+	runners := make([]types.IRunner, 0, 64)
 
 	var (
 		runner types.IRunner
@@ -84,7 +80,7 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 		case hla_chatingar_producer_settings.CServiceFullName:
 			runner, err = hla_chatingar_producer_app.InitApp(pArgs, pDefaultPath)
 		default:
-			return nil, fmt.Errorf("unknown service %s", sName)
+			return nil, ErrUnknownService
 		}
 		if err != nil {
 			return nil, err

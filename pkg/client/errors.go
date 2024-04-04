@@ -2,16 +2,20 @@ package client
 
 import "errors"
 
+const (
+	errPrefix = "pkg/client = "
+)
+
 var (
-	ErrLimitMessageSize     = errors.New("limit message size")
-	ErrInitCheckMessage     = errors.New("init check message")
-	ErrDecryptCipherKey     = errors.New("decrypt cipher key")
-	ErrDecryptPublicKey     = errors.New("decrypt public key")
-	ErrInvalidPublicKeySize = errors.New("invalid public key size")
-	ErrDecodePayloadWrapper = errors.New("decode payload wrapper")
-	ErrInvalidDataHash      = errors.New("invalid data hash")
-	ErrInvalidHashSign      = errors.New("invalid hash sign")
-	ErrInvalidPayloadSize   = errors.New("invalid payload size")
-	ErrDecodePayload        = errors.New("decode payload")
-	ErrEncryptSymmetricKey  = errors.New("encrypt symmetric key")
+	ErrLimitMessageSize     = errors.New(errPrefix + "limit message size")
+	ErrInitCheckMessage     = errors.New(errPrefix + "init check message")
+	ErrDecryptCipherKey     = errors.New(errPrefix + "decrypt cipher key")
+	ErrDecryptPublicKey     = errors.New(errPrefix + "decrypt public key")
+	ErrInvalidPublicKeySize = errors.New(errPrefix + "invalid public key size")
+	ErrDecodePayloadWrapper = errors.New(errPrefix + "decode payload wrapper")
+	ErrInvalidDataHash      = errors.New(errPrefix + "invalid data hash")
+	ErrInvalidHashSign      = errors.New(errPrefix + "invalid hash sign")
+	ErrInvalidPayloadSize   = errors.New(errPrefix + "invalid payload size")
+	ErrDecodePayload        = errors.New(errPrefix + "decode payload")
+	ErrEncryptSymmetricKey  = errors.New(errPrefix + "encrypt symmetric key")
 )

@@ -1,3 +1,4 @@
+// nolint: goerr113
 package queue
 
 import (
@@ -264,7 +265,7 @@ func testQueue(queue IMessageQueue) error {
 
 	cancel()
 	if <-notClosed {
-		return fmt.Errorf("success dequeue with close")
+		return errors.New("success dequeue with close")
 	}
 	return nil
 }

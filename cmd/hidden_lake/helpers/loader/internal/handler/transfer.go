@@ -155,7 +155,7 @@ func makeHLTClient(pCfg config.IConfig, pConn string) hlt_client.IClient {
 	return hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			fmt.Sprintf("http://%s", pConn),
+			"http://"+pConn,
 			&http.Client{Timeout: time.Minute / 2},
 			net_message.NewSettings(&net_message.SSettings{
 				FWorkSizeBits: sett.GetWorkSizeBits(),

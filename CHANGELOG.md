@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `go-peer`: append lint-run to makefile
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger`: delete share_enabled option, requestID

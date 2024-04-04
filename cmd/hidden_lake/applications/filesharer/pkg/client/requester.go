@@ -2,8 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
@@ -35,10 +33,7 @@ func (p *sRequester) GetListFiles(pCtx context.Context, pAliasName string, pRequ
 	}
 
 	if resp.GetCode() != http.StatusOK {
-		return nil, utils.MergeErrors(
-			ErrDecodeResponse,
-			fmt.Errorf("got %d code", resp.GetCode()),
-		)
+		return nil, ErrDecodeResponse
 	}
 
 	list := make([]hlf_settings.SFileInfo, 0, hlf_settings.CDefaultPageOffset)
@@ -48,10 +43,7 @@ func (p *sRequester) GetListFiles(pCtx context.Context, pAliasName string, pRequ
 
 	for _, info := range list {
 		if len(encoding.HexDecode(info.FHash)) != hashing.CSHA256Size {
-			return nil, utils.MergeErrors(
-				ErrInvalidResponse,
-				errors.New("got invalid hash value"),
-			)
+			return nil, ErrInvalidResponse
 		}
 	}
 
@@ -65,10 +57,7 @@ func (p *sRequester) LoadFileChunk(pCtx context.Context, pAliasName string, pReq
 	}
 
 	if resp.GetCode() != http.StatusOK {
-		return nil, utils.MergeErrors(
-			ErrDecodeResponse,
-			fmt.Errorf("got %d code", resp.GetCode()),
-		)
+		return nil, ErrDecodeResponse
 	}
 
 	return resp.GetBody(), nil

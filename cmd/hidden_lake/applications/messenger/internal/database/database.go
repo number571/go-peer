@@ -1,12 +1,11 @@
 package database
 
 import (
-	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 type sKeyValueDB struct {
@@ -17,7 +16,7 @@ type sKeyValueDB struct {
 func NewKeyValueDB(pSettings database.ISettings) (IKVDatabase, error) {
 	db, err := database.NewKVDatabase(pSettings)
 	if err != nil {
-		return nil, fmt.Errorf("new key/value database: %w", err)
+		return nil, utils.MergeErrors(ErrCreateDB, err)
 	}
 	return &sKeyValueDB{fDB: db}, nil
 }
@@ -34,23 +33,23 @@ func (p *sKeyValueDB) Load(pR IRelation, pStart, pEnd uint64) ([]IMessage, error
 	defer p.fMutex.Unlock()
 
 	if pStart > pEnd {
-		return nil, errors.New("start > end")
+		return nil, ErrStartGtEnd
 	}
 
 	size := p.getSize(pR)
 	if pEnd > size {
-		return nil, errors.New("end > size")
+		return nil, ErrEndGtSize
 	}
 
 	res := make([]IMessage, 0, pEnd-pStart)
 	for i := pStart; i < pEnd; i++ {
 		data, err := p.fDB.Get(getKeyMessageByEnum(pR, i))
 		if err != nil {
-			return nil, fmt.Errorf("read message: %w", err)
+			return nil, utils.MergeErrors(ErrGetMessage, err)
 		}
 		msg := LoadMessage(data)
 		if msg == nil {
-			return nil, errors.New("message is nil")
+			return nil, ErrLoadMessage
 		}
 		res = append(res, msg)
 	}
@@ -65,11 +64,11 @@ func (p *sKeyValueDB) Push(pR IRelation, pMsg IMessage) error {
 	size := p.getSize(pR)
 	numBytes := encoding.Uint64ToBytes(size + 1)
 	if err := p.fDB.Set(getKeySize(pR), numBytes[:]); err != nil {
-		return fmt.Errorf("set size of message to database: %w", err)
+		return utils.MergeErrors(ErrSetSizeMessage, err)
 	}
 
 	if err := p.fDB.Set(getKeyMessageByEnum(pR, size), pMsg.ToBytes()); err != nil {
-		return fmt.Errorf("set message to database: %w", err)
+		return utils.MergeErrors(ErrSetMessage, err)
 	}
 
 	return nil
@@ -80,7 +79,7 @@ func (p *sKeyValueDB) Close() error {
 	defer p.fMutex.Unlock()
 
 	if err := p.fDB.Close(); err != nil {
-		return fmt.Errorf("close KV database: %w", err)
+		return utils.MergeErrors(ErrCloseDB, err)
 	}
 	return nil
 }

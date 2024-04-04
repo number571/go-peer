@@ -1,3 +1,4 @@
+// nolint: goerr113
 package anonymity
 
 import (
@@ -116,7 +117,7 @@ func TestComplexFetchPayload(t *testing.T) {
 				return
 			}
 
-			if string(resp) != fmt.Sprintf("%s (response)", reqBody) {
+			if string(resp) != reqBody+" (response)" {
 				t.Errorf("string(resp) != reqBody (%d)", i)
 				return
 			}
@@ -688,7 +689,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 			testutils.TcHead,
 			func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 				// send response
-				return []byte(fmt.Sprintf("%s (response)", string(reqBytes))), nil
+				return []byte(string(reqBytes) + " (response)"), nil
 			},
 		)
 	}

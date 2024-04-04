@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -70,7 +69,7 @@ func TestApp(t *testing.T) {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			fmt.Sprintf("http://%s", testutils.TgAddrs[23]),
+			"http://"+testutils.TgAddrs[23],
 			&http.Client{Timeout: time.Minute},
 			net_message.NewSettings(&net_message.SSettings{
 				FNetworkKey:   testutils.TCNetworkKey,

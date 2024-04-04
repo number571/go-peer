@@ -10,6 +10,8 @@
 8. Custom Unmarshal with fields 
 9. golint: "goerr113,wrapcheck,cyclop,funlen,gocyclo,gocognit"
 10. Add Err values to all packages, projects
+11. Create share errors (most popular)
+12. Create errPrefix
 
 ### Tests
 

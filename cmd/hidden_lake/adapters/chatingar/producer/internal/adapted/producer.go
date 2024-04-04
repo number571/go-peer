@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -41,18 +42,18 @@ func (p *sAdaptedProducer) Produce(pCtx context.Context, pMsg net_message.IMessa
 		bytes.NewBuffer([]byte(reqStr)),
 	)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	httpClient := &http.Client{Timeout: 30 * time.Second}
 	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	if code := resp.StatusCode; code != http.StatusCreated {
-		return fmt.Errorf("got status code = %d", code)
+		return ErrBadStatusCode
 	}
 
 	return nil

@@ -14,6 +14,7 @@ import (
 	"github.com/number571/go-peer/internal/language"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
@@ -130,7 +131,7 @@ func getSettings(
 
 	myPubKey, err := pHlsClient.GetPubKey(pCtx)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetPublicKey, err)
 	}
 
 	result.FPublicKey = myPubKey.ToString()
@@ -138,13 +139,13 @@ func getSettings(
 
 	gotSettings, err := pHlsClient.GetSettings(pCtx)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetSettingsHLS, err)
 	}
 	result.FNetworkKey = gotSettings.GetNetworkKey()
 
 	allConns, err := getAllConnections(pCtx, pHlsClient)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetAllConnections, err)
 	}
 	result.FConnections = allConns
 
@@ -157,12 +158,12 @@ func getAllConnections(
 ) ([]sConnection, error) {
 	conns, err := pClient.GetConnections(pCtx)
 	if err != nil {
-		return nil, fmt.Errorf("error: read connections")
+		return nil, utils.MergeErrors(ErrReadConnections, err)
 	}
 
 	onlines, err := pClient.GetOnlines(pCtx)
 	if err != nil {
-		return nil, fmt.Errorf("error: read online connections")
+		return nil, utils.MergeErrors(ErrReadOnlineConnections, err)
 	}
 
 	connections := make([]sConnection, 0, len(conns))

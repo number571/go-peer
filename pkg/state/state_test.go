@@ -1,4 +1,4 @@
-// gotests -all -parallel . > state_test.go
+// nolint: goerr113
 package state
 
 import (

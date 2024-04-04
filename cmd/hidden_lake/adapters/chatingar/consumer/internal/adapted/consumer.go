@@ -3,7 +3,6 @@ package adapted
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -49,7 +49,7 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 	if !p.fEnabled {
 		countComments, err := p.loadCountComments(pCtx)
 		if err != nil {
-			return nil, err
+			return nil, utils.MergeErrors(ErrLoadCountComments, err)
 		}
 
 		p.fCurrPage = (countComments / cPageOffet) + 1
@@ -79,28 +79,28 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessa
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed: build request")
+		return nil, utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	httpClient := &http.Client{Timeout: 30 * time.Second}
 	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
-		return nil, fmt.Errorf("failed: bad request")
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	if code := resp.StatusCode; code != http.StatusOK {
-		return nil, fmt.Errorf("got status code = %d", code)
+		return nil, ErrBadStatusCode
 	}
 
 	var messagesDTO sMessagesDTO
 	if err := json.NewDecoder(resp.Body).Decode(&messagesDTO); err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrDecodeMessages, err)
 	}
 
 	sizeComments := len(messagesDTO.Comments)
 	if sizeComments > cPageOffet {
-		return nil, errors.New("has limit pages")
+		return nil, ErrLimitPage
 	}
 	if sizeComments == cPageOffet {
 		p.fCurrPage++
@@ -130,32 +130,32 @@ func (p *sAdaptedConsumer) loadCountComments(pCtx context.Context) (uint64, erro
 	req, err := http.NewRequestWithContext(
 		pCtx,
 		http.MethodGet,
-		fmt.Sprintf("https://api.chatingar.com/api/post/%s", p.fPostID),
+		"https://api.chatingar.com/api/post/"+p.fPostID,
 		nil,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("failed: build request")
+		return 0, utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	httpClient := &http.Client{Timeout: 30 * time.Second}
 	resp, err := httpClient.Do(chatingar.EnrichRequest(req))
 	if err != nil {
-		return 0, fmt.Errorf("failed: bad request")
+		return 0, utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	if code := resp.StatusCode; code != http.StatusOK {
-		return 0, fmt.Errorf("got status code = %d", code)
+		return 0, ErrBadStatusCode
 	}
 
 	var count sCountDTO
 	if err := json.NewDecoder(resp.Body).Decode(&count); err != nil {
-		return 0, err
+		return 0, utils.MergeErrors(ErrDecodeCount, err)
 	}
 
 	result := count.Post.CommentCount
 	if result < 0 {
-		return 0, errors.New("got count < 0")
+		return 0, ErrCountLtNull
 	}
 
 	return uint64(result), nil

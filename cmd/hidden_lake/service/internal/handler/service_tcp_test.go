@@ -1,7 +1,9 @@
+// nolint: goerr113
 package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -92,7 +94,7 @@ func testStartNodeHLS() (anonymity.INode, context.CancelFunc, error) {
 
 	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 9), testutils.TgAddrs[4])
 	if node == nil {
-		return nil, nil, fmt.Errorf("node is not running")
+		return nil, nil, errors.New("node is not running")
 	}
 
 	node.HandleFunc(
@@ -122,7 +124,7 @@ func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 
 	node, ctx, cancel := testRunNewNode(fmt.Sprintf(tcPathDBTemplate, 10), "")
 	if node == nil {
-		return nil, cancel, fmt.Errorf("node is not running")
+		return nil, cancel, errors.New("node is not running")
 	}
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 

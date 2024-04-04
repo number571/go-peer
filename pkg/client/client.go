@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -11,7 +10,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -87,14 +85,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	)
 
 	if resultSize > msgLimitSize {
-		return nil, utils.MergeErrors(
-			ErrLimitMessageSize,
-			fmt.Errorf(
-				"limit of message size without hex encoding = %d bytes < current payload size with additional padding = %d bytes",
-				msgLimitSize,
-				resultSize,
-			),
-		)
+		return nil, ErrLimitMessageSize
 	}
 
 	return p.encryptWithParams(

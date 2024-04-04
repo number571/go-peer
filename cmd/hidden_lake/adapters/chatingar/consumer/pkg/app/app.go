@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -63,7 +62,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		hlt_client.NewClient(
 			hlt_client.NewBuilder(),
 			hlt_client.NewRequester(
-				fmt.Sprintf("http://%s", p.fHltAddr),
+				"http://"+p.fHltAddr,
 				&http.Client{Timeout: time.Minute},
 				p.fSettings,
 			),

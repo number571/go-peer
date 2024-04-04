@@ -24,7 +24,7 @@ func TestHandleConnectsAPI(t *testing.T) {
 	client := hls_client.NewClient(
 		hls_client.NewBuilder(),
 		hls_client.NewRequester(
-			fmt.Sprintf("http://%s", testutils.TgAddrs[6]),
+			"http://"+testutils.TgAddrs[6],
 			&http.Client{Timeout: time.Minute},
 		),
 	)

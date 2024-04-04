@@ -1,7 +1,5 @@
 package std
 
-import "fmt"
-
 var (
 	_ ILogging = sLogging{}
 )
@@ -20,7 +18,7 @@ func LoadLogging(pLogging []string) (ILogging, error) {
 	for _, v := range pLogging {
 		logType, ok := mapping[v]
 		if !ok {
-			return nil, fmt.Errorf("undefined log type '%s'", v)
+			return nil, ErrUnknownLogType
 		}
 		logging[logType] = true
 	}

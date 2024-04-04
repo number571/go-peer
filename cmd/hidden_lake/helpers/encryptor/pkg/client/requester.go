@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -55,7 +54,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 
 	result := string(res)
 	if result != hle_settings.CServiceFullName {
-		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
+		return "", ErrInvalidTitle
 	}
 
 	return result, nil
@@ -103,12 +102,12 @@ func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IM
 
 	pubKey := asymmetric.LoadRSAPubKey(result.FPublicKey)
 	if pubKey == nil {
-		return nil, nil, utils.MergeErrors(ErrInvalidResponse, errors.New("decode public key"))
+		return nil, nil, ErrInvalidPublicKey
 	}
 
 	data := encoding.HexDecode(result.FHexData)
 	if data == nil {
-		return nil, nil, utils.MergeErrors(ErrInvalidResponse, errors.New("decode data"))
+		return nil, nil, ErrInvalidHexFormat
 	}
 
 	return pubKey, data, nil
@@ -128,7 +127,7 @@ func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error)
 
 	pubKey := asymmetric.LoadRSAPubKey(string(res))
 	if pubKey == nil {
-		return nil, utils.MergeErrors(ErrDecodeResponse, errors.New("got invalid public key"))
+		return nil, ErrInvalidPublicKey
 	}
 
 	return pubKey, nil

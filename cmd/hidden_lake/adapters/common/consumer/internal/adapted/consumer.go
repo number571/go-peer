@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	"github.com/number571/go-peer/pkg/database"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -43,12 +44,12 @@ func NewAdaptedConsumer(
 func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, error) {
 	countService, err := p.loadCountFromService(pCtx)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrLoadCountService, err)
 	}
 
 	countDB, err := p.loadCountFromDB()
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrLoadCountDB, err)
 	}
 
 	if countDB >= countService {
@@ -57,11 +58,11 @@ func (p *sAdaptedConsumer) Consume(pCtx context.Context) (net_message.IMessage, 
 
 	msg, err := p.loadMessageFromService(pCtx, countDB)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrLoadMessage, err)
 	}
 
 	if err := p.incrementCountInDB(); err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrIncrementCount, err)
 	}
 
 	return msg, nil
@@ -75,27 +76,27 @@ func (p *sAdaptedConsumer) loadMessageFromService(pCtx context.Context, pID uint
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed: build request")
+		return nil, utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed: bad request")
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	msgStringAsBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed: read body from service")
+		return nil, utils.MergeErrors(ErrReadResponse, err)
 	}
 
 	if len(msgStringAsBytes) <= 1 || msgStringAsBytes[0] == '!' {
-		return nil, fmt.Errorf("failed: incorrect response from service")
+		return nil, ErrInvalidResponse
 	}
 
 	msg, err := net_message.LoadMessage(p.fSettings, string(msgStringAsBytes[1:]))
 	if err != nil {
-		return nil, fmt.Errorf("message is nil")
+		return nil, utils.MergeErrors(ErrDecodeMessage, err)
 	}
 
 	return msg, nil
@@ -109,28 +110,28 @@ func (p *sAdaptedConsumer) loadCountFromService(pCtx context.Context) (uint64, e
 		nil,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("failed: build request")
+		return 0, utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, fmt.Errorf("failed: bad request")
+		return 0, utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	bytesCount, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, fmt.Errorf("failed: read body from service")
+		return 0, utils.MergeErrors(ErrReadResponse, err)
 	}
 
 	if len(bytesCount) <= 1 || bytesCount[0] == '!' {
-		return 0, fmt.Errorf("failed: incorrect response from service")
+		return 0, ErrInvalidResponse
 	}
 
 	strCount := string(bytesCount[1:])
 	countService, err := strconv.ParseUint(strCount, 10, 64)
 	if err != nil {
-		return 0, err
+		return 0, utils.MergeErrors(ErrParseCount, err)
 	}
 
 	return countService, nil
@@ -140,25 +141,33 @@ func (p *sAdaptedConsumer) loadCountFromDB() (uint64, error) {
 	res, err := p.fKVDatabase.Get([]byte(cDBCountKey))
 	if err != nil {
 		if !errors.Is(err, leveldb.ErrNotFound) {
-			return 0, err
+			return 0, utils.MergeErrors(ErrGetCount, err)
 		}
 		res = []byte(strconv.Itoa(0))
 		if err := p.fKVDatabase.Set([]byte(cDBCountKey), res); err != nil {
-			return 0, err
+			return 0, utils.MergeErrors(ErrInitCountKey, err)
 		}
 	}
 
-	return strconv.ParseUint(string(res), 10, 64)
+	count, err := strconv.ParseUint(string(res), 10, 64)
+	if err != nil {
+		return 0, utils.MergeErrors(ErrParseCount, err)
+	}
+	return count, nil
 }
 
 func (p *sAdaptedConsumer) incrementCountInDB() error {
 	count, err := p.loadCountFromDB()
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrLoadCountDB, err)
 	}
 
-	return p.fKVDatabase.Set(
+	err = p.fKVDatabase.Set(
 		[]byte(cDBCountKey),
 		[]byte(strconv.FormatUint(count+1, 10)),
 	)
+	if err != nil {
+		return utils.MergeErrors(ErrSetNewCount, err)
+	}
+	return nil
 }

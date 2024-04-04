@@ -2,10 +2,14 @@ package message
 
 import "errors"
 
+const (
+	errPrefix = "pkg/client/message = "
+)
+
 var (
-	ErrUnknownType        = errors.New("unknown type of message")
-	ErrSeparatorNotFound  = errors.New("separator is not found")
-	ErrDeserializeMessage = errors.New("deserialize message")
-	ErrDecodePayload      = errors.New("decode hex payload")
-	ErrInvalidMessage     = errors.New("invalid message")
+	ErrUnknownType        = errors.New(errPrefix + "unknown type of message")
+	ErrSeparatorNotFound  = errors.New(errPrefix + "separator is not found")
+	ErrDeserializeMessage = errors.New(errPrefix + "deserialize message")
+	ErrDecodePayload      = errors.New(errPrefix + "decode hex payload")
+	ErrInvalidMessage     = errors.New(errPrefix + "invalid message")
 )

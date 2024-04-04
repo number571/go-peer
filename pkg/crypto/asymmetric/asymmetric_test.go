@@ -1,8 +1,9 @@
+// nolint: goerr113
 package asymmetric
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -110,23 +111,23 @@ func TestLoadRSAKey(t *testing.T) {
 
 func testRSAConverter(priv IPrivKey, pub IPubKey) error {
 	if priv.GetSize() != tcKeySize {
-		return fmt.Errorf("private key size != tcKeySize")
+		return errors.New("private key size != tcKeySize")
 	}
 
 	if pub.GetSize() != tcKeySize {
-		return fmt.Errorf("public key size != tcKeySize")
+		return errors.New("public key size != tcKeySize")
 	}
 
 	if priv.ToString() != tcPrivKey {
-		return fmt.Errorf("private key string != tcPrivKey")
+		return errors.New("private key string != tcPrivKey")
 	}
 
 	if pub.ToString() != tcPubKey {
-		return fmt.Errorf("public key string != tcPrivKey")
+		return errors.New("public key string != tcPrivKey")
 	}
 
 	if pub.GetHasher().ToString() != tcAddr {
-		return fmt.Errorf("address string != tcAddr")
+		return errors.New("address string != tcAddr")
 	}
 
 	return nil

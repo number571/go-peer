@@ -44,7 +44,7 @@ func TestGetLogFunc(t *testing.T) {
 }
 
 func TestStdLogger(t *testing.T) {
-	stdLogger := NewStdLogger(&tsLogger{}, func(ia logger.ILogArg) string {
+	stdLogger := NewStdLogger(&tsLogger{}, func(_ logger.ILogArg) string {
 		return ""
 	})
 	if _, ok := stdLogger.GetSettings().GetOutInfo().(*os.File); !ok {

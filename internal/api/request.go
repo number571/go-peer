@@ -3,11 +3,11 @@ package api
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 func Request(
@@ -40,20 +40,20 @@ func Request(
 		bytes.NewBuffer(reqBytes),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("new request: %w", err)
+		return nil, utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	req.Header.Set("Content-Type", contentType)
 
 	resp, err := pClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("do request: %w", err)
+		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	result, err := loadResponse(resp.StatusCode, resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("load request: %w", err)
+		return nil, utils.MergeErrors(ErrLoadResponse, err)
 	}
 	return result, nil
 }
@@ -61,11 +61,11 @@ func Request(
 func loadResponse(pStatusCode int, pReader io.ReadCloser) ([]byte, error) {
 	resp, err := io.ReadAll(pReader)
 	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
+		return nil, utils.MergeErrors(ErrReadResponse, err)
 	}
 
 	if pStatusCode != http.StatusOK {
-		return nil, fmt.Errorf("error code = %d (%x)", pStatusCode, resp)
+		return nil, ErrBadStatusCode
 	}
 
 	return resp, nil

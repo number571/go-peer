@@ -9,12 +9,13 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
+	internal_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/internal/language"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 )
@@ -58,7 +59,7 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 			}
 		case http.MethodHead:
 			pseudonym := strings.TrimSpace(pR.FormValue("pseudonym"))
-			if !utils.PseudonymIsValid(pseudonym) {
+			if !internal_utils.PseudonymIsValid(pseudonym) {
 				ErrorPage(pLogger, cfg, "read_pseudonym", "pseudonym is invalid")(pW, pR)
 				return
 			}
@@ -135,7 +136,7 @@ func getSettings(pCtx context.Context, pCfg config.IConfig, pHlsClient hls_clien
 
 	myPubKey, err := pHlsClient.GetPubKey(pCtx)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetPublicKey, err)
 	}
 
 	result.FPublicKey = myPubKey.ToString()
@@ -143,13 +144,13 @@ func getSettings(pCtx context.Context, pCfg config.IConfig, pHlsClient hls_clien
 
 	gotSettings, err := pHlsClient.GetSettings(pCtx)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetSettings, err)
 	}
 	result.FNetworkKey = gotSettings.GetNetworkKey()
 
 	allConns, err := getAllConnections(pCtx, pHlsClient)
 	if err != nil {
-		return nil, err
+		return nil, utils.MergeErrors(ErrGetAllConnections, err)
 	}
 	result.FConnections = allConns
 
@@ -159,12 +160,12 @@ func getSettings(pCtx context.Context, pCfg config.IConfig, pHlsClient hls_clien
 func getAllConnections(pCtx context.Context, pClient hls_client.IClient) ([]sConnection, error) {
 	conns, err := pClient.GetConnections(pCtx)
 	if err != nil {
-		return nil, fmt.Errorf("error: read connections")
+		return nil, ErrReadConnections
 	}
 
 	onlines, err := pClient.GetOnlines(pCtx)
 	if err != nil {
-		return nil, fmt.Errorf("error: read online connections")
+		return nil, ErrReadOnlineConnections
 	}
 
 	connections := make([]sConnection, 0, len(conns))

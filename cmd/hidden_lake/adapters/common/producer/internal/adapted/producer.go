@@ -3,13 +3,13 @@ package adapted
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -34,26 +34,26 @@ func (p *sAdaptedProducer) Produce(pCtx context.Context, pMsg net_message.IMessa
 		bytes.NewBuffer([]byte(pMsg.ToString())),
 	)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrBuildRequest, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	defer resp.Body.Close()
 
 	if code := resp.StatusCode; code != http.StatusOK {
-		return fmt.Errorf("got status code = %d", code)
+		return ErrBadStatusCode
 	}
 
 	res, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrReadResponse, err)
 	}
 
 	if len(res) == 0 || res[0] == '!' {
-		return errors.New("got invalid resp")
+		return ErrInvalidResponse
 	}
 	return nil
 }

@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
@@ -37,14 +37,14 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 
 		if _, err := message.LoadMessage(pCfg.GetSettings(), pld.GetBody()); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return fmt.Errorf("load message: %w", err)
+			return utils.MergeErrors(ErrLoadMessage, err)
 		}
 
 		// check database
 		hltDB := pDBWrapper.Get()
 		if hltDB == nil {
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-			return errors.New("database is nil")
+			return ErrDatabaseNull
 		}
 
 		// check message from in database queue
@@ -54,7 +54,7 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 				return nil
 			}
 			pLogger.PushErro(logBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-			return fmt.Errorf("put message to database: %w", err)
+			return utils.MergeErrors(ErrPushMessageDB, err)
 		}
 
 		hasBroadastError := false
@@ -82,7 +82,7 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 					pCtx,
 					httpClient,
 					http.MethodPost,
-					fmt.Sprintf("http://%s", cHost),
+					"http://"+cHost,
 					pNetMsg.ToString(),
 				)
 				if err != nil {
@@ -94,7 +94,6 @@ func HandleServiceTCP(pCfg config.IConfig, pDBWrapper database.IDBWrapper, pLogg
 		}
 
 		wg.Wait()
-
 		return nil
 	}
 }

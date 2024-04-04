@@ -1,7 +1,6 @@
 package language
 
 import (
-	"errors"
 	"strings"
 )
 
@@ -14,7 +13,7 @@ func ToILanguage(s string) (ILanguage, error) {
 	case "ESP":
 		return CLangESP, nil
 	default:
-		return 0, errors.New("unknown language")
+		return 0, ErrUnknownLanguage
 	}
 }
 

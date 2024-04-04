@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"errors"
 	"net"
 	"sync"
 	"time"
@@ -101,7 +100,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) er
 			case <-pCtx.Done():
 				listErr[i] = pCtx.Err()
 			case <-timer.C:
-				listErr[i] = utils.MergeErrors(ErrWriteTimeout, errors.New(a))
+				listErr[i] = ErrWriteTimeout
 			case err := <-chErr:
 				if err == nil {
 					return

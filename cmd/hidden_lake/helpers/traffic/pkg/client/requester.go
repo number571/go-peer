@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -57,7 +56,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 
 	result := string(resp)
 	if result != hlt_settings.CServiceFullName {
-		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("incorrect title pattern"))
+		return "", ErrInvalidTitle
 	}
 
 	return result, nil
@@ -97,7 +96,7 @@ func (p *sRequester) GetHash(pCtx context.Context, i uint64) (string, error) {
 
 	// response in hex encoding
 	if len(resp) != 2*hashing.CSHA256Size {
-		return "", utils.MergeErrors(ErrDecodeResponse, errors.New("got invalid size of hash"))
+		return "", ErrDecodeResponse
 	}
 
 	return string(resp), nil
@@ -117,11 +116,11 @@ func (p *sRequester) GetMessage(pCtx context.Context, pHash string) (net_message
 
 	msg, err := net_message.LoadMessage(p.fParams, string(resp))
 	if err != nil {
-		return nil, utils.MergeErrors(ErrDecodeResponse, errors.New("load message"))
+		return nil, utils.MergeErrors(ErrDecodeMessage, err)
 	}
 
 	if !bytes.Equal(msg.GetHash(), encoding.HexDecode(pHash)) {
-		return nil, utils.MergeErrors(ErrInvalidResponse, errors.New("got invalid hash"))
+		return nil, ErrInvalidHexFormat
 	}
 
 	return msg, nil

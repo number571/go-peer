@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/utils"
 
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -45,7 +46,7 @@ func HandleServiceTCP(
 			friends[sender.GetHasher().ToString()] = sender
 			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
 				pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
-				return nil, err
+				return nil, utils.MergeErrors(ErrUpdateFriends, err)
 			}
 			// update list of friends and continue read request
 			pNode.GetListPubKeys().AddPubKey(sender)
@@ -56,14 +57,14 @@ func HandleServiceTCP(
 		loadReq, err := request.LoadRequest(reqBytes)
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
-			return nil, err
+			return nil, utils.MergeErrors(ErrLoadRequest, err)
 		}
 
 		// get service's address by hostname
 		service, ok := cfg.GetService(loadReq.GetHost())
 		if !ok {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
-			return nil, fmt.Errorf("failed: address undefined")
+			return nil, ErrUndefinedService
 		}
 
 		// generate new request to serivce
@@ -75,7 +76,7 @@ func HandleServiceTCP(
 		)
 		if err != nil {
 			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroProxyRequestType))
-			return nil, err
+			return nil, utils.MergeErrors(ErrBuildRequest, err)
 		}
 
 		// append headers from request & set service headers
@@ -89,7 +90,7 @@ func HandleServiceTCP(
 		resp, err := httpClient.Do(pushReq)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
-			return nil, err
+			return nil, utils.MergeErrors(ErrBadRequest, err)
 		}
 		defer resp.Body.Close()
 
@@ -111,7 +112,7 @@ func HandleServiceTCP(
 		default:
 			// unknown response mode
 			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
-			return nil, fmt.Errorf("failed: got invalid value of header (response-mode)")
+			return nil, ErrInvalidResponseMode
 		}
 	}
 }

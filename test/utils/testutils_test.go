@@ -1,3 +1,4 @@
+// nolint: goerr113
 package testutils
 
 import (

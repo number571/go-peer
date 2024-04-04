@@ -1,14 +1,13 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"sync"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -56,16 +55,16 @@ type SAddress struct {
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); !os.IsNotExist(err) {
-		return nil, fmt.Errorf("config file '%s' already exist", pFilepath)
+		return nil, utils.MergeErrors(ErrConfigAlreadyExist, err)
 	}
 
 	pCfg.fFilepath = pFilepath
 	if err := pCfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("init config: %w", err)
+		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
 	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
-		return nil, fmt.Errorf("write config: %w", err)
+		return nil, utils.MergeErrors(ErrWriteConfig, err)
 	}
 
 	return pCfg, nil
@@ -73,22 +72,22 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 
 func LoadConfig(pFilepath string) (IConfig, error) {
 	if _, err := os.Stat(pFilepath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("config file '%s' does not exist", pFilepath)
+		return nil, utils.MergeErrors(ErrConfigNotFound, err)
 	}
 
 	bytes, err := os.ReadFile(pFilepath)
 	if err != nil {
-		return nil, fmt.Errorf("read config: %w", err)
+		return nil, utils.MergeErrors(ErrReadConfig, err)
 	}
 
 	cfg := new(SConfig)
 	if err := encoding.DeserializeYAML(bytes, cfg); err != nil {
-		return nil, fmt.Errorf("deserialize config: %w", err)
+		return nil, utils.MergeErrors(ErrDeserializeConfig, err)
 	}
 
 	cfg.fFilepath = pFilepath
 	if err := cfg.initConfig(); err != nil {
-		return nil, fmt.Errorf("load logging: %w", err)
+		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
 	return cfg, nil
@@ -161,15 +160,15 @@ func (p *SConfig) initConfig() error {
 	}
 
 	if !p.isValid() {
-		return errors.New("load config settings")
+		return ErrLoadConfigSettings
 	}
 
 	if err := p.loadPubKeys(); err != nil {
-		return fmt.Errorf("load public keys: %w", err)
+		return utils.MergeErrors(ErrLoadPublicKey, err)
 	}
 
 	if err := p.loadLogging(); err != nil {
-		return fmt.Errorf("load logging: %w", err)
+		return utils.MergeErrors(ErrLoadLogging, err)
 	}
 
 	return nil
@@ -190,18 +189,18 @@ func (p *SConfig) loadPubKeys() error {
 	mapping := make(map[string]struct{})
 	for name, val := range p.FFriends {
 		if _, ok := mapping[val]; ok {
-			return fmt.Errorf("found public key duplicate '%s'", val)
+			return ErrDuplicatePublicKey
 		}
 		mapping[val] = struct{}{}
 
 		pubKey := asymmetric.LoadRSAPubKey(val)
 		if pubKey == nil {
-			return fmt.Errorf("public key is nil for '%s'", name)
+			return ErrInvalidPublicKey
 		}
 
 		p.fFriends[name] = pubKey
 		if pubKey.GetSize() != p.FSettings.FKeySizeBits {
-			return fmt.Errorf("not supported key size for '%s'", name)
+			return ErrNotSupportedKeySize
 		}
 	}
 

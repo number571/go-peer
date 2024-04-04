@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -60,7 +59,7 @@ func TestApp(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	client := client.NewClient(
 		client.NewRequester(
-			fmt.Sprintf("http://%s", testutils.TgAddrs[56]),
+			"http://"+testutils.TgAddrs[56],
 			&http.Client{Timeout: time.Minute},
 		),
 	)

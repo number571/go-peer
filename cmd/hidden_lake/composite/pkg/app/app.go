@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/composite/internal/config"
@@ -70,7 +69,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 func (p *sApp) enable(_ context.Context) state.IStateF {
 	return func() error {
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is running...", hlc_settings.CServiceName))
+		p.fStdfLogger.PushInfo(hlc_settings.CServiceName + " is running...")
 		return nil
 	}
 }
@@ -80,7 +79,7 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 		pCancel()
 		pWg.Wait() // wait canceled context
 
-		p.fStdfLogger.PushInfo(fmt.Sprintf("%s is shutting down...", hlc_settings.CServiceName))
+		p.fStdfLogger.PushInfo(hlc_settings.CServiceName + " is shutting down...")
 		return nil
 	}
 }

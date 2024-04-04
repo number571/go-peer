@@ -1,3 +1,4 @@
+// nolint: goerr113
 package network
 
 import (
@@ -102,7 +103,7 @@ func TestBroadcast(t *testing.T) {
 	wg.Add(4 * tcIter)
 
 	headHandle := uint64(testutils.TcHead)
-	handleF := func(pCtx context.Context, node INode, conn conn.IConn, pMsg message.IMessage) error {
+	handleF := func(pCtx context.Context, node INode, _ conn.IConn, pMsg message.IMessage) error {
 		defer func() {
 			_ = node.BroadcastMessage(pCtx, pMsg)
 			wg.Done()
@@ -315,7 +316,7 @@ func TestHandleMessage(t *testing.T) {
 		return
 	}
 
-	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
+	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return errors.New("some error")
 	})
 	msg2 := message.NewMessage(sett, payload.NewPayload(1, []byte{2}), 1, 0)
@@ -324,7 +325,7 @@ func TestHandleMessage(t *testing.T) {
 		return
 	}
 
-	node.HandleFunc(1, func(ctx context.Context, i1 INode, i2 conn.IConn, b message.IMessage) error {
+	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return nil
 	})
 	msg3 := message.NewMessage(sett, payload.NewPayload(1, []byte{3}), 1, 0)

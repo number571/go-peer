@@ -49,7 +49,7 @@ func TestNullLogger(t *testing.T) {
 			FWarn: os.Stdout,
 			FErro: os.Stdout,
 		}),
-		func(arg ILogArg) string {
+		func(_ ILogArg) string {
 			return ""
 		},
 	)

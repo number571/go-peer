@@ -119,5 +119,10 @@ func downloadFile(
 	pW.Header().Set("Content-Length", strconv.FormatUint(fileSize, 10))
 
 	stream := stream.BuildStream(pCtx, pHlsClient, aliasName, fileName, fileHash, fileSize)
+	if stream == nil {
+		ErrorPage(pLogger, pCfg, "build_stream", "build stream")(pW, pR)
+		return
+	}
+
 	http.ServeContent(pW, pR, fileName, time.Now(), stream)
 }

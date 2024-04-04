@@ -56,7 +56,7 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDBWrap
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
-			fmt.Sprintf("http://%s", addr),
+			"http://"+addr,
 			&http.Client{Timeout: time.Minute},
 			testNetworkMessageSettings(),
 		),

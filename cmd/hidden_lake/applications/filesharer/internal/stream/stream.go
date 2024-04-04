@@ -3,14 +3,14 @@ package stream
 import (
 	"context"
 	"crypto/sha256"
-	"errors"
 	"hash"
 	"io"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/utils"
+	internal_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/utils"
 	hlf_client "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/client"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 const (
@@ -46,7 +46,7 @@ func BuildStream(
 	pFileHash string,
 	pFileSize uint64,
 ) IReadSeeker {
-	chunkSize, err := utils.GetMessageLimit(pCtx, pHlsClient)
+	chunkSize, err := internal_utils.GetMessageLimit(pCtx, pHlsClient)
 	if err != nil {
 		return nil
 	}
@@ -74,10 +74,10 @@ func (p *sStream) Read(b []byte) (int, error) {
 	if len(p.fBuffer) == 0 {
 		chunk, err := p.loadFileChunk()
 		if err != nil {
-			return 0, err
+			return 0, utils.MergeErrors(ErrLoadFileChunk, err)
 		}
 		if _, err := p.fHasher.Write(chunk); err != nil {
-			return 0, err
+			return 0, utils.MergeErrors(ErrWriteFileChunk, err)
 		}
 		p.fBuffer = chunk
 	}
@@ -92,7 +92,7 @@ func (p *sStream) Read(b []byte) (int, error) {
 
 	hashSum := encoding.HexEncode(p.fHasher.Sum(nil))
 	if hashSum != p.fFileHash {
-		return 0, errors.New("invalid hash")
+		return 0, ErrInvalidHash
 	}
 
 	return n, io.EOF
@@ -108,10 +108,10 @@ func (p *sStream) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekEnd:
 		pos = int64(p.fFileSize) + offset
 	default:
-		return 0, errors.New("stream..Reader.Seek: invalid whence")
+		return 0, ErrInvalidWhence
 	}
 	if pos < 0 {
-		return 0, errors.New("stream..Reader.Seek: negative position")
+		return 0, ErrNegativePosition
 	}
 	p.fBuffer = p.fBuffer[:0]
 	p.fPosition = uint64(pos)
@@ -133,5 +133,5 @@ func (p *sStream) loadFileChunk() ([]byte, error) {
 		}
 		return chunk, nil
 	}
-	return nil, lastErr
+	return nil, utils.MergeErrors(ErrRetryFailed, lastErr)
 }

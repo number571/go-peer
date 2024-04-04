@@ -1,13 +1,12 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -39,13 +38,13 @@ func (p *sEditor) UpdateNetworkKey(pNetworkKey string) error {
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return fmt.Errorf("load config (update connections): %w", err)
+		return utils.MergeErrors(ErrLoadConfig, err)
 	}
 
 	cfg := icfg.(*SConfig)
 	cfg.FSettings.FNetworkKey = pNetworkKey
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
-		return fmt.Errorf("write config (update connections): %w", err)
+		return utils.MergeErrors(ErrWriteConfig, err)
 	}
 
 	p.fConfig.FSettings.fMutex.Lock()
@@ -62,13 +61,13 @@ func (p *sEditor) UpdateConnections(pConns []string) error {
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return fmt.Errorf("load config (update connections): %w", err)
+		return utils.MergeErrors(ErrLoadConfig, err)
 	}
 
 	cfg := icfg.(*SConfig)
 	cfg.FConnections = deleteDuplicateStrings(pConns)
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
-		return fmt.Errorf("write config (update connections): %w", err)
+		return utils.MergeErrors(ErrWriteConfig, err)
 	}
 
 	p.fConfig.fMutex.Lock()
@@ -82,28 +81,28 @@ func (p *sEditor) UpdateFriends(pFriends map[string]asymmetric.IPubKey) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	for name, pubKey := range pFriends {
+	for _, pubKey := range pFriends {
 		if pubKey.GetSize() == p.fConfig.GetSettings().GetKeySizeBits() {
 			continue
 		}
-		return fmt.Errorf("not supported key size for '%s'", name)
+		return ErrNotSupportedKeySize
 	}
 
 	filepath := p.fConfig.fFilepath
 	icfg, err := LoadConfig(filepath)
 	if err != nil {
-		return fmt.Errorf("load config (update friends): %w", err)
+		return utils.MergeErrors(ErrLoadConfig, err)
 	}
 
 	if hasDuplicatePubKeys(pFriends) {
-		return errors.New("has duplicates public keys")
+		return ErrDuplicatePublicKey
 	}
 
 	cfg := icfg.(*SConfig)
 	cfg.fFriends = pFriends
 	cfg.FFriends = pubKeysToStrings(pFriends)
 	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
-		return fmt.Errorf("write config (update friends): %w", err)
+		return utils.MergeErrors(ErrWriteConfig, err)
 	}
 
 	p.fConfig.fMutex.Lock()

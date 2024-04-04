@@ -1,12 +1,10 @@
 package database
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -47,7 +45,7 @@ func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
 
 func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
 	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
-		return errors.New("got message with diff settings")
+		return utils.MergeErrors(ErrLoadMessage, err)
 	}
 
 	if ok := p.fLRUCache.Set(pMsg.GetHash(), pMsg.ToBytes()); !ok {
@@ -59,7 +57,7 @@ func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
 
 func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 	if len(pHash) != hashing.CSHA256Size {
-		return nil, errors.New("key size invalid")
+		return nil, ErrInvalidKeySize
 	}
 
 	msgBytes, ok := p.fLRUCache.Get(pHash)
@@ -69,7 +67,7 @@ func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 
 	msg, err := net_message.LoadMessage(p.fSettings, msgBytes)
 	if err != nil {
-		return nil, fmt.Errorf("load message: %w", err)
+		return nil, utils.MergeErrors(ErrLoadMessage, err)
 	}
 
 	return msg, nil
