@@ -1,11 +1,15 @@
 package language
 
-import "errors"
-
 const (
 	errPrefix = "internal/language = "
 )
 
+type SLanguageError struct {
+	str string
+}
+
+func (err *SLanguageError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrUnknownLanguage = errors.New(errPrefix + "unknown language")
+	ErrUnknownLanguage = &SLanguageError{"unknown language"}
 )

@@ -1,14 +1,18 @@
 package app
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/applications/filesharer/pkg/app = "
 )
 
+type SAppError struct {
+	str string
+}
+
+func (err *SAppError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrRunning = errors.New(errPrefix + "app running")
-	ErrService = errors.New(errPrefix + "service")
-	ErrInitSTG = errors.New(errPrefix + "init storage")
-	ErrClose   = errors.New(errPrefix + "close")
+	ErrRunning = &SAppError{"app running"}
+	ErrService = &SAppError{"service"}
+	ErrInitSTG = &SAppError{"init storage"}
+	ErrClose   = &SAppError{"close"}
 )

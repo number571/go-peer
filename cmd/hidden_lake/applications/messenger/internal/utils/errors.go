@@ -1,13 +1,17 @@
 package utils
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/applications/messenger/internal/utils = "
 )
 
+type SUtilsError struct {
+	str string
+}
+
+func (err *SUtilsError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrGetSizeInBase64    = errors.New(errPrefix + "get size in base64")
-	ErrMessageSizeGtLimit = errors.New(errPrefix + "message size > limit")
-	ErrGetSettingsHLS     = errors.New(errPrefix + "get settings hls")
+	ErrGetSizeInBase64    = &SUtilsError{"get size in base64"}
+	ErrMessageSizeGtLimit = &SUtilsError{"message size > limit"}
+	ErrGetSettingsHLS     = &SUtilsError{"get settings hls"}
 )

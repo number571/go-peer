@@ -9,9 +9,6 @@
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
 9. golint: "wrapcheck,cyclop,funlen,gocognit"
-10. Add Err values to all packages, projects
-11. Create share errors (most popular)
-12. Create errPrefix
 
 ### Tests
 

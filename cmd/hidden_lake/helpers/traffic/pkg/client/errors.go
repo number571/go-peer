@@ -1,16 +1,20 @@
 package client
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/helpers/traffic/pkg/client = "
 )
 
+type SClientError struct {
+	str string
+}
+
+func (err *SClientError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrBadRequest       = errors.New(errPrefix + "bad request")
-	ErrDecodeResponse   = errors.New(errPrefix + "decode response")
-	ErrInvalidResponse  = errors.New(errPrefix + "invalid response")
-	ErrInvalidHexFormat = errors.New(errPrefix + "invalid hex format")
-	ErrInvalidTitle     = errors.New(errPrefix + "invalid title")
-	ErrDecodeMessage    = errors.New(errPrefix + "decode message")
+	ErrBadRequest       = &SClientError{"bad request"}
+	ErrDecodeResponse   = &SClientError{"decode response"}
+	ErrInvalidResponse  = &SClientError{"invalid response"}
+	ErrInvalidHexFormat = &SClientError{"invalid hex format"}
+	ErrInvalidTitle     = &SClientError{"invalid title"}
+	ErrDecodeMessage    = &SClientError{"decode message"}
 )

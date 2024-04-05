@@ -1,14 +1,18 @@
 package client
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/service/pkg/client = "
 )
 
+type SClientError struct {
+	str string
+}
+
+func (err *SClientError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrBadRequest       = errors.New(errPrefix + "bad request")
-	ErrDecodeResponse   = errors.New(errPrefix + "decode response")
-	ErrInvalidPublicKey = errors.New(errPrefix + "invalid public key")
-	ErrInvalidTitle     = errors.New(errPrefix + "invalid title")
+	ErrBadRequest       = &SClientError{"bad request"}
+	ErrDecodeResponse   = &SClientError{"decode response"}
+	ErrInvalidPublicKey = &SClientError{"invalid public key"}
+	ErrInvalidTitle     = &SClientError{"invalid title"}
 )

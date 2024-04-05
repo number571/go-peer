@@ -1,13 +1,17 @@
 package app
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/helpers/template/pkg/app = "
 )
 
+type SAppError struct {
+	str string
+}
+
+func (err *SAppError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrRunning = errors.New(errPrefix + "app running")
-	ErrService = errors.New(errPrefix + "service")
-	ErrClose   = errors.New(errPrefix + "close")
+	ErrRunning = &SAppError{"app running"}
+	ErrService = &SAppError{"service"}
+	ErrClose   = &SAppError{"close"}
 )

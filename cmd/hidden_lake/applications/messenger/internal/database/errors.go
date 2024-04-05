@@ -1,18 +1,22 @@
 package database
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/applications/messenger/internal/database = "
 )
 
+type SDatabaseError struct {
+	str string
+}
+
+func (err *SDatabaseError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrLoadMessage    = errors.New(errPrefix + "load message")
-	ErrGetMessage     = errors.New(errPrefix + "get message")
-	ErrSetMessage     = errors.New(errPrefix + "set message")
-	ErrSetSizeMessage = errors.New(errPrefix + "set size message")
-	ErrCloseDB        = errors.New(errPrefix + "close db")
-	ErrEndGtSize      = errors.New(errPrefix + "end > size")
-	ErrStartGtEnd     = errors.New(errPrefix + "start > end")
-	ErrCreateDB       = errors.New(errPrefix + "create db")
+	ErrLoadMessage    = &SDatabaseError{"load message"}
+	ErrGetMessage     = &SDatabaseError{"get message"}
+	ErrSetMessage     = &SDatabaseError{"set message"}
+	ErrSetSizeMessage = &SDatabaseError{"set size message"}
+	ErrCloseDB        = &SDatabaseError{"close db"}
+	ErrEndGtSize      = &SDatabaseError{"end > size"}
+	ErrStartGtEnd     = &SDatabaseError{"start > end"}
+	ErrCreateDB       = &SDatabaseError{"create db"}
 )

@@ -1,16 +1,20 @@
 package api
 
-import "errors"
-
 const (
 	errPrefix = "internal/api = "
 )
 
+type SApiError struct {
+	str string
+}
+
+func (err *SApiError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrBadStatusCode = errors.New(errPrefix + "bad status code")
-	ErrReadResponse  = errors.New(errPrefix + "read response")
-	ErrLoadResponse  = errors.New(errPrefix + "load response")
-	ErrBadRequest    = errors.New(errPrefix + "bad request")
-	ErrBuildRequest  = errors.New(errPrefix + "build request")
-	ErrCopyBytes     = errors.New(errPrefix + "copy bytes")
+	ErrBadStatusCode = &SApiError{"bad status code"}
+	ErrReadResponse  = &SApiError{"read response"}
+	ErrLoadResponse  = &SApiError{"load response"}
+	ErrBadRequest    = &SApiError{"bad request"}
+	ErrBuildRequest  = &SApiError{"build request"}
+	ErrCopyBytes     = &SApiError{"copy bytes"}
 )

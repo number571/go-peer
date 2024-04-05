@@ -1,15 +1,19 @@
 package adapted
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/adapters/common/producer/internal/adapted = "
 )
 
+type SAdaptedError struct {
+	str string
+}
+
+func (err *SAdaptedError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrInvalidResponse = errors.New(errPrefix + "invalid response")
-	ErrReadResponse    = errors.New(errPrefix + "read response")
-	ErrBadStatusCode   = errors.New(errPrefix + "bad status code")
-	ErrBadRequest      = errors.New(errPrefix + "bad request")
-	ErrBuildRequest    = errors.New(errPrefix + "build request")
+	ErrInvalidResponse = &SAdaptedError{"invalid response"}
+	ErrReadResponse    = &SAdaptedError{"read response"}
+	ErrBadStatusCode   = &SAdaptedError{"bad status code"}
+	ErrBadRequest      = &SAdaptedError{"bad request"}
+	ErrBuildRequest    = &SAdaptedError{"build request"}
 )

@@ -1,11 +1,15 @@
 package std
 
-import "errors"
-
 const (
 	errPrefix = "internal/logger/std = "
 )
 
+type SStdError struct {
+	str string
+}
+
+func (err *SStdError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrUnknownLogType = errors.New(errPrefix + "unknown log type")
+	ErrUnknownLogType = &SStdError{"unknown log type"}
 )

@@ -160,7 +160,7 @@ func (p *SConfig) initConfig() error {
 	}
 
 	if !p.isValid() {
-		return ErrLoadConfigSettings
+		return ErrInvalidConfig
 	}
 
 	if err := p.loadPubKeys(); err != nil {

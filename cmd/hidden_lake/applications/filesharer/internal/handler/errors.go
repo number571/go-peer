@@ -1,15 +1,19 @@
 package handler
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/applications/filesharer/internal/handler = "
 )
 
+type SHandlerError struct {
+	str string
+}
+
+func (err *SHandlerError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrReadOnlineConnections = errors.New(errPrefix + "read online connections")
-	ErrReadConnections       = errors.New(errPrefix + "read connections")
-	ErrGetAllConnections     = errors.New(errPrefix + "get all connections")
-	ErrGetPublicKey          = errors.New(errPrefix + "get public key")
-	ErrGetSettingsHLS        = errors.New(errPrefix + "get settings hls")
+	ErrReadOnlineConnections = &SHandlerError{"read online connections"}
+	ErrReadConnections       = &SHandlerError{"read connections"}
+	ErrGetAllConnections     = &SHandlerError{"get all connections"}
+	ErrGetPublicKey          = &SHandlerError{"get public key"}
+	ErrGetSettingsHLS        = &SHandlerError{"get settings hls"}
 )

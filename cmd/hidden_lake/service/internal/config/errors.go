@@ -1,24 +1,28 @@
 package config
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/service/internal/config = "
 )
 
+type SConfigError struct {
+	str string
+}
+
+func (err *SConfigError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrNotSupportedKeySize = errors.New(errPrefix + "not supported key size")
-	ErrInvalidPublicKey    = errors.New(errPrefix + "invalid public key")
-	ErrDuplicatePublicKey  = errors.New(errPrefix + "duplicate public key")
-	ErrLoadLogging         = errors.New(errPrefix + "load logging")
-	ErrLoadPublicKey       = errors.New(errPrefix + "load public key")
-	ErrLoadConfigSettings  = errors.New(errPrefix + "load config settings")
-	ErrLoadConfig          = errors.New(errPrefix + "load config")
-	ErrInitConfig          = errors.New(errPrefix + "init config")
-	ErrDeserializeConfig   = errors.New(errPrefix + "deserialize config")
-	ErrReadConfig          = errors.New(errPrefix + "read config")
-	ErrConfigNotFound      = errors.New(errPrefix + "config not found")
-	ErrWriteConfig         = errors.New(errPrefix + "write config")
-	ErrConfigAlreadyExist  = errors.New(errPrefix + "config already exist")
-	ErrBuildConfig         = errors.New(errPrefix + "build config")
+	ErrNotSupportedKeySize = &SConfigError{"not supported key size"}
+	ErrInvalidPublicKey    = &SConfigError{"invalid public key"}
+	ErrDuplicatePublicKey  = &SConfigError{"duplicate public key"}
+	ErrLoadLogging         = &SConfigError{"load logging"}
+	ErrLoadPublicKey       = &SConfigError{"load public key"}
+	ErrInvalidConfig       = &SConfigError{"invalid config"}
+	ErrLoadConfig          = &SConfigError{"load config"}
+	ErrInitConfig          = &SConfigError{"init config"}
+	ErrDeserializeConfig   = &SConfigError{"deserialize config"}
+	ErrReadConfig          = &SConfigError{"read config"}
+	ErrConfigNotFound      = &SConfigError{"config not found"}
+	ErrWriteConfig         = &SConfigError{"write config"}
+	ErrConfigAlreadyExist  = &SConfigError{"config already exist"}
+	ErrBuildConfig         = &SConfigError{"build config"}
 )

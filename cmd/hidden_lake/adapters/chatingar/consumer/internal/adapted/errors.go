@@ -1,18 +1,22 @@
 package adapted
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/adapters/chatingar/consumer/internal/adapted = "
 )
 
+type SAdaptedError struct {
+	str string
+}
+
+func (err *SAdaptedError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrBuildRequest      = errors.New(errPrefix + "build request")
-	ErrBadRequest        = errors.New(errPrefix + "bad request")
-	ErrBadStatusCode     = errors.New(errPrefix + "bad status code")
-	ErrDecodeCount       = errors.New(errPrefix + "decode count")
-	ErrCountLtNull       = errors.New(errPrefix + "count < 0")
-	ErrLimitPage         = errors.New(errPrefix + "limit page")
-	ErrDecodeMessages    = errors.New(errPrefix + "ldecode messages")
-	ErrLoadCountComments = errors.New(errPrefix + "load count comments")
+	ErrBuildRequest      = &SAdaptedError{"build request"}
+	ErrBadRequest        = &SAdaptedError{"bad request"}
+	ErrBadStatusCode     = &SAdaptedError{"bad status code"}
+	ErrDecodeCount       = &SAdaptedError{"decode count"}
+	ErrCountLtNull       = &SAdaptedError{"count < 0"}
+	ErrLimitPage         = &SAdaptedError{"limit page"}
+	ErrDecodeMessages    = &SAdaptedError{"ldecode messages"}
+	ErrLoadCountComments = &SAdaptedError{"load count comments"}
 )

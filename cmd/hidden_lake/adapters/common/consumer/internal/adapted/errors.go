@@ -1,23 +1,27 @@
 package adapted
 
-import "errors"
-
 const (
 	errPrefix = "cmd/hidden_lake/adapters/common/consumer/internal/adapted = "
 )
 
+type SAdaptedError struct {
+	str string
+}
+
+func (err *SAdaptedError) Error() string { return errPrefix + err.str }
+
 var (
-	ErrLoadCountService = errors.New(errPrefix + "load count from service")
-	ErrLoadCountDB      = errors.New(errPrefix + "load count from db")
-	ErrGetCount         = errors.New(errPrefix + "get count")
-	ErrSetNewCount      = errors.New(errPrefix + "set new count")
-	ErrInitCountKey     = errors.New(errPrefix + "init count key")
-	ErrParseCount       = errors.New(errPrefix + "parse count")
-	ErrInvalidResponse  = errors.New(errPrefix + "invalid response")
-	ErrReadResponse     = errors.New(errPrefix + "read response")
-	ErrBadRequest       = errors.New(errPrefix + "bad request")
-	ErrBuildRequest     = errors.New(errPrefix + "build request")
-	ErrDecodeMessage    = errors.New(errPrefix + "decode message")
-	ErrIncrementCount   = errors.New(errPrefix + "increment count")
-	ErrLoadMessage      = errors.New(errPrefix + "load message")
+	ErrLoadCountService = &SAdaptedError{"load count from service"}
+	ErrLoadCountDB      = &SAdaptedError{"load count from db"}
+	ErrGetCount         = &SAdaptedError{"get count"}
+	ErrSetNewCount      = &SAdaptedError{"set new count"}
+	ErrInitCountKey     = &SAdaptedError{"init count key"}
+	ErrParseCount       = &SAdaptedError{"parse count"}
+	ErrInvalidResponse  = &SAdaptedError{"invalid response"}
+	ErrReadResponse     = &SAdaptedError{"read response"}
+	ErrBadRequest       = &SAdaptedError{"bad request"}
+	ErrBuildRequest     = &SAdaptedError{"build request"}
+	ErrDecodeMessage    = &SAdaptedError{"decode message"}
+	ErrIncrementCount   = &SAdaptedError{"increment count"}
+	ErrLoadMessage      = &SAdaptedError{"load message"}
 )
