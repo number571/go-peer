@@ -32,6 +32,15 @@ const (
 	tcMethodNotAllowed = "method not allowed"
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SApiError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestLoadResponse(t *testing.T) {
 	if _, err := loadResponse(0, &tsReadCloser{}); err == nil {
 		t.Error("success load response with invalid readCloser")

@@ -14,6 +14,15 @@ import (
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SConnKeeperError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestSettings(t *testing.T) {
 	t.Parallel()
 

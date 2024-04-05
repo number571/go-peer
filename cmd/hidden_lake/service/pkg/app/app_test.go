@@ -25,6 +25,15 @@ func testDeleteFiles() {
 	os.RemoveAll(tcPathConfig)
 }
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SAppError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestApp(t *testing.T) {
 	t.Parallel()
 

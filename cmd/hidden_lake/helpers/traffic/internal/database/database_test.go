@@ -21,6 +21,15 @@ const (
 	tcPathDBTemplate = "test_database_%d.db"
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SDatabaseError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestSettings(t *testing.T) {
 	t.Parallel()
 

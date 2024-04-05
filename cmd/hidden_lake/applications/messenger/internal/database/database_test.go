@@ -16,6 +16,15 @@ const (
 	tcPath = "database.db"
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SDatabaseError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestDatabase(t *testing.T) {
 	t.Parallel()
 

@@ -40,6 +40,15 @@ const (
 	tcMessagesCapacity  = 1000
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SConfigError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,

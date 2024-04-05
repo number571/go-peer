@@ -17,6 +17,15 @@ const (
 	tcPathStorage = pkg_settings.CPathSTG
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SAppError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func testDeleteFiles() {
 	os.RemoveAll(tcPathStorage)
 	os.RemoveAll(tcPathConfig)

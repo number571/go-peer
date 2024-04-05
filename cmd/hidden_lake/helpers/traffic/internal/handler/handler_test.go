@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
@@ -29,6 +30,15 @@ import (
 const (
 	databaseTemplate = "database_test_%s.db"
 )
+
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SHandlerError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
 
 func testNetworkMessageSettings() net_message.ISettings {
 	return net_message.NewSettings(&net_message.SSettings{

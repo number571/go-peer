@@ -2,6 +2,15 @@ package language
 
 import "testing"
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SLanguageError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestPanicFromLanguage(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {

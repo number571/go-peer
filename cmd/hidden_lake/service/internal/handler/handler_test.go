@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -64,6 +65,15 @@ services:
 		testutils.TgPubKeys[2],
 	)
 )
+
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SHandlerError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
 
 func testStartServerHTTP(addr string) *http.Server {
 	mux := http.NewServeMux()

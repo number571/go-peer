@@ -111,6 +111,15 @@ func testConfigDefaultInit(configPath string) {
 	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
 }
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SConfigError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestBuildConfig(t *testing.T) {
 	t.Parallel()
 

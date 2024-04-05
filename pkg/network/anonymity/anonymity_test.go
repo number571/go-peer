@@ -34,6 +34,15 @@ const (
 	tcIter           = 10
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SAnonymityError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 

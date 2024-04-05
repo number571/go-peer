@@ -17,6 +17,15 @@ const (
 	tcPathDatabase = pkg_settings.CPathDB
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SAppError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func testDeleteFiles() {
 	os.RemoveAll(tcPathDatabase)
 	os.RemoveAll(tcPathConfig)

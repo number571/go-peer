@@ -23,6 +23,15 @@ var (
 	tgMessage    = tsMessage{"hello", 5}
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SEncodingError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestHex(t *testing.T) {
 	t.Parallel()
 

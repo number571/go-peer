@@ -13,6 +13,15 @@ const (
 	tcAddress2   = "test_address2"
 )
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SConfigError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func testConfigDefaultInit(configPath string) {
 	_, _ = BuildConfig(configPath, &SConfig{
 		FSettings: &SConfigSettings{

@@ -2,6 +2,15 @@ package std
 
 import "testing"
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SStdError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestLogging(t *testing.T) {
 	logging, err := LoadLogging([]string{"info", "erro"})
 	if err != nil {
