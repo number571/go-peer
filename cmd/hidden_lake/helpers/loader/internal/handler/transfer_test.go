@@ -207,6 +207,6 @@ func copyWithPaste(pathTo, addr string) error {
 	return os.WriteFile(
 		pathTo+"/hlt.yml",
 		[]byte(fmt.Sprintf(string(cfgDataFmt), testutils.TCWorkSize, testutils.TCNetworkKey, addr)),
-		0o644,
+		0o600,
 	)
 }

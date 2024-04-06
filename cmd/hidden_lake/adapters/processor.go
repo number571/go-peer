@@ -25,8 +25,9 @@ func ProduceProcessor(
 	mux.HandleFunc("/adapter", produceHandler(pCtx, pProducer, pLogger, pSettings))
 
 	server := &http.Server{
-		Addr:    pIncomingAddr,
-		Handler: mux,
+		Addr:              pIncomingAddr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {

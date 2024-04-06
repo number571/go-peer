@@ -101,7 +101,7 @@ func runService() {
 		msg = bytes.TrimPrefix(msg, []byte(authBytes))
 		fmt.Printf("\n%s\n%s", string(msg), startInput)
 	})
-	_ = http.ListenAndServe(os.Args[2], nil)
+	_ = http.ListenAndServe(os.Args[2], nil) //nolint:gosec
 }
 
 func runQueue() {

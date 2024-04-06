@@ -63,7 +63,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
+	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o600)
 }
 
 func TestConfig(t *testing.T) {

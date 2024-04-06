@@ -30,10 +30,10 @@ func main() {
 		panic("generate key error")
 	}
 
-	if err := os.WriteFile("priv.key", []byte(priv.ToString()), 0o644); err != nil {
+	if err := os.WriteFile("priv.key", []byte(priv.ToString()), 0o600); err != nil {
 		panic(err)
 	}
-	if err := os.WriteFile("pub.key", []byte(priv.GetPubKey().ToString()), 0o644); err != nil {
+	if err := os.WriteFile("pub.key", []byte(priv.GetPubKey().ToString()), 0o600); err != nil {
 		panic(err)
 	}
 }

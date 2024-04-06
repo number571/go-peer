@@ -49,7 +49,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel 
 func getPrivKey(pCfg config.IConfig, pKeyPath string) (asymmetric.IPrivKey, error) {
 	if _, err := os.Stat(pKeyPath); os.IsNotExist(err) {
 		privKey := asymmetric.NewRSAPrivKey(pCfg.GetSettings().GetKeySizeBits())
-		if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o644); err != nil {
+		if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o600); err != nil {
 			return nil, utils.MergeErrors(ErrWritePrivateKey, err)
 		}
 		return privKey, nil

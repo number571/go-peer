@@ -146,7 +146,7 @@ func BenchmarkPuzzleParallel(b *testing.B) {
 }
 
 func testPseudoRandomBytes(pSeed int) []byte {
-	r := rand.New(rand.NewSource(int64(pSeed)))
+	r := rand.New(rand.NewSource(int64(pSeed))) //nolint:gosec
 	result := make([]byte, 0, 16)
 	for i := 0; i < 16; i++ {
 		result = append(result, byte(r.Intn(256)))

@@ -32,7 +32,7 @@ func TestInit(t *testing.T) {
 	}
 
 	os.Remove(configFile)
-	if err := os.WriteFile(configFile, []byte("abc"), 0o644); err != nil {
+	if err := os.WriteFile(configFile, []byte("abc"), 0o600); err != nil {
 		t.Error(err)
 		return
 	}

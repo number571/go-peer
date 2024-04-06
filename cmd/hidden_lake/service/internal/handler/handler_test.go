@@ -163,7 +163,7 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 }
 
 func testNewWrapper(cfgPath string) config.IWrapper {
-	_ = os.WriteFile(cfgPath, []byte(tcConfig), 0o644)
+	_ = os.WriteFile(cfgPath, []byte(tcConfig), 0o600)
 	cfg, err := config.LoadConfig(cfgPath)
 	if err != nil {
 		panic(err)

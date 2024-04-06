@@ -58,7 +58,7 @@ func main() {
 	http.HandleFunc("/push", pushPage)
 	http.HandleFunc("/load", loadPage)
 
-	_ = http.ListenAndServe(addr, nil)
+	_ = http.ListenAndServe(addr, nil) //nolint:gosec
 }
 
 func pushPage(w http.ResponseWriter, r *http.Request) {

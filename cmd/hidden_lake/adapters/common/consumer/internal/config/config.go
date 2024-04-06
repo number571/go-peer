@@ -42,7 +42,7 @@ func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
-	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o644); err != nil {
+	if err := os.WriteFile(pFilepath, encoding.SerializeYAML(pCfg), 0o600); err != nil {
 		return nil, utils.MergeErrors(ErrWriteConfig, err)
 	}
 

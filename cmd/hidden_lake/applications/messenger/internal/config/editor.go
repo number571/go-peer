@@ -43,7 +43,7 @@ func (p *sEditor) UpdatePseudonym(pPseudonym string) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FSettings.FPseudonym = pPseudonym
-	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o600); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}
 
@@ -66,7 +66,7 @@ func (p *sEditor) UpdateLanguage(pLang language.ILanguage) error {
 
 	cfg := icfg.(*SConfig)
 	cfg.FSettings.FLanguage = language.FromILanguage(pLang)
-	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o644); err != nil {
+	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o600); err != nil {
 		return fmt.Errorf("write config (update language): %w", err)
 	}
 

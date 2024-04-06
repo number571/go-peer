@@ -108,7 +108,7 @@ func testNewConfigString() string {
 }
 
 func testConfigDefaultInit(configPath string) {
-	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o644)
+	_ = os.WriteFile(configPath, []byte(testNewConfigString()), 0o600)
 }
 
 func TestError(t *testing.T) {
@@ -157,7 +157,7 @@ func testIncorrectConfig(configFile string) error {
 		return errors.New("success load config on non exist file")
 	}
 
-	if err := os.WriteFile(configFile, []byte("abc"), 0o644); err != nil {
+	if err := os.WriteFile(configFile, []byte("abc"), 0o600); err != nil {
 		return err
 	}
 
@@ -166,7 +166,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg1Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "settings", "settings_v2"))
-	if err := os.WriteFile(configFile, cfg1Bytes, 0o644); err != nil {
+	if err := os.WriteFile(configFile, cfg1Bytes, 0o600); err != nil {
 		return err
 	}
 
@@ -175,7 +175,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg2Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "PubKey", "PubKey_v2"))
-	if err := os.WriteFile(configFile, cfg2Bytes, 0o644); err != nil {
+	if err := os.WriteFile(configFile, cfg2Bytes, 0o600); err != nil {
 		return err
 	}
 
@@ -184,7 +184,7 @@ func testIncorrectConfig(configFile string) error {
 	}
 
 	cfg3Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "erro", "erro_v2"))
-	if err := os.WriteFile(configFile, cfg3Bytes, 0o644); err != nil {
+	if err := os.WriteFile(configFile, cfg3Bytes, 0o600); err != nil {
 		return err
 	}
 
@@ -196,7 +196,7 @@ func testIncorrectConfig(configFile string) error {
 	pubKey2 := tgPubKeys[tcPubKeyAlias2]
 
 	cfg4Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, pubKey2))
-	if err := os.WriteFile(configFile, cfg4Bytes, 0o644); err != nil {
+	if err := os.WriteFile(configFile, cfg4Bytes, 0o600); err != nil {
 		return err
 	}
 
@@ -206,7 +206,7 @@ func testIncorrectConfig(configFile string) error {
 
 	newPubKey := asymmetric.NewRSAPrivKey(512).GetPubKey().ToString()
 	cfg5Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, newPubKey))
-	if err := os.WriteFile(configFile, cfg5Bytes, 0o644); err != nil {
+	if err := os.WriteFile(configFile, cfg5Bytes, 0o600); err != nil {
 		return err
 	}
 
