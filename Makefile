@@ -14,7 +14,7 @@ _GO_TEST_LIST=\
 	grep -v /examples/ | \
 	grep -v /cmd/
 
-.PHONY: default clean \
+.PHONY: default clean go-fmt-vet \
 	lint-run test-run \
 	test-coverage test-coverage-view \
 	git-status git-push 
@@ -30,11 +30,16 @@ go-fmt-vet:
 	go fmt ./...
 	go vet ./...
 
+### LINT
+
+lint-run: clean go-fmt-vet
+	golangci-lint run -E "gas,unconvert,gosimple,goconst,gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+
 ### TEST
 # example run: make test-run N=10
 # for i in {1..100}; do echo $i; go test -race -shuffle=on -count=1 ./...; done;
 
-test-run: clean go-fmt-vet
+test-run:
 	$(_CHECK_ERROR);
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
@@ -47,7 +52,7 @@ test-run: clean go-fmt-vet
 
 ### TEST COVERAGE
 
-test-coverage: clean go-fmt-vet
+test-coverage:
 	make test-coverage -C cmd/hidden_lake/
 	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
 	$(_CHECK_ERROR)
@@ -66,11 +71,6 @@ test-coverage-badge:
 	else \
 		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
-
-### LINT
-
-lint-run:
-	golangci-lint run -E "gas,unconvert,gosimple,goconst,gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
 
 ### GIT
 
