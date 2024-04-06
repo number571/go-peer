@@ -82,7 +82,7 @@ func TestLRUCache(t *testing.T) {
 		if !ok {
 			break
 		}
-		key := encoding.Uint64ToBytes(uint64(i))
+		key := encoding.Uint64ToBytes(i)
 		if !bytes.Equal(k, key[:]) {
 			t.Error("got incorrect key")
 			return

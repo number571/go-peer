@@ -187,7 +187,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			return
 		}
 
-		if pld.GetHead() != uint64(i) {
+		if pld.GetHead() != i {
 			t.Error("got bad index")
 			return
 		}

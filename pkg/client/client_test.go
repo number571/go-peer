@@ -280,14 +280,14 @@ func TestGetMessageLimit(t *testing.T) {
 	client1 := testNewClient()
 
 	msg1 := random.NewStdPRNG().GetBytes(tgMsgLimit)
-	pld1 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg1))
+	pld1 := payload.NewPayload(uint64(testutils.TcHead), msg1)
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld1); err != nil {
 		t.Error("message1 > message limit:", err)
 		return
 	}
 
 	msg2 := random.NewStdPRNG().GetBytes(tgMsgLimit + 1)
-	pld2 := payload.NewPayload(uint64(testutils.TcHead), []byte(msg2))
+	pld2 := payload.NewPayload(uint64(testutils.TcHead), msg2)
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld2); err == nil {
 		t.Error("message2 > message limit but not alert:", err)
 		return

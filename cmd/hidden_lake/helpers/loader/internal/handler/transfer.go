@@ -123,7 +123,7 @@ func transferToConsumers(pCtx context.Context, pCfg config.IConfig, pProducer hl
 		case <-pCtx.Done():
 			return
 		default:
-			if uint64(i) >= pCfg.GetSettings().GetMessagesCapacity() {
+			if i >= pCfg.GetSettings().GetMessagesCapacity() {
 				break
 			}
 

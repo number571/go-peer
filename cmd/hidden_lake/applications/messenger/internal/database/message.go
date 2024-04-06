@@ -88,7 +88,7 @@ func (p *sMessage) ToBytes() []byte {
 			{firstByte},
 			blockTimestamp[:],
 			p.fPseudonym,
-			[]byte(p.fMessage),
+			p.fMessage,
 		},
 		[]byte{},
 	)

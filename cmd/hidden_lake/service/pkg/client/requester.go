@@ -73,7 +73,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 	}
 
 	cfgSettings := new(config.SConfigSettings)
-	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+	if err := encoding.DeserializeJSON(res, cfgSettings); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
@@ -106,7 +106,7 @@ func (p *sRequester) FetchRequest(pCtx context.Context, pRequest *hls_settings.S
 		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
-	resp, err := response.LoadResponse([]byte(res))
+	resp, err := response.LoadResponse(res)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
@@ -140,7 +140,7 @@ func (p *sRequester) GetFriends(pCtx context.Context) (map[string]asymmetric.IPu
 	}
 
 	var vFriends []hls_settings.SFriend
-	if err := encoding.DeserializeJSON([]byte(res), &vFriends); err != nil {
+	if err := encoding.DeserializeJSON(res, &vFriends); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
@@ -193,7 +193,7 @@ func (p *sRequester) GetOnlines(pCtx context.Context) ([]string, error) {
 	}
 
 	var onlines []string
-	if err := encoding.DeserializeJSON([]byte(res), &onlines); err != nil {
+	if err := encoding.DeserializeJSON(res, &onlines); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
@@ -227,7 +227,7 @@ func (p *sRequester) GetConnections(pCtx context.Context) ([]string, error) {
 	}
 
 	var connects []string
-	if err := encoding.DeserializeJSON([]byte(res), &connects); err != nil {
+	if err := encoding.DeserializeJSON(res, &connects); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 

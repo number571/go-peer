@@ -10,7 +10,7 @@ _TEST_RESULT_PATH=./_test/result
 _TEST_PPROF_PATH=./_test/pprof
 
 .PHONY: default build clean \
-	test-run test-coverage test-coverage-view \
+	test-coverage test-coverage-view \
 	pprof-run
 
 default: build 

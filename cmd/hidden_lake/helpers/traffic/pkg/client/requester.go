@@ -79,7 +79,7 @@ func (p *sRequester) GetPointer(pCtx context.Context) (uint64, error) {
 		return 0, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
-	return uint64(pointer), nil
+	return pointer, nil
 }
 
 func (p *sRequester) GetHash(pCtx context.Context, i uint64) (string, error) {
@@ -153,7 +153,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 	}
 
 	cfgSettings := new(config.SConfigSettings)
-	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+	if err := encoding.DeserializeJSON(res, cfgSettings); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 

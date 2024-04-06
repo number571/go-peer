@@ -196,11 +196,11 @@ func (p *sMessage) ToString() string {
 }
 
 func getAuthHash(networkKey string, pAuthSalt, pBytes []byte) []byte {
-	authKey := keybuilder.NewKeyBuilder(1, []byte(pAuthSalt)).Build(networkKey)
+	authKey := keybuilder.NewKeyBuilder(1, pAuthSalt).Build(networkKey)
 	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
 }
 
 func getCipher(networkKey string, pCipherSalt []byte) symmetric.ICipher {
-	cipherKey := keybuilder.NewKeyBuilder(1, []byte(pCipherSalt)).Build(networkKey)
+	cipherKey := keybuilder.NewKeyBuilder(1, pCipherSalt).Build(networkKey)
 	return symmetric.NewAESCipher(cipherKey)
 }

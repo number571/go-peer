@@ -31,6 +31,7 @@ import (
 
 const (
 	tcPathDBTemplate = "database_test_%d_%d.db"
+	tcMsgBody        = "hello, world!"
 	tcIter           = 10
 )
 
@@ -229,18 +230,17 @@ func TestFetchPayload(t *testing.T) {
 		return
 	}
 
-	msgBody := "hello, world!"
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(msgBody)),
+		adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
 		return
 	}
 
-	if string(result) != fmt.Sprintf("echo: '%s'", msgBody) {
+	if string(result) != fmt.Sprintf("echo: '%s'", tcMsgBody) {
 		t.Error("got invalid message body")
 		return
 	}
@@ -278,11 +278,10 @@ func TestBroadcastPayload(t *testing.T) {
 		return
 	}
 
-	msgBody := "hello, world!"
 	err1 := nodes[0].SendPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(msgBody)),
+		payload.NewPayload(uint64(testutils.TcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
@@ -291,7 +290,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	select {
 	case x := <-chResult:
-		if x != fmt.Sprintf("echo: '%s'", msgBody) {
+		if x != fmt.Sprintf("echo: '%s'", tcMsgBody) {
 			t.Error("got invalid message body")
 			return
 		}
@@ -318,8 +317,7 @@ func TestPanicEnqueuePayload(t *testing.T) {
 	ctx := context.Background()
 	logBuilder := anon_logger.NewLogBuilder("test")
 
-	msgBody := "hello, world!"
-	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
+	pld := adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)).ToOrigin()
 
 	pubKey := sNode.GetMessageQueue().GetClient().GetPubKey()
 	_ = sNode.enqueuePayload(ctx, logBuilder, '?', pubKey, pld)
@@ -343,8 +341,7 @@ func TestEnqueuePayload(t *testing.T) {
 	ctx := context.Background()
 	logBuilder := anon_logger.NewLogBuilder("test")
 
-	msgBody := "hello, world!"
-	pld := adapters.NewPayload(testutils.TcHead, []byte(msgBody)).ToOrigin()
+	pld := adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)).ToOrigin()
 
 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
@@ -357,7 +354,7 @@ func TestEnqueuePayload(t *testing.T) {
 		pubKey,
 		adapters.NewPayload(
 			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
+			wrapRequest([]byte(tcMsgBody)),
 		).ToOrigin(),
 	)
 	if err != nil {
@@ -396,12 +393,11 @@ func TestHandleWrapper(t *testing.T) {
 	// // ignore add public key (f2f_disabled=true)
 	// node.GetListPubKeys().AddPubKey(pubKey)
 
-	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		pubKey,
 		adapters.NewPayload(
 			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
+			wrapRequest([]byte(tcMsgBody)),
 		).ToOrigin(),
 	)
 	if err != nil {
@@ -434,7 +430,7 @@ func TestHandleWrapper(t *testing.T) {
 		pubKey,
 		adapters.NewPayload(
 			111,
-			wrapRequest([]byte(msgBody)),
+			wrapRequest([]byte(tcMsgBody)),
 		).ToOrigin(),
 	)
 	if err != nil {
@@ -452,7 +448,7 @@ func TestHandleWrapper(t *testing.T) {
 		pubKey,
 		adapters.NewPayload(
 			111,
-			[]byte("?"+msgBody),
+			[]byte("?"+tcMsgBody),
 		).ToOrigin(),
 	)
 	if err != nil {
@@ -470,7 +466,7 @@ func TestHandleWrapper(t *testing.T) {
 		pubKey,
 		adapters.NewPayload(
 			111,
-			wrapResponse([]byte(msgBody)),
+			wrapResponse([]byte(tcMsgBody)),
 		).ToOrigin(),
 	)
 	if err != nil {
@@ -507,12 +503,11 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	node := _node.(*sNode)
 	client := node.fQueue.GetClient()
 
-	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
 		adapters.NewPayload(
 			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
+			wrapRequest([]byte(tcMsgBody)),
 		).ToOrigin(),
 	)
 	if err != nil {

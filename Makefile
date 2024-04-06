@@ -26,12 +26,15 @@ clean:
 	make -C ./cmd clean 
 	make -C ./examples clean
 
+go-fmt-vet:
+	go fmt ./...
+	go vet ./...
+
 ### TEST
 # example run: make test-run N=10
 # for i in {1..100}; do echo $i; go test -race -shuffle=on -count=1 ./...; done;
 
-test-run: clean
-	go vet ./...;
+test-run: clean go-fmt-vet
 	$(_CHECK_ERROR);
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
@@ -44,7 +47,7 @@ test-run: clean
 
 ### TEST COVERAGE
 
-test-coverage: clean
+test-coverage: clean go-fmt-vet
 	make test-coverage -C cmd/hidden_lake/
 	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
 	$(_CHECK_ERROR)
@@ -64,9 +67,10 @@ test-coverage-badge:
 		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
-### LINT
+### LINT gas, [https://habr.com/ru/companies/roistat/articles/413175/]
+
 lint-run:
-	golangci-lint run -E "gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+	golangci-lint run -E "unconvert,gosimple,goconst,gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
 
 ### GIT
 

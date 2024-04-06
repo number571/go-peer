@@ -146,7 +146,7 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 	}
 
 	cfgSettings := new(config.SConfigSettings)
-	if err := encoding.DeserializeJSON([]byte(res), cfgSettings); err != nil {
+	if err := encoding.DeserializeJSON(res, cfgSettings); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 

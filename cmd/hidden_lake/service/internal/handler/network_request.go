@@ -94,7 +94,7 @@ func HandleNetworkRequestAPI(
 			respBytes, err := pNode.FetchPayload(
 				pCtx,
 				pubKey,
-				adapters.NewPayload(uint32(pkg_settings.CServiceMask), data),
+				adapters.NewPayload(pkg_settings.CServiceMask, data),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))
