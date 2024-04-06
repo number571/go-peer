@@ -8,7 +8,9 @@ type SAnonymityError struct {
 	str string
 }
 
-func (err *SAnonymityError) Error() string { return errPrefix + err.str }
+func (err *SAnonymityError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrSetHashIntoDB          = &SAnonymityError{"set hash into database"}

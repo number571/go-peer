@@ -8,7 +8,9 @@ type SNetworkError struct {
 	str string
 }
 
-func (err *SNetworkError) Error() string { return errPrefix + err.str }
+func (err *SNetworkError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrNoConnections        = &SNetworkError{"no connections"}

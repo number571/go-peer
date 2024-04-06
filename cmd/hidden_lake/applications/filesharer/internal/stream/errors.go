@@ -8,7 +8,9 @@ type SStreamError struct {
 	str string
 }
 
-func (err *SStreamError) Error() string { return errPrefix + err.str }
+func (err *SStreamError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrWriteFileChunk   = &SStreamError{"write file chunk"}

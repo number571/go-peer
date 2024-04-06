@@ -8,7 +8,9 @@ type SAppError struct {
 	str string
 }
 
-func (err *SAppError) Error() string { return errPrefix + err.str }
+func (err *SAppError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrRunning        = &SAppError{"app running"}

@@ -8,7 +8,9 @@ type SUtilsError struct {
 	str string
 }
 
-func (err *SUtilsError) Error() string { return errPrefix + err.str }
+func (err *SUtilsError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrGetSizeInBase64    = &SUtilsError{"get size in base64"}

@@ -8,7 +8,9 @@ type SMessageError struct {
 	str string
 }
 
-func (err *SMessageError) Error() string { return errPrefix + err.str }
+func (err *SMessageError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrUnknownType        = &SMessageError{"unknown type"}

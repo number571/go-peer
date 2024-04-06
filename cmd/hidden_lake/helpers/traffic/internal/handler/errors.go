@@ -8,7 +8,9 @@ type SHandlerError struct {
 	str string
 }
 
-func (err *SHandlerError) Error() string { return errPrefix + err.str }
+func (err *SHandlerError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrLoadMessage   = &SHandlerError{"load message"}

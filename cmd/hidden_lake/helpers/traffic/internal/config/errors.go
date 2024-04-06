@@ -8,7 +8,9 @@ type SConfigError struct {
 	str string
 }
 
-func (err *SConfigError) Error() string { return errPrefix + err.str }
+func (err *SConfigError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrInvalidConfig      = &SConfigError{"invalid config"}

@@ -8,7 +8,9 @@ type SDatabaseError struct {
 	str string
 }
 
-func (err *SDatabaseError) Error() string { return errPrefix + err.str }
+func (err *SDatabaseError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrOpenDB               = &SDatabaseError{"open database"}

@@ -8,7 +8,9 @@ type SUtilsError struct {
 	str string
 }
 
-func (err *SUtilsError) Error() string { return errPrefix + err.str }
+func (err *SUtilsError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrRespSizeGeLimit = &SUtilsError{"response size >= limit message size"}

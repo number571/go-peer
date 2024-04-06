@@ -8,7 +8,9 @@ type SStateError struct {
 	str string
 }
 
-func (err *SStateError) Error() string { return errPrefix + err.str }
+func (err *SStateError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrStateEnabled  = &SStateError{"state already enabled"}

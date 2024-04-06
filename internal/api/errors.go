@@ -8,7 +8,9 @@ type SApiError struct {
 	str string
 }
 
-func (err *SApiError) Error() string { return errPrefix + err.str }
+func (err *SApiError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrBadStatusCode = &SApiError{"bad status code"}

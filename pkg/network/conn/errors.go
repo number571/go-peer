@@ -8,7 +8,9 @@ type SConnError struct {
 	str string
 }
 
-func (err *SConnError) Error() string { return errPrefix + err.str }
+func (err *SConnError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrReadFromSocket      = &SConnError{"read from socket"}

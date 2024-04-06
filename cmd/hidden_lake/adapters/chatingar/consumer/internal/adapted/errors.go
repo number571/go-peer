@@ -8,7 +8,9 @@ type SAdaptedError struct {
 	str string
 }
 
-func (err *SAdaptedError) Error() string { return errPrefix + err.str }
+func (err *SAdaptedError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrBuildRequest      = &SAdaptedError{"build request"}

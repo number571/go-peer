@@ -8,7 +8,9 @@ type SClientError struct {
 	str string
 }
 
-func (err *SClientError) Error() string { return errPrefix + err.str }
+func (err *SClientError) Error() string {
+	return errPrefix + err.str
+}
 
 var (
 	ErrBadRequest     = &SClientError{"bad request"}
