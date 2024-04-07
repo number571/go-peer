@@ -22,10 +22,3 @@ type ISettings interface {
 	GetPath() string
 	GetMessagesCapacity() uint64
 }
-
-type IDBWrapper interface {
-	types.ICloser
-
-	Get() IDatabase
-	Set(IDatabase) IDBWrapper
-}

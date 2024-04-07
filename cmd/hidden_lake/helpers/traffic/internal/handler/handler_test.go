@@ -47,7 +47,7 @@ func testNetworkMessageSettings() net_message.ISettings {
 	})
 }
 
-func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDBWrapper, hlt_client.IClient) {
+func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDatabase, hlt_client.IClient) {
 	db, err := database.NewDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath:             fmt.Sprintf(databaseTemplate, addr),
@@ -60,8 +60,7 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDBWrap
 		return nil, nil, nil, nil
 	}
 
-	wDB := database.NewDBWrapper().Set(db)
-	srv, _, cancel := testRunService(wDB, addr, "")
+	srv, _, cancel := testRunService(db, addr, "")
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -73,18 +72,18 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDBWrap
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, cancel, wDB, hltClient
+	return srv, cancel, db, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, wDB database.IDBWrapper) {
+func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, db database.IDatabase) {
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
 	cancel()
-	_ = closer.CloseAll([]types.ICloser{srv, wDB})
+	_ = closer.CloseAll([]types.ICloser{srv, db})
 }
 
-func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*http.Server, connkeeper.IConnKeeper, context.CancelFunc) {
+func testRunService(db database.IDatabase, addr string, addrNode string) (*http.Server, connkeeper.IConnKeeper, context.CancelFunc) {
 	mux := http.NewServeMux()
 
 	connKeeperSettings := &connkeeper.SSettings{
@@ -156,9 +155,9 @@ func testRunService(wDB database.IDBWrapper, addr string, addrNode string) (*htt
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
-	mux.HandleFunc(pkg_settings.CHandleStoragePointerPath, HandlePointerAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleStorageHashesPath, HandleHashesAPI(wDB, logger))
-	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleMessageAPI(ctx, cfg, wDB, logger, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleStoragePointerPath, HandlePointerAPI(db, logger))
+	mux.HandleFunc(pkg_settings.CHandleStorageHashesPath, HandleHashesAPI(db, logger))
+	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleMessageAPI(ctx, cfg, db, logger, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigSettings, HandleConfigSettingsAPI(cfg, logger))
 
 	srv := &http.Server{

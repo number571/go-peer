@@ -17,8 +17,8 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper database.IDBWrapper, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
-	tcpHandler := HandleServiceTCP(pCfg, pDBWrapper, pAnonLogger)
+func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDatabase database.IDatabase, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
+	tcpHandler := HandleServiceTCP(pCfg, pDatabase, pAnonLogger)
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
@@ -26,13 +26,6 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper data
 		if pR.Method != http.MethodGet && pR.Method != http.MethodPost {
 			pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
-			return
-		}
-
-		database := pDBWrapper.Get()
-		if database == nil {
-			pHTTPLogger.PushErro(logBuilder.WithMessage("get_database"))
-			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
@@ -47,7 +40,7 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDBWrapper data
 				return
 			}
 
-			msg, err := database.Load(hash)
+			msg, err := pDatabase.Load(hash)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("load_hash"))
 				_ = api.Response(pW, http.StatusNotFound, "failed: load message")

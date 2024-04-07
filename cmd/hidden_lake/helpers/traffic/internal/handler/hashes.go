@@ -12,20 +12,13 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandleHashesAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) http.HandlerFunc {
+func HandleHashesAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
 		if pR.Method != http.MethodGet {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogMethod))
 			_ = api.Response(pW, http.StatusMethodNotAllowed, "failed: incorrect method")
-			return
-		}
-
-		database := pDBWrapper.Get()
-		if database == nil {
-			pLogger.PushErro(logBuilder.WithMessage("get_database"))
-			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
 			return
 		}
 
@@ -37,7 +30,7 @@ func HandleHashesAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) htt
 			return
 		}
 
-		hash, err := database.Hash(uint64(id))
+		hash, err := pDatabase.Hash(uint64(id))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_hashes"))
 			_ = api.Response(pW, http.StatusNotAcceptable, "failed: load size from DB")

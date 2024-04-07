@@ -29,8 +29,9 @@ var (
 )
 
 type sApp struct {
-	fState  state.IState
-	fPathTo string
+	fState    state.IState
+	fPathTo   string
+	fParallel uint64
 
 	fCfgW       config.IWrapper
 	fNode       anonymity.INode
@@ -59,15 +60,11 @@ func NewApp(
 		stdfLogger = std_logger.NewStdLogger(logging, std_logger.GetLogFunc())
 	)
 
-	cfgWrapper := config.NewWrapper(pCfg)
-	node := initNode(cfgWrapper, pPrivKey, anonLogger, pParallel)
-
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fPathTo:     pPathTo,
-		fCfgW:       cfgWrapper,
-		fNode:       node,
-		fConnKeeper: initConnKeeper(pCfg, node),
+		fParallel:   pParallel,
+		fCfgW:       config.NewWrapper(pCfg),
 		fPrivKey:    pPrivKey,
 		fAnonLogger: anonLogger,
 		fHTTPLogger: httpLogger,
@@ -110,9 +107,13 @@ func (p *sApp) Run(pCtx context.Context) error {
 
 func (p *sApp) enable(pCtx context.Context) state.IStateF {
 	return func() error {
-		if err := p.initDatabase(); err != nil {
-			return utils.MergeErrors(ErrInitDB, err)
+		if err := p.initAnonNode(); err != nil {
+			return utils.MergeErrors(ErrCreateAnonNode, err)
 		}
+
+		p.initConnKeeper(
+			p.fNode.GetNetworkNode(),
+		)
 
 		p.initServicePPROF()
 		p.initServiceHTTP(pCtx)
@@ -136,7 +137,7 @@ func (p *sApp) stop() error {
 	err := closer.CloseAll([]types.ICloser{
 		p.fServiceHTTP,
 		p.fServicePPROF,
-		p.fNode.GetDBWrapper(),
+		p.fNode.GetKVDatabase(),
 		p.fNode.GetNetworkNode(),
 	})
 	if err != nil {

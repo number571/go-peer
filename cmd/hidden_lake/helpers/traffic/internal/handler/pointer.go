@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandlePointerAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) http.HandlerFunc {
+func HandlePointerAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
@@ -21,14 +21,7 @@ func HandlePointerAPI(pDBWrapper database.IDBWrapper, pLogger logger.ILogger) ht
 			return
 		}
 
-		database := pDBWrapper.Get()
-		if database == nil {
-			pLogger.PushErro(logBuilder.WithMessage("get_database"))
-			_ = api.Response(pW, http.StatusInternalServerError, "failed: get database")
-			return
-		}
-
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		_ = api.Response(pW, http.StatusOK, strconv.FormatUint(database.Pointer(), 10))
+		_ = api.Response(pW, http.StatusOK, strconv.FormatUint(pDatabase.Pointer(), 10))
 	}
 }

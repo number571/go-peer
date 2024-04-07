@@ -107,7 +107,7 @@ func testAllPushFree(node anonymity.INode, cancel context.CancelFunc, srv *http.
 	cancel()
 	_ = closer.CloseAll([]types.ICloser{
 		srv,
-		node.GetDBWrapper(),
+		node.GetKVDatabase(),
 		node.GetNetworkNode(),
 	})
 }

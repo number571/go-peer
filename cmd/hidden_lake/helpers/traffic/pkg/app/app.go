@@ -33,8 +33,8 @@ type sApp struct {
 
 	fPathTo     string
 	fConfig     config.IConfig
-	fDBWrapper  database.IDBWrapper
 	fNode       network.INode
+	fDatabase   database.IDatabase
 	fConnKeeper connkeeper.IConnKeeper
 
 	fAnonLogger logger.ILogger
@@ -55,15 +55,9 @@ func NewApp(
 		stdfLogger = std_logger.NewStdLogger(pCfg.GetLogging(), std_logger.GetLogFunc())
 	)
 
-	dbWrapper := database.NewDBWrapper()
-	node := initNode(pCfg, dbWrapper, anonLogger)
-
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fConfig:     pCfg,
-		fDBWrapper:  dbWrapper,
-		fNode:       node,
-		fConnKeeper: initConnKeeper(pCfg, node),
 		fPathTo:     pPathTo,
 		fAnonLogger: anonLogger,
 		fHTTPLogger: httpLogger,
@@ -109,8 +103,11 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 			return utils.MergeErrors(ErrInitDB, err)
 		}
 
-		p.initServiceHTTP(pCtx)
+		p.initNetworkNode(p.fDatabase)
+		p.initConnKeeper(p.fNode)
+
 		p.initServicePPROF()
+		p.initServiceHTTP(pCtx)
 
 		p.fStdfLogger.PushInfo(hlt_settings.CServiceName + " is running...")
 		return nil
@@ -130,8 +127,8 @@ func (p *sApp) stop() error {
 	err := closer.CloseAll([]types.ICloser{
 		p.fServiceHTTP,
 		p.fServicePPROF,
-		p.fDBWrapper,
-		p.fConnKeeper.GetNetworkNode(),
+		p.fDatabase,
+		p.fNode,
 	})
 	if err != nil {
 		return utils.MergeErrors(ErrClose, err)

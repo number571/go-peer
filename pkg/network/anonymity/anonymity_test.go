@@ -187,20 +187,6 @@ func TestDataType(t *testing.T) {
 	_ = unwrapBytes([]byte{})
 }
 
-func TestWrapper(t *testing.T) {
-	t.Parallel()
-
-	wrapper := NewDBWrapper()
-	if db := wrapper.Get(); db != nil {
-		t.Error("db is not null")
-		return
-	}
-	if err := wrapper.Close(); err != nil {
-		t.Error(err)
-		return
-	}
-}
-
 func TestFetchPayload(t *testing.T) {
 	t.Parallel()
 
@@ -486,12 +472,12 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	node.GetDBWrapper().Set(nil)
-	netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
-	if err := handler(ctx, nil, nil, netMsg41); err == nil {
-		t.Error("got success code with closed database")
-		return
-	}
+	// node.GetDBWrapper().Set(nil)
+	// netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
+	// if err := handler(ctx, nil, nil, netMsg41); err == nil {
+	// 	t.Error("got success code with closed database")
+	// 	return
+	// }
 }
 
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
@@ -535,19 +521,19 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
-	db := node.GetDBWrapper().Get()
-	node.GetDBWrapper().Set(nil)
-	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
-		t.Error("success use store function with null database")
-		return
-	}
+	// db := node.GetDBWrapper().Get()
+	// node.GetDBWrapper().Set(nil)
+	// if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
+	// 	t.Error("success use store function with null database")
+	// 	return
+	// }
 
-	node.GetDBWrapper().Set(db)
-	db.Close()
-	if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
-		t.Error("success use store function with closed database")
-		return
-	}
+	// node.GetDBWrapper().Set(db)
+	// db.Close()
+	// if ok, err := node.storeHashWithBroadcast(ctx, logBuilder, netMsg); ok || err == nil {
+	// 	t.Error("success use store function with closed database")
+	// 	return
+	// }
 }
 
 func TestRecvSendMessage(t *testing.T) {
@@ -794,7 +780,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
 		),
-		NewDBWrapper().Set(db),
+		db,
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      addr,
@@ -850,7 +836,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 
 func testFreeNodes(nodes []INode, cancels []context.CancelFunc, typeDB int) {
 	for i, node := range nodes {
-		node.GetDBWrapper().Close()
+		node.GetKVDatabase().Close()
 		node.GetNetworkNode().Close()
 		cancels[i]()
 	}

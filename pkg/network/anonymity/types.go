@@ -24,7 +24,7 @@ type INode interface {
 
 	GetLogger() logger.ILogger
 	GetSettings() ISettings
-	GetDBWrapper() IDBWrapper
+	GetKVDatabase() database.IKVDatabase
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys

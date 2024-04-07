@@ -118,12 +118,12 @@ func HandleServiceTCP(
 }
 
 func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IPubKey) bool {
-	pubKey, ok := pFriends[pPubKey.GetHasher().ToString()]
-	if !ok || !bytes.Equal(pubKey.ToBytes(), pPubKey.ToBytes()) {
-		// the same keys, but different values
-		return false
+	for _, pubKey := range pFriends {
+		if bytes.Equal(pubKey.ToBytes(), pPubKey.ToBytes()) {
+			return true
+		}
 	}
-	return true
+	return false
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

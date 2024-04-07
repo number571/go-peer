@@ -70,7 +70,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				)
 			},
 		),
-		anonymity.NewDBWrapper().Set(db),
+		db,
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      address,

@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -31,7 +32,7 @@ type sNode struct {
 	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
-	fDBWrapper     IDBWrapper
+	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IMessageQueue
 	fFriends       asymmetric.IListPubKeys
@@ -42,7 +43,7 @@ type sNode struct {
 func NewNode(
 	pSett ISettings,
 	pLogger logger.ILogger,
-	pDBWrapper IDBWrapper,
+	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IMessageQueue,
 	pFriends asymmetric.IListPubKeys,
@@ -51,7 +52,7 @@ func NewNode(
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
 		fLogger:        pLogger,
-		fDBWrapper:     pDBWrapper,
+		fKVDatavase:    pKVDatavase,
 		fNetwork:       pNetwork,
 		fQueue:         pQueue,
 		fFriends:       pFriends,
@@ -114,8 +115,8 @@ func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sNode) GetDBWrapper() IDBWrapper {
-	return p.fDBWrapper
+func (p *sNode) GetKVDatabase() database.IKVDatabase {
+	return p.fKVDatavase
 }
 
 func (p *sNode) GetNetworkNode() network.INode {
@@ -254,7 +255,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 				// continue to read a message from unknown public key
 				p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
 			default:
-				// ignore reading messages from unknown public key
+				// ignore reading message from unknown public key
 				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
 				return nil
 			}
@@ -401,20 +402,14 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	database := p.fDBWrapper.Get()
-	if database == nil {
-		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-		return false, ErrNilDB
-	}
-
 	// check already received data by hash
-	if _, err := database.Get(pHash); err == nil {
+	if _, err := p.fKVDatavase.Get(pHash); err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
 		return false, nil
 	}
 
 	// set hash to database with new address
-	if err := database.Set(pHash, []byte{}); err != nil {
+	if err := p.fKVDatavase.Set(pHash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 		return false, utils.MergeErrors(ErrSetHashIntoDB, err)
 	}
