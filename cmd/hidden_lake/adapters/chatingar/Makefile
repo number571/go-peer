@@ -1,12 +1,11 @@
-N=1
 GC=go build
-.PHONY: default build test clean
-default: build
+BINPATH=../../../../bin
+.PHONY: default build run clean
+default: build run
 build:
-	make -C ./consumer build
-	make -C ./producer build
-test:
-	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
+	$(GC) -o $(BINPATH)/chatingar ./cmd/chatingar
+run:
+	./$(BINPATH)/chatingar
 clean:
-	make -C ./consumer clean 
-	make -C ./producer clean 
+	rm -f hla_chatingar.yml $(BINPATH)/chatingar
+	rm -rf hla_chatingar.db

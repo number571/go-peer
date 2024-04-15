@@ -6,5 +6,4 @@ services:
   - hidden-lake-service
   - hidden-lake-traffic
   - hidden-lake-filesharer
-  - hidden-lake-adapter=common_consumer
-  - hidden-lake-adapter=common_producer
+  - hidden-lake-adapters=common

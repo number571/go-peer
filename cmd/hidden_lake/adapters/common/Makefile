@@ -1,14 +1,11 @@
-N=1
 GC=go build
-.PHONY: default build test clean
-default: build
+BINPATH=../../../../bin
+.PHONY: default build run clean
+default: build run
 build:
-	make -C ./consumer build
-	make -C ./producer build
-	make -C ./service build
-test:
-	for i in {1..$(N)}; do go clean -testcache; echo $$i; go test ./...; done
+	$(GC) -o $(BINPATH)/common ./cmd/common
+run:
+	./$(BINPATH)/common
 clean:
-	make -C ./consumer clean 
-	make -C ./producer clean 
-	make -C ./service clean 
+	rm -f hla_common.yml $(BINPATH)/common
+	rm -rf hla_common.db

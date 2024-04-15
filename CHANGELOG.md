@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/adapters`: producer, consumer apps -> one app
+
 ## v1.6.8
 
 *April 07, 2024*

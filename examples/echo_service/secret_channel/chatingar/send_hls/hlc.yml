@@ -5,5 +5,4 @@ logging:
 services:
   - hidden-lake-service
   - hidden-lake-traffic
-  - hidden-lake-adapter=chatingar_consumer
-  - hidden-lake-adapter=chatingar_producer
+  - hidden-lake-adapters=chatingar

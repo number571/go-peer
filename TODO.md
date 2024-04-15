@@ -9,6 +9,7 @@
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
 9. Crowds в теории строения скрытых систем (третья стадия анонимности)
+10. Net message re-encryption
 
 ### Tests
 
