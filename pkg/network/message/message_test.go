@@ -54,9 +54,15 @@ func TestMessage(t *testing.T) {
 		FNetworkKey:   tcNetworkKey,
 	})
 
-	msg := NewMessage(sett, pld, 1, tcLimitVoid)
-	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcBody)) {
+	msgTmp := NewMessage(sett, pld, 1, tcLimitVoid)
+	if !bytes.Equal(msgTmp.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
+		return
+	}
+
+	msg, err := LoadMessage(sett, msgTmp.ToBytes())
+	if err != nil {
+		t.Error(err)
 		return
 	}
 

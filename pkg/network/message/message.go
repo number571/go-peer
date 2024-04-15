@@ -27,6 +27,17 @@ const (
 		encoding.CSizeUint64
 )
 
+const (
+	cCipherSaltIndex = cSaltSize
+	cAuthSaltIndex   = cCipherSaltIndex + cSaltSize
+)
+
+const (
+	cProofIndex  = encoding.CSizeUint64
+	cHashIndex   = cProofIndex + hashing.CSHA256Size
+	cPldLenIndex = cHashIndex + encoding.CSizeUint64
+)
+
 var (
 	_ IMessage = &sMessage{}
 )
@@ -44,15 +55,16 @@ type sMessage struct {
 }
 
 func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSize uint64) IMessage {
+	prng := random.NewStdPRNG()
+
+	authSalt := prng.GetBytes(cSaltSize)
+	cipherSalt := prng.GetBytes(cSaltSize)
+
 	payloadBytes := pPld.ToBytes()
 	payloadSize := encoding.Uint64ToBytes(uint64(len(payloadBytes)))
 
-	prng := random.NewStdPRNG()
-
-	randVoidSize := prng.GetUint64() % (pLimitVoidSize + 1)
-	voidBytes := prng.GetBytes(randVoidSize)
-
-	payloadVoidBytes := bytes.Join(
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pLimitVoidSize + 1))
+	sizeXPayloadVoidBytes := bytes.Join(
 		[][]byte{
 			payloadSize[:],
 			payloadBytes,
@@ -61,24 +73,23 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 		[]byte{},
 	)
 
-	authSalt := prng.GetBytes(cSaltSize)
-	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, payloadVoidBytes)
+	// H( KDF(K,Sa), LM || M || V )
+	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, sizeXPayloadVoidBytes)
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
-
-	cipherSalt := prng.GetBytes(cSaltSize)
-	cipher := getCipher(pSett.GetNetworkKey(), cipherSalt)
 	proofBytes := encoding.Uint64ToBytes(proof)
 
+	cipher := getCipher(pSett.GetNetworkKey(), cipherSalt)
 	return &sMessage{
 		fSalt: [2][]byte{
 			cipherSalt,
 			authSalt,
 		},
+		// E( KDF(K,Sc), P(HLMV) || HLMV || LM || M || V )
 		fEncPPHP: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
 				hash,
-				payloadVoidBytes,
+				sizeXPayloadVoidBytes,
 			},
 			[]byte{},
 		)),
@@ -91,17 +102,6 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 
 func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	var msgBytes []byte
-
-	const (
-		cipherSaltIndex = cSaltSize
-		authSaltIndex   = cipherSaltIndex + cSaltSize
-	)
-
-	const (
-		proofIndex  = encoding.CSizeUint64
-		hashIndex   = proofIndex + hashing.CSHA256Size
-		pldLenIndex = hashIndex + encoding.CSizeUint64
-	)
 
 	switch x := pData.(type) {
 	case []byte:
@@ -116,38 +116,37 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidHeaderSize
 	}
 
-	cipherSaltBytes := msgBytes[:cipherSaltIndex]
-	authSaltBytes := msgBytes[cipherSaltIndex:authSaltIndex]
-	encPPHPBytes := msgBytes[authSaltIndex:]
+	cipherSaltBytes := msgBytes[:cCipherSaltIndex]
+	authSaltBytes := msgBytes[cCipherSaltIndex:cAuthSaltIndex]
+	encPPHPBytes := msgBytes[cAuthSaltIndex:]
 
 	cipher := getCipher(pSett.GetNetworkKey(), cipherSaltBytes)
 	pphpBytes := cipher.DecryptBytes(encPPHPBytes)
 
 	proofArr := [encoding.CSizeUint64]byte{}
-	copy(proofArr[:], pphpBytes[:proofIndex])
+	copy(proofArr[:], pphpBytes[:cProofIndex])
 	proof := encoding.BytesToUint64(proofArr)
 
 	payloadSizeArr := [encoding.CSizeUint64]byte{}
-	copy(payloadSizeArr[:], pphpBytes[hashIndex:pldLenIndex])
+	copy(payloadSizeArr[:], pphpBytes[cHashIndex:cPldLenIndex])
 	payloadLength := encoding.BytesToUint64(payloadSizeArr)
 
-	hash := pphpBytes[proofIndex:hashIndex]
+	hash := pphpBytes[cProofIndex:cHashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(hash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	lenPayloadVoidBytes := pphpBytes[hashIndex:]
-	if (payloadLength + encoding.CSizeUint64) > uint64(len(lenPayloadVoidBytes)) {
+	payloadVoidBytes := pphpBytes[cPldLenIndex:]
+	if payloadLength > uint64(len(payloadVoidBytes)) {
 		return nil, ErrInvalidPayloadSize
 	}
 
-	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, lenPayloadVoidBytes)
+	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, pphpBytes[cHashIndex:])
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payloadVoidBytes := lenPayloadVoidBytes[encoding.CSizeUint64:]
 	payloadBytes := payloadVoidBytes[:payloadLength]
 	voidBytes := payloadVoidBytes[payloadLength:]
 
