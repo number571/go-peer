@@ -13,12 +13,18 @@ import (
 )
 
 const (
+	// Salt = 128bit
+	cSaltSize = 16
+
 	// Salt(cipher) + Salt(auth) + IV + Hash + Proof + PayloadSize + PayloadHead
-	cSaltSize        = 16
-	CMessageHeadSize = 2*cSaltSize +
+	CMessageHeadSize = 0 +
+		cSaltSize +
+		cSaltSize +
 		symmetric.CAESBlockSize +
 		hashing.CSHA256Size +
-		3*encoding.CSizeUint64
+		encoding.CSizeUint64 +
+		encoding.CSizeUint64 +
+		encoding.CSizeUint64
 )
 
 var (
@@ -131,17 +137,20 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	payloadVoidBytes := pphpBytes[hashIndex:]
-	if (payloadLength + encoding.CSizeUint64) > uint64(len(payloadVoidBytes)) {
+	lenPayloadVoidBytes := pphpBytes[hashIndex:]
+	if (payloadLength + encoding.CSizeUint64) > uint64(len(lenPayloadVoidBytes)) {
 		return nil, ErrInvalidPayloadSize
 	}
 
-	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, payloadVoidBytes)
+	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, lenPayloadVoidBytes)
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payloadBytes := payloadVoidBytes[encoding.CSizeUint64:][:payloadLength]
+	payloadVoidBytes := lenPayloadVoidBytes[encoding.CSizeUint64:]
+	payloadBytes := payloadVoidBytes[:payloadLength]
+	voidBytes := payloadVoidBytes[payloadLength:]
+
 	payload := payload.LoadPayload(payloadBytes)
 	if payload == nil {
 		return nil, ErrDecodePayload
@@ -154,7 +163,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		},
 		fEncPPHP: encPPHPBytes,
 		fHash:    hash,
-		fVoid:    payloadVoidBytes[payloadLength:],
+		fVoid:    voidBytes,
 		fProof:   proof,
 		fPayload: payload,
 	}, nil

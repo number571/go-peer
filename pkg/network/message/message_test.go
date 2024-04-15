@@ -66,6 +66,11 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
+	if (len(msg.ToBytes()) - len(voidBytes)) != len(msg.GetPayload().GetBody())+CMessageHeadSize {
+		t.Error("invalid message size in bytes with void")
+		return
+	}
+
 	payloadSize := encoding.Uint64ToBytes(uint64(len(pld.ToBytes())))
 	payloadRandBytes := bytes.Join(
 		[][]byte{payloadSize[:], pld.ToBytes(), voidBytes},

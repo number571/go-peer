@@ -8,6 +8,10 @@
 
 - Update `cmd/hidden_lake/adapters`: producer, consumer apps -> one app
 
+### BUG FIXES
+
+- Update `pkg/network/message`: fix GetVoid bytes method
+
 ## v1.6.8
 
 *April 07, 2024*
