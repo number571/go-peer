@@ -82,7 +82,9 @@ func TestMessage(t *testing.T) {
 		[][]byte{payloadSize[:], pld.ToBytes(), voidBytes},
 		[]byte{},
 	)
-	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, msg.GetSalt()[1], payloadRandBytes)) {
+
+	authSalt := msg.ToBytes()[CSaltSize : 2*CSaltSize]
+	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, authSalt, payloadRandBytes)) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -130,9 +132,9 @@ func TestMessage(t *testing.T) {
 	}
 
 	msg3 := NewMessage(sett, pld, 1, 0).(*sMessage)
-	msg3.fEncPPHP[0] ^= 1
+	msg3.fEncd[0] ^= 1
 	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
-		t.Error("success load with invalid pphp")
+		t.Error("success load with invalid encd")
 		return
 	}
 

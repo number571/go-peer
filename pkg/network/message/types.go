@@ -10,7 +10,6 @@ type IMessage interface {
 
 	GetHash() []byte
 	GetVoid() []byte
-	GetSalt() [2][]byte
 	GetProof() uint64
 	GetPayload() payload.IPayload
 }

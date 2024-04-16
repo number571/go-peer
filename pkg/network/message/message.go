@@ -14,12 +14,12 @@ import (
 
 const (
 	// Salt = 128bit
-	cSaltSize = 16
+	CSaltSize = 16
 
 	// Salt(cipher) + Salt(auth) + IV + Hash + Proof + PayloadSize + PayloadHead
 	CMessageHeadSize = 0 +
-		cSaltSize +
-		cSaltSize +
+		CSaltSize +
+		CSaltSize +
 		symmetric.CAESBlockSize +
 		hashing.CSHA256Size +
 		encoding.CSizeUint64 +
@@ -28,8 +28,8 @@ const (
 )
 
 const (
-	cCipherSaltIndex = cSaltSize
-	cAuthSaltIndex   = cCipherSaltIndex + cSaltSize
+	cCipherSaltIndex = CSaltSize
+	cAuthSaltIndex   = cCipherSaltIndex + CSaltSize
 )
 
 const (
@@ -43,22 +43,22 @@ var (
 )
 
 type sMessage struct {
-	fSalt    [2][]byte // cipher_salt+auth_salt
-	fEncPPHP []byte    // enc(proof_psize_hash_payload)
+	// Result fields
+	fSalt []byte // Sc || Sa
+	fEncd []byte // E( KDF(K,Sc), P(HLMV) || HLMV || LM || M || V )
 
-	// not used in LoadMessage(), ToBytes(), ToString()
-	// used only in GetVoid(), GetHash(), in GetProof(), GetPayload()
-	fHash    []byte
-	fVoid    []byte
-	fProof   uint64
-	fPayload payload.IPayload
+	// Only read fields
+	fHash    []byte           // HLMV = H( KDF(K,Sa), LM || M || V )
+	fVoid    []byte           // V
+	fProof   uint64           // P(HLMV)
+	fPayload payload.IPayload // M
 }
 
 func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSize uint64) IMessage {
 	prng := random.NewStdPRNG()
 
-	authSalt := prng.GetBytes(cSaltSize)
-	cipherSalt := prng.GetBytes(cSaltSize)
+	authSalt := prng.GetBytes(CSaltSize)
+	cipherSalt := prng.GetBytes(CSaltSize)
 
 	payloadBytes := pPld.ToBytes()
 	payloadSize := encoding.Uint64ToBytes(uint64(len(payloadBytes)))
@@ -73,19 +73,17 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 		[]byte{},
 	)
 
-	// H( KDF(K,Sa), LM || M || V )
 	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, sizeXPayloadVoidBytes)
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := getCipher(pSett.GetNetworkKey(), cipherSalt)
 	return &sMessage{
-		fSalt: [2][]byte{
-			cipherSalt,
-			authSalt,
-		},
-		// E( KDF(K,Sc), P(HLMV) || HLMV || LM || M || V )
-		fEncPPHP: cipher.EncryptBytes(bytes.Join(
+		fSalt: bytes.Join(
+			[][]byte{cipherSalt, authSalt},
+			[]byte{},
+		),
+		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
 				hash,
@@ -116,33 +114,35 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidHeaderSize
 	}
 
-	cipherSaltBytes := msgBytes[:cCipherSaltIndex]
-	authSaltBytes := msgBytes[cCipherSaltIndex:cAuthSaltIndex]
-	encPPHPBytes := msgBytes[cAuthSaltIndex:]
+	saltBytes := msgBytes[:cAuthSaltIndex]
+	encdBytes := msgBytes[cAuthSaltIndex:]
+
+	cipherSaltBytes := saltBytes[:cCipherSaltIndex]
+	authSaltBytes := saltBytes[cCipherSaltIndex:]
 
 	cipher := getCipher(pSett.GetNetworkKey(), cipherSaltBytes)
-	pphpBytes := cipher.DecryptBytes(encPPHPBytes)
+	dBytes := cipher.DecryptBytes(encdBytes)
 
 	proofArr := [encoding.CSizeUint64]byte{}
-	copy(proofArr[:], pphpBytes[:cProofIndex])
+	copy(proofArr[:], dBytes[:cProofIndex])
 	proof := encoding.BytesToUint64(proofArr)
 
 	payloadSizeArr := [encoding.CSizeUint64]byte{}
-	copy(payloadSizeArr[:], pphpBytes[cHashIndex:cPldLenIndex])
+	copy(payloadSizeArr[:], dBytes[cHashIndex:cPldLenIndex])
 	payloadLength := encoding.BytesToUint64(payloadSizeArr)
 
-	hash := pphpBytes[cProofIndex:cHashIndex]
+	hash := dBytes[cProofIndex:cHashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(hash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	payloadVoidBytes := pphpBytes[cPldLenIndex:]
+	payloadVoidBytes := dBytes[cPldLenIndex:]
 	if payloadLength > uint64(len(payloadVoidBytes)) {
 		return nil, ErrInvalidPayloadSize
 	}
 
-	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, pphpBytes[cHashIndex:])
+	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, dBytes[cHashIndex:])
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
@@ -156,11 +156,8 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	}
 
 	return &sMessage{
-		fSalt: [2][]byte{
-			cipherSaltBytes,
-			authSaltBytes,
-		},
-		fEncPPHP: encPPHPBytes,
+		fSalt:    saltBytes,
+		fEncd:    encdBytes,
 		fHash:    hash,
 		fVoid:    voidBytes,
 		fProof:   proof,
@@ -170,10 +167,6 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 
 func (p *sMessage) GetProof() uint64 {
 	return p.fProof
-}
-
-func (p *sMessage) GetSalt() [2][]byte {
-	return p.fSalt
 }
 
 func (p *sMessage) GetHash() []byte {
@@ -190,11 +183,7 @@ func (p *sMessage) GetPayload() payload.IPayload {
 
 func (p *sMessage) ToBytes() []byte {
 	return bytes.Join(
-		[][]byte{
-			p.fSalt[0],
-			p.fSalt[1],
-			p.fEncPPHP,
-		},
+		[][]byte{p.fSalt, p.fEncd},
 		[]byte{},
 	)
 }
