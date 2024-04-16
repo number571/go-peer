@@ -66,6 +66,11 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
+	if msgTmp.ToString() != msg.ToString() {
+		t.Error("msgTmp != msg")
+		return
+	}
+
 	voidBytes := msg.GetVoid()
 	if len(voidBytes) > tcLimitVoid {
 		t.Error("got length void bytes > limit")
@@ -106,6 +111,10 @@ func TestMessage(t *testing.T) {
 		}
 		if msgN.GetProof() != msgL.GetProof() {
 			t.Error("got invalid proof")
+			return
+		}
+		if len(msgN.ToBytes()) != CMessageHeadSize+len(pld.GetBody()) {
+			t.Error("msg size != head size + payload body")
 			return
 		}
 		break

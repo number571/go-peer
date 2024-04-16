@@ -7,10 +7,11 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/adapters`: producer, consumer apps -> one app
+- Update `pkg/network/message`: delete GetSalt method
 
 ### BUG FIXES
 
-- Update `pkg/network/message`: fix GetVoid bytes method
+- Update `pkg/network/message`: fix LoadMessage with voidBytes
 
 ## v1.6.8
 
