@@ -19,10 +19,6 @@ const (
 	cSeparatorLen = len(CSeparator)
 )
 
-var (
-	_ IMessage = &SMessage{}
-)
-
 // Basic structure of transport package.
 type SMessage struct {
 	FPubk string `json:"pubk"`
