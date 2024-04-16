@@ -25,12 +25,12 @@ var (
 
 // Basic structure of transport package.
 type SMessage struct {
-	FPubKey  string `json:"pubk"`
-	FEncKey  string `json:"enck"`
-	FSalt    string `json:"salt"`
-	FHash    string `json:"hash"`
-	FSign    string `json:"sign"`
-	FPayload []byte `json:"-"`
+	FPubk string `json:"pubk"`
+	FEnck string `json:"enck"`
+	FSalt string `json:"salt"`
+	FHash string `json:"hash"`
+	FSign string `json:"sign"`
+	FData []byte `json:"-"`
 }
 
 // Message can be created only with client module.
@@ -58,11 +58,11 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 
 	switch x := pMsg.(type) {
 	case []byte:
-		msg.FPayload = x[i+cSeparatorLen:]
+		msg.FData = x[i+cSeparatorLen:]
 	case string:
 		encStr := strings.TrimSpace(x[i+cSeparatorLen:])
-		msg.FPayload = encoding.HexDecode(encStr)
-		if msg.FPayload == nil {
+		msg.FData = encoding.HexDecode(encStr)
+		if msg.FData == nil {
 			return nil, ErrDecodePayload
 		}
 	}
@@ -74,12 +74,12 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	return msg, nil
 }
 
-func (p *SMessage) GetPubKey() []byte {
-	return encoding.HexDecode(p.FPubKey)
+func (p *SMessage) GetPubk() []byte {
+	return encoding.HexDecode(p.FPubk)
 }
 
-func (p *SMessage) GetEncKey() []byte {
-	return encoding.HexDecode(p.FEncKey)
+func (p *SMessage) GetEnck() []byte {
+	return encoding.HexDecode(p.FEnck)
 }
 
 func (p *SMessage) GetSalt() []byte {
@@ -94,15 +94,15 @@ func (p *SMessage) GetSign() []byte {
 	return encoding.HexDecode(p.FSign)
 }
 
-func (p *SMessage) GetPayload() []byte {
-	return p.FPayload
+func (p *SMessage) GetData() []byte {
+	return p.FData
 }
 
 func (p *SMessage) ToBytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			encoding.SerializeJSON(p),
-			p.FPayload,
+			p.FData,
 		},
 		[]byte(CSeparator),
 	)
@@ -112,7 +112,7 @@ func (p *SMessage) ToString() string {
 	return strings.Join(
 		[]string{
 			string(encoding.SerializeJSON(p)),
-			encoding.HexEncode(p.FPayload),
+			encoding.HexEncode(p.FData),
 		},
 		CSeparator,
 	)
@@ -124,12 +124,12 @@ func (p *SMessage) IsValid(psett ISettings) bool {
 	switch {
 	case
 		uint64(len(p.ToBytes())) != msgSizeBytes,
-		uint64(len(p.GetEncKey())) != keySizeBytes,
+		uint64(len(p.GetEnck())) != keySizeBytes,
 		uint64(len(p.GetSign())) != symmetric.CAESBlockSize+keySizeBytes,
-		uint64(len(p.GetPubKey())) < symmetric.CAESBlockSize+keySizeBytes,
+		uint64(len(p.GetPubk())) < symmetric.CAESBlockSize+keySizeBytes,
 		len(p.GetHash()) != symmetric.CAESBlockSize+hashing.CSHA256Size,
 		len(p.GetSalt()) != symmetric.CAESBlockSize+symmetric.CAESKeySize,
-		len(p.GetPayload()) < symmetric.CAESBlockSize:
+		len(p.GetData()) < symmetric.CAESBlockSize:
 		return false
 	default:
 		return true

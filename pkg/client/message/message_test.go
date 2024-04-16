@@ -135,12 +135,12 @@ func testMessage(t *testing.T, msg IMessage) {
 		return
 	}
 
-	if !bytes.Equal(msg.GetEncKey(), encoding.HexDecode(tcSession)) {
+	if !bytes.Equal(msg.GetEnck(), encoding.HexDecode(tcSession)) {
 		t.Error("incorrect session value")
 		return
 	}
 
-	if !bytes.Equal(msg.GetPubKey(), encoding.HexDecode(tcSender)) {
+	if !bytes.Equal(msg.GetPubk(), encoding.HexDecode(tcSender)) {
 		t.Error("incorrect sender value")
 		return
 	}
@@ -155,14 +155,14 @@ func testMessage(t *testing.T, msg IMessage) {
 		return
 	}
 
-	if msg.GetPayload() == nil {
+	if msg.GetData() == nil {
 		t.Error("failed get encrypted payload")
 		return
 	}
 
 	msg1 := msg.(*SMessage)
-	msg1.FPayload = []byte{123}
-	if !bytes.Equal(msg.GetPayload(), []byte{123}) {
+	msg1.FData = []byte{123}
+	if !bytes.Equal(msg.GetData(), []byte{123}) {
 		t.Error("success got incorrect payload")
 		return
 	}

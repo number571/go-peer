@@ -130,12 +130,12 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 
 	cipher := symmetric.NewAESCipher(session)
 	return &message.SMessage{
-		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-		FEncKey:  encoding.HexEncode(encKey),
-		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
-		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
-		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-		FPayload: cipher.EncryptBytes(payloadWrapper.ToBytes()), // JSON field to raw Body (no need HEX encode)
+		FPubk: encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
+		FEnck: encoding.HexEncode(encKey),
+		FSalt: encoding.HexEncode(cipher.EncryptBytes(salt)),
+		FHash: encoding.HexEncode(cipher.EncryptBytes(hash)),
+		FSign: encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
+		FData: cipher.EncryptBytes(payloadWrapper.ToBytes()), // JSON field to raw Body (no need HEX encode)
 	}, nil
 }
 
@@ -148,14 +148,14 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.fPrivKey.DecryptBytes(pMsg.GetEncKey())
+	session := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
 	if session == nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
 	// Decrypt public key of sender by decrypted session key.
 	cipher := symmetric.NewAESCipher(session)
-	publicBytes := cipher.DecryptBytes(pMsg.GetPubKey())
+	publicBytes := cipher.DecryptBytes(pMsg.GetPubk())
 
 	// Load public key and check standart size.
 	pubKey := asymmetric.LoadRSAPubKey(publicBytes)
@@ -167,7 +167,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt main data of message by session key.
-	payloadWrapperBytes := cipher.DecryptBytes(pMsg.GetPayload())
+	payloadWrapperBytes := cipher.DecryptBytes(pMsg.GetData())
 	payloadWrapper := payload.LoadPayload(payloadWrapperBytes)
 	if payloadWrapper == nil {
 		return nil, nil, ErrDecodePayloadWrapper

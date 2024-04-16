@@ -8,11 +8,10 @@ import (
 
 type IClient interface {
 	GetSettings() message.ISettings
+	GetMessageLimit() uint64
 
 	GetPubKey() asymmetric.IPubKey
 	GetPrivKey() asymmetric.IPrivKey
-
-	GetMessageLimit() uint64
 
 	EncryptPayload(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
 	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)

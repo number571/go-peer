@@ -182,14 +182,14 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	sMsg3 := *sMsg
-	sMsg3.FEncKey = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	sMsg3.FEnck = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg3); err == nil {
 		t.Error("success decrypt message with incorrect session key")
 		return
 	}
 
 	sMsg4 := *sMsg
-	sMsg4.FPubKey = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+	sMsg4.FPubk = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 	if _, _, err := client1.DecryptMessage(&sMsg4); err == nil {
 		t.Error("success decrypt message with incorrect sender key (incorrect)")
 		return
@@ -207,14 +207,14 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	sMsg6 := *sMsg
-	sMsg6.FPayload = []byte("111")
+	sMsg6.FData = []byte("111")
 	if _, _, err := client1.DecryptMessage(&sMsg6); err == nil {
 		t.Error("success decrypt message with incorrect payload (iv block)")
 		return
 	}
 
 	sMsg7 := *sMsg
-	sMsg7.FPayload = random.NewStdPRNG().GetBytes(948)
+	sMsg7.FData = random.NewStdPRNG().GetBytes(948)
 	if _, _, err := client1.DecryptMessage(&sMsg7); err == nil {
 		t.Error("success decrypt message with incorrect payload (payload is nil)")
 		return
@@ -358,11 +358,11 @@ func (p *sClient) tInvalidEncryptWithParams(pRecv asymmetric.IPubKey, pPld paylo
 
 	cipher := symmetric.NewAESCipher(session)
 	return &message.SMessage{
-		FPubKey:  encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-		FEncKey:  encoding.HexEncode(pRecv.EncryptBytes(session)),
-		FSalt:    encoding.HexEncode(cipher.EncryptBytes(salt)),
-		FHash:    encoding.HexEncode(cipher.EncryptBytes(hash)),
-		FSign:    encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-		FPayload: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
+		FPubk: encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
+		FEnck: encoding.HexEncode(pRecv.EncryptBytes(session)),
+		FSalt: encoding.HexEncode(cipher.EncryptBytes(salt)),
+		FHash: encoding.HexEncode(cipher.EncryptBytes(hash)),
+		FSign: encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
+		FData: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
 	}
 }
