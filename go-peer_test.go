@@ -2,23 +2,22 @@ package gopeer
 
 import (
 	"bytes"
-	"os"
+	_ "embed"
 	"regexp"
 	"strings"
 	"testing"
 )
 
+var (
+	//go:embed CHANGELOG.md
+	tgBinaryCHANGELOG []byte
+)
+
 func TestGoPeerVersion(t *testing.T) {
 	t.Parallel()
 
-	changelog, err := os.ReadFile("CHANGELOG.md")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
 	re := regexp.MustCompile(`##\s+(v\d+\.\d+\.\d+~?)\s+`)
-	match := re.FindAllStringSubmatch(string(changelog), -1)
+	match := re.FindAllStringSubmatch(string(tgBinaryCHANGELOG), -1)
 	if len(match) < 2 {
 		t.Error("versions not found")
 		return
@@ -51,7 +50,7 @@ func TestGoPeerVersion(t *testing.T) {
 		}
 	}
 
-	if bytes.Count(changelog, []byte("*??? ??, ????*")) != 1 {
+	if bytes.Count(tgBinaryCHANGELOG, []byte("*??? ??, ????*")) != 1 {
 		t.Error("is there no new version or more than one new version?")
 		return
 	}

@@ -30,10 +30,10 @@ const (
 
 var (
 	//go:embed test_binary.msg
-	TCBinaryMessage []byte
+	TGBinaryMessage []byte
 
 	//go:embed test_string.msg
-	TCStringMessage string
+	TGStringMessage string
 )
 
 var (

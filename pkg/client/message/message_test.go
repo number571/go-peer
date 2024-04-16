@@ -104,14 +104,14 @@ func TestMessage(t *testing.T) {
 		FKeySizeBits:      testutils.TcKeySize,
 	})
 
-	msg1, err := LoadMessage(params, testutils.TCBinaryMessage)
+	msg1, err := LoadMessage(params, testutils.TGBinaryMessage)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	testMessage(t, msg1)
 
-	msg2, err := LoadMessage(params, testutils.TCStringMessage)
+	msg2, err := LoadMessage(params, testutils.TGStringMessage)
 	if err != nil {
 		t.Error(err)
 		return
@@ -120,12 +120,12 @@ func TestMessage(t *testing.T) {
 }
 
 func testMessage(t *testing.T, msg IMessage) {
-	if !bytes.Equal(msg.ToBytes(), testutils.TCBinaryMessage) {
+	if !bytes.Equal(msg.ToBytes(), testutils.TGBinaryMessage) {
 		t.Error("invalid convert to bytes")
 		return
 	}
 
-	if msg.ToString() != testutils.TCStringMessage {
+	if msg.ToString() != testutils.TGStringMessage {
 		t.Error("invalid convert to string")
 		return
 	}
