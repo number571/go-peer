@@ -11,7 +11,7 @@ type IMessage interface {
 	GetPubKey() []byte  // Public key of the sender.
 	GetEncKey() []byte  // One-time key of encryption data.
 	GetSalt() []byte    // Random bytes for hide data of the hash.
-	GetHash() []byte    // Hash of the (sender + receiver + payload).
+	GetHash() []byte    // HMAC of the (salt, sender + receiver + payload).
 	GetSign() []byte    // Sign of the hash.
 	GetPayload() []byte // Main data in the ecnrypted bytes format.
 }
