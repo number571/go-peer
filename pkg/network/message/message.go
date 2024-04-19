@@ -4,7 +4,6 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -13,23 +12,13 @@ import (
 )
 
 const (
-	// Salt = 128bit
-	CSaltSize = 16
-
-	// Salt(cipher) + Salt(auth) + IV + Hash + Proof + PayloadSize + PayloadHead
+	// IV + Hash + Proof + PayloadSize + PayloadHead
 	CMessageHeadSize = 0 +
-		CSaltSize +
-		CSaltSize +
 		symmetric.CAESBlockSize +
 		hashing.CSHA256Size +
 		encoding.CSizeUint64 +
 		encoding.CSizeUint64 +
 		encoding.CSizeUint64
-)
-
-const (
-	cCipherSaltIndex = CSaltSize
-	cAuthSaltIndex   = cCipherSaltIndex + CSaltSize
 )
 
 const (
@@ -43,12 +32,8 @@ var (
 )
 
 type sMessage struct {
-	// Result fields
-	fSalt []byte // Sc || Sa
-	fEncd []byte // E( KDF(K,Sc), P(HLMV) || HLMV || LM || M || V )
-
-	// Only read fields
-	fHash    []byte           // HLMV = H( KDF(K,Sa), LM || M || V )
+	fEncd    []byte           // E( K, P(HLMV) || HLMV || L(M) || M || V )
+	fHash    []byte           // HLMV = H( K, L(M) || M || V )
 	fVoid    []byte           // V
 	fProof   uint64           // P(HLMV)
 	fPayload payload.IPayload // M
@@ -56,9 +41,6 @@ type sMessage struct {
 
 func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSize uint64) IMessage {
 	prng := random.NewStdPRNG()
-
-	authSalt := prng.GetBytes(CSaltSize)
-	cipherSalt := prng.GetBytes(CSaltSize)
 
 	payloadBytes := pPld.ToBytes()
 	payloadSize := encoding.Uint64ToBytes(uint64(len(payloadBytes)))
@@ -73,16 +55,14 @@ func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSiz
 		[]byte{},
 	)
 
-	hash := getAuthHash(pSett.GetNetworkKey(), authSalt, sizeXPayloadVoidBytes)
+	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	hash := hashing.NewHMACSHA256Hasher(key, sizeXPayloadVoidBytes).ToBytes()
+	cipher := symmetric.NewAESCipher(key)
+
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := getCipher(pSett.GetNetworkKey(), cipherSalt)
 	return &sMessage{
-		fSalt: bytes.Join(
-			[][]byte{cipherSalt, authSalt},
-			[]byte{},
-		),
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
@@ -114,14 +94,8 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidHeaderSize
 	}
 
-	saltBytes := msgBytes[:cAuthSaltIndex]
-	encdBytes := msgBytes[cAuthSaltIndex:]
-
-	cipherSaltBytes := saltBytes[:cCipherSaltIndex]
-	authSaltBytes := saltBytes[cCipherSaltIndex:]
-
-	cipher := getCipher(pSett.GetNetworkKey(), cipherSaltBytes)
-	dBytes := cipher.DecryptBytes(encdBytes)
+	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	dBytes := symmetric.NewAESCipher(key).DecryptBytes(msgBytes)
 
 	proofArr := [encoding.CSizeUint64]byte{}
 	copy(proofArr[:], dBytes[:cProofIndex])
@@ -142,7 +116,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidPayloadSize
 	}
 
-	newHash := getAuthHash(pSett.GetNetworkKey(), authSaltBytes, dBytes[cHashIndex:])
+	newHash := hashing.NewHMACSHA256Hasher(key, dBytes[cHashIndex:]).ToBytes()
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
@@ -156,8 +130,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	}
 
 	return &sMessage{
-		fSalt:    saltBytes,
-		fEncd:    encdBytes,
+		fEncd:    msgBytes,
 		fHash:    hash,
 		fVoid:    voidBytes,
 		fProof:   proof,
@@ -182,22 +155,9 @@ func (p *sMessage) GetPayload() payload.IPayload {
 }
 
 func (p *sMessage) ToBytes() []byte {
-	return bytes.Join(
-		[][]byte{p.fSalt, p.fEncd},
-		[]byte{},
-	)
+	return p.fEncd
 }
 
 func (p *sMessage) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
-}
-
-func getAuthHash(networkKey string, pAuthSalt, pBytes []byte) []byte {
-	authKey := keybuilder.NewKeyBuilder(1, pAuthSalt).Build(networkKey)
-	return hashing.NewHMACSHA256Hasher(authKey, pBytes).ToBytes()
-}
-
-func getCipher(networkKey string, pCipherSalt []byte) symmetric.ICipher {
-	cipherKey := keybuilder.NewKeyBuilder(1, pCipherSalt).Build(networkKey)
-	return symmetric.NewAESCipher(cipherKey)
 }

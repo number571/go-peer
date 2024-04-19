@@ -8,6 +8,7 @@
 
 - Update `cmd/hidden_lake/adapters`: producer, consumer apps -> one app
 - Update `pkg/network/message`: delete GetSalt method
+- Update `pkg/network/message`: delete salt values
 
 ### BUG FIXES
 

@@ -4,25 +4,17 @@
 /*
 	NETWORK MESSAGE FORMAT
 
-	Sc || Sa || E( KDF(K,Sc), P(HLMV) || HLMV || LM || M || V )
+	E( K, P(HLMV) || HLMV || L(M) || M || V )
 	where
-		HLMV = H( KDF(K,Sa), LM || M || V )
-		LM   = L(M)
-		Sc   = G(N)
-		Sa   = G(N)
+		HLMV = H( K, L(M) || M || V )
 		where
-			KDF - key derivation function
-			H   - hmac
+			H   - HMAC
 			K   - network key
-			Sa  - auth salt
 			M   - message bytes
 			L   - length
-			G   - prng
-			Sc  - cipher salt
 			P   - proof of work
 			E   - encrypt
 			V   - void bytes
-			N   - num random bytes
 
 	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg
 */

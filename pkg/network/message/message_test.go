@@ -88,8 +88,9 @@ func TestMessage(t *testing.T) {
 		[]byte{},
 	)
 
-	authSalt := msg.ToBytes()[CSaltSize : 2*CSaltSize]
-	if !bytes.Equal(msg.GetHash(), getAuthHash(tcNetworkKey, authSalt, payloadRandBytes)) {
+	key := hashing.NewSHA256Hasher([]byte(tcNetworkKey)).ToBytes()
+	newHash := hashing.NewHMACSHA256Hasher(key, payloadRandBytes).ToBytes()
+	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Error("payload hash not equal hash of message")
 		return
 	}
@@ -172,7 +173,7 @@ func TestMessage(t *testing.T) {
 	msgBytes := bytes.Join(
 		[][]byte{
 			{}, // pass payload
-			getAuthHash("_", []byte{}, []byte{}),
+			hashing.NewSHA256Hasher([]byte{}).ToBytes(),
 		},
 		[]byte{},
 	)
