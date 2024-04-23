@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	// IV + Hash + Proof + PayloadSize + PayloadHead
+	// IV + Proof + Hash + PayloadSize + PayloadHead
 	CMessageHeadSize = 0 +
 		symmetric.CAESBlockSize +
-		hashing.CSHA256Size +
 		encoding.CSizeUint64 +
+		hashing.CSHA256Size +
 		encoding.CSizeUint64 +
 		encoding.CSizeUint64
 )
