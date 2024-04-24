@@ -13,29 +13,25 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-const (
-	cRetryNum = 2
-)
-
 var (
 	_ IReadSeeker = &sStream{}
 )
 
 type sStream struct {
 	fContext   context.Context
+	fRetryNum  uint64
 	fHlfClient hlf_client.IClient
-
-	fBuffer   []byte
-	fPosition uint64
-
-	fHasher    hash.Hash
 	fAliasName string
-	fChunkSize uint64
 	fFileInfo  IFileInfo
+	fBuffer    []byte
+	fPosition  uint64
+	fHasher    hash.Hash
+	fChunkSize uint64
 }
 
 func BuildStream(
 	pCtx context.Context,
+	pRetryNum uint64,
 	pHlsClient hls_client.IClient,
 	pAliasName string,
 	pFileInfo IFileInfo,
@@ -46,13 +42,12 @@ func BuildStream(
 	}
 
 	return &sStream{
-		fContext: pCtx,
-
+		fContext:  pCtx,
+		fRetryNum: pRetryNum,
 		fHlfClient: hlf_client.NewClient(
 			hlf_client.NewBuilder(),
 			hlf_client.NewRequester(pHlsClient),
 		),
-
 		fAliasName: pAliasName,
 		fHasher:    sha256.New(),
 		fChunkSize: chunkSize,
@@ -110,7 +105,7 @@ func (p *sStream) Seek(offset int64, whence int) (int64, error) {
 
 func (p *sStream) loadFileChunk() ([]byte, error) {
 	var lastErr error
-	for i := 0; i <= cRetryNum; i++ {
+	for i := uint64(0); i <= p.fRetryNum; i++ {
 		chunk, err := p.fHlfClient.LoadFileChunk(
 			p.fContext,
 			p.fAliasName,

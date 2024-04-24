@@ -1,5 +1,9 @@
 package stream
 
+var (
+	_ IFileInfo = &sFileInfo{}
+)
+
 type sFileInfo struct {
 	fName string
 	fHash string
