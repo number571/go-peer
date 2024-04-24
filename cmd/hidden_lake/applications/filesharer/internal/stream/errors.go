@@ -19,4 +19,5 @@ var (
 	ErrRetryFailed      = &SStreamError{"retry failed"}
 	ErrInvalidWhence    = &SStreamError{"invalid whence"}
 	ErrNegativePosition = &SStreamError{"negative position"}
+	ErrGetMessageLimit  = &SStreamError{"get message limit"}
 )

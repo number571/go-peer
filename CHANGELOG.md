@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/filesharer`: append IFileInfo to stream package
+
 ## v1.6.9
 
 *April 23, 2024*

@@ -28,27 +28,21 @@ type sStream struct {
 	fBuffer   []byte
 	fPosition uint64
 
-	fHasher   hash.Hash
-	fFileHash string
-
+	fHasher    hash.Hash
 	fAliasName string
-	fFileName  string
-
-	fFileSize  uint64
 	fChunkSize uint64
+	fFileInfo  IFileInfo
 }
 
 func BuildStream(
 	pCtx context.Context,
 	pHlsClient hls_client.IClient,
 	pAliasName string,
-	pFileName string,
-	pFileHash string,
-	pFileSize uint64,
-) IReadSeeker {
+	pFileInfo IFileInfo,
+) (IReadSeeker, error) {
 	chunkSize, err := internal_utils.GetMessageLimit(pCtx, pHlsClient)
 	if err != nil {
-		return nil
+		return nil, utils.MergeErrors(ErrGetMessageLimit, err)
 	}
 
 	return &sStream{
@@ -60,14 +54,10 @@ func BuildStream(
 		),
 
 		fAliasName: pAliasName,
-		fFileName:  pFileName,
-
-		fHasher:   sha256.New(),
-		fFileHash: pFileHash,
-
-		fFileSize:  pFileSize,
+		fHasher:    sha256.New(),
 		fChunkSize: chunkSize,
-	}
+		fFileInfo:  pFileInfo,
+	}, nil
 }
 
 func (p *sStream) Read(b []byte) (int, error) {
@@ -86,12 +76,12 @@ func (p *sStream) Read(b []byte) (int, error) {
 	p.fBuffer = p.fBuffer[n:]
 	p.fPosition += uint64(n)
 
-	if p.fPosition < p.fFileSize {
+	if p.fPosition < p.fFileInfo.GetSize() {
 		return n, nil
 	}
 
 	hashSum := encoding.HexEncode(p.fHasher.Sum(nil))
-	if hashSum != p.fFileHash {
+	if hashSum != p.fFileInfo.GetHash() {
 		return 0, ErrInvalidHash
 	}
 
@@ -106,7 +96,7 @@ func (p *sStream) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekCurrent:
 		pos = int64(p.fPosition) + offset
 	case io.SeekEnd:
-		pos = int64(p.fFileSize) + offset
+		pos = int64(p.fFileInfo.GetSize()) + offset
 	default:
 		return 0, ErrInvalidWhence
 	}
@@ -124,7 +114,7 @@ func (p *sStream) loadFileChunk() ([]byte, error) {
 		chunk, err := p.fHlfClient.LoadFileChunk(
 			p.fContext,
 			p.fAliasName,
-			p.fFileName,
+			p.fFileInfo.GetName(),
 			p.fPosition/p.fChunkSize,
 		)
 		if err != nil {

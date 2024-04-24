@@ -9,6 +9,8 @@
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
 9. HL schemes update
+10. HLD: send/recv files to/from multi nodes by parts
+11. Создать распределённое приложение задач-решателей!
 
 ### Tests
 
