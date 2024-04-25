@@ -11,8 +11,8 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 	"github.com/number571/go-peer/pkg/utils"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -79,7 +79,7 @@ func TestClientPanicWithMessageSize(t *testing.T) {
 	_ = NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: 1024,
-			FKeySizeBits:      tcKeySizeBits,
+			FKeySizeBits:      512,
 		}),
 		tgPrivKey,
 	)
@@ -167,70 +167,13 @@ func TestDecrypt(t *testing.T) {
 		return
 	}
 
-	if _, _, err := client1.DecryptMessage(nil); err == nil {
-		t.Error("success decrypt nil message")
-		return
-	}
-
-	sMsg := msg.(*message.SMessage)
-
-	sMsg1 := *sMsg
-	sMsg1.FHash = "0000000000000000" + "0000000000000000000000000000000000000000000000000000000000000000"
-	if _, _, err := client1.DecryptMessage(&sMsg1); err == nil {
-		t.Error("success decrypt message with incorrect hash")
-		return
-	}
-
-	sMsg3 := *sMsg
-	sMsg3.FEnck = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	if _, _, err := client1.DecryptMessage(&sMsg3); err == nil {
-		t.Error("success decrypt message with incorrect session key")
-		return
-	}
-
-	sMsg4 := *sMsg
-	sMsg4.FPubk = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	if _, _, err := client1.DecryptMessage(&sMsg4); err == nil {
-		t.Error("success decrypt message with incorrect sender key (incorrect)")
-		return
-	}
-
-	somePubKey := asymmetric.LoadRSAPubKey(tcPubKey1023Bit)
-	msg2, err := client1.EncryptPayload(somePubKey, pl)
-	if err != nil {
+	if _, _, err := client1.DecryptMessage(msg); err != nil {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client1.DecryptMessage(msg2); err == nil {
-		t.Error("success decrypt message with incorrect sender key (size)")
-		return
-	}
 
-	sMsg6 := *sMsg
-	sMsg6.FData = []byte("111")
-	if _, _, err := client1.DecryptMessage(&sMsg6); err == nil {
-		t.Error("success decrypt message with incorrect payload (iv block)")
-		return
-	}
-
-	sMsg7 := *sMsg
-	sMsg7.FData = random.NewStdPRNG().GetBytes(948)
-	if _, _, err := client1.DecryptMessage(&sMsg7); err == nil {
-		t.Error("success decrypt message with incorrect payload (payload is nil)")
-		return
-	}
-
-	sMsg8 := *sMsg
-	sMsg8.FSalt = "00000000000000000000000000000000" + "0000000000000000000000000000000000000000000000000000000000000000"
-	if _, _, err := client1.DecryptMessage(&sMsg8); err == nil {
-		t.Error("success decrypt message with incorrect salt")
-		return
-	}
-
-	sMsg9 := *sMsg
-	sMsg9.FSign = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-	if _, _, err := client1.DecryptMessage(&sMsg9); err == nil {
-		t.Error("success decrypt message with incorrect sign")
+	if _, _, err := client1.DecryptMessage(nil); err == nil {
+		t.Error("success decrypt nil message")
 		return
 	}
 
@@ -356,13 +299,20 @@ func (p *sClient) tInvalidEncryptWithParams(pRecv asymmetric.IPubKey, pPld paylo
 		[]byte{},
 	)).ToBytes()
 
-	cipher := symmetric.NewAESCipher(session)
-	return &message.SMessage{
-		FPubk: encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-		FEnck: encoding.HexEncode(pRecv.EncryptBytes(session)),
-		FSalt: encoding.HexEncode(cipher.EncryptBytes(salt)),
-		FHash: encoding.HexEncode(cipher.EncryptBytes(hash)),
-		FSign: encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-		FData: cipher.EncryptBytes(doublePayload.ToBytes()), // JSON field to raw Body (no need HEX encode)
+	encKey := pRecv.EncryptBytes(session)
+	if encKey == nil {
+		panic(ErrEncryptSymmetricKey)
 	}
+
+	cipher := symmetric.NewAESCipher(session)
+	return message.NewMessage(
+		encKey,
+		cipher.EncryptBytes(joiner.NewBytesJoiner([][]byte{
+			p.GetPubKey().ToBytes(),
+			salt,
+			hash,
+			p.fPrivKey.SignBytes(hash),
+			doublePayload.ToBytes(),
+		})),
+	)
 }

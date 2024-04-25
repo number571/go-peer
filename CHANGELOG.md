@@ -7,6 +7,7 @@
 ### IMPROVEMENTS
 
 - Update `docs`: append 'Hidden Lake' article
+- Update `pkg/client`: remove JSON format
 
 ### CHANGES
 

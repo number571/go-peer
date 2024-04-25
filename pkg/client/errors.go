@@ -21,7 +21,7 @@ var (
 	ErrDecodePayloadWrapper = &SClientError{"decode payload wrapper"}
 	ErrInvalidDataHash      = &SClientError{"invalid data hash"}
 	ErrInvalidHashSign      = &SClientError{"invalid hash sign"}
-	ErrInvalidPayloadSize   = &SClientError{"invalid payload size"}
 	ErrDecodePayload        = &SClientError{"decode payload"}
 	ErrEncryptSymmetricKey  = &SClientError{"encrypt symmetric key"}
+	ErrDecodeBytesJoiner    = &SClientError{"decode bytes joiner"}
 )

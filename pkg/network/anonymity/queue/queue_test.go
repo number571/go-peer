@@ -247,7 +247,7 @@ func testQueue(queue IMessageQueue) error {
 		return err
 	}
 
-	hash := msg2.GetHash()
+	hash := msg2.GetEnck()
 	for i := 0; i < 3; i++ {
 		if err := queue.EnqueueMessage(msg2); err != nil {
 			return err
@@ -260,8 +260,8 @@ func testQueue(queue IMessageQueue) error {
 		if err != nil {
 			return err
 		}
-		if !bytes.Equal(msg.GetHash(), hash) {
-			return fmt.Errorf("hash of messages not equals (%d)", i)
+		if !bytes.Equal(msg.GetEnck(), hash) {
+			return fmt.Errorf("enc_key of messages not equals (%d)", i)
 		}
 	}
 

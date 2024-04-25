@@ -8,8 +8,8 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 var (
@@ -95,30 +95,27 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 	)
 }
 
-func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload, pPadd uint64) (message.IMessage, error) {
+func (p *sClient) encryptWithParams(
+	pRecv asymmetric.IPubKey,
+	pPld payload.IPayload,
+	pPadd uint64,
+) (message.IMessage, error) {
 	var (
 		rand    = random.NewStdPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
-	payloadBytes := pPld.ToBytes()
-	payloadWrapper := payload.NewPayload(
-		uint64(len(payloadBytes)),
-		bytes.Join(
-			[][]byte{
-				payloadBytes,
-				rand.GetBytes(pPadd),
-			},
-			[]byte{},
-		),
-	)
+	data := joiner.NewBytesJoiner([][]byte{
+		pPld.ToBytes(),
+		rand.GetBytes(pPadd),
+	})
 
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
 			p.GetPubKey().GetHasher().ToBytes(),
 			pRecv.GetHasher().ToBytes(),
-			payloadWrapper.ToBytes(),
+			data,
 		},
 		[]byte{},
 	)).ToBytes()
@@ -129,36 +126,49 @@ func (p *sClient) encryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayl
 	}
 
 	cipher := symmetric.NewAESCipher(session)
-	return &message.SMessage{
-		FPubk: encoding.HexEncode(cipher.EncryptBytes(p.GetPubKey().ToBytes())),
-		FEnck: encoding.HexEncode(encKey),
-		FSalt: encoding.HexEncode(cipher.EncryptBytes(salt)),
-		FHash: encoding.HexEncode(cipher.EncryptBytes(hash)),
-		FSign: encoding.HexEncode(cipher.EncryptBytes(p.fPrivKey.SignBytes(hash))),
-		FData: cipher.EncryptBytes(payloadWrapper.ToBytes()), // JSON field to raw Body (no need HEX encode)
-	}, nil
+	return message.NewMessage(
+		encKey,
+		cipher.EncryptBytes(joiner.NewBytesJoiner([][]byte{
+			p.GetPubKey().ToBytes(),
+			salt,
+			hash,
+			p.fPrivKey.SignBytes(hash),
+			data,
+		})),
+	), nil
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
-	// Initial check.
 	if pMsg == nil || !pMsg.IsValid(p.fSettings) {
 		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
-	if session == nil {
+	sKey := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
+	if sKey == nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
-	// Decrypt public key of sender by decrypted session key.
-	cipher := symmetric.NewAESCipher(session)
-	publicBytes := cipher.DecryptBytes(pMsg.GetPubk())
+	// Decrypt data block by decrypted session key.
+	encSlice := symmetric.NewAESCipher(sKey).DecryptBytes(pMsg.GetEncd())
+	decSlice, err := joiner.LoadBytesJoiner(encSlice)
+	if err != nil || len(decSlice) != 5 {
+		return nil, nil, ErrDecodeBytesJoiner
+	}
+
+	// Decode wrapped data.
+	var (
+		pkey = decSlice[0]
+		salt = decSlice[1]
+		hash = decSlice[2]
+		sign = decSlice[3]
+		data = decSlice[4]
+	)
 
 	// Load public key and check standart size.
-	pubKey := asymmetric.LoadRSAPubKey(publicBytes)
+	pubKey := asymmetric.LoadRSAPubKey(pkey)
 	if pubKey == nil {
 		return nil, nil, ErrDecryptPublicKey
 	}
@@ -166,30 +176,12 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		return nil, nil, ErrInvalidPublicKeySize
 	}
 
-	// Decrypt main data of message by session key.
-	payloadWrapperBytes := cipher.DecryptBytes(pMsg.GetData())
-	payloadWrapper := payload.LoadPayload(payloadWrapperBytes)
-	if payloadWrapper == nil {
-		return nil, nil, ErrDecodePayloadWrapper
-	}
-
-	// Check size of payload.
-	mustLen := payloadWrapper.GetHead()
-	payloadBytes := payloadWrapper.GetBody()
-	if mustLen > uint64(len(payloadBytes)) {
-		return nil, nil, ErrInvalidPayloadSize
-	}
-
-	// Decrypt salt & hash.
-	salt := cipher.DecryptBytes(pMsg.GetSalt())
-	hash := cipher.DecryptBytes(pMsg.GetHash())
-
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
 			pubKey.GetHasher().ToBytes(),
 			p.GetPubKey().GetHasher().ToBytes(),
-			payloadWrapper.ToBytes(),
+			data,
 		},
 		[]byte{},
 	)).ToBytes()
@@ -197,19 +189,23 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		return nil, nil, ErrInvalidDataHash
 	}
 
-	// Decrypt sign of message and verify this
-	// by public key of sender and hash of message.
-	sign := cipher.DecryptBytes(pMsg.GetSign())
+	// Verify sign by public key of sender and hash of message.
 	if !pubKey.VerifyBytes(hash, sign) {
 		return nil, nil, ErrInvalidHashSign
 	}
 
-	// Remove random bytes and get main data
-	pld := payload.LoadPayload(payloadBytes[:mustLen])
+	// Decode main data of message by session key.
+	payloadWrapper, err := joiner.LoadBytesJoiner(data)
+	if err != nil || len(payloadWrapper) != 2 {
+		return nil, nil, ErrDecodePayloadWrapper
+	}
+
+	// Remove random bytes and get main data.
+	pld := payload.LoadPayload(payloadWrapper[0])
 	if pld == nil {
 		return nil, nil, ErrDecodePayload
 	}
 
-	// Return decrypted message with title
+	// Return public key of sender with payload.
 	return pubKey, pld, nil
 }

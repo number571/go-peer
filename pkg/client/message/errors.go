@@ -13,9 +13,7 @@ func (err *SMessageError) Error() string {
 }
 
 var (
-	ErrUnknownType        = &SMessageError{"unknown type of message"}
-	ErrSeparatorNotFound  = &SMessageError{"separator is not found"}
-	ErrDeserializeMessage = &SMessageError{"deserialize message"}
-	ErrDecodePayload      = &SMessageError{"decode hex payload"}
-	ErrInvalidMessage     = &SMessageError{"invalid message"}
+	ErrUnknownType     = &SMessageError{"unknown type of message"}
+	ErrInvalidMessage  = &SMessageError{"invalid message"}
+	ErrLoadBytesJoiner = &SMessageError{"load bytes joiner"}
 )
