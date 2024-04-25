@@ -152,8 +152,8 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt data block by decrypted session key.
-	encSlice := symmetric.NewAESCipher(sKey).DecryptBytes(pMsg.GetEncd())
-	decSlice, err := joiner.LoadBytesJoiner(encSlice)
+	decJoiner := symmetric.NewAESCipher(sKey).DecryptBytes(pMsg.GetEncd())
+	decSlice, err := joiner.LoadBytesJoiner(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
 	}
@@ -169,11 +169,8 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 
 	// Load public key and check standart size.
 	pubKey := asymmetric.LoadRSAPubKey(pkey)
-	if pubKey == nil {
-		return nil, nil, ErrDecryptPublicKey
-	}
-	if pubKey.GetSize() != p.GetPubKey().GetSize() {
-		return nil, nil, ErrInvalidPublicKeySize
+	if pubKey == nil || pubKey.GetSize() != p.GetPubKey().GetSize() {
+		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.

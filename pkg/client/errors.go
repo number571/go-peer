@@ -16,8 +16,7 @@ var (
 	ErrLimitMessageSize     = &SClientError{"limit message size"}
 	ErrInitCheckMessage     = &SClientError{"init check message"}
 	ErrDecryptCipherKey     = &SClientError{"decrypt cipher key"}
-	ErrDecryptPublicKey     = &SClientError{"decrypt public key"}
-	ErrInvalidPublicKeySize = &SClientError{"invalid public key size"}
+	ErrDecodePublicKey      = &SClientError{"decode public key"}
 	ErrDecodePayloadWrapper = &SClientError{"decode payload wrapper"}
 	ErrInvalidDataHash      = &SClientError{"invalid data hash"}
 	ErrInvalidHashSign      = &SClientError{"invalid hash sign"}

@@ -90,6 +90,7 @@ func TestClientPanicWithKeySize(t *testing.T) {
 
 	testDiffKeySize(t)
 	testLittleKeySize(t)
+	testLittleMessageSize(t)
 }
 
 func testDiffKeySize(t *testing.T) {
@@ -121,6 +122,22 @@ func testLittleKeySize(t *testing.T) {
 			FKeySizeBits:      128,
 		}),
 		asymmetric.NewRSAPrivKey(128),
+	)
+}
+
+func testLittleMessageSize(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	_ = NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: 128,
+			FKeySizeBits:      tcKeySizeBits,
+		}),
+		tgPrivKey,
 	)
 }
 
@@ -169,6 +186,46 @@ func TestDecrypt(t *testing.T) {
 
 	if _, _, err := client1.DecryptMessage(msg); err != nil {
 		t.Error(err)
+		return
+	}
+
+	newEncd1 := make([]byte, len(msg.GetEncd()))
+	copy(newEncd1, msg.GetEncd())
+	newEncd1[0] ^= 1
+
+	newMsg1 := message.NewMessage(msg.GetEnck(), newEncd1)
+	if _, _, err := client1.DecryptMessage(newMsg1); err == nil {
+		t.Error("success decrypt invalid message")
+		return
+	}
+
+	newEncd2 := make([]byte, len(msg.GetEncd()))
+	copy(newEncd2, msg.GetEncd())
+	newEncd2[symmetric.CAESBlockSize+8+1] ^= 1 // public key padding
+
+	newMsg2 := message.NewMessage(msg.GetEnck(), newEncd2)
+	if _, _, err := client1.DecryptMessage(newMsg2); err == nil {
+		t.Error("success decrypt invalid message (public key)")
+		return
+	}
+
+	newEncd3 := make([]byte, len(msg.GetEncd()))
+	copy(newEncd3, msg.GetEncd())
+	newEncd3[symmetric.CAESBlockSize+196+1] ^= 1 // hash padding
+
+	newMsg3 := message.NewMessage(msg.GetEnck(), newEncd3)
+	if _, _, err := client1.DecryptMessage(newMsg3); err == nil {
+		t.Error("success decrypt invalid message (hash)")
+		return
+	}
+
+	newEncd4 := make([]byte, len(msg.GetEncd()))
+	copy(newEncd4, msg.GetEncd())
+	newEncd4[symmetric.CAESBlockSize+236+1] ^= 1 // sign padding
+
+	newMsg4 := message.NewMessage(msg.GetEnck(), newEncd4)
+	if _, _, err := client1.DecryptMessage(newMsg4); err == nil {
+		t.Error("success decrypt invalid message (sign)")
 		return
 	}
 
