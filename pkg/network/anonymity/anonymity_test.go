@@ -472,12 +472,12 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	// node.GetDBWrapper().Set(nil)
-	// netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
-	// if err := handler(ctx, nil, nil, netMsg41); err == nil {
-	// 	t.Error("got success code with closed database")
-	// 	return
-	// }
+	node.fKVDatavase.Close()
+	netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
+	if err := handler(ctx, nil, nil, netMsg41); err == nil {
+		t.Error("got success code with closed database")
+		return
+	}
 }
 
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
