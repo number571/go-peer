@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `docs`: append 'Hidden Lake' article
+
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/filesharer`: append IFileInfo to stream package

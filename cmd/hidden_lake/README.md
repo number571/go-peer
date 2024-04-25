@@ -41,7 +41,7 @@ By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) netw
 
 Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT, HLM, HLF, HLL, HLE. The `main services` include only HLS. The `application services` are HLM and HLF. The `helper services` are HLT, HLL and HLE.
 
-> More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [habr.com/ru/articles/765464](https://habr.com/ru/articles/765464/ "Habr HL")
+> More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [hidden_lake_anonymous_network_view.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "HLANv")
 
 ## How it works
 
@@ -316,4 +316,4 @@ $ ./hls_<arch-name>_<platform-name> # [From release]
 ...
 ```
 
-> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test).
+> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test), [anon_filesharing](https://github.com/number571/go-peer/tree/master/examples/anon_filesharing/prod_test).
