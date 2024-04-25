@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -63,6 +64,12 @@ func TestInvalidMessage(t *testing.T) {
 	}
 
 	if _, err := LoadMessage(params, []byte{123}); err == nil {
+		t.Error("success load invalid message")
+		return
+	}
+
+	msgBytes := joiner.NewBytesJoiner([][]byte{[]byte("aaa"), []byte("bbb")})
+	if _, err := LoadMessage(params, msgBytes); err == nil {
 		t.Error("success load invalid message")
 		return
 	}

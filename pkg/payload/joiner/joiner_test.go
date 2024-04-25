@@ -16,6 +16,15 @@ var tgSlice = [][]byte{
 	random.NewStdPRNG().GetBytes(123),
 }
 
+func TestError(t *testing.T) {
+	str := "value"
+	err := &SJoinerError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestJoiner(t *testing.T) {
 	joinerBytes := NewBytesJoiner(tgSlice)
 
