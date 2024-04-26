@@ -60,7 +60,10 @@ func (p *sMessage) GetEncd() []byte {
 }
 
 func (p *sMessage) ToBytes() []byte {
-	return joiner.NewBytesJoiner([][]byte{p.fEnck, p.fEncd})
+	return joiner.NewBytesJoiner([][]byte{
+		p.fEnck,
+		p.fEncd,
+	})
 }
 
 func (p *sMessage) ToString() string {

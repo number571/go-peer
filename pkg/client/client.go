@@ -146,13 +146,13 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decrypt session key by private key of receiver.
-	sKey := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
-	if sKey == nil {
+	session := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
+	if session == nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
 	// Decrypt data block by decrypted session key.
-	decJoiner := symmetric.NewAESCipher(sKey).DecryptBytes(pMsg.GetEncd())
+	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(pMsg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
