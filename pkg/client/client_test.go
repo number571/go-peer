@@ -250,7 +250,6 @@ func TestMessageSize(t *testing.T) {
 	t.Parallel()
 
 	client1 := testNewClient()
-	sizes := make([]int, 0, len(tgMessages))
 
 	for _, smsg := range tgMessages {
 		pl := payload.NewPayload(uint64(testutils.TcHead), []byte(smsg))
@@ -259,16 +258,8 @@ func TestMessageSize(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		sizes = append(sizes, len(msg.ToBytes()))
-	}
-
-	for i := 0; i < len(sizes)-1; i++ {
-		if sizes[i] != sizes[i+1] {
-			t.Errorf(
-				"len bytes of different messages = id(%d, %d) not equals = size(%d, %d)",
-				i, i+1,
-				sizes[i], sizes[i+1],
-			)
+		if uint64(len(msg.ToBytes())) != client1.GetSettings().GetMessageSizeBytes() {
+			t.Error("got invalid message size bytes")
 			return
 		}
 	}
