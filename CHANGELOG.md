@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake`: update list of HLT nodes
+
 ## v1.6.10
 
 *April 27, 2024*

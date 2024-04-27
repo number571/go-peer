@@ -157,7 +157,7 @@ $ ./hls_<arch-name>_<platform-name>
 
 ### Settings
 
-The Hidden Lake network must have `common configuration` file settings for successful data exchange between network nodes. If some settings are different, other nodes will consider it a `protocol violation` and reject the connection attempt. You can find ready-made configuration files for HLS and HLT services in the [prod/1](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/1), [prod/2](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/2) directories.
+The Hidden Lake network must have `common configuration` file settings for successful data exchange between network nodes. If some settings are different, other nodes will consider it a `protocol violation` and reject the connection attempt. You can find ready-made configuration files for HLS and HLT services in the [prod/1](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/1), [prod/2](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/2), [prod/3](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/3), [prod/4](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/4) directories.
 
 ```yaml
 # [HLS, HLT] nodes
@@ -166,12 +166,6 @@ work_size_bits: 22
 key_size_bits: 4096
 queue_period_ms: 5000
 limit_void_size_bytes: 4096
-
-# [HLT] nodes
-messages_capacity: 1048576  ## 2^20 msgs ~= 8GiB
-                            ## [ID=1,ID=3]
-messages_capacity: 33554432 ## 2^25 msgs ~= 256GiB
-                            ## [ID=5]
 ```
 
 <table style="width: 100%">
@@ -195,6 +189,8 @@ messages_capacity: 33554432 ## 2^25 msgs ~= 256GiB
                 <th>City</th>
                 <th>Characteristics</th>
                 <th>Expired time</th>
+                <th>Logging</th>
+                <th>Storage size</th>
             </tr>
             <tr>
                 <td>1</td>
@@ -209,55 +205,47 @@ messages_capacity: 33554432 ## 2^25 msgs ~= 256GiB
                 <td>Moscow</td>
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
                 <td>±eternal</td>
+                <td>off</td>
+                <td>2^20</td>
             </tr>
             <tr>
                 <td>2</td>
-                <td>HLTr</td>
+                <td>HLTr/HLTs</td>
                 <td>v1.6.10</td>
                 <td>195.133.1.126</td>
-                <td>9581</td>
-                <td>8Jkl93Mdk93md1bz</td>
-                <td>[1]</td>
+                <td>9581/9582</td>
+                <td>kf92j74Nof92n9F4</td>
+                <td>[]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
                 <td>Russia</td>
                 <td>Moscow</td>
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
+                <td>off</td>
+                <td>2^19</td>
             </tr>
             <tr>
                 <td>3</td>
                 <td>HLTr/HLTs</td>
                 <td>v1.6.10</td>
-                <td>62.233.46.109</td>
+                <td>193.233.18.245</td>
                 <td>9581/9582</td>
                 <td>oi4r9NW9Le7fKF9d</td>
                 <td>[]</td>
-                <td><a href="https://eternalhost.net">eternalhost.net</a></td>
-                <td>Russia</td>
-                <td>Moscow</td>
-                <td>1x2.8GHz, 1.0GB RAM, 16GB HDD</td>
-                <td>±eternal</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>HLTr</td>
-                <td>v1.6.10</td>
-                <td>193.233.18.245</td>
-                <td>9581</td>
-                <td>oi4r9NW9Le7fKF9d</td>
-                <td>[3]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
                 <td>Russia</td>
                 <td>Novosibirsk</td>
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
+                <td>on</td>
+                <td>2^18</td>
             </tr>
             <tr>
-                <td>5</td>
-                <td>HLTs</td>
+                <td>4</td>
+                <td>HLTr/HLTs</td>
                 <td>v1.6.10</td>
                 <td>185.43.4.253</td>
-                <td>9582</td>
+                <td>9581/9582</td>
                 <td>j2BR39JfDf7Bajx3</td>
                 <td>[]</td>
                 <td><a href="https://firstvds.ru">firstvds.ru</a></td>
@@ -265,6 +253,8 @@ messages_capacity: 33554432 ## 2^25 msgs ~= 256GiB
                 <td>Moscow</td>
                 <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
                 <td>±10.12.2024</td>
+                <td>off</td>
+                <td>2^24</td>
             </tr>
         </table>
     </td>

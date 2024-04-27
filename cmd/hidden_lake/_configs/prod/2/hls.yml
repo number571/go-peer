@@ -1,8 +1,8 @@
 settings:
   message_size_bytes: 8192
   work_size_bits: 22
-  queue_period_ms: 5000
   key_size_bits: 4096
+  queue_period_ms: 5000
   limit_void_size_bytes: 4096
   network_key: oi4r9NW9Le7fKF9d
 logging:
@@ -19,4 +19,3 @@ services:
     host: 127.0.0.1:9592
 connections:
 - 193.233.18.245:9581
-- 62.233.46.109:9581

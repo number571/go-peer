@@ -4,11 +4,10 @@ settings:
   key_size_bits: 4096
   queue_period_ms: 5000
   limit_void_size_bytes: 4096
-  network_key: 8Jkl93Mdk93md1bz
+  network_key: oi4r9NW9Le7fKF9d
 logging:
   - info
   - warn
   - erro
 connections: 
-  - 94.103.91.81:9581
-  - 195.133.1.126:9581
+  - 193.233.18.245:9581
