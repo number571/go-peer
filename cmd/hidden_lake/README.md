@@ -183,7 +183,6 @@ limit_void_size_bytes: 4096
                 <th>Host</th>
                 <th>Port</th>
                 <th>Network key</th>
-                <th>Connections</th>
                 <th>Provider</th>
                 <th>Country</th>
                 <th>City</th>
@@ -199,7 +198,6 @@ limit_void_size_bytes: 4096
                 <td>94.103.91.81</td> 
                 <td>9581/9582</td>
                 <td>8Jkl93Mdk93md1bz</td>
-                <td>[]</td>
                 <td><a href="https://vdsina.ru">vdsina.ru</a></td>
                 <td>Russia</td>
                 <td>Moscow</td>
@@ -215,7 +213,6 @@ limit_void_size_bytes: 4096
                 <td>195.133.1.126</td>
                 <td>9581/9582</td>
                 <td>kf92j74Nof92n9F4</td>
-                <td>[]</td>
                 <td><a href="https://ruvds.com">ruvds.ru</a></td>
                 <td>Russia</td>
                 <td>Moscow</td>
@@ -231,7 +228,6 @@ limit_void_size_bytes: 4096
                 <td>193.233.18.245</td>
                 <td>9581/9582</td>
                 <td>oi4r9NW9Le7fKF9d</td>
-                <td>[]</td>
                 <td><a href="https://4vps.su">4vps.su</a></td>
                 <td>Russia</td>
                 <td>Novosibirsk</td>
@@ -247,7 +243,6 @@ limit_void_size_bytes: 4096
                 <td>185.43.4.253</td>
                 <td>9581/9582</td>
                 <td>j2BR39JfDf7Bajx3</td>
-                <td>[]</td>
                 <td><a href="https://firstvds.ru">firstvds.ru</a></td>
                 <td>Russia</td>
                 <td>Moscow</td>
