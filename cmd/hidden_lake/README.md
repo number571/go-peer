@@ -204,7 +204,7 @@ limit_void_size_bytes: 4096
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
                 <td>±eternal</td>
                 <td>off</td>
-                <td>2^20</td>
+                <td>2^20msgs ~= 12GiB</td>
             </tr>
             <tr>
                 <td>2</td>
@@ -219,7 +219,7 @@ limit_void_size_bytes: 4096
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
                 <td>off</td>
-                <td>2^19</td>
+                <td>2^19msgs ~= 6GiB</td>
             </tr>
             <tr>
                 <td>3</td>
@@ -234,7 +234,7 @@ limit_void_size_bytes: 4096
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
                 <td>on</td>
-                <td>2^18</td>
+                <td>2^18msgs ~= 3GiB</td>
             </tr>
             <tr>
                 <td>4</td>
@@ -249,7 +249,7 @@ limit_void_size_bytes: 4096
                 <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
                 <td>±10.12.2024</td>
                 <td>off</td>
-                <td>2^24</td>
+                <td>2^24msgs ~= 192GiB</td>
             </tr>
         </table>
     </td>
