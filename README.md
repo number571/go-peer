@@ -247,9 +247,6 @@ PUSH_FORMAT='{
         "method":"POST",
         "host":"hidden-echo-service",
         "path":"/echo",
-        "head":{
-                "Accept": "application/json"
-        },
         "body":"aGVsbG8sIHdvcmxkIQ=="
     }
 }';

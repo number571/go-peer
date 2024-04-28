@@ -7,10 +7,7 @@ PUSH_FORMAT='{
     "req_data":{
         "method":"GET",
         "host":"hidden-lake-filesharer",
-        "path":"/list?page=0",
-        "head":{
-        "Accept": "application/json"
-        }
+        "path":"/list?page=0"
     }
 }';
 

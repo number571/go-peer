@@ -16,9 +16,6 @@ const (
 			"method":"POST",
 			"host":"hidden-echo-service",
 			"path":"/echo",
-			"head":{
-				"Accept": "application/json"
-			},
 			"body":"%s"
 		}
 	}`
