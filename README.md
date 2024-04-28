@@ -241,22 +241,17 @@ Identification between `recv_hls` and `send_hls` nodes is performed using public
 
 Structure of request. The body `hello, world!` is encoded base64.
 ```bash
-JSON_DATA='{
+PUSH_FORMAT='{
+    "receiver":"Bob",
+    "req_data":{
         "method":"POST",
         "host":"hidden-echo-service",
         "path":"/echo",
         "head":{
-            "Accept": "application/json"
+                "Accept": "application/json"
         },
         "body":"aGVsbG8sIHdvcmxkIQ=="
-}';
-```
-
-Request format
-```bash
-PUSH_FORMAT='{
-        "receiver":"Alice",
-        "hex_data":"'$(str2hex "$JSON_DATA")'"
+    }
 }';
 ```
 
