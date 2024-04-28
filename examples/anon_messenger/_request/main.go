@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -17,17 +16,15 @@ import (
 const (
 	cRequestTemplate = `{
         "receiver":"%s",
-        "req_data":"%s"
-	}`
-
-	cJsonDataTemplate = `{
-        "method":"POST",
-        "host":"hidden-lake-messenger",
-        "path":"/push",
-        "head":{
-			"%s": "%s"
-        },
-        "body":"%s"
+        "req_data":{
+			"method":"POST",
+			"host":"hidden-lake-messenger",
+			"path":"/push",
+			"head":{
+				"%s": "%s"
+			},
+			"body":"%s"
+		}
 	}`
 )
 
@@ -43,22 +40,20 @@ func main() {
 
 func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
-	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
 	pseudonym := "Bob"
-	requestData := replacer.Replace(
-		fmt.Sprintf(
-			cJsonDataTemplate,
-			hlm_settings.CHeaderPseudonym,
-			pseudonym,
-			base64.StdEncoding.EncodeToString(pMessage),
-		),
+	requestData := fmt.Sprintf(
+		cRequestTemplate,
+		pReceiver,
+		hlm_settings.CHeaderPseudonym,
+		pseudonym,
+		base64.StdEncoding.EncodeToString(pMessage),
 	)
 
 	req, err := http.NewRequest(
 		http.MethodPut,
 		"http://localhost:7572/api/network/request",
-		bytes.NewBufferString(fmt.Sprintf(cRequestTemplate, pReceiver, requestData)),
+		bytes.NewBufferString(requestData),
 	)
 	if err != nil {
 		panic(err)

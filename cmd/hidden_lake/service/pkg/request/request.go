@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	_ IRequest = &sRequest{}
+	_ IRequest = &SRequest{}
 )
 
-type sRequest struct {
+type SRequest struct {
 	FMethod string            `json:"method"`
 	FHost   string            `json:"host"`
 	FPath   string            `json:"path"`
@@ -19,7 +19,7 @@ type sRequest struct {
 }
 
 func NewRequest(pMethod, pHost, pPath string) IRequest {
-	return &sRequest{
+	return &SRequest{
 		FMethod: pMethod,
 		FHost:   pHost,
 		FPath:   pPath,
@@ -27,22 +27,22 @@ func NewRequest(pMethod, pHost, pPath string) IRequest {
 }
 
 func LoadRequest(pBytes []byte) (IRequest, error) {
-	request := new(sRequest)
+	request := new(SRequest)
 	if err := encoding.DeserializeJSON(pBytes, request); err != nil {
 		return nil, fmt.Errorf("load request: %w", err)
 	}
 	return request, nil
 }
 
-func (p *sRequest) ToBytes() []byte {
+func (p *SRequest) ToBytes() []byte {
 	return encoding.SerializeJSON(p)
 }
 
-func (p *sRequest) ToString() string {
+func (p *SRequest) ToString() string {
 	return string(p.ToBytes())
 }
 
-func (p *sRequest) WithHead(pHead map[string]string) IRequest {
+func (p *SRequest) WithHead(pHead map[string]string) IRequest {
 	p.FHead = make(map[string]string, len(pHead))
 	for k, v := range pHead {
 		p.FHead[k] = v
@@ -50,24 +50,24 @@ func (p *sRequest) WithHead(pHead map[string]string) IRequest {
 	return p
 }
 
-func (p *sRequest) WithBody(pBody []byte) IRequest {
+func (p *SRequest) WithBody(pBody []byte) IRequest {
 	p.FBody = pBody
 	return p
 }
 
-func (p *sRequest) GetHost() string {
+func (p *SRequest) GetHost() string {
 	return p.FHost
 }
 
-func (p *sRequest) GetPath() string {
+func (p *SRequest) GetPath() string {
 	return p.FPath
 }
 
-func (p *sRequest) GetMethod() string {
+func (p *SRequest) GetMethod() string {
 	return p.FMethod
 }
 
-func (p *sRequest) GetHead() map[string]string {
+func (p *SRequest) GetHead() map[string]string {
 	headers := make(map[string]string, len(p.FHead))
 	for k, v := range p.FHead {
 		headers[k] = v
@@ -75,6 +75,6 @@ func (p *sRequest) GetHead() map[string]string {
 	return headers
 }
 
-func (p *sRequest) GetBody() []byte {
+func (p *SRequest) GetBody() []byte {
 	return p.FBody
 }

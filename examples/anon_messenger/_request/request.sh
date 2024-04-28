@@ -11,7 +11,9 @@ else
     SENT_DATA=$(echo -ne "\x02example.txt\x02hello, world!" | base64);
 fi
 
-JSON_DATA='{
+PUSH_FORMAT='{
+    "receiver":"Alice",
+    "req_data":{
         "method":"POST",
         "host":"hidden-lake-messenger",
         "path":"/push",
@@ -19,14 +21,7 @@ JSON_DATA='{
             "Hl-Messenger-Pseudonym": "Bob"
         },
         "body":"'${SENT_DATA}'"
-}';
-
-JSON_DATA=${JSON_DATA//\"/\\\"} # "method" -> \"method\", ...
-JSON_DATA=${JSON_DATA//[$'\t\r\n ']} # delete \t \r \n ' ' from string
-
-PUSH_FORMAT='{
-        "receiver":"Alice",
-        "req_data":"'$JSON_DATA'"
+    }
 }';
 
 curl -i -X PUT -H 'Accept: application/json' http://localhost:7572/api/network/request --data "${PUSH_FORMAT}";

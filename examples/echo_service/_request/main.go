@@ -6,24 +6,21 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
 const (
 	cRequestTemplate = `{
         "receiver":"%s",
-        "req_data":"%s"
-	}`
-
-	cJsonDataTemplate = `{
-        "method":"POST",
-        "host":"hidden-echo-service",
-        "path":"/echo",
-        "head":{
-            "Accept": "application/json"
-        },
-        "body":"%s"
+        "req_data":{
+			"method":"POST",
+			"host":"hidden-echo-service",
+			"path":"/echo",
+			"head":{
+				"Accept": "application/json"
+			},
+			"body":"%s"
+		}
 	}`
 )
 
@@ -43,18 +40,16 @@ func main() {
 
 func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: (10 * time.Minute)}
-	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	requestData := replacer.Replace(
-		fmt.Sprintf(
-			cJsonDataTemplate,
-			base64.StdEncoding.EncodeToString(pMessage),
-		),
+	requestData := fmt.Sprintf(
+		cRequestTemplate,
+		pReceiver,
+		base64.StdEncoding.EncodeToString(pMessage),
 	)
 	req, err := http.NewRequest(
 		http.MethodPost,
 		"http://localhost:7572/api/network/request",
-		bytes.NewBufferString(fmt.Sprintf(cRequestTemplate, pReceiver, requestData)),
+		bytes.NewBufferString(requestData),
 	)
 	if err != nil {
 		panic(err)

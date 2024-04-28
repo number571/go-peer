@@ -7,6 +7,7 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake`: update list of HLT nodes
+- Update `cmd/hidden_lake/service`: update interface request format
 
 ## v1.6.10
 

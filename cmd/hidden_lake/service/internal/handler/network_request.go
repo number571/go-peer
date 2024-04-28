@@ -49,7 +49,7 @@ func HandleNetworkRequestAPI(
 			return
 		}
 
-		pubKey, data, errCode := unwrapRequest(pConfig, vRequest)
+		pubKey, req, errCode := unwrapRequest(pConfig, vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
@@ -78,7 +78,7 @@ func HandleNetworkRequestAPI(
 			err := pNode.SendPayload(
 				pCtx,
 				pubKey,
-				payload.NewPayload(uint64(pkg_settings.CServiceMask), data),
+				payload.NewPayload(uint64(pkg_settings.CServiceMask), req.ToBytes()),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_payload"))
@@ -94,7 +94,7 @@ func HandleNetworkRequestAPI(
 			respBytes, err := pNode.FetchPayload(
 				pCtx,
 				pubKey,
-				adapters.NewPayload(pkg_settings.CServiceMask, data),
+				adapters.NewPayload(pkg_settings.CServiceMask, req.ToBytes()),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))
@@ -116,7 +116,10 @@ func HandleNetworkRequestAPI(
 	}
 }
 
-func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asymmetric.IPubKey, []byte, int) {
+func unwrapRequest(
+	pConfig config.IConfig,
+	pRequest pkg_settings.SRequest,
+) (asymmetric.IPubKey, request.IRequest, int) {
 	friends := pConfig.GetFriends()
 
 	pubKey, ok := friends[pRequest.FReceiver]
@@ -124,11 +127,10 @@ func unwrapRequest(pConfig config.IConfig, pRequest pkg_settings.SRequest) (asym
 		return nil, nil, cErrorGetFriends
 	}
 
-	reqData := []byte(pRequest.FReqData)
-	_, err := request.LoadRequest(reqData)
-	if err != nil {
-		return nil, nil, cErrorLoadRequest
+	req := pRequest.FReqData
+	if req == nil {
+		return nil, nil, cErrorDecodeData
 	}
 
-	return pubKey, reqData, cErrorNone
+	return pubKey, req, cErrorNone
 }

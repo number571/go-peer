@@ -5,23 +5,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
 const (
 	cRequestTemplate = `{
         "receiver":"%s",
-        "req_data":"%s"
-	}`
-
-	cJsonData = `{
-        "method":"GET",
-        "host":"hidden-lake-filesharer",
-        "path":"/list?page=0",
-        "head":{
-            "Accept": "application/json"
-        }
+        "req_data":{
+			"method":"GET",
+			"host":"hidden-lake-filesharer",
+			"path":"/list?page=0",
+			"head":{
+				"Accept": "application/json"
+			}
+		}
 	}`
 )
 
@@ -32,13 +29,11 @@ func main() {
 
 func getListFiles(pReceiver string) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
-	replacer := strings.NewReplacer("\n", "", "\t", "", "\r", "", " ", "", "\"", "\\\"")
 
-	requestData := replacer.Replace(cJsonData)
 	req, err := http.NewRequest(
 		http.MethodPost,
 		"http://localhost:8572/api/network/request",
-		bytes.NewBufferString(fmt.Sprintf(cRequestTemplate, pReceiver, requestData)),
+		bytes.NewBufferString(fmt.Sprintf(cRequestTemplate, pReceiver)),
 	)
 	if err != nil {
 		panic(err)

@@ -8,6 +8,7 @@ services:
       - SERVICE_PATH=examples/anon_filesharing/default/node1_hlf
       - SERVICE_KEY=examples/anon_filesharing/_keys/4096/priv_node1.key
     ports:
+      - 8572:8572
       - 8080:8080
     networks:
       - hidden-lake

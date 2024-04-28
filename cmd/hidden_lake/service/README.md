@@ -490,7 +490,10 @@ success: delete online connection
 ```bash
 #!/bin/bash
 
-JSON_DATA='{
+# base64(hello, world!) = aGVsbG8sIHdvcmxkIQ==
+PUSH_FORMAT='{
+    "receiver":"Bob",
+    "req_data":{
         "method":"POST",
         "host":"hidden-echo-service",
         "path":"/echo",
@@ -498,16 +501,7 @@ JSON_DATA='{
                 "Accept": "application/json"
         },
         "body":"aGVsbG8sIHdvcmxkIQ=="
-}';
-
-JSON_DATA=${JSON_DATA//\"/\\\"} # "method" -> \"method\", ...
-JSON_DATA=${JSON_DATA//[$'\t\r\n ']} # delete ['\t', '\r', '\n', ' '] from string
-
-# POST = request with response from service
-# PUT  = broadcast without response from service
-PUSH_FORMAT='{
-        "receiver":"Bob",
-        "req_data":"'$JSON_DATA'"
+    }
 }';
 ```
 
