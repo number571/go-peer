@@ -6,6 +6,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 type IClient interface {
@@ -14,8 +15,8 @@ type IClient interface {
 
 	GetPubKey(context.Context) (asymmetric.IPubKey, error)
 
-	EncryptMessage(context.Context, asymmetric.IPubKey, []byte) (net_message.IMessage, error)
-	DecryptMessage(context.Context, net_message.IMessage) (asymmetric.IPubKey, []byte, error)
+	EncryptMessage(context.Context, asymmetric.IPubKey, payload.IPayload) (net_message.IMessage, error)
+	DecryptMessage(context.Context, net_message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }
 
 type IRequester interface {
@@ -24,6 +25,6 @@ type IRequester interface {
 
 	GetPubKey(context.Context) (asymmetric.IPubKey, error)
 
-	EncryptMessage(context.Context, asymmetric.IPubKey, []byte) (net_message.IMessage, error)
-	DecryptMessage(context.Context, net_message.IMessage) (asymmetric.IPubKey, []byte, error)
+	EncryptMessage(context.Context, asymmetric.IPubKey, payload.IPayload) (net_message.IMessage, error)
+	DecryptMessage(context.Context, net_message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
 }

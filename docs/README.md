@@ -36,7 +36,6 @@ Also, the composition of these works can be found in the book [The general theor
 
 ### 5. Schemes
 
-<!-- TODO: proto is old, need update -->
 1. [Hidden Lake proto](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_message_layers.svg)
 
 ## Default applications ports

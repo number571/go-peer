@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
@@ -60,7 +61,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pData []byte) (net_message.IMessage, error) {
+func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pPayload payload.IPayload) (net_message.IMessage, error) {
 	resp, err := api.Request(
 		pCtx,
 		p.fClient,
@@ -68,7 +69,8 @@ func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPu
 		fmt.Sprintf(cHandleMessageEncryptTemplate, p.fHost),
 		hle_settings.SContainer{
 			FPublicKey: pPubKey.ToString(),
-			FHexData:   encoding.HexEncode(pData),
+			FPldHead:   pPayload.GetHead(),
+			FHexData:   encoding.HexEncode(pPayload.GetBody()),
 		},
 	)
 	if err != nil {
@@ -83,7 +85,7 @@ func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPu
 	return msg, nil
 }
 
-func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, []byte, error) {
+func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
 	resp, err := api.Request(
 		pCtx,
 		p.fClient,
@@ -110,7 +112,7 @@ func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IM
 		return nil, nil, ErrInvalidHexFormat
 	}
 
-	return pubKey, data, nil
+	return pubKey, payload.NewPayload(result.FPldHead, data), nil
 }
 
 func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error) {

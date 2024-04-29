@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/helpers/encryptor`: append 'pld_head' field
+
 ### CHANGES
 
 - Update `cmd/hidden_lake`: update list of HLT nodes

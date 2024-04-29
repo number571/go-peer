@@ -657,10 +657,10 @@ $ make
 Encrypt and decrypt message
 ```bash
 $ cd examples/encrypt_message/client_hle
-$ go run ./main.go e 'hello, world'
-> 000000000003df67bf78638d051770be...15ce81c8f862ad747405a07236238d04
-$ go run ./main.go d '000000000003df67bf78638d051770be...15ce81c8f862ad747405a07236238d04'
-> hello, world
+$ go run ./main.go e 'hello, world!'
+> 5a8b4f0b388650fd...8d7cbd8fa01c008
+$ go run ./main.go d '5a8b4f0b388650fd...8d7cbd8fa01c008'
+> hello, world!
 ```
 
 **[⬆ back to top](#installation)**

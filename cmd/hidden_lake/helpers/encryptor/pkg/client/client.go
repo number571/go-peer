@@ -7,6 +7,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 var (
@@ -31,15 +32,15 @@ func (p *sClient) GetIndex(pCtx context.Context) (string, error) {
 	return res, nil
 }
 
-func (p *sClient) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pData []byte) (net_message.IMessage, error) {
-	res, err := p.fRequester.EncryptMessage(pCtx, pPubKey, pData)
+func (p *sClient) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pPayload payload.IPayload) (net_message.IMessage, error) {
+	res, err := p.fRequester.EncryptMessage(pCtx, pPubKey, pPayload)
 	if err != nil {
 		return nil, fmt.Errorf("encrypt message (client): %w", err)
 	}
 	return res, nil
 }
 
-func (p *sClient) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, []byte, error) {
+func (p *sClient) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
 	pubKey, data, err := p.fRequester.DecryptMessage(pCtx, pNetMsg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decrypt message (client): %w", err)

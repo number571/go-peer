@@ -8,8 +8,10 @@ import (
 	"time"
 
 	hle_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/client"
+	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
@@ -44,7 +46,11 @@ func main() {
 		}
 
 		pubKey := asymmetric.LoadRSAPubKey(string(readPubKey))
-		netMsg, err := hleClient.EncryptMessage(ctx, pubKey, []byte(os.Args[2]))
+		netMsg, err := hleClient.EncryptMessage(
+			ctx,
+			pubKey,
+			payload.NewPayload(uint64(settings.CServiceMask), []byte(os.Args[2])),
+		)
 		if err != nil {
 			panic(err)
 		}
@@ -61,7 +67,11 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Println(string(data))
+		if data.GetHead() != uint64(settings.CServiceMask) {
+			panic("service mask error")
+		}
+
+		fmt.Println(string(data.GetBody()))
 	default:
 		panic("unknown mode")
 	}

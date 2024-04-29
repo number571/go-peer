@@ -62,15 +62,10 @@ func HandleMessageDecryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pCl
 			return
 		}
 
-		if uint32(pld.GetHead()) != hls_settings.CServiceMask {
-			pLogger.PushWarn(logBuilder.WithMessage("invalid_service_mask"))
-			_ = api.Response(pW, http.StatusFailedDependency, "failed: invalid service mask")
-			return
-		}
-
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 		_ = api.Response(pW, http.StatusOK, hle_settings.SContainer{
 			FPublicKey: pubKey.ToString(),
+			FPldHead:   pld.GetHead(),
 			FHexData:   encoding.HexEncode(pld.GetBody()),
 		})
 	}

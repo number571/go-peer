@@ -15,7 +15,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/config"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -58,7 +57,7 @@ func HandleMessageEncryptAPI(
 
 		msg, err := pClient.EncryptPayload(
 			pubKey,
-			adapters.NewPayload(hls_settings.CServiceMask, bodyData).ToOrigin(),
+			payload.NewPayload(vContainer.FPldHead, bodyData),
 		)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("encrypt_payload"))

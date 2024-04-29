@@ -9,6 +9,7 @@ import (
 
 	hle_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -33,13 +34,13 @@ func TestHandleEncryptDecryptAPI(t *testing.T) {
 
 	data := []byte("hello, world!")
 
-	netMsg, err := hleClient.EncryptMessage(context.Background(), pubKey, data)
+	netMsg, err := hleClient.EncryptMessage(context.Background(), pubKey, payload.NewPayload(1, data))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	gotPubKey, gotData, err := hleClient.DecryptMessage(context.Background(), netMsg)
+	gotPubKey, getPld, err := hleClient.DecryptMessage(context.Background(), netMsg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -50,7 +51,7 @@ func TestHandleEncryptDecryptAPI(t *testing.T) {
 		return
 	}
 
-	if !bytes.Equal(gotData, data) {
+	if !bytes.Equal(getPld.GetBody(), data) {
 		t.Error("got invalid data")
 		return
 	}
