@@ -3,7 +3,7 @@ package anonymity
 type iHead interface {
 	uint64() uint64
 	getRoute() uint32
-	getAction() uint32
+	getAction() iAction
 }
 
 var (
@@ -19,16 +19,16 @@ func loadHead(pN uint64) iHead {
 	return sHead(pN)
 }
 
-func joinHead(pAction, pRoute uint32) iHead {
-	return sHead((uint64(pAction) << 32) | uint64(pRoute))
+func joinHead(pAction iAction, pRoute uint32) iHead {
+	return sHead((uint64(pAction.(sAction)) << 32) | uint64(pRoute))
 }
 
 func (p sHead) getRoute() uint32 {
 	return uint32(p & 0xFFFFFFFF)
 }
 
-func (p sHead) getAction() uint32 {
-	return uint32(p >> 32)
+func (p sHead) getAction() iAction {
+	return sAction(uint32(p >> 32))
 }
 
 func (p sHead) uint64() uint64 {

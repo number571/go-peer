@@ -167,26 +167,6 @@ func TestF2FWithoutFriends(t *testing.T) {
 	t.Error("get response without list of friends")
 }
 
-func TestDataType(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	switch {
-	case isRequest([]byte{}):
-		t.Error("is request = true with void bytes")
-	case isResponse([]byte{}):
-		t.Error("is response = true with void bytes")
-	}
-
-	_ = unwrapBytes([]byte{})
-}
-
 func TestFetchPayload(t *testing.T) {
 	t.Parallel()
 
@@ -287,28 +267,6 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 }
 
-func TestPanicEnqueuePayload(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	node, cancels := testNewNode(time.Minute, "", 12, 0, 0, false)
-	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 12)
-
-	sNode := node.(*sNode)
-
-	ctx := context.Background()
-	logBuilder := anon_logger.NewLogBuilder("test")
-
-	pld := adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)).ToOrigin()
-
-	pubKey := sNode.GetMessageQueue().GetClient().GetPubKey()
-	_ = sNode.enqueuePayload(ctx, logBuilder, '?', pubKey, pld)
-}
-
 func TestEnqueuePayload(t *testing.T) {
 	t.Parallel()
 
@@ -331,17 +289,17 @@ func TestEnqueuePayload(t *testing.T) {
 
 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
-	if err := node.enqueuePayload(ctx, logBuilder, cIsRequest, pubKey, overPld); err == nil {
+	if err := node.enqueuePayload(ctx, true, logBuilder, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
 	}
 
 	msg, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(tcMsgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+			[]byte(tcMsgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -357,7 +315,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := node.enqueuePayload(ctx, logBuilder, cIsRequest, pubKey, pld); err != nil {
+		if err := node.enqueuePayload(ctx, true, logBuilder, pubKey, pld); err != nil {
 			return
 		}
 	}
@@ -381,10 +339,10 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(tcMsgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+			[]byte(tcMsgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -414,10 +372,10 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg2, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			111,
-			wrapRequest([]byte(tcMsgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), 111).uint64(),
+			[]byte(tcMsgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -450,10 +408,10 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg4, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			111,
-			wrapResponse([]byte(tcMsgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(false), 111).uint64(),
+			[]byte(tcMsgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -491,10 +449,10 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(tcMsgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), 111).uint64(),
+			[]byte(tcMsgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -553,7 +511,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	client := node.fQueue.GetClient()
 	pubKey := client.GetPubKey()
-	actionKey := newActionKey(pubKey, 111)
+	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
 	action, ok := node.getAction(actionKey)
@@ -585,10 +543,10 @@ func TestRecvSendMessage(t *testing.T) {
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+			[]byte(msgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -633,10 +591,10 @@ func TestRetryEnqueue(t *testing.T) {
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			testutils.TcHead,
-			wrapRequest([]byte(msgBody)),
-		).ToOrigin(),
+		payload.NewPayload(
+			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+			[]byte(msgBody),
+		),
 	)
 	if err != nil {
 		t.Error(err)

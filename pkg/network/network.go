@@ -39,7 +39,7 @@ func NewNode(
 		fVSettings:    pVSettings,
 		fCacheSetter:  pCacheSetter,
 		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
-		fHandleRoutes: make(map[uint64]IHandlerF, 256),
+		fHandleRoutes: make(map[uint64]IHandlerF, 64),
 	}
 }
 

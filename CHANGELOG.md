@@ -7,6 +7,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake/helpers/encryptor`: append 'pld_head' field
+- Update `pkg/network/anonymity`: move request/response from payload body (1=byte) to payload head (1=bit)
 
 ### CHANGES
 
@@ -17,6 +18,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/applications/messenger`: fix message size limit
+- Update `cmd/hidden_lake/applications/filesharer`: fix retry_num param
 
 ## v1.6.10
 

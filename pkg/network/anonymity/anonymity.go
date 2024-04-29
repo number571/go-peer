@@ -56,8 +56,8 @@ func NewNode(
 		fNetwork:       pNetwork,
 		fQueue:         pQueue,
 		fFriends:       pFriends,
-		fHandleRoutes:  make(map[uint32]IHandlerF),
-		fHandleActions: make(map[string]chan []byte),
+		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
+		fHandleActions: make(map[string]chan []byte, 64),
 	}
 }
 
@@ -140,7 +140,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, logBuilder, cIsRequest, pRecv, pPld); err != nil {
+	if err := p.enqueuePayload(pCtx, true, logBuilder, pRecv, pPld); err != nil {
 		// internal logger
 		return utils.MergeErrors(ErrBroadcastPayload, err)
 	}
@@ -150,7 +150,7 @@ func (p *sNode) SendPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld
 // Send message with response waiting.
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
-	headAction := uint32(random.NewStdPRNG().GetUint64())
+	headAction := sAction(random.NewStdPRNG().GetUint64())
 	newPld := payload.NewPayload(
 		joinHead(headAction, pPld.GetHead()).uint64(),
 		pPld.GetBody(),
@@ -162,7 +162,7 @@ func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPl
 	defer p.delAction(actionKey)
 
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, logBuilder, cIsRequest, pRecv, newPld); err != nil {
+	if err := p.enqueuePayload(pCtx, true, logBuilder, pRecv, newPld); err != nil {
 		// internal logger
 		return nil, utils.MergeErrors(ErrEnqueuePayload, err)
 	}
@@ -250,107 +250,116 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 
 		// check sender's public key in f2f list
 		if !p.fFriends.InPubKeys(sender) {
-			switch p.fSettings.GetF2FDisabled() {
-			case true:
-				// continue to read a message from unknown public key
-				p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
-			default:
-				// ignore reading message from unknown public key
+			// if f2f=enabled:
+			// ignore reading message from unknown public key
+			if !p.fSettings.GetF2FDisabled() {
 				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
 				return nil
 			}
+			// if f2f=disabled:
+			// continue to read a message from unknown public key
+			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
 		}
 
 		// get header of payload
 		head := loadHead(pld.GetHead())
 		body := pld.GetBody()
 
-		switch {
-		// got response message from our side request
-		case isResponse(body):
-			// get session by payload head
-			actionKey := newActionKey(sender, head.getAction())
-			action, ok := p.getAction(actionKey)
-			if !ok {
-				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseGetResponse))
-				return nil
-			}
-
-			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseGetResponse))
-			action <- unwrapBytes(body)
-			return nil
-
-		// got request from another side (need generate response)
-		case isRequest(body):
-			// get function by payload head
-			f, ok := p.getRoute(head.getRoute())
-			if !ok || f == nil {
-				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
-				return nil
-			}
-
-			// response can be nil
-			resp, err := f(pCtx, p, sender, unwrapBytes(body))
-			if err != nil {
-				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
-				return nil
-			}
-			if resp == nil {
-				p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoWithoutResponse))
-				return nil
-			}
-
-			// create response and put this to the queue
-			_ = p.enqueuePayload(
-				pCtx,
-				logBuilder,
-				cIsResponse,
-				sender,
-				payload.NewPayload(pld.GetHead(), resp),
-			)
-
-			// internal logger
-			return nil
-
-		// undefined type of message (not request/response)
-		default:
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageType))
-			return nil
+		if action := head.getAction(); action.isRequest() {
+			// got request from another side (need generate response)
+			p.handleRequest(pCtx, logBuilder, sender, head, body)
+		} else {
+			// got response message from our side request
+			p.handleResponse(pCtx, logBuilder, sender, action, body)
 		}
+
+		return nil
 	}
 }
 
-func (p *sNode) enqueuePayload(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pType iDataType, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
-	var (
-		newBody []byte
-		logType anon_logger.ILogType
-	)
-
-	switch pType {
-	case cIsRequest:
-		newBody = wrapRequest(pPld.GetBody())
-		logType = anon_logger.CLogBaseEnqueueRequest
-	case cIsResponse:
-		newBody = wrapResponse(pPld.GetBody())
-		logType = anon_logger.CLogBaseEnqueueResponse
-	default:
-		panic("got unknown type")
+func (p *sNode) handleResponse(
+	_ context.Context,
+	pLogBuilder anon_logger.ILogBuilder,
+	pSender asymmetric.IPubKey,
+	pAction iAction,
+	pBody []byte,
+) {
+	// get session by payload head
+	actionKey := newActionKey(pSender, pAction)
+	action, ok := p.getAction(actionKey)
+	if !ok {
+		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
+		return
 	}
 
-	if pType == cIsRequest {
+	p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
+	action <- pBody
+}
+
+func (p *sNode) handleRequest(
+	pCtx context.Context,
+	pLogBuilder anon_logger.ILogBuilder,
+	pSender asymmetric.IPubKey,
+	pHead iHead,
+	pBody []byte,
+) {
+	// get function by payload head
+	f, ok := p.getRoute(pHead.getRoute())
+	if !ok || f == nil {
+		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
+		return
+	}
+
+	// response can be nil
+	resp, err := f(pCtx, p, pSender, pBody)
+	if err != nil {
+		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
+		return
+	}
+	if resp == nil {
+		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoWithoutResponse))
+		return
+	}
+
+	// create response and put this to the queue
+	// internal logger
+	_ = p.enqueuePayload(
+		pCtx,
+		false,
+		pLogBuilder,
+		pSender,
+		payload.NewPayload(pHead.uint64(), resp),
+	)
+}
+
+func (p *sNode) enqueuePayload(
+	pCtx context.Context,
+	pIsRequest bool,
+	pLogBuilder anon_logger.ILogBuilder,
+	pRecv asymmetric.IPubKey,
+	pPld payload.IPayload,
+) error {
+	logType := anon_logger.CLogBaseEnqueueResponse
+	if pIsRequest {
+		logType = anon_logger.CLogBaseEnqueueRequest
+
 		// enrich logger with raw message
 		pLogBuilder.
 			WithPubKey(p.fQueue.GetClient().GetPubKey())
 	}
 
-	newPld := payload.NewPayload(pPld.GetHead(), newBody)
+	head := loadHead(pPld.GetHead())
+	newAction := head.getAction().setType(pIsRequest)
+	newHead := joinHead(newAction, head.getRoute()).uint64()
+
+	newPld := payload.NewPayload(newHead, pPld.GetBody())
 	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
 	if err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return utils.MergeErrors(ErrEncryptPayload, err)
 	}
 
-	if pType == cIsRequest {
+	if pIsRequest {
 		// enrich logger with raw message
 		pLogBuilder.
 			// without hash: log only from net_message!
@@ -378,7 +387,11 @@ func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_me
 		WithSize(size)
 }
 
-func (p *sNode) storeHashWithBroadcast(pCtx context.Context, pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) (bool, error) {
+func (p *sNode) storeHashWithBroadcast(
+	pCtx context.Context,
+	pLogBuilder anon_logger.ILogBuilder,
+	pNetMsg net_message.IMessage,
+) (bool, error) {
 	// try push hash into database
 	hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, pNetMsg.GetHash())
 	if err != nil || !hashIsSaved {
@@ -454,7 +467,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey asymmetric.IPubKey, pHead uint32) string {
+func newActionKey(pPubKey asymmetric.IPubKey, pAction iAction) string {
 	pubKeyAddr := pPubKey.GetHasher().ToString()
-	return fmt.Sprintf("%s-%d", pubKeyAddr, pHead)
+	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

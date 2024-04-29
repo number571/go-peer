@@ -56,10 +56,9 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 			hasBroadastError = true
 		}
 
-		switch hasBroadastError {
-		case true:
+		if hasBroadastError {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
-		default:
+		} else {
 			pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		}
 
