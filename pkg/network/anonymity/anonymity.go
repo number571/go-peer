@@ -158,14 +158,14 @@ func (p *sNode) FetchPayload(
 	pRecv asymmetric.IPubKey,
 	pPld adapters.IPayload,
 ) ([]byte, error) {
-	headAction := sAction(random.NewStdPRNG().GetUint64()).setType(true)
+	headAction := sAction(random.NewStdPRNG().GetUint64())
 	actionKey := newActionKey(pRecv, headAction)
 
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
 	newPld := payload.NewPayload(
-		joinHead(headAction, pPld.GetHead()).uint64(),
+		joinHead(headAction.setType(true), pPld.GetHead()).uint64(),
 		pPld.GetBody(),
 	)
 
