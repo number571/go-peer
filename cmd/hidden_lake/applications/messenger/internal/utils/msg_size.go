@@ -12,10 +12,12 @@ import (
 )
 
 var (
-	gReqSize = uint64(len(hlm_client.NewBuilder().PushMessage(
-		strings.Repeat("-", settings.CPseudonymSize),
-		[]byte{},
-	).GetBody()))
+	// {"method":"POST","host":"hidden-lake-messenger","path":"/push","head":{"Hl-Messenger-Pseudonym":"--------------------------------"},"body":""}
+	gReqSize = uint64(len(
+		hlm_client.NewBuilder().
+			PushMessage(strings.Repeat("-", settings.CPseudonymSize), []byte{}).
+			ToBytes(),
+	))
 )
 
 func GetMessageLimit(pCtx context.Context, pHlsClient client.IClient) (uint64, error) {
