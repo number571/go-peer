@@ -15,8 +15,6 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -204,7 +202,7 @@ func sendMessage(
 		return utils.MergeErrors(ErrGetMessageLimit, err)
 	}
 
-	if uint64(len(pMsgBytes)) > (msgLimit + symmetric.CAESBlockSize + hashing.CSHA256Size) {
+	if uint64(len(pMsgBytes)) > msgLimit {
 		return ErrLenMessageGtLimit
 	}
 

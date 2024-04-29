@@ -10,6 +10,10 @@
 - Update `cmd/hidden_lake/service`: update interface request format
 - Update `cmd/hidden_lake/applications/messenger`: delete pseudonyms
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/messenger`: fix message size limit
+
 ## v1.6.10
 
 *April 27, 2024*
