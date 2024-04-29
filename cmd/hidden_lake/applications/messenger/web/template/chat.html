@@ -88,12 +88,13 @@ Babilejo
             let obj = JSON.parse(e.data);
 
             var d1 = document.getElementById('chat_body');
+            var aliasName = "{{.FAddress.FAliasName}}";
             var insertHTML = "";
             if (obj.filename == "") { // got text message
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + obj.pseudonym + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">`+aliasName+`</p>
               <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">` + obj.maindata + `</p>
               <p class="small ms-3 mb-3 text-muted">` + obj.timestamp + `</p>
             </div>
@@ -104,7 +105,7 @@ Babilejo
                 insertHTML = `
           <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
             <div>
-              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">` + obj.pseudonym + `</p>
+              <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">`+aliasName+`</p>
               <button class="btn btn-muted text-dark w-100" onclick="downloadBase64File('` + obj.maindata + `', '` + filename + `')">
                 ` + filename + `
               </button>
@@ -152,18 +153,19 @@ Babilejo
 </style>
 
 <div id="chat_body" class="card-body" style="position: relative; height: 100%; overflow:auto;">
+    {{$x:=.FAddress}}
     {{range .FMessages}}
     {{if .FIsIncoming}}
     <div class="need-break-text d-flex flex-row justify-content-start mb-2 pt-1">
         <div>
             {{if (eq .FFileName "")}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FPseudonym}}
+                {{$x.FAliasName}}
             </p>
             <p class="rounded text-center p-2 ms-3 mb-1 text-white bg-secondary">{{.FMainData}}</p>
             {{else}}
             <p class="border border-secondary rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FPseudonym}}
+                {{$x.FAliasName}}
             </p>
             <button class="btn btn-muted text-center text-dark w-100"
                 onclick="downloadBase64File('{{.FMainData}}', '{{.FFileName}}')">
@@ -178,12 +180,12 @@ Babilejo
         <div>
             {{if (eq .FFileName "")}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FPseudonym}}
+                ___
             </p>
             <p class="rounded text-center p-2 me-3 mb-1 text-white bg-info">{{.FMainData}}</p>
             {{else}}
             <p class="border border-info rounded text-center p-2 me-3 mb-1 text-white bg-dark">
-                {{.FPseudonym}}
+                ___
             </p>
             <button class="btn btn-primary text-center text-white w-100"
                 onclick="downloadBase64File('{{.FMainData}}', '{{.FFileName}}')">

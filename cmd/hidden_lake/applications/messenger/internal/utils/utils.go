@@ -5,7 +5,6 @@ import (
 	"strings"
 	"unicode"
 
-	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 )
 
@@ -54,10 +53,4 @@ func HasNotWritableCharacters(pS string) bool {
 		}
 	}
 	return false
-}
-
-func PseudonymIsValid(pPseudonym string) bool {
-	return pPseudonym != "" &&
-		len(pPseudonym) <= hlm_settings.CPseudonymSize &&
-		!HasNotWritableCharacters(pPseudonym)
 }

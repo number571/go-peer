@@ -7,7 +7,7 @@ import (
 )
 
 type IClient interface {
-	PushMessage(context.Context, string, string, []byte) error
+	PushMessage(context.Context, string, []byte) error
 }
 
 type IRequester interface {
@@ -15,5 +15,5 @@ type IRequester interface {
 }
 
 type IBuilder interface {
-	PushMessage(string, []byte) hls_request.IRequest
+	PushMessage([]byte) hls_request.IRequest
 }

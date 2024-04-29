@@ -20,9 +20,6 @@ const (
 			"method":"POST",
 			"host":"hidden-lake-messenger",
 			"path":"/push",
-			"head":{
-				"%s": "%s"
-			},
 			"body":"%s"
 		}
 	}`
@@ -41,12 +38,9 @@ func main() {
 func sendMessage(pReceiver string, pMessage []byte) {
 	httpClient := http.Client{Timeout: time.Minute / 2}
 
-	pseudonym := "Bob"
 	requestData := fmt.Sprintf(
 		cRequestTemplate,
 		pReceiver,
-		hlm_settings.CHeaderPseudonym,
-		pseudonym,
 		base64.StdEncoding.EncodeToString(pMessage),
 	)
 

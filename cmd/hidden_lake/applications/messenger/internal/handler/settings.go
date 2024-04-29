@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
-	internal_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	"github.com/number571/go-peer/internal/language"
@@ -28,7 +27,6 @@ type sConnection struct {
 
 type sSettings struct {
 	*sTemplate
-	FPseudonym     string
 	FNetworkKey    string
 	FPublicKey     string
 	FPublicKeyHash string
@@ -55,16 +53,6 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
 			if err := hlsClient.SetNetworkKey(pCtx, networkKey); err != nil {
 				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
-				return
-			}
-		case http.MethodHead:
-			pseudonym := strings.TrimSpace(pR.FormValue("pseudonym"))
-			if !internal_utils.PseudonymIsValid(pseudonym) {
-				ErrorPage(pLogger, cfg, "read_pseudonym", "pseudonym is invalid")(pW, pR)
-				return
-			}
-			if err := cfgEditor.UpdatePseudonym(pseudonym); err != nil {
-				ErrorPage(pLogger, cfg, "update_pseudonym", "update pseudonym")(pW, pR)
 				return
 			}
 		case http.MethodPut:
@@ -132,7 +120,6 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 func getSettings(pCtx context.Context, pCfg config.IConfig, pHlsClient hls_client.IClient) (*sSettings, error) {
 	result := new(sSettings)
 	result.sTemplate = getTemplate(pCfg)
-	result.FPseudonym = pCfg.GetSettings().GetPseudonym()
 
 	myPubKey, err := pHlsClient.GetPubKey(pCtx)
 	if err != nil {

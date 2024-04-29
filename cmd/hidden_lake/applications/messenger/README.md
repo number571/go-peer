@@ -54,7 +54,6 @@ Default config `hlm.yml`
 settings:
   messages_capacity: 2048
   language: ENG
-  pseudonym: i4sRNRXw_qoCv-RCBF_VjZy8nnOKYafI
   storage_key: u4Dz9PvNzn3DOItsrSWMODIrUwK5tmsw
 logging:
   - info

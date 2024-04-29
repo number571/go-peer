@@ -85,12 +85,12 @@ func FriendsChatPage(
 				return
 			}
 
-			if err := sendMessage(pCtx, pCfg, client, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCtx, client, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
 
-			dbMsg := database.NewMessage(false, pCfg.GetSettings().GetPseudonym(), msgBytes)
+			dbMsg := database.NewMessage(false, msgBytes)
 			if err := pDB.Push(rel, dbMsg); err != nil {
 				ErrorPage(pLogger, pCfg, "push_message", "add message to database")(pW, pR)
 				return
@@ -131,7 +131,6 @@ func FriendsChatPage(
 				FIsIncoming: msg.IsIncoming(),
 				SMessage: getMessage(
 					false,
-					msg.GetPseudonym(),
 					msg.GetMessage(),
 					msg.GetTimestamp(),
 				),
@@ -196,7 +195,6 @@ func getUploadFile(pR *http.Request) (string, []byte, error) {
 
 func sendMessage(
 	pCtx context.Context,
-	pCfg config.IConfig,
 	pClient hls_client.IClient,
 	pAliasName string,
 	pMsgBytes []byte,
@@ -214,8 +212,8 @@ func sendMessage(
 		hlm_client.NewBuilder(),
 		hlm_client.NewRequester(pClient),
 	)
-	err = hlmClient.PushMessage(pCtx, pAliasName, pCfg.GetSettings().GetPseudonym(), pMsgBytes)
-	if err != nil {
+
+	if err := hlmClient.PushMessage(pCtx, pAliasName, pMsgBytes); err != nil {
 		return utils.MergeErrors(ErrPushMessage, err)
 	}
 

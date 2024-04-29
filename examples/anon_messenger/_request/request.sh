@@ -17,9 +17,6 @@ PUSH_FORMAT='{
         "method":"POST",
         "host":"hidden-lake-messenger",
         "path":"/push",
-        "head":{
-            "Hl-Messenger-Pseudonym": "Bob"
-        },
         "body":"'${SENT_DATA}'"
     }
 }';

@@ -4,15 +4,12 @@ import (
 	"bytes"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
 	cIsIncomingSize = 1
 	cTimestampSize  = encoding.CSizeUint64
-	cPseudonymSize  = settings.CPseudonymSize
 )
 
 var (
@@ -22,26 +19,19 @@ var (
 type sMessage struct {
 	fIsIncoming bool
 	fTimestamp  uint64
-	fPseudonym  []byte
 	fMessage    []byte
 }
 
-func NewMessage(pIsIncoming bool, pPseudonym string, pMessage []byte) IMessage {
-	if !utils.PseudonymIsValid(pPseudonym) {
-		panic("!utils.PseudonymIsValid(pPseudonym)")
-	}
-	pseudonym := make([]byte, cPseudonymSize)
-	copy(pseudonym, []byte(pPseudonym))
+func NewMessage(pIsIncoming bool, pMessage []byte) IMessage {
 	return &sMessage{
 		fIsIncoming: pIsIncoming,
 		fTimestamp:  uint64(time.Now().Unix()),
-		fPseudonym:  pseudonym,
 		fMessage:    pMessage,
 	}
 }
 
 func LoadMessage(pMsgBytes []byte) IMessage {
-	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize + cPseudonymSize) {
+	if len(pMsgBytes) < (cIsIncomingSize + cTimestampSize) {
 		return nil
 	}
 
@@ -56,13 +46,8 @@ func LoadMessage(pMsgBytes []byte) IMessage {
 	return &sMessage{
 		fIsIncoming: isIncoming,
 		fTimestamp:  encoding.BytesToUint64(blockTimestamp),
-		fPseudonym:  pMsgBytes[cIsIncomingSize+cTimestampSize : cIsIncomingSize+cTimestampSize+cPseudonymSize],
-		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize+cPseudonymSize:],
+		fMessage:    pMsgBytes[cIsIncomingSize+cTimestampSize:],
 	}
-}
-
-func (p *sMessage) GetPseudonym() string {
-	return string(bytes.TrimRight(p.fPseudonym, "\x00"))
 }
 
 func (p *sMessage) IsIncoming() bool {
@@ -87,7 +72,6 @@ func (p *sMessage) ToBytes() []byte {
 		[][]byte{
 			{firstByte},
 			blockTimestamp[:],
-			p.fPseudonym,
 			p.fMessage,
 		},
 		[]byte{},

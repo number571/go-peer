@@ -18,10 +18,10 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) PushMessage(pPseudonym string, pBody []byte) hls_request.IRequest {
-	return hls_request.NewRequest(http.MethodPost, hlm_settings.CServiceFullName, hlm_settings.CPushPath).
-		WithHead(map[string]string{
-			hlm_settings.CHeaderPseudonym: pPseudonym,
-		}).
-		WithBody(pBody)
+func (p *sBuilder) PushMessage(pBody []byte) hls_request.IRequest {
+	return hls_request.NewRequest(
+		http.MethodPost,
+		hlm_settings.CServiceFullName,
+		hlm_settings.CPushPath,
+	).WithBody(pBody)
 }

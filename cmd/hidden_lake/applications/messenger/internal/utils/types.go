@@ -7,6 +7,5 @@ type SSubscribe struct {
 type SMessage struct {
 	FFileName  string `json:"filename"` // can be ""
 	FTimestamp string `json:"timestamp"`
-	FPseudonym string `json:"pseudonym"`
 	FMainData  string `json:"maindata"`
 }

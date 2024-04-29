@@ -55,27 +55,6 @@ Agordoj
         <div class="card-body">
             <form method="POST" action="/settings">
                 <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
-                <input hidden name="method" value="HEAD">
-                <div class="row mb-3">
-                    <div class="col-md-8 w-75">
-                        {{if (eq .FLanguage 0)}}
-                        <input type="text" name="pseudonym" placeholder="Pseudonym" value="{{.FPseudonym}}"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{else if (eq .FLanguage 1)}}
-                        <input type="text" name="pseudonym" placeholder="Псевдоним" value="{{.FPseudonym}}"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{else if (eq .FLanguage 2)}}
-                        <input type="text" name="pseudonym" placeholder="Alnomo" value="{{.FPseudonym}}"
-                            class="text-center form-control bg-dark text-white w-100">
-                        {{end}}
-                    </div>
-                    <div class="col-md-4 w-25">
-                        <input type="submit" name="submit" value="◀" class="btn btn-info w-100">
-                    </div>
-                </div>
-            </form>
-            <form method="POST" action="/settings">
-                <!-- HTML does not support another methods (PUT, DELETE, etc...) -->
                 <input hidden name="method" value="PUT">
                 <div class="row">
                     <div class="col-md-6 w-50">

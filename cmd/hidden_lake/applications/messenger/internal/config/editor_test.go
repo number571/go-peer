@@ -24,7 +24,6 @@ func (p *tsConfig) GetSettings() IConfigSettings     { return nil }
 func (p *tsConfig) GetLanguage() language.ILanguage  { return 0 }
 func (p *tsConfig) GetLogging() logger.ILogging      { return nil }
 func (p *tsConfig) GetShareEnabled() bool            { return false }
-func (p *tsConfig) GetPseudonym() string             { return "" }
 func (p *tsConfig) GetAddress() IAddress             { return nil }
 func (p *tsConfig) GetNetworkKey() string            { return "" }
 func (p *tsConfig) GetConnection() string            { return "" }
@@ -81,11 +80,6 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 	}
 	if err := editor.UpdateLanguage(res); err == nil {
 		t.Error("success update network key with incorrect filepath")
-		return
-	}
-
-	if err := editor.UpdatePseudonym("test"); err == nil {
-		t.Error("success update pseudonym with incorrect filepath")
 		return
 	}
 }

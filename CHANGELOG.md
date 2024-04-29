@@ -8,6 +8,7 @@
 
 - Update `cmd/hidden_lake`: update list of HLT nodes
 - Update `cmd/hidden_lake/service`: update interface request format
+- Update `cmd/hidden_lake/applications/messenger`: delete pseudonyms
 
 ## v1.6.10
 

@@ -37,13 +37,6 @@ func HandleIncomigHTTP(
 			return
 		}
 
-		senderPseudonym := pR.Header.Get(hlm_settings.CHeaderPseudonym)
-		if !hlm_utils.PseudonymIsValid(senderPseudonym) {
-			pLogger.PushWarn(logBuilder.WithMessage("get_sender_pseudonym"))
-			_ = api.Response(pW, http.StatusUnauthorized, "failed: get pseudonym from messenger")
-			return
-		}
-
 		rawMsgBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
@@ -70,7 +63,7 @@ func HandleIncomigHTTP(
 		}
 
 		rel := database.NewRelation(myPubKey, fPubKey)
-		dbMsg := database.NewMessage(true, senderPseudonym, rawMsgBytes)
+		dbMsg := database.NewMessage(true, rawMsgBytes)
 
 		if err := pDB.Push(rel, dbMsg); err != nil {
 			pLogger.PushErro(logBuilder.WithMessage("push_message"))
@@ -82,7 +75,6 @@ func HandleIncomigHTTP(
 			fPubKey.GetHasher().ToString(),
 			getMessage(
 				true,
-				dbMsg.GetPseudonym(),
 				dbMsg.GetMessage(),
 				dbMsg.GetTimestamp(),
 			),
@@ -115,7 +107,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 	}
 }
 
-func getMessage(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessage {
+func getMessage(pEscape bool, pRawMsgBytes []byte, pTimestamp string) hlm_utils.SMessage {
 	switch {
 	case isText(pRawMsgBytes):
 		msgData := unwrapText(pRawMsgBytes, pEscape)
@@ -123,7 +115,6 @@ func getMessage(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp
 			panic("message data = nil")
 		}
 		return hlm_utils.SMessage{
-			FPseudonym: pPseudonym,
 			FTimestamp: pTimestamp,
 			FMainData:  msgData,
 		}
@@ -133,7 +124,6 @@ func getMessage(pEscape bool, pPseudonym string, pRawMsgBytes []byte, pTimestamp
 			panic("filename = nil OR message data = nil")
 		}
 		return hlm_utils.SMessage{
-			FPseudonym: pPseudonym,
 			FFileName:  filename,
 			FTimestamp: pTimestamp,
 			FMainData:  msgData,

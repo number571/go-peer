@@ -31,29 +31,6 @@ func newEditor(pCfg IConfig) IEditor {
 	}
 }
 
-func (p *sEditor) UpdatePseudonym(pPseudonym string) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	filepath := p.fConfig.fFilepath
-	icfg, err := LoadConfig(filepath)
-	if err != nil {
-		return fmt.Errorf("load config (update language): %w", err)
-	}
-
-	cfg := icfg.(*SConfig)
-	cfg.FSettings.FPseudonym = pPseudonym
-	if err := os.WriteFile(filepath, encoding.SerializeYAML(cfg), 0o600); err != nil {
-		return fmt.Errorf("write config (update language): %w", err)
-	}
-
-	p.fConfig.FSettings.fMutex.Lock()
-	defer p.fConfig.FSettings.fMutex.Unlock()
-
-	p.fConfig.FSettings.FPseudonym = pPseudonym
-	return nil
-}
-
 func (p *sEditor) UpdateLanguage(pLang language.ILanguage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()

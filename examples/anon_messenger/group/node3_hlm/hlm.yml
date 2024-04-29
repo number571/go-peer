@@ -1,6 +1,5 @@
 settings:
   messages_capacity: 2048
-  pseudonym: Carol
   language: ENG
 logging:
 - info

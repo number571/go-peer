@@ -1,6 +1,5 @@
 settings:
   messages_capacity: 2048
-  pseudonym: "Alice"
 logging:
 - info
 - warn

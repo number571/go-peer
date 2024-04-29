@@ -4,7 +4,6 @@ import (
 	"os"
 	"sync"
 
-	internal_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/language"
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -20,7 +19,6 @@ var (
 type SConfigSettings struct {
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
-	FPseudonym        string `yaml:"pseudonym"`
 	FStorageKey       string `yaml:"storage_key,omitempty"`
 	FLanguage         string `yaml:"language,omitempty"`
 
@@ -97,13 +95,6 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
 }
 
-func (p *SConfigSettings) GetPseudonym() string {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	return p.FPseudonym
-}
-
 func (p *SConfigSettings) GetStorageKey() string {
 	return p.FStorageKey
 }
@@ -126,7 +117,6 @@ func (p *SConfigSettings) loadLanguage() error {
 
 func (p *SConfig) isValid() bool {
 	return true &&
-		internal_utils.PseudonymIsValid(p.FSettings.FPseudonym) &&
 		p.FConnection != "" &&
 		p.FAddress.FInterface != "" &&
 		p.FAddress.FIncoming != "" &&

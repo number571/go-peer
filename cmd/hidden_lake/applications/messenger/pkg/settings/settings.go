@@ -16,11 +16,6 @@ const (
 )
 
 const (
-	CPseudonymSize   = 32 // x >= 1 && x <= CPseudonymSize
-	CHeaderPseudonym = "Hl-Messenger-Pseudonym"
-)
-
-const (
 	CDefaultInterfaceAddress = "127.0.0.1:9591"
 	CDefaultIncomingAddress  = "127.0.0.1:9592"
 )

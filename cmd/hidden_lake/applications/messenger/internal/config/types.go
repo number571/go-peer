@@ -11,7 +11,6 @@ type IWrapper interface {
 }
 
 type IEditor interface {
-	UpdatePseudonym(string) error
 	UpdateLanguage(language.ILanguage) error
 }
 
@@ -25,7 +24,6 @@ type IConfig interface {
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
 	GetWorkSizeBits() uint64
-	GetPseudonym() string
 	GetStorageKey() string
 	GetLanguage() language.ILanguage
 }

@@ -5,9 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/database"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -44,8 +42,7 @@ func TestDatabase(t *testing.T) {
 	friend := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[1])
 
 	rel := NewRelation(iam, friend)
-	pseudonym := random.NewStdPRNG().GetString(settings.CPseudonymSize)
-	err1 := db.Push(rel, NewMessage(true, pseudonym, []byte(testutils.TcBody)))
+	err1 := db.Push(rel, NewMessage(true, []byte(testutils.TcBody)))
 	if err1 != nil {
 		t.Error(err1)
 		return
@@ -70,11 +67,6 @@ func TestDatabase(t *testing.T) {
 
 	if !msgs[0].IsIncoming() {
 		t.Error("!msgs[0].IsIncoming()")
-		return
-	}
-
-	if msgs[0].GetPseudonym() != pseudonym {
-		t.Error("msgs[0].GetSenderID() != pseudonym")
 		return
 	}
 

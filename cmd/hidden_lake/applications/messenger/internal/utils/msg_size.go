@@ -2,21 +2,17 @@ package utils
 
 import (
 	"context"
-	"strings"
 
 	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/internal/base64"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
-	// {"method":"POST","host":"hidden-lake-messenger","path":"/push","head":{"Hl-Messenger-Pseudonym":"--------------------------------"},"body":""}
+	// {"method":"POST","host":"hidden-lake-messenger","path":"/push","head":null,"body":""}
 	gReqSize = uint64(len(
-		hlm_client.NewBuilder().
-			PushMessage(strings.Repeat("-", settings.CPseudonymSize), []byte{}).
-			ToBytes(),
+		hlm_client.NewBuilder().PushMessage([]byte{}).ToBytes(),
 	))
 )
 

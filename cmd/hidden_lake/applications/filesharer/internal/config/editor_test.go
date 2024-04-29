@@ -24,7 +24,6 @@ func (p *tsConfig) GetSettings() IConfigSettings     { return nil }
 func (p *tsConfig) GetLanguage() language.ILanguage  { return 0 }
 func (p *tsConfig) GetLogging() logger.ILogging      { return nil }
 func (p *tsConfig) GetShare() bool                   { return false }
-func (p *tsConfig) GetPseudonym() string             { return "" }
 func (p *tsConfig) GetAddress() IAddress             { return nil }
 func (p *tsConfig) GetNetworkKey() string            { return "" }
 func (p *tsConfig) GetConnection() string            { return "" }

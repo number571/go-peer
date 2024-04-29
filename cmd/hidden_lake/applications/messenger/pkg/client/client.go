@@ -18,6 +18,6 @@ func NewClient(pBuilder IBuilder, pRequester IRequester) IClient {
 	}
 }
 
-func (p *sClient) PushMessage(pCtx context.Context, pAliasName string, pPseudonym string, pBody []byte) error {
-	return p.fRequester.PushMessage(pCtx, pAliasName, p.fBuilder.PushMessage(pPseudonym, pBody))
+func (p *sClient) PushMessage(pCtx context.Context, pAliasName string, pBody []byte) error {
+	return p.fRequester.PushMessage(pCtx, pAliasName, p.fBuilder.PushMessage(pBody))
 }
