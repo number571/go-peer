@@ -25,6 +25,5 @@ var (
 	ErrActionTimeout          = &SAnonymityError{"action timeout"}
 	ErrEnqueuePayload         = &SAnonymityError{"enqueue payload"}
 	ErrFetchResponse          = &SAnonymityError{"fetch response"}
-	ErrBroadcastPayload       = &SAnonymityError{"broadcast payload"}
 	ErrRunning                = &SAnonymityError{"node running"}
 )

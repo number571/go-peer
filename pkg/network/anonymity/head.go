@@ -28,7 +28,7 @@ func (p sHead) getRoute() uint32 {
 }
 
 func (p sHead) getAction() iAction {
-	return sAction(uint32(p >> 32))
+	return sAction(p >> 32)
 }
 
 func (p sHead) uint64() uint64 {

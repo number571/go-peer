@@ -138,31 +138,39 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 }
 
 // Send message without response waiting.
-func (p *sNode) SendPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld payload.IPayload) error {
+func (p *sNode) SendPayload(
+	pCtx context.Context,
+	pRecv asymmetric.IPubKey,
+	pPld payload.IPayload,
+) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, true, logBuilder, pRecv, pPld); err != nil {
+	if err := p.enqueuePayload(pCtx, logBuilder, pRecv, pPld); err != nil {
 		// internal logger
-		return utils.MergeErrors(ErrBroadcastPayload, err)
+		return utils.MergeErrors(ErrEnqueuePayload, err)
 	}
 	return nil
 }
 
 // Send message with response waiting.
 // Payload head must be uint32.
-func (p *sNode) FetchPayload(pCtx context.Context, pRecv asymmetric.IPubKey, pPld adapters.IPayload) ([]byte, error) {
-	headAction := sAction(random.NewStdPRNG().GetUint64())
-	newPld := payload.NewPayload(
-		joinHead(headAction, pPld.GetHead()).uint64(),
-		pPld.GetBody(),
-	)
-
+func (p *sNode) FetchPayload(
+	pCtx context.Context,
+	pRecv asymmetric.IPubKey,
+	pPld adapters.IPayload,
+) ([]byte, error) {
+	headAction := sAction(random.NewStdPRNG().GetUint64()).setType(true)
 	actionKey := newActionKey(pRecv, headAction)
 
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
+	newPld := payload.NewPayload(
+		joinHead(headAction, pPld.GetHead()).uint64(),
+		pPld.GetBody(),
+	)
+
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, true, logBuilder, pRecv, newPld); err != nil {
+	if err := p.enqueuePayload(pCtx, logBuilder, pRecv, newPld); err != nil {
 		// internal logger
 		return nil, utils.MergeErrors(ErrEnqueuePayload, err)
 	}
@@ -323,24 +331,25 @@ func (p *sNode) handleRequest(
 
 	// create response and put this to the queue
 	// internal logger
+	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
 		pCtx,
-		false,
 		pLogBuilder,
 		pSender,
-		payload.NewPayload(pHead.uint64(), resp),
+		payload.NewPayload(newHead, resp),
 	)
 }
 
 func (p *sNode) enqueuePayload(
 	pCtx context.Context,
-	pIsRequest bool,
 	pLogBuilder anon_logger.ILogBuilder,
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload,
 ) error {
+	isRequest := loadHead(pPld.GetHead()).getAction().isRequest()
+
 	logType := anon_logger.CLogBaseEnqueueResponse
-	if pIsRequest {
+	if isRequest {
 		logType = anon_logger.CLogBaseEnqueueRequest
 
 		// enrich logger with raw message
@@ -348,18 +357,13 @@ func (p *sNode) enqueuePayload(
 			WithPubKey(p.fQueue.GetClient().GetPubKey())
 	}
 
-	head := loadHead(pPld.GetHead())
-	newAction := head.getAction().setType(pIsRequest)
-	newHead := joinHead(newAction, head.getRoute()).uint64()
-
-	newPld := payload.NewPayload(newHead, pPld.GetBody())
-	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, newPld)
+	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, pPld)
 	if err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return utils.MergeErrors(ErrEncryptPayload, err)
 	}
 
-	if pIsRequest {
+	if isRequest {
 		// enrich logger with raw message
 		pLogBuilder.
 			// without hash: log only from net_message!

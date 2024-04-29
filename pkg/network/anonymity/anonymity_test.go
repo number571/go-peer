@@ -289,7 +289,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
-	if err := node.enqueuePayload(ctx, true, logBuilder, pubKey, overPld); err == nil {
+	if err := node.enqueuePayload(ctx, logBuilder, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
 	}
@@ -315,7 +315,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := node.enqueuePayload(ctx, true, logBuilder, pubKey, pld); err != nil {
+		if err := node.enqueuePayload(ctx, logBuilder, pubKey, pld); err != nil {
 			return
 		}
 	}
