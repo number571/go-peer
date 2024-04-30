@@ -15,7 +15,7 @@ var (
 )
 
 // (1bit=A||31bit=B)
-// A = used as req/rsp
+// A = used as req=0/rsp=1
 // B = used as action
 type sAction uint32
 

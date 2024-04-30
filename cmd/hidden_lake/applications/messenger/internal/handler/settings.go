@@ -45,7 +45,11 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 			return
 		}
 
-		_ = pR.ParseForm()
+		if err := pR.ParseForm(); err != nil {
+			ErrorPage(pLogger, cfg, "parse_form", "parse form")(pW, pR)
+			return
+		}
+
 		hlsClient := getHLSClient(cfg)
 
 		switch pR.FormValue("method") {

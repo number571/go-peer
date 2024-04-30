@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"html/template"
 	"io"
 	"net/http"
@@ -51,8 +52,16 @@ func FriendsChatPage(
 			return
 		}
 
-		_ = pR.ParseForm()
-		_ = pR.ParseMultipartForm(10 << 20) // default value
+		if err := pR.ParseForm(); err != nil {
+			ErrorPage(pLogger, pCfg, "parse_form", "parse form")(pW, pR)
+			return
+		}
+
+		// default max value = 16MiB
+		if err := pR.ParseMultipartForm(16 << 20); err != nil && !errors.Is(err, http.ErrNotMultipart) {
+			ErrorPage(pLogger, pCfg, "parse_multipart_form", "parse multipart form")(pW, pR)
+			return
+		}
 
 		aliasName := pR.URL.Query().Get("alias_name")
 		if aliasName == "" {

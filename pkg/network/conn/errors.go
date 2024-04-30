@@ -22,4 +22,6 @@ var (
 	ErrInvalidMessageBytes = &SConnError{"invalid message bytes"}
 	ErrSendPayloadBytes    = &SConnError{"send payload bytes"}
 	ErrCreateConnection    = &SConnError{"create connection"}
+	ErrSetReadDeadline     = &SConnError{"set read deadline"}
+	ErrSetWriteDeadline    = &SConnError{"set write deadline"}
 )

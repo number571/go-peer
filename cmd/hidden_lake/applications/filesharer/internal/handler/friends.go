@@ -33,7 +33,10 @@ func FriendsPage(
 			return
 		}
 
-		_ = pR.ParseForm()
+		if err := pR.ParseForm(); err != nil {
+			ErrorPage(pLogger, pCfg, "parse_form", "parse form")(pW, pR)
+			return
+		}
 
 		hlsClient := getHLSClient(pCfg)
 

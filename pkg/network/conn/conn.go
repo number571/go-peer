@@ -118,7 +118,9 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			_ = p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteTimeout()))
+			if err := p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteTimeout())); err != nil {
+				return utils.MergeErrors(ErrSetWriteDeadline, err)
+			}
 
 			n, err := p.fSocket.Write(pBytes[:bytesPtr])
 			if err != nil {
@@ -187,7 +189,10 @@ func (p *sConn) recvHeadBytes(
 func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitTimeout time.Duration) ([]byte, error) {
 	dataRaw := make([]byte, 0, pMustLen)
 
-	_ = p.fSocket.SetReadDeadline(time.Now().Add(pInitTimeout))
+	if err := p.fSocket.SetReadDeadline(time.Now().Add(pInitTimeout)); err != nil {
+		return nil, utils.MergeErrors(ErrSetReadDeadline, err)
+	}
+
 	mustLen := pMustLen
 	for mustLen != 0 {
 		select {
@@ -209,7 +214,10 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitTimeou
 			)
 
 			mustLen -= uint64(n)
-			_ = p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout()))
+
+			if err := p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout())); err != nil {
+				return nil, utils.MergeErrors(ErrSetReadDeadline, err)
+			}
 		}
 	}
 
