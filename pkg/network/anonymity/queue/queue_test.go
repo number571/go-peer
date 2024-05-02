@@ -125,7 +125,7 @@ func TestRunStopQueue(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
-		payload.NewPayload(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		t.Error(err)
@@ -202,7 +202,7 @@ func testQueue(queue IMessageQueue) error {
 	client := queue.GetClient()
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
-		payload.NewPayload(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		return err
@@ -241,7 +241,7 @@ func testQueue(queue IMessageQueue) error {
 
 	msg2, err := client.EncryptPayload(
 		client.GetPubKey(),
-		payload.NewPayload(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		return err

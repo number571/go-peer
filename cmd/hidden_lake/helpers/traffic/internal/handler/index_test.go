@@ -27,7 +27,7 @@ func TestErrorsAPI(t *testing.T) {
 		),
 	)
 
-	pld := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
+	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})

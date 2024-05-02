@@ -13,6 +13,6 @@ type IClient interface {
 	GetPubKey() asymmetric.IPubKey
 	GetPrivKey() asymmetric.IPrivKey
 
-	EncryptPayload(asymmetric.IPubKey, payload.IPayload) (message.IMessage, error)
-	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload, error)
+	EncryptPayload(asymmetric.IPubKey, payload.IPayload64) (message.IMessage, error)
+	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload64, error)
 }

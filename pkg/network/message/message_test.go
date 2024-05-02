@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	_ payload.IPayload = &sInvalidPayload{}
+	_ payload.IPayload64 = &sInvalidPayload{}
 )
 
 const (
@@ -48,7 +48,7 @@ func TestError(t *testing.T) {
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
-	pld := payload.NewPayload(tcHead, []byte(tcBody))
+	pld := payload.NewPayload64(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 		FNetworkKey:   tcNetworkKey,
@@ -82,9 +82,10 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	payloadSize := encoding.Uint64ToBytes(uint64(len(pld.ToBytes())))
+	payloadSize := encoding.Uint32ToBytes(uint32(len(pld.ToBytes())))
+	voidSize := encoding.Uint32ToBytes(uint32(len(voidBytes)))
 	payloadRandBytes := bytes.Join(
-		[][]byte{payloadSize[:], pld.ToBytes(), voidBytes},
+		[][]byte{payloadSize[:], pld.ToBytes(), voidSize[:], voidBytes},
 		[]byte{},
 	)
 

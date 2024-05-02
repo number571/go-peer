@@ -56,7 +56,7 @@ func main() {
 			FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
 			FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
 		}),
-		payload.NewPayload(serviceHeader, []byte("hello, world!")),
+		payload.NewPayload64(serviceHeader, []byte("hello, world!")),
 		1,
 		0,
 	)
@@ -84,7 +84,7 @@ func handler() network.IHandlerF {
 					FNetworkKey:   node.GetVSettings().GetNetworkKey(),
 					FWorkSizeBits: node.GetSettings().GetConnSettings().GetWorkSizeBits(),
 				}),
-				payload.NewPayload(
+				payload.NewPayload64(
 					serviceHeader,
 					[]byte(fmt.Sprintf("echo: [%s]", string(msg.GetPayload().GetBody()))),
 				),

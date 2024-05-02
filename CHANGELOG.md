@@ -14,6 +14,7 @@
 - Update `cmd/hidden_lake`: update list of HLT nodes
 - Update `cmd/hidden_lake/service`: update interface request format
 - Update `cmd/hidden_lake/applications/messenger`: delete pseudonyms
+- Update `pkg/payload`: IPayload -> IPayload32, IPayload64
 
 ### BUG FIXES
 

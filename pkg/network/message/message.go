@@ -9,22 +9,22 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 const (
-	// IV + Proof + Hash + PayloadSize + PayloadHead
+	// IV + Proof + Hash + (2 x PayloadSize) + PayloadHead
 	CMessageHeadSize = 0 +
-		symmetric.CAESBlockSize +
-		encoding.CSizeUint64 +
-		hashing.CSHA256Size +
-		encoding.CSizeUint64 +
-		encoding.CSizeUint64
+		1*symmetric.CAESBlockSize +
+		1*encoding.CSizeUint64 +
+		1*hashing.CSHA256Size +
+		2*encoding.CSizeUint32 +
+		1*encoding.CSizeUint64
 )
 
 const (
-	cProofIndex  = encoding.CSizeUint64
-	cHashIndex   = cProofIndex + hashing.CSHA256Size
-	cPldLenIndex = cHashIndex + encoding.CSizeUint64
+	cProofIndex = encoding.CSizeUint64
+	cHashIndex  = cProofIndex + hashing.CSHA256Size
 )
 
 var (
@@ -32,42 +32,32 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte           // E( K, P(HLMV) || HLMV || L(M) || M || V )
-	fHash    []byte           // HLMV = H( K, L(M) || M || V )
-	fVoid    []byte           // V
-	fProof   uint64           // P(HLMV)
-	fPayload payload.IPayload // M
+	fEncd    []byte             // E( K, P(HLMV) || HLMV || L(M) || M || V )
+	fHash    []byte             // HLMV = H( K, L(M) || M || V )
+	fVoid    []byte             // V
+	fProof   uint64             // P(HLMV)
+	fPayload payload.IPayload64 // M
 }
 
-func NewMessage(pSett ISettings, pPld payload.IPayload, pParallel, pLimitVoidSize uint64) IMessage {
+func NewMessage(pSett ISettings, pPld payload.IPayload64, pParallel, pLimitVoidSize uint64) IMessage {
 	prng := random.NewStdPRNG()
 
-	payloadBytes := pPld.ToBytes()
-	payloadSize := encoding.Uint64ToBytes(uint64(len(payloadBytes)))
-
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pLimitVoidSize + 1))
-	sizeXPayloadVoidBytes := bytes.Join(
-		[][]byte{
-			payloadSize[:],
-			payloadBytes,
-			voidBytes,
-		},
-		[]byte{},
-	)
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
-	hash := hashing.NewHMACSHA256Hasher(key, sizeXPayloadVoidBytes).ToBytes()
-	cipher := symmetric.NewAESCipher(key)
+	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
 	proofBytes := encoding.Uint64ToBytes(proof)
 
+	cipher := symmetric.NewAESCipher(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
 				hash,
-				sizeXPayloadVoidBytes,
+				bytesJoiner,
 			},
 			[]byte{},
 		)),
@@ -101,19 +91,15 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	copy(proofArr[:], dBytes[:cProofIndex])
 	proof := encoding.BytesToUint64(proofArr)
 
-	payloadSizeArr := [encoding.CSizeUint64]byte{}
-	copy(payloadSizeArr[:], dBytes[cHashIndex:cPldLenIndex])
-	payloadLength := encoding.BytesToUint64(payloadSizeArr)
-
 	hash := dBytes[cProofIndex:cHashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
 	if !puzzle.VerifyBytes(hash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	payloadVoidBytes := dBytes[cPldLenIndex:]
-	if payloadLength > uint64(len(payloadVoidBytes)) {
-		return nil, ErrInvalidPayloadSize
+	bytesSlice, err := joiner.LoadBytesJoiner32(dBytes[cHashIndex:])
+	if err != nil || len(bytesSlice) != 2 {
+		return nil, ErrDecodeBytesJoiner
 	}
 
 	newHash := hashing.NewHMACSHA256Hasher(key, dBytes[cHashIndex:]).ToBytes()
@@ -121,10 +107,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payloadBytes := payloadVoidBytes[:payloadLength]
-	voidBytes := payloadVoidBytes[payloadLength:]
-
-	payload := payload.LoadPayload(payloadBytes)
+	payload := payload.LoadPayload64(bytesSlice[0])
 	if payload == nil {
 		return nil, ErrDecodePayload
 	}
@@ -132,7 +115,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	return &sMessage{
 		fEncd:    msgBytes,
 		fHash:    hash,
-		fVoid:    voidBytes,
+		fVoid:    bytesSlice[1],
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -150,7 +133,7 @@ func (p *sMessage) GetVoid() []byte {
 	return p.fVoid
 }
 
-func (p *sMessage) GetPayload() payload.IPayload {
+func (p *sMessage) GetPayload() payload.IPayload64 {
 	return p.fPayload
 }
 

@@ -48,7 +48,7 @@ func main() {
 	for i := 0; i < 3; i++ {
 		msg, err := q.GetClient().EncryptPayload(
 			q.GetClient().GetPubKey(),
-			payload.NewPayload(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))),
+			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))),
 		)
 		if err != nil {
 			panic(err)

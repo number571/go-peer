@@ -7,12 +7,12 @@ import (
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
-func TestPayload(t *testing.T) {
+func TestPayload64(t *testing.T) {
 	t.Parallel()
 
-	pl := NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
+	pl := NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
 
-	decPl := LoadPayload(pl.ToBytes())
+	decPl := LoadPayload64(pl.ToBytes())
 	if decPl == nil {
 		t.Error("decode payload is nil")
 		return
@@ -28,7 +28,35 @@ func TestPayload(t *testing.T) {
 		return
 	}
 
-	invalidPld := LoadPayload([]byte{1})
+	invalidPld := LoadPayload64([]byte{1})
+	if invalidPld != nil {
+		t.Error("invalid payload success decoded")
+		return
+	}
+}
+
+func TestPayload32(t *testing.T) {
+	t.Parallel()
+
+	pl := NewPayload32(testutils.TcHead, []byte(testutils.TcBody))
+
+	decPl := LoadPayload32(pl.ToBytes())
+	if decPl == nil {
+		t.Error("decode payload is nil")
+		return
+	}
+
+	if !bytes.Equal(pl.GetBody(), decPl.GetBody()) {
+		t.Error("data not equal with decoded version of payload")
+		return
+	}
+
+	if pl.GetHead() != decPl.GetHead() {
+		t.Error("title not equal with decoded version of payload")
+		return
+	}
+
+	invalidPld := LoadPayload32([]byte{1})
 	if invalidPld != nil {
 		t.Error("invalid payload success decoded")
 		return

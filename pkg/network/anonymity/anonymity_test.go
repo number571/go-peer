@@ -23,7 +23,6 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -120,7 +119,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			resp, err := nodes[0].FetchPayload(
 				ctx,
 				nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-				adapters.NewPayload(testutils.TcHead, []byte(reqBody)),
+				payload.NewPayload32(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -158,7 +157,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcBody)),
+		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody)),
 	)
 	if err != nil {
 		return
@@ -189,7 +188,7 @@ func TestFetchPayload(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
 		t.Error("success fetch payload with large body")
@@ -199,7 +198,7 @@ func TestFetchPayload(t *testing.T) {
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)),
+		payload.NewPayload32(testutils.TcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
@@ -237,7 +236,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err := nodes[0].SendPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
+		payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
 		t.Error("success broadcast payload with large body")
@@ -247,7 +246,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err1 := nodes[0].SendPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(tcMsgBody)),
+		payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
@@ -285,10 +284,10 @@ func TestEnqueuePayload(t *testing.T) {
 	ctx := context.Background()
 	logBuilder := anon_logger.NewLogBuilder("test")
 
-	pld := adapters.NewPayload(testutils.TcHead, []byte(tcMsgBody)).ToOrigin()
+	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody))
 
 	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
-	overPld := adapters.NewPayload(testutils.TcHead, overheadBody).ToOrigin()
+	overPld := payload.NewPayload64(uint64(testutils.TcHead), overheadBody)
 	if err := node.enqueuePayload(ctx, logBuilder, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
@@ -296,7 +295,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(tcMsgBody),
 		),
@@ -339,7 +338,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(tcMsgBody),
 		),
@@ -372,7 +371,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg2, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
 		),
@@ -390,10 +389,10 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg3, err := client.EncryptPayload(
 		pubKey,
-		adapters.NewPayload(
-			111,
+		payload.NewPayload64(
+			uint64(111),
 			[]byte("?"+tcMsgBody),
-		).ToOrigin(),
+		),
 	)
 	if err != nil {
 		t.Error(err)
@@ -408,7 +407,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	msg4, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(false), 111).uint64(),
 			[]byte(tcMsgBody),
 		),
@@ -449,7 +448,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 
 	msg, err := client.EncryptPayload(
 		client.GetPubKey(),
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
 		),
@@ -543,7 +542,7 @@ func TestRecvSendMessage(t *testing.T) {
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(msgBody),
 		),
@@ -591,7 +590,7 @@ func TestRetryEnqueue(t *testing.T) {
 	msgBody := "hello, world!"
 	msg, err := client.EncryptPayload(
 		pubKey,
-		payload.NewPayload(
+		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(msgBody),
 		),
@@ -810,7 +809,7 @@ func testDeleteDB(typeDB int) {
 func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsgBytes []byte) net_message.IMessage {
 	return net_message.NewMessage(
 		pSett,
-		payload.NewPayload(
+		payload.NewPayload64(
 			p.fSettings.GetNetworkMask(),
 			pMsgBytes,
 		),

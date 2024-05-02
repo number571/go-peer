@@ -25,12 +25,12 @@ func TestErrorsAPI(t *testing.T) {
 		),
 	)
 
-	if _, err := client.EncryptMessage(context.Background(), asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]), payload.NewPayload(1, []byte{123})); err == nil {
+	if _, err := client.EncryptMessage(context.Background(), asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0]), payload.NewPayload64(1, []byte{123})); err == nil {
 		t.Error("success encrypt message with unknown host")
 		return
 	}
 
-	pld := payload.NewPayload(uint64(testutils.TcHead), []byte(testutils.TcBody))
+	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})

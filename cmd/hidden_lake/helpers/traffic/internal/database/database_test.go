@@ -419,7 +419,7 @@ func TestDatabase(t *testing.T) {
 func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_message.IMessage, error) {
 	msg, err := cl.EncryptPayload(
 		cl.GetPubKey(),
-		payload.NewPayload(uint64(testutils.TcHead), []byte(data)),
+		payload.NewPayload64(uint64(testutils.TcHead), []byte(data)),
 	)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_
 			FNetworkKey:   networkKey,
 			FWorkSizeBits: testutils.TCWorkSize,
 		}),
-		payload.NewPayload(0, msg.ToBytes()),
+		payload.NewPayload64(0, msg.ToBytes()),
 		1,
 		0,
 	)

@@ -114,7 +114,7 @@ func TestClosedConn(t *testing.T) {
 		FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
 	})
 
-	pld := payload.NewPayload(1, []byte("aaa"))
+	pld := payload.NewPayload64(1, []byte("aaa"))
 	msg := message.NewMessage(sett, pld, 1, 0)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -206,7 +206,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		FNetworkKey:   pNetworkKey,
 	})
 
-	pld := payload.NewPayload(tcHead, []byte(tcBody))
+	pld := payload.NewPayload64(tcHead, []byte(tcBody))
 	msg := message.NewMessage(sett, pld, 1, 0)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {

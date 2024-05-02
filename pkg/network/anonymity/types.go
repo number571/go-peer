@@ -8,7 +8,6 @@ import (
 	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
@@ -29,8 +28,8 @@ type INode interface {
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
 
-	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload) error
-	FetchPayload(context.Context, asymmetric.IPubKey, adapters.IPayload) ([]byte, error)
+	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload64) error
+	FetchPayload(context.Context, asymmetric.IPubKey, payload.IPayload32) ([]byte, error)
 }
 
 type ISettings interface {

@@ -17,7 +17,7 @@ func main() {
 
 	msg, err := client1.EncryptPayload(
 		client2.GetPubKey(),
-		payload.NewPayload(0x0, []byte("hello, world!")),
+		payload.NewPayload64(0x0, []byte("hello, world!")),
 	)
 	if err != nil {
 		panic(err)

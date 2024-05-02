@@ -37,7 +37,7 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 
 	encMsg, err := client.encryptWithParams(
 		client.GetPubKey(),
-		payload.NewPayload(0, []byte{}),
+		payload.NewPayload64(0, []byte{}),
 		0,
 	)
 	if err != nil {
@@ -78,7 +78,7 @@ func (p *sClient) GetSettings() message.ISettings {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload) (message.IMessage, error) {
+func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
 	var (
 		msgLimitSize = p.GetMessageLimit()
 		resultSize   = uint64(len(pPld.GetBody()))
@@ -97,7 +97,7 @@ func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload
 
 func (p *sClient) encryptWithParams(
 	pRecv asymmetric.IPubKey,
-	pPld payload.IPayload,
+	pPld payload.IPayload64,
 	pPadd uint64,
 ) (message.IMessage, error) {
 	var (
@@ -106,7 +106,7 @@ func (p *sClient) encryptWithParams(
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
-	data := joiner.NewBytesJoiner([][]byte{
+	data := joiner.NewBytesJoiner32([][]byte{
 		pPld.ToBytes(),
 		rand.GetBytes(pPadd),
 	})
@@ -128,7 +128,7 @@ func (p *sClient) encryptWithParams(
 	cipher := symmetric.NewAESCipher(session)
 	return message.NewMessage(
 		encKey,
-		cipher.EncryptBytes(joiner.NewBytesJoiner([][]byte{
+		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
 			p.GetPubKey().ToBytes(),
 			salt,
 			hash,
@@ -140,7 +140,7 @@ func (p *sClient) encryptWithParams(
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
+func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload64, error) {
 	if pMsg == nil || !pMsg.IsValid(p.fSettings) {
 		return nil, nil, ErrInitCheckMessage
 	}
@@ -153,7 +153,7 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 
 	// Decrypt data block by decrypted session key.
 	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(pMsg.GetEncd())
-	decSlice, err := joiner.LoadBytesJoiner(decJoiner)
+	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
 	}
@@ -192,13 +192,13 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 	}
 
 	// Decode main data of message by session key.
-	payloadWrapper, err := joiner.LoadBytesJoiner(data)
+	payloadWrapper, err := joiner.LoadBytesJoiner32(data)
 	if err != nil || len(payloadWrapper) != 2 {
 		return nil, nil, ErrDecodePayloadWrapper
 	}
 
 	// Remove random bytes and get main data.
-	pld := payload.LoadPayload(payloadWrapper[0])
+	pld := payload.LoadPayload64(payloadWrapper[0])
 	if pld == nil {
 		return nil, nil, ErrDecodePayload
 	}

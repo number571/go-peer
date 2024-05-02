@@ -7,7 +7,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
@@ -24,7 +24,7 @@ func main() {
 		resp, _ := nodeClient.FetchPayload(
 			ctx,
 			pubKeyService,
-			adapters.NewPayload(nodeRouter, []byte("hello, world!")),
+			payload.NewPayload32(nodeRouter, []byte("hello, world!")),
 		)
 		fmt.Println(string(resp))
 	}

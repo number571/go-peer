@@ -11,7 +11,7 @@ type IMessage interface {
 	GetHash() []byte
 	GetVoid() []byte
 	GetProof() uint64
-	GetPayload() payload.IPayload
+	GetPayload() payload.IPayload64
 }
 
 type ISettings interface {

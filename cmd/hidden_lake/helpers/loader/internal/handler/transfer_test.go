@@ -124,7 +124,7 @@ func TestHandleTransferAPI(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		encMsg, err := client.EncryptPayload(
 			privKey.GetPubKey(),
-			payload.NewPayload(
+			payload.NewPayload64(
 				uint64(i),
 				[]byte("hello, world!"),
 			),
@@ -135,7 +135,7 @@ func TestHandleTransferAPI(t *testing.T) {
 		}
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
-			payload.NewPayload(
+			payload.NewPayload64(
 				hls_settings.CNetworkMask,
 				encMsg.ToBytes(),
 			),

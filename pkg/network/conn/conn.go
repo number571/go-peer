@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
@@ -69,17 +69,8 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg net_message.IMessage) er
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	msgBytes := pMsg.ToBytes()
-	msgSizeBytes := encoding.Uint64ToBytes(uint64(len(msgBytes)))
-
-	err := p.sendBytes(pCtx, bytes.Join(
-		[][]byte{
-			msgSizeBytes[:],
-			msgBytes,
-		},
-		[]byte{},
-	))
-	if err != nil {
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pMsg.ToBytes()})
+	if err := p.sendBytes(pCtx, bytesJoiner); err != nil {
 		return utils.MergeErrors(ErrSendPayloadBytes, err)
 	}
 
@@ -138,21 +129,17 @@ func (p *sConn) recvHeadBytes(
 	pCtx context.Context,
 	pChRead chan<- struct{},
 	pInitTimeout time.Duration,
-) (uint64, error) {
+) (uint32, error) {
 	defer func() { pChRead <- struct{}{} }()
 
-	const (
-		sizeIndex     = encoding.CSizeUint64
-		sizeHashIndex = sizeIndex + hashing.CSHA256Size
-		dataHashIndex = sizeHashIndex + hashing.CSHA256Size
+	var (
+		headBytes []byte
+		err       error
 	)
 
-	sizeHead := make([]byte, encoding.CSizeUint64)
 	chErr := make(chan error)
-
 	go func() {
-		var err error
-		sizeHead, err = p.recvDataBytes(pCtx, encoding.CSizeUint64, pInitTimeout)
+		headBytes, err = p.recvDataBytes(pCtx, encoding.CSizeUint32, pInitTimeout)
 		if err != nil {
 			chErr <- utils.MergeErrors(ErrReadHeaderBlock, err)
 			return
@@ -170,23 +157,23 @@ func (p *sConn) recvHeadBytes(
 		break
 	}
 
-	msgSizeBytes := [encoding.CSizeUint64]byte{}
-	copy(msgSizeBytes[:], sizeHead[:sizeIndex])
+	msgSizeBytes := [encoding.CSizeUint32]byte{}
+	copy(msgSizeBytes[:], headBytes)
 
-	gotMsgSize := encoding.BytesToUint64(msgSizeBytes)
+	gotMsgSize := encoding.BytesToUint32(msgSizeBytes)
 	fullMsgSize := p.fSettings.GetLimitMessageSizeBytes() + net_message.CMessageHeadSize
 
 	switch {
 	case gotMsgSize < net_message.CMessageHeadSize:
 		fallthrough
-	case gotMsgSize > fullMsgSize+p.fSettings.GetLimitVoidSizeBytes():
+	case uint64(gotMsgSize) > fullMsgSize+p.fSettings.GetLimitVoidSizeBytes():
 		return 0, ErrInvalidMsgSize
 	}
 
 	return gotMsgSize, nil
 }
 
-func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitTimeout time.Duration) ([]byte, error) {
+func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeout time.Duration) ([]byte, error) {
 	dataRaw := make([]byte, 0, pMustLen)
 
 	if err := p.fSocket.SetReadDeadline(time.Now().Add(pInitTimeout)); err != nil {
@@ -213,7 +200,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint64, pInitTimeou
 				[]byte{},
 			)
 
-			mustLen -= uint64(n)
+			mustLen -= uint32(n)
 
 			if err := p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout())); err != nil {
 				return nil, utils.MergeErrors(ErrSetReadDeadline, err)

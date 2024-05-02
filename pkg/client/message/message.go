@@ -36,7 +36,7 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 		return nil, ErrUnknownType
 	}
 
-	wrapSlice, err := joiner.LoadBytesJoiner(recvMsg)
+	wrapSlice, err := joiner.LoadBytesJoiner32(recvMsg)
 	if err != nil || len(wrapSlice) != 2 {
 		return nil, ErrLoadBytesJoiner
 	}
@@ -60,7 +60,7 @@ func (p *sMessage) GetEncd() []byte {
 }
 
 func (p *sMessage) ToBytes() []byte {
-	return joiner.NewBytesJoiner([][]byte{
+	return joiner.NewBytesJoiner32([][]byte{
 		p.fEnck,
 		p.fEncd,
 	})

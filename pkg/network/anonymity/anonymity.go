@@ -18,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/utils"
 
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -141,7 +140,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 func (p *sNode) SendPayload(
 	pCtx context.Context,
 	pRecv asymmetric.IPubKey,
-	pPld payload.IPayload,
+	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 	if err := p.enqueuePayload(pCtx, logBuilder, pRecv, pPld); err != nil {
@@ -156,7 +155,7 @@ func (p *sNode) SendPayload(
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
 	pRecv asymmetric.IPubKey,
-	pPld adapters.IPayload,
+	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewStdPRNG().GetUint64())
 	actionKey := newActionKey(pRecv, headAction)
@@ -164,7 +163,7 @@ func (p *sNode) FetchPayload(
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	newPld := payload.NewPayload(
+	newPld := payload.NewPayload64(
 		joinHead(headAction.setType(true), pPld.GetHead()).uint64(),
 		pPld.GetBody(),
 	)
@@ -336,7 +335,7 @@ func (p *sNode) handleRequest(
 		pCtx,
 		pLogBuilder,
 		pSender,
-		payload.NewPayload(newHead, resp),
+		payload.NewPayload64(newHead, resp),
 	)
 }
 
@@ -344,7 +343,7 @@ func (p *sNode) enqueuePayload(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
 	pRecv asymmetric.IPubKey,
-	pPld payload.IPayload,
+	pPld payload.IPayload64,
 ) error {
 	isRequest := loadHead(pPld.GetHead()).getAction().isRequest()
 

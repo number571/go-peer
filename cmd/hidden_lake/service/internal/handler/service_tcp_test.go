@@ -20,7 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -132,7 +132,7 @@ func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 		return nil, cancel, err
 	}
 
-	pld := adapters.NewPayload(
+	pld := payload.NewPayload32(
 		pkg_settings.CServiceMask,
 		request.NewRequest(http.MethodGet, tcServiceAddressInHLS, "/echo").
 			WithHead(map[string]string{

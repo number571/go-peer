@@ -16,6 +16,7 @@ var (
 	ErrUnknownType        = &SMessageError{"unknown type"}
 	ErrInvalidHeaderSize  = &SMessageError{"length of message bytes < size of header"}
 	ErrInvalidProofOfWork = &SMessageError{"got invalid proof of work"}
+	ErrDecodeBytesJoiner  = &SMessageError{"decode bytes joiner"}
 	ErrInvalidPayloadSize = &SMessageError{"got invalid payload size"}
 	ErrInvalidAuthHash    = &SMessageError{"got invalid auth hash"}
 	ErrDecodePayload      = &SMessageError{"decode payload"}

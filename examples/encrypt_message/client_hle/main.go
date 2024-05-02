@@ -49,7 +49,7 @@ func main() {
 		netMsg, err := hleClient.EncryptMessage(
 			ctx,
 			pubKey,
-			payload.NewPayload(uint64(settings.CServiceMask), []byte(os.Args[2])),
+			payload.NewPayload64(uint64(settings.CServiceMask), []byte(os.Args[2])),
 		)
 		if err != nil {
 			panic(err)

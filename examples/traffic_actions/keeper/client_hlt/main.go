@@ -78,7 +78,7 @@ func main() {
 
 		msg, err := client.EncryptPayload(
 			privKey.GetPubKey(),
-			payload.NewPayload(cPldHead, []byte(args[1])),
+			payload.NewPayload64(cPldHead, []byte(args[1])),
 		)
 		if err != nil {
 			panic(err)
@@ -86,7 +86,7 @@ func main() {
 
 		netMsg := net_message.NewMessage(
 			netSett,
-			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
 			1,
 			0,
 		)

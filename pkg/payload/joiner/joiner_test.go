@@ -13,7 +13,9 @@ var tgSlice = [][]byte{
 	[]byte("world->571"),
 	random.NewStdPRNG().GetBytes(571),
 	[]byte("qwerty"),
+	{},
 	random.NewStdPRNG().GetBytes(123),
+	{},
 }
 
 func TestError(t *testing.T) {
@@ -25,10 +27,10 @@ func TestError(t *testing.T) {
 	}
 }
 
-func TestJoiner(t *testing.T) {
-	joinerBytes := NewBytesJoiner(tgSlice)
+func TestJoiner32(t *testing.T) {
+	joinerBytes := NewBytesJoiner32(tgSlice)
 
-	slice, err := LoadBytesJoiner(joinerBytes)
+	slice, err := LoadBytesJoiner32(joinerBytes)
 	if err != nil {
 		t.Error(err)
 		return

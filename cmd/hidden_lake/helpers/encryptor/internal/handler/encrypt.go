@@ -57,7 +57,7 @@ func HandleMessageEncryptAPI(
 
 		msg, err := pClient.EncryptPayload(
 			pubKey,
-			payload.NewPayload(vContainer.FPldHead, bodyData),
+			payload.NewPayload64(vContainer.FPldHead, bodyData),
 		)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("encrypt_payload"))
@@ -67,7 +67,7 @@ func HandleMessageEncryptAPI(
 
 		netMsg := net_message.NewMessage(
 			pConfig.GetSettings(),
-			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
 			pParallel,
 			pConfig.GetSettings().GetLimitVoidSizeBytes(),
 		)

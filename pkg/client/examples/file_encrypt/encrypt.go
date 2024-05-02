@@ -52,7 +52,7 @@ func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename st
 
 		msg, err := client.EncryptPayload(
 			receiver,
-			payload.NewPayload(
+			payload.NewPayload64(
 				payloadHead,
 				bytes.Join(
 					[][]byte{

@@ -14,7 +14,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
-	"github.com/number571/go-peer/pkg/network/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -78,7 +77,7 @@ func HandleNetworkRequestAPI(
 			err := pNode.SendPayload(
 				pCtx,
 				pubKey,
-				payload.NewPayload(uint64(pkg_settings.CServiceMask), req.ToBytes()),
+				payload.NewPayload64(uint64(pkg_settings.CServiceMask), req.ToBytes()),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("send_payload"))
@@ -94,7 +93,7 @@ func HandleNetworkRequestAPI(
 			respBytes, err := pNode.FetchPayload(
 				pCtx,
 				pubKey,
-				adapters.NewPayload(pkg_settings.CServiceMask, req.ToBytes()),
+				payload.NewPayload32(pkg_settings.CServiceMask, req.ToBytes()),
 			)
 			if err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("fetch_payload"))

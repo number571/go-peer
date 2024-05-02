@@ -100,7 +100,7 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.ISettings, msg
 	for i := 0; i < messageCount; i++ {
 		msg, err := client.EncryptPayload(
 			client.GetPubKey(), // self encrypt
-			payload.NewPayload(uint64(i), []byte("hello, world!")),
+			payload.NewPayload64(uint64(i), []byte("hello, world!")),
 		)
 		if err != nil {
 			return err
@@ -108,7 +108,7 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.ISettings, msg
 
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
-			payload.NewPayload(hls_settings.CNetworkMask, msg.ToBytes()),
+			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
 			1,
 			0,
 		)

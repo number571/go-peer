@@ -6,15 +6,12 @@ import (
 )
 
 const (
+	CSizeUint32 = 4 // bytes
 	CSizeUint64 = 8 // bytes
-	// Visual code's extension "Go v0.35.2" is piece of shit and can't
-	// use CSizeUint64 constant for return [CSizeUint64]byte type
-	// but can return with static constant cSizeUint64
-	cSizeUint64 = CSizeUint64
 )
 
 // Uint64 to slice of bytes by big endian.
-func Uint64ToBytes(pNum uint64) [cSizeUint64]byte {
+func Uint64ToBytes(pNum uint64) [CSizeUint64]byte {
 	res := [CSizeUint64]byte{}
 
 	var data = new(bytes.Buffer)
@@ -24,7 +21,23 @@ func Uint64ToBytes(pNum uint64) [cSizeUint64]byte {
 	return res
 }
 
+// Uint32 to slice of bytes by big endian.
+func Uint32ToBytes(pNum uint32) [CSizeUint32]byte {
+	res := [CSizeUint32]byte{}
+
+	var data = new(bytes.Buffer)
+	_ = binary.Write(data, binary.BigEndian, pNum)
+
+	copy(res[:], data.Bytes())
+	return res
+}
+
 // Slice of bytes to uint64 by big endian.
-func BytesToUint64(pBytes [cSizeUint64]byte) uint64 {
+func BytesToUint64(pBytes [CSizeUint64]byte) uint64 {
 	return binary.BigEndian.Uint64(pBytes[:])
+}
+
+// Slice of bytes to uint32 by big endian.
+func BytesToUint32(pBytes [CSizeUint32]byte) uint32 {
+	return binary.BigEndian.Uint32(pBytes[:])
 }

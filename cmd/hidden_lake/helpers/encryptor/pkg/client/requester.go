@@ -61,7 +61,7 @@ func (p *sRequester) GetIndex(pCtx context.Context) (string, error) {
 	return result, nil
 }
 
-func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pPayload payload.IPayload) (net_message.IMessage, error) {
+func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPubKey, pPayload payload.IPayload64) (net_message.IMessage, error) {
 	resp, err := api.Request(
 		pCtx,
 		p.fClient,
@@ -85,7 +85,7 @@ func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPu
 	return msg, nil
 }
 
-func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, payload.IPayload, error) {
+func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IMessage) (asymmetric.IPubKey, payload.IPayload64, error) {
 	resp, err := api.Request(
 		pCtx,
 		p.fClient,
@@ -112,7 +112,7 @@ func (p *sRequester) DecryptMessage(pCtx context.Context, pNetMsg net_message.IM
 		return nil, nil, ErrInvalidHexFormat
 	}
 
-	return pubKey, payload.NewPayload(result.FPldHead, data), nil
+	return pubKey, payload.NewPayload64(result.FPldHead, data), nil
 }
 
 func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error) {

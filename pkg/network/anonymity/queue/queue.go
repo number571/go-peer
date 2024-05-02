@@ -198,7 +198,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
 				FNetworkKey:   oldVSettings.GetNetworkKey(),
 			}),
-			payload.NewPayload(
+			payload.NewPayload64(
 				p.fSettings.GetNetworkMask(),
 				pMsg.ToBytes(),
 			),
@@ -233,7 +233,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 
 	msg, err := p.fClient.EncryptPayload(
 		p.fVoidPool.fReceiver,
-		payload.NewPayload(0, []byte{1}),
+		payload.NewPayload64(0, []byte{1}),
 	)
 	if err != nil {
 		panic(err)
@@ -247,7 +247,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
 				FNetworkKey:   oldVSettings.GetNetworkKey(),
 			}),
-			payload.NewPayload(
+			payload.NewPayload64(
 				p.fSettings.GetNetworkMask(),
 				msg.ToBytes(),
 			),

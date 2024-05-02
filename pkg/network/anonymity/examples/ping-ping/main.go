@@ -32,7 +32,7 @@ var (
 		_ = n.SendPayload(
 			ctx,
 			pubKey,
-			payload.NewPayload(uint64(nodeRouter), numBytes[:]),
+			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 		)
 		return nil, nil
 	}
@@ -48,7 +48,7 @@ func main() {
 	_ = nodeClient.SendPayload(
 		ctx,
 		pubKeyService,
-		payload.NewPayload(uint64(nodeRouter), numBytes[:]),
+		payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 	)
 
 	select {}
