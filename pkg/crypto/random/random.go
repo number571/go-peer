@@ -26,8 +26,7 @@ func NewStdPRNG() IPRNG {
 // Generates a cryptographically strong pseudo-random bytes.
 func (p *sStdPRNG) GetBytes(n uint64) []byte {
 	slice := make([]byte, n)
-	_, err := rand.Read(slice)
-	if err != nil {
+	if _, err := rand.Read(slice); err != nil {
 		panic(err) // 'return nil' is insecure
 	}
 	return slice

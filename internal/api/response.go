@@ -30,8 +30,7 @@ func Response(pW http.ResponseWriter, pRet int, pRes interface{}) error {
 	pW.Header().Set("Content-Type", contentType)
 	pW.WriteHeader(pRet)
 
-	_, err := io.Copy(pW, bytes.NewBuffer(respBytes))
-	if err != nil {
+	if _, err := io.Copy(pW, bytes.NewBuffer(respBytes)); err != nil {
 		return utils.MergeErrors(ErrCopyBytes, err)
 	}
 
