@@ -22,7 +22,7 @@ func GetMessageLimit(pCtx context.Context, pHlsClient client.IClient) (uint64, e
 
 	msgLimitOrig := sett.GetLimitMessageSizeBytes()
 	if gReqSize >= msgLimitOrig {
-		return 0, ErrMessageSizeGtLimit
+		return 0, ErrMessageSizeGteLimit
 	}
 
 	return msgLimitOrig - gReqSize, nil

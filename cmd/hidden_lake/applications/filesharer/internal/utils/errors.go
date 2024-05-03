@@ -13,6 +13,6 @@ func (err *SUtilsError) Error() string {
 }
 
 var (
-	ErrRespSizeGeLimit = &SUtilsError{"response size >= limit message size"}
-	ErrGetSettingsHLS  = &SUtilsError{"get settings from HLS"}
+	ErrMessageSizeGteLimit = &SUtilsError{"message size >= limit"}
+	ErrGetSettingsHLS      = &SUtilsError{"get settings hls"}
 )

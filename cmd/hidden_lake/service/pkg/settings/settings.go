@@ -30,10 +30,6 @@ const (
 )
 
 const (
-	CRequestQueueCapacity = (1 << 10) // 1024 request_ids ~= 44KiB
-)
-
-const (
 	CRetryEnqueue   = 2
 	CFetchTimeRatio = 10
 )

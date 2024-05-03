@@ -40,15 +40,14 @@ func LoadResponse(pData interface{}) (IResponse, error) {
 			return nil, utils.MergeErrors(ErrDecodeResponse, err)
 		}
 		response.FBody = bytesSlice[1]
-		return response, nil
 	case string:
 		if err := encoding.DeserializeJSON([]byte(x), response); err != nil {
 			return nil, utils.MergeErrors(ErrDecodeResponse, err)
 		}
-		return response, nil
 	default:
 		return nil, ErrUnknownType
 	}
+	return response, nil
 }
 
 func (p *SResponse) ToBytes() []byte {

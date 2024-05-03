@@ -30,7 +30,7 @@ func GetMessageLimit(pCtx context.Context, pHlsClient hls_client.IClient) (uint6
 
 	msgLimitOrig := sett.GetLimitMessageSizeBytes()
 	if gRespSize >= msgLimitOrig {
-		return 0, ErrRespSizeGeLimit
+		return 0, ErrMessageSizeGteLimit
 	}
 
 	return msgLimitOrig - gRespSize, nil

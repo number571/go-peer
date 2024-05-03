@@ -44,15 +44,14 @@ func LoadRequest(pData interface{}) (IRequest, error) {
 			return nil, utils.MergeErrors(ErrDecodeRequest, err)
 		}
 		request.FBody = bytesSlice[1]
-		return request, nil
 	case string:
 		if err := encoding.DeserializeJSON([]byte(x), request); err != nil {
 			return nil, utils.MergeErrors(ErrDecodeRequest, err)
 		}
-		return request, nil
 	default:
 		return nil, ErrUnknownType
 	}
+	return request, nil
 }
 
 func (p *SRequest) ToBytes() []byte {
