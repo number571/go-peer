@@ -109,7 +109,7 @@ func HandleNetworkRequestAPI(
 			}
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			_ = api.Response(pW, http.StatusOK, resp)
+			_ = api.Response(pW, http.StatusOK, resp.ToString())
 			return
 		}
 	}

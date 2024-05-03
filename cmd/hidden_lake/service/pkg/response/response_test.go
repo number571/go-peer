@@ -37,7 +37,7 @@ func TestResponse(t *testing.T) {
 		return
 	}
 
-	resp2, err := LoadResponse([]byte(respStr))
+	resp2, err := LoadResponse(respStr)
 	if err != nil {
 		t.Error(err)
 		return

@@ -8,6 +8,7 @@
 
 - Update `cmd/hidden_lake/helpers/encryptor`: append 'pld_head' field
 - Update `pkg/network/anonymity`: move request/response from payload body (1=byte) to payload head (1=bit)
+- Update `pkg/hidden_lake/service`: remove JSON body encoding in IRequest, IResponse
 
 ### CHANGES
 

@@ -1,9 +1,9 @@
 package request
 
 import (
-	"fmt"
-
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/payload/joiner"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -11,35 +11,59 @@ var (
 )
 
 type SRequest struct {
+	SRequestBlock
+	FBody []byte `json:"body"`
+}
+
+type SRequestBlock struct {
 	FMethod string            `json:"method"`
 	FHost   string            `json:"host"`
 	FPath   string            `json:"path"`
 	FHead   map[string]string `json:"head"`
-	FBody   []byte            `json:"body"`
 }
 
 func NewRequest(pMethod, pHost, pPath string) IRequest {
 	return &SRequest{
-		FMethod: pMethod,
-		FHost:   pHost,
-		FPath:   pPath,
+		SRequestBlock: SRequestBlock{
+			FMethod: pMethod,
+			FHost:   pHost,
+			FPath:   pPath,
+		},
 	}
 }
 
-func LoadRequest(pBytes []byte) (IRequest, error) {
-	request := new(SRequest)
-	if err := encoding.DeserializeJSON(pBytes, request); err != nil {
-		return nil, fmt.Errorf("load request: %w", err)
+func LoadRequest(pData interface{}) (IRequest, error) {
+	var request = new(SRequest)
+	switch x := pData.(type) {
+	case []byte:
+		bytesSlice, err := joiner.LoadBytesJoiner32(x)
+		if err != nil || len(bytesSlice) != 2 {
+			return nil, ErrLoadBytesJoiner
+		}
+		if err := encoding.DeserializeJSON(bytesSlice[0], request); err != nil {
+			return nil, utils.MergeErrors(ErrDecodeRequest, err)
+		}
+		request.FBody = bytesSlice[1]
+		return request, nil
+	case string:
+		if err := encoding.DeserializeJSON([]byte(x), request); err != nil {
+			return nil, utils.MergeErrors(ErrDecodeRequest, err)
+		}
+		return request, nil
+	default:
+		return nil, ErrUnknownType
 	}
-	return request, nil
 }
 
 func (p *SRequest) ToBytes() []byte {
-	return encoding.SerializeJSON(p)
+	return joiner.NewBytesJoiner32([][]byte{
+		encoding.SerializeJSON(p.SRequestBlock),
+		p.FBody,
+	})
 }
 
 func (p *SRequest) ToString() string {
-	return string(p.ToBytes())
+	return string(encoding.SerializeJSON(p))
 }
 
 func (p *SRequest) WithHead(pHead map[string]string) IRequest {

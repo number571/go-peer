@@ -18,7 +18,7 @@ var (
 		"test_header3": "test_value3",
 	}
 	tgBody     = []byte("test_data")
-	tgBRequest = []byte(`{
+	tgBRequest = `{
 		"host": "test_host",
 		"path": "test_path",
 		"method": "test_method",
@@ -28,7 +28,7 @@ var (
 			"test_header3": "test_value3"
 		},
 		"body": "dGVzdF9kYXRh"
-	}`)
+	}`
 )
 
 func TestRequest(t *testing.T) {

@@ -106,7 +106,7 @@ func (p *sRequester) FetchRequest(pCtx context.Context, pRequest *hls_settings.S
 		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
-	resp, err := response.LoadResponse(res)
+	resp, err := response.LoadResponse(string(res))
 	if err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}

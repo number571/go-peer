@@ -1,44 +1,68 @@
 package response
 
 import (
-	"fmt"
-
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/payload/joiner"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
-	_ IResponse = &sResponse{}
+	_ IResponse = &SResponse{}
 )
 
-type sResponse struct {
+type SResponse struct {
+	SResponseBlock
+	FBody []byte `json:"body"`
+}
+
+type SResponseBlock struct {
 	FCode int               `json:"code"`
 	FHead map[string]string `json:"head"`
-	FBody []byte            `json:"body"`
 }
 
 func NewResponse(pCode int) IResponse {
-	return &sResponse{
-		FCode: pCode,
+	return &SResponse{
+		SResponseBlock: SResponseBlock{
+			FCode: pCode,
+		},
 	}
 }
 
-func LoadResponse(pBytes []byte) (IResponse, error) {
-	response := new(sResponse)
-	if err := encoding.DeserializeJSON(pBytes, response); err != nil {
-		return nil, fmt.Errorf("load response: %w", err)
+func LoadResponse(pData interface{}) (IResponse, error) {
+	var response = new(SResponse)
+	switch x := pData.(type) {
+	case []byte:
+		bytesSlice, err := joiner.LoadBytesJoiner32(x)
+		if err != nil || len(bytesSlice) != 2 {
+			return nil, ErrLoadBytesJoiner
+		}
+		if err := encoding.DeserializeJSON(bytesSlice[0], response); err != nil {
+			return nil, utils.MergeErrors(ErrDecodeResponse, err)
+		}
+		response.FBody = bytesSlice[1]
+		return response, nil
+	case string:
+		if err := encoding.DeserializeJSON([]byte(x), response); err != nil {
+			return nil, utils.MergeErrors(ErrDecodeResponse, err)
+		}
+		return response, nil
+	default:
+		return nil, ErrUnknownType
 	}
-	return response, nil
 }
 
-func (p *sResponse) ToBytes() []byte {
-	return encoding.SerializeJSON(p)
+func (p *SResponse) ToBytes() []byte {
+	return joiner.NewBytesJoiner32([][]byte{
+		encoding.SerializeJSON(p.SResponseBlock),
+		p.FBody,
+	})
 }
 
-func (p *sResponse) ToString() string {
-	return string(p.ToBytes())
+func (p *SResponse) ToString() string {
+	return string(encoding.SerializeJSON(p))
 }
 
-func (p *sResponse) WithHead(pHead map[string]string) IResponse {
+func (p *SResponse) WithHead(pHead map[string]string) IResponse {
 	p.FHead = make(map[string]string)
 	for k, v := range pHead {
 		p.FHead[k] = v
@@ -46,16 +70,16 @@ func (p *sResponse) WithHead(pHead map[string]string) IResponse {
 	return p
 }
 
-func (p *sResponse) WithBody(pBody []byte) IResponse {
+func (p *SResponse) WithBody(pBody []byte) IResponse {
 	p.FBody = pBody
 	return p
 }
 
-func (p *sResponse) GetCode() int {
+func (p *SResponse) GetCode() int {
 	return p.FCode
 }
 
-func (p *sResponse) GetHead() map[string]string {
+func (p *SResponse) GetHead() map[string]string {
 	headers := make(map[string]string)
 	for k, v := range p.FHead {
 		headers[k] = v
@@ -63,6 +87,6 @@ func (p *sResponse) GetHead() map[string]string {
 	return headers
 }
 
-func (p *sResponse) GetBody() []byte {
+func (p *SResponse) GetBody() []byte {
 	return p.FBody
 }
