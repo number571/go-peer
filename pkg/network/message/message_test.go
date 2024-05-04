@@ -50,11 +50,12 @@ func TestMessage(t *testing.T) {
 
 	pld := payload.NewPayload64(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
-		FWorkSizeBits: testutils.TCWorkSize,
-		FNetworkKey:   tcNetworkKey,
+		FWorkSizeBits:       testutils.TCWorkSize,
+		FNetworkKey:         tcNetworkKey,
+		FLimitVoidSizeBytes: tcLimitVoid,
 	})
 
-	msgTmp := NewMessage(sett, pld, 1, tcLimitVoid)
+	msgTmp := NewMessage(sett, pld)
 	if !bytes.Equal(msgTmp.GetPayload().GetBody(), []byte(tcBody)) {
 		t.Error("payload body not equal body in message")
 		return
@@ -101,18 +102,27 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
+	newSett := NewSettings(&SSettings{
+		FWorkSizeBits: testutils.TCWorkSize,
+		FNetworkKey:   tcNetworkKey,
+	})
+
 	for i := 0; i < 10; i++ {
-		msgN := NewMessage(sett, pld, 1, 0)
+		msgN := NewMessage(newSett, pld)
 		if msgN.GetProof() == 0 {
 			continue
 		}
-		msgL, err := LoadMessage(sett, msgN.ToBytes())
+		msgL, err := LoadMessage(newSett, msgN.ToBytes())
 		if err != nil {
 			t.Error(err)
 			return
 		}
 		if msgN.GetProof() != msgL.GetProof() {
 			t.Error("got invalid proof")
+			return
+		}
+		if len(msgN.ToBytes()) != len(msgL.ToBytes()) {
+			t.Error("new msg size != load msg size")
 			return
 		}
 		if len(msgN.ToBytes()) != CMessageHeadSize+len(pld.GetBody()) {
@@ -142,7 +152,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg3 := NewMessage(sett, pld, 1, 0).(*sMessage)
+	msg3 := NewMessage(sett, pld).(*sMessage)
 	msg3.fEncd[0] ^= 1
 	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
 		t.Error("success load with invalid encd")

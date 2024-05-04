@@ -71,8 +71,6 @@ func main() {
 				serviceHeader,
 				[]byte("hello, world!"),
 			),
-			1,
-			0,
 		),
 	)
 	if err != nil {

@@ -44,7 +44,11 @@ type sVoidPool struct {
 	fReceiver asymmetric.IPubKey
 }
 
-func NewMessageQueue(pSettings ISettings, pVSettings IVSettings, pClient client.IClient) IMessageQueue {
+func NewMessageQueue(
+	pSettings ISettings,
+	pVSettings IVSettings,
+	pClient client.IClient,
+) IMessageQueue {
 	return &sMessageQueue{
 		fState:     state.NewBoolState(),
 		fSettings:  pSettings,
@@ -195,15 +199,15 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldVSettings.GetNetworkKey(),
+				FWorkSizeBits:       p.fSettings.GetWorkSizeBits(),
+				FNetworkKey:         oldVSettings.GetNetworkKey(),
+				FParallel:           p.fSettings.GetParallel(),
+				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
 			payload.NewPayload64(
 				p.fSettings.GetNetworkMask(),
 				pMsg.ToBytes(),
 			),
-			p.fSettings.GetParallel(),
-			p.fSettings.GetLimitVoidSizeBytes(),
 		)
 	}()
 
@@ -244,15 +248,15 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:   oldVSettings.GetNetworkKey(),
+				FWorkSizeBits:       p.fSettings.GetWorkSizeBits(),
+				FNetworkKey:         oldVSettings.GetNetworkKey(),
+				FParallel:           p.fSettings.GetParallel(),
+				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
 			payload.NewPayload64(
 				p.fSettings.GetNetworkMask(),
 				msg.ToBytes(),
 			),
-			p.fSettings.GetParallel(),
-			p.fSettings.GetLimitVoidSizeBytes(),
 		)
 	}()
 

@@ -41,6 +41,9 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 
 	maxParallel := uint64(runtime.GOMAXPROCS(0))
 	setParallel := pParallel
+	if pParallel == 0 {
+		setParallel = 1
+	}
 	if pParallel > maxParallel {
 		setParallel = maxParallel
 	}

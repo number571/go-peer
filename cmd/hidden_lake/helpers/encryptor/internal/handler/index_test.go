@@ -34,7 +34,7 @@ func TestErrorsAPI(t *testing.T) {
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
-	if _, _, err := client.DecryptMessage(context.Background(), message.NewMessage(sett, pld, 1, 0)); err == nil {
+	if _, _, err := client.DecryptMessage(context.Background(), message.NewMessage(sett, pld)); err == nil {
 		t.Error("success decrypt message with unknown host")
 		return
 	}

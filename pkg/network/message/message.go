@@ -39,16 +39,16 @@ type sMessage struct {
 	fPayload payload.IPayload64 // M
 }
 
-func NewMessage(pSett ISettings, pPld payload.IPayload64, pParallel, pLimitVoidSize uint64) IMessage {
+func NewMessage(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
 	prng := random.NewStdPRNG()
 
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pLimitVoidSize + 1))
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pParallel)
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewAESCipher(key)

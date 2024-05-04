@@ -65,11 +65,15 @@ func HandleMessageEncryptAPI(
 			return
 		}
 
+		cfgSett := pConfig.GetSettings()
 		netMsg := net_message.NewMessage(
-			pConfig.GetSettings(),
+			net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits:       cfgSett.GetWorkSizeBits(),
+				FNetworkKey:         cfgSett.GetNetworkKey(),
+				FParallel:           pParallel,
+				FLimitVoidSizeBytes: cfgSett.GetLimitVoidSizeBytes(),
+			}),
 			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
-			pParallel,
-			pConfig.GetSettings().GetLimitVoidSizeBytes(),
 		)
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))

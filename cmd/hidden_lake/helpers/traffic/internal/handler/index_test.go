@@ -31,7 +31,7 @@ func TestErrorsAPI(t *testing.T) {
 	sett := message.NewSettings(&message.SSettings{
 		FWorkSizeBits: testutils.TCWorkSize,
 	})
-	if err := client.PutMessage(context.Background(), message.NewMessage(sett, pld, 1, 0)); err == nil {
+	if err := client.PutMessage(context.Background(), message.NewMessage(sett, pld)); err == nil {
 		t.Error("success put message with unknown host")
 		return
 	}

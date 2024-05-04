@@ -85,7 +85,7 @@ func main() {
 	fmt.Println("messages have been successfully transported")
 }
 
-func pushMessages(ctx context.Context, netMsgSettings net_message.ISettings, msgSettings message.ISettings) error {
+func pushMessages(ctx context.Context, netMsgSettings net_message.IConstructSettings, msgSettings message.ISettings) error {
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
 		hlt_client.NewRequester(
@@ -109,8 +109,6 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.ISettings, msg
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
 			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
-			1,
-			0,
 		)
 		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			return err

@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/network/message`: new IConstructSettings
+
 ## v1.6.11
 
 *May 04, 2024*

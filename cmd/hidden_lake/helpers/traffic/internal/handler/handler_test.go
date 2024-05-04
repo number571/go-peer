@@ -40,7 +40,7 @@ func TestError(t *testing.T) {
 	}
 }
 
-func testNetworkMessageSettings() net_message.ISettings {
+func testNetworkMessageSettings() net_message.IConstructSettings {
 	return net_message.NewSettings(&net_message.SSettings{
 		FNetworkKey:   testutils.TCNetworkKey,
 		FWorkSizeBits: testutils.TCWorkSize,

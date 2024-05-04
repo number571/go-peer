@@ -37,6 +37,11 @@ func TestPuzzle(t *testing.T) {
 		return
 	}
 
+	if puzzle.ProofBytes(hash, 0) != proof {
+		t.Error("proof is invalid with parallel=[0,1]")
+		return
+	}
+
 	if NewPoWPuzzle(25).VerifyBytes(hash, proof) {
 		t.Error("proof 10 with 25 bits is valid?")
 		return

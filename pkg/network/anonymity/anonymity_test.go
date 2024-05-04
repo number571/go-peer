@@ -806,14 +806,12 @@ func testDeleteDB(typeDB int) {
 	}
 }
 
-func (p *sNode) testNewNetworkMessage(pSett net_message.ISettings, pMsgBytes []byte) net_message.IMessage {
+func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsgBytes []byte) net_message.IMessage {
 	return net_message.NewMessage(
 		pSett,
 		payload.NewPayload64(
 			p.fSettings.GetNetworkMask(),
 			pMsgBytes,
 		),
-		1,
-		0,
 	)
 }

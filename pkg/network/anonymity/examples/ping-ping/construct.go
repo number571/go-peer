@@ -27,15 +27,6 @@ const (
 )
 
 func newNode(serviceName, address string) anonymity.INode {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: "./database_" + serviceName + ".db",
-		}),
-	)
-	if err != nil {
-		panic(err)
-	}
-
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  serviceName,
@@ -70,7 +61,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				)
 			},
 		),
-		db,
+		newKVDatabase(serviceName),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      address,
@@ -110,6 +101,18 @@ func newNode(serviceName, address string) anonymity.INode {
 	)
 }
 
+func newKVDatabase(serviceName string) database.IKVDatabase {
+	db, err := database.NewKVDatabase(
+		database.NewSettings(&database.SSettings{
+			FPath: "./database_" + serviceName + ".db",
+		}),
+	)
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
 func newVSettings(nKey string) conn.IVSettings {
 	return conn.NewVSettings(&conn.SVSettings{
 		FNetworkKey: nKey,
@@ -120,7 +123,7 @@ func newConnSettings(wSize uint64, mSize uint64) conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
 		FWorkSizeBits:          wSize,
 		FLimitMessageSizeBytes: mSize,
-		FLimitVoidSizeBytes:    8192,
+		FLimitVoidSizeBytes:    4096,
 		FWaitReadTimeout:       time.Hour,
 		FDialTimeout:           time.Minute,
 		FReadTimeout:           time.Minute,

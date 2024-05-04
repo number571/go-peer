@@ -14,6 +14,12 @@ type IMessage interface {
 	GetPayload() payload.IPayload64
 }
 
+type IConstructSettings interface {
+	ISettings
+	GetParallel() uint64
+	GetLimitVoidSizeBytes() uint64
+}
+
 type ISettings interface {
 	GetWorkSizeBits() uint64
 	GetNetworkKey() string

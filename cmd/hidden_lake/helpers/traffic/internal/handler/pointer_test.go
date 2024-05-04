@@ -34,8 +34,6 @@ func TestHandlePointerAPI(t *testing.T) {
 	netMsg := net_message.NewMessage(
 		testNetworkMessageSettings(),
 		payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
-		1,
-		0,
 	)
 	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)

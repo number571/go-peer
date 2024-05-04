@@ -155,7 +155,7 @@ func TestBroadcast(t *testing.T) {
 				FNetworkKey:   nodes[0].GetVSettings().GetNetworkKey(),
 				FWorkSizeBits: nodes[0].GetSettings().GetConnSettings().GetWorkSizeBits(),
 			})
-			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld, 1, 0))
+			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld))
 		}(i)
 	}
 
@@ -319,7 +319,7 @@ func TestHandleMessage(t *testing.T) {
 	})
 
 	node.HandleFunc(1, nil)
-	msg1 := message.NewMessage(sett, payload.NewPayload64(1, []byte{1}), 1, 0)
+	msg1 := message.NewMessage(sett, payload.NewPayload64(1, []byte{1}))
 	if ok := node.handleMessage(ctx, nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
@@ -328,7 +328,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return errors.New("some error")
 	})
-	msg2 := message.NewMessage(sett, payload.NewPayload64(1, []byte{2}), 1, 0)
+	msg2 := message.NewMessage(sett, payload.NewPayload64(1, []byte{2}))
 	if ok := node.handleMessage(ctx, nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
@@ -337,7 +337,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return nil
 	})
-	msg3 := message.NewMessage(sett, payload.NewPayload64(1, []byte{3}), 1, 0)
+	msg3 := message.NewMessage(sett, payload.NewPayload64(1, []byte{3}))
 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return
@@ -384,7 +384,7 @@ func TestContextCancel(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
-			if err := node2.BroadcastMessage(ctx, message.NewMessage(sett, pld, 1, 0)); err != nil {
+			if err := node2.BroadcastMessage(ctx, message.NewMessage(sett, pld)); err != nil {
 				return
 			}
 		}

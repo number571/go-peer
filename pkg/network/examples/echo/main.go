@@ -57,8 +57,6 @@ func main() {
 			FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
 		}),
 		payload.NewPayload64(serviceHeader, []byte("hello, world!")),
-		1,
-		0,
 	)
 	if err := conn.WriteMessage(ctx, sendMsg); err != nil {
 		panic(err)
@@ -88,8 +86,6 @@ func handler() network.IHandlerF {
 					serviceHeader,
 					[]byte(fmt.Sprintf("echo: [%s]", string(msg.GetPayload().GetBody()))),
 				),
-				1,
-				0,
 			),
 		)
 		return nil
