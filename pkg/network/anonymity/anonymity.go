@@ -198,7 +198,7 @@ func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) erro
 			// next iter
 		}
 	}
-	return ErrEnqueueMessage
+	return ErrRetryLimit
 }
 
 func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, error) {
@@ -371,7 +371,7 @@ func (p *sNode) enqueuePayload(
 
 	if err := p.enqueueMessage(pCtx, msg); err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
-		return err
+		return utils.MergeErrors(ErrEnqueueMessage, err)
 	}
 
 	p.fLogger.PushInfo(pLogBuilder.WithType(logType))

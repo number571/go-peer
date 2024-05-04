@@ -13,6 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/utils"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
@@ -37,7 +38,7 @@ func (p *sApp) initAnonNode() error {
 		}),
 	)
 	if err != nil {
-		return err
+		return utils.MergeErrors(ErrOpenKVDatabase, err)
 	}
 
 	p.fNode = anonymity.NewNode(

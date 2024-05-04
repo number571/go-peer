@@ -103,7 +103,7 @@ func (p *SConfig) initConfig() error {
 func (p *SConfig) loadLogging() error {
 	result, err := logger.LoadLogging(p.FLogging)
 	if err != nil {
-		return utils.MergeErrors(ErrLoadLogging, err)
+		return utils.MergeErrors(ErrInvalidLogging, err)
 	}
 	p.fLogging = result
 	return nil

@@ -15,6 +15,7 @@ func (err *SConfigError) Error() string {
 var (
 	ErrInvalidConfig      = &SConfigError{"invalid config"}
 	ErrLoadLogging        = &SConfigError{"load logging"}
+	ErrInvalidLogging     = &SConfigError{"invalid logging"}
 	ErrLoadLanguage       = &SConfigError{"load language"}
 	ErrToLanguage         = &SConfigError{"to language"}
 	ErrInitConfig         = &SConfigError{"init config"}

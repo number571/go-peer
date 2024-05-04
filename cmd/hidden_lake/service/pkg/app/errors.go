@@ -26,4 +26,5 @@ var (
 	ErrSetParallelNull   = &SAppError{"set parallel = 0"}
 	ErrGetParallel       = &SAppError{"get parallel"}
 	ErrCreateAnonNode    = &SAppError{"create anon node"}
+	ErrOpenKVDatabase    = &SAppError{"open kv database"}
 )

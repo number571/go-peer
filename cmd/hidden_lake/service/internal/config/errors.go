@@ -17,6 +17,7 @@ var (
 	ErrInvalidPublicKey    = &SConfigError{"invalid public key"}
 	ErrDuplicatePublicKey  = &SConfigError{"duplicate public key"}
 	ErrLoadLogging         = &SConfigError{"load logging"}
+	ErrInvalidLogging      = &SConfigError{"invalid logging"}
 	ErrLoadPublicKey       = &SConfigError{"load public key"}
 	ErrInvalidConfig       = &SConfigError{"invalid config"}
 	ErrLoadConfig          = &SConfigError{"load config"}
