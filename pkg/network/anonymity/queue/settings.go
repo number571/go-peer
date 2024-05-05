@@ -40,13 +40,10 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FVoidCapacity == 0 {
 		panic(`p.FVoidCapacity == 0`)
 	}
-	if p.FParallel == 0 {
-		panic(`p.FParallel == 0`)
-	}
 	if p.FDuration == 0 {
 		panic(`p.FDuration == 0`)
 	}
-	// p.FNetworkMask, p.FWorkSizeBits, p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
+	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
 	return p
 }
 

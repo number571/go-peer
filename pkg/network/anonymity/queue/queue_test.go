@@ -29,7 +29,7 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
 }
@@ -46,25 +46,16 @@ func testSettings(t *testing.T, n int) {
 		_ = NewSettings(&SSettings{
 			FVoidCapacity: testutils.TCQueueCapacity,
 			FDuration:     500 * time.Millisecond,
-			FParallel:     1,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FDuration:     500 * time.Millisecond,
-			FParallel:     1,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
 			FMainCapacity: testutils.TCQueueCapacity,
 			FVoidCapacity: testutils.TCQueueCapacity,
-			FParallel:     1,
-		})
-	case 3:
-		_ = NewSettings(&SSettings{
-			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: testutils.TCQueueCapacity,
-			FDuration:     500 * time.Millisecond,
 		})
 	}
 }

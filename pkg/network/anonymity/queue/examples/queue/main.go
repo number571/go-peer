@@ -22,7 +22,6 @@ func main() {
 	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{
 			FDuration:     time.Second,
-			FParallel:     1,
 			FMainCapacity: 1 << 5,
 			FVoidCapacity: 1 << 5,
 		}),

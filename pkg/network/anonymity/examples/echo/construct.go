@@ -82,7 +82,6 @@ func newNode(serviceName, address string) anonymity.INode {
 				FNetworkMask:  networkMask,
 				FWorkSizeBits: workSize,
 				FDuration:     2 * time.Second,
-				FParallel:     1,
 				FMainCapacity: 32,
 				FVoidCapacity: 32,
 			}),
