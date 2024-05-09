@@ -115,27 +115,8 @@ Launching an anonymous network is primarily the launch of an anonymizing HLS ser
 ### 1. Running from source code
 
 ```bash
-$ git clone -b <tag-name> --depth=1 https://github.com/number571/go-peer.git
-$ cd go-peer/cmd/hidden_lake/service
-$ make default
-...
-> [INFO] 2023/12/29 23:29:43 HLS is running...
-> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
-...
-```
-
-or just
-
-```bash
 $ go install github.com/number571/go-peer/cmd/hidden_lake/service/cmd/hls@<tag-name>
 $ hls
-> [INFO] 2023/12/29 23:29:43 HLS is running...
-> [INFO] 2023/12/29 23:29:48 service=HLS type=BRDCS hash=8B77F546...3CE1421C addr=E04D2DC8...61D4FE2A proof=0001379020 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:53 service=HLS type=BRDCS hash=3EA3189F...DC793A4E addr=E04D2DC8...61D4FE2A proof=0000076242 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:29:58 service=HLS type=BRDCS hash=475A8886...0F77621F addr=E04D2DC8...61D4FE2A proof=0001964664 size=8192B conn=127.0.0.1:
-...
 ```
 
 ### 2. Running from release version
@@ -146,12 +127,6 @@ When starting from the release version, you must specify the processor architect
 $ wget https://github.com/number571/go-peer/releases/download/<tag-name>/hls_<arch-name>_<platform-name>
 $ chmod +x hls_<arch-name>_<platform-name>
 $ ./hls_<arch-name>_<platform-name>
-...
-> [INFO] 2023/12/29 23:31:43 HLS is running...
-> [INFO] 2023/12/29 23:31:48 service=HLS type=BRDCS hash=E8CDB448...FF23639E addr=E04D2DC8...61D4FE2A proof=0001277744 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:31:53 service=HLS type=BRDCS hash=C6B5C47F...AB63128A addr=E04D2DC8...61D4FE2A proof=0001062655 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:31:58 service=HLS type=BRDCS hash=5789D462...B81C3A5F addr=E04D2DC8...61D4FE2A proof=0000517841 size=8192B conn=127.0.0.1
-...
 ```
 
 ## Production
@@ -286,20 +261,8 @@ limit_void_size_bytes: 4096
 The HLS node is easy to connect to a production environment. To do this, it is sufficient to specify two parameters: `network_key` and `connections`. The network_key parameter is used to separate networks from each other, preventing them from merging. The connections parameter is used for direct network connection to HLS and HLT nodes.
 
 ```bash
-$ cd cmd/hidden_lake/service
-$ yes | cp ../_configs/prod/1/hls.yml .
-
-# $ make run # [From source]
-$ ./hls_<arch-name>_<platform-name> # [From release]
-...
-> [INFO] 2023/12/29 23:49:26 HLS is running...
-> [INFO] 2023/12/29 23:49:27 service=HLS type=UNDEC hash=1079200E...FFCD5871 addr=00000000...00000000 proof=0000165513 size=8192B conn=94.103.91.81:9581
-> [INFO] 2023/12/29 23:49:31 service=HLS type=BRDCS hash=1DE4BC0F...AC611F44 addr=E04D2DC8...61D4FE2A proof=0000265462 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:49:32 service=HLS type=UNDEC hash=EECEF795...1B042618 addr=00000000...00000000 proof=0002571939 size=8192B conn=94.103.91.81:9581
-> [INFO] 2023/12/29 23:49:36 service=HLS type=BRDCS hash=98AC78E7...AAA7F8F1 addr=E04D2DC8...61D4FE2A proof=0001741261 size=8192B conn=127.0.0.1:
-> [INFO] 2023/12/29 23:49:37 service=HLS type=UNDEC hash=7CB7B53A...1FE35530 addr=00000000...00000000 proof=0000199886 size=8192B conn=94.103.91.81:9581
-> [INFO] 2023/12/29 23:49:41 service=HLS type=BRDCS hash=5D609534...9CC17DAE addr=E04D2DC8...61D4FE2A proof=0001091209 size=8192B conn=127.0.0.1:
-...
+$ wget https://raw.githubusercontent.com/number571/go-peer/<tag-name>/cmd/hidden_lake/_configs/prod/1/hls.yml
+$ hls
 ```
 
 > There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test), [anon_filesharing](https://github.com/number571/go-peer/tree/master/examples/anon_filesharing/prod_test).
