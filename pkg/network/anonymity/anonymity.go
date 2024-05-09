@@ -415,9 +415,6 @@ func (p *sNode) storeHashWithBroadcast(
 }
 
 func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) (bool, error) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	// check already received data by hash
 	if _, err := p.fKVDatavase.Get(pHash); err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))

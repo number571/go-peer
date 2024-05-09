@@ -8,6 +8,10 @@
 
 - Update `pkg/network/message`: new IConstructSettings
 
+### BUG FIXES
+
+- Update `pkg/network/anonymity`: delete mutex on storeHashIntoDatabase method
+
 ## v1.6.11
 
 *May 04, 2024*
