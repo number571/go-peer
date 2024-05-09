@@ -131,6 +131,17 @@ $ ./hls_<arch-name>_<platform-name>
 
 ## Production
 
+### Running
+
+The HLS node is easy to connect to a production environment. To do this, it is sufficient to specify two parameters: `network_key` and `connections`. The network_key parameter is used to separate networks from each other, preventing them from merging. The connections parameter is used for direct network connection to HLS and HLT nodes.
+
+```bash
+$ wget https://raw.githubusercontent.com/number571/go-peer/<tag-name>/cmd/hidden_lake/_configs/prod/1/hls.yml
+$ hls
+```
+
+> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test), [anon_filesharing](https://github.com/number571/go-peer/tree/master/examples/anon_filesharing/prod_test).
+
 ### Settings
 
 The Hidden Lake network must have `common configuration` file settings for successful data exchange between network nodes. If some settings are different, other nodes will consider it a `protocol violation` and reject the connection attempt. You can find ready-made configuration files for HLS and HLT services in the [prod/1](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/1), [prod/2](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/2), [prod/3](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/3), [prod/4](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/4) directories.
@@ -255,14 +266,3 @@ limit_void_size_bytes: 4096
     </td>
   </tr>
 </table>
-
-### Running
-
-The HLS node is easy to connect to a production environment. To do this, it is sufficient to specify two parameters: `network_key` and `connections`. The network_key parameter is used to separate networks from each other, preventing them from merging. The connections parameter is used for direct network connection to HLS and HLT nodes.
-
-```bash
-$ wget https://raw.githubusercontent.com/number571/go-peer/<tag-name>/cmd/hidden_lake/_configs/prod/1/hls.yml
-$ hls
-```
-
-> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test), [anon_filesharing](https://github.com/number571/go-peer/tree/master/examples/anon_filesharing/prod_test).
