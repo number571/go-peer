@@ -4,7 +4,7 @@
 
 ```bash
 usage: 
-    ./main [service-name] [login]
+    ./main -salt=[service-name] -work=[diff-size]
 stdin:
     [master-key]EOL
 ```
@@ -14,12 +14,12 @@ EOL - End of Line (Enter)
 ## Example
 
 ```bash
-$ go run . service-name login
-> master-key
-62ZD5+xzT+eQkqFjNJqLryOsLSxSUzfCMEHlt6Y4dEo=
+$ go run . -salt="service-name" -work=24
+master-key
+EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ=
 ```
 
 ```bash
-$ echo "master-key" | go run . service-name login
-> 62ZD5+xzT+eQkqFjNJqLryOsLSxSUzfCMEHlt6Y4dEo=
+$ echo "master-key" | go run . -salt="service-name" -work=24
+EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ=
 ```

@@ -187,7 +187,7 @@ func (p *sNode) GetConnections() map[string]conn.IConn {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	var mapping = make(map[string]conn.IConn, len(p.fConnections))
+	mapping := make(map[string]conn.IConn, len(p.fConnections))
 	for addr, conn := range p.fConnections {
 		mapping[addr] = conn
 	}

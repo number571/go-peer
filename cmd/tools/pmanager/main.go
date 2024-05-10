@@ -3,40 +3,25 @@ package main
 import (
 	"bufio"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"os"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 )
 
-const (
-	cWorkSize = 22
-)
-
 func main() {
-	if len(os.Args) != 3 {
-		panic(fmt.Sprintf(
-			"usage:\n\t%s\nstdin:\n\t%s\n\n",
-			"./main [service] [login]",
-			"[master-key]EOF",
-		))
-	}
+	saltParam := flag.String("salt", "_salt_", "default salt value")
+	workParam := flag.Uint("work", 24, "default work value")
+	flag.Parse()
 
-	var (
-		service = []byte(os.Args[1])
-		login   = []byte(os.Args[2])
-	)
+	keyBuilder := keybuilder.NewKeyBuilder(1<<(*workParam), []byte(*saltParam))
+	gotPassword := keyBuilder.Build(readUntilEOL())
 
-	keyBuilder := keybuilder.NewKeyBuilder(1<<cWorkSize, login)
-	extendedKey := keyBuilder.Build(readUntilEOF("> "))
-
-	passBytes := hashing.NewHMACSHA256Hasher(extendedKey, service).ToBytes()
-	fmt.Println(base64.StdEncoding.EncodeToString(passBytes))
+	fmt.Println(base64.URLEncoding.EncodeToString(gotPassword))
 }
 
-func readUntilEOF(prefix string) string {
-	fmt.Print(prefix)
+func readUntilEOL() string {
 	res, _, err := bufio.NewReader(os.Stdin).ReadLine()
 	if err != nil {
 		panic(err)

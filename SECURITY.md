@@ -8,7 +8,7 @@ If a problem is found and such a problem becomes critical, a new version of the 
 
 Most of the project updates are related to patch versions. The minor version, in turn, is updated solely based on considerations of stability of all functions during manual testing. Thus, patch versions are directly related to fixing problems and creating new functionality, while minor versions are related to standardizing everything created in patch versions.
 
-You can find out more about all the changes made during the correction or update of the project in the file CHANGELOG.md.
+You can find out more about all the changes made during the correction or update of the project in the file [CHANGELOG.md](https://github.com/number571/go-peer/blob/master/CHANGELOG.md).
 
 ## Reporting a Vulnerability
 
