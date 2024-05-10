@@ -1,35 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"os"
-	"strconv"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		panic(fmt.Sprintf(
-			"usage: \n\t%s\n\n",
-			"./main [key-size]",
-		))
-	}
-
-	keySize, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		panic(err)
-	}
-
-	if keySize < 0 {
-		panic("key size is negative")
-	}
-
-	priv := asymmetric.NewRSAPrivKey(uint64(keySize))
+	keySize := flag.Uint64("size", 2048, "set key size")
+	flag.Parse()
+	priv := asymmetric.NewRSAPrivKey(*keySize)
 	if priv == nil {
 		panic("generate key error")
 	}
-
 	if err := os.WriteFile("priv.key", []byte(priv.ToString()), 0o600); err != nil {
 		panic(err)
 	}
