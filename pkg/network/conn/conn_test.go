@@ -7,6 +7,7 @@ import (
 	"math"
 	"net"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -226,12 +227,15 @@ func TestReadMessage(t *testing.T) {
 		rawConn,
 	).(*sConn)
 
-	ch := make(chan struct{})
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
+	ch := make(chan struct{})
 	rawConn.bodyPart = false
 	rawConn.headSize = message.CMessageHeadSize + 10
 	rawConn.bodySize = message.CMessageHeadSize + 10
 	go func() {
+		defer wg.Done()
 		ctx := context.Background()
 		if _, err := conn.ReadMessage(ctx, ch); err == nil {
 			t.Error("success read message with invalid conn 1")
@@ -239,12 +243,15 @@ func TestReadMessage(t *testing.T) {
 		}
 	}()
 	<-ch
+	wg.Wait()
 
+	wg.Add(1)
 	rawConn.cancelBody = true
 	rawConn.bodyPart = false
 	rawConn.headSize = message.CMessageHeadSize + 10
 	rawConn.bodySize = message.CMessageHeadSize + 10
 	go func() {
+		defer wg.Done()
 		ctx := context.Background()
 		if _, err := conn.ReadMessage(ctx, ch); err == nil {
 			t.Error("success read message with invalid conn 2")
@@ -252,6 +259,7 @@ func TestReadMessage(t *testing.T) {
 		}
 	}()
 	<-ch
+	wg.Wait()
 }
 
 func TestRecvDataBytes(t *testing.T) {
