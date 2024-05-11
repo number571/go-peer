@@ -27,6 +27,12 @@ type tsReadCloser struct {
 func (p *tsReadCloser) Read(_ []byte) (n int, err error) { return 0, errors.New("some error") }
 func (p *tsReadCloser) Close() error                     { return nil }
 
+type tsResponseWriter struct{}
+
+func (p *tsResponseWriter) Header() http.Header         { return make(http.Header) }
+func (p *tsResponseWriter) Write(_ []byte) (int, error) { return 0, errors.New("some error") }
+func (p *tsResponseWriter) WriteHeader(_ int)           {}
+
 const (
 	tcMessage          = "hello, world!"
 	tcMethodNotAllowed = "method not allowed"
@@ -43,7 +49,18 @@ func TestError(t *testing.T) {
 	}
 }
 
+func TestResponseAPI(t *testing.T) {
+	t.Parallel()
+
+	if err := Response(&tsResponseWriter{}, 200, []byte{123}); err == nil {
+		t.Error("success response with invalid response writer")
+		return
+	}
+}
+
 func TestLoadResponse(t *testing.T) {
+	t.Parallel()
+
 	if _, err := loadResponse(0, &tsReadCloser{}); err == nil {
 		t.Error("success load response with invalid readCloser")
 		return

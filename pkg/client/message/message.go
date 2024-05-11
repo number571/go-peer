@@ -71,14 +71,7 @@ func (p *sMessage) ToString() string {
 }
 
 func (p *sMessage) IsValid(psett ISettings) bool {
-	msgSizeBytes := psett.GetMessageSizeBytes()
-	keySizeBytes := psett.GetKeySizeBits() / 8
-	switch {
-	case
-		uint64(len(p.ToBytes())) != msgSizeBytes,
-		uint64(len(p.GetEnck())) != keySizeBytes:
-		return false
-	default:
-		return true
-	}
+	return true &&
+		uint64(len(p.ToBytes())) == psett.GetMessageSizeBytes() &&
+		uint64(len(p.GetEnck())) == psett.GetKeySizeBits()/8
 }

@@ -65,7 +65,7 @@ func testSettings(t *testing.T, n int) {
 // func TestIInitDatabase(t *testing.T) {
 // 	t.Parallel()
 
-// 	prng := random.NewStdPRNG()
+// 	prng := random.NewCSPRNG()
 // 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 // 	defer os.RemoveAll(path)
 

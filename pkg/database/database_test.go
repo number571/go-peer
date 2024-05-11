@@ -149,7 +149,7 @@ func TestTryDecrypt(t *testing.T) {
 // func TestInvalidCreateDB(t *testing.T) {
 // 	t.Parallel()
 
-// 	prng := random.NewStdPRNG()
+// 	prng := random.NewCSPRNG()
 // 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
 // 	defer os.RemoveAll(path)
 

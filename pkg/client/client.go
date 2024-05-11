@@ -101,7 +101,7 @@ func (p *sClient) encryptWithParams(
 	pPadd uint64,
 ) (message.IMessage, error) {
 	var (
-		rand    = random.NewStdPRNG()
+		rand    = random.NewCSPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
@@ -151,13 +151,8 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		return nil, nil, ErrDecryptCipherKey
 	}
 
-	// Decrypt data block by decrypted session key.
+	// Decrypt data block by decrypted session key. Decode data block.
 	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(pMsg.GetEncd())
-	if decJoiner == nil {
-		return nil, nil, ErrDecryptBytesJoiner
-	}
-
-	// Decode data block.
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner

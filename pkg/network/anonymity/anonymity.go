@@ -157,7 +157,7 @@ func (p *sNode) FetchPayload(
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
-	headAction := sAction(random.NewStdPRNG().GetUint64())
+	headAction := sAction(random.NewCSPRNG().GetUint64())
 	actionKey := newActionKey(pRecv, headAction)
 
 	p.setAction(actionKey)

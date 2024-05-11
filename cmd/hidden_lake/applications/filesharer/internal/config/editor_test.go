@@ -71,7 +71,7 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 	config := wrapper.GetConfig().(*SConfig)
 	editor := wrapper.GetEditor()
 
-	config.fFilepath = random.NewStdPRNG().GetString(32)
+	config.fFilepath = random.NewCSPRNG().GetString(32)
 
 	res, err := language.ToILanguage("RUS")
 	if err != nil {

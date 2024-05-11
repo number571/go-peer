@@ -11,6 +11,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 	"github.com/number571/go-peer/pkg/utils"
@@ -54,7 +55,7 @@ var (
 		"AAAAAAAAAAAAAAAAAAAAAAA",
 		"AAAAAAAAAAAAAAAAAAAAAAAA",
 		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-		random.NewStdPRNG().GetString(tgMsgLimit), // maximum size of message
+		random.NewCSPRNG().GetString(tgMsgLimit), // maximum size of message
 	}
 )
 
@@ -237,13 +238,43 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	client1Ptr := client1.(*sClient)
-	msg3, err := client1Ptr.tInvalidEncryptPayload(client1.GetPubKey(), pl)
+	msg3, err := client1Ptr.tInvalidEncryptPayload1(client1.GetPubKey(), pl)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	if _, _, err := client1.DecryptMessage(msg3); err == nil {
-		t.Error("success decrypt message with incorrect payload (double)")
+		t.Error("success decrypt message with incorrect payload (1)")
+		return
+	}
+
+	msg4, err := client1Ptr.tInvalidEncryptPayload2(client1.GetPubKey(), pl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if _, _, err := client1.DecryptMessage(msg4); err == nil {
+		t.Error("success decrypt message with incorrect payload (2)")
+		return
+	}
+
+	msg5, err := client1Ptr.tInvalidEncryptPayload3(client1.GetPubKey(), pl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if _, _, err := client1.DecryptMessage(msg5); err == nil {
+		t.Error("success decrypt message with incorrect payload (3)")
+		return
+	}
+
+	msg6, err := client1Ptr.tInvalidEncryptPayload4(client1.GetPubKey(), pl)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if _, _, err := client1.DecryptMessage(msg6); err == nil {
+		t.Error("success decrypt message with incorrect payload (4)")
 		return
 	}
 }
@@ -272,14 +303,14 @@ func TestGetMessageLimit(t *testing.T) {
 
 	client1 := testNewClient()
 
-	msg1 := random.NewStdPRNG().GetBytes(tgMsgLimit)
+	msg1 := random.NewCSPRNG().GetBytes(tgMsgLimit)
 	pld1 := payload.NewPayload64(uint64(testutils.TcHead), msg1)
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld1); err != nil {
 		t.Error("message1 > message limit:", err)
 		return
 	}
 
-	msg2 := random.NewStdPRNG().GetBytes(tgMsgLimit + 1)
+	msg2 := random.NewCSPRNG().GetBytes(tgMsgLimit + 1)
 	pld2 := payload.NewPayload64(uint64(testutils.TcHead), msg2)
 	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld2); err == nil {
 		t.Error("message2 > message limit but not alert:", err)
@@ -297,7 +328,9 @@ func testNewClient() IClient {
 	)
 }
 
-func (p *sClient) tInvalidEncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
+// INVALID_1
+
+func (p *sClient) tInvalidEncryptPayload1(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
 	var (
 		msgLimitSize = p.GetMessageLimit()
 		resultSize   = uint64(len(pPld.ToBytes()))
@@ -314,16 +347,16 @@ func (p *sClient) tInvalidEncryptPayload(pRecv asymmetric.IPubKey, pPld payload.
 		)
 	}
 
-	return p.tInvalidEncryptWithParams(
+	return p.tInvalidEncryptWithParams1(
 		pRecv,
 		pPld,
 		msgLimitSize-resultSize,
 	), nil
 }
 
-func (p *sClient) tInvalidEncryptWithParams(pRecv asymmetric.IPubKey, pPld payload.IPayload64, pPadd uint64) message.IMessage {
+func (p *sClient) tInvalidEncryptWithParams1(pRecv asymmetric.IPubKey, pPld payload.IPayload64, pPadd uint64) message.IMessage {
 	var (
-		rand    = random.NewStdPRNG()
+		rand    = random.NewCSPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
@@ -365,4 +398,198 @@ func (p *sClient) tInvalidEncryptWithParams(pRecv asymmetric.IPubKey, pPld paylo
 			doublePayload.ToBytes(),
 		})),
 	)
+}
+
+// INVALID_2
+
+func (p *sClient) tInvalidEncryptPayload2(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
+	var (
+		msgLimitSize = p.GetMessageLimit()
+		resultSize   = uint64(len(pPld.GetBody()))
+	)
+
+	if resultSize > msgLimitSize {
+		return nil, ErrLimitMessageSize
+	}
+
+	return p.tInvalidEncryptWithParams2(
+		pRecv,
+		pPld,
+		msgLimitSize-resultSize,
+	)
+}
+
+func (p *sClient) tInvalidEncryptWithParams2(
+	pRecv asymmetric.IPubKey,
+	pPld payload.IPayload64,
+	pPadd uint64,
+) (message.IMessage, error) {
+	var (
+		rand    = random.NewCSPRNG()
+		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		session = rand.GetBytes(symmetric.CAESKeySize)
+	)
+
+	data := joiner.NewBytesJoiner32([][]byte{
+		bytes.Join(
+			[][]byte{
+				pPld.ToBytes(),
+				rand.GetBytes(pPadd),
+				{1, 2, 3, 4}, // uint32
+			},
+			[]byte{},
+		),
+	})
+
+	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
+		[][]byte{
+			p.GetPubKey().GetHasher().ToBytes(),
+			pRecv.GetHasher().ToBytes(),
+			data,
+		},
+		[]byte{},
+	)).ToBytes()
+
+	encKey := pRecv.EncryptBytes(session)
+	if encKey == nil {
+		return nil, ErrEncryptSymmetricKey
+	}
+
+	cipher := symmetric.NewAESCipher(session)
+	return message.NewMessage(
+		encKey,
+		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
+			p.GetPubKey().ToBytes(),
+			salt,
+			hash,
+			p.fPrivKey.SignBytes(hash),
+			data,
+		})),
+	), nil
+}
+
+// INVALID_3
+
+func (p *sClient) tInvalidEncryptPayload3(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
+	var (
+		msgLimitSize = p.GetMessageLimit()
+		resultSize   = uint64(len(pPld.GetBody()))
+	)
+
+	if resultSize > msgLimitSize {
+		return nil, ErrLimitMessageSize
+	}
+
+	return p.tInvalidEncryptWithParams3(
+		pRecv,
+		pPld,
+		msgLimitSize+encoding.CSizeUint64,
+	)
+}
+
+func (p *sClient) tInvalidEncryptWithParams3(
+	pRecv asymmetric.IPubKey,
+	_ payload.IPayload64,
+	pPadd uint64,
+) (message.IMessage, error) {
+	var (
+		rand    = random.NewCSPRNG()
+		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		session = rand.GetBytes(symmetric.CAESKeySize)
+	)
+
+	data := joiner.NewBytesJoiner32([][]byte{
+		nil,
+		rand.GetBytes(pPadd),
+	})
+
+	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
+		[][]byte{
+			p.GetPubKey().GetHasher().ToBytes(),
+			pRecv.GetHasher().ToBytes(),
+			data,
+		},
+		[]byte{},
+	)).ToBytes()
+
+	encKey := pRecv.EncryptBytes(session)
+	if encKey == nil {
+		return nil, ErrEncryptSymmetricKey
+	}
+
+	cipher := symmetric.NewAESCipher(session)
+	return message.NewMessage(
+		encKey,
+		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
+			p.GetPubKey().ToBytes(),
+			salt,
+			hash,
+			p.fPrivKey.SignBytes(hash),
+			data,
+		})),
+	), nil
+}
+
+// INVALID_4
+
+func (p *sClient) tInvalidEncryptPayload4(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
+	var (
+		msgLimitSize = p.GetMessageLimit()
+		resultSize   = uint64(len(pPld.GetBody()))
+	)
+
+	if resultSize > msgLimitSize {
+		return nil, ErrLimitMessageSize
+	}
+
+	return p.tInvalidEncryptWithParams4(
+		pRecv,
+		pPld,
+		msgLimitSize-resultSize,
+	)
+}
+
+func (p *sClient) tInvalidEncryptWithParams4(
+	pRecv asymmetric.IPubKey,
+	pPld payload.IPayload64,
+	pPadd uint64,
+) (message.IMessage, error) {
+	var (
+		rand    = random.NewCSPRNG()
+		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		session = rand.GetBytes(symmetric.CAESKeySize)
+	)
+
+	data := joiner.NewBytesJoiner32([][]byte{
+		pPld.ToBytes(),
+		rand.GetBytes(pPadd),
+	})
+
+	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
+		[][]byte{
+			p.GetPubKey().GetHasher().ToBytes(),
+			pRecv.GetHasher().ToBytes(),
+			data,
+		},
+		[]byte{},
+	)).ToBytes()
+
+	hash[0] ^= 1
+
+	encKey := pRecv.EncryptBytes(session)
+	if encKey == nil {
+		return nil, ErrEncryptSymmetricKey
+	}
+
+	cipher := symmetric.NewAESCipher(session)
+	return message.NewMessage(
+		encKey,
+		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
+			p.GetPubKey().ToBytes(),
+			salt,
+			hash,
+			p.fPrivKey.SignBytes(hash),
+			data,
+		})),
+	), nil
 }

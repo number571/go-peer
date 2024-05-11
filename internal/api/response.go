@@ -9,7 +9,11 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-func Response(pW http.ResponseWriter, pRet int, pRes interface{}) error {
+func Response(
+	pW http.ResponseWriter,
+	pRet int,
+	pRes interface{},
+) error {
 	var (
 		contentType string
 		respBytes   []byte

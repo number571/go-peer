@@ -5,9 +5,12 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/payload/joiner"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -171,13 +174,18 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	randBytes := random.NewStdPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
+	if _, err := LoadMessage(sett, []byte{1}); err == nil {
+		t.Error("success load incorrect message")
+		return
+	}
+
+	randBytes := random.NewCSPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
 	if _, err := LoadMessage(sett, randBytes); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
-	prng := random.NewStdPRNG()
+	prng := random.NewCSPRNG()
 	if _, err := LoadMessage(sett, prng.GetBytes(64)); err == nil {
 		t.Error("success load incorrect message")
 		return
@@ -193,5 +201,105 @@ func TestMessage(t *testing.T) {
 	if _, err := LoadMessage(sett, msgBytes); err == nil {
 		t.Error("success load incorrect payload")
 		return
+	}
+
+	if _, err := LoadMessage(sett, tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
+		t.Error("success load invalid message 1")
+		return
+	}
+
+	if _, err := LoadMessage(sett, tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
+		t.Error("success load invalid message 2")
+		return
+	}
+
+	if _, err := LoadMessage(sett, tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
+		t.Error("success load invalid message 3")
+		return
+	}
+}
+
+func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
+
+	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proofBytes := encoding.Uint64ToBytes(proof)
+
+	cipher := symmetric.NewAESCipher(key)
+	return &sMessage{
+		fEncd: cipher.EncryptBytes(bytes.Join(
+			[][]byte{
+				proofBytes[:],
+				hash,
+				bytesJoiner,
+			},
+			[]byte{},
+		)),
+		fHash:    hash,
+		fProof:   proof,
+		fPayload: pPld,
+	}
+}
+
+func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+	prng := random.NewCSPRNG()
+
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
+
+	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+
+	hash[0] ^= 1
+
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proofBytes := encoding.Uint64ToBytes(proof)
+
+	cipher := symmetric.NewAESCipher(key)
+	return &sMessage{
+		fEncd: cipher.EncryptBytes(bytes.Join(
+			[][]byte{
+				proofBytes[:],
+				hash,
+				bytesJoiner,
+			},
+			[]byte{},
+		)),
+		fHash:    hash,
+		fVoid:    voidBytes,
+		fProof:   proof,
+		fPayload: pPld,
+	}
+}
+
+func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+	prng := random.NewCSPRNG()
+
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})
+
+	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+
+	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proofBytes := encoding.Uint64ToBytes(proof)
+
+	cipher := symmetric.NewAESCipher(key)
+	return &sMessage{
+		fEncd: cipher.EncryptBytes(bytes.Join(
+			[][]byte{
+				proofBytes[:],
+				hash,
+				bytesJoiner,
+			},
+			[]byte{},
+		)),
+		fHash:    hash,
+		fVoid:    voidBytes,
+		fProof:   proof,
+		fPayload: pPld,
 	}
 }

@@ -170,7 +170,7 @@ func TestRSAEncrypt(t *testing.T) {
 
 	pub := priv.GetPubKey()
 
-	if enc := pub.EncryptBytes(random.NewStdPRNG().GetBytes(1 << 10)); enc != nil {
+	if enc := pub.EncryptBytes(random.NewCSPRNG().GetBytes(1 << 10)); enc != nil {
 		t.Error("success encrypt message with size > key size")
 		return
 	}

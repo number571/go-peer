@@ -288,7 +288,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody))
 
-	overheadBody := random.NewStdPRNG().GetBytes(testutils.TCMessageSize + 1)
+	overheadBody := random.NewCSPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := payload.NewPayload64(uint64(testutils.TcHead), overheadBody)
 	if err := node.enqueuePayload(ctx, logBuilder, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")

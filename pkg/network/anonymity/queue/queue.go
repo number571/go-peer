@@ -164,7 +164,7 @@ func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
 
 func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessage {
 	randDuration := time.Duration(
-		random.NewStdPRNG().GetUint64() % uint64(p.fSettings.GetRandDuration()+1),
+		random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandDuration()+1),
 	)
 
 	select {

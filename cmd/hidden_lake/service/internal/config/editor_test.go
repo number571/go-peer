@@ -184,7 +184,7 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 	config := wrapper.GetConfig().(*SConfig)
 	editor := wrapper.GetEditor()
 
-	config.fFilepath = random.NewStdPRNG().GetString(32)
+	config.fFilepath = random.NewCSPRNG().GetString(32)
 
 	if err := editor.UpdateNetworkKey(tcNewNetworkKey); err == nil {
 		t.Error("success update network key with incorrect filepath")

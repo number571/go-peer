@@ -40,7 +40,7 @@ type sMessage struct {
 }
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
-	prng := random.NewStdPRNG()
+	prng := random.NewCSPRNG()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})

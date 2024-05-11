@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestStdPRNG(t *testing.T) {
+func TestCSPRNG(t *testing.T) {
 	t.Parallel()
 
-	r := NewStdPRNG()
+	r := NewCSPRNG()
 
 	if bytes.Equal(r.GetBytes(8), r.GetBytes(8)) {
 		t.Error("bytes in random equals")
@@ -25,10 +25,10 @@ func TestStdPRNG(t *testing.T) {
 	}
 }
 
-func TestStdPRNGBool(t *testing.T) {
+func TestCSPRNGBool(t *testing.T) {
 	t.Parallel()
 
-	r := NewStdPRNG()
+	r := NewCSPRNG()
 	for i := 0; i < 1000; i++ {
 		t1 := r.GetBool()
 		t2 := r.GetBool()

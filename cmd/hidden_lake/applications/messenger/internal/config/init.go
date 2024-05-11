@@ -19,7 +19,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
 				FWorkSizeBits:     hlm_settings.CDefaultWorkSizeBits,
-				FStorageKey:       random.NewStdPRNG().GetString(32),
+				FStorageKey:       random.NewCSPRNG().GetString(32),
 				FLanguage:         hlm_settings.CDefaultLanguage,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

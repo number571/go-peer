@@ -56,7 +56,7 @@ func NewKVDatabase(pSett ISettings) (IKVDatabase, error) {
 			return nil, utils.MergeErrors(ErrReadSalt, err)
 		}
 		isInitSalt = true
-		saltValue = random.NewStdPRNG().GetBytes(2 * cSaltSize)
+		saltValue = random.NewCSPRNG().GetBytes(2 * cSaltSize)
 		if err := db.Put([]byte(cSaltKey), saltValue, nil); err != nil {
 			return nil, utils.MergeErrors(ErrPushSalt, err)
 		}
