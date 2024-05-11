@@ -3,11 +3,15 @@ package conn
 import (
 	"bytes"
 	"context"
+	"errors"
+	"math"
 	"net"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -17,6 +21,43 @@ const (
 	tcHead = 12345
 	tcBody = "hello, world!"
 )
+
+type tsConn struct {
+	readDlError bool
+	cancelBody  bool
+	bodyPart    bool
+	headSize    uint32
+	bodySize    uint64
+}
+
+func (p *tsConn) Read(b []byte) (n int, err error) {
+	if !p.bodyPart {
+		headBytes := encoding.Uint32ToBytes(p.headSize)
+		n = copy(b, headBytes[:])
+		p.bodyPart = true
+		return n, nil
+	}
+	if p.cancelBody {
+		return 0, errors.New("some error1") // nolint: goerr113
+	}
+	bodyBytes := random.NewCSPRNG().GetBytes(p.bodySize)
+	n = copy(b, bodyBytes)
+	return n, nil
+}
+func (p *tsConn) Write(_ []byte) (n int, err error) {
+	return 0, errors.New("some error2") // nolint: goerr113
+}
+func (p *tsConn) Close() error                  { return nil }
+func (p *tsConn) LocalAddr() net.Addr           { return &net.TCPAddr{} }
+func (p *tsConn) RemoteAddr() net.Addr          { return &net.TCPAddr{} }
+func (p *tsConn) SetDeadline(_ time.Time) error { return nil }
+func (p *tsConn) SetReadDeadline(_ time.Time) error {
+	if p.bodyPart && p.readDlError {
+		return errors.New("some error3") // nolint: goerr113
+	}
+	return nil
+}
+func (p *tsConn) SetWriteDeadline(_ time.Time) error { return nil }
 
 func TestError(t *testing.T) {
 	t.Parallel()
@@ -166,6 +207,165 @@ func TestInvalidConn(t *testing.T) {
 		t.Error("success connect to invalid address")
 		return
 	}
+}
+
+func TestReadMessage(t *testing.T) {
+	t.Parallel()
+
+	rawConn := &tsConn{}
+	conn := LoadConn(
+		NewSettings(&SSettings{
+			FWorkSizeBits:          testutils.TCWorkSize,
+			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:       time.Hour,
+			FDialTimeout:           time.Minute,
+			FReadTimeout:           time.Minute,
+			FWriteTimeout:          time.Minute,
+		}),
+		NewVSettings(&SVSettings{}),
+		rawConn,
+	).(*sConn)
+
+	ch := make(chan struct{})
+
+	rawConn.bodyPart = false
+	rawConn.headSize = message.CMessageHeadSize + 10
+	rawConn.bodySize = message.CMessageHeadSize + 10
+	go func() {
+		ctx := context.Background()
+		if _, err := conn.ReadMessage(ctx, ch); err == nil {
+			t.Error("success read message with invalid conn 1")
+			return
+		}
+	}()
+	<-ch
+
+	rawConn.cancelBody = true
+	rawConn.bodyPart = false
+	rawConn.headSize = message.CMessageHeadSize + 10
+	rawConn.bodySize = message.CMessageHeadSize + 10
+	go func() {
+		ctx := context.Background()
+		if _, err := conn.ReadMessage(ctx, ch); err == nil {
+			t.Error("success read message with invalid conn 2")
+			return
+		}
+	}()
+	<-ch
+}
+
+func TestRecvDataBytes(t *testing.T) {
+	t.Parallel()
+
+	rawConn := &tsConn{}
+	conn := LoadConn(
+		NewSettings(&SSettings{
+			FWorkSizeBits:          testutils.TCWorkSize,
+			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:       time.Hour,
+			FDialTimeout:           time.Minute,
+			FReadTimeout:           time.Minute,
+			FWriteTimeout:          time.Minute,
+		}),
+		NewVSettings(&SVSettings{}),
+		rawConn,
+	).(*sConn)
+
+	ch := make(chan struct{})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if _, err := conn.recvDataBytes(ctx, 1, 5*time.Second); err == nil {
+		t.Error("success recv data bytes with invalid conn 1")
+		return
+	}
+
+	rawConn.bodyPart = false
+	rawConn.headSize = message.CMessageHeadSize + 10
+	rawConn.bodySize = message.CMessageHeadSize + 10
+	rawConn.readDlError = true
+	go func() {
+		ctx := context.Background()
+		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
+			t.Error("success recv data bytes with invalid conn 2")
+			return
+		}
+	}()
+	<-ch
+}
+
+func TestSendBytes(t *testing.T) {
+	t.Parallel()
+
+	rawConn := &tsConn{}
+	conn := LoadConn(
+		NewSettings(&SSettings{
+			FWorkSizeBits:          testutils.TCWorkSize,
+			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:       time.Hour,
+			FDialTimeout:           time.Minute,
+			FReadTimeout:           time.Minute,
+			FWriteTimeout:          time.Minute,
+		}),
+		NewVSettings(&SVSettings{}),
+		rawConn,
+	).(*sConn)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if err := conn.sendBytes(ctx, []byte{123}); err == nil {
+		t.Error("success send bytes with invalid conn 1")
+		return
+	}
+
+	if err := conn.sendBytes(context.Background(), []byte{123}); err == nil {
+		t.Error("success send bytes with invalid conn 2")
+		return
+	}
+}
+
+func TestRecvHeadBytes(t *testing.T) {
+	t.Parallel()
+
+	rawConn := &tsConn{}
+	conn := LoadConn(
+		NewSettings(&SSettings{
+			FWorkSizeBits:          testutils.TCWorkSize,
+			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:       time.Hour,
+			FDialTimeout:           time.Minute,
+			FReadTimeout:           time.Minute,
+			FWriteTimeout:          time.Minute,
+		}),
+		NewVSettings(&SVSettings{}),
+		rawConn,
+	).(*sConn)
+
+	ch := make(chan struct{})
+
+	rawConn.bodyPart = false
+	rawConn.headSize = 1
+	go func() {
+		ctx := context.Background()
+		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
+			t.Error("success recv head bytes with invalid conn 1")
+			return
+		}
+	}()
+	<-ch
+
+	rawConn.bodyPart = false
+	rawConn.headSize = math.MaxUint32
+	go func() {
+		ctx := context.Background()
+		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
+			t.Error("success recv head bytes with invalid conn 2")
+			return
+		}
+	}()
+	<-ch
 }
 
 func TestConnWithNetworkKey(t *testing.T) {
