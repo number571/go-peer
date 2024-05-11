@@ -23,6 +23,8 @@ const (
 )
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SNetworkError{str}
 	if err.Error() != errPrefix+str {

@@ -3,6 +3,8 @@ package std
 import "testing"
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SStdError{str}
 	if err.Error() != errPrefix+str {
@@ -12,6 +14,8 @@ func TestError(t *testing.T) {
 }
 
 func TestLogging(t *testing.T) {
+	t.Parallel()
+
 	logging, err := LoadLogging([]string{"info", "erro"})
 	if err != nil {
 		t.Error(err)

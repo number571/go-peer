@@ -2,7 +2,10 @@ package request
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
+
+	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 const (
@@ -18,18 +21,47 @@ var (
 		"test_header3": "test_value3",
 	}
 	tgBody     = []byte("test_data")
-	tgBRequest = `{
-		"host": "test_host",
-		"path": "test_path",
-		"method": "test_method",
-		"head": {
-			"test_header1": "test_value1",
-			"test_header2": "test_value2",
-			"test_header3": "test_value3"
-		},
-		"body": "dGVzdF9kYXRh"
-	}`
+	tgBRequest = `{"method":"test_method","host":"test_host","path":"test_path","head":{"test_header1":"test_value1","test_header2":"test_value2","test_header3":"test_value3"},"body":"dGVzdF9kYXRh"}`
 )
+
+func TestError(t *testing.T) {
+	t.Parallel()
+
+	str := "value"
+	err := &SRequestError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
+func TestInvalidRequest(t *testing.T) {
+	t.Parallel()
+
+	if _, err := LoadRequest([]byte{123}); err == nil {
+		t.Error("success load invalid request bytes")
+		return
+	}
+
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{
+		{byte(123)},
+		{byte(111)},
+	})
+	if _, err := LoadRequest(bytesJoiner); err == nil {
+		t.Error("success load invalid request bytes joiner")
+		return
+	}
+
+	if _, err := LoadRequest("123"); err == nil {
+		t.Error("success load invalid request string")
+		return
+	}
+
+	if _, err := LoadRequest(struct{}{}); err == nil {
+		t.Error("success load invalid request type")
+		return
+	}
+}
 
 func TestRequest(t *testing.T) {
 	t.Parallel()
@@ -87,6 +119,14 @@ func TestLoadRequest(t *testing.T) {
 	request2, err := LoadRequest(tgBRequest)
 	if err != nil {
 		t.Error(err)
+		return
+	}
+
+	reqStr := request2.ToString()
+	if reqStr != tgBRequest {
+		fmt.Println(reqStr)
+		fmt.Println(tgBRequest)
+		t.Error("string request is invalid")
 		return
 	}
 

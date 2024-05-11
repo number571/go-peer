@@ -19,6 +19,8 @@ var tgSlice = [][]byte{
 }
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SJoinerError{str}
 	if err.Error() != errPrefix+str {

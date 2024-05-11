@@ -3,6 +3,8 @@ package response
 import (
 	"bytes"
 	"testing"
+
+	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 const (
@@ -17,6 +19,45 @@ var (
 		"key3": "value3",
 	}
 )
+
+func TestError(t *testing.T) {
+	t.Parallel()
+
+	str := "value"
+	err := &SResponseError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
+func TestInvalidResponse(t *testing.T) {
+	t.Parallel()
+
+	if _, err := LoadResponse([]byte{123}); err == nil {
+		t.Error("success load invalid response bytes")
+		return
+	}
+
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{
+		{byte(123)},
+		{byte(111)},
+	})
+	if _, err := LoadResponse(bytesJoiner); err == nil {
+		t.Error("success load invalid response bytes joiner")
+		return
+	}
+
+	if _, err := LoadResponse("123"); err == nil {
+		t.Error("success load invalid response string")
+		return
+	}
+
+	if _, err := LoadResponse(struct{}{}); err == nil {
+		t.Error("success load invalid response type")
+		return
+	}
+}
 
 func TestResponse(t *testing.T) {
 	t.Parallel()

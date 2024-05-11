@@ -24,6 +24,8 @@ var (
 )
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SEncodingError{str}
 	if err.Error() != errPrefix+str {

@@ -37,6 +37,8 @@ func (p *sInvalidPayload) ToBytes() []byte {
 }
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SMessageError{str}
 	if err.Error() != errPrefix+str {

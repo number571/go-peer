@@ -112,6 +112,8 @@ func testConfigDefaultInit(configPath string) {
 }
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SConfigError{str}
 	if err.Error() != errPrefix+str {

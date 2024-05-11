@@ -8,6 +8,8 @@ import (
 )
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SStateError{str}
 	if err.Error() != errPrefix+str {

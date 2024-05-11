@@ -22,6 +22,8 @@ const (
 )
 
 func TestError(t *testing.T) {
+	t.Parallel()
+
 	str := "value"
 	err := &SDatabaseError{str}
 	if err.Error() != errPrefix+str {
