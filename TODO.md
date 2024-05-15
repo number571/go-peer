@@ -8,6 +8,7 @@
 6. Append errors (as traffic/database) for all interface methods
 7. Append Batch's to database
 8. Custom Unmarshal with fields 
+9. Check correct HLT.db
 
 ### Tests
 
