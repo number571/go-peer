@@ -56,7 +56,11 @@ func (p *sDatabase) Hash(i uint64) ([]byte, error) {
 	defer p.fMutex.Unlock()
 
 	messagesCapacity := p.Settings().GetMessagesCapacity()
-	hash, err := p.fDB.Get(getKeyHash(i % messagesCapacity))
+	if i >= messagesCapacity {
+		return nil, ErrGtMessagesCapacity
+	}
+
+	hash, err := p.fDB.Get(getKeyHash(i))
 	if err != nil {
 		return nil, utils.MergeErrors(ErrMessageIsNotExist, err)
 	}

@@ -13,15 +13,16 @@ func (err *SDatabaseError) Error() string {
 }
 
 var (
-	ErrMessageIsExist    = &SDatabaseError{"message is exist"}
-	ErrMessageIsNotExist = &SDatabaseError{"message is not exist"}
-	ErrInvalidKeySize    = &SDatabaseError{"invalid key size"}
-	ErrLoadMessage       = &SDatabaseError{"load message"}
-	ErrCloseDB           = &SDatabaseError{"close db"}
-	ErrSetPointer        = &SDatabaseError{"set pointer"}
-	ErrIncrementPointer  = &SDatabaseError{"increment pointer"}
-	ErrWriteMessage      = &SDatabaseError{"write message"}
-	ErrRewriteKeyHash    = &SDatabaseError{"rewrite key hash"}
-	ErrDeleteOldKey      = &SDatabaseError{"delete old key"}
-	ErrCreateDB          = &SDatabaseError{"create db"}
+	ErrMessageIsExist     = &SDatabaseError{"message is exist"}
+	ErrMessageIsNotExist  = &SDatabaseError{"message is not exist"}
+	ErrGtMessagesCapacity = &SDatabaseError{"gt message capacity"}
+	ErrInvalidKeySize     = &SDatabaseError{"invalid key size"}
+	ErrLoadMessage        = &SDatabaseError{"load message"}
+	ErrCloseDB            = &SDatabaseError{"close db"}
+	ErrSetPointer         = &SDatabaseError{"set pointer"}
+	ErrIncrementPointer   = &SDatabaseError{"increment pointer"}
+	ErrWriteMessage       = &SDatabaseError{"write message"}
+	ErrRewriteKeyHash     = &SDatabaseError{"rewrite key hash"}
+	ErrDeleteOldKey       = &SDatabaseError{"delete old key"}
+	ErrCreateDB           = &SDatabaseError{"create db"}
 )
