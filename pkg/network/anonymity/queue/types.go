@@ -6,8 +6,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IMessageQueue interface {

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	cAllocBytes = 1024
+	cAllocBytes = 4096
 )
 
 func NewBytesJoiner32(pBytesSlice [][]byte) []byte {

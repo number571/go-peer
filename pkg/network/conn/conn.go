@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/encoding"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 	"github.com/number571/go-peer/pkg/utils"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (

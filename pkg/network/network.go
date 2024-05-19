@@ -8,8 +8,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/utils"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -65,7 +66,7 @@ func (p *sNode) SetVSettings(pVSettings conn.IVSettings) {
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
-func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg message.IMessage) error {
+func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage) error {
 	connections := p.GetConnections()
 	lenConnections := len(connections)
 
@@ -243,7 +244,7 @@ func (p *sNode) handleConn(pCtx context.Context, pAddress string, pConn conn.ICo
 
 	var (
 		readHeadCh = make(chan struct{})
-		readFullCh = make(chan message.IMessage)
+		readFullCh = make(chan net_message.IMessage)
 	)
 
 	go p.messageReader(
@@ -280,7 +281,7 @@ func (p *sNode) messageReader(
 	pCtx context.Context,
 	pConn conn.IConn,
 	readHeadCh chan<- struct{},
-	readFullCh chan<- message.IMessage,
+	readFullCh chan<- net_message.IMessage,
 ) {
 	for {
 		select {
@@ -300,7 +301,7 @@ func (p *sNode) messageReader(
 // Processes the message for correctness and redirects it to the handler function.
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
-func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg message.IMessage) bool {
+func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg net_message.IMessage) bool {
 	if !p.fCacheSetter.Set(pMsg.GetHash(), []byte{}) {
 		return true // hash of message already in queue
 	}

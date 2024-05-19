@@ -5,13 +5,16 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-type (
-	IHandlerF func(context.Context, INode, conn.IConn, message.IMessage) error
-)
+type IHandlerF func(
+	context.Context,
+	INode, conn.IConn,
+	net_message.IMessage,
+) error
 
 type INode interface {
 	types.ICloser
@@ -28,7 +31,7 @@ type INode interface {
 	AddConnection(context.Context, string) error
 	DelConnection(string) error
 
-	BroadcastMessage(context.Context, message.IMessage) error
+	BroadcastMessage(context.Context, net_message.IMessage) error
 }
 
 type ISettings interface {

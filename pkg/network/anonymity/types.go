@@ -13,9 +13,12 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type (
-	IHandlerF func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
-)
+type IHandlerF func(
+	context.Context,
+	INode,
+	asymmetric.IPubKey,
+	[]byte,
+) ([]byte, error)
 
 type INode interface {
 	types.IRunner
@@ -38,11 +41,4 @@ type ISettings interface {
 	GetNetworkMask() uint64
 	GetRetryEnqueue() uint64
 	GetFetchTimeout() time.Duration
-}
-
-type IDBWrapper interface {
-	types.ICloser
-
-	Get() database.IKVDatabase
-	Set(database.IKVDatabase) IDBWrapper
 }

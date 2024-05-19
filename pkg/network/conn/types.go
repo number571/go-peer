@@ -5,8 +5,9 @@ import (
 	"net"
 	"time"
 
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/types"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IConn interface {
