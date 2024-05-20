@@ -19,7 +19,7 @@ const (
 )
 
 func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename string) {
-	msgLimit := client.GetMessageLimit()
+	msgLimit := client.GetMessageLimit() - encoding.CSizeUint64
 	headSize := hashing.CSHA256Size + (2 * encoding.CSizeUint64) + uint64(len(filename)) + 1
 	if msgLimit <= headSize {
 		panic("msgLimit <= headSize")
@@ -50,7 +50,7 @@ func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename st
 		iBytes := encoding.Uint64ToBytes(uint64(i))
 		countBytes := encoding.Uint64ToBytes(uint64(count))
 
-		msg, err := client.EncryptPayload(
+		msg, err := client.EncryptMessage(
 			receiver,
 			payload.NewPayload64(
 				payloadHead,
@@ -65,7 +65,7 @@ func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename st
 					},
 					[]byte{},
 				),
-			),
+			).ToBytes(),
 		)
 		if err != nil {
 			panic(err)
@@ -75,7 +75,7 @@ func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename st
 		if err != nil {
 			panic(err)
 		}
-		_, errW := outputFile.Write(msg.ToBytes())
+		_, errW := outputFile.Write(msg)
 		errC := outputFile.Close()
 		if errW != nil || errC != nil {
 			panic(errW)

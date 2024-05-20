@@ -27,4 +27,5 @@ var (
 	ErrGetParallel       = &SAppError{"get parallel"}
 	ErrCreateAnonNode    = &SAppError{"create anon node"}
 	ErrOpenKVDatabase    = &SAppError{"open kv database"}
+	ErrMessageSizeLimit  = &SAppError{"message size limit"}
 )

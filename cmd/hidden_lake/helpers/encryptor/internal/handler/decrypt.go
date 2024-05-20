@@ -7,9 +7,9 @@ import (
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/payload"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/config"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
@@ -48,17 +48,17 @@ func HandleMessageDecryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pCl
 			return
 		}
 
-		msg, err := message.LoadMessage(pConfig.GetSettings(), netPld.GetBody())
-		if err != nil {
-			pLogger.PushWarn(logBuilder.WithMessage("decode_message"))
-			_ = api.Response(pW, http.StatusTeapot, "failed: decode message")
-			return
-		}
-
-		pubKey, pld, err := pClient.DecryptMessage(msg)
+		pubKey, decMsg, err := pClient.DecryptMessage(netPld.GetBody())
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decrypt_message"))
 			_ = api.Response(pW, http.StatusBadRequest, "failed: decrypt message")
+			return
+		}
+
+		pld := payload.LoadPayload64(decMsg)
+		if pld == nil {
+			pLogger.PushWarn(logBuilder.WithMessage("load_payload"))
+			_ = api.Response(pW, http.StatusBadRequest, "failed: load payload")
 			return
 		}
 

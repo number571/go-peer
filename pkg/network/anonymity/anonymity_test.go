@@ -295,12 +295,12 @@ func TestEnqueuePayload(t *testing.T) {
 		return
 	}
 
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -338,12 +338,12 @@ func TestHandleWrapper(t *testing.T) {
 	// // ignore add public key (f2f_disabled=true)
 	// node.GetListPubKeys().AddPubKey(pubKey)
 
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -353,7 +353,7 @@ func TestHandleWrapper(t *testing.T) {
 	ctx := context.Background()
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.testNewNetworkMessage(sett, msg.ToBytes())
+	netMsg := node.testNewNetworkMessage(sett, msg)
 	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error(err)
 		return
@@ -371,55 +371,55 @@ func TestHandleWrapper(t *testing.T) {
 		},
 	)
 
-	msg2, err := client.EncryptPayload(
+	msg2, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	netMsg2 := node.testNewNetworkMessage(sett, msg2.ToBytes())
+	netMsg2 := node.testNewNetworkMessage(sett, msg2)
 	if err := handler(ctx, nil, nil, netMsg2); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
 
-	msg3, err := client.EncryptPayload(
+	msg3, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			uint64(111),
 			[]byte("?"+tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	netMsg3 := node.testNewNetworkMessage(sett, msg3.ToBytes())
+	netMsg3 := node.testNewNetworkMessage(sett, msg3)
 	if err := handler(ctx, nil, nil, netMsg3); err != nil {
 		t.Error(err) // works only logger
 		return
 	}
 
-	msg4, err := client.EncryptPayload(
+	msg4, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(false), 111).uint64(),
 			[]byte(tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	netMsg4 := node.testNewNetworkMessage(sett, msg4.ToBytes())
+	netMsg4 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(ctx, nil, nil, netMsg4); err != nil {
 		t.Error(err) // works only logger
 		return
@@ -432,7 +432,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	node.fKVDatavase.Close()
-	netMsg41 := node.testNewNetworkMessage(sett, msg4.ToBytes())
+	netMsg41 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(ctx, nil, nil, netMsg41); err == nil {
 		t.Error("got success code with closed database")
 		return
@@ -448,12 +448,12 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	node := _node.(*sNode)
 	client := node.fQueue.GetClient()
 
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		client.GetPubKey(),
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -461,7 +461,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	}
 
 	sett := net_message.NewSettings(&net_message.SSettings{})
-	netMsg := node.testNewNetworkMessage(sett, msg.ToBytes())
+	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
 	ctx := context.Background()
@@ -542,12 +542,12 @@ func TestRecvSendMessage(t *testing.T) {
 	ctx2 := context.Background()
 
 	msgBody := "hello, world!"
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(msgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -590,12 +590,12 @@ func TestRetryEnqueue(t *testing.T) {
 	pubKey := client.GetPubKey()
 
 	msgBody := "hello, world!"
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(msgBody),
-		),
+		).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)

@@ -37,9 +37,9 @@ func TestHandleHashesAPI(t *testing.T) {
 		privKey,
 	)
 
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		pubKey,
-		payload.NewPayload64(0, []byte("hello")),
+		payload.NewPayload64(0, []byte("hello")).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -48,7 +48,7 @@ func TestHandleHashesAPI(t *testing.T) {
 
 	netMsg := net_message.NewMessage(
 		testNetworkMessageSettings(),
-		payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
+		payload.NewPayload64(hls_settings.CNetworkMask, msg),
 	)
 	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)

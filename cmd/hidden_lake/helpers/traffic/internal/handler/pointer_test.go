@@ -22,9 +22,9 @@ func TestHandlePointerAPI(t *testing.T) {
 	defer testAllFree(addr, srv, cancel, db)
 
 	client := testNewClient()
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -33,7 +33,7 @@ func TestHandlePointerAPI(t *testing.T) {
 
 	netMsg := net_message.NewMessage(
 		testNetworkMessageSettings(),
-		payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
+		payload.NewPayload64(hls_settings.CNetworkMask, msg),
 	)
 	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)

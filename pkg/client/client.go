@@ -8,7 +8,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
@@ -35,16 +34,12 @@ func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
 		fPrivKey:  pPrivKey,
 	}
 
-	encMsg, err := client.encryptWithParams(
-		client.GetPubKey(),
-		payload.NewPayload64(0, []byte{}),
-		0,
-	)
+	encMsg, err := client.encryptWithParams(client.GetPubKey(), []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
 
-	client.fStructSize = uint64(len(encMsg.ToBytes()))
+	client.fStructSize = uint64(len(encMsg))
 	if limit := client.GetMessageLimit(); limit == 0 {
 		panic("the message size is lower than struct size")
 	}
@@ -78,39 +73,31 @@ func (p *sClient) GetSettings() message.ISettings {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptPayload(pRecv asymmetric.IPubKey, pPld payload.IPayload64) (message.IMessage, error) {
+func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
 	var (
 		msgLimitSize = p.GetMessageLimit()
-		resultSize   = uint64(len(pPld.GetBody()))
+		resultSize   = uint64(len(pMsg))
 	)
 
 	if resultSize > msgLimitSize {
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithParams(
-		pRecv,
-		pPld,
-		msgLimitSize-resultSize,
-	)
+	return p.encryptWithParams(pRecv, pMsg, msgLimitSize-resultSize)
 }
 
 func (p *sClient) encryptWithParams(
 	pRecv asymmetric.IPubKey,
-	pPld payload.IPayload64,
+	pMsg []byte,
 	pPadd uint64,
-) (message.IMessage, error) {
+) ([]byte, error) {
 	var (
 		rand    = random.NewCSPRNG()
 		salt    = rand.GetBytes(symmetric.CAESKeySize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
-	data := joiner.NewBytesJoiner32([][]byte{
-		pPld.ToBytes(),
-		rand.GetBytes(pPadd),
-	})
-
+	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
 			p.GetPubKey().GetHasher().ToBytes(),
@@ -135,24 +122,25 @@ func (p *sClient) encryptWithParams(
 			p.fPrivKey.SignBytes(hash),
 			data,
 		})),
-	), nil
+	).ToBytes(), nil
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, payload.IPayload64, error) {
-	if pMsg == nil || !pMsg.IsValid(p.fSettings) {
+func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error) {
+	msg, err := message.LoadMessage(p.fSettings, pMsg)
+	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.fPrivKey.DecryptBytes(pMsg.GetEnck())
+	session := p.fPrivKey.DecryptBytes(msg.GetEnck())
 	if session == nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
 	// Decrypt data block by decrypted session key. Decode data block.
-	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(pMsg.GetEncd())
+	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(msg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
@@ -197,12 +185,6 @@ func (p *sClient) DecryptMessage(pMsg message.IMessage) (asymmetric.IPubKey, pay
 		return nil, nil, ErrDecodePayloadWrapper
 	}
 
-	// Remove random bytes and get main data.
-	pld := payload.LoadPayload64(payloadWrapper[0])
-	if pld == nil {
-		return nil, nil, ErrDecodePayload
-	}
-
 	// Return public key of sender with payload.
-	return pubKey, pld, nil
+	return pubKey, payloadWrapper[0], nil
 }

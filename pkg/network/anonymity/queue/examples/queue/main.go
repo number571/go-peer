@@ -45,9 +45,9 @@ func main() {
 	}()
 
 	for i := 0; i < 3; i++ {
-		msg, err := q.GetClient().EncryptPayload(
+		msg, err := q.GetClient().EncryptMessage(
 			q.GetClient().GetPubKey(),
-			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))),
+			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
 			panic(err)
@@ -66,9 +66,13 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		pubKey, pld, err := q.GetClient().DecryptMessage(msg)
+		pubKey, decMsg, err := q.GetClient().DecryptMessage(msg.ToBytes())
 		if err != nil {
 			panic(err)
+		}
+		pld := payload.LoadPayload64(decMsg)
+		if pld == nil {
+			panic("payloas is nil")
 		}
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")

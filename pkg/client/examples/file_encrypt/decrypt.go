@@ -9,9 +9,9 @@ import (
 	"unicode"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/payload"
 )
 
 func decryptFile(client client.IClient, decPrefix string) {
@@ -56,17 +56,14 @@ func decryptChunks(client client.IClient, encChunks []string) (string, []byte) {
 			panic(err)
 		}
 
-		encMsg, err := message.LoadMessage(
-			newSettings(client.GetPrivKey().GetSize()),
-			encBytes,
-		)
+		_, decMsg, err := client.DecryptMessage(encBytes)
 		if err != nil {
 			panic(err)
 		}
 
-		_, pld, err := client.DecryptMessage(encMsg)
-		if err != nil {
-			panic(err)
+		pld := payload.LoadPayload64(decMsg)
+		if pld == nil {
+			panic("payload = nil")
 		}
 
 		if pld.GetHead() != payloadHead {

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
@@ -24,9 +23,9 @@ func TestHandleMessageAPI(t *testing.T) {
 	defer testAllFree(addr, srv, cancel, db)
 
 	client := testNewClient()
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -35,7 +34,7 @@ func TestHandleMessageAPI(t *testing.T) {
 
 	netMsg := net_message.NewMessage(
 		testNetworkMessageSettings(),
-		payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
+		payload.NewPayload64(hls_settings.CNetworkMask, msg),
 	)
 	if err := hltClient.PutMessage(context.Background(), netMsg); err != nil {
 		t.Error(err)
@@ -49,16 +48,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	gotEncMsg, err := message.LoadMessage(
-		client.GetSettings(),
-		gotNetMsg.GetPayload().GetBody(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	gotPubKey, gotPld, err := client.DecryptMessage(gotEncMsg)
+	gotPubKey, decMsg, err := client.DecryptMessage(gotNetMsg.GetPayload().GetBody())
 	if err != nil {
 		t.Error(err)
 		return
@@ -69,6 +59,7 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
+	gotPld := payload.LoadPayload64(decMsg)
 	if string(gotPld.GetBody()) != testutils.TcBody {
 		t.Error(err)
 		return

@@ -16,6 +16,7 @@ var gLogMap = map[anon_logger.ILogType]string{
 	anon_logger.CLogInfoWithoutResponse:   "WTHRS",
 	anon_logger.CLogWarnMessageType:       "MTYPE",
 	anon_logger.CLogWarnMessageNull:       "MNULL",
+	anon_logger.CLogWarnPayloadNull:       "PNULL",
 	anon_logger.CLogWarnNotFriend:         "NTFRN",
 	anon_logger.CLogWarnUnknownRoute:      "UNKRT",
 	anon_logger.CLogWarnIncorrectResponse: "ICRSP",

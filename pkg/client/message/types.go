@@ -6,7 +6,6 @@ import (
 
 type IMessage interface {
 	types.IConverter
-	IsValid(ISettings) bool
 
 	GetEnck() []byte
 	GetEncd() []byte

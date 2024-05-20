@@ -3,7 +3,6 @@ package client
 import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 type IClient interface {
@@ -13,6 +12,6 @@ type IClient interface {
 	GetPubKey() asymmetric.IPubKey
 	GetPrivKey() asymmetric.IPrivKey
 
-	EncryptPayload(asymmetric.IPubKey, payload.IPayload64) (message.IMessage, error)
-	DecryptMessage(message.IMessage) (asymmetric.IPubKey, payload.IPayload64, error)
+	EncryptMessage(asymmetric.IPubKey, []byte) ([]byte, error)
+	DecryptMessage([]byte) (asymmetric.IPubKey, []byte, error)
 }

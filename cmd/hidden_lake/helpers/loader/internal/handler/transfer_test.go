@@ -122,12 +122,12 @@ func TestHandleTransferAPI(t *testing.T) {
 	client := client.NewClient(msgSettings, privKey)
 
 	for i := 0; i < 5; i++ {
-		encMsg, err := client.EncryptPayload(
+		encMsg, err := client.EncryptMessage(
 			privKey.GetPubKey(),
 			payload.NewPayload64(
 				uint64(i),
 				[]byte("hello, world!"),
-			),
+			).ToBytes(),
 		)
 		if err != nil {
 			t.Error(err)
@@ -137,7 +137,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			netMsgSettings,
 			payload.NewPayload64(
 				hls_settings.CNetworkMask,
-				encMsg.ToBytes(),
+				encMsg,
 			),
 		)
 		err = hltClient1.PutMessage(context.Background(), netMsg)
@@ -173,18 +173,13 @@ func TestHandleTransferAPI(t *testing.T) {
 			return
 		}
 
-		msg, err := message.LoadMessage(msgSettings, netMsg.GetPayload().GetBody())
+		pubKey, decMsg, err := client.DecryptMessage(netMsg.GetPayload().GetBody())
 		if err != nil {
 			t.Error(err)
 			return
 		}
 
-		pubKey, pld, err := client.DecryptMessage(msg)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
+		pld := payload.LoadPayload64(decMsg)
 		if pld.GetHead() != i {
 			t.Error("got bad index")
 			return

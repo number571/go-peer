@@ -76,9 +76,9 @@ func main() {
 			panic("len write.args != 2")
 		}
 
-		msg, err := client.EncryptPayload(
+		msg, err := client.EncryptMessage(
 			privKey.GetPubKey(),
-			payload.NewPayload64(cPldHead, []byte(args[1])),
+			payload.NewPayload64(cPldHead, []byte(args[1])).ToBytes(),
 		)
 		if err != nil {
 			panic(err)
@@ -86,7 +86,7 @@ func main() {
 
 		netMsg := net_message.NewMessage(
 			netSett,
-			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
+			payload.NewPayload64(hls_settings.CNetworkMask, msg),
 		)
 
 		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
@@ -104,18 +104,22 @@ func main() {
 			panic(err)
 		}
 
-		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
-		if err != nil {
-			panic("load message is nil")
+		if netMsg.GetPayload().GetHead() != hls_settings.CNetworkMask {
+			panic("net.payload.head is invalid")
 		}
 
-		pubKey, pld, err := client.DecryptMessage(msg)
+		pubKey, decMsg, err := client.DecryptMessage(netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)
 		}
 
+		pld := payload.LoadPayload64(decMsg)
+		if pld == nil {
+			panic("payload = nil")
+		}
+
 		if pld.GetHead() != cPldHead {
-			panic("payload head != constant head")
+			panic("payload.head != set.head")
 		}
 
 		if pubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {

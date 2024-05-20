@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/payload"
@@ -36,7 +35,7 @@ type sMessageQueue struct {
 type sMainPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
-	fRawQueue chan message.IMessage
+	fRawQueue chan []byte
 }
 
 type sVoidPool struct {
@@ -57,7 +56,7 @@ func NewMessageQueue(
 		fClient:    pClient,
 		fMainPool: &sMainPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetMainCapacity()),
-			fRawQueue: make(chan message.IMessage, pSettings.GetMainCapacity()),
+			fRawQueue: make(chan []byte, pSettings.GetMainCapacity()),
 		},
 		fVoidPool: &sVoidPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetVoidCapacity()),
@@ -153,7 +152,7 @@ func (p *sMessageQueue) SetVSettings(pVSettings IVSettings) {
 	}
 }
 
-func (p *sMessageQueue) EnqueueMessage(pMsg message.IMessage) error {
+func (p *sMessageQueue) EnqueueMessage(pMsg []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainCapacity() {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
@@ -193,7 +192,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	}
 }
 
-func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage) error {
+func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg []byte) error {
 	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 
@@ -205,10 +204,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg message.IMessage
 				FParallel:           p.fSettings.GetParallel(),
 				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
-			payload.NewPayload64(
-				p.fSettings.GetNetworkMask(),
-				pMsg.ToBytes(),
-			),
+			payload.NewPayload64(p.fSettings.GetNetworkMask(), pMsg),
 		)
 	}()
 
@@ -236,9 +232,9 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 		}
 	}
 
-	msg, err := p.fClient.EncryptPayload(
+	msg, err := p.fClient.EncryptMessage(
 		p.fVoidPool.fReceiver,
-		payload.NewPayload64(0, []byte{1}),
+		payload.NewPayload64(0, []byte{1}).ToBytes(),
 	)
 	if err != nil {
 		panic(err)
@@ -254,10 +250,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 				FParallel:           p.fSettings.GetParallel(),
 				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
-			payload.NewPayload64(
-				p.fSettings.GetNetworkMask(),
-				msg.ToBytes(),
-			),
+			payload.NewPayload64(p.fSettings.GetNetworkMask(), msg),
 		)
 	}()
 

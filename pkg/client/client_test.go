@@ -55,7 +55,7 @@ var (
 		"AAAAAAAAAAAAAAAAAAAAAAA",
 		"AAAAAAAAAAAAAAAAAAAAAAAA",
 		"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-		random.NewCSPRNG().GetString(tgMsgLimit), // maximum size of message
+		random.NewCSPRNG().GetString(tgMsgLimit - encoding.CSizeUint64), // maximum size of message - payload64.head
 	}
 )
 
@@ -154,7 +154,7 @@ func TestEncrypt(t *testing.T) {
 	_ = client1.GetPrivKey()
 
 	pl := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
-	msg, err := client1.EncryptPayload(client2.GetPubKey(), pl)
+	msg, err := client1.EncryptMessage(client2.GetPubKey(), pl.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
@@ -163,12 +163,13 @@ func TestEncrypt(t *testing.T) {
 	// os.WriteFile("test_binary.msg", msg.ToBytes(), 0644)
 	// os.WriteFile("test_string.msg", []byte(msg.ToString()), 0644)
 
-	_, decPl, err := client2.DecryptMessage(msg)
+	_, decMsg, err := client2.DecryptMessage(msg)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
+	decPl := payload.LoadPayload64(decMsg)
 	if !bytes.Equal([]byte(testutils.TcBody), decPl.GetBody()) {
 		t.Error("data not equal with decrypted data")
 		return
@@ -181,13 +182,19 @@ func TestDecrypt(t *testing.T) {
 	client1 := testNewClient()
 
 	pl := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
-	msg, err := client1.EncryptPayload(client1.GetPubKey(), pl)
+	msg1, err := client1.EncryptMessage(client1.GetPubKey(), pl.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if _, _, err := client1.DecryptMessage(msg); err != nil {
+	if _, _, err := client1.DecryptMessage(msg1); err != nil {
+		t.Error(err)
+		return
+	}
+
+	msg, err := message.LoadMessage(client1.GetSettings(), msg1)
+	if err != nil {
 		t.Error(err)
 		return
 	}
@@ -197,7 +204,7 @@ func TestDecrypt(t *testing.T) {
 	newEncd1[0] ^= 1
 
 	newMsg1 := message.NewMessage(msg.GetEnck(), newEncd1)
-	if _, _, err := client1.DecryptMessage(newMsg1); err == nil {
+	if _, _, err := client1.DecryptMessage(newMsg1.ToBytes()); err == nil {
 		t.Error("success decrypt invalid message")
 		return
 	}
@@ -207,7 +214,7 @@ func TestDecrypt(t *testing.T) {
 	newEncd2[symmetric.CAESBlockSize+8+1] ^= 1 // public key padding
 
 	newMsg2 := message.NewMessage(msg.GetEnck(), newEncd2)
-	if _, _, err := client1.DecryptMessage(newMsg2); err == nil {
+	if _, _, err := client1.DecryptMessage(newMsg2.ToBytes()); err == nil {
 		t.Error("success decrypt invalid message (public key)")
 		return
 	}
@@ -217,7 +224,7 @@ func TestDecrypt(t *testing.T) {
 	newEncd3[symmetric.CAESBlockSize+196+1] ^= 1 // hash padding
 
 	newMsg3 := message.NewMessage(msg.GetEnck(), newEncd3)
-	if _, _, err := client1.DecryptMessage(newMsg3); err == nil {
+	if _, _, err := client1.DecryptMessage(newMsg3.ToBytes()); err == nil {
 		t.Error("success decrypt invalid message (hash)")
 		return
 	}
@@ -227,7 +234,7 @@ func TestDecrypt(t *testing.T) {
 	newEncd4[symmetric.CAESBlockSize+236+1] ^= 1 // sign padding
 
 	newMsg4 := message.NewMessage(msg.GetEnck(), newEncd4)
-	if _, _, err := client1.DecryptMessage(newMsg4); err == nil {
+	if _, _, err := client1.DecryptMessage(newMsg4.ToBytes()); err == nil {
 		t.Error("success decrypt invalid message (sign)")
 		return
 	}
@@ -243,7 +250,7 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client1.DecryptMessage(msg3); err == nil {
+	if _, _, err := client1.DecryptMessage(msg3.ToBytes()); err == nil {
 		t.Error("success decrypt message with incorrect payload (1)")
 		return
 	}
@@ -253,7 +260,7 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client1.DecryptMessage(msg4); err == nil {
+	if _, _, err := client1.DecryptMessage(msg4.ToBytes()); err == nil {
 		t.Error("success decrypt message with incorrect payload (2)")
 		return
 	}
@@ -263,7 +270,7 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client1.DecryptMessage(msg5); err == nil {
+	if _, _, err := client1.DecryptMessage(msg5.ToBytes()); err == nil {
 		t.Error("success decrypt message with incorrect payload (3)")
 		return
 	}
@@ -273,7 +280,7 @@ func TestDecrypt(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client1.DecryptMessage(msg6); err == nil {
+	if _, _, err := client1.DecryptMessage(msg6.ToBytes()); err == nil {
 		t.Error("success decrypt message with incorrect payload (4)")
 		return
 	}
@@ -286,12 +293,12 @@ func TestMessageSize(t *testing.T) {
 
 	for _, smsg := range tgMessages {
 		pl := payload.NewPayload64(uint64(testutils.TcHead), []byte(smsg))
-		msg, err := client1.EncryptPayload(client1.GetPubKey(), pl)
+		msg, err := client1.EncryptMessage(client1.GetPubKey(), pl.ToBytes())
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		if uint64(len(msg.ToBytes())) != client1.GetSettings().GetMessageSizeBytes() {
+		if uint64(len(msg)) != client1.GetSettings().GetMessageSizeBytes() {
 			t.Error("got invalid message size bytes")
 			return
 		}
@@ -303,16 +310,16 @@ func TestGetMessageLimit(t *testing.T) {
 
 	client1 := testNewClient()
 
-	msg1 := random.NewCSPRNG().GetBytes(tgMsgLimit)
+	msg1 := random.NewCSPRNG().GetBytes(tgMsgLimit - encoding.CSizeUint64)
 	pld1 := payload.NewPayload64(uint64(testutils.TcHead), msg1)
-	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld1); err != nil {
+	if _, err := client1.EncryptMessage(client1.GetPubKey(), pld1.ToBytes()); err != nil {
 		t.Error("message1 > message limit:", err)
 		return
 	}
 
 	msg2 := random.NewCSPRNG().GetBytes(tgMsgLimit + 1)
 	pld2 := payload.NewPayload64(uint64(testutils.TcHead), msg2)
-	if _, err := client1.EncryptPayload(client1.GetPubKey(), pld2); err == nil {
+	if _, err := client1.EncryptMessage(client1.GetPubKey(), pld2.ToBytes()); err == nil {
 		t.Error("message2 > message limit but not alert:", err)
 		return
 	}

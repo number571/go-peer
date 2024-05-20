@@ -384,13 +384,7 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
-		loadMsg, err := message.LoadMessage(cl.GetSettings(), loadNetMsg.GetPayload().GetBody())
-		if err != nil {
-			t.Error(err)
-			return
-		}
-
-		pubKey, pl, err := cl.DecryptMessage(loadMsg)
+		pubKey, decMsg, err := cl.DecryptMessage(loadNetMsg.GetPayload().GetBody())
 		if err != nil {
 			t.Error(err)
 			return
@@ -401,6 +395,7 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
+		pl := payload.LoadPayload64(decMsg)
 		if pl.GetHead() != uint64(testutils.TcHead) {
 			t.Error("load msg head != init head")
 			return
@@ -419,9 +414,9 @@ func TestDatabase(t *testing.T) {
 }
 
 func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_message.IMessage, error) {
-	msg, err := cl.EncryptPayload(
+	msg, err := cl.EncryptMessage(
 		cl.GetPubKey(),
-		payload.NewPayload64(uint64(testutils.TcHead), []byte(data)),
+		payload.NewPayload64(uint64(testutils.TcHead), []byte(data)).ToBytes(),
 	)
 	if err != nil {
 		return nil, err
@@ -431,7 +426,7 @@ func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_
 			FNetworkKey:   networkKey,
 			FWorkSizeBits: testutils.TCWorkSize,
 		}),
-		payload.NewPayload64(0, msg.ToBytes()),
+		payload.NewPayload64(0, msg),
 	)
 	return netMsg, nil
 }

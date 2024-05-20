@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/types"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -20,7 +19,7 @@ type IMessageQueue interface {
 	GetSettings() ISettings
 	GetClient() client.IClient
 
-	EnqueueMessage(message.IMessage) error
+	EnqueueMessage([]byte) error
 	DequeueMessage(context.Context) net_message.IMessage
 }
 

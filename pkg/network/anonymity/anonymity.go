@@ -182,7 +182,7 @@ func (p *sNode) FetchPayload(
 	return resp, nil
 }
 
-func (p *sNode) enqueueMessage(pCtx context.Context, pMsg message.IMessage) error {
+func (p *sNode) enqueueMessage(pCtx context.Context, pMsg []byte) error {
 	retryNum := p.fSettings.GetRetryEnqueue()
 	for i := uint64(0); i <= retryNum; i++ {
 		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
@@ -227,10 +227,11 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		p.enrichLogger(logBuilder, pNetMsg).
 			WithConn(pConn)
 
-		// load encrypted message
 		client := p.fQueue.GetClient()
-		msg, err := message.LoadMessage(client.GetSettings(), pNetMsg.GetPayload().GetBody())
-		if err != nil {
+		encMsg := pNetMsg.GetPayload().GetBody()
+
+		// load encrypted message without decryption try
+		if _, err := message.LoadMessage(client.GetSettings(), encMsg); err != nil {
 			// problem from sender's side
 			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 			return utils.MergeErrors(ErrLoadMessage, err)
@@ -246,7 +247,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		}
 
 		// try decrypt message
-		sender, pld, err := client.DecryptMessage(msg)
+		sender, decMsg, err := client.DecryptMessage(encMsg)
 		if err != nil {
 			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 			return nil
@@ -268,10 +269,18 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
 		}
 
-		// get header of payload
+		// get payload from decrypted message
+		pld := payload.LoadPayload64(decMsg)
+		if pld == nil {
+			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnPayloadNull))
+			return nil
+		}
+
+		// get [head:body] from payload
 		head := loadHead(pld.GetHead())
 		body := pld.GetBody()
 
+		// check state of payload = [request,response]?
 		if action := head.getAction(); action.isRequest() {
 			// got request from another side (need generate response)
 			p.handleRequest(pCtx, logBuilder, sender, head, body)
@@ -345,18 +354,17 @@ func (p *sNode) enqueuePayload(
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
+	client := p.fQueue.GetClient()
 	isRequest := loadHead(pPld.GetHead()).getAction().isRequest()
 
 	logType := anon_logger.CLogBaseEnqueueResponse
 	if isRequest {
 		logType = anon_logger.CLogBaseEnqueueRequest
-
 		// enrich logger with raw message
-		pLogBuilder.
-			WithPubKey(p.fQueue.GetClient().GetPubKey())
+		pLogBuilder.WithPubKey(client.GetPubKey())
 	}
 
-	msg, err := p.fQueue.GetClient().EncryptPayload(pRecv, pPld)
+	msg, err := client.EncryptMessage(pRecv, pPld.ToBytes())
 	if err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroEncryptPayload))
 		return utils.MergeErrors(ErrEncryptPayload, err)
@@ -364,9 +372,8 @@ func (p *sNode) enqueuePayload(
 
 	if isRequest {
 		// enrich logger with raw message
-		pLogBuilder.
-			// without hash: log only from net_message!
-			WithSize(len(msg.ToBytes()))
+		// without hash: log only from net_message!
+		pLogBuilder.WithSize(len(msg))
 	}
 
 	if err := p.enqueueMessage(pCtx, msg); err != nil {

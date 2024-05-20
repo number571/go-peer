@@ -98,9 +98,9 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.IConstructSett
 	client := client.NewClient(msgSettings, privKey)
 
 	for i := 0; i < messageCount; i++ {
-		msg, err := client.EncryptPayload(
+		msg, err := client.EncryptMessage(
 			client.GetPubKey(), // self encrypt
-			payload.NewPayload64(uint64(i), []byte("hello, world!")),
+			payload.NewPayload64(uint64(i), []byte("hello, world!")).ToBytes(),
 		)
 		if err != nil {
 			return err
@@ -108,7 +108,7 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.IConstructSett
 
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
-			payload.NewPayload64(hls_settings.CNetworkMask, msg.ToBytes()),
+			payload.NewPayload64(hls_settings.CNetworkMask, msg),
 		)
 		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			return err
@@ -157,12 +157,7 @@ func checkMessages(ctx context.Context, netMsgSettings net_message.ISettings, ms
 			return errors.New("network mask is invalid")
 		}
 
-		encMsg, err := message.LoadMessage(msgSettings, netMsg.GetPayload().GetBody())
-		if err != nil {
-			return err
-		}
-
-		pubKey, pld, err := client.DecryptMessage(encMsg)
+		pubKey, decMsg, err := client.DecryptMessage(netMsg.GetPayload().GetBody())
 		if err != nil {
 			return err
 		}
@@ -171,6 +166,7 @@ func checkMessages(ctx context.Context, netMsgSettings net_message.ISettings, ms
 			return errors.New("got invalid public key")
 		}
 
+		pld := payload.LoadPayload64(decMsg)
 		if pld.GetHead() > messageCount {
 			return errors.New("got invalid head value")
 		}

@@ -116,9 +116,9 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {
 		t.Error(err)
@@ -193,9 +193,9 @@ func testQueue(queue IMessageQueue) error {
 	}()
 
 	client := queue.GetClient()
-	msg, err := client.EncryptPayload(
+	msg, err := client.EncryptMessage(
 		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {
 		return err
@@ -232,17 +232,22 @@ func testQueue(queue IMessageQueue) error {
 		}
 	}
 
-	msg2, err := client.EncryptPayload(
+	msg2Tmp, err := client.EncryptMessage(
 		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)),
+		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
+	if err != nil {
+		return err
+	}
+
+	msg2, err := message.LoadMessage(client.GetSettings(), msg2Tmp)
 	if err != nil {
 		return err
 	}
 
 	hash := msg2.GetEnck()
 	for i := 0; i < 3; i++ {
-		if err := queue.EnqueueMessage(msg2); err != nil {
+		if err := queue.EnqueueMessage(msg2.ToBytes()); err != nil {
 			return err
 		}
 	}

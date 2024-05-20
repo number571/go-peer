@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/database"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -39,6 +40,17 @@ func (p *sApp) initAnonNode() error {
 	)
 	if err != nil {
 		return utils.MergeErrors(ErrOpenKVDatabase, err)
+	}
+
+	client := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
+			FKeySizeBits:      p.fPrivKey.GetSize(),
+		}),
+		p.fPrivKey,
+	)
+	if client.GetMessageLimit() <= encoding.CSizeUint64 {
+		return utils.MergeErrors(ErrMessageSizeLimit, err)
 	}
 
 	p.fNode = anonymity.NewNode(
@@ -92,13 +104,7 @@ func (p *sApp) initAnonNode() error {
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
-			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
-					FKeySizeBits:      p.fPrivKey.GetSize(),
-				}),
-				p.fPrivKey,
-			),
+			client,
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

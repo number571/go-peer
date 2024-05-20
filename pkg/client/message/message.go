@@ -44,7 +44,7 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	msg.fEnck = wrapSlice[0]
 	msg.fEncd = wrapSlice[1]
 
-	if !msg.IsValid(psett) {
+	if !msg.isValid(psett) {
 		return nil, ErrInvalidMessage
 	}
 
@@ -70,7 +70,7 @@ func (p *sMessage) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
 }
 
-func (p *sMessage) IsValid(psett ISettings) bool {
+func (p *sMessage) isValid(psett ISettings) bool {
 	return true &&
 		uint64(len(p.ToBytes())) == psett.GetMessageSizeBytes() &&
 		uint64(len(p.GetEnck())) == psett.GetKeySizeBits()/8

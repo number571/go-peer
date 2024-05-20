@@ -8,6 +8,7 @@
 
 - Update `pkg/network/message`: new IConstructSettings
 - Update `cmd/hidden_lake/composite`: append messenger, filesharer to init config
+- Update `pkg/client`: update IClient, IMessage
 
 ### BUG FIXES
 

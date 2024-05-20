@@ -9,6 +9,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -41,7 +42,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 					FNetworkKey:         sett.GetNetworkKey(),
 					FF2FDisabled:        sett.GetF2FDisabled(),
 				},
-				FLimitMessageSizeBytes: pNode.GetMessageQueue().GetClient().GetMessageLimit(),
+				FLimitMessageSizeBytes: pNode.GetMessageQueue().GetClient().GetMessageLimit() - encoding.CSizeUint64,
 			})
 			return
 

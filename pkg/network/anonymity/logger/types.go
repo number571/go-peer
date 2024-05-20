@@ -29,6 +29,7 @@ const (
 	// WARN
 	CLogWarnMessageType
 	CLogWarnMessageNull
+	CLogWarnPayloadNull
 	CLogWarnNotFriend
 	CLogWarnUnknownRoute
 	CLogWarnIncorrectResponse

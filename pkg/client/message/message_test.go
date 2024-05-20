@@ -121,8 +121,8 @@ func testMessage(t *testing.T, params ISettings, msg IMessage) {
 		return
 	}
 
-	msg1 := NewMessage(msg.GetEnck(), msg.GetEncd())
-	if !msg1.IsValid(params) {
+	msg1 := NewMessage(msg.GetEnck(), msg.GetEncd()).(*sMessage)
+	if !msg1.isValid(params) {
 		t.Error("new message is invalid")
 		return
 	}
