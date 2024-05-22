@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## v1.6.12~
+## v1.6.13~
 
 *??? ??, ????*
+
+## v1.6.12
+
+*May 22, 2024*
 
 ### CHANGES
 
@@ -13,7 +17,7 @@
 ### BUG FIXES
 
 - Update `pkg/network/anonymity`: delete mutex on storeHashIntoDatabase method
-- Update `cmd/hidden_lake/helpers/traffix`: fix GetHash method
+- Update `cmd/hidden_lake/helpers/traffic`: fix GetHash method
 
 ## v1.6.11
 
