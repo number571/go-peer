@@ -46,6 +46,8 @@ logging:
 - erro
 services:
 - hidden-lake-service
+- hidden-lake-messenger
+- hidden-lake-filesharer
 ```
 
 ## Running options
