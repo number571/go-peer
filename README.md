@@ -93,6 +93,13 @@ All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `
 5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`);
 6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger|filesharer`);
 
+### Make dependencies
+
+There are a number of dependencies that represent separate applications for providing additional information about the quality of the code. These applications are not entered into the project, but are loaded via the `make install-deps` command. The list of applications is as follows:
+
+1. golangci-lint [github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2](https://github.com/golangci/golangci-lint/tree/v1.57.2)
+2. go-cover-treemap [github.com/nikolaydubina/go-cover-treemap@v1.4.2](https://github.com/nikolaydubina/go-cover-treemap/tree/v1.4.2)
+
 ## Theoretical works
 
 1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
