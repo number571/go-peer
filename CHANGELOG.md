@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `Makefile`: append 'test-coverage-treemap'
+
 ## v1.6.12
 
 *May 22, 2024*

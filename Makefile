@@ -16,8 +16,9 @@ _GO_TEST_LIST=\
 
 .PHONY: default clean go-fmt-vet \
 	lint-run test-run \
-	test-coverage test-coverage-view \
-	git-status git-push 
+	test-coverage test-coverage-view test-coverage-treemap test-coverage-badge \
+	git-status git-push \
+	install-deps
 
 default: lint-run test-run
 
@@ -29,6 +30,12 @@ clean:
 go-fmt-vet:
 	go fmt ./...
 	go vet ./...
+
+### INSTALL
+
+install-deps:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+	go install github.com/nikolaydubina/go-cover-treemap@v1.4.2
 
 ### LINT
 
@@ -61,6 +68,10 @@ test-coverage-view:
 	make test-coverage-view -C cmd/hidden_lake/
 	go tool cover -html=$(_TEST_RESULT_PATH)/coverage.out
 
+test-coverage-treemap:
+	make test-coverage-treemap -C cmd/hidden_lake/
+	go-cover-treemap -coverprofile=$(_TEST_RESULT_PATH)/coverage.out > $(_TEST_RESULT_PATH)/coverage.svg
+
 test-coverage-badge: 
 	make test-coverage-badge -C cmd/hidden_lake/
 	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
@@ -74,7 +85,7 @@ test-coverage-badge:
 
 ### GIT
 
-git-status: lint-run test-coverage test-coverage-badge
+git-status: lint-run test-coverage test-coverage-treemap test-coverage-badge
 	go fmt ./...
 	git add .
 	git status 

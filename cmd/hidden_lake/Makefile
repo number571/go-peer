@@ -10,7 +10,7 @@ _TEST_RESULT_PATH=./_test/result
 _TEST_PPROF_PATH=./_test/pprof
 
 .PHONY: default build clean \
-	test-coverage test-coverage-view \
+	test-coverage test-coverage-view test-coverage-treemap test-coverage-badge \
 	pprof-run
 
 default: build 
@@ -30,11 +30,14 @@ clean:
 ### TEST COVERAGE
 
 test-coverage: clean
-	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`; \
-	$(_CHECK_ERROR); \
+	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
+	$(_CHECK_ERROR)
 
 test-coverage-view:
 	go tool cover -html=$(_TEST_RESULT_PATH)/coverage.out
+
+test-coverage-treemap:
+	go-cover-treemap -coverprofile=$(_TEST_RESULT_PATH)/coverage.out > $(_TEST_RESULT_PATH)/coverage.svg
 
 test-coverage-badge: 
 	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
