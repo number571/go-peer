@@ -61,6 +61,10 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 
 > Examples of works in the directory [github.com/number571/go-peer/examples](https://github.com/number571/go-peer/tree/master/examples "Examples");
 
+## Coverage map
+
+<p align="center"><img src="test/result/coverage.svg" alt="coverage.svg"/></p>
+
 ## Installation
 
 ```bash
@@ -93,7 +97,7 @@ All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `
 5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`);
 6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger|filesharer`);
 
-### Make dependencies
+### Makefile
 
 There are a number of dependencies that represent separate applications for providing additional information about the quality of the code. These applications are not entered into the project, but are loaded via the `make install-deps` command. The list of applications is as follows:
 

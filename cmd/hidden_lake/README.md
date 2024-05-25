@@ -43,6 +43,10 @@ Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT,
 
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [hidden_lake_anonymous_network_view.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "HLANv")
 
+## Coverage map
+
+<p align="center"><img src="_test/result/coverage.svg" alt="coverage.svg"/></p>
+
 ## How it works
 
 The anonymous Hidden Lake network is an `abstract` network. This means that regardless of the system in which it is located and regardless of the number of nodes, as well as their location, the HL network remains anonymous. This property is achieved due to a theoretically provable `queue-based` task. Its algorithm can be described as follows.
