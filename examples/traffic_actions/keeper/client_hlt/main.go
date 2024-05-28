@@ -38,7 +38,7 @@ func main() {
 		FNetworkKey:   "j2BR39JfDf7Bajx3",
 	})
 
-	readPrivKey, err := os.ReadFile("priv.key")
+	readPrivKey, err := os.ReadFile("../_keys/priv.key")
 	if err != nil {
 		panic(err)
 	}
