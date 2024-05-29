@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
@@ -15,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/internal/closer"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -94,10 +96,17 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 		}
 
 		msgBroker := msgbroker.NewMessageBroker()
+		hlsClient := hls_client.NewClient(
+			hls_client.NewBuilder(),
+			hls_client.NewRequester(
+				"http://"+p.fConfig.GetConnection(),
+				&http.Client{Timeout: (10 * time.Minute)},
+			),
+		)
 
 		p.initServicePPROF()
-		p.initIncomingServiceHTTP(pCtx, msgBroker)
-		p.initInterfaceServiceHTTP(pCtx, msgBroker)
+		p.initIncomingServiceHTTP(pCtx, hlsClient, msgBroker)
+		p.initInterfaceServiceHTTP(pCtx, hlsClient, msgBroker)
 
 		p.fStdfLogger.PushInfo(hlm_settings.CServiceName + " is running...")
 		return nil

@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	tcPathConfig  = pkg_settings.CPathYML
-	tcPathStorage = pkg_settings.CPathSTG
+	tcTestdataPath = "./testdata/"
+	tcPathConfig   = pkg_settings.CPathYML
+	tcPathStorage  = pkg_settings.CPathSTG
 )
 
 func TestError(t *testing.T) {
@@ -28,16 +29,16 @@ func TestError(t *testing.T) {
 	}
 }
 
-func testDeleteFiles() {
-	os.RemoveAll(tcPathStorage)
-	os.RemoveAll(tcPathConfig)
+func testDeleteFiles(prefixPath string) {
+	os.RemoveAll(prefixPath + tcPathStorage)
+	os.RemoveAll(prefixPath + tcPathConfig)
 }
 
 func TestApp(t *testing.T) {
 	t.Parallel()
 
-	testDeleteFiles()
-	defer testDeleteFiles()
+	testDeleteFiles("./")
+	defer testDeleteFiles("./")
 
 	// Run application
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
@@ -92,4 +93,16 @@ func TestApp(t *testing.T) {
 		}
 	}()
 	time.Sleep(100 * time.Millisecond)
+}
+
+func TestInitApp(t *testing.T) {
+	t.Parallel()
+
+	testDeleteFiles(tcTestdataPath)
+	defer testDeleteFiles(tcTestdataPath)
+
+	if _, err := InitApp([]string{}, tcTestdataPath); err != nil {
+		t.Error(err)
+		return
+	}
 }

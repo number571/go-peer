@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
 	"github.com/number571/go-peer/pkg/logger"
@@ -14,6 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/internal/closer"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
@@ -91,9 +93,17 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 			return utils.MergeErrors(ErrInitSTG, err)
 		}
 
+		hlsClient := hls_client.NewClient(
+			hls_client.NewBuilder(),
+			hls_client.NewRequester(
+				"http://"+p.fConfig.GetConnection(),
+				&http.Client{Timeout: (10 * time.Minute)},
+			),
+		)
+
 		p.initServicePPROF()
-		p.initIncomingServiceHTTP(pCtx)
-		p.initInterfaceServiceHTTP(pCtx)
+		p.initIncomingServiceHTTP(pCtx, hlsClient)
+		p.initInterfaceServiceHTTP(pCtx, hlsClient)
 
 		p.fStdfLogger.PushInfo(hlf_settings.CServiceName + " is running...")
 		return nil

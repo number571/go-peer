@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/msgbroker"
 	hlm_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
@@ -16,15 +15,16 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func HandleIncomigHTTP(
 	pCtx context.Context,
 	pLogger logger.ILogger,
-	pCfg config.IConfig,
 	pDB database.IKVDatabase,
 	pBroker msgbroker.IMessageBroker,
+	pHlsClient hls_client.IClient,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeOFF)
@@ -55,7 +55,7 @@ func HandleIncomigHTTP(
 			return
 		}
 
-		myPubKey, err := getHLSClient(pCfg).GetPubKey(pCtx)
+		myPubKey, err := pHlsClient.GetPubKey(pCtx)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_public_key"))
 			_ = api.Response(pW, http.StatusBadGateway, "failed: get public key from service")

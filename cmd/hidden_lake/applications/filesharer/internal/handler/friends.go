@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/web"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -24,6 +25,7 @@ func FriendsPage(
 	pCtx context.Context,
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
+	pHlsClient hls_client.IClient,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlf_settings.CServiceName, pR)
@@ -37,8 +39,6 @@ func FriendsPage(
 			ErrorPage(pLogger, pCfg, "parse_form", "parse form")(pW, pR)
 			return
 		}
-
-		hlsClient := getHLSClient(pCfg)
 
 		switch pR.FormValue("method") {
 		case http.MethodPost:
@@ -61,7 +61,7 @@ func FriendsPage(
 				aliasName = pubKey.GetHasher().ToString()
 			}
 
-			if err := hlsClient.AddFriend(pCtx, aliasName, pubKey); err != nil {
+			if err := pHlsClient.AddFriend(pCtx, aliasName, pubKey); err != nil {
 				ErrorPage(pLogger, pCfg, "add_friend", "add friend")(pW, pR)
 				return
 			}
@@ -72,13 +72,13 @@ func FriendsPage(
 				return
 			}
 
-			if err := hlsClient.DelFriend(pCtx, aliasName); err != nil {
+			if err := pHlsClient.DelFriend(pCtx, aliasName); err != nil {
 				ErrorPage(pLogger, pCfg, "del_friend", "delete friend")(pW, pR)
 				return
 			}
 		}
 
-		friends, err := hlsClient.GetFriends(pCtx)
+		friends, err := pHlsClient.GetFriends(pCtx)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_friends", "read friends")(pW, pR)
 			return

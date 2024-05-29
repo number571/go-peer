@@ -12,5 +12,3 @@ func TestError(t *testing.T) {
 		return
 	}
 }
-
-func TestNothing(_ *testing.T) {}

@@ -33,7 +33,12 @@ type sSettings struct {
 	FConnections   []sConnection
 }
 
-func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.IWrapper) http.HandlerFunc {
+func SettingsPage(
+	pCtx context.Context,
+	pLogger logger.ILogger,
+	pWrapper config.IWrapper,
+	pHlsClient hls_client.IClient,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
 
@@ -50,12 +55,10 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 			return
 		}
 
-		hlsClient := getHLSClient(cfg)
-
 		switch pR.FormValue("method") {
 		case http.MethodPatch:
 			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
-			if err := hlsClient.SetNetworkKey(pCtx, networkKey); err != nil {
+			if err := pHlsClient.SetNetworkKey(pCtx, networkKey); err != nil {
 				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
 				return
 			}
@@ -84,7 +87,7 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 			}
 
 			connect := fmt.Sprintf("%s:%s", host, port)
-			if err := hlsClient.AddConnection(pCtx, connect); err != nil {
+			if err := pHlsClient.AddConnection(pCtx, connect); err != nil {
 				ErrorPage(pLogger, cfg, "add_connection", "add connection")(pW, pR)
 				return
 			}
@@ -95,13 +98,13 @@ func SettingsPage(pCtx context.Context, pLogger logger.ILogger, pWrapper config.
 				return
 			}
 
-			if err := hlsClient.DelConnection(pCtx, connect); err != nil {
+			if err := pHlsClient.DelConnection(pCtx, connect); err != nil {
 				ErrorPage(pLogger, cfg, "del_connection", "delete connection")(pW, pR)
 				return
 			}
 		}
 
-		result, err := getSettings(pCtx, cfg, hlsClient)
+		result, err := getSettings(pCtx, cfg, pHlsClient)
 		if err != nil {
 			ErrorPage(pLogger, cfg, "get_settings", "get settings")(pW, pR)
 			return

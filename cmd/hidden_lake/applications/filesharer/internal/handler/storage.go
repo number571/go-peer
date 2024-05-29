@@ -30,6 +30,7 @@ func StoragePage(
 	pCtx context.Context,
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
+	pHlsClient hls_client.IClient,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlf_settings.CServiceName, pR)
@@ -46,9 +47,8 @@ func StoragePage(
 			return
 		}
 
-		hlsClient := getHLSClient(pCfg)
 		if fileName := query.Get("file_name"); fileName != "" {
-			downloadFile(pCtx, pLogger, pCfg, pW, pR, hlsClient)
+			downloadFile(pCtx, pLogger, pCfg, pW, pR, pHlsClient)
 			return
 		}
 
@@ -59,7 +59,7 @@ func StoragePage(
 
 		hlfClient := hlf_client.NewClient(
 			hlf_client.NewBuilder(),
-			hlf_client.NewRequester(hlsClient),
+			hlf_client.NewRequester(pHlsClient),
 		)
 
 		filesList, err := hlfClient.GetListFiles(pCtx, aliasName, uint64(page))

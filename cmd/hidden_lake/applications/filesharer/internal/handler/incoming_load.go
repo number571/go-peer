@@ -8,21 +8,21 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/internal/utils"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 
 	hlf_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/filesharer/pkg/settings"
+	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 func HandleIncomigLoadHTTP(
 	pCtx context.Context,
 	pLogger logger.ILogger,
-	pCfg config.IConfig,
 	pStgPath string,
+	pHlsClient hls_client.IClient,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeON)
@@ -59,7 +59,7 @@ func HandleIncomigLoadHTTP(
 			return
 		}
 
-		chunkSize, err := utils.GetMessageLimit(pCtx, getHLSClient(pCfg))
+		chunkSize, err := utils.GetMessageLimit(pCtx, pHlsClient)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_chunk_size"))
 			_ = api.Response(pW, http.StatusNotAcceptable, "failed: get chunk size")

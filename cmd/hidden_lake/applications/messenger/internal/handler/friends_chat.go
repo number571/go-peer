@@ -43,6 +43,7 @@ func FriendsChatPage(
 	pLogger logger.ILogger,
 	pCfg config.IConfig,
 	pDB database.IKVDatabase,
+	pHlsClient hls_client.IClient,
 ) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlm_settings.CServiceName, pR)
@@ -69,14 +70,13 @@ func FriendsChatPage(
 			return
 		}
 
-		client := getHLSClient(pCfg)
-		myPubKey, err := client.GetPubKey(pCtx)
+		myPubKey, err := pHlsClient.GetPubKey(pCtx)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_public_key", "read public key")(pW, pR)
 			return
 		}
 
-		recvPubKey, err := getReceiverPubKey(pCtx, client, aliasName)
+		recvPubKey, err := getReceiverPubKey(pCtx, pHlsClient, aliasName)
 		if err != nil {
 			ErrorPage(pLogger, pCfg, "get_receiver", "get receiver by public key")(pW, pR)
 			return
@@ -92,7 +92,7 @@ func FriendsChatPage(
 				return
 			}
 
-			if err := sendMessage(pCtx, client, aliasName, msgBytes); err != nil {
+			if err := sendMessage(pCtx, pHlsClient, aliasName, msgBytes); err != nil {
 				ErrorPage(pLogger, pCfg, "send_message", "push message to network")(pW, pR)
 				return
 			}
