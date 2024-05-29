@@ -552,7 +552,7 @@ func (p *sClient) tInvalidEncryptPayload4(pRecv asymmetric.IPubKey, pPld payload
 	return p.tInvalidEncryptWithParams4(
 		pRecv,
 		pPld,
-		msgLimitSize-resultSize,
+		msgLimitSize-resultSize-encoding.CSizeUint64,
 	)
 }
 

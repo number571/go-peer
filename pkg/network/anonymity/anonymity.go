@@ -272,6 +272,7 @@ func (p *sNode) handleWrapper() network.IHandlerF {
 		// get payload from decrypted message
 		pld := payload.LoadPayload64(decMsg)
 		if pld == nil {
+			// got invalid payload64 format from sender
 			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnPayloadNull))
 			return nil
 		}

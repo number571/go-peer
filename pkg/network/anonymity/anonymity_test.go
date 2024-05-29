@@ -338,6 +338,9 @@ func TestHandleWrapper(t *testing.T) {
 	// // ignore add public key (f2f_disabled=true)
 	// node.GetListPubKeys().AddPubKey(pubKey)
 
+	ctx := context.Background()
+	sett := net_message.NewSettings(&net_message.SSettings{})
+
 	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
@@ -350,9 +353,6 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	ctx := context.Background()
-
-	sett := net_message.NewSettings(&net_message.SSettings{})
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error(err)
@@ -361,6 +361,18 @@ func TestHandleWrapper(t *testing.T) {
 
 	if err := handler(ctx, nil, nil, netMsg); err != nil {
 		t.Error("repeated message:", err.Error())
+		return
+	}
+
+	msgWithoutPld, err := client.EncryptMessage(pubKey, []byte{123})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	netMsgWithoutPld := node.testNewNetworkMessage(sett, msgWithoutPld)
+	if err := handler(ctx, nil, nil, netMsgWithoutPld); err != nil {
+		t.Error(err) // works only logger
 		return
 	}
 
