@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/config"
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/template/pkg/config"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/template/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/utils"

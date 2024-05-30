@@ -1,7 +1,7 @@
 package client
 
 const (
-	errPrefix = "cmd/hidden_lake/helpers/template/pkg/client = "
+	errPrefix = "cmd/hidden_lake/template/pkg/client = "
 )
 
 type SClientError struct {

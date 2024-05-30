@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	gopeer "github.com/number571/go-peer"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/app"
+	"github.com/number571/go-peer/cmd/hidden_lake/template/pkg/app"
 	"github.com/number571/go-peer/internal/flag"
 )
 

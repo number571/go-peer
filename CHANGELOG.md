@@ -8,6 +8,10 @@
 
 - Update `Makefile`: append 'test-coverage-treemap'
 
+### CHANGES
+
+- Update `cmd/hidden_lake`: move template from helpers to root hidden_lake directory
+
 ## v1.6.12
 
 *May 22, 2024*

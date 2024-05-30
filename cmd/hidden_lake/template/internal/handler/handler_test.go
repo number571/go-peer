@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
+	"github.com/number571/go-peer/cmd/hidden_lake/template/internal/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/template/pkg/settings"
 	"github.com/number571/go-peer/pkg/logger"
 )
 

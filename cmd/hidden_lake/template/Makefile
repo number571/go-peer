@@ -1,6 +1,6 @@
 N=1
 GC=go build
-ROOPATH=../../../..
+ROOPATH=../../..
 BINPATH=$(ROOPATH)/bin
 
 .PHONY: default build run test clean

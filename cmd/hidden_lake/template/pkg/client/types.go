@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/config"
+	"github.com/number571/go-peer/cmd/hidden_lake/template/pkg/config"
 )
 
 type IClient interface {

@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/template/pkg/settings"
+	hl_t_settings "github.com/number571/go-peer/cmd/hidden_lake/template/pkg/settings"
 	logger "github.com/number571/go-peer/internal/logger/std"
 )
 
