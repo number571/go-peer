@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/sha256"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -51,25 +52,33 @@ func HandleIncomigListHTTP(pLogger logger.ILogger, pCfg config.IConfig, pStgPath
 
 func getListFileInfo(pCfg config.IConfig, pStgPath string, pPage uint64) ([]hlf_settings.SFileInfo, error) {
 	pageOffset := pCfg.GetSettings().GetPageOffset()
+	fileReader := pageOffset
 
 	entries, err := os.ReadDir(pStgPath)
 	if err != nil {
 		return nil, err
 	}
-	lenEntries := uint64(len(entries))
 
-	result := make([]hlf_settings.SFileInfo, 0, lenEntries)
-	for i := (pPage * pageOffset); i < lenEntries; i++ {
-		e := entries[i]
+	files := make([]fs.DirEntry, 0, len(entries))
+	for _, e := range entries {
 		if e.IsDir() {
 			continue
 		}
-		if i != (pPage*pageOffset) && i%pageOffset == 0 {
+		files = append(files, e)
+	}
+
+	result := make([]hlf_settings.SFileInfo, 0, pageOffset)
+	for i := (pPage * pageOffset); i < uint64(len(files)); i++ {
+		if fileReader == 0 {
 			break
 		}
-		fullPath := filepath.Join(pStgPath, e.Name())
+		fileReader--
+
+		fileName := files[i].Name()
+		fullPath := filepath.Join(pStgPath, fileName)
+
 		result = append(result, hlf_settings.SFileInfo{
-			FName: e.Name(),
+			FName: fileName,
 			FHash: getFileHash(fullPath),
 			FSize: getFileSize(fullPath),
 		})

@@ -42,13 +42,13 @@ Stokado
                     <div class="col-md-8 w-75">
                         {{if (eq .FLanguage 0)}}
                         <input type="number" name="page" placeholder="Page" value="{{$page}}"
-                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+" min="0">
                         {{else if (eq .FLanguage 1)}}
                         <input type="number" name="page" placeholder="Страница" value="{{$page}}"
-                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+" min="0">
                         {{else if (eq .FLanguage 2)}}
                         <input type="number" name="page" placeholder="Paĝo" value="{{$page}}"
-                            class="text-center form-control bg-dark text-white w-100" pattern="\d+">
+                            class="text-center form-control bg-dark text-white w-100" pattern="\d+" min="0">
                         {{end}}
                     </div>
                     <div class="col-md-4 w-25">

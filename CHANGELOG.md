@@ -12,6 +12,10 @@
 
 - Update `cmd/hidden_lake`: move template from helpers to root hidden_lake directory
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/filesharer`: fix load list of files from storage
+
 ## v1.6.12
 
 *May 22, 2024*
