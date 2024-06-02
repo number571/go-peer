@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/utils"
@@ -234,7 +235,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 
 	msg, err := p.fClient.EncryptMessage(
 		p.fVoidPool.fReceiver,
-		payload.NewPayload64(0, []byte{1}).ToBytes(),
+		random.NewCSPRNG().GetBytes(encoding.CSizeUint64),
 	)
 	if err != nil {
 		panic(err)

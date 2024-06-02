@@ -12,7 +12,8 @@ import (
 
 type IHandlerF func(
 	context.Context,
-	INode, conn.IConn,
+	INode,
+	conn.IConn,
 	net_message.IMessage,
 ) error
 
