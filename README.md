@@ -50,6 +50,9 @@
 	About project
 </h2>
 
+> [!WARNING]
+> The go-peer package and the Hidden Lake anonymous network are under `active development`. New versions may not be compatible with the old ones. As a result, it is necessary to use the latest release versions in order to keep up to date.
+
 The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes in the decentralized form. The library can be divided into several main `pkg` modules:
 
 1. The `crypto` module represents cryptographic primitives: 1) asymmetric encryption, decryption; 2) asymmetric signing and signature verification; 3) symmetric encryption and decryption; 4) hashing; 5) key building; 6) computational problems (puzzles); 7) cryptographically stable pseudorandom number generator.
