@@ -331,7 +331,7 @@ func TestHandleWrapper(t *testing.T) {
 	defer testFreeNodes([]INode{_node}, []context.CancelFunc{cancel}, 7)
 
 	node := _node.(*sNode)
-	handler := node.handleWrapper()
+	handler := node.networkHandler
 	client := node.fQueue.GetClient()
 	pubKey := client.GetPubKey()
 
@@ -732,7 +732,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		}),
 	)
 	if err != nil {
-		return nil, nil
+		panic(err)
 	}
 	parallel := uint64(1)
 	networkMask := uint32(1)

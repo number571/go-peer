@@ -11,6 +11,8 @@ type IMessage interface {
 	GetHash() []byte
 	GetVoid() []byte
 	GetProof() uint64
+
+	// payload = head(32bit) || body(Nbit)
 	GetPayload() payload.IPayload32
 }
 

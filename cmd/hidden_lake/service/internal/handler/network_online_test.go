@@ -13,7 +13,6 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -125,14 +124,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
-		HandleServiceTCP(
-			config.NewWrapper(cfg),
-			logger.NewLogger(
-				logger.NewSettings(&logger.SSettings{}),
-				func(_ logger.ILogArg) string { return "" },
-			),
-			time.Minute,
-		),
+		HandleServiceTCP(config.NewWrapper(cfg)),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 

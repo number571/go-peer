@@ -64,7 +64,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 	enableFunc := func() error {
 		p.fNetwork.HandleFunc(
 			p.fSettings.GetNetworkMask(),
-			p.handleWrapper(),
+			p.networkHandler,
 		)
 		return nil
 	}
@@ -219,79 +219,82 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
-func (p *sNode) handleWrapper() network.IHandlerF {
-	return func(pCtx context.Context, _ network.INode, pConn conn.IConn, pNetMsg net_message.IMessage) error {
-		logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
+func (p *sNode) networkHandler(
+	pCtx context.Context,
+	_ network.INode, // used as p.fNetwork
+	pConn conn.IConn,
+	pNetMsg net_message.IMessage,
+) error {
+	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
-		// update logger state
-		p.enrichLogger(logBuilder, pNetMsg).
-			WithConn(pConn)
+	// update logger state
+	p.enrichLogger(logBuilder, pNetMsg).
+		WithConn(pConn)
 
-		client := p.fQueue.GetClient()
-		encMsg := pNetMsg.GetPayload().GetBody()
+	client := p.fQueue.GetClient()
+	encMsg := pNetMsg.GetPayload().GetBody()
 
-		// load encrypted message without decryption try
-		if _, err := message.LoadMessage(client.GetSettings(), encMsg); err != nil {
-			// problem from sender's side
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return utils.MergeErrors(ErrLoadMessage, err)
-		}
+	// load encrypted message without decryption try
+	if _, err := message.LoadMessage(client.GetSettings(), encMsg); err != nil {
+		// problem from sender's side
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
+		return utils.MergeErrors(ErrLoadMessage, err)
+	}
 
-		// try store hash of message
-		if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pNetMsg); !ok {
-			// internal logger
-			if err != nil {
-				return utils.MergeErrors(ErrStoreHashWithBroadcast, err)
-			}
-			return nil
-		}
-
-		// try decrypt message
-		sender, decMsg, err := client.DecryptMessage(encMsg)
+	// try store hash of message
+	if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pNetMsg); !ok {
+		// internal logger
 		if err != nil {
-			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
-			return nil
+			return utils.MergeErrors(ErrStoreHashWithBroadcast, err)
 		}
-
-		// enrich logger
-		logBuilder.WithPubKey(sender)
-
-		// check sender's public key in f2f list
-		if !p.fFriends.InPubKeys(sender) {
-			// if f2f=enabled:
-			// ignore reading message from unknown public key
-			if !p.fSettings.GetF2FDisabled() {
-				p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
-				return nil
-			}
-			// if f2f=disabled:
-			// continue to read a message from unknown public key
-			p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
-		}
-
-		// get payload from decrypted message
-		pld := payload.LoadPayload64(decMsg)
-		if pld == nil {
-			// got invalid payload64 format from sender
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnPayloadNull))
-			return nil
-		}
-
-		// get [head:body] from payload
-		head := loadHead(pld.GetHead())
-		body := pld.GetBody()
-
-		// check state of payload = [request,response]?
-		if action := head.getAction(); action.isRequest() {
-			// got request from another side (need generate response)
-			p.handleRequest(pCtx, logBuilder, sender, head, body)
-		} else {
-			// got response message from our side request
-			p.handleResponse(pCtx, logBuilder, sender, action, body)
-		}
-
 		return nil
 	}
+
+	// try decrypt message
+	sender, decMsg, err := client.DecryptMessage(encMsg)
+	if err != nil {
+		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
+		return nil
+	}
+
+	// enrich logger
+	logBuilder.WithPubKey(sender)
+
+	// check sender's public key in f2f list
+	if !p.fFriends.InPubKeys(sender) {
+		// if f2f=enabled:
+		// ignore reading message from unknown public key
+		if !p.fSettings.GetF2FDisabled() {
+			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
+			return nil
+		}
+		// if f2f=disabled:
+		// continue to read a message from unknown public key
+		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
+	}
+
+	// get payload from decrypted message
+	pld := payload.LoadPayload64(decMsg)
+	if pld == nil {
+		// got invalid payload64 format from sender
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnPayloadNull))
+		return nil
+	}
+
+	// get [head:body] from payload
+	head := loadHead(pld.GetHead())
+	body := pld.GetBody()
+
+	// check state of payload = [request,response]?
+	if action := head.getAction(); action.isRequest() {
+		// got request from another side (need generate response)
+		p.handleRequest(pCtx, logBuilder, sender, head, body)
+	} else {
+		// got response message from our side request
+		p.handleResponse(pCtx, logBuilder, sender, action, body)
+	}
+
+	return nil
 }
 
 func (p *sNode) handleResponse(

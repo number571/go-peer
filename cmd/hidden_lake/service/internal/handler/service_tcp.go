@@ -7,14 +7,12 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -22,14 +20,14 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-func HandleServiceTCP(
-	pCfgW config.IWrapper,
-	pLogger logger.ILogger,
-	pFetchTimeout time.Duration,
-) anonymity.IHandlerF {
-	httpClient := &http.Client{Timeout: pFetchTimeout}
-
-	return func(pCtx context.Context, pNode anonymity.INode, sender asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
+	return func(
+		pCtx context.Context,
+		pNode anonymity.INode,
+		sender asymmetric.IPubKey,
+		reqBytes []byte,
+	) ([]byte, error) {
+		logger := pNode.GetLogger()
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
 		// enrich logger
@@ -45,25 +43,25 @@ func HandleServiceTCP(
 			// update config state with new friend
 			friends[sender.GetHasher().ToString()] = sender
 			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
-				pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
+				logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
 				return nil, utils.MergeErrors(ErrUpdateFriends, err)
 			}
 			// update list of friends and continue read request
 			pNode.GetListPubKeys().AddPubKey(sender)
-			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
+			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
 		}
 
 		// load request from message's body
 		loadReq, err := request.LoadRequest(reqBytes)
 		if err != nil {
-			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
+			logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
 			return nil, utils.MergeErrors(ErrLoadRequest, err)
 		}
 
 		// get service's address by hostname
 		service, ok := cfg.GetService(loadReq.GetHost())
 		if !ok {
-			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
+			logger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
 			return nil, ErrUndefinedService
 		}
 
@@ -75,7 +73,7 @@ func HandleServiceTCP(
 			bytes.NewReader(loadReq.GetBody()),
 		)
 		if err != nil {
-			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroProxyRequestType))
+			logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroProxyRequestType))
 			return nil, utils.MergeErrors(ErrBuildRequest, err)
 		}
 
@@ -87,9 +85,10 @@ func HandleServiceTCP(
 
 		// send request to service
 		// and receive response from service
+		httpClient := &http.Client{Timeout: pNode.GetSettings().GetFetchTimeout()}
 		resp, err := httpClient.Do(pushReq)
 		if err != nil {
-			pLogger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
+			logger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
 			return nil, utils.MergeErrors(ErrBadRequest, err)
 		}
 		defer resp.Body.Close()
@@ -99,7 +98,7 @@ func HandleServiceTCP(
 		switch respMode {
 		case "", hls_settings.CHeaderResponseModeON:
 			// send response to the client
-			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoResponseFromService))
+			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogInfoResponseFromService))
 			return response.NewResponse(resp.StatusCode).
 					WithHead(getResponseHead(resp)).
 					WithBody(getResponseBody(resp)).
@@ -107,11 +106,11 @@ func HandleServiceTCP(
 				nil
 		case hls_settings.CHeaderResponseModeOFF:
 			// response is not required by the client side
-			pLogger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
+			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
 			return nil, nil
 		default:
 			// unknown response mode
-			pLogger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
+			logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseResponseModeFromService))
 			return nil, ErrInvalidResponseMode
 		}
 	}
