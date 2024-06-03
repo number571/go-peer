@@ -13,7 +13,7 @@ type sSettings struct {
 	FServiceName  string
 	FF2FDisabled  bool
 	FRetryEnqueue uint64
-	FNetworkMask  uint64
+	FNetworkMask  uint32
 	FFetchTimeout time.Duration
 }
 
@@ -52,7 +52,7 @@ func (p *sSettings) GetFetchTimeout() time.Duration {
 	return p.FFetchTimeout
 }
 
-func (p *sSettings) GetNetworkMask() uint64 {
+func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
 }
 

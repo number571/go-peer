@@ -113,7 +113,7 @@ func TestBroadcast(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4 * tcIter)
 
-	headHandle := uint64(testutils.TcHead)
+	headHandle := testutils.TcHead
 	handleF := func(pCtx context.Context, node INode, _ conn.IConn, pMsg message.IMessage) error {
 		defer func() {
 			_ = node.BroadcastMessage(pCtx, pMsg)
@@ -149,7 +149,7 @@ func TestBroadcast(t *testing.T) {
 	ctx := context.Background()
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
-			pld := payload.NewPayload64(
+			pld := payload.NewPayload32(
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
@@ -321,7 +321,7 @@ func TestHandleMessage(t *testing.T) {
 	})
 
 	node.HandleFunc(1, nil)
-	msg1 := message.NewMessage(sett, payload.NewPayload64(1, []byte{1}))
+	msg1 := message.NewMessage(sett, payload.NewPayload32(1, []byte{1}))
 	if ok := node.handleMessage(ctx, nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
@@ -330,7 +330,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return errors.New("some error")
 	})
-	msg2 := message.NewMessage(sett, payload.NewPayload64(1, []byte{2}))
+	msg2 := message.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
 	if ok := node.handleMessage(ctx, nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
@@ -339,7 +339,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
 		return nil
 	})
-	msg3 := message.NewMessage(sett, payload.NewPayload64(1, []byte{3}))
+	msg3 := message.NewMessage(sett, payload.NewPayload32(1, []byte{3}))
 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return
@@ -374,7 +374,7 @@ func TestContextCancel(t *testing.T) {
 		return
 	}
 
-	headHandle := uint64(testutils.TcHead)
+	headHandle := testutils.TcHead
 	sett := message.NewSettings(&message.SSettings{
 		FNetworkKey:   node2.GetVSettings().GetNetworkKey(),
 		FWorkSizeBits: node2.GetSettings().GetConnSettings().GetWorkSizeBits(),
@@ -382,7 +382,7 @@ func TestContextCancel(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 1000; i++ {
-			pld := payload.NewPayload64(
+			pld := payload.NewPayload32(
 				headHandle,
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)

@@ -108,7 +108,7 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.IConstructSett
 
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
-			payload.NewPayload64(hls_settings.CNetworkMask, msg),
+			payload.NewPayload32(hls_settings.CNetworkMask, msg),
 		)
 		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			return err

@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	// IV + Proof + Hash + (2 x PayloadSize) + PayloadHead
+	// IV + Proof + Hash + (2 x Payload32Head) + Payload32Head
 	CMessageHeadSize = 0 +
 		1*symmetric.CAESBlockSize +
 		1*encoding.CSizeUint64 +
 		1*hashing.CSHA256Size +
 		2*encoding.CSizeUint32 +
-		1*encoding.CSizeUint64
+		1*encoding.CSizeUint32
 )
 
 const (
@@ -36,10 +36,10 @@ type sMessage struct {
 	fHash    []byte             // HLMV = H( K, L(M) || M || V )
 	fVoid    []byte             // V
 	fProof   uint64             // P(HLMV)
-	fPayload payload.IPayload64 // M
+	fPayload payload.IPayload32 // M
 }
 
-func NewMessage(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
@@ -107,7 +107,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payload := payload.LoadPayload64(bytesSlice[0])
+	payload := payload.LoadPayload32(bytesSlice[0])
 	if payload == nil {
 		return nil, ErrDecodePayload
 	}
@@ -133,7 +133,7 @@ func (p *sMessage) GetVoid() []byte {
 	return p.fVoid
 }
 
-func (p *sMessage) GetPayload() payload.IPayload64 {
+func (p *sMessage) GetPayload() payload.IPayload32 {
 	return p.fPayload
 }
 

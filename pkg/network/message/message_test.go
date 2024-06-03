@@ -53,7 +53,7 @@ func TestError(t *testing.T) {
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
-	pld := payload.NewPayload64(tcHead, []byte(tcBody))
+	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
 		FWorkSizeBits:       testutils.TCWorkSize,
 		FNetworkKey:         tcNetworkKey,
@@ -219,7 +219,7 @@ func TestMessage(t *testing.T) {
 	}
 }
 
-func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
@@ -244,7 +244,7 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload64) IMes
 	}
 }
 
-func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
@@ -275,7 +275,7 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload64) IMes
 	}
 }
 
-func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload64) IMessage {
+func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))

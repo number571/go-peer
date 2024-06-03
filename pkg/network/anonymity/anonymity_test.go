@@ -735,7 +735,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB, retryNum in
 		return nil, nil
 	}
 	parallel := uint64(1)
-	networkMask := uint64(1)
+	networkMask := uint32(1)
 	networkKey := "old_network_key"
 	limitVoidSize := uint64(10_000)
 	node := NewNode(
@@ -823,7 +823,7 @@ func testDeleteDB(typeDB int) {
 func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsgBytes []byte) net_message.IMessage {
 	return net_message.NewMessage(
 		pSett,
-		payload.NewPayload64(
+		payload.NewPayload32(
 			p.fSettings.GetNetworkMask(),
 			pMsgBytes,
 		),

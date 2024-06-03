@@ -21,7 +21,7 @@ type INode interface {
 	types.ICloser
 
 	Listen(context.Context) error
-	HandleFunc(uint64, IHandlerF) INode
+	HandleFunc(uint32, IHandlerF) INode
 
 	SetVSettings(conn.IVSettings)
 	GetVSettings() conn.IVSettings

@@ -11,6 +11,8 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake`: move template from helpers to root hidden_lake directory
+- Update `pkg/network`: HandleFunc(uint64) -> HandleFunc(uint32)
+- Update `cmd/hidden_lake/service`: change CNetworkMask, CServiceMask
 
 ### BUG FIXES
 

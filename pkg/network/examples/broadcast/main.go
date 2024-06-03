@@ -67,7 +67,7 @@ func main() {
 				FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
 				FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
 			}),
-			payload.NewPayload64(
+			payload.NewPayload32(
 				serviceHeader,
 				[]byte("hello, world!"),
 			),

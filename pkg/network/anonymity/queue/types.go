@@ -24,7 +24,7 @@ type IMessageQueue interface {
 }
 
 type ISettings interface {
-	GetNetworkMask() uint64
+	GetNetworkMask() uint32
 	GetWorkSizeBits() uint64
 	GetMainCapacity() uint64
 	GetVoidCapacity() uint64

@@ -73,7 +73,7 @@ func HandleMessageEncryptAPI(
 				FParallel:           pParallel,
 				FLimitVoidSizeBytes: cfgSett.GetLimitVoidSizeBytes(),
 			}),
-			payload.NewPayload64(hls_settings.CNetworkMask, msg),
+			payload.NewPayload32(hls_settings.CNetworkMask, msg),
 		)
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))

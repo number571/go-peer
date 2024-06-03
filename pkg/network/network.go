@@ -24,7 +24,7 @@ type sNode struct {
 	fListener     net.Listener
 	fCacheSetter  cache.ICacheSetter
 	fConnections  map[string]conn.IConn
-	fHandleRoutes map[uint64]IHandlerF
+	fHandleRoutes map[uint32]IHandlerF
 }
 
 // Creating a node object managed by connections with multiple nodes.
@@ -40,7 +40,7 @@ func NewNode(
 		fVSettings:    pVSettings,
 		fCacheSetter:  pCacheSetter,
 		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
-		fHandleRoutes: make(map[uint64]IHandlerF, 64),
+		fHandleRoutes: make(map[uint32]IHandlerF, 64),
 	}
 }
 
@@ -175,7 +175,7 @@ func (p *sNode) Close() error {
 }
 
 // Saves the function to the map by key for subsequent redirection.
-func (p *sNode) HandleFunc(pHead uint64, pHandle IHandlerF) INode {
+func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -342,7 +342,7 @@ func (p *sNode) setConnection(pAddress string, pConn conn.IConn) {
 }
 
 // Gets the handler function by key.
-func (p *sNode) getFunction(pHead uint64) (IHandlerF, bool) {
+func (p *sNode) getFunction(pHead uint32) (IHandlerF, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 

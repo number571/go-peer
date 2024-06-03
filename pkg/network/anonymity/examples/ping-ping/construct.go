@@ -20,7 +20,7 @@ import (
 
 const (
 	networkKey  = "network-key"
-	networkMask = uint64(0x1122334455667788)
+	networkMask = uint32(0x11223344)
 	keySize     = uint64(1024)
 	msgSize     = uint64(8192)
 	workSize    = uint64(10)

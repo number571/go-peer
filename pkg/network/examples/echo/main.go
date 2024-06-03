@@ -56,7 +56,7 @@ func main() {
 			FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
 			FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
 		}),
-		payload.NewPayload64(serviceHeader, []byte("hello, world!")),
+		payload.NewPayload32(serviceHeader, []byte("hello, world!")),
 	)
 	if err := conn.WriteMessage(ctx, sendMsg); err != nil {
 		panic(err)
@@ -82,7 +82,7 @@ func handler() network.IHandlerF {
 					FNetworkKey:   node.GetVSettings().GetNetworkKey(),
 					FWorkSizeBits: node.GetSettings().GetConnSettings().GetWorkSizeBits(),
 				}),
-				payload.NewPayload64(
+				payload.NewPayload32(
 					serviceHeader,
 					[]byte(fmt.Sprintf("echo: [%s]", string(msg.GetPayload().GetBody()))),
 				),

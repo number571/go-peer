@@ -135,7 +135,7 @@ func TestHandleTransferAPI(t *testing.T) {
 		}
 		netMsg := net_message.NewMessage(
 			netMsgSettings,
-			payload.NewPayload64(
+			payload.NewPayload32(
 				hls_settings.CNetworkMask,
 				encMsg,
 			),

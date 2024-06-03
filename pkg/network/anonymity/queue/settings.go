@@ -10,7 +10,7 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FNetworkMask        uint64
+	FNetworkMask        uint32
 	FWorkSizeBits       uint64
 	FMainCapacity       uint64
 	FVoidCapacity       uint64
@@ -47,7 +47,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetNetworkMask() uint64 {
+func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
 }
 

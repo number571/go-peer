@@ -192,7 +192,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 	if err != nil {
 		panic(err)
 	}
-	networkMask := uint64(1)
+	networkMask := uint32(1)
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  "TEST",

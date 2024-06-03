@@ -205,7 +205,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg []byte) error {
 				FParallel:           p.fSettings.GetParallel(),
 				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
-			payload.NewPayload64(p.fSettings.GetNetworkMask(), pMsg),
+			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
 		)
 	}()
 
@@ -251,7 +251,7 @@ func (p *sMessageQueue) fillVoidPool(pCtx context.Context) error {
 				FParallel:           p.fSettings.GetParallel(),
 				FLimitVoidSizeBytes: p.fSettings.GetLimitVoidSizeBytes(),
 			}),
-			payload.NewPayload64(p.fSettings.GetNetworkMask(), msg),
+			payload.NewPayload32(p.fSettings.GetNetworkMask(), msg),
 		)
 	}()
 
