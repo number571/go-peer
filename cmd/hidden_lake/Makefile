@@ -6,6 +6,7 @@ _GO_TEST_LIST=\
 	go list ./... | \
 	grep -vsE '/cmd/hidden_lake/.*/cmd/' 
 
+_TEST_UTILS_PATH=./../../test/utils
 _TEST_RESULT_PATH=./_test/result
 _TEST_PPROF_PATH=./_test/pprof
 
@@ -42,11 +43,11 @@ test-coverage-treemap:
 test-coverage-badge: 
 	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
 	if [ `${_COVERAGE_FLOOR}` -lt 60 ]; then \
-		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-crimson" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/dc143c/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
 	elif [ `${_COVERAGE_FLOOR}` -gt 80 ]; then \
-		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-green" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/97ca00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
 	else \
-		curl "https://img.shields.io/badge/coverage-`${_COVERAGE_FLOOR}`%25-darkorange" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/ff8c00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
 	fi
 
 ### PPROF
