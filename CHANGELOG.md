@@ -14,6 +14,7 @@
 - Update `pkg/network`: HandleFunc(uint64) -> HandleFunc(uint32)
 - Update `cmd/hidden_lake/service`: change CNetworkMask, CServiceMask
 - Update `Makefile`: delete curl to https://img.shields.io/badge
+- Update `images`: change go-peer_badge.png -> go-peer_badge.svg
 
 ### BUG FIXES
 
