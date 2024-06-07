@@ -15,6 +15,7 @@
 - Update `cmd/hidden_lake/service`: change CNetworkMask, CServiceMask
 - Update `Makefile`: delete curl to https://img.shields.io/badge
 - Update `images`: change go-peer_badge.png -> go-peer_badge.svg
+- Update `pkg/crypto/keybuilder`: change Build interface
 
 ### BUG FIXES
 

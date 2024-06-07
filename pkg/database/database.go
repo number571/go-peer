@@ -56,19 +56,17 @@ func NewKVDatabase(pSett ISettings) (IKVDatabase, error) {
 			return nil, utils.MergeErrors(ErrReadSalt, err)
 		}
 		isInitSalt = true
-		saltValue = random.NewCSPRNG().GetBytes(2 * cSaltSize)
+		saltValue = random.NewCSPRNG().GetBytes(cSaltSize)
 		if err := db.Put([]byte(cSaltKey), saltValue, nil); err != nil {
 			return nil, utils.MergeErrors(ErrPushSalt, err)
 		}
 	}
 
-	cipherSalt := saltValue[:cSaltSize]
-	cipherKeyBuilder := keybuilder.NewKeyBuilder(1<<pSett.GetWorkSize(), cipherSalt)
-	cipherKey := cipherKeyBuilder.Build(pSett.GetPassword())
+	keyBuilder := keybuilder.NewKeyBuilder(1<<pSett.GetWorkSize(), saltValue)
+	buildKeys := keyBuilder.Build(pSett.GetPassword(), 2*symmetric.CAESKeySize)
 
-	authSalt := saltValue[cSaltSize:]
-	authKeyBuilder := keybuilder.NewKeyBuilder(1<<pSett.GetWorkSize(), authSalt)
-	authKey := authKeyBuilder.Build(pSett.GetPassword())
+	cipherKey := buildKeys[:symmetric.CAESKeySize]
+	authKey := buildKeys[symmetric.CAESKeySize:]
 
 	if isInitSalt {
 		saltHash := hashing.NewHMACSHA256Hasher(authKey, saltValue).ToBytes()

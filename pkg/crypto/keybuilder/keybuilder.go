@@ -3,7 +3,6 @@ package keybuilder
 import (
 	"crypto/sha256"
 
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -23,12 +22,12 @@ func NewKeyBuilder(pIterN uint64, pSalt []byte) IKeyBuilder {
 	}
 }
 
-func (p *sKeyBuilder) Build(pPassword string) []byte {
+func (p *sKeyBuilder) Build(pPassword string, pKeyLen uint64) []byte {
 	return pbkdf2.Key(
 		[]byte(pPassword),
 		p.fSalt,
 		int(p.fIterN),
-		int(symmetric.CAESKeySize),
+		int(pKeyLen),
 		sha256.New,
 	)
 }
