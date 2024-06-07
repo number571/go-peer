@@ -60,6 +60,7 @@ const (
   limit_void_size_bytes: %d
   network_key: %s
   f2f_disabled: true
+  qbt_disabled: true
 logging:
   - info
   - erro
@@ -269,6 +270,11 @@ func TestComplexConfig(t *testing.T) {
 
 	if !cfg.GetSettings().GetF2FDisabled() {
 		t.Error("settings f2f disabled is invalid")
+		return
+	}
+
+	if !cfg.GetSettings().GetQBTDisabled() {
+		t.Error("settings qbt disabled is invalid")
 		return
 	}
 

@@ -226,6 +226,7 @@ settings:
   limit_void_size_bytes: 4096
   network_key: hls-network-key
   f2f_disabled: false
+  qbt_disabled: false
 logging:
   - info
   - warn
