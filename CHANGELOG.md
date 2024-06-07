@@ -7,6 +7,8 @@
 ### IMPROVEMENTS
 
 - Update `Makefile`: append 'test-coverage-treemap'
+- Update `pkg/network/anonymity/queue`: append qbt_disabled field
+- Update `examples/secure_messenger`: rename -> secure_network/secpy_chat, append messenger & filesharer
 
 ### CHANGES
 

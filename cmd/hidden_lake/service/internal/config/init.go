@@ -29,6 +29,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				FNetworkKey:         hls_settings.CDefaultNetworkKey,
 				FF2FDisabled:        hls_settings.CDefaultF2FDisabled,
+				FQBTDisabled:        hls_settings.CDefaultQBTDisabled,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

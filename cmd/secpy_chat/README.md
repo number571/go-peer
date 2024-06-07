@@ -59,13 +59,13 @@ The application connects to two services at once: [HLE](https://github.com/numbe
 
 Build and run services HLT, HLE
 ```bash
-$ cd examples/secure_messenger
+$ cd examples/secure_network/secpy_chat
 $ make
 ```
 
 Run client#1
 ```bash
-$ cd examples/secure_messenger/node1
+$ cd examples/secure_network/secpy_chat/node1
 $ python3 main.py
 > /friend Alice
 # waiting client#2
@@ -75,7 +75,7 @@ $ python3 main.py
 
 Run client#2
 ```bash
-$ cd examples/secure_messenger/node2
+$ cd examples/secure_network/secpy_chat/node2
 $ python3 main.py
 > /friend Bob
 # waiting client#1

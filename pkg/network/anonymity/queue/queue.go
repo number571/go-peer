@@ -50,7 +50,7 @@ func NewMessageQueue(
 	pVSettings IVSettings,
 	pClient client.IClient,
 ) IMessageQueue {
-	return &sMessageQueue{
+	mq := &sMessageQueue{
 		fState:     state.NewBoolState(),
 		fSettings:  pSettings,
 		fVSettings: pVSettings,
@@ -61,9 +61,15 @@ func NewMessageQueue(
 		},
 		fVoidPool: &sVoidPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetVoidCapacity()),
-			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
+			fReceiver: nil, // set only if qbt_disabled=false
 		},
 	}
+	if !pSettings.GetQBTDisabled() { // if qbt_disabled=false
+		mq.fVoidPool.fReceiver = asymmetric.NewRSAPrivKey(
+			pClient.GetPrivKey().GetSize(),
+		).GetPubKey()
+	}
+	return mq
 }
 
 func (p *sMessageQueue) GetSettings() ISettings {
@@ -105,6 +111,13 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 
 func (p *sMessageQueue) runVoidPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
+
+	if p.fSettings.GetQBTDisabled() {
+		<-pCtx.Done()
+		chErr <- pCtx.Err()
+		return
+	}
+
 	for {
 		select {
 		case <-pCtx.Done():
@@ -147,6 +160,7 @@ func (p *sMessageQueue) SetVSettings(pVSettings IVSettings) {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		<-p.fMainPool.fQueue
 	}
+
 	for len(p.fVoidPool.fQueue) > 0 {
 		atomic.AddInt64(&p.fVoidPool.fCount, -1)
 		<-p.fVoidPool.fQueue
@@ -167,6 +181,16 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	randDuration := time.Duration(
 		random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandDuration()+1),
 	)
+
+	if p.fSettings.GetQBTDisabled() {
+		select {
+		case <-pCtx.Done():
+			return nil
+		case x := <-p.fMainPool.fQueue:
+			atomic.AddInt64(&p.fMainPool.fCount, -1)
+			return x
+		}
+	}
 
 	select {
 	case <-pCtx.Done():

@@ -93,6 +93,7 @@ func (p *sApp) initAnonNode() error {
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:        hls_settings.CNetworkMask,
+				FQBTDisabled:        cfgSettings.GetQBTDisabled(),
 				FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
 				FMainCapacity:       hls_settings.CQueueMainCapacity,
 				FVoidCapacity:       hls_settings.CQueueVoidCapacity,

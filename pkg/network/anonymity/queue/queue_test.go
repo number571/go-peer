@@ -62,6 +62,38 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
+func TestQueueVoidDisabled(t *testing.T) {
+	t.Parallel()
+
+	queue := NewMessageQueue(
+		NewSettings(&SSettings{
+			FNetworkMask:  1,
+			FQBTDisabled:  true,
+			FWorkSizeBits: 10,
+			FMainCapacity: testutils.TCQueueCapacity,
+			FVoidCapacity: testutils.TCQueueCapacity,
+			FParallel:     1,
+			FDuration:     100 * time.Millisecond,
+			FRandDuration: 100 * time.Millisecond,
+		}),
+		NewVSettings(&SVSettings{
+			FNetworkKey: "network_key",
+		}),
+		client.NewClient(
+			message.NewSettings(&message.SSettings{
+				FMessageSizeBytes: testutils.TCMessageSize,
+				FKeySizeBits:      testutils.TcKeySize,
+			}),
+			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		),
+	)
+
+	if err := testQueue(queue); err != nil {
+		t.Error(err)
+		return
+	}
+}
+
 func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
@@ -219,15 +251,18 @@ func testQueue(queue IMessageQueue) error {
 		return errors.New("incorrect set variable settings")
 	}
 
-	msgs := make([]net_message.IMessage, 0, 3)
-	for i := 0; i < 3; i++ {
-		msgs = append(msgs, queue.DequeueMessage(ctx))
-	}
+	// auto fill queue enabled only if qbt_disabled=false
+	if !queue.GetSettings().GetQBTDisabled() {
+		msgs := make([]net_message.IMessage, 0, 3)
+		for i := 0; i < 3; i++ {
+			msgs = append(msgs, queue.DequeueMessage(ctx))
+		}
 
-	for i := 0; i < len(msgs)-1; i++ {
-		for j := i + 1; j < len(msgs); j++ {
-			if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
-				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
+		for i := 0; i < len(msgs)-1; i++ {
+			for j := i + 1; j < len(msgs); j++ {
+				if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
+					return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
+				}
 			}
 		}
 	}

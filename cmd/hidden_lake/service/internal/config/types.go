@@ -27,6 +27,7 @@ type IConfigSettings interface {
 
 	GetLimitVoidSizeBytes() uint64
 	GetF2FDisabled() bool
+	GetQBTDisabled() bool
 }
 
 type IConfig interface {

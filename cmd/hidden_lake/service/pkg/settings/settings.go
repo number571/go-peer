@@ -42,6 +42,7 @@ const (
 	CDefaultQueueRandPeriod = 0         // 0 seconds
 	CDefaultLimitVoidSize   = (4 << 10) // 4KiB
 	CDefaultF2FDisabled     = false     // friend-to-friend
+	CDefaultQBTDisabled     = false     // queue-based-task
 	CDefaultNetworkKey      = "default"
 )
 

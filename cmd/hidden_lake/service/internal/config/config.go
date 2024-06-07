@@ -26,6 +26,7 @@ type SConfigSettings struct {
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FF2FDisabled        bool   `json:"f2f_disabled,omitempty" yaml:"f2f_disabled,omitempty"`
+	FQBTDisabled        bool   `json:"qbt_disabled,omitempty" yaml:"qbt_disabled,omitempty"`
 }
 
 type SConfig struct {
@@ -126,6 +127,10 @@ func (p *SConfigSettings) GetNetworkKey() string {
 
 func (p *SConfigSettings) GetF2FDisabled() bool {
 	return p.FF2FDisabled
+}
+
+func (p *SConfigSettings) GetQBTDisabled() bool {
+	return p.FQBTDisabled
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {
