@@ -50,13 +50,8 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 			return utils.MergeErrors(ErrPushMessageDB, err)
 		}
 
-		hasBroadastError := false
+		// need pass return error if exist (some of connections may be closed)
 		if err := pNode.BroadcastMessage(pCtx, pNetMsg); err != nil {
-			// need pass error (some of connections may be closed)
-			hasBroadastError = true
-		}
-
-		if hasBroadastError {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		} else {
 			pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
