@@ -52,7 +52,7 @@ func testSettings(t *testing.T, n int) {
 func TestTryRecover(t *testing.T) {
 	t.Parallel()
 
-	dbPath := fmt.Sprintf(tcPathDBTemplate, 5)
+	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
@@ -129,7 +129,12 @@ func TestTryDecrypt(t *testing.T) {
 func TestInvalidInitDB(t *testing.T) {
 	t.Parallel()
 
-	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
+	testIvalidInitDB(t, 5, []byte(cHashKey))
+	testIvalidInitDB(t, 6, []byte(cRandKey))
+}
+
+func testIvalidInitDB(t *testing.T, n int, key []byte) {
+	dbPath := fmt.Sprintf(tcPathDBTemplate, n)
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
@@ -143,7 +148,7 @@ func TestInvalidInitDB(t *testing.T) {
 	}
 
 	db := store.(*sKVDatabase)
-	if err := delDB(db.fDB, []byte(cHashKey)); err != nil {
+	if err := delDB(db.fDB, key); err != nil {
 		t.Error(err)
 		return
 	}
@@ -156,7 +161,7 @@ func TestInvalidInitDB(t *testing.T) {
 		FPassword: "CIPHER",
 	}))
 	if errx == nil {
-		t.Error("success open database with incorrect hash param")
+		t.Error("success open database with incorrect param")
 		return
 	}
 }

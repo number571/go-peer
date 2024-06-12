@@ -139,7 +139,7 @@ func (p *sAdaptedConsumer) loadCountFromService(pCtx context.Context) (uint64, e
 func (p *sAdaptedConsumer) loadCountFromDB() (uint64, error) {
 	res, err := p.fKVDatabase.Get([]byte(cDBCountKey))
 	if err != nil {
-		if !errors.Is(err, database.ErrGetNotFound) {
+		if !errors.Is(err, database.ErrNotFound) {
 			return 0, utils.MergeErrors(ErrGetCount, err)
 		}
 		res = []byte(strconv.Itoa(0))

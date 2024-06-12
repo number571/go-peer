@@ -88,7 +88,7 @@ func setDB(pDB *bbolt.DB, pKey []byte, pValue []byte) error {
 	return pDB.Update(func(tx *bbolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte(cBucket))
 		if err != nil {
-			return ErrOpenBucket
+			return err
 		}
 		return bucket.Put(pKey, pValue)
 	})
@@ -116,11 +116,11 @@ func getDB(pDB *bbolt.DB, pKey []byte) ([]byte, error) {
 	err := pDB.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket([]byte(cBucket))
 		if b == nil {
-			return ErrOpenBucket
+			return ErrNotFound
 		}
 		val := b.Get(pKey)
 		if val == nil {
-			return ErrGetNotFound
+			return ErrNotFound
 		}
 		encValue = make([]byte, len(val))
 		copy(encValue, val)
@@ -144,7 +144,7 @@ func delDB(pDB *bbolt.DB, pKey []byte) error {
 	return pDB.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket([]byte(cBucket))
 		if b == nil {
-			return ErrOpenBucket
+			return nil
 		}
 		return b.Delete(pKey)
 	})
@@ -164,7 +164,7 @@ func getSaltValue(pDB *bbolt.DB) ([]byte, bool, error) {
 	initValue := false
 	saltValue, err := getDB(pDB, []byte(cSaltKey))
 	if err != nil {
-		if !errors.Is(err, ErrOpenBucket) && !errors.Is(err, ErrGetNotFound) {
+		if !errors.Is(err, ErrNotFound) {
 			return nil, false, utils.MergeErrors(ErrReadSalt, err)
 		}
 		initValue = true

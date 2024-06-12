@@ -26,9 +26,8 @@ var (
 	ErrSetValueDB           = &SDatabaseError{"set value to database"}
 	ErrGetValueDB           = &SDatabaseError{"get value from database"}
 	ErrDelValueDB           = &SDatabaseError{"del value from database"}
-	ErrGetNotFound          = &SDatabaseError{"get value not found"}
+	ErrNotFound             = &SDatabaseError{"value not found"}
 	ErrCloseDB              = &SDatabaseError{"close database"}
 	ErrInvalidEncryptedSize = &SDatabaseError{"invalid encrypted size"}
 	ErrInvalidDataHash      = &SDatabaseError{"invalid data hash"}
-	ErrOpenBucket           = &SDatabaseError{"open bucket"}
 )
