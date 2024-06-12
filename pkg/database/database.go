@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"errors"
-	"sync"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
@@ -30,7 +29,6 @@ const (
 )
 
 type sKVDatabase struct {
-	fMutex    sync.Mutex
 	fDB       *bbolt.DB
 	fSettings ISettings
 	fCipher   symmetric.ICipher
@@ -72,9 +70,6 @@ func (p *sKVDatabase) GetSettings() ISettings {
 }
 
 func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	val := doEncrypt(p.fCipher, p.fAuthKey, pValue)
 
@@ -95,9 +90,6 @@ func setDB(pDB *bbolt.DB, pKey []byte, pValue []byte) error {
 }
 
 func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	encValue, err := getDB(p.fDB, key)
 	if err != nil {
@@ -130,9 +122,6 @@ func getDB(pDB *bbolt.DB, pKey []byte) ([]byte, error) {
 }
 
 func (p *sKVDatabase) Del(pKey []byte) error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	key := hashing.NewHMACSHA256Hasher(p.fAuthKey, pKey).ToBytes()
 	if err := delDB(p.fDB, key); err != nil {
 		return utils.MergeErrors(ErrDelValueDB, err)
@@ -151,9 +140,6 @@ func delDB(pDB *bbolt.DB, pKey []byte) error {
 }
 
 func (p *sKVDatabase) Close() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
 	if err := p.fDB.Close(); err != nil {
 		return utils.MergeErrors(ErrCloseDB, err)
 	}

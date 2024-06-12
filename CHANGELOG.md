@@ -24,6 +24,7 @@
 ### BUG FIXES
 
 - Update `cmd/hidden_lake/applications/filesharer`: fix load list of files from storage
+- Update `pkg/database`: delete mutex
 
 ## v1.6.12
 
