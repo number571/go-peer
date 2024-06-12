@@ -14,16 +14,21 @@ func (err *SDatabaseError) Error() string {
 
 var (
 	ErrOpenDB               = &SDatabaseError{"open database"}
+	ErrGetSalt              = &SDatabaseError{"get salt value"}
 	ErrReadSalt             = &SDatabaseError{"read salt value"}
-	ErrReadSaltHash         = &SDatabaseError{"read salt hash"}
+	ErrReadRand             = &SDatabaseError{"read rand"}
+	ErrGetHashRand          = &SDatabaseError{"get hash rand"}
+	ErrReadHashRand         = &SDatabaseError{"read hash rand"}
 	ErrPushSalt             = &SDatabaseError{"push salt value"}
-	ErrPushSaltHash         = &SDatabaseError{"push salt hash"}
-	ErrInvalidSaltHash      = &SDatabaseError{"invalid salt hash"}
+	ErrPushRand             = &SDatabaseError{"push rand value"}
+	ErrPushHashRand         = &SDatabaseError{"push hash rand"}
+	ErrInvalidHash          = &SDatabaseError{"invalid hash"}
 	ErrSetValueDB           = &SDatabaseError{"set value to database"}
 	ErrGetValueDB           = &SDatabaseError{"get value from database"}
 	ErrDelValueDB           = &SDatabaseError{"del value from database"}
+	ErrGetNotFound          = &SDatabaseError{"get value not found"}
 	ErrCloseDB              = &SDatabaseError{"close database"}
-	ErrRecoverDB            = &SDatabaseError{"recover database"}
 	ErrInvalidEncryptedSize = &SDatabaseError{"invalid encrypted size"}
 	ErrInvalidDataHash      = &SDatabaseError{"invalid data hash"}
+	ErrOpenBucket           = &SDatabaseError{"open bucket"}
 )

@@ -93,7 +93,7 @@ All programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux`, `
 > [!IMPORTANT]
 > All dependencies are loaded into the go-peer project once using the `go mod vendor` command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
 
-1. Go library [github.com/syndtr/goleveldb](https://github.com/syndtr/goleveldb "goleveldb") (used by `pkg/database`);
+1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/database`);
 2. Go library [golang.org/x/net](https://golang.org/x/net "x/net") (used by `cmd/hidden_lake/applications/messenger`);
 3. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`);
 4. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`);

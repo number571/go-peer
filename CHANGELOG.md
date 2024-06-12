@@ -18,6 +18,8 @@
 - Update `Makefile`: delete curl to https://img.shields.io/badge
 - Update `images`: change go-peer_badge.png -> go-peer_badge.svg
 - Update `pkg/crypto/keybuilder`: change Build interface
+- Update `pkg/database`: leveldb -> bbolt
+- Update `pkg/database`: db.Del return err=nil if value not found in DB
 
 ### BUG FIXES
 

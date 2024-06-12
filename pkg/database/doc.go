@@ -1,14 +1,30 @@
 // Package database is a key-value database with integrated password encryption functions.
 //
 /*
-	DATABASE ENCRYPTION FORMAT
+	DATABASE INIT FORMAT
 
-	H(EM) || EM
+	Ak, Ck <- KDF(S, P)
+	S || R || H[Ak](R)
 	where
-		EM = E(M)
+		H  - hmac
+		S  - salt value
+		R  - random value
+		P  - password
+		Ak - auth-key
+		Ck - cipher-key
+*/
+/*
+	DATABASE SET FORMAT
+
+	{H[Ak](K) : (H[Ak](EV) || EV)}
+	where
+		EV = E[Ck](V)
 		where
-			E - encrypt (cipher-key)
-			H - hmac (auth-key)
-			M - message bytes
+			E  - encrypt
+			H  - hmac
+			K  - database key
+			V  - database value
+			Ak - auth-key
+			Ck - cipher-key
 */
 package database

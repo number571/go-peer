@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/database"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/utils"
-	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
@@ -140,7 +139,7 @@ func (p *sAdaptedConsumer) loadCountFromService(pCtx context.Context) (uint64, e
 func (p *sAdaptedConsumer) loadCountFromDB() (uint64, error) {
 	res, err := p.fKVDatabase.Get([]byte(cDBCountKey))
 	if err != nil {
-		if !errors.Is(err, leveldb.ErrNotFound) {
+		if !errors.Is(err, database.ErrGetNotFound) {
 			return 0, utils.MergeErrors(ErrGetCount, err)
 		}
 		res = []byte(strconv.Itoa(0))

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -68,43 +67,6 @@ func TestTryRecover(t *testing.T) {
 
 	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
 		t.Error(err)
-		return
-	}
-
-	store.Close()
-
-	entries, err := os.ReadDir(dbPath)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	for _, e := range entries {
-		name := e.Name()
-		if !strings.HasPrefix(name, "MANIFEST-") {
-			continue
-		}
-		os.Remove(dbPath + "/" + name)
-	}
-
-	store, err = NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
-	}))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	value, err := store.Get([]byte("KEY"))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if !bytes.Equal(value, []byte("VALUE")) {
-		t.Error("invalid equal values")
 		return
 	}
 
@@ -180,18 +142,8 @@ func TestInvalidInitDB(t *testing.T) {
 		return
 	}
 
-	if err := store.Del([]byte(cSaltKey)); err == nil {
-		t.Error("success delete cSaltKey")
-		return
-	}
-
-	if err := store.Del([]byte(cHashKey)); err == nil {
-		t.Error("success delete cHashKey")
-		return
-	}
-
 	db := store.(*sKVDatabase)
-	if err := db.fDB.Delete([]byte(cHashKey), nil); err != nil {
+	if err := delDB(db.fDB, []byte(cHashKey)); err != nil {
 		t.Error(err)
 		return
 	}
@@ -317,11 +269,6 @@ func TestBasicDB(t *testing.T) {
 
 	if err := store.Del([]byte("KEY")); err != nil {
 		t.Error("[testBasic]", err)
-		return
-	}
-
-	if err := store.Del([]byte("KEY")); err == nil {
-		t.Error("success delete already deleted value")
 		return
 	}
 
