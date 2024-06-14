@@ -62,20 +62,15 @@ Pri la projekto
                     {{if (eq .FLanguage 0)}}
                     The HLM is a messenger based on the core of an anonymous network with theoretically provable
                     anonymity of HLS. A feature of this messenger is the provision of anonymity of the fact of
-                    transactions (sending, receiving). The HLM can use HLT to download messages when the user was
-                    offline.
+                    transactions (sending, receiving).
                     {{else if (eq .FLanguage 1)}}
                     HLM - это мессенджер, основанный на ядре анонимной сети (HLS) с теоретически доказуемой
-                    анонимностью.
-                    Особенностью данного мессенджера является анонимность факта совершения
-                    транзакций (отправление, получение). HLM может использовать HLT для загрузки сообщений, когда
-                    пользователь находится не в сети.
+                    анонимностью. Особенностью данного мессенджера является анонимность факта совершения
+                    транзакций (отправление, получение).
                     {{else if (eq .FLanguage 2)}}
                     HLM estas mesaĝisto bazita sur La Anonima Retkerno (HLS) kun teorie pruvebla
-                    anonimeco.
-                    La propreco de ĉi tiu mesaĝisto estas la anonimeco de la fakto de komisiono
-                    transakcioj (sendo, ricevo). HLM povas uzi HLT por ŝarĝi mesaĝojn kiam
-                    la uzanto estas eksterreta.
+                    anonimeco. La propreco de ĉi tiu mesaĝisto estas la anonimeco de la fakto de komisiono
+                    transakcioj (sendo, ricevo).
                     {{end}}
                 </p>
                 <p class="text-left">
@@ -91,24 +86,6 @@ Pri la projekto
                     HLS estas la kerno de anonima reto kun teorie pruvebla anonimeco, konstruita sur
                     la bazo de ligoj "unu kun la alia" (F2F). La kerno estas bazita sur "vico" modelo. En certaj kazoj
                     En efektivigoj, LA hls-kerno povas havi la posedaĵon de "abstrakteco".
-                    {{end}}
-                </p>
-                <p class="text-left">
-                    {{if (eq .FLanguage 0)}}
-                    The HLT is an application that emulates itself as a HLS for receiving messages from the network. It
-                    stores downloaded messages in its database for subsequent issuance. The database works as a ring
-                    structure in which old messages are overwritten with new ones. HLT can also work in
-                    relayer mode.
-                    {{else if (eq .FLanguage 1)}}
-                    HLT - это приложение, которое эмулирует себя как HLS для получения сообщений из сети. HLT
-                    сохраняет загруженные сообщения в своей базе данных для последующей выдачи. База данных работает как
-                    структура кольцо, в которой старые сообщения перезаписываются новыми. HLT может работать также в
-                    режиме ретранслятора.
-                    {{else if (eq .FLanguage 2)}}
-                    HLT estas apliko kiu kopias sin kiel hls por ricevi mesaĝojn de la reto. HLT
-                    konservas la elŝutitajn mesaĝojn en sia datumbazo por posta liberigo. La datumbazo funkcias kiel
-                    ringa strukturo en kiu malnovaj mesaĝoj estas superskribitaj per novaj. HLT ankaŭ povas funkcii en
-                    ripetila reĝimo.
                     {{end}}
                 </p>
             </div>
@@ -148,7 +125,7 @@ Pri la projekto
                     a cryptographic protocol applicable in anonymous networks and secure client applications with
                     subsequent implementation in the Go programming language.
                     {{else if (eq .FLanguage 1)}}
-                    Монолитный криптографический протокол - это научно-аналитическая статья, описывающая анализ
+                    Монолитный криптографический протокол - это научно-исследовательская статья, описывающая анализ
                     криптографического протокола, применимого в анонимных сетях и клиент-безопасных приложениях с
                     последующей реализацией на языке программирования Go.
                     {{else if (eq .FLanguage 2)}}
@@ -174,7 +151,7 @@ Pri la projekto
                     analysis of theoretically provable anonymous networks with unique characteristics of immunity to
                     the level of centralization and the number of nodes in the network.
                     {{else if (eq .FLanguage 1)}}
-                    Абстрактные анонимные сети - это научно-аналитическая статья, описывающая
+                    Абстрактные анонимные сети - это научно-исследовательская статья, описывающая
                     анализ теоретически доказуемых анонимных сетей с уникальными характеристиками невосприимчивости к
                     уровню централизации и количеству узлов в сети.
                     {{else if (eq .FLanguage 2)}}
@@ -199,7 +176,7 @@ Pri la projekto
                     The Decentralized Key Exchange Protocol is a scientific and analytical article describing secure
                     ways to transfer keys without using trusted certification authorities.
                     {{else if (eq .FLanguage 1)}}
-                    Децентрализованный протокол обмена ключами - это научно-аналитическая статья, описывающая
+                    Децентрализованный протокол обмена ключами - это научно-исследовательская статья, описывающая
                     безопасные способы передачи ключей без использования доверенных центров сертификации.
                     {{else if (eq .FLanguage 2)}}
                     La Protokolo De Malcentra Ŝlosila Interŝanĝo estas scienca kaj analiza artikolo priskribanta sekuraj
@@ -216,6 +193,27 @@ Pri la projekto
                     {{end}}
                     <a href="https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf"
                         class="text-info">decentralized_key_exchange_protocol.pdf</a>;
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The Anonymous Hidden Lake Network is a research article describing the basic mechanisms of the Hidden Lake anonymous network using mathematical models.
+                    {{else if (eq .FLanguage 1)}}
+                    Анонимная сеть "Hidden Lake" - это научно-исследовательская статья, описывающая
+                    основные механизмы работы анонимной сети Hidden Lake при помощи математических моделей.
+                    {{else if (eq .FLanguage 2)}}
+                    La Anonima Kaŝa Lago Reto Estas esplorartikolo priskribanta La bazajn mekanismojn De La Kaŝa Lago anonima reto uzanta matematikajn modelojn.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The "Hidden Lake" anonymous network:
+                    {{else if (eq .FLanguage 1)}}
+                    Анонимная сеть "Hidden Lake":
+                    {{else if (eq .FLanguage 2)}}
+                    Anonima reto"Kaŝita Lago":
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf"
+                        class="text-info">hidden_lake_anonymous_network.pdf</a>;
                 </p>
             </div>
             <div class="p-3 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">

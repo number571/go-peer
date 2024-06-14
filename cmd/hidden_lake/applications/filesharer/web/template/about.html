@@ -197,6 +197,27 @@ Pri la projekto
                     <a href="https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf"
                         class="text-info">decentralized_key_exchange_protocol.pdf</a>;
                 </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The Anonymous Hidden Lake Network is a research article describing the basic mechanisms of the Hidden Lake anonymous network using mathematical models.
+                    {{else if (eq .FLanguage 1)}}
+                    Анонимная сеть "Hidden Lake" - это научно-исследовательская статья, описывающая
+                    основные механизмы работы анонимной сети Hidden Lake при помощи математических моделей.
+                    {{else if (eq .FLanguage 2)}}
+                    La Anonima Kaŝa Lago Reto Estas esplorartikolo priskribanta La bazajn mekanismojn De La Kaŝa Lago anonima reto uzanta matematikajn modelojn.
+                    {{end}}
+                </p>
+                <p class="text-left">
+                    {{if (eq .FLanguage 0)}}
+                    The "Hidden Lake" anonymous network:
+                    {{else if (eq .FLanguage 1)}}
+                    Анонимная сеть "Hidden Lake":
+                    {{else if (eq .FLanguage 2)}}
+                    Anonima reto"Kaŝita Lago":
+                    {{end}}
+                    <a href="https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf"
+                        class="text-info">hidden_lake_anonymous_network.pdf</a>;
+                </p>
             </div>
             <div class="p-3 tab-pane fade" id="pills-source" role="tabpanel" aria-labelledby="pills-source-tab">
                 <p class="text-left">

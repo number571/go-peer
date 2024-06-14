@@ -6,8 +6,7 @@
 4. Append errors (as traffic/database) for all interface methods
 5. Append Batch's to database
 6. Custom Unmarshal with fields 
-7. Test database crash
-8. Check Ring-QB-net
+7. Check Ring-QB-net
 
 ### Tests
 
