@@ -25,7 +25,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
 				FKeySizeBits:        hls_settings.CDefaultKeySize,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
-				FQueueRandPeriodMS:  hls_settings.CDefaultQueueRandPeriod,
+				FQRandPeriodMS:      hls_settings.CDefaultQRandPeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				FNetworkKey:         hls_settings.CDefaultNetworkKey,
 				FF2FDisabled:        hls_settings.CDefaultF2FDisabled,

@@ -222,7 +222,7 @@ settings:
   work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
-  queue_rand_period_ms: 5000
+  qrand_period_ms: 5000
   limit_void_size_bytes: 4096
   f2f_disabled: true
   qbt_disabled: true  
