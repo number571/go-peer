@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/helpers/traffic`: rename queue_period_ms -> max_queue_period_ms
 - Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 0
 - Update `cmd/hidden_lake/service`: rename queue_rand_period_ms -> qrand_period_ms
+- Update `pkg/network/anonymity`: enrichLogger: len(pNetMsg.GetPayload().GetBody()) -> len(pNetMsg.ToBytes())
 
 <!-- ... -->
 

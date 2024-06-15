@@ -14,6 +14,7 @@ import (
 
 const (
 	// IV + Proof + Hash + (2 x Payload32Head) + Payload32Head
+	// 16 + 8 + 32 + 2x4 + 4 = 68 additional bytes to origin message
 	CMessageHeadSize = 0 +
 		1*symmetric.CAESBlockSize +
 		1*encoding.CSizeUint64 +

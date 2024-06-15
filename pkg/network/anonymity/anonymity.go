@@ -391,13 +391,13 @@ func (p *sNode) enqueuePayload(
 
 func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) anon_logger.ILogBuilder {
 	var (
-		size  = len(pNetMsg.GetPayload().GetBody())
+		size  = len(pNetMsg.ToBytes())
 		hash  = pNetMsg.GetHash()
 		proof = pNetMsg.GetProof()
 	)
 	return pLogBuilder.
-		WithHash(hash).
 		WithProof(proof).
+		WithHash(hash).
 		WithSize(size)
 }
 
