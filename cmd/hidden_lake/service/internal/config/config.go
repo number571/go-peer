@@ -20,7 +20,7 @@ type SConfigSettings struct {
 	fMutex              sync.RWMutex
 	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FQueuePeriodMS      uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
-	FQRandPeriodMS      uint64 `json:"qrand_period_ms" yaml:"qrand_period_ms,omitempty"`
+	FQueueRandPeriodMS  uint64 `json:"queue_rand_period_ms" yaml:"queue_rand_period_ms,omitempty"`
 	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
@@ -110,8 +110,8 @@ func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 	return p.FQueuePeriodMS
 }
 
-func (p *SConfigSettings) GetQRandPeriodMS() uint64 {
-	return p.FQRandPeriodMS
+func (p *SConfigSettings) GetQueueRandPeriodMS() uint64 {
+	return p.FQueueRandPeriodMS
 }
 
 func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {

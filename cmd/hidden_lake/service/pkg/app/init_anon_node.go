@@ -28,7 +28,7 @@ func (p *sApp) initAnonNode() error {
 
 	var (
 		minQueuePeriod = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
-		addQueuePeriod = time.Duration(cfgSettings.GetQRandPeriodMS()) * time.Millisecond
+		addQueuePeriod = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
 		maxQueuePeriod = minQueuePeriod + addQueuePeriod
 	)
 

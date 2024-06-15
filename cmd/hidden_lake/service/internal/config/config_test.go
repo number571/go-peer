@@ -56,7 +56,7 @@ const (
   work_size_bits: %d
   key_size_bits: %d
   queue_period_ms: %d
-  qrand_period_ms: %d
+  queue_rand_period_ms: %d
   limit_void_size_bytes: %d
   network_key: %s
   f2f_disabled: true
@@ -258,7 +258,7 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetSettings().GetQRandPeriodMS() != tcQueueRandPeriod {
+	if cfg.GetSettings().GetQueueRandPeriodMS() != tcQueueRandPeriod {
 		t.Error("settings queue rand period is invalid")
 		return
 	}
