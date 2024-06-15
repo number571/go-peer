@@ -4,7 +4,6 @@ settings:
   key_size_bits: 4096
   messages_capacity: 2048
   max_queue_period_ms: 5000
-  limit_void_size_bytes: 4096
   network_key: 8Jkl93Mdk93md1bz
 logging:
 - info

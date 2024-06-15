@@ -1,5 +1,7 @@
 # CHANGELOG
 
+<!-- ... -->
+
 ## v1.6.14~
 
 *??? ??, ????*
@@ -7,6 +9,9 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/helpers/traffic`: rename queue_period_ms -> max_queue_period_ms
+- Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 0
+
+<!-- ... -->
 
 ## v1.6.13
 
@@ -34,6 +39,8 @@
 - Update `cmd/hidden_lake/applications/filesharer`: fix load list of files from storage
 - Update `pkg/database`: delete mutex
 
+<!-- ... -->
+
 ## v1.6.12
 
 *May 22, 2024*
@@ -48,6 +55,8 @@
 
 - Update `pkg/network/anonymity`: delete mutex on storeHashIntoDatabase method
 - Update `cmd/hidden_lake/helpers/traffic`: fix GetHash method
+
+<!-- ... -->
 
 ## v1.6.11
 
@@ -71,6 +80,8 @@
 - Update `cmd/hidden_lake/applications/messenger`: fix message size limit
 - Update `cmd/hidden_lake/applications/filesharer`: fix retry_num param
 
+<!-- ... -->
+
 ## v1.6.10
 
 *April 27, 2024*
@@ -83,6 +94,8 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/filesharer`: append IFileInfo to stream package
+
+<!-- ... -->
 
 ## v1.6.9
 
@@ -97,6 +110,8 @@
 ### BUG FIXES
 
 - Update `pkg/network/message`: fix LoadMessage with voidBytes
+
+<!-- ... -->
 
 ## v1.6.8
 

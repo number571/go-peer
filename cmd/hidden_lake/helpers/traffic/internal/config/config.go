@@ -21,8 +21,8 @@ type SConfigSettings struct {
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FMaxQueuePeriodMS   uint64 `json:"max_queue_period_ms,omitempty" yaml:"max_queue_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
-	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FStorageEnabled     bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
+	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {

@@ -4,7 +4,6 @@ settings:
   messages_capacity: 2048
   work_size_bits: 22
   max_queue_period_ms: 5000
-  limit_void_size_bytes: 4096
   network_key: default
 logging:
 - info

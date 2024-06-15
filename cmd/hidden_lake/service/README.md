@@ -93,7 +93,6 @@ settings:
   work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
-  limit_void_size_bytes: 4096
 logging:
   - info
   - warn
@@ -223,10 +222,11 @@ settings:
   work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
+  queue_rand_period_ms: 5000
   limit_void_size_bytes: 4096
+  f2f_disabled: true
+  qbt_disabled: true  
   network_key: hls-network-key
-  f2f_disabled: false
-  qbt_disabled: false
 logging:
   - info
   - warn
@@ -418,7 +418,7 @@ Content-Length: 120
 ```
 
 ```json
-{"message_size_bytes":8192,"queue_period_ms":5000,"key_size_bits":4096,"work_size_bits":22,"limit_void_size_bytes":4096}
+{"message_size_bytes":8192,"queue_period_ms":5000,"key_size_bits":4096,"work_size_bits":22}
 ```
 
 #### 3.2. POST Request
