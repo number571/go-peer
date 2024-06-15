@@ -27,10 +27,9 @@ func (p *sApp) initAnonNode() error {
 	)
 
 	var (
-		queueDuration     = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
-		queueRandDuration = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
-		queueMaxDuration  = queueDuration + queueRandDuration
-		fetchTimeout      = queueMaxDuration * hls_settings.CFetchTimeRatio
+		minQueuePeriod = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
+		addQueuePeriod = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
+		maxQueuePeriod = minQueuePeriod + addQueuePeriod
 	)
 
 	kvDatabase, err := database.NewKVDatabase(
@@ -59,7 +58,7 @@ func (p *sApp) initAnonNode() error {
 			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
 			FNetworkMask:  hls_settings.CNetworkMask,
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
-			FFetchTimeout: fetchTimeout,
+			FFetchTimeout: hls_settings.CFetchTimeRatio * maxQueuePeriod,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -69,16 +68,16 @@ func (p *sApp) initAnonNode() error {
 			network.NewSettings(&network.SSettings{
 				FAddress:      cfg.GetAddress().GetTCP(),
 				FMaxConnects:  hls_settings.CNetworkMaxConns,
-				FReadTimeout:  queueMaxDuration,
-				FWriteTimeout: queueMaxDuration,
+				FReadTimeout:  maxQueuePeriod,
+				FWriteTimeout: maxQueuePeriod,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 					FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
 					FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 					FDialTimeout:           hls_settings.CConnDialTimeout,
-					FReadTimeout:           queueMaxDuration,
-					FWriteTimeout:          queueMaxDuration,
+					FReadTimeout:           maxQueuePeriod,
+					FWriteTimeout:          maxQueuePeriod,
 				}),
 			}),
 			conn.NewVSettings(&conn.SVSettings{
@@ -99,8 +98,8 @@ func (p *sApp) initAnonNode() error {
 				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
 				FParallel:           p.fParallel,
 				FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
-				FDuration:           queueDuration,
-				FRandDuration:       queueRandDuration,
+				FDuration:           minQueuePeriod,
+				FRandDuration:       addQueuePeriod,
 			}),
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: cfgSettings.GetNetworkKey(),

@@ -151,7 +151,7 @@ $ hls
 The Hidden Lake network must have `common configuration` file settings for successful data exchange between network nodes. If some settings are different, other nodes will consider it a `protocol violation` and reject the connection attempt. You can find ready-made configuration files for HLS and HLT services in the [prod/1](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/1), [prod/2](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/2), [prod/3](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/3), [prod/4](https://github.com/number571/go-peer/blob/master/cmd/hidden_lake/_configs/prod/4) directories.
 
 ```yaml
-# [HLS, HLT] nodes
+# default settings
 message_size_bytes: 8192
 work_size_bits: 22
 key_size_bits: 4096

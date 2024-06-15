@@ -14,27 +14,27 @@ import (
 
 func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 	cfgSettings := p.fConfig.GetSettings()
-	queueDuration := time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
+	maxQueuePeriod := time.Duration(cfgSettings.GetMaxQueuePeriodMS()) * time.Millisecond
 
 	// queue_period_ms in HLT can be = 0 (as only-storage mode)
-	if queueDuration == 0 {
-		queueDuration = 1
+	if maxQueuePeriod == 0 {
+		maxQueuePeriod = 1
 	}
 
 	p.fNode = network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      p.fConfig.GetAddress().GetTCP(),
 			FMaxConnects:  hls_settings.CNetworkMaxConns,
-			FReadTimeout:  queueDuration,
-			FWriteTimeout: queueDuration,
+			FReadTimeout:  maxQueuePeriod,
+			FWriteTimeout: maxQueuePeriod,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 				FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
 				FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
 				FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 				FDialTimeout:           hls_settings.CConnDialTimeout,
-				FReadTimeout:           queueDuration,
-				FWriteTimeout:          queueDuration,
+				FReadTimeout:           maxQueuePeriod,
+				FWriteTimeout:          maxQueuePeriod,
 			}),
 		}),
 		conn.NewVSettings(&conn.SVSettings{

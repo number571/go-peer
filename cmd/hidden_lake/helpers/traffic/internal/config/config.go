@@ -19,7 +19,7 @@ type SConfigSettings struct {
 	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FMessagesCapacity   uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty" yaml:"queue_period_ms,omitempty"`
+	FMaxQueuePeriodMS   uint64 `json:"max_queue_period_ms,omitempty" yaml:"max_queue_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FStorageEnabled     bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
@@ -91,8 +91,8 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
 }
 
-func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
-	return p.FQueuePeriodMS
+func (p *SConfigSettings) GetMaxQueuePeriodMS() uint64 {
+	return p.FMaxQueuePeriodMS
 }
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {

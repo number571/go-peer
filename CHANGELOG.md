@@ -4,6 +4,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/helpers/traffic`: rename queue_period_ms -> max_queue_period_ms
+
 ## v1.6.13
 
 *June 12, 2024*

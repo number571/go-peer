@@ -50,7 +50,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if settings.GetQueuePeriodMS() != hls_settings.CDefaultQueuePeriod {
+	if settings.GetMaxQueuePeriodMS() != hls_settings.CDefaultQueuePeriod {
 		t.Error("incorrect queue period ms")
 		return
 	}

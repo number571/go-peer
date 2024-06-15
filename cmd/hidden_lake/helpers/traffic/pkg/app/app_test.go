@@ -49,7 +49,7 @@ func TestApp(t *testing.T) {
 			FSettings: &config.SConfigSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FWorkSizeBits:     testutils.TCWorkSize,
-				FQueuePeriodMS:    testutils.TCQueuePeriod,
+				FMaxQueuePeriodMS: testutils.TCQueuePeriod,
 				FMessagesCapacity: testutils.TCCapacity,
 				FNetworkKey:       "_",
 				FKeySizeBits:      testutils.TcKeySize,

@@ -42,7 +42,7 @@ func testConfigDefaultInit(configPath string) {
 			FMessageSizeBytes: tcMessageSize,
 			FWorkSizeBits:     tcWorkSize,
 			FMessagesCapacity: tcCapMessages,
-			FQueuePeriodMS:    tcQueuePeriodMS,
+			FMaxQueuePeriodMS: tcQueuePeriodMS,
 			FNetworkKey:       tcNetwork,
 			FKeySizeBits:      testutils.TcKeySize,
 		},
@@ -90,8 +90,8 @@ func TestConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriodMS {
-		t.Error("settings queue period is invalid")
+	if cfg.GetSettings().GetMaxQueuePeriodMS() != tcQueuePeriodMS {
+		t.Error("settings max queue period is invalid")
 		return
 	}
 
