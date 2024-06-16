@@ -40,8 +40,8 @@ func testRunService(addr string) *http.Server {
 
 	srv := &http.Server{
 		Addr:        addr,
-		ReadTimeout: time.Second,
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: time.Second,
 	}
 
 	go func() { _ = srv.ListenAndServe() }()

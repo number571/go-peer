@@ -83,8 +83,8 @@ func testStartServerHTTP(addr string) *http.Server {
 
 	srv := &http.Server{
 		Addr:        addr,
-		ReadTimeout: time.Second,
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: time.Second,
 	}
 
 	go func() { _ = srv.ListenAndServe() }()
@@ -156,8 +156,8 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 
 	srv := &http.Server{
 		Addr:        addr,
-		ReadTimeout: time.Second,
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: time.Second,
 	}
 
 	go func() { _ = srv.ListenAndServe() }()

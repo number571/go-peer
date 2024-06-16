@@ -18,8 +18,8 @@ func InitPprofService(pAddr string) *http.Server {
 
 	server := &http.Server{
 		Addr:        pAddr,
-		ReadTimeout: (5 * time.Second),
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: (5 * time.Second),
 	}
 
 	return server

@@ -28,8 +28,8 @@ func (p *sApp) initIncomingServiceHTTP(pCtx context.Context, pHlsClient hls_clie
 
 	p.fIncServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetIncoming(),
-		ReadTimeout: (5 * time.Second),
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: (5 * time.Second),
 	}
 }
 
@@ -50,8 +50,8 @@ func (p *sApp) initInterfaceServiceHTTP(pCtx context.Context, pHlsClient hls_cli
 
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),
-		ReadTimeout: (5 * time.Second),
 		Handler:     mux, // http.TimeoutHandler returns bug with progress bar of file downloading
+		ReadTimeout: (5 * time.Second),
 	}
 }
 

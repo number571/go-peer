@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
@@ -21,38 +22,40 @@ import (
 )
 
 func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
+	httpClient := &http.Client{Timeout: time.Minute}
+
 	return func(
 		pCtx context.Context,
 		pNode anonymity.INode,
-		sender asymmetric.IPubKey,
-		reqBytes []byte,
+		pSender asymmetric.IPubKey,
+		pReqBytes []byte,
 	) ([]byte, error) {
 		logger := pNode.GetLogger()
 		logBuilder := anon_logger.NewLogBuilder(hls_settings.CServiceName)
 
 		// enrich logger
 		logBuilder.
-			WithSize(len(reqBytes)).
-			WithPubKey(sender)
+			WithSize(len(pReqBytes)).
+			WithPubKey(pSender)
 
 		cfg := pCfgW.GetConfig()
 		friends := cfg.GetFriends()
 
 		// append public key to list of friends if f2f option is disabled
-		if cfg.GetSettings().GetF2FDisabled() && !inFriendsList(friends, sender) {
+		if cfg.GetSettings().GetF2FDisabled() && !inFriendsList(friends, pSender) {
 			// update config state with new friend
-			friends[sender.GetHasher().ToString()] = sender
+			friends[pSender.GetHasher().ToString()] = pSender
 			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
 				logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
 				return nil, utils.MergeErrors(ErrUpdateFriends, err)
 			}
 			// update list of friends and continue read request
-			pNode.GetListPubKeys().AddPubKey(sender)
+			pNode.GetListPubKeys().AddPubKey(pSender)
 			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
 		}
 
 		// load request from message's body
-		loadReq, err := request.LoadRequest(reqBytes)
+		loadReq, err := request.LoadRequest(pReqBytes)
 		if err != nil {
 			logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogErroLoadRequestType))
 			return nil, utils.MergeErrors(ErrLoadRequest, err)
@@ -81,11 +84,9 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 		for key, val := range loadReq.GetHead() {
 			pushReq.Header.Set(key, val)
 		}
-		pushReq.Header.Set(hls_settings.CHeaderPublicKey, sender.ToString())
+		pushReq.Header.Set(hls_settings.CHeaderPublicKey, pSender.ToString())
 
-		// send request to service
-		// and receive response from service
-		httpClient := &http.Client{Timeout: pNode.GetSettings().GetFetchTimeout()}
+		// send request and receive response from service
 		resp, err := httpClient.Do(pushReq)
 		if err != nil {
 			logger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))

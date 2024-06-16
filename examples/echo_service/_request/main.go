@@ -36,7 +36,7 @@ func main() {
 }
 
 func sendMessage(pReceiver string, pMessage []byte) {
-	httpClient := http.Client{Timeout: (10 * time.Minute)}
+	httpClient := http.Client{Timeout: time.Hour}
 
 	requestData := fmt.Sprintf(
 		cRequestTemplate,

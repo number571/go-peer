@@ -29,8 +29,8 @@ func (p *sApp) initIncomingServiceHTTP(
 
 	p.fIncServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetIncoming(),
-		ReadTimeout: (5 * time.Second),
 		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		ReadTimeout: (5 * time.Second),
 	}
 }
 
@@ -58,8 +58,8 @@ func (p *sApp) initInterfaceServiceHTTP(
 
 	p.fIntServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetInterface(),
-		ReadTimeout: (5 * time.Second),
 		Handler:     mux, // http.TimeoutHandler send panic from websocket use
+		ReadTimeout: (5 * time.Second),
 	}
 }
 
