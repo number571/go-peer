@@ -1,8 +1,5 @@
 N=1
 
-PPROF_NAME=_
-PPROF_PORT=_
-
 # updates in 'test-coverage-badge' block
 _COVERAGE_FLOOR=_ 
 

@@ -28,14 +28,13 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 		logBuilder := anon_logger.NewLogBuilder(hlt_settings.CServiceName)
 
 		// enrich logger
-		pld := pNetMsg.GetPayload()
 		logBuilder.
 			WithConn(pConn).
 			WithHash(pNetMsg.GetHash()).
 			WithProof(pNetMsg.GetProof()).
-			WithSize(len(pld.GetBody()))
+			WithSize(len(pNetMsg.ToBytes()))
 
-		if _, err := message.LoadMessage(pCfg.GetSettings(), pld.GetBody()); err != nil {
+		if _, err := message.LoadMessage(pCfg.GetSettings(), pNetMsg.GetPayload().GetBody()); err != nil {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 			return utils.MergeErrors(ErrLoadMessage, err)
 		}
