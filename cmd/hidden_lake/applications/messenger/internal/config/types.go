@@ -23,8 +23,6 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	GetMessagesCapacity() uint64
-	GetWorkSizeBits() uint64
-	GetStorageKey() string
 	GetLanguage() language.ILanguage
 }
 

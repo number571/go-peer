@@ -23,8 +23,6 @@ Most of the code is a call to API functions from the HLS kernel. Thanks to this 
 <p align="center"><img src="_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 1. Example of chat room in HLM.</p>
 
-However, there are additional features aimed at the security of the HLM application itself. All messages are stored in a local database in encrypted form with a key formed from `storage_key` param.
-
 ## Supported platforms
 
 - Windows (x86_64, arm64)
@@ -53,8 +51,6 @@ Default config `hlm.yml`
 ```yaml
 settings:
   messages_capacity: 2048
-  language: ENG
-  storage_key: u4Dz9PvNzn3DOItsrSWMODIrUwK5tmsw
 logging:
   - info
   - warn

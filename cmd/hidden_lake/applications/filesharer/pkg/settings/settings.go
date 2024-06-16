@@ -18,10 +18,7 @@ const (
 const (
 	CDefaultRetryNum   = 2
 	CDefaultPageOffset = 10
-)
-
-const (
-	CDefaultLanguage = "ENG"
+	CDefaultLanguage   = ""
 )
 
 const (

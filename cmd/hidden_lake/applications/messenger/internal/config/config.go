@@ -21,8 +21,6 @@ type SConfigSettings struct {
 	fLanguage language.ILanguage
 
 	FMessagesCapacity uint64 `yaml:"messages_capacity"`
-	FWorkSizeBits     uint64 `yaml:"work_size_bits,omitempty"`
-	FStorageKey       string `yaml:"storage_key,omitempty"`
 	FLanguage         string `yaml:"language,omitempty"`
 }
 
@@ -88,14 +86,6 @@ func (p *SConfig) GetSettings() IConfigSettings {
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {
 	return p.FMessagesCapacity
-}
-
-func (p *SConfigSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
-}
-
-func (p *SConfigSettings) GetStorageKey() string {
-	return p.FStorageKey
 }
 
 func (p *SConfigSettings) GetLanguage() language.ILanguage {

@@ -56,7 +56,6 @@ Default config `hlf.yml`
 settings:
   retry_num: 2
   page_offset: 10
-  language: ENG
 logging:
 - info
 - warn

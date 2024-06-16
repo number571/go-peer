@@ -20,13 +20,12 @@ type SConfigSettings struct {
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
-
-	FLogging    []string     `yaml:"logging,omitempty"`
-	FAddress    string       `yaml:"address"`
-	FConnection *SConnection `yaml:"connection"`
-
 	fLogging logger.ILogging
+
+	FSettings   *SConfigSettings `yaml:"settings"`
+	FLogging    []string         `yaml:"logging,omitempty"`
+	FAddress    string           `yaml:"address"`
+	FConnection *SConnection     `yaml:"connection"`
 }
 
 type SConnection struct {

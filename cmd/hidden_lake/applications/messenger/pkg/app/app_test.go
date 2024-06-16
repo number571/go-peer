@@ -44,7 +44,6 @@ func TestApp(t *testing.T) {
 	cfg, err := config.BuildConfig(tcPathConfig, &config.SConfig{
 		FSettings: &config.SConfigSettings{
 			FMessagesCapacity: testutils.TCCapacity,
-			FWorkSizeBits:     testutils.TCWorkSize,
 		},
 		FAddress: &config.SAddress{
 			FInterface: testutils.TgAddrs[57],

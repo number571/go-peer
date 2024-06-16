@@ -20,8 +20,8 @@ type SConfigSettings struct {
 	fMutex    sync.RWMutex
 	fLanguage language.ILanguage
 
-	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
 	FPageOffset uint64 `yaml:"page_offset"`
+	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
 	FLanguage   string `yaml:"language,omitempty"`
 }
 

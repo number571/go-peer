@@ -327,8 +327,6 @@ Most of the code is a call to API functions from the HLS kernel. Thanks to this 
 <p align="center"><img src="cmd/hidden_lake/applications/messenger/_images/hlm_chat.gif" alt="hlm_chat.gif"/></p>
 <p align="center">Figure 6. Example of chat room in HLM.</p>
 
-However, there are additional features aimed at the security of the HLM application itself. All messages are stored in a local database in encrypted form with a key formed from `storage_key` param.
-
 ### Build and run
 
 Default build and run
@@ -351,9 +349,6 @@ Default config `hlm.yml`
 ```yaml
 settings:
   messages_capacity: 2048
-  work_size_bits: 20
-  language: ENG
-  storage_key: u4Dz9PvNzn3DOItsrSWMODIrUwK5tmsw
 logging:
   - info
   - warn
@@ -435,7 +430,6 @@ Default config `hlf.yml`
 settings:
   retry_num: 2
   page_offset: 10
-  language: ENG
 logging:
 - info
 - warn

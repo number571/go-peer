@@ -12,6 +12,8 @@
 - Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 4096 -> CDefaultLimitVoidSize = 0
 - Update `cmd/hidden_lake/service`: CDefaultNetworkKey = "default" -> CDefaultNetworkKey = ""
 - Update `pkg/network/anonymity`: enrichLogger: len(pNetMsg.GetPayload().GetBody()) -> len(pNetMsg.ToBytes())
+- Update `cmd/hidden_lake/applications/messenger`: delete "storage_key", "work_size_bits" params
+- Update `cmd/hidden_lake/applications`: CDefaultLanguage = "ENG" -> CDefaultLanguage = ""
 
 <!-- ... -->
 

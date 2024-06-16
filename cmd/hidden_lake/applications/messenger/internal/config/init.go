@@ -4,7 +4,6 @@ import (
 	"os"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/crypto/random"
 
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -18,8 +17,6 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
-				FWorkSizeBits:     hlm_settings.CDefaultWorkSizeBits,
-				FStorageKey:       random.NewCSPRNG().GetString(32),
 				FLanguage:         hlm_settings.CDefaultLanguage,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

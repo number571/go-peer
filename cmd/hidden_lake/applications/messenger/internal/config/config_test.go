@@ -17,7 +17,6 @@ const (
 	tcConfigTemplate = `settings:
   messages_capacity: %d
   language: RUS
-  storage_key: '%s'
 logging:
   - info
   - erro
@@ -33,7 +32,6 @@ const (
 	tcAddressIncoming   = "address_incoming"
 	tcAddressPPROF      = "address_pprof"
 	tcConnectionService = "connection_service"
-	tcStorageKey        = "storage_key"
 	tcMessageSize       = (1 << 20)
 	tcMessagesCapacity  = 1000
 )
@@ -53,7 +51,6 @@ func testNewConfigString() string {
 	return fmt.Sprintf(
 		tcConfigTemplate,
 		tcMessagesCapacity,
-		tcStorageKey,
 		tcAddressInterface,
 		tcAddressIncoming,
 		tcAddressPPROF,
@@ -84,11 +81,6 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetLanguage() != language.CLangRUS {
 		t.Error("settings language is invalid")
-		return
-	}
-
-	if cfg.GetSettings().GetStorageKey() != tcStorageKey {
-		t.Error("settings storage_key is invalid")
 		return
 	}
 
