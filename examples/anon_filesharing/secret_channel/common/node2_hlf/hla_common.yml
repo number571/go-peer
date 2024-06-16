@@ -1,6 +1,6 @@
 settings:
   work_size_bits: 22
-  wait_time_ms: 1_000
+  wait_time_ms: 5_000
 logging:
 - info
 - warn

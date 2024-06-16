@@ -2,7 +2,9 @@ settings:
   message_size_bytes: 4096
   work_size_bits: 22
   key_size_bits: 2048
-  queue_period_ms: 30_000
+  queue_period_ms: 20_000
+  queue_rand_period_ms: 10_000
+  limit_void_size_bytes: 1024
 logging:
 - info
 - warn
