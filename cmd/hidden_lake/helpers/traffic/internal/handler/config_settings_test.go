@@ -50,11 +50,6 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if settings.GetMaxQueuePeriodMS() != hls_settings.CDefaultQueuePeriod {
-		t.Error("incorrect queue period ms")
-		return
-	}
-
 	if settings.GetLimitVoidSizeBytes() != hls_settings.CDefaultLimitVoidSize {
 		t.Error("incorrect limit void size bytes")
 		return

@@ -25,7 +25,6 @@ type IConn interface {
 
 type ISettings interface {
 	GetLimitMessageSizeBytes() uint64
-	GetLimitVoidSizeBytes() uint64
 	GetWorkSizeBits() uint64
 
 	GetDialTimeout() time.Duration

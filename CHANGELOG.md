@@ -8,8 +8,9 @@
 
 ### CHANGES
 
-- Update `cmd/hidden_lake/helpers/traffic`: rename queue_period_ms -> max_queue_period_ms
-- Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 0
+- Update `cmd/hidden_lake/helpers/traffic`: delete queue_period_ms
+- Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 4096 -> CDefaultLimitVoidSize = 0
+- Update `cmd/hidden_lake/service`: CDefaultNetworkKey = "default" -> CDefaultNetworkKey = ""
 - Update `pkg/network/anonymity`: enrichLogger: len(pNetMsg.GetPayload().GetBody()) -> len(pNetMsg.ToBytes())
 
 <!-- ... -->

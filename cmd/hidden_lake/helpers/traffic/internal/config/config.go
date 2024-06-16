@@ -17,23 +17,21 @@ var (
 type SConfigSettings struct {
 	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
-	FMessagesCapacity   uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FMaxQueuePeriodMS   uint64 `json:"max_queue_period_ms,omitempty" yaml:"max_queue_period_ms,omitempty"`
+	FMessagesCapacity   uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
-	FStorageEnabled     bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FStorageEnabled     bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
-
-	FLogging     []string  `yaml:"logging,omitempty"`
-	FAddress     *SAddress `yaml:"address,omitempty"`
-	FConnections []string  `yaml:"connections,omitempty"`
-	FConsumers   []string  `yaml:"consumers,omitempty"`
-
 	fLogging logger.ILogging
+
+	FSettings    *SConfigSettings `yaml:"settings"`
+	FLogging     []string         `yaml:"logging,omitempty"`
+	FAddress     *SAddress        `yaml:"address,omitempty"`
+	FConnections []string         `yaml:"connections,omitempty"`
+	FConsumers   []string         `yaml:"consumers,omitempty"`
 }
 
 type SAddress struct {
@@ -89,10 +87,6 @@ func (p *SConfigSettings) GetMessageSizeBytes() uint64 {
 
 func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
-}
-
-func (p *SConfigSettings) GetMaxQueuePeriodMS() uint64 {
-	return p.FMaxQueuePeriodMS
 }
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {

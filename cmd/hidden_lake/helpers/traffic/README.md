@@ -58,7 +58,6 @@ settings:
   key_size_bits: 4096
   work_size_bits: 22
   messages_capacity: 2048
-  max_queue_period_ms: 5000
 logging:
   - info
   - warn
@@ -109,7 +108,6 @@ settings:
   key_size_bits: 4096
   work_size_bits: 22
   messages_capacity: 2048
-  max_queue_period_ms: 5000
   limit_void_size_bytes: 4096
   storage_enabled: true
   network_key: hlt-network-key

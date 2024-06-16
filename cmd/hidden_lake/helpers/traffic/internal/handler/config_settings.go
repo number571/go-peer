@@ -26,7 +26,6 @@ func HandleConfigSettingsAPI(pCfg config.IConfig, pLogger logger.ILogger) http.H
 		_ = api.Response(pW, http.StatusOK, config.SConfigSettings{
 			FMessageSizeBytes:   sett.GetMessageSizeBytes(),
 			FWorkSizeBits:       sett.GetWorkSizeBits(),
-			FMaxQueuePeriodMS:   sett.GetMaxQueuePeriodMS(),
 			FKeySizeBits:        sett.GetKeySizeBits(),
 			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
 			FMessagesCapacity:   sett.GetMessagesCapacity(),

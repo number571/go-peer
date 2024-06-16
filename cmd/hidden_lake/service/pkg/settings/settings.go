@@ -30,8 +30,8 @@ const (
 )
 
 const (
-	CRetryEnqueue   = 2
-	CFetchTimeRatio = 10
+	CRetryEnqueue    = 2
+	CMulFetchTimeout = 10
 )
 
 const (
@@ -43,7 +43,7 @@ const (
 	CDefaultLimitVoidSize   = 0         // 0 bytes
 	CDefaultF2FDisabled     = false     // friend-to-friend
 	CDefaultQBTDisabled     = false     // queue-based-task
-	CDefaultNetworkKey      = "default"
+	CDefaultNetworkKey      = ""
 )
 
 const (
@@ -59,6 +59,8 @@ const (
 const (
 	CNetworkQueueCapacity = (2 << 10) // 2048 hashes ~= 64KiB
 	CNetworkMaxConns      = (1 << 8)  // 256 conns
+	CNetworkWriteTimeout  = 5 * time.Second
+	CNetworkReadTimeout   = 5 * time.Second
 )
 
 const (

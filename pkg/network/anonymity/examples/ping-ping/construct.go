@@ -120,9 +120,8 @@ func newVSettings(nKey string) conn.IVSettings {
 
 func newConnSettings(wSize uint64, mSize uint64) conn.ISettings {
 	return conn.NewSettings(&conn.SSettings{
+		FLimitMessageSizeBytes: mSize + 4096,
 		FWorkSizeBits:          wSize,
-		FLimitMessageSizeBytes: mSize,
-		FLimitVoidSizeBytes:    4096,
 		FWaitReadTimeout:       time.Hour,
 		FDialTimeout:           time.Minute,
 		FReadTimeout:           time.Minute,

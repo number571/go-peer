@@ -22,12 +22,11 @@ type SConfigSettings struct {
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
-
-	FLogging []string  `yaml:"logging,omitempty"`
-	FAddress *SAddress `yaml:"address"`
-
 	fLogging logger.ILogging
+
+	FSettings *SConfigSettings `yaml:"settings"`
+	FLogging  []string         `yaml:"logging,omitempty"`
+	FAddress  *SAddress        `yaml:"address"`
 }
 
 type SAddress struct {

@@ -17,23 +17,22 @@ var (
 )
 
 type SConfigSettings struct {
+	fMutex    sync.RWMutex
+	fLanguage language.ILanguage
+
 	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
 	FPageOffset uint64 `yaml:"page_offset"`
 	FLanguage   string `yaml:"language,omitempty"`
-
-	fMutex    sync.RWMutex
-	fLanguage language.ILanguage
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
-
-	FLogging    []string  `yaml:"logging,omitempty"`
-	FAddress    *SAddress `yaml:"address"`
-	FConnection string    `yaml:"connection"`
-
 	fFilepath string
 	fLogging  logger.ILogging
+
+	FSettings   *SConfigSettings `yaml:"settings"`
+	FLogging    []string         `yaml:"logging,omitempty"`
+	FAddress    *SAddress        `yaml:"address"`
+	FConnection string           `yaml:"connection"`
 }
 
 type SAddress struct {

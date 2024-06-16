@@ -17,12 +17,13 @@ var (
 )
 
 type SConfigSettings struct {
-	fMutex              sync.RWMutex
+	fMutex sync.RWMutex
+
 	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
-	FQueuePeriodMS      uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
-	FQueueRandPeriodMS  uint64 `json:"queue_rand_period_ms" yaml:"queue_rand_period_ms,omitempty"`
 	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FQueuePeriodMS      uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
+	FQueueRandPeriodMS  uint64 `json:"queue_rand_period_ms,omitempty" yaml:"queue_rand_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FF2FDisabled        bool   `json:"f2f_disabled,omitempty" yaml:"f2f_disabled,omitempty"`
@@ -30,18 +31,17 @@ type SConfigSettings struct {
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
+	fFilepath string
+	fMutex    sync.RWMutex
+	fLogging  logger.ILogging
+	fFriends  map[string]asymmetric.IPubKey
 
+	FSettings    *SConfigSettings     `yaml:"settings"`
 	FLogging     []string             `yaml:"logging,omitempty"`
 	FAddress     *SAddress            `yaml:"address,omitempty"`
 	FServices    map[string]*SService `yaml:"services,omitempty"`
 	FConnections []string             `yaml:"connections,omitempty"`
 	FFriends     map[string]string    `yaml:"friends,omitempty"`
-
-	fFilepath string
-	fMutex    sync.RWMutex
-	fLogging  logger.ILogging
-	fFriends  map[string]asymmetric.IPubKey
 }
 
 type SService struct {

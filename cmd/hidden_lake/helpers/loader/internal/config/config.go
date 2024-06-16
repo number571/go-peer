@@ -20,14 +20,13 @@ type SConfigSettings struct {
 }
 
 type SConfig struct {
-	FSettings *SConfigSettings `yaml:"settings"`
-
-	FLogging   []string  `yaml:"logging,omitempty"`
-	FAddress   *SAddress `yaml:"address"`
-	FProducers []string  `yaml:"producers,omitempty"`
-	FConsumers []string  `yaml:"consumers,omitempty"`
-
 	fLogging logger.ILogging
+
+	FSettings  *SConfigSettings `yaml:"settings"`
+	FLogging   []string         `yaml:"logging,omitempty"`
+	FAddress   *SAddress        `yaml:"address"`
+	FProducers []string         `yaml:"producers,omitempty"`
+	FConsumers []string         `yaml:"consumers,omitempty"`
 }
 
 type SAddress struct {

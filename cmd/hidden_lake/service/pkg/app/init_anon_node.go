@@ -58,7 +58,7 @@ func (p *sApp) initAnonNode() error {
 			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
 			FNetworkMask:  hls_settings.CNetworkMask,
 			FRetryEnqueue: hls_settings.CRetryEnqueue,
-			FFetchTimeout: hls_settings.CFetchTimeRatio * maxQueuePeriod,
+			FFetchTimeout: hls_settings.CMulFetchTimeout * maxQueuePeriod,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -68,16 +68,15 @@ func (p *sApp) initAnonNode() error {
 			network.NewSettings(&network.SSettings{
 				FAddress:      cfg.GetAddress().GetTCP(),
 				FMaxConnects:  hls_settings.CNetworkMaxConns,
-				FReadTimeout:  maxQueuePeriod,
-				FWriteTimeout: maxQueuePeriod,
+				FReadTimeout:  hls_settings.CNetworkReadTimeout,
+				FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetLimitVoidSizeBytes(),
 					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
-					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
-					FLimitVoidSizeBytes:    cfgSettings.GetLimitVoidSizeBytes(),
 					FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 					FDialTimeout:           hls_settings.CConnDialTimeout,
-					FReadTimeout:           maxQueuePeriod,
-					FWriteTimeout:          maxQueuePeriod,
+					FReadTimeout:           hls_settings.CNetworkReadTimeout,
+					FWriteTimeout:          hls_settings.CNetworkWriteTimeout,
 				}),
 			}),
 			conn.NewVSettings(&conn.SVSettings{

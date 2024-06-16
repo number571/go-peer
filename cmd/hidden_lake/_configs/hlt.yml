@@ -1,10 +1,8 @@
 settings:
   message_size_bytes: 8192
   key_size_bits: 4096
-  messages_capacity: 2048
   work_size_bits: 22
-  max_queue_period_ms: 5000
-  network_key: default
+  messages_capacity: 2048
 logging:
 - info
 - warn

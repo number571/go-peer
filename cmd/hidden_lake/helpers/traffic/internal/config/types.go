@@ -18,7 +18,6 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
-	GetMaxQueuePeriodMS() uint64
 	GetMessagesCapacity() uint64
 	GetLimitVoidSizeBytes() uint64
 	GetStorageEnabled() bool

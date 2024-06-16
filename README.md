@@ -515,7 +515,6 @@ settings:
   key_size_bits: 4096
   messages_capacity: 2048
   work_size_bits: 22
-  max_queue_period_ms: 5000
 logging:
   - info
   - warn

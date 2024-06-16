@@ -3,7 +3,6 @@ settings:
   key_size_bits: 2048
   work_size_bits: 22
   messages_capacity: 2048
-  max_queue_period_ms: 30_000
 address:
   tcp: :8581
   http: :8582

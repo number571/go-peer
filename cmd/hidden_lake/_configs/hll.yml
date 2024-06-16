@@ -1,7 +1,6 @@
 settings:
   messages_capacity: 2048
   work_size_bits: 22
-  network_key: default
 logging:
 - info
 - warn

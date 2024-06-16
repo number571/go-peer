@@ -167,7 +167,7 @@ func (p *sConn) recvHeadBytes(
 	switch {
 	case gotMsgSize < net_message.CMessageHeadSize:
 		fallthrough
-	case uint64(gotMsgSize) > fullMsgSize+p.fSettings.GetLimitVoidSizeBytes():
+	case uint64(gotMsgSize) > fullMsgSize:
 		return 0, ErrInvalidMsgSize
 	}
 

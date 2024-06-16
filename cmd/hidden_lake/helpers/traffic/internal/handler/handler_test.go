@@ -119,7 +119,6 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes:   testutils.TCMessageSize,
 			FWorkSizeBits:       testutils.TCWorkSize,
-			FMaxQueuePeriodMS:   hls_settings.CDefaultQueuePeriod,
 			FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 			FKeySizeBits:        testutils.TcKeySize,
 			FNetworkKey:         testutils.TCNetworkKey,
