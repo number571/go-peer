@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/hidden_lake`: append info log with settings at start application
+- Update `cmd/hidden_lake/composite`: append check duplicates
 
 ### CHANGES
 

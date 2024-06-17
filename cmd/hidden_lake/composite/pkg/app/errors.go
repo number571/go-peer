@@ -17,6 +17,7 @@ var (
 	ErrService        = &SAppError{"service"}
 	ErrClose          = &SAppError{"close"}
 	ErrUnknownService = &SAppError{"unknown service"}
+	ErrHasDuplicates  = &SAppError{"has duplicates"}
 	ErrGetRunners     = &SAppError{"get runners"}
 	ErrInitConfig     = &SAppError{"init config"}
 )

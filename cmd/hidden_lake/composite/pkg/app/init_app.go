@@ -51,22 +51,37 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel 
 	return NewApp(cfg, runners), nil
 }
 
-func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel uint64) ([]types.IRunner, error) {
-	runners := make([]types.IRunner, 0, 64)
+func getRunners(
+	pCfg config.IConfig,
+	pArgs []string,
+	pDefaultPath string,
+	pDefaultKey string,
+	pDefaultParallel uint64,
+) ([]types.IRunner, error) {
+	var (
+		services = pCfg.GetServices()
+		runners  = make([]types.IRunner, 0, len(services))
+		mapsdupl = make(map[string]struct{}, len(services))
+	)
 
 	var (
 		runner types.IRunner
 		err    error
 	)
 
-	for _, sName := range pCfg.GetServices() {
+	for _, sName := range services {
+		if _, ok := mapsdupl[sName]; ok {
+			return nil, ErrHasDuplicates
+		}
+		mapsdupl[sName] = struct{}{}
+
 		switch sName {
 		case hls_settings.CServiceFullName:
 			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
-		case hlt_settings.CServiceFullName:
-			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
 		case hle_settings.CServiceFullName:
 			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultKey, pDefaultParallel)
+		case hlt_settings.CServiceFullName:
+			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
 		case hll_settings.CServiceFullName:
 			runner, err = hll_app.InitApp(pArgs, pDefaultPath)
 		case hlm_settings.CServiceFullName:
@@ -83,6 +98,7 @@ func getRunners(pCfg config.IConfig, pArgs []string, pDefaultPath, pDefaultKey s
 		if err != nil {
 			return nil, err
 		}
+
 		runners = append(runners, runner)
 	}
 
