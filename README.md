@@ -132,9 +132,8 @@ Also, the composition of these works can be found in the book `The general theor
 Basic | Applied | Helpers
 :-----------------------------:|:-----------------------------:|:------------------------------:
 [HL Service](#1-hidden-lake-service) | [HL Messenger](#2-hidden-lake-messenger) | [HL Traffic](#4-hidden-lake-traffic)
-[HL Composite](#8-hidden-lake-composite) | [HL Filesharer](#3-hidden-lake-filesharer) | [HL Adapters](#7-hidden-lake-adapters)
-_ | _ | [HL Loader](#5-hidden-lake-loader)
-_ | _ | [HL Encryptor](#6-hidden-lake-encryptor)
+[HL Composite](#8-hidden-lake-composite) | [HL Filesharer](#3-hidden-lake-filesharer) | [HL Loader](#5-hidden-lake-loader)
+[HL Adapters](#7-hidden-lake-adapters) | _ | [HL Encryptor](#6-hidden-lake-encryptor)
 
 ## 1. Hidden Lake Service
 

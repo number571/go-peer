@@ -2,7 +2,7 @@ package settings
 
 const (
 	CServiceName     = "HLA=chatingar"
-	CServiceFullName = "hidden-lake-adapters=chatingar"
+	CServiceFullName = "hidden-lake-adapter=chatingar"
 )
 
 const (

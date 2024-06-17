@@ -6,4 +6,4 @@ services:
   - hidden-lake-service
   - hidden-lake-traffic
   - hidden-lake-filesharer
-  - hidden-lake-adapters=chatingar
+  - hidden-lake-adapter=chatingar
