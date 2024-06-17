@@ -124,7 +124,10 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 		p.fStdfLogger.PushInfo(fmt.Sprintf(
 			"%s is started; %s",
 			hls_settings.CServiceName,
-			encoding.SerializeJSON(pkg_config.GetConfigSettings(p.fCfgW.GetConfig(), p.fNode)),
+			encoding.SerializeJSON(pkg_config.GetConfigSettings(
+				p.fCfgW.GetConfig(),
+				p.fNode.GetMessageQueue().GetClient(),
+			)),
 		))
 		return nil
 	}

@@ -2,13 +2,13 @@ package config
 
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
+	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/network/anonymity"
 )
 
-func GetConfigSettings(pCfg config.IConfig, pNode anonymity.INode) SConfigSettings {
+func GetConfigSettings(pCfg config.IConfig, pClient client.IClient) SConfigSettings {
 	sett := pCfg.GetSettings()
-	msgLimit := pNode.GetMessageQueue().GetClient().GetMessageLimit()
+	msgLimit := pClient.GetMessageLimit()
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
 			FMessageSizeBytes:   sett.GetMessageSizeBytes(),

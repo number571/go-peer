@@ -32,7 +32,10 @@ func HandleConfigSettingsAPI(
 		switch pR.Method {
 		case http.MethodGet:
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-			_ = api.Response(pW, http.StatusOK, pkg_config.GetConfigSettings(pWrapper.GetConfig(), pNode))
+			_ = api.Response(pW, http.StatusOK, pkg_config.GetConfigSettings(
+				pWrapper.GetConfig(),
+				pNode.GetMessageQueue().GetClient(),
+			))
 			return
 
 		case http.MethodPost:
