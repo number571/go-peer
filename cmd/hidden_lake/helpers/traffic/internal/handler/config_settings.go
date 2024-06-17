@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/config"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -21,16 +22,6 @@ func HandleConfigSettingsAPI(pCfg config.IConfig, pLogger logger.ILogger) http.H
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-
-		sett := pCfg.GetSettings()
-		_ = api.Response(pW, http.StatusOK, config.SConfigSettings{
-			FMessageSizeBytes:   sett.GetMessageSizeBytes(),
-			FWorkSizeBits:       sett.GetWorkSizeBits(),
-			FKeySizeBits:        sett.GetKeySizeBits(),
-			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
-			FMessagesCapacity:   sett.GetMessagesCapacity(),
-			FNetworkKey:         sett.GetNetworkKey(),
-			FStorageEnabled:     sett.GetStorageEnabled(),
-		})
+		_ = api.Response(pW, http.StatusOK, pkg_config.GetConfigSettings(pCfg))
 	}
 }

@@ -3,16 +3,19 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/internal/config"
+	pkg_config "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/config"
 	hle_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	std_logger "github.com/number571/go-peer/internal/logger/std"
 	internal_types "github.com/number571/go-peer/internal/types"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/types"
@@ -94,7 +97,11 @@ func (p *sApp) enable(_ context.Context) state.IStateF {
 		p.initServiceHTTP()
 		p.initServicePPROF()
 
-		p.fStdfLogger.PushInfo(hle_settings.CServiceName + " is running...")
+		p.fStdfLogger.PushInfo(fmt.Sprintf(
+			"%s is started; %s",
+			hle_settings.CServiceName,
+			encoding.SerializeJSON(pkg_config.GetConfigSettings(p.fConfig)),
+		))
 		return nil
 	}
 }
@@ -104,7 +111,10 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 		pCancel()
 		pWg.Wait() // wait canceled context
 
-		p.fStdfLogger.PushInfo(hle_settings.CServiceName + " is shutting down...")
+		p.fStdfLogger.PushInfo(fmt.Sprintf( // nolint: perfsprint
+			"%s is stopped",
+			hle_settings.CServiceName,
+		))
 		return p.stop()
 	}
 }

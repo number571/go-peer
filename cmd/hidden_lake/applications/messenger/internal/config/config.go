@@ -20,8 +20,8 @@ type SConfigSettings struct {
 	fMutex    sync.RWMutex
 	fLanguage language.ILanguage
 
-	FMessagesCapacity uint64 `yaml:"messages_capacity"`
-	FLanguage         string `yaml:"language,omitempty"`
+	FMessagesCapacity uint64 `json:"messages_capacity" yaml:"messages_capacity"`
+	FLanguage         string `json:"language,omitempty" yaml:"language,omitempty"`
 }
 
 type SConfig struct {

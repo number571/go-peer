@@ -9,14 +9,17 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
-func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pNode anonymity.INode) http.HandlerFunc {
+func HandleConfigSettingsAPI(
+	pWrapper config.IWrapper,
+	pLogger logger.ILogger,
+	pNode anonymity.INode,
+) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(pkg_settings.CServiceName, pR)
 
@@ -29,22 +32,7 @@ func HandleConfigSettingsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, p
 		switch pR.Method {
 		case http.MethodGet:
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-
-			sett := pWrapper.GetConfig().GetSettings()
-			_ = api.Response(pW, http.StatusOK, pkg_config.SConfigSettings{
-				SConfigSettings: config.SConfigSettings{
-					FMessageSizeBytes:   sett.GetMessageSizeBytes(),
-					FWorkSizeBits:       sett.GetWorkSizeBits(),
-					FQueuePeriodMS:      sett.GetQueuePeriodMS(),
-					FQueueRandPeriodMS:  sett.GetQueueRandPeriodMS(),
-					FKeySizeBits:        sett.GetKeySizeBits(),
-					FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
-					FNetworkKey:         sett.GetNetworkKey(),
-					FF2FDisabled:        sett.GetF2FDisabled(),
-					FQBTDisabled:        sett.GetQBTDisabled(),
-				},
-				FLimitMessageSizeBytes: pNode.GetMessageQueue().GetClient().GetMessageLimit() - encoding.CSizeUint64,
-			})
+			_ = api.Response(pW, http.StatusOK, pkg_config.GetConfigSettings(pWrapper.GetConfig(), pNode))
 			return
 
 		case http.MethodPost:

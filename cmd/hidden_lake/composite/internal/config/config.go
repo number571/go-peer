@@ -13,10 +13,10 @@ var (
 )
 
 type SConfig struct {
+	fLogging logger.ILogging
+
 	FLogging  []string `yaml:"logging,omitempty"`
 	FServices []string `yaml:"services"`
-
-	fLogging logger.ILogging
 }
 
 func BuildConfig(pFilepath string, pCfg *SConfig) (IConfig, error) {

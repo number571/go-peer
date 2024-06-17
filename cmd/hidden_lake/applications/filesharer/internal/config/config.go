@@ -20,9 +20,9 @@ type SConfigSettings struct {
 	fMutex    sync.RWMutex
 	fLanguage language.ILanguage
 
-	FPageOffset uint64 `yaml:"page_offset"`
-	FRetryNum   uint64 `yaml:"retry_num,omitempty"`
-	FLanguage   string `yaml:"language,omitempty"`
+	FPageOffset uint64 `json:"page_offset" yaml:"page_offset"`
+	FRetryNum   uint64 `json:"retry_num,omitempty" yaml:"retry_num,omitempty"`
+	FLanguage   string `json:"language,omitempty" yaml:"language,omitempty"`
 }
 
 type SConfig struct {

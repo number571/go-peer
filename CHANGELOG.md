@@ -6,9 +6,13 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake`: append info log with settings at start application
+
 ### CHANGES
 
-- Update `cmd/hidden_lake/helpers/traffic`: delete queue_period_ms
+- Update `cmd/hidden_lake/helpers/traffic`: delete "queue_period_ms" param
 - Update `cmd/hidden_lake/service`: CDefaultLimitVoidSize = 4096 -> CDefaultLimitVoidSize = 0
 - Update `cmd/hidden_lake/service`: CDefaultNetworkKey = "default" -> CDefaultNetworkKey = ""
 - Update `pkg/network/anonymity`: enrichLogger: len(pNetMsg.GetPayload().GetBody()) -> len(pNetMsg.ToBytes())
