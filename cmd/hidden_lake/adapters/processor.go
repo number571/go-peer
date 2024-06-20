@@ -105,13 +105,13 @@ func produceHandler(
 		msg, err := net_message.LoadMessage(pSettings, string(msgStrAsBytes))
 		if err != nil {
 			pLogger.PushWarn(err.Error())
-			_ = api.Response(w, http.StatusConflict, "failed: read message")
+			_ = api.Response(w, http.StatusNotAcceptable, "failed: read message")
 			return
 		}
 
 		if err := pProducer.Produce(pCtx, msg); err != nil {
 			pLogger.PushWarn(err.Error())
-			_ = api.Response(w, http.StatusConflict, "failed: produce message")
+			_ = api.Response(w, http.StatusBadGateway, "failed: produce message")
 			return
 		}
 

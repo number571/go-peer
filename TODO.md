@@ -7,6 +7,7 @@
 5. Append Batch's to database
 6. Custom Unmarshal with fields 
 7. Check Ring-QB-net
+8. HLC in the safe execution mode (password, encryption)
 
 ### Tests
 

@@ -49,12 +49,13 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 			return utils.MergeErrors(ErrPushMessageDB, err)
 		}
 
-		// need pass return error if exist (some of connections may be closed)
-		if err := pNode.BroadcastMessage(pCtx, pNetMsg); err != nil {
-			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
-		} else {
-			pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
-		}
+		// some of connections may be closed
+		// need pass return error if exist
+		logBroadcastMessage(
+			pLogger,
+			logBuilder,
+			pNode.BroadcastMessage(pCtx, pNetMsg),
+		)
 
 		consumers := pCfg.GetConsumers()
 
@@ -82,4 +83,16 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 		wg.Wait()
 		return nil
 	}
+}
+
+func logBroadcastMessage(
+	pLogger logger.ILogger,
+	pLogBuilder anon_logger.ILogBuilder,
+	pErr error,
+) {
+	if pErr != nil {
+		pLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
+		return
+	}
+	pLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 }

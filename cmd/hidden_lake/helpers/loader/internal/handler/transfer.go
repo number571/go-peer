@@ -42,7 +42,7 @@ func HandleNetworkTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) ht
 		case http.MethodPost:
 			if err := transfer.run(); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("already_running"))
-				_ = api.Response(pW, http.StatusOK, "failed: already running")
+				_ = api.Response(pW, http.StatusConflict, "failed: already running")
 				return
 			}
 
@@ -53,7 +53,7 @@ func HandleNetworkTransferAPI(pConfig config.IConfig, pLogger logger.ILogger) ht
 		case http.MethodDelete:
 			if err := transfer.stop(); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("already_stopped"))
-				_ = api.Response(pW, http.StatusOK, "failed: already atopped")
+				_ = api.Response(pW, http.StatusConflict, "failed: already atopped")
 				return
 			}
 

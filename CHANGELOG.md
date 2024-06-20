@@ -20,6 +20,10 @@
 - Update `cmd/hidden_lake/applications/messenger`: delete "storage_key", "work_size_bits" params
 - Update `cmd/hidden_lake/applications`: CDefaultLanguage = "ENG" -> CDefaultLanguage = ""
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake`: fix http status responses 
+
 <!-- ... -->
 
 ## v1.6.13

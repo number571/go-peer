@@ -21,8 +21,6 @@ const (
 	cErrorNone = iota
 	cErrorGetFriends
 	cErrorDecodeData
-	cErrorLoadRequest
-	cErrorLoadRequestID
 )
 
 func HandleNetworkRequestAPI(
@@ -59,14 +57,6 @@ func HandleNetworkRequestAPI(
 		case cErrorDecodeData:
 			pLogger.PushWarn(logBuilder.WithMessage("decode_data"))
 			_ = api.Response(pW, http.StatusTeapot, "failed: decode hex format data")
-			return
-		case cErrorLoadRequest:
-			pLogger.PushWarn(logBuilder.WithMessage("load_request"))
-			_ = api.Response(pW, http.StatusForbidden, "failed: decode request")
-			return
-		case cErrorLoadRequestID:
-			pLogger.PushWarn(logBuilder.WithMessage("load_request_id"))
-			_ = api.Response(pW, http.StatusForbidden, "failed: decode request id")
 			return
 		default:
 			panic("undefined error code")

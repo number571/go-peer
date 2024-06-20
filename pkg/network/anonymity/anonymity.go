@@ -281,19 +281,31 @@ func (p *sNode) networkHandler(
 		return nil
 	}
 
+	// do request or response action
+	return p.handleDoAction(pCtx, logBuilder, sender, pld)
+}
+
+func (p *sNode) handleDoAction(
+	pCtx context.Context,
+	pLogBuilder anon_logger.ILogBuilder,
+	pSender asymmetric.IPubKey,
+	pPld payload.IPayload64,
+) error {
 	// get [head:body] from payload
-	head := loadHead(pld.GetHead())
-	body := pld.GetBody()
+	head := loadHead(pPld.GetHead())
+	body := pPld.GetBody()
 
 	// check state of payload = [request,response]?
-	if action := head.getAction(); action.isRequest() {
+	action := head.getAction()
+
+	if action.isRequest() {
 		// got request from another side (need generate response)
-		p.handleRequest(pCtx, logBuilder, sender, head, body)
-	} else {
-		// got response message from our side request
-		p.handleResponse(pCtx, logBuilder, sender, action, body)
+		p.handleRequest(pCtx, pLogBuilder, pSender, head, body)
+		return nil
 	}
 
+	// got response message from our side request
+	p.handleResponse(pCtx, pLogBuilder, pSender, action, body)
 	return nil
 }
 

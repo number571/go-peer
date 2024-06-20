@@ -18,6 +18,9 @@
 		<a href="https://github.com/number571/go-peer/blob/master/LICENSE">
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
+		<a href="https://github.com/number571/go-peer/actions">
+        	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Build" />
+		</a>
 		<a href="https://github.com/number571/go-peer/blob/ee4b08c309d6966bd31621ceb7b0826708ca5dfb/Makefile#L55">
         	<img src="test/result/badge.svg" alt="Coverage" />
 		</a>
@@ -29,9 +32,6 @@
 		</a>
 	</p>
 	<p align="center">
-		<a href="https://github.com/number571/go-peer/actions">
-        	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Tests" />
-		</a>
 		<a href="https://goreportcard.com/report/github.com/number571/go-peer">
         	<img src="https://goreportcard.com/badge/github.com/number571/go-peer" alt="GoReportCard" />
 		</a>
@@ -40,6 +40,12 @@
 		</a>
 		<a href="https://github.com/number571/go-peer/commits/master">
         	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
+		</a>
+		<a href="https://img.shields.io/github/languages/code-size/number571/go-peer.svg">
+        	<img src="https://img.shields.io/github/languages/code-size/number571/go-peer.svg" alt="CodeSize" />
+		</a>
+		<a href="https://img.shields.io/github/downloads/number571/go-peer/total.svg">
+        	<img src="https://img.shields.io/github/downloads/number571/go-peer/total.svg" alt="Downloads" />
 		</a>
 	</p>
 	<p align="center">
@@ -779,6 +785,12 @@ The difference between the old version of Hidden Lake and the new one is in the 
 2. The old version was a monolith, incorporating both transport logic, anonymizing, and applied. The new version is already based on the micro service architecture
 3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library
 4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all
+
+**[⬆ back to top](#installation)**
+
+## Star history
+
+[![Star History Chart](https://api.star-history.com/svg?repos=number571/go-peer&type=Date)](https://star-history.com/#number571/go-peer&Date)
 
 **[⬆ back to top](#installation)**
 
