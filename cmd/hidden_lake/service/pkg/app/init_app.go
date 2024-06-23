@@ -27,13 +27,12 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel 
 	}
 
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
-	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
-
 	cfg, err := config.InitConfig(filepath.Join(inputPath, pkg_settings.CPathYML), nil)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
+	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
 	privKey, err := getPrivKey(cfg, inputKey)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPrivateKey, err)

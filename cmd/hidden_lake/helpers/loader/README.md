@@ -46,7 +46,6 @@ Default config `hll.yml`
 ```yaml
 settings:
   messages_capacity: 2048
-  work_size_bits: 22
 logging:
 - info
 - warn

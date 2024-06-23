@@ -215,7 +215,6 @@ Default config `hls.yml`
 ```yaml
 settings:
   message_size_bytes: 8192
-  work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
 logging:
@@ -513,7 +512,6 @@ settings:
   message_size_bytes: 8192
   key_size_bits: 4096
   messages_capacity: 2048
-  work_size_bits: 22
 logging:
   - info
   - warn
@@ -579,7 +577,6 @@ Default config `hll.yml`
 ```yaml
 settings:
   messages_capacity: 2048
-  work_size_bits: 22
 logging:
 - info
 - warn
@@ -647,7 +644,6 @@ Default config `hle.yml`
 ```yaml
 settings:
   message_size_bytes: 8192
-  work_size_bits: 22
   key_size_bits: 4096
 logging:
 - info

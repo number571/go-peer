@@ -10,6 +10,7 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
 			FMessagesCapacity: sett.GetMessagesCapacity(),
+			FWorkSizeBits:     sett.GetWorkSizeBits(),
 			FLanguage:         language.FromILanguage(sett.GetLanguage()),
 		},
 	}

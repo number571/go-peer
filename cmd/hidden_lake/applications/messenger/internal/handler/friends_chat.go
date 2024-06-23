@@ -29,6 +29,7 @@ type sChatMessage struct {
 
 type sChatAddress struct {
 	FAliasName  string
+	FPublicKey  string
 	FPubKeyHash string
 }
 
@@ -128,6 +129,7 @@ func FriendsChatPage(
 			sTemplate: getTemplate(pCfg),
 			FAddress: sChatAddress{
 				FAliasName:  aliasName,
+				FPublicKey:  recvPubKey.ToString(),
 				FPubKeyHash: recvPubKey.GetHasher().ToString(),
 			},
 			FMessages: make([]sChatMessage, 0, len(msgs)),

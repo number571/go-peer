@@ -5,3 +5,4 @@ prog_hls
 hls.yml
 hls.db/ 
 !cmd/hlm 
+pasw.txt

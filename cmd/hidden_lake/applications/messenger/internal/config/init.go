@@ -17,6 +17,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
 				FMessagesCapacity: hlm_settings.CDefaultMessagesCapacity,
+				FWorkSizeBits:     hlm_settings.CDefaultWorkSize,
 				FLanguage:         hlm_settings.CDefaultLanguage,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

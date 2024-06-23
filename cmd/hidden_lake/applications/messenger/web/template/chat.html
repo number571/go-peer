@@ -12,8 +12,8 @@ Babilejo
 
 {{define "header"}}
 <script type="text/javascript" defer>
-    const copy_pubkey_hash = async (pub_key) => {
-        let text = pub_key;
+    const copy_pubkey = async () => {
+        let text = "{{.FAddress.FPublicKey}}";
         try {
             await navigator.clipboard.writeText(text);
             console.log('Content copied to clipboard');
@@ -28,14 +28,14 @@ Babilejo
     }
 </script>
 
-<button id="copy_pubkey_hash" type="button" class="btn btn-info"
-    onclick="copy_pubkey_hash('{{.FAddress.FPubKeyHash}}');set_info_color('copy_pubkey_hash');">
+<button id="copy_pubkey" type="button" class="btn btn-info"
+    onclick="copy_pubkey('{{.FAddress.FPublicKey}}');set_info_color('copy_pubkey');">
     {{if (eq .FLanguage 0)}}
-    Hash
+    Key
     {{else if (eq .FLanguage 1)}}
-    Хеш
+    Ключ
     {{else if (eq .FLanguage 2)}}
-    Haŝiŝo
+    Ŝlosilo
     {{end}}
 </button>
 {{end}}

@@ -6,7 +6,7 @@ echo "
 Description=HiddenLakeMessenger
 
 [Service]
-ExecStart=/root/hlm_amd64_linux -path=/root
+ExecStart=/root/hlm_amd64_linux -path=/root -pasw=/root/pasw.txt
 Restart=always
 RestartSec=10
 

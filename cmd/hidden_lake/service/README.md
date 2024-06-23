@@ -90,7 +90,6 @@ Default config `hls.yml`
 ```yaml
 settings:
   message_size_bytes: 8192
-  work_size_bits: 22
   key_size_bits: 4096
   queue_period_ms: 5000
 logging:

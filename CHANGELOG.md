@@ -6,6 +6,15 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/applications/messenger`: creates pasw.txt file for database
+
+### CHANGES
+
+- Update `cmd/hidden_lake/service`: CDefaultWorkSizeBits = 22 -> CDefaultWorkSizeBits = 0
+- Update `cmd/hidden_lake/applications/messenger`: chat: copy hash of public key -> copy public key
+
 <!-- ... -->
 
 ## v1.6.14

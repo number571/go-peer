@@ -56,7 +56,6 @@ Default config `hlt.yml`
 settings:
   message_size_bytes: 8192
   key_size_bits: 4096
-  work_size_bits: 22
   messages_capacity: 2048
 logging:
   - info
