@@ -17,6 +17,4 @@ var (
 	ErrReadPrivateKey    = &SAppError{"read private key"}
 	ErrWritePrivateKey   = &SAppError{"write private key"}
 	ErrSizePrivateKey    = &SAppError{"size private key"}
-	ErrWritePassword     = &SAppError{"write password"}
-	ErrReadPassword      = &SAppError{"read password"}
 )
