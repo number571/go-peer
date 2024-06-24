@@ -43,11 +43,11 @@ test-coverage-treemap:
 test-coverage-badge: 
 	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
 	if [ `${_COVERAGE_FLOOR}` -lt 60 ]; then \
-		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/dc143c/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_coverage_template.svg | sed -e "s/{{.color}}/dc143c/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge_coverage.svg; \
 	elif [ `${_COVERAGE_FLOOR}` -gt 80 ]; then \
-		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/97ca00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_coverage_template.svg | sed -e "s/{{.color}}/97ca00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge_coverage.svg; \
 	else \
-		cat $(_TEST_UTILS_PATH)/badge_template.svg | sed -e "s/{{.color}}/ff8c00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge.svg; \
+		cat $(_TEST_UTILS_PATH)/badge_coverage_template.svg | sed -e "s/{{.color}}/ff8c00/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge_coverage.svg; \
 	fi
 
 ### PPROF

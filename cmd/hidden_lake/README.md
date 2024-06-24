@@ -17,13 +17,13 @@
         	<img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
 		<a href="https://github.com/number571/go-peer/blob/d06ff1b7d35ceb8fa779acda2e1335896b0afdb1/cmd/hidden_lake/Makefile#L50">
-        	<img src="_test/result/badge.svg" alt="Coverage" />
+        	<img src="_test/result/badge_coverage.svg" alt="Coverage" />
 		</a>
         <a href="https://pkg.go.dev/github.com/number571/go-peer/cmd/hidden_lake?status.svg">
         	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
 		</a>
         <a href="https://github.com/number571/go-peer">
-        	<img src="https://github.com/number571/go-peer/blob/master/images/go-peer_badge.svg" alt="Go-Peer" />
+        	<img src="../../images/go-peer_badge.svg" alt="Go-Peer" />
 		</a>
         <a href="https://github.com/croqaz/awesome-decentralized">
         	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome" />

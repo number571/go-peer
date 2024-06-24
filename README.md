@@ -22,7 +22,7 @@
         	<img src="https://github.com/number571/go-peer/actions/workflows/build.yml/badge.svg" alt="Build" />
 		</a>
 		<a href="https://github.com/number571/go-peer/blob/ee4b08c309d6966bd31621ceb7b0826708ca5dfb/Makefile#L55">
-        	<img src="test/result/badge.svg" alt="Coverage" />
+        	<img src="test/result/badge_coverage.svg" alt="Coverage" />
 		</a>
 		<a href="https://godoc.org/github.com/number571/go-peer">
         	<img src="https://godoc.org/github.com/number571/go-peer?status.svg" alt="GoDoc" />
@@ -40,6 +40,9 @@
 		</a>
 		<a href="https://github.com/number571/go-peer/commits/master">
         	<img src="https://img.shields.io/github/last-commit/number571/go-peer.svg" alt="Commits" />
+		</a>
+		<a href="https://github.com/number571/go-peer/blob/ee4b08c309d6966bd31621ceb7b0826708ca5dfb/Makefile#L55">
+        	<img src="test/result/badge_codelines.svg" alt="Code Lines" />
 		</a>
 		<a href="https://img.shields.io/github/languages/code-size/number571/go-peer.svg">
         	<img src="https://img.shields.io/github/languages/code-size/number571/go-peer.svg" alt="CodeSize" />

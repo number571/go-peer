@@ -17,7 +17,7 @@
       <img src="https://img.shields.io/github/license/number571/go-peer.svg" alt="License" />
 		</a>
     <a href="https://github.com/number571/go-peer">
-      <img src="https://github.com/number571/go-peer/blob/master/images/go-peer_badge.svg" alt="Go-Peer" />
+      <img src="../..//images/go-peer_badge.svg" alt="Go-Peer" />
 		</a>
 	</p>
 	About project
