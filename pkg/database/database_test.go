@@ -107,24 +107,20 @@ func TestTryDecrypt(t *testing.T) {
 	}
 }
 
-// // The test fails when the user is root.
-// func TestInvalidCreateDB(t *testing.T) {
-// 	t.Parallel()
+func TestInvalidCreateDB(t *testing.T) {
+	t.Parallel()
 
-// 	prng := random.NewCSPRNG()
-// 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
-// 	defer os.RemoveAll(path)
+	path := "./not_exist/path/to/database/57193nf82jfu4fm3/database.db"
+	defer os.RemoveAll(path)
 
-// 	_, err := NewKVDatabase(database.NewSettings(&database.SSettings{
-// 		FPath:     path,
-// 		FWorkSize: testutils.TCWorkSize,
-// 		FPassword: "CIPHER",
-// 	}))
-// 	if err == nil {
-// 		t.Error("success create database with incorrect path")
-// 		return
-// 	}
-// }
+	_, err := NewKVDatabase(NewSettings(&SSettings{
+		FPath: path,
+	}))
+	if err == nil {
+		t.Error("success create database with incorrect path")
+		return
+	}
+}
 
 func TestInvalidInitDB(t *testing.T) {
 	t.Parallel()
