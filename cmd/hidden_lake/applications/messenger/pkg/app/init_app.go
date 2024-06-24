@@ -21,7 +21,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string) (types.IRunner, e
 	}
 
 	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
-	password, err := initapp.GetPrivKeyAsPassword(inputKey, settings.CServiceFullName)
+	password, err := initapp.GetPasswordFromPrivKey(inputKey)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPassword, err)
 	}
