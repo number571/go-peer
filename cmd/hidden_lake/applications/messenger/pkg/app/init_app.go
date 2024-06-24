@@ -20,8 +20,10 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string) (types.IRunner, e
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
+	// 1. https://crypto.stackexchange.com/questions/3288/is-truncating-a-hashed-private-key-with-sha-1-safe-to-use-as-the-symmetric-key-f
+	// 2. https://www.reddit.com/r/crypto/comments/zwmoqf/can_a_private_key_be_used_for_symmetric_encryption/
 	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
-	password, err := initapp.GetPrivKeyAsPassword(inputKey, settings.CServiceFullName)
+	password, err := initapp.GetPassword(inputKey, settings.CServiceFullName)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPassword, err)
 	}
