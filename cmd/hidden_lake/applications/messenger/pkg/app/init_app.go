@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-func InitApp(pArgs []string, pDefaultPath, pDefaultPasw string) (types.IRunner, error) {
+func InitApp(pArgs []string, pDefaultPath, pDefaultKey string) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 
 	cfg, err := config.InitConfig(filepath.Join(inputPath, settings.CPathYML), nil)
@@ -20,8 +20,8 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultPasw string) (types.IRunner, 
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
-	inputPasw := flag.GetFlagValue(pArgs, "pasw", pDefaultPasw)
-	password, err := initapp.GetPassword(inputPasw)
+	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
+	password, err := initapp.GetPrivKeyAsPassword(inputKey, settings.CServiceFullName)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPassword, err)
 	}

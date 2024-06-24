@@ -97,19 +97,18 @@ func (p *sApp) disable(pCancel context.CancelFunc, pWg *sync.WaitGroup) state.IS
 
 func runnersToServices(pRunners []types.IRunner) []internal_types.IServiceF {
 	services := make([]internal_types.IServiceF, 0, len(pRunners))
-	for _, r := range pRunners {
-		r := r
-		services = append(services, runnerToService(r))
+	for _, runner := range pRunners {
+		runner := runner
+		services = append(
+			services,
+			func(pCtx context.Context, pWg *sync.WaitGroup, pChErr chan<- error) {
+				defer pWg.Done()
+				if err := runner.Run(pCtx); err != nil {
+					pChErr <- err
+					return
+				}
+			},
+		)
 	}
 	return services
-}
-
-func runnerToService(pRunner types.IRunner) internal_types.IServiceF {
-	return func(pCtx context.Context, pWg *sync.WaitGroup, pChErr chan<- error) {
-		defer pWg.Done()
-		if err := pRunner.Run(pCtx); err != nil {
-			pChErr <- err
-			return
-		}
-	}
 }
