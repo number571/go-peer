@@ -15,4 +15,5 @@ func (err *SClientError) Error() string {
 var (
 	ErrBadRequest     = &SClientError{"bad request"}
 	ErrDecodeResponse = &SClientError{"decode response"}
+	ErrPushMessage    = &SClientError{"push message"}
 )

@@ -5,6 +5,7 @@ import (
 
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	hls_request "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
+	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -23,7 +24,7 @@ func NewRequester(pHLSClient hls_client.IClient) IRequester {
 
 func (p *sRequester) PushMessage(pCtx context.Context, pAliasName string, pRequest hls_request.IRequest) error {
 	if err := p.fHLSClient.BroadcastRequest(pCtx, pAliasName, pRequest); err != nil {
-		return err // TODO: create errors
+		return utils.MergeErrors(ErrPushMessage, err)
 	}
 	return nil
 }
