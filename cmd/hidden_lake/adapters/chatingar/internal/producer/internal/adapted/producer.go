@@ -38,7 +38,7 @@ func (p *sAdaptedProducer) Produce(pCtx context.Context, pMsg net_message.IMessa
 	req, err := http.NewRequestWithContext(
 		pCtx,
 		http.MethodPost,
-		"https://api.chatingar.com/api/comment",
+		"https://chatingar-api.onrender.com/api/comment",
 		bytes.NewBuffer([]byte(reqStr)),
 	)
 	if err != nil {

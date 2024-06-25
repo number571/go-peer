@@ -1,6 +1,7 @@
 package adapted
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -72,7 +73,7 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessa
 		pCtx,
 		http.MethodGet,
 		fmt.Sprintf(
-			"https://api.chatingar.com/api/comment/%s?page=%d",
+			"https://chatingar-api.onrender.com/api/comment/%s?page=%d",
 			p.fPostID,
 			p.fCurrPage,
 		),
@@ -93,8 +94,14 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessa
 		return nil, ErrBadStatusCode
 	}
 
+	gr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil, ErrGzipReader
+	}
+	defer gr.Close()
+
 	var messagesDTO sMessagesDTO
-	if err := json.NewDecoder(resp.Body).Decode(&messagesDTO); err != nil {
+	if err := json.NewDecoder(gr).Decode(&messagesDTO); err != nil {
 		return nil, utils.MergeErrors(ErrDecodeMessages, err)
 	}
 
@@ -130,7 +137,7 @@ func (p *sAdaptedConsumer) loadCountComments(pCtx context.Context) (uint64, erro
 	req, err := http.NewRequestWithContext(
 		pCtx,
 		http.MethodGet,
-		"https://api.chatingar.com/api/post/"+p.fPostID,
+		"https://chatingar-api.onrender.com/api/post/"+p.fPostID,
 		nil,
 	)
 	if err != nil {
@@ -148,8 +155,14 @@ func (p *sAdaptedConsumer) loadCountComments(pCtx context.Context) (uint64, erro
 		return 0, ErrBadStatusCode
 	}
 
+	gr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return 0, ErrGzipReader
+	}
+	defer gr.Close()
+
 	var count sCountDTO
-	if err := json.NewDecoder(resp.Body).Decode(&count); err != nil {
+	if err := json.NewDecoder(gr).Decode(&count); err != nil {
 		return 0, utils.MergeErrors(ErrDecodeCount, err)
 	}
 
