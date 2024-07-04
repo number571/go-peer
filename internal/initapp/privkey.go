@@ -7,7 +7,7 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-func GetPrivKey(pKeySize uint64, pKeyPath string) (asymmetric.IPrivKey, error) {
+func GetPrivKey(pKeyPath string, pKeySize uint64) (asymmetric.IPrivKey, error) {
 	if _, err := os.Stat(pKeyPath); os.IsNotExist(err) {
 		privKey := asymmetric.NewRSAPrivKey(pKeySize)
 		if err := os.WriteFile(pKeyPath, []byte(privKey.ToString()), 0o600); err != nil {

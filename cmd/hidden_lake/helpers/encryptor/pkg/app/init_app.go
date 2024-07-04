@@ -31,7 +31,7 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultKey string, pDefaultParallel 
 	}
 
 	inputKey := flag.GetFlagValue(pArgs, "key", pDefaultKey)
-	privKey, err := initapp.GetPrivKey(cfg.GetSettings().GetKeySizeBits(), inputKey)
+	privKey, err := initapp.GetPrivKey(inputKey, cfg.GetSettings().GetKeySizeBits())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPrivateKey, err)
 	}

@@ -63,7 +63,7 @@ func TestGetPrivKey(t *testing.T) {
 	testDeleteFile(tcTmpPrivKey512Path)
 	defer testDeleteFile(tcTmpPrivKey512Path)
 
-	privKey, err := GetPrivKey(1024, tcPrivKey1024Path)
+	privKey, err := GetPrivKey(tcPrivKey1024Path, 1024)
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,29 +73,29 @@ func TestGetPrivKey(t *testing.T) {
 		return
 	}
 
-	if _, err := GetPrivKey(1024, tcInvalidPrivKey1024Path); err == nil {
+	if _, err := GetPrivKey(tcInvalidPrivKey1024Path, 1024); err == nil {
 		t.Error("success get invalid private key")
 		return
 	}
-	if _, err := GetPrivKey(2048, tcPrivKey1024Path); err == nil {
+	if _, err := GetPrivKey(tcPrivKey1024Path, 2048); err == nil {
 		t.Error("success get private key with diff size")
 		return
 	}
-	if _, err := GetPrivKey(512, "./random/not_exist/path/57199u140291724y121291d1/priv.key"); err == nil {
+	if _, err := GetPrivKey("./random/not_exist/path/57199u140291724y121291d1/priv.key", 512); err == nil {
 		t.Error("success get private key with not exist directory")
 		return
 	}
-	if _, err := GetPrivKey(512, tcTestdataDirPath); err == nil {
+	if _, err := GetPrivKey(tcTestdataDirPath, 512); err == nil {
 		t.Error("success get private key as directory")
 		return
 	}
 
-	tmpPrivKey, err := GetPrivKey(512, tcTmpPrivKey512Path)
+	tmpPrivKey, err := GetPrivKey(tcTmpPrivKey512Path, 512)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	tmpPrivKeyX, err := GetPrivKey(512, tcTmpPrivKey512Path)
+	tmpPrivKeyX, err := GetPrivKey(tcTmpPrivKey512Path, 512)
 	if err != nil {
 		t.Error(err)
 		return
