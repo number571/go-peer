@@ -15,7 +15,8 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anon_messenger/secret_channel/common/node1_hlm
-      - SERVICE_KEY=examples/anon_messenger/_keys/2048/priv_node1.key
+      - SERVICE_PRIV=examples/anon_messenger/_keys/2048/priv_node1.key
+      - SERVICE_PASW=examples/anon_messenger/_keys/pasw/pasw_node1.key
     ports:
       - 8080:8080
     networks:
@@ -26,7 +27,8 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anon_messenger/secret_channel/common/node2_hlm
-      - SERVICE_KEY=examples/anon_messenger/_keys/2048/priv_node2.key
+      - SERVICE_PRIV=examples/anon_messenger/_keys/2048/priv_node2.key
+      - SERVICE_PASW=examples/anon_messenger/_keys/pasw/pasw_node2.key
     ports:
       - 7070:7070
       - 7572:7572

@@ -10,6 +10,7 @@ COPY ./ ./
 RUN go build -o hlc ./cmd/hidden_lake/composite/cmd/hlc
 
 ENV SERVICE_PATH="/mounted"
-ENV SERVICE_KEY="/mounted/priv.key"
+ENV SERVICE_PRIV="/mounted/priv.key"
+ENV SERVICE_PASW="/mounted/pasw.key"
 ENV SERVICE_PARALLEL="1"
-CMD ./hlc -path="${SERVICE_PATH}" -key="${SERVICE_KEY}" -parallel="${SERVICE_PARALLEL}"
+CMD ./hlc -path="${SERVICE_PATH}" -priv="${SERVICE_PRIV}" -pasw="${SERVICE_PASW}" -parallel="${SERVICE_PARALLEL}"

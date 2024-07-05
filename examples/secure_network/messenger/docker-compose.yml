@@ -6,7 +6,8 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/secure_network/messenger/node1_hlm
-      - SERVICE_KEY=examples/secure_network/_keys/4096/priv_node1.key
+      - SERVICE_PRIV=examples/secure_network/_keys/4096/priv_node1.key
+      - SERVICE_PASW=examples/secure_network/_keys/pasw/pasw_node1.key
     ports:
       - 8080:8080
     networks:
@@ -17,7 +18,8 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/secure_network/messenger/node2_hlm
-      - SERVICE_KEY=examples/secure_network/_keys/4096/priv_node2.key
+      - SERVICE_PRIV=examples/secure_network/_keys/4096/priv_node2.key
+      - SERVICE_PASW=examples/secure_network/_keys/pasw/pasw_node1.key
     ports:
       - 7070:7070
       - 7572:7572

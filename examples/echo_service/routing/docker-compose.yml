@@ -12,7 +12,7 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/routing/recv_hls
-      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_recv.key
+      - SERVICE_PRIV=examples/echo_service/_keys/4096/priv_recv.key
     networks:
       - local-network
       - hidden-lake
@@ -22,7 +22,7 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/routing/send_hls
-      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_send.key
+      - SERVICE_PRIV=examples/echo_service/_keys/4096/priv_send.key
     ports:
       - 7572:7572
     networks:

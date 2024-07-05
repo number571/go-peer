@@ -14,7 +14,7 @@ import (
 
 const (
 	tcTestdataPath = "./testdata/"
-	tcPathKey      = "priv1024.key" // nolint: gosec
+	tcPathKey      = "password.key" // nolint: gosec
 	tcPathConfig   = pkg_settings.CPathYML
 	tcPathDatabase = pkg_settings.CPathDB
 )

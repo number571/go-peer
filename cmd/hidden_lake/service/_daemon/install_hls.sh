@@ -6,7 +6,7 @@ echo "
 Description=HiddenLakeService
 
 [Service]
-ExecStart=/root/hls_amd64_linux -path=/root -key=/root/priv.key -parallel=1
+ExecStart=/root/hls_amd64_linux -path=/root -priv=/root/priv.key -parallel=1
 Restart=always
 RestartSec=10
 

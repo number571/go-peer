@@ -8,7 +8,7 @@
 
 ### IMPROVEMENTS
 
-- Update `cmd/hidden_lake/applications/messenger`: creates password for DB from private key
+- Update `cmd/hidden_lake/applications/messenger`: creates password for DB
 
 ### CHANGES
 

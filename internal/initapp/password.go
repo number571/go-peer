@@ -3,23 +3,21 @@ package initapp
 import (
 	"os"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
-/*
-1. https://crypto.stackexchange.com/questions/3288/is-truncating-a-hashed-private-key-with-sha-1-safe-to-use-as-the-symmetric-key-f
-2. https://www.reddit.com/r/crypto/comments/zwmoqf/can_a_private_key_be_used_for_symmetric_encryption/
-*/
-func GetPasswordFromPrivKey(pKeyPath string) (string, error) {
-	privKeyStr, err := os.ReadFile(pKeyPath)
+func GetPassword(pPaswPath string) (string, error) {
+	if _, err := os.Stat(pPaswPath); os.IsNotExist(err) {
+		pasw := random.NewCSPRNG().GetString(32)
+		if err := os.WriteFile(pPaswPath, []byte(pasw), 0o600); err != nil {
+			return "", utils.MergeErrors(ErrWritePrivateKey, err)
+		}
+		return pasw, nil
+	}
+	paswBytes, err := os.ReadFile(pPaswPath)
 	if err != nil {
 		return "", utils.MergeErrors(ErrReadPrivateKey, err)
 	}
-	privKey := asymmetric.LoadRSAPrivKey(string(privKeyStr))
-	if privKey == nil {
-		return "", ErrInvalidPrivateKey
-	}
-	return hashing.NewSHA256Hasher(privKey.ToBytes()).ToString(), nil
+	return string(paswBytes), nil
 }

@@ -11,7 +11,9 @@ const (
 	tcTestdataPath           = "./testdata/"
 	tcTestdataDirPath        = "./testdata/directory"
 	tcPrivKey1024Path        = tcTestdataPath + "priv1024.key"
+	tcPasswordPath           = tcTestdataPath + "password.key"
 	tcTmpPrivKey512Path      = tcTestdataPath + "tmp_priv512.key"
+	tcTmpPasswordPath        = tcTestdataPath + "tmp_password.key"
 	tcInvalidPrivKey1024Path = tcTestdataPath + "invalid_priv1024.key"
 
 	tcPassword    = "ee12f9c090cb1903708dea269bdcefa352171611da1c635a0a0694244bf9c049" // nolint: gosec
@@ -33,10 +35,13 @@ func TestError(t *testing.T) {
 	}
 }
 
-func TestGetPrivKeyAsPassword(t *testing.T) {
+func TestPassword(t *testing.T) {
 	t.Parallel()
 
-	password, err := GetPasswordFromPrivKey(tcPrivKey1024Path)
+	testDeleteFile(tcTmpPasswordPath)
+	defer testDeleteFile(tcTmpPasswordPath)
+
+	password, err := GetPassword(tcPasswordPath)
 	if err != nil {
 		t.Error(err)
 		return
@@ -47,12 +52,23 @@ func TestGetPrivKeyAsPassword(t *testing.T) {
 		return
 	}
 
-	if _, err := GetPasswordFromPrivKey(tcInvalidPrivKey1024Path); err == nil {
-		t.Error("success get invalid private key")
+	if _, err := GetPassword("./random/not_exist/path/57199u140291724y121291d1/priv.key"); err == nil {
+		t.Error("success get private key with not exist directory")
 		return
 	}
-	if _, err := GetPasswordFromPrivKey("./random/not_exist/path/57199u140291724y121291d1/priv.key"); err == nil {
-		t.Error("success get private key with not exist directory")
+
+	tmpPassword, err := GetPassword(tcTmpPasswordPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	tmpPasswordX, err := GetPassword(tcTmpPasswordPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if tmpPassword != tmpPasswordX {
+		t.Error("diff tmp passwords")
 		return
 	}
 }

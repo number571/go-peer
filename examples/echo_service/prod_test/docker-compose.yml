@@ -12,7 +12,7 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/prod_test/recv_hls
-      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_recv.key
+      - SERVICE_PRIV=examples/echo_service/_keys/4096/priv_recv.key
     networks:
       - local-network
   send_hls:
@@ -21,7 +21,7 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/echo_service/prod_test/send_hls
-      - SERVICE_KEY=examples/echo_service/_keys/4096/priv_send.key
+      - SERVICE_PRIV=examples/echo_service/_keys/4096/priv_send.key
     ports:
       - 7572:7572
   other_hls:
@@ -32,7 +32,7 @@ services:
         replicas: 3
     environment:
       - SERVICE_PATH=examples/echo_service/prod_test/other_hls
-      - SERVICE_KEY=examples/echo_service/prod_test/other_hls/priv.key
+      - SERVICE_PRIV=examples/echo_service/prod_test/other_hls/priv.key
 networks:
   local-network:
     driver: bridge
