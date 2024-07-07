@@ -110,7 +110,7 @@ func TestTryDecrypt(t *testing.T) {
 func TestInvalidCreateDB(t *testing.T) {
 	t.Parallel()
 
-	path := "./not_exist/path/to/database/57193nf82jfu4fm3/database.db"
+	path := "./not_exist/path/to/database/57199u140291724y121291d1/database.db"
 	defer os.RemoveAll(path)
 
 	_, err := NewKVDatabase(NewSettings(&SSettings{

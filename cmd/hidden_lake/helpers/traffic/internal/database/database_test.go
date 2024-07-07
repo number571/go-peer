@@ -61,25 +61,23 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
-// // The test fails when the user is root.
-// func TestIInitDatabase(t *testing.T) {
-// 	t.Parallel()
+func TestIInitDatabase(t *testing.T) {
+	t.Parallel()
 
-// 	prng := random.NewCSPRNG()
-// 	path := "/" + prng.GetString(32) + "/" + prng.GetString(32) + "/" + prng.GetString(32)
-// 	defer os.RemoveAll(path)
+	path := "./not_exist/path/to/database/57199u140291724y121291d1/database.db"
+	defer os.RemoveAll(path)
 
-// 	_, err := NewDatabase(NewSettings(&SSettings{
-// 		FPath:             path,
-// 		FNetworkKey:       testutils.TCNetworkKey,
-// 		FWorkSizeBits:     testutils.TCWorkSize,
-// 		FMessagesCapacity: testutils.TCCapacity,
-// 	}))
-// 	if err == nil {
-// 		t.Error("success init database with invalid path")
-// 		return
-// 	}
-// }
+	_, err := NewDatabase(NewSettings(&SSettings{
+		FPath:             path,
+		FNetworkKey:       testutils.TCNetworkKey,
+		FWorkSizeBits:     testutils.TCWorkSize,
+		FMessagesCapacity: testutils.TCCapacity,
+	}))
+	if err == nil {
+		t.Error("success init database with invalid path")
+		return
+	}
+}
 
 func TestDatabaseLoad(t *testing.T) {
 	t.Parallel()
