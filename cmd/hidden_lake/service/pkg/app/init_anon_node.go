@@ -64,7 +64,7 @@ func (p *sApp) initAnonNode() error {
 				FReadTimeout:  hls_settings.CNetworkReadTimeout,
 				FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetLimitVoidSizeBytes(),
+					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetRandMessageSizeBytes(),
 					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 					FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 					FDialTimeout:           hls_settings.CConnDialTimeout,
@@ -83,14 +83,14 @@ func (p *sApp) initAnonNode() error {
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FNetworkMask:        hls_settings.CNetworkMask,
-				FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
-				FMainCapacity:       hls_settings.CQueueMainCapacity,
-				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
-				FParallel:           p.fParallel,
-				FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
-				FDuration:           time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond,
-				FRandDuration:       time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond,
+				FNetworkMask:          hls_settings.CNetworkMask,
+				FWorkSizeBits:         cfgSettings.GetWorkSizeBits(),
+				FMainPoolCapacity:     hls_settings.CQueueMainPoolCapacity,
+				FRandPoolCapacity:     hls_settings.CQueueRandPoolCapacity,
+				FParallel:             p.fParallel,
+				FRandMessageSizeBytes: cfgSettings.GetRandMessageSizeBytes(),
+				FQueuePeriod:          time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond,
+				FRandQueuePeriod:      time.Duration(cfgSettings.GetRandQueuePeriodMS()) * time.Millisecond,
 			}),
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: cfgSettings.GetNetworkKey(),

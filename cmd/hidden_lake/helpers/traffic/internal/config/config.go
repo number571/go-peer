@@ -15,13 +15,13 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
-	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
-	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FMessagesCapacity   uint64 `json:"messages_capacity" yaml:"messages_capacity"`
-	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
-	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
-	FStorageEnabled     bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
+	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
+	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
+	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FMessagesCapacity     uint64 `json:"messages_capacity" yaml:"messages_capacity"`
+	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
+	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FStorageEnabled       bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
 }
 
 type SConfig struct {
@@ -93,8 +93,8 @@ func (p *SConfigSettings) GetMessagesCapacity() uint64 {
 	return p.FMessagesCapacity
 }
 
-func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
-	return p.FLimitVoidSizeBytes
+func (p *SConfigSettings) GetRandMessageSizeBytes() uint64 {
+	return p.FRandMessageSizeBytes
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {

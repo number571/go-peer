@@ -107,7 +107,7 @@ settings:
   key_size_bits: 4096
   work_size_bits: 22
   messages_capacity: 2048
-  limit_void_size_bytes: 4096
+  rand_message_size_bytes: 4096
   storage_enabled: true
   network_key: hlt-network-key
 logging:

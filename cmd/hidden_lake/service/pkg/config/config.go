@@ -11,15 +11,15 @@ func GetConfigSettings(pCfg config.IConfig, pClient client.IClient) SConfigSetti
 	msgLimit := pClient.GetMessageLimit()
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
-			FMessageSizeBytes:   sett.GetMessageSizeBytes(),
-			FKeySizeBits:        sett.GetKeySizeBits(),
-			FWorkSizeBits:       sett.GetWorkSizeBits(),
-			FFetchTimeoutMS:     sett.GetFetchTimeoutMS(),
-			FQueuePeriodMS:      sett.GetQueuePeriodMS(),
-			FQueueRandPeriodMS:  sett.GetQueueRandPeriodMS(),
-			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
-			FNetworkKey:         sett.GetNetworkKey(),
-			FF2FDisabled:        sett.GetF2FDisabled(),
+			FMessageSizeBytes:     sett.GetMessageSizeBytes(),
+			FKeySizeBits:          sett.GetKeySizeBits(),
+			FWorkSizeBits:         sett.GetWorkSizeBits(),
+			FFetchTimeoutMS:       sett.GetFetchTimeoutMS(),
+			FQueuePeriodMS:        sett.GetQueuePeriodMS(),
+			FRandQueuePeriodMS:    sett.GetRandQueuePeriodMS(),
+			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),
+			FNetworkKey:           sett.GetNetworkKey(),
+			FF2FDisabled:          sett.GetF2FDisabled(),
 		},
 		// encoding.CSizeUint64 = payload64.Head()
 		FLimitMessageSizeBytes: msgLimit - encoding.CSizeUint64,

@@ -33,18 +33,18 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte             // E( K, P(HLMV) || HLMV || L(M) || M || V )
-	fHash    []byte             // HLMV = H( K, L(M) || M || V )
-	fVoid    []byte             // V
-	fProof   uint64             // P(HLMV)
+	fEncd    []byte             // E( K, P(HLMR) || HLMR || L(M) || M || R )
+	fHash    []byte             // HLMR = H( K, L(M) || M || R )
+	fRand    []byte             // R
+	fProof   uint64             // P(HLMR)
 	fPayload payload.IPayload32 // M
 }
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
-	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
+	randBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
+	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), randBytes})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
@@ -63,7 +63,7 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 			[]byte{},
 		)),
 		fHash:    hash,
-		fVoid:    voidBytes,
+		fRand:    randBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}
@@ -116,7 +116,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	return &sMessage{
 		fEncd:    msgBytes,
 		fHash:    hash,
-		fVoid:    bytesSlice[1],
+		fRand:    bytesSlice[1],
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -130,8 +130,8 @@ func (p *sMessage) GetHash() []byte {
 	return p.fHash
 }
 
-func (p *sMessage) GetVoid() []byte {
-	return p.fVoid
+func (p *sMessage) GetRand() []byte {
+	return p.fRand
 }
 
 func (p *sMessage) GetPayload() payload.IPayload32 {

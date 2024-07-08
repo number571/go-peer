@@ -24,8 +24,8 @@ type IConfigSettings interface {
 
 	GetFetchTimeoutMS() uint64
 	GetQueuePeriodMS() uint64
-	GetQueueRandPeriodMS() uint64
-	GetLimitVoidSizeBytes() uint64
+	GetRandQueuePeriodMS() uint64
+	GetRandMessageSizeBytes() uint64
 	GetF2FDisabled() bool
 }
 

@@ -79,11 +79,11 @@ func newNode(serviceName, address string) anonymity.INode {
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FNetworkMask:  networkMask,
-				FWorkSizeBits: workSize,
-				FDuration:     2 * time.Second,
-				FMainCapacity: 32,
-				FVoidCapacity: 32,
+				FNetworkMask:      networkMask,
+				FWorkSizeBits:     workSize,
+				FQueuePeriod:      2 * time.Second,
+				FMainPoolCapacity: 32,
+				FRandPoolCapacity: 32,
 			}),
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: networkKey,

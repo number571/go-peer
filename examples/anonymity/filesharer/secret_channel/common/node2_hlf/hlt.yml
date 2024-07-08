@@ -3,7 +3,7 @@ settings:
   key_size_bits: 2048
   work_size_bits: 22
   messages_capacity: 2048
-  limit_void_size_bytes: 1024
+  rand_message_size_bytes: 1024
 address:
   tcp: :7581
   http: :7582

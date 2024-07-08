@@ -21,9 +21,9 @@ const (
 func main() {
 	q := queue.NewMessageQueue(
 		queue.NewSettings(&queue.SSettings{
-			FDuration:     time.Second,
-			FMainCapacity: 1 << 5,
-			FVoidCapacity: 1 << 5,
+			FQueuePeriod:      time.Second,
+			FMainPoolCapacity: 1 << 5,
+			FRandPoolCapacity: 1 << 5,
 		}),
 		queue.NewVSettings(&queue.SVSettings{}),
 		client.NewClient(

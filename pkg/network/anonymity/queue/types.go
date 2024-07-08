@@ -26,12 +26,12 @@ type IMessageQueue interface {
 type ISettings interface {
 	GetNetworkMask() uint32
 	GetWorkSizeBits() uint64
-	GetMainCapacity() uint64
-	GetVoidCapacity() uint64
 	GetParallel() uint64
-	GetDuration() time.Duration
-	GetRandDuration() time.Duration
-	GetLimitVoidSizeBytes() uint64
+	GetMainPoolCapacity() uint64
+	GetRandPoolCapacity() uint64
+	GetQueuePeriod() time.Duration
+	GetRandQueuePeriod() time.Duration
+	GetRandMessageSizeBytes() uint64
 }
 
 type IVSettings interface {

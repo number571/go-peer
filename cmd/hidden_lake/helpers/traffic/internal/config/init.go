@@ -21,13 +21,13 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
-				FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
-				FKeySizeBits:        hls_settings.CDefaultKeySize,
-				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
-				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
-				FMessagesCapacity:   hlt_settings.CDefaultMessagesCapacity,
-				FStorageEnabled:     hlt_settings.CDefaultStorageEnabled,
-				FNetworkKey:         hls_settings.CDefaultNetworkKey,
+				FMessageSizeBytes:     hls_settings.CDefaultMessageSize,
+				FKeySizeBits:          hls_settings.CDefaultKeySize,
+				FWorkSizeBits:         hls_settings.CDefaultWorkSize,
+				FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
+				FMessagesCapacity:     hlt_settings.CDefaultMessagesCapacity,
+				FStorageEnabled:       hlt_settings.CDefaultStorageEnabled,
+				FNetworkKey:           hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

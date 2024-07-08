@@ -6,18 +6,18 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FWorkSizeBits       uint64
-	FNetworkKey         string
-	FParallel           uint64
-	FLimitVoidSizeBytes uint64
+	FWorkSizeBits         uint64
+	FNetworkKey           string
+	FParallel             uint64
+	FRandMessageSizeBytes uint64
 }
 
 func NewSettings(pSett *SSettings) IConstructSettings {
 	return (&sSettings{
-		FWorkSizeBits:       pSett.FWorkSizeBits,
-		FNetworkKey:         pSett.FNetworkKey,
-		FParallel:           pSett.FParallel,
-		FLimitVoidSizeBytes: pSett.FLimitVoidSizeBytes,
+		FWorkSizeBits:         pSett.FWorkSizeBits,
+		FNetworkKey:           pSett.FNetworkKey,
+		FParallel:             pSett.FParallel,
+		FRandMessageSizeBytes: pSett.FRandMessageSizeBytes,
 	}).mustNotNull()
 }
 
@@ -37,6 +37,6 @@ func (p *sSettings) GetParallel() uint64 {
 	return p.FParallel
 }
 
-func (p *sSettings) GetLimitVoidSizeBytes() uint64 {
-	return p.FLimitVoidSizeBytes
+func (p *sSettings) GetRandMessageSizeBytes() uint64 {
+	return p.FRandMessageSizeBytes
 }

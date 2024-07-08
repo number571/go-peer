@@ -35,8 +35,8 @@ const (
 	CDefaultFetchTimeout    = 60_000    // 60 seconds
 	CDefaultQueuePeriod     = 5_000     // 5 seconds
 	CDefaultWorkSize        = 0         // bits
-	CDefaultQueueRandPeriod = 0         // 0 seconds
-	CDefaultLimitVoidSize   = 0         // 0 bytes
+	CDefaultRandQueuePeriod = 0         // 0 seconds
+	CDefaultRandMessageSize = 0         // 0 bytes
 	CDefaultF2FDisabled     = false     // friend-to-friend
 	CDefaultNetworkKey      = ""
 )
@@ -47,8 +47,8 @@ const (
 )
 
 const (
-	CQueueMainCapacity = (1 << 8) // 256 messages ~= 2MiB
-	CQueueVoidCapacity = (1 << 5) //  32 messages ~= 256KiB
+	CQueueMainPoolCapacity = (1 << 8) // 256 messages ~= 2MiB
+	CQueueRandPoolCapacity = (1 << 5) //  32 messages ~= 256KiB
 )
 
 const (

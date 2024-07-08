@@ -4,9 +4,9 @@
 /*
 	NETWORK MESSAGE FORMAT
 
-	E( K, P(HLMV) || HLMV || L(M) || M || V )
+	E( K, P(HLMR) || HLMR || L(M) || M || R )
 	where
-		HLMV = H( K, L(M) || M || V )
+		HLMR = H( K, L(M) || M || R )
 		where
 			H   - HMAC
 			K   - network key
@@ -14,7 +14,7 @@
 			L   - length
 			P   - proof of work
 			E   - encrypt
-			V   - void bytes
+			R   - rand bytes
 
 	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg
 */

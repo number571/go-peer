@@ -39,7 +39,7 @@ var (
   key_size_bits: %d
   fetch_timeout_ms: 60000
   queue_period_ms: 1000
-  limit_void_size_bytes: 4096
+  rand_message_size_bytes: 4096
   network_key: test
 address:
   tcp: test_address_tcp
@@ -208,11 +208,11 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		testNewNetworkNode(addr),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FNetworkMask:  networkMask,
-				FWorkSizeBits: testutils.TCWorkSize,
-				FMainCapacity: testutils.TCQueueCapacity,
-				FVoidCapacity: testutils.TCQueueCapacity,
-				FDuration:     500 * time.Millisecond,
+				FNetworkMask:      networkMask,
+				FWorkSizeBits:     testutils.TCWorkSize,
+				FMainPoolCapacity: testutils.TCQueueCapacity,
+				FRandPoolCapacity: testutils.TCQueueCapacity,
+				FQueuePeriod:      500 * time.Millisecond,
 			}),
 			queue.NewVSettings(&queue.SVSettings{}),
 			client.NewClient(

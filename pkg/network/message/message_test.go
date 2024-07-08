@@ -55,9 +55,9 @@ func TestMessage(t *testing.T) {
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
-		FWorkSizeBits:       testutils.TCWorkSize,
-		FNetworkKey:         tcNetworkKey,
-		FLimitVoidSizeBytes: tcLimitVoid,
+		FWorkSizeBits:         testutils.TCWorkSize,
+		FNetworkKey:           tcNetworkKey,
+		FRandMessageSizeBytes: tcLimitVoid,
 	})
 
 	msgTmp := NewMessage(sett, pld)
@@ -77,7 +77,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	voidBytes := msg.GetVoid()
+	voidBytes := msg.GetRand()
 	if len(voidBytes) > tcLimitVoid {
 		t.Error("got length void bytes > limit")
 		return
@@ -247,7 +247,7 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
@@ -269,7 +269,7 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			[]byte{},
 		)),
 		fHash:    hash,
-		fVoid:    voidBytes,
+		fRand:    voidBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}
@@ -278,7 +278,7 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetLimitVoidSizeBytes() + 1))
+	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
@@ -298,7 +298,7 @@ func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			[]byte{},
 		)),
 		fHash:    hash,
-		fVoid:    voidBytes,
+		fRand:    voidBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}

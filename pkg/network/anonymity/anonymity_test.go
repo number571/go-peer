@@ -729,13 +729,13 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 		),
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
-				FNetworkMask:        networkMask,
-				FWorkSizeBits:       testutils.TCWorkSize,
-				FMainCapacity:       testutils.TCQueueCapacity,
-				FVoidCapacity:       testutils.TCQueueCapacity,
-				FParallel:           parallel,
-				FLimitVoidSizeBytes: limitVoidSize,
-				FDuration:           time.Second,
+				FNetworkMask:          networkMask,
+				FWorkSizeBits:         testutils.TCWorkSize,
+				FMainPoolCapacity:     testutils.TCQueueCapacity,
+				FRandPoolCapacity:     testutils.TCQueueCapacity,
+				FParallel:             parallel,
+				FRandMessageSizeBytes: limitVoidSize,
+				FQueuePeriod:          time.Second,
 			}),
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: networkKey,

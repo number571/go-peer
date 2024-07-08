@@ -15,11 +15,11 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
-				FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
-				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
-				FKeySizeBits:        hls_settings.CDefaultKeySize,
-				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
-				FNetworkKey:         hls_settings.CDefaultNetworkKey,
+				FMessageSizeBytes:     hls_settings.CDefaultMessageSize,
+				FWorkSizeBits:         hls_settings.CDefaultWorkSize,
+				FKeySizeBits:          hls_settings.CDefaultKeySize,
+				FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
+				FNetworkKey:           hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

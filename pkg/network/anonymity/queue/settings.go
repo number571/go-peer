@@ -10,37 +10,37 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FNetworkMask        uint32
-	FWorkSizeBits       uint64
-	FMainCapacity       uint64
-	FVoidCapacity       uint64
-	FParallel           uint64
-	FLimitVoidSizeBytes uint64
-	FDuration           time.Duration
-	FRandDuration       time.Duration
+	FNetworkMask          uint32
+	FWorkSizeBits         uint64
+	FMainPoolCapacity     uint64
+	FRandPoolCapacity     uint64
+	FParallel             uint64
+	FRandMessageSizeBytes uint64
+	FQueuePeriod          time.Duration
+	FRandQueuePeriod      time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkMask:        pSett.FNetworkMask,
-		FWorkSizeBits:       pSett.FWorkSizeBits,
-		FMainCapacity:       pSett.FMainCapacity,
-		FVoidCapacity:       pSett.FVoidCapacity,
-		FParallel:           pSett.FParallel,
-		FLimitVoidSizeBytes: pSett.FLimitVoidSizeBytes,
-		FDuration:           pSett.FDuration,
-		FRandDuration:       pSett.FRandDuration,
+		FNetworkMask:          pSett.FNetworkMask,
+		FWorkSizeBits:         pSett.FWorkSizeBits,
+		FMainPoolCapacity:     pSett.FMainPoolCapacity,
+		FRandPoolCapacity:     pSett.FRandPoolCapacity,
+		FParallel:             pSett.FParallel,
+		FRandMessageSizeBytes: pSett.FRandMessageSizeBytes,
+		FQueuePeriod:          pSett.FQueuePeriod,
+		FRandQueuePeriod:      pSett.FRandQueuePeriod,
 	}).mustNotNull()
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FDuration != 0 && p.FVoidCapacity == 0 {
-		panic(`p.FDuration != 0 && p.FVoidCapacity == 0`)
+	if p.FQueuePeriod != 0 && p.FRandPoolCapacity == 0 {
+		panic(`p.FQueuePeriod != 0 && p.FRandPoolCapacity == 0`)
 	}
-	if p.FMainCapacity == 0 {
-		panic(`p.FMainCapacity == 0`)
+	if p.FMainPoolCapacity == 0 {
+		panic(`p.FMainPoolCapacity == 0`)
 	}
-	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
+	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandQueuePeriod, p.FLimitVoidSizeBytes can be = 0
 	return p
 }
 
@@ -56,22 +56,22 @@ func (p *sSettings) GetParallel() uint64 {
 	return p.FParallel
 }
 
-func (p *sSettings) GetMainCapacity() uint64 {
-	return p.FMainCapacity
+func (p *sSettings) GetMainPoolCapacity() uint64 {
+	return p.FMainPoolCapacity
 }
 
-func (p *sSettings) GetVoidCapacity() uint64 {
-	return p.FVoidCapacity
+func (p *sSettings) GetRandPoolCapacity() uint64 {
+	return p.FRandPoolCapacity
 }
 
-func (p *sSettings) GetDuration() time.Duration {
-	return p.FDuration
+func (p *sSettings) GetQueuePeriod() time.Duration {
+	return p.FQueuePeriod
 }
 
-func (p *sSettings) GetRandDuration() time.Duration {
-	return p.FRandDuration
+func (p *sSettings) GetRandQueuePeriod() time.Duration {
+	return p.FRandQueuePeriod
 }
 
-func (p *sSettings) GetLimitVoidSizeBytes() uint64 {
-	return p.FLimitVoidSizeBytes
+func (p *sSettings) GetRandMessageSizeBytes() uint64 {
+	return p.FRandMessageSizeBytes
 }

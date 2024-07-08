@@ -19,7 +19,7 @@ type IConfigSettings interface {
 	net_message.ISettings
 
 	GetMessagesCapacity() uint64
-	GetLimitVoidSizeBytes() uint64
+	GetRandMessageSizeBytes() uint64
 	GetStorageEnabled() bool
 }
 

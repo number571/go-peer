@@ -17,7 +17,7 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
-	GetLimitVoidSizeBytes() uint64
+	GetRandMessageSizeBytes() uint64
 }
 
 type IAddress interface {

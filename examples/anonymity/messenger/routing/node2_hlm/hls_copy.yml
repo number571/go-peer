@@ -4,8 +4,8 @@ settings:
   key_size_bits: 4096
   fetch_timeout_ms: 60000
   queue_period_ms: 5000
-  queue_rand_period_ms: 5000
-  limit_void_size_bytes: 4096
+  rand_queue_period_ms: 5000
+  rand_message_size_bytes: 4096
 logging:
 - info
 - warn

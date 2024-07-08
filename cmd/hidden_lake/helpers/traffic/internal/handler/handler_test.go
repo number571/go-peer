@@ -117,12 +117,12 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 
 	cfg := &config.SConfig{
 		FSettings: &config.SConfigSettings{
-			FMessageSizeBytes:   testutils.TCMessageSize,
-			FWorkSizeBits:       testutils.TCWorkSize,
-			FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
-			FKeySizeBits:        testutils.TcKeySize,
-			FNetworkKey:         testutils.TCNetworkKey,
-			FMessagesCapacity:   testutils.TCCapacity,
+			FMessageSizeBytes:     testutils.TCMessageSize,
+			FWorkSizeBits:         testutils.TCWorkSize,
+			FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
+			FKeySizeBits:          testutils.TcKeySize,
+			FNetworkKey:           testutils.TCNetworkKey,
+			FMessagesCapacity:     testutils.TCCapacity,
 		},
 	}
 

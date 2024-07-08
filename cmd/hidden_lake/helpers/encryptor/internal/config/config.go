@@ -14,11 +14,11 @@ var (
 )
 
 type SConfigSettings struct {
-	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
-	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
-	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
-	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
+	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
+	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
+	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
 type SConfig struct {
@@ -124,8 +124,8 @@ func (p *SAddress) GetPPROF() string {
 	return p.FPPROF
 }
 
-func (p *SConfigSettings) GetLimitVoidSizeBytes() uint64 {
-	return p.FLimitVoidSizeBytes
+func (p *SConfigSettings) GetRandMessageSizeBytes() uint64 {
+	return p.FRandMessageSizeBytes
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {

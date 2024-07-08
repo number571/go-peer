@@ -46,13 +46,13 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FVoidCapacity: testutils.TCQueueCapacity,
-			FDuration:     500 * time.Millisecond,
+			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FQueuePeriod:      500 * time.Millisecond,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FMainCapacity: testutils.TCQueueCapacity,
-			FDuration:     500 * time.Millisecond,
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FQueuePeriod:      500 * time.Millisecond,
 		})
 	}
 }
@@ -62,12 +62,12 @@ func TestQueueVoidDisabled(t *testing.T) {
 
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
-			FNetworkMask:  1,
-			FWorkSizeBits: 10,
-			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: testutils.TCQueueCapacity,
-			FParallel:     1,
-			FRandDuration: 100 * time.Millisecond,
+			FNetworkMask:      1,
+			FWorkSizeBits:     10,
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FParallel:         1,
+			FRandQueuePeriod:  100 * time.Millisecond,
 		}),
 		NewVSettings(&SVSettings{
 			FNetworkKey: "network_key",
@@ -99,10 +99,10 @@ func TestRunStopQueue(t *testing.T) {
 	)
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
-			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: 1,
-			FParallel:     1,
-			FDuration:     100 * time.Millisecond,
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: 1,
+			FParallel:         1,
+			FQueuePeriod:      100 * time.Millisecond,
 		}),
 		NewVSettings(&SVSettings{}),
 		client,
@@ -121,7 +121,7 @@ func TestRunStopQueue(t *testing.T) {
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
 		sQueue := queue.(*sMessageQueue)
-		if len(sQueue.fVoidPool.fQueue) == int(sett.GetVoidCapacity()) {
+		if len(sQueue.fRandPool.fQueue) == int(sett.GetRandPoolCapacity()) {
 			return nil
 		}
 		return errors.New("len(void queue) != max capacity")
@@ -172,13 +172,13 @@ func TestQueue(t *testing.T) {
 
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
-			FNetworkMask:  1,
-			FWorkSizeBits: 10,
-			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: testutils.TCQueueCapacity,
-			FParallel:     1,
-			FDuration:     100 * time.Millisecond,
-			FRandDuration: 100 * time.Millisecond,
+			FNetworkMask:      1,
+			FWorkSizeBits:     10,
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FParallel:         1,
+			FQueuePeriod:      100 * time.Millisecond,
+			FRandQueuePeriod:  100 * time.Millisecond,
 		}),
 		NewVSettings(&SVSettings{
 			FNetworkKey: "old_network_key",
@@ -193,7 +193,7 @@ func TestQueue(t *testing.T) {
 	)
 
 	sett := queue.GetSettings()
-	if sett.GetMainCapacity() != testutils.TCQueueCapacity {
+	if sett.GetMainPoolCapacity() != testutils.TCQueueCapacity {
 		t.Error("sett.GetMainCapacity() != testutils.TCQueueCapacity")
 		return
 	}
@@ -245,7 +245,7 @@ func testQueue(queue IMessageQueue) error {
 	}
 
 	// auto fill queue enabled only if QB=true
-	if queue.GetSettings().GetDuration() != 0 {
+	if queue.GetSettings().GetQueuePeriod() != 0 {
 		msgs := make([]net_message.IMessage, 0, 3)
 		for i := 0; i < 3; i++ {
 			msgs = append(msgs, queue.DequeueMessage(ctx))

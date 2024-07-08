@@ -45,8 +45,8 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if sett.GetLimitVoidSizeBytes() != 4096 {
-		t.Error("invalid limit void size")
+	if sett.GetRandMessageSizeBytes() != 4096 {
+		t.Error("invalid rand message size")
 		return
 	}
 

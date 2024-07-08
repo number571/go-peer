@@ -9,7 +9,7 @@ type IMessage interface {
 	types.IConverter
 
 	GetHash() []byte
-	GetVoid() []byte
+	GetRand() []byte
 	GetProof() uint64
 
 	// payload = head(32bit) || body(Nbit)
@@ -19,7 +19,7 @@ type IMessage interface {
 type IConstructSettings interface {
 	ISettings
 	GetParallel() uint64
-	GetLimitVoidSizeBytes() uint64
+	GetRandMessageSizeBytes() uint64
 }
 
 type ISettings interface {

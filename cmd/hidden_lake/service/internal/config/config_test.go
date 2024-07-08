@@ -58,8 +58,8 @@ const (
   key_size_bits: %d
   fetch_timeout_ms: %d
   queue_period_ms: %d
-  queue_rand_period_ms: %d
-  limit_void_size_bytes: %d
+  rand_queue_period_ms: %d
+  rand_message_size_bytes: %d
   network_key: %s
   f2f_disabled: true
 logging:
@@ -265,13 +265,13 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
-	if cfg.GetSettings().GetQueueRandPeriodMS() != tcQueueRandPeriod {
-		t.Error("settings queue rand period is invalid")
+	if cfg.GetSettings().GetRandQueuePeriodMS() != tcQueueRandPeriod {
+		t.Error("settings rand queue period is invalid")
 		return
 	}
 
-	if cfg.GetSettings().GetLimitVoidSizeBytes() != tcLimitVoidSize {
-		t.Error("settings limit void size is invalid")
+	if cfg.GetSettings().GetRandMessageSizeBytes() != tcLimitVoidSize {
+		t.Error("settings rand message size is invalid")
 		return
 	}
 

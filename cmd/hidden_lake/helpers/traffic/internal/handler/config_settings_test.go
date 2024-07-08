@@ -50,8 +50,8 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if settings.GetLimitVoidSizeBytes() != hls_settings.CDefaultLimitVoidSize {
-		t.Error("incorrect limit void size bytes")
+	if settings.GetRandMessageSizeBytes() != hls_settings.CDefaultRandMessageSize {
+		t.Error("incorrect rand message size bytes")
 		return
 	}
 }

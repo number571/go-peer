@@ -68,10 +68,10 @@ func HandleMessageEncryptAPI(
 		cfgSett := pConfig.GetSettings()
 		netMsg := net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits:       cfgSett.GetWorkSizeBits(),
-				FNetworkKey:         cfgSett.GetNetworkKey(),
-				FParallel:           pParallel,
-				FLimitVoidSizeBytes: cfgSett.GetLimitVoidSizeBytes(),
+				FWorkSizeBits:         cfgSett.GetWorkSizeBits(),
+				FNetworkKey:           cfgSett.GetNetworkKey(),
+				FParallel:             pParallel,
+				FRandMessageSizeBytes: cfgSett.GetRandMessageSizeBytes(),
 			}),
 			payload.NewPayload32(hls_settings.CNetworkMask, msg),
 		)

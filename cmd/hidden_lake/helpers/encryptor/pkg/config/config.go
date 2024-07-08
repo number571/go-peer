@@ -8,11 +8,11 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 	sett := pCfg.GetSettings()
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
-			FMessageSizeBytes:   sett.GetMessageSizeBytes(),
-			FKeySizeBits:        sett.GetKeySizeBits(),
-			FWorkSizeBits:       sett.GetWorkSizeBits(),
-			FLimitVoidSizeBytes: sett.GetLimitVoidSizeBytes(),
-			FNetworkKey:         sett.GetNetworkKey(),
+			FMessageSizeBytes:     sett.GetMessageSizeBytes(),
+			FKeySizeBits:          sett.GetKeySizeBits(),
+			FWorkSizeBits:         sett.GetWorkSizeBits(),
+			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),
+			FNetworkKey:           sett.GetNetworkKey(),
 		},
 	}
 }

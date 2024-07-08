@@ -14,6 +14,7 @@
 - Update `cmd/hidden_lake/service`: append fetch_timeout_ms param
 - Update `examples/secure_network`: delete secure_network/filesharer|messenger
 - Update `examples/anonymity/messenger|filesharer|echo_service`: default -> insecure with f2f_disabled=true, queue_period_ms=0
+- Update `cmd/hidden_lake/service`: rename limit_void_size_bytes -> rand_message_size_bytes, queue_rand_period_ms -> rand_queue_period_ms
 
 <!-- ... -->
 
@@ -760,7 +761,7 @@
 - Update `go.mod`: go1.16 -> go1.17 (reason: fyne/v2 used golang.org/x/sys v0.5.0)
 - Update `pkg/anonymity/logbuilder`: append size of messages
 - Update `hidden_lake/service`: change receiver ID from PubKey to AliasName
-- Update `cfgs[message_size_bytes]`: change from 1MiB to 4KiB (also limit_void_size_bytes)
+- Update `cfgs[message_size_bytes]`: change from 1MiB to 4KiB (also rand_message_size_bytes)
 
 ### BUG FIXES
 
