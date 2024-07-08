@@ -9,6 +9,6 @@ logging:
   - warn
   - erro
 address:
-  tcp: :6582
+  tcp: :6581
 connections:
   - middle_hlt_1:6581
