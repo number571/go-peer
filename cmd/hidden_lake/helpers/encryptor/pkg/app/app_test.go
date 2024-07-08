@@ -140,7 +140,7 @@ func TestInitApp(t *testing.T) {
 		return
 	}
 
-	if _, err := InitApp([]string{}, tcTestdataPath, "./not_exist/path/to/database/57199u140291724y121291d1/priv.key", 1); err == nil {
+	if _, err := InitApp([]string{}, tcTestdataPath, "./not_exist/path/to/key/57199u140291724y121291d1/priv.key", 1); err == nil {
 		t.Error("success init app with undefined dir key")
 		return
 	}
