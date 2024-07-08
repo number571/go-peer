@@ -30,19 +30,14 @@ const (
 )
 
 const (
-	CRetryEnqueue    = 2
-	CMulFetchTimeout = 10
-)
-
-const (
-	CDefaultMessageSize     = (8 << 10) // 8KiB
+	CDefaultMessageSize     = (8 << 10) // 8192-B
+	CDefaultKeySize         = (4 << 10) // 4096-b
+	CDefaultFetchTimeout    = 60_000    // 60 seconds
+	CDefaultQueuePeriod     = 5_000     // 5 seconds
 	CDefaultWorkSize        = 0         // bits
-	CDefaultKeySize         = 4096      // bits
-	CDefaultQueuePeriod     = 5000      // 5 seconds
 	CDefaultQueueRandPeriod = 0         // 0 seconds
 	CDefaultLimitVoidSize   = 0         // 0 bytes
 	CDefaultF2FDisabled     = false     // friend-to-friend
-	CDefaultQBTDisabled     = false     // queue-based-task
 	CDefaultNetworkKey      = ""
 )
 

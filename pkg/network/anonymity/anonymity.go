@@ -138,12 +138,11 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) SendPayload(
-	pCtx context.Context,
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, logBuilder, pRecv, pPld); err != nil {
+	if err := p.enqueuePayload(logBuilder, pRecv, pPld); err != nil {
 		// internal logger
 		return utils.MergeErrors(ErrEnqueuePayload, err)
 	}
@@ -169,7 +168,7 @@ func (p *sNode) FetchPayload(
 	)
 
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(pCtx, logBuilder, pRecv, newPld); err != nil {
+	if err := p.enqueuePayload(logBuilder, pRecv, newPld); err != nil {
 		// internal logger
 		return nil, utils.MergeErrors(ErrEnqueuePayload, err)
 	}
@@ -180,25 +179,6 @@ func (p *sNode) FetchPayload(
 	}
 
 	return resp, nil
-}
-
-func (p *sNode) enqueueMessage(pCtx context.Context, pMsg []byte) error {
-	retryNum := p.fSettings.GetRetryEnqueue()
-	for i := uint64(0); i <= retryNum; i++ {
-		if err := p.fQueue.EnqueueMessage(pMsg); err == nil {
-			return nil
-		}
-		if i == retryNum {
-			break
-		}
-		select {
-		case <-pCtx.Done():
-			return pCtx.Err()
-		case <-time.After(p.fQueue.GetSettings().GetDuration()):
-			// next iter
-		}
-	}
-	return ErrRetryLimit
 }
 
 func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, error) {
@@ -357,7 +337,6 @@ func (p *sNode) handleRequest(
 	// internal logger
 	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
-		pCtx,
 		pLogBuilder,
 		pSender,
 		payload.NewPayload64(newHead, resp),
@@ -365,7 +344,6 @@ func (p *sNode) handleRequest(
 }
 
 func (p *sNode) enqueuePayload(
-	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
@@ -392,7 +370,7 @@ func (p *sNode) enqueuePayload(
 		pLogBuilder.WithSize(len(msg))
 	}
 
-	if err := p.enqueueMessage(pCtx, msg); err != nil {
+	if err := p.fQueue.EnqueueMessage(msg); err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
 		return utils.MergeErrors(ErrEnqueueMessage, err)
 	}

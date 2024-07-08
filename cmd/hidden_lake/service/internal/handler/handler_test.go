@@ -37,6 +37,7 @@ var (
   message_size_bytes: 8192
   work_size_bits: 22
   key_size_bits: %d
+  fetch_timeout_ms: 60000
   queue_period_ms: 1000
   limit_void_size_bytes: 4096
   network_key: test
@@ -196,7 +197,6 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 	node := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  "TEST",
-			FRetryEnqueue: 0,
 			FNetworkMask:  networkMask,
 			FFetchTimeout: time.Minute,
 		}),

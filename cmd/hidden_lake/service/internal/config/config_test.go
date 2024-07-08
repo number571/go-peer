@@ -30,6 +30,7 @@ const (
 	tcServiceName2    = "test_service2"
 	tcMessageSize     = (1 << 20)
 	tcWorkSize        = 22
+	tcFetchTimeout    = 5000
 	tcQueuePeriod     = 1000
 	tcQueueRandPeriod = 2000
 	tcLimitVoidSize   = (1 << 20)
@@ -55,12 +56,12 @@ const (
   message_size_bytes: %d
   work_size_bits: %d
   key_size_bits: %d
+  fetch_timeout_ms: %d
   queue_period_ms: %d
   queue_rand_period_ms: %d
   limit_void_size_bytes: %d
   network_key: %s
   f2f_disabled: true
-  qbt_disabled: true
 logging:
   - info
   - erro
@@ -88,6 +89,7 @@ func testNewConfigString() string {
 		tcMessageSize,
 		tcWorkSize,
 		testutils.TcKeySize,
+		tcFetchTimeout,
 		tcQueuePeriod,
 		tcQueueRandPeriod,
 		tcLimitVoidSize,
@@ -253,6 +255,11 @@ func TestComplexConfig(t *testing.T) {
 		return
 	}
 
+	if cfg.GetSettings().GetFetchTimeoutMS() != tcFetchTimeout {
+		t.Error("settings fetch timeout is invalid")
+		return
+	}
+
 	if cfg.GetSettings().GetQueuePeriodMS() != tcQueuePeriod {
 		t.Error("settings queue period is invalid")
 		return
@@ -270,11 +277,6 @@ func TestComplexConfig(t *testing.T) {
 
 	if !cfg.GetSettings().GetF2FDisabled() {
 		t.Error("settings f2f disabled is invalid")
-		return
-	}
-
-	if !cfg.GetSettings().GetQBTDisabled() {
-		t.Error("settings qbt disabled is invalid")
 		return
 	}
 

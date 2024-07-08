@@ -65,13 +65,13 @@ $ ./hle -path=/root -priv=/root/priv.key -parallel=1
 
 Build and run HLE service
 ```bash
-$ cd examples/encrypt_message
+$ cd examples/encryptor
 $ make
 ```
 
 Encrypt and decrypt message
 ```bash
-$ cd examples/encrypt_message/client_hle
+$ cd examples/encryptor/client_hle
 $ go run ./main.go e 'hello, world!'
 > 5a8b4f0b388650fd...8d7cbd8fa01c008
 $ go run ./main.go d '5a8b4f0b388650fd...8d7cbd8fa01c008'

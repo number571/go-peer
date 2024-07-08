@@ -89,6 +89,7 @@ func TestApp(t *testing.T) {
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FKeySizeBits:      testutils.TcKeySize,
 			FQueuePeriodMS:    testutils.TCQueuePeriod,
+			FFetchTimeoutMS:   testutils.TCFetchTimeout,
 			FNetworkKey:       "_",
 		},
 		FAddress: &config.SAddress{

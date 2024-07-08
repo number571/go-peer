@@ -12,7 +12,6 @@ type SSettings sSettings
 type sSettings struct {
 	FServiceName  string
 	FF2FDisabled  bool
-	FRetryEnqueue uint64
 	FNetworkMask  uint32
 	FFetchTimeout time.Duration
 }
@@ -21,7 +20,6 @@ func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FServiceName:  pSett.FServiceName,
 		FF2FDisabled:  pSett.FF2FDisabled,
-		FRetryEnqueue: pSett.FRetryEnqueue,
 		FNetworkMask:  pSett.FNetworkMask,
 		FFetchTimeout: pSett.FFetchTimeout,
 	}).mustNotNull()
@@ -54,8 +52,4 @@ func (p *sSettings) GetFetchTimeout() time.Duration {
 
 func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
-}
-
-func (p *sSettings) GetRetryEnqueue() uint64 {
-	return p.FRetryEnqueue
 }

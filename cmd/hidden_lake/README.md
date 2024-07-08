@@ -97,17 +97,17 @@ On the basis of this characteristic, methods of possible application also begin 
 
 The anonymous Hidden Lake network has different launch modes depending on the environment in which it is located.
 
-1. Classic direct communication. In this communication mode, the nodes are connected to each other directly. This method is convenient only if at least one of the nodes has a public IP address that goes beyond NAT. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/default).
+1. Classic direct communication. In this communication mode, the nodes are connected to each other directly. This method is convenient only if at least one of the nodes has a public IP address that goes beyond NAT. [Example](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/default).
 
 <p align="center"><img src="_images/launch_mode_1.jpg" alt="launch_mode_1.jpg"/></p>
 <p align="center">Figure 4. The direct communication launch mode.</p>
 
-2. Communication via a relayer. In this startup mode, nodes are connected to each other using separate relay nodes. In this concept, relayers become TURN servers that redirect traffic to all connected nodes, including other relayers. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/routing).
+2. Communication via a relayer. In this startup mode, nodes are connected to each other using separate relay nodes. In this concept, relayers become TURN servers that redirect traffic to all connected nodes, including other relayers. [Example](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/routing).
 
 <p align="center"><img src="_images/launch_mode_2.jpg" alt="launch_mode_2.jpg"/></p>
 <p align="center">Figure 5. The relayer communication launch mode.</p>
 
-3. Communication through a secret communication channel. In this mode, communication begins to adapt to a communication platform other than the primary Hidden Lake network. [Example](https://github.com/number571/go-peer/tree/master/examples/echo_service/secret_channel).
+3. Communication through a secret communication channel. In this mode, communication begins to adapt to a communication platform other than the primary Hidden Lake network. [Example](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/secret_channel).
 
 <p align="center"><img src="_images/launch_mode_3.jpg" alt="launch_mode_3.jpg"/></p>
 <p align="center">Figure 6. The secret channel communication launch mode.</p>
@@ -144,7 +144,7 @@ $ wget https://raw.githubusercontent.com/number571/go-peer/<tag-name>/cmd/hidden
 $ hls
 ```
 
-> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anon_messenger/prod_test), [anon_filesharing](https://github.com/number571/go-peer/tree/master/examples/anon_filesharing/prod_test).
+> There are also examples of running HL applications in a production environment. For more information, follow the links: [echo_service](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/prod_test), [anon_messenger](https://github.com/number571/go-peer/tree/master/examples/anonymity/messenger/prod_test), [anon_filesharer](https://github.com/number571/go-peer/tree/master/examples/anonymity/filesharer/prod_test).
 
 ### Settings
 
@@ -155,6 +155,7 @@ The Hidden Lake network must have `common configuration` file settings for succe
 message_size_bytes: 8192
 work_size_bits: 22
 key_size_bits: 4096
+fetch_timeout_ms: 60000
 queue_period_ms: 5000
 ```
 

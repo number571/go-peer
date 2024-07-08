@@ -30,7 +30,6 @@ var (
 
 		numBytes = encoding.Uint64ToBytes(num + 1)
 		_ = n.SendPayload(
-			ctx,
 			pubKey,
 			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 		)
@@ -42,11 +41,8 @@ func main() {
 	nodeService, nodeClient := runServiceNode(), runClientNode()
 	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
 
-	ctx := context.Background()
-
 	numBytes := encoding.Uint64ToBytes(0)
 	_ = nodeClient.SendPayload(
-		ctx,
 		pubKeyService,
 		payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 	)

@@ -91,6 +91,7 @@ Default config `hls.yml`
 settings:
   message_size_bytes: 8192
   key_size_bits: 4096
+  fetch_timeout_ms: 60000
   queue_period_ms: 5000
 logging:
   - info
@@ -155,7 +156,7 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service/routing
+$ cd examples/anonymity/echo_service/routing
 $ make
 ```
 
@@ -166,7 +167,7 @@ Logs from one another connected node. When sending requests and receiving respon
 
 Send request
 ```bash
-$ cd examples/echo_service
+$ cd examples/anonymity/echo_service
 $ make request # go run ./_request/main.go
 # OR
 $ ./_request/request.sh
@@ -220,11 +221,11 @@ settings:
   message_size_bytes: 8192
   work_size_bits: 22
   key_size_bits: 4096
+  fetch_timeout_ms: 60000
   queue_period_ms: 5000
   queue_rand_period_ms: 5000
   limit_void_size_bytes: 4096
   f2f_disabled: true
-  qbt_disabled: true  
   network_key: hls-network-key
 logging:
   - info

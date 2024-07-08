@@ -116,6 +116,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FKeySizeBits:      testutils.TcKeySize,
 			FQueuePeriodMS:    testutils.TCQueuePeriod,
+			FFetchTimeoutMS:   testutils.TCFetchTimeout,
 		},
 	})
 	if err != nil {

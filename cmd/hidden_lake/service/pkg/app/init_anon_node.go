@@ -26,12 +26,6 @@ func (p *sApp) initAnonNode() error {
 		cfgSettings = cfg.GetSettings()
 	)
 
-	var (
-		minQueuePeriod = time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond
-		addQueuePeriod = time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond
-		maxQueuePeriod = minQueuePeriod + addQueuePeriod
-	)
-
 	kvDatabase, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
 			FPath: filepath.Join(p.fPathTo, hls_settings.CPathDB),
@@ -57,8 +51,7 @@ func (p *sApp) initAnonNode() error {
 			FServiceName:  hls_settings.CServiceName,
 			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
 			FNetworkMask:  hls_settings.CNetworkMask,
-			FRetryEnqueue: hls_settings.CRetryEnqueue,
-			FFetchTimeout: hls_settings.CMulFetchTimeout * maxQueuePeriod,
+			FFetchTimeout: time.Duration(cfgSettings.GetFetchTimeoutMS()) * time.Millisecond,
 		}),
 		// Insecure to use logging in real anonymity projects!
 		// Logging should only be used in overview or testing;
@@ -91,14 +84,13 @@ func (p *sApp) initAnonNode() error {
 		queue.NewMessageQueue(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:        hls_settings.CNetworkMask,
-				FQBTDisabled:        cfgSettings.GetQBTDisabled(),
 				FWorkSizeBits:       cfgSettings.GetWorkSizeBits(),
 				FMainCapacity:       hls_settings.CQueueMainCapacity,
 				FVoidCapacity:       hls_settings.CQueueVoidCapacity,
 				FParallel:           p.fParallel,
 				FLimitVoidSizeBytes: cfgSettings.GetLimitVoidSizeBytes(),
-				FDuration:           minQueuePeriod,
-				FRandDuration:       addQueuePeriod,
+				FDuration:           time.Duration(cfgSettings.GetQueuePeriodMS()) * time.Millisecond,
+				FRandDuration:       time.Duration(cfgSettings.GetQueueRandPeriodMS()) * time.Millisecond,
 			}),
 			queue.NewVSettings(&queue.SVSettings{
 				FNetworkKey: cfgSettings.GetNetworkKey(),

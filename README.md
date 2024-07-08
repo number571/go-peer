@@ -219,6 +219,7 @@ Default config `hls.yml`
 settings:
   message_size_bytes: 8192
   key_size_bits: 4096
+  fetch_timeout_ms: 60000
   queue_period_ms: 5000
 logging:
   - info
@@ -274,7 +275,7 @@ PUSH_FORMAT='{
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service/routing
+$ cd examples/anonymity/echo_service/routing
 $ make
 ```
 
@@ -285,7 +286,7 @@ Logs from one another connected node. When sending requests and receiving respon
 
 Send request
 ```bash
-$ cd examples/echo_service
+$ cd examples/anonymity/echo_service
 $ make request # go run ./_request/main.go
 # OR
 $ ./_request/request.sh
@@ -372,7 +373,7 @@ The example will involve (as well as in HLS) five nodes `node1_hlm, node2_hlm` a
 
 Build and run nodes
 ```bash
-$ cd examples/anon_messenger/routing
+$ cd examples/anonymity/messenger/routing
 $ make
 ```
 
@@ -453,7 +454,7 @@ The example will involve three nodes `node1_hlf, node2_hlf` and `middle_hlt_1, m
 
 Build and run nodes
 ```bash
-$ cd examples/anon_filesharing/routing
+$ cd examples/anonymity/filesharer/routing
 $ make
 ```
 
@@ -660,13 +661,13 @@ address:
 
 Build and run HLE service
 ```bash
-$ cd examples/encrypt_message
+$ cd examples/encryptor
 $ make
 ```
 
 Encrypt and decrypt message
 ```bash
-$ cd examples/encrypt_message/client_hle
+$ cd examples/encryptor/client_hle
 $ go run ./main.go e 'hello, world!'
 > 5a8b4f0b388650fd...8d7cbd8fa01c008
 $ go run ./main.go d '5a8b4f0b388650fd...8d7cbd8fa01c008'
@@ -699,13 +700,13 @@ Since the adapters are capable of performing the same functions as the source pr
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service/secret_channel
+$ cd examples/anonymity/echo_service/secret_channel
 $ make
 ```
 
 Send request
 ```bash
-$ cd examples/echo_service
+$ cd examples/anonymity/echo_service
 $ ./request.sh
 ```
 
@@ -725,7 +726,7 @@ There are no external differences, but there are internal ones. While the origin
 <p align="center"><img src="cmd/hidden_lake/adapters/_images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 15. Example of running HLA client.</p>
 
-Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
+Similarly, you can use a more complex composition, as shown in the example `examples/anonymity/messenger/secret_channel`.
 
 **[⬆ back to top](#installation)**
 

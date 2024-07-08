@@ -1,9 +1,7 @@
 .PHONY: default clean 
 default: clean 
 clean:
-	make -C ./anon_filesharing clean
-	make -C ./anon_messenger clean
-	make -C ./echo_service clean
-	make -C ./encrypt_message clean
-	make -C ./secure_network clean
+	make -C ./anonymity clean
+	make -C ./encryptor clean
+	make -C ./secpy_chat clean
 	make -C ./traffic_actions clean

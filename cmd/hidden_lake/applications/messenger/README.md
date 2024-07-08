@@ -74,7 +74,7 @@ The example will involve (as well as in HLS) five nodes `node1_hlm, node2_hlm` a
 
 Build and run nodes
 ```bash
-$ cd examples/anon_messenger/routing
+$ cd examples/anonymity/messenger/routing
 $ make
 ```
 

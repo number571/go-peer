@@ -65,7 +65,6 @@ func HandleNetworkRequestAPI(
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.SendPayload(
-				pCtx,
 				pubKey,
 				payload.NewPayload64(uint64(pkg_settings.CServiceMask), req.ToBytes()),
 			)

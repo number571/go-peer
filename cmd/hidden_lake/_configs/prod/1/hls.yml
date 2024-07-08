@@ -2,6 +2,7 @@ settings:
   message_size_bytes: 8192
   work_size_bits: 22
   key_size_bits: 4096
+  fetch_timeout_ms: 60000
   queue_period_ms: 5000
   network_key: 8Jkl93Mdk93md1bz
 logging:

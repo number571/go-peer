@@ -22,11 +22,11 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
+	GetFetchTimeoutMS() uint64
 	GetQueuePeriodMS() uint64
 	GetQueueRandPeriodMS() uint64
 	GetLimitVoidSizeBytes() uint64
 	GetF2FDisabled() bool
-	GetQBTDisabled() bool
 }
 
 type IConfig interface {

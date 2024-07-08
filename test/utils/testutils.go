@@ -24,8 +24,9 @@ const (
 	TCCapacity      = (1 << 10)
 	TCMaxConnects   = (1 << 6)
 	TCQueueCapacity = (1 << 4)
-	TCQueuePeriod   = 1000          // milliseconds
-	TCNetworkKey    = "network-key" // milliseconds
+	TCQueuePeriod   = 1000   // milliseconds
+	TCFetchTimeout  = 10_000 // milliseconds
+	TCNetworkKey    = "network-key"
 )
 
 var (

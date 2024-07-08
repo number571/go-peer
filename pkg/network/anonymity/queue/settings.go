@@ -11,7 +11,6 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FNetworkMask        uint32
-	FQBTDisabled        bool
 	FWorkSizeBits       uint64
 	FMainCapacity       uint64
 	FVoidCapacity       uint64
@@ -24,7 +23,6 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FNetworkMask:        pSett.FNetworkMask,
-		FQBTDisabled:        pSett.FQBTDisabled,
 		FWorkSizeBits:       pSett.FWorkSizeBits,
 		FMainCapacity:       pSett.FMainCapacity,
 		FVoidCapacity:       pSett.FVoidCapacity,
@@ -36,14 +34,11 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if !p.FQBTDisabled && p.FVoidCapacity == 0 {
-		panic(`!p.FQBTDisabled && p.FVoidCapacity == 0`)
+	if p.FDuration != 0 && p.FVoidCapacity == 0 {
+		panic(`p.FDuration != 0 && p.FVoidCapacity == 0`)
 	}
 	if p.FMainCapacity == 0 {
 		panic(`p.FMainCapacity == 0`)
-	}
-	if p.FDuration == 0 {
-		panic(`p.FDuration == 0`)
 	}
 	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandDuration, p.FLimitVoidSizeBytes can be = 0
 	return p
@@ -51,10 +46,6 @@ func (p *sSettings) mustNotNull() ISettings {
 
 func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
-}
-
-func (p *sSettings) GetQBTDisabled() bool {
-	return p.FQBTDisabled
 }
 
 func (p *sSettings) GetWorkSizeBits() uint64 {

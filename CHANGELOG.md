@@ -6,6 +6,15 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/network/anonymity`: delete GetRetryEnqueue
+- Update `pkg/network/anonymity/queue`: delete GetQBTDisabled
+- Update `cmd/hidden_lake/service`: qbt_disabled=true -> queue_period_ms=0
+- Update `cmd/hidden_lake/service`: append fetch_timeout_ms param
+- Update `examples/secure_network`: delete secure_network/filesharer|messenger
+- Update `examples/anonymity/messenger|filesharer|echo_service`: default -> insecure with f2f_disabled=true, queue_period_ms=0
+
 <!-- ... -->
 
 ## v1.6.15

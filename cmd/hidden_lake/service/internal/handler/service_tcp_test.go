@@ -83,6 +83,7 @@ func testStartNodeHLS() (anonymity.INode, context.CancelFunc, error) {
 			FWorkSizeBits:     testutils.TCWorkSize,
 			FKeySizeBits:      testutils.TcKeySize,
 			FQueuePeriodMS:    testutils.TCQueuePeriod,
+			FFetchTimeoutMS:   testutils.TCFetchTimeout,
 		},
 	}
 

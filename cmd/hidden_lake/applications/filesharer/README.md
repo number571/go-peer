@@ -79,7 +79,7 @@ The example will involve three nodes `node1_hlf, node2_hlf` and `middle_hlt_1, m
 
 Build and run nodes
 ```bash
-$ cd examples/anon_filesharing/routing
+$ cd examples/anonymity/filesharer/routing
 $ make
 ```
 

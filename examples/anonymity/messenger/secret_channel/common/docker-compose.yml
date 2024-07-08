@@ -1,0 +1,39 @@
+version: "3"
+services:
+  service:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/adapters/common/cmd/service/Dockerfile
+    environment:
+      - SERVICE_ADDR=:6060
+      - LOG_ENABLED=false
+    networks:
+      - hidden-lake
+  node1_hlc:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/messenger/secret_channel/common/node1_hlm
+      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node1.key
+      - SERVICE_PASW=examples/anonymity/_keys/pasw/pasw_node1.key
+    ports:
+      - 8080:8080
+    networks:
+      - hidden-lake
+  node2_hlc:
+    build:
+      context: ./../../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/messenger/secret_channel/common/node2_hlm
+      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node2.key
+      - SERVICE_PASW=examples/anonymity/_keys/pasw/pasw_node2.key
+    ports:
+      - 7070:7070
+      - 7572:7572
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

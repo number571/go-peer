@@ -31,7 +31,7 @@ type INode interface {
 	GetMessageQueue() queue.IMessageQueue
 	GetListPubKeys() asymmetric.IListPubKeys
 
-	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload64) error
+	SendPayload(asymmetric.IPubKey, payload.IPayload64) error
 	FetchPayload(context.Context, asymmetric.IPubKey, payload.IPayload32) ([]byte, error)
 }
 
@@ -39,6 +39,5 @@ type ISettings interface {
 	GetServiceName() string
 	GetF2FDisabled() bool
 	GetNetworkMask() uint32
-	GetRetryEnqueue() uint64
 	GetFetchTimeout() time.Duration
 }

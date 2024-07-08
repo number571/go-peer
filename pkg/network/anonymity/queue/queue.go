@@ -61,10 +61,10 @@ func NewMessageQueue(
 		},
 		fVoidPool: &sVoidPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetVoidCapacity()),
-			fReceiver: nil, // set only if qbt_disabled=false
+			fReceiver: nil, // set only if QB=true
 		},
 	}
-	if !pSettings.GetQBTDisabled() { // if qbt_disabled=false
+	if pSettings.GetDuration() != 0 { // if QB=true
 		mq.fVoidPool.fReceiver = asymmetric.NewRSAPrivKey(
 			pClient.GetPrivKey().GetSize(),
 		).GetPubKey()
@@ -112,7 +112,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 func (p *sMessageQueue) runVoidPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
 
-	if p.fSettings.GetQBTDisabled() {
+	if p.fSettings.GetDuration() == 0 {
 		<-pCtx.Done()
 		chErr <- pCtx.Err()
 		return
@@ -182,7 +182,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 		random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandDuration()+1),
 	)
 
-	if p.fSettings.GetQBTDisabled() {
+	if p.fSettings.GetDuration() == 0 {
 		select {
 		case <-pCtx.Done():
 			return nil

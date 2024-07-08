@@ -24,12 +24,12 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FMessageSizeBytes:   hls_settings.CDefaultMessageSize,
 				FWorkSizeBits:       hls_settings.CDefaultWorkSize,
 				FKeySizeBits:        hls_settings.CDefaultKeySize,
+				FFetchTimeoutMS:     hls_settings.CDefaultFetchTimeout,
 				FQueuePeriodMS:      hls_settings.CDefaultQueuePeriod,
 				FQueueRandPeriodMS:  hls_settings.CDefaultQueueRandPeriod,
 				FLimitVoidSizeBytes: hls_settings.CDefaultLimitVoidSize,
 				FNetworkKey:         hls_settings.CDefaultNetworkKey,
 				FF2FDisabled:        hls_settings.CDefaultF2FDisabled,
-				FQBTDisabled:        hls_settings.CDefaultQBTDisabled,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

@@ -21,13 +21,13 @@ type SConfigSettings struct {
 
 	FMessageSizeBytes   uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits        uint64 `json:"key_size_bits" yaml:"key_size_bits"`
-	FQueuePeriodMS      uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
+	FFetchTimeoutMS     uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
+	FQueuePeriodMS      uint64 `json:"queue_period_ms,omitempty" yaml:"queue_period_ms,omitempty"`
 	FWorkSizeBits       uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FQueueRandPeriodMS  uint64 `json:"queue_rand_period_ms,omitempty" yaml:"queue_rand_period_ms,omitempty"`
 	FLimitVoidSizeBytes uint64 `json:"limit_void_size_bytes,omitempty" yaml:"limit_void_size_bytes,omitempty"`
 	FNetworkKey         string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FF2FDisabled        bool   `json:"f2f_disabled,omitempty" yaml:"f2f_disabled,omitempty"`
-	FQBTDisabled        bool   `json:"qbt_disabled,omitempty" yaml:"qbt_disabled,omitempty"`
 }
 
 type SConfig struct {
@@ -106,6 +106,10 @@ func (p *SConfigSettings) GetKeySizeBits() uint64 {
 	return p.FKeySizeBits
 }
 
+func (p *SConfigSettings) GetFetchTimeoutMS() uint64 {
+	return p.FFetchTimeoutMS
+}
+
 func (p *SConfigSettings) GetQueuePeriodMS() uint64 {
 	return p.FQueuePeriodMS
 }
@@ -129,10 +133,6 @@ func (p *SConfigSettings) GetF2FDisabled() bool {
 	return p.FF2FDisabled
 }
 
-func (p *SConfigSettings) GetQBTDisabled() bool {
-	return p.FQBTDisabled
-}
-
 func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
 }
@@ -146,7 +146,7 @@ func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
 		p.FSettings.FKeySizeBits != 0 &&
-		p.FSettings.FQueuePeriodMS != 0
+		p.FSettings.FFetchTimeoutMS != 0
 }
 
 func (p *SConfig) initConfig() error {

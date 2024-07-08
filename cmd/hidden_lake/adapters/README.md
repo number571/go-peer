@@ -22,13 +22,13 @@ Since the adapters are capable of performing the same functions as the source pr
 
 Build and run nodes
 ```bash
-$ cd examples/echo_service/secret_channel
+$ cd examples/anonymity/echo_service/secret_channel
 $ make
 ```
 
 Send request
 ```bash
-$ cd examples/echo_service
+$ cd examples/anonymity/echo_service
 $ ./request.sh
 ```
 
@@ -48,4 +48,4 @@ There are no external differences, but there are internal ones. While the origin
 <p align="center"><img src="_images/hla_request.gif" alt="hla_request.gif"/></p>
 <p align="center">Figure 2. Example of running HLA client.</p>
 
-Similarly, you can use a more complex composition, as shown in the example `examples/anon_messenger/secret_channel`.
+Similarly, you can use a more complex composition, as shown in the example `examples/anonymity/messenger/secret_channel`.

@@ -31,7 +31,7 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		testSettings(t, i)
 	}
 }
@@ -54,11 +54,6 @@ func testSettings(t *testing.T, n int) {
 			FMainCapacity: testutils.TCQueueCapacity,
 			FDuration:     500 * time.Millisecond,
 		})
-	case 2:
-		_ = NewSettings(&SSettings{
-			FMainCapacity: testutils.TCQueueCapacity,
-			FVoidCapacity: testutils.TCQueueCapacity,
-		})
 	}
 }
 
@@ -68,12 +63,10 @@ func TestQueueVoidDisabled(t *testing.T) {
 	queue := NewMessageQueue(
 		NewSettings(&SSettings{
 			FNetworkMask:  1,
-			FQBTDisabled:  true,
 			FWorkSizeBits: 10,
 			FMainCapacity: testutils.TCQueueCapacity,
 			FVoidCapacity: testutils.TCQueueCapacity,
 			FParallel:     1,
-			FDuration:     100 * time.Millisecond,
 			FRandDuration: 100 * time.Millisecond,
 		}),
 		NewVSettings(&SVSettings{
@@ -251,8 +244,8 @@ func testQueue(queue IMessageQueue) error {
 		return errors.New("incorrect set variable settings")
 	}
 
-	// auto fill queue enabled only if qbt_disabled=false
-	if !queue.GetSettings().GetQBTDisabled() {
+	// auto fill queue enabled only if QB=true
+	if queue.GetSettings().GetDuration() != 0 {
 		msgs := make([]net_message.IMessage, 0, 3)
 		for i := 0; i < 3; i++ {
 			msgs = append(msgs, queue.DequeueMessage(ctx))

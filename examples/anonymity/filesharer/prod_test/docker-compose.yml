@@ -1,0 +1,28 @@
+version: "3"
+services:
+  node1_hlc:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/filesharer/prod_test/node1_hlf
+      - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node1.key
+    ports:
+      - 8572:8572
+      - 8080:8080
+    networks:
+      - hidden-lake
+  node2_hlc:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/filesharer/prod_test/node2_hlf
+      - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node2.key
+    ports:
+      - 7070:7070
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge
