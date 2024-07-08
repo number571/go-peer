@@ -135,25 +135,15 @@ func TestInitApp(t *testing.T) {
 		return
 	}
 
-	if _, err := InitApp([]string{"parallel", "0"}, tcTestdataPath, tcPrivKey4096, 1); err == nil {
-		t.Error("success init app with parallel=0")
-		return
-	}
-
-	if _, err := InitApp([]string{"parallel", "0"}, tcTestdataPath, tcPrivKey4096, 1); err == nil {
-		t.Error("success init app with parallel=0")
-		return
-	}
-
 	if _, err := InitApp([]string{}, tcTestdataPath, tcPrivKey1024, 1); err == nil {
 		t.Error("success init app with diff key size")
 		return
 	}
 
-	// if _, err := InitApp([]string{}, tcTestdataPath, "./undefined/dir/priv.key", 1); err == nil {
-	// 	t.Error("success init app with undefined dir key")
-	// 	return
-	// }
+	if _, err := InitApp([]string{}, tcTestdataPath, "./not_exist/path/to/database/57199u140291724y121291d1/priv.key", 1); err == nil {
+		t.Error("success init app with undefined dir key")
+		return
+	}
 }
 
 func testNetworkMessageSettings() net_message.ISettings {

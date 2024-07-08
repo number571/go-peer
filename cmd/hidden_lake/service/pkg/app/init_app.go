@@ -17,12 +17,9 @@ import (
 // initApp work with the raw data = read files, read args
 func InitApp(pArgs []string, pDefaultPath, pDefaultPrivPath string, pDefaultParallel uint64) (types.IRunner, error) {
 	strParallel := flag.GetFlagValue(pArgs, "parallel", strconv.FormatUint(pDefaultParallel, 10))
-	setParallel, err := strconv.Atoi(strParallel)
+	setParallel, err := strconv.ParseUint(strParallel, 10, 64)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetParallel, err)
-	}
-	if setParallel == 0 {
-		return nil, ErrSetParallelNull
 	}
 
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
@@ -37,5 +34,5 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultPrivPath string, pDefaultPara
 		return nil, utils.MergeErrors(ErrGetPrivateKey, err)
 	}
 
-	return NewApp(cfg, privKey, inputPath, uint64(setParallel)), nil
+	return NewApp(cfg, privKey, inputPath, setParallel), nil
 }
