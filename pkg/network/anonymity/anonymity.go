@@ -348,21 +348,16 @@ func (p *sNode) enqueuePayload(
 	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
-	client := p.fQueue.GetClient()
-	isRequest := loadHead(pPld.GetHead()).getAction().isRequest()
-
 	logType := anon_logger.CLogBaseEnqueueResponse
-	if isRequest {
-		logType = anon_logger.CLogBaseEnqueueRequest
-		// enrich logger with raw message
-		pLogBuilder.WithPubKey(client.GetPubKey())
-	}
-
 	pldBytes := pPld.ToBytes()
-	if isRequest {
-		// enrich logger with raw message
-		// without hash: log only from net_message!
-		pLogBuilder.WithSize(len(pldBytes))
+
+	if loadHead(pPld.GetHead()).getAction().isRequest() {
+		logType = anon_logger.CLogBaseEnqueueRequest
+		client := p.fQueue.GetClient()
+		// enrich logger
+		pLogBuilder.
+			WithPubKey(client.GetPubKey()).
+			WithSize(len(pldBytes))
 	}
 
 	if err := p.fQueue.EnqueueMessage(pRecv, pldBytes); err != nil {
