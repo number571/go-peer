@@ -185,7 +185,7 @@ queue_period_ms: 5000
             <tr>
                 <td>1</td>
                 <td>HLTr/HLTs</td>
-                <td>v1.6.15</td>
+                <td>v1.6.16</td>
                 <td>94.103.91.81</td> 
                 <td>9581/9582</td>
                 <td>8Jkl93Mdk93md1bz</td>
@@ -200,7 +200,7 @@ queue_period_ms: 5000
             <tr>
                 <td>2</td>
                 <td>HLTr/HLTs</td>
-                <td>v1.6.15</td>
+                <td>v1.6.16</td>
                 <td>195.133.1.126</td>
                 <td>9581/9582</td>
                 <td>kf92j74Nof92n9F4</td>
@@ -215,7 +215,7 @@ queue_period_ms: 5000
             <tr>
                 <td>3</td>
                 <td>HLTr/HLTs</td>
-                <td>v1.6.15</td>
+                <td>v1.6.16</td>
                 <td>193.233.18.245</td>
                 <td>9581/9582</td>
                 <td>oi4r9NW9Le7fKF9d</td>
@@ -230,7 +230,7 @@ queue_period_ms: 5000
             <tr>
                 <td>4</td>
                 <td>HLTr/HLTs</td>
-                <td>v1.6.15</td>
+                <td>v1.6.16</td>
                 <td>185.43.4.253</td>
                 <td>9581/9582</td>
                 <td>j2BR39JfDf7Bajx3</td>
