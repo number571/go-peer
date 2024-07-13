@@ -17,7 +17,6 @@ var (
 	ErrNilDB                  = &SAnonymityError{"database is nil"}
 	ErrRetryLimit             = &SAnonymityError{"retry limit"}
 	ErrEnqueueMessage         = &SAnonymityError{"enqueue message"}
-	ErrEncryptPayload         = &SAnonymityError{"encrypt payload"}
 	ErrUnknownType            = &SAnonymityError{"unknown type"}
 	ErrLoadMessage            = &SAnonymityError{"load message"}
 	ErrStoreHashWithBroadcast = &SAnonymityError{"store hash with broadcast"}

@@ -33,7 +33,7 @@ type sNode struct {
 	fLogger        logger.ILogger
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
-	fQueue         queue.IMessageQueue
+	fQueue         queue.IMessageQueueProcessor
 	fFriends       asymmetric.IListPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
@@ -44,7 +44,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
-	pQueue queue.IMessageQueue,
+	pQueue queue.IMessageQueueProcessor,
 	pFriends asymmetric.IListPubKeys,
 ) INode {
 	return &sNode{
@@ -122,7 +122,7 @@ func (p *sNode) GetNetworkNode() network.INode {
 	return p.fNetwork
 }
 
-func (p *sNode) GetMessageQueue() queue.IMessageQueue {
+func (p *sNode) GetMessageQueue() queue.IMessageQueueProcessor {
 	return p.fQueue
 }
 
@@ -358,19 +358,14 @@ func (p *sNode) enqueuePayload(
 		pLogBuilder.WithPubKey(client.GetPubKey())
 	}
 
-	msg, err := client.EncryptMessage(pRecv, pPld.ToBytes())
-	if err != nil {
-		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroEncryptPayload))
-		return utils.MergeErrors(ErrEncryptPayload, err)
-	}
-
+	pldBytes := pPld.ToBytes()
 	if isRequest {
 		// enrich logger with raw message
 		// without hash: log only from net_message!
-		pLogBuilder.WithSize(len(msg))
+		pLogBuilder.WithSize(len(pldBytes))
 	}
 
-	if err := p.fQueue.EnqueueMessage(msg); err != nil {
+	if err := p.fQueue.EnqueueMessage(pRecv, pldBytes); err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
 		return utils.MergeErrors(ErrEnqueueMessage, err)
 	}

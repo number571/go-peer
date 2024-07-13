@@ -274,7 +274,6 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	client := nodes[0].GetMessageQueue().GetClient()
 	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
@@ -287,20 +286,13 @@ func TestEnqueuePayload(t *testing.T) {
 		return
 	}
 
-	msg, err := client.EncryptMessage(
-		pubKey,
-		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
-			[]byte(tcMsgBody),
-		).ToBytes(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	pldBytes := payload.NewPayload64(
+		joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+		[]byte(tcMsgBody),
+	).ToBytes()
 
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.fQueue.EnqueueMessage(msg); err != nil {
+		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -544,20 +536,13 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	msgBody := "hello, world!"
-	msg, err := client.EncryptMessage(
-		pubKey,
-		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
-			[]byte(msgBody),
-		).ToBytes(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	pldBytes := payload.NewPayload64(
+		joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+		[]byte(msgBody),
+	).ToBytes()
 
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.fQueue.EnqueueMessage(msg); err != nil {
+		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -566,7 +551,7 @@ func TestRecvSendMessage(t *testing.T) {
 	hasError := false
 	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.fQueue.EnqueueMessage(msg); err != nil {
+		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			hasError = true
 			break
 		}
@@ -727,7 +712,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 				}),
 			),
 		),
-		queue.NewMessageQueue(
+		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:          networkMask,
 				FWorkSizeBits:         testutils.TCWorkSize,

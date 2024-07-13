@@ -13,6 +13,7 @@ func (err *SQueueError) Error() string {
 }
 
 var (
-	ErrRunning    = &SQueueError{"queue running"}
-	ErrQueueLimit = &SQueueError{"queue limit"}
+	ErrRunning        = &SQueueError{"queue running"}
+	ErrQueueLimit     = &SQueueError{"queue limit"}
+	ErrEncryptMessage = &SQueueError{"encrypt message"}
 )

@@ -22,7 +22,6 @@ var gLogMap = map[anon_logger.ILogType]string{
 	anon_logger.CLogWarnIncorrectResponse: "ICRSP",
 	anon_logger.CLogErroDatabaseGet:       "DBGET",
 	anon_logger.CLogErroDatabaseSet:       "DBSET",
-	anon_logger.CLogErroEncryptPayload:    "ENCPL",
 
 	// extend
 	CLogBaseResponseModeFromService: "RSPMD",

@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/types"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-type IMessageQueue interface {
+type IMessageQueueProcessor interface {
 	types.IRunner
 
 	SetVSettings(IVSettings)
@@ -19,7 +20,7 @@ type IMessageQueue interface {
 	GetSettings() ISettings
 	GetClient() client.IClient
 
-	EnqueueMessage([]byte) error
+	EnqueueMessage(asymmetric.IPubKey, []byte) error
 	DequeueMessage(context.Context) net_message.IMessage
 }
 

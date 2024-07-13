@@ -18,10 +18,10 @@ import (
 )
 
 var (
-	_ IMessageQueue = &sMessageQueue{}
+	_ IMessageQueueProcessor = &sMessageQueueProcessor{}
 )
 
-type sMessageQueue struct {
+type sMessageQueueProcessor struct {
 	fMutex sync.RWMutex
 	fState state.IState
 
@@ -45,12 +45,12 @@ type sRandPool struct {
 	fReceiver asymmetric.IPubKey
 }
 
-func NewMessageQueue(
+func NewMessageQueueProcessor(
 	pSettings ISettings,
 	pVSettings IVSettings,
 	pClient client.IClient,
-) IMessageQueue {
-	mq := &sMessageQueue{
+) IMessageQueueProcessor {
+	mq := &sMessageQueueProcessor{
 		fState:     state.NewBoolState(),
 		fSettings:  pSettings,
 		fVSettings: pVSettings,
@@ -69,19 +69,19 @@ func NewMessageQueue(
 	return mq
 }
 
-func (p *sMessageQueue) GetSettings() ISettings {
+func (p *sMessageQueueProcessor) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sMessageQueue) GetVSettings() IVSettings {
+func (p *sMessageQueueProcessor) GetVSettings() IVSettings {
 	return p.getVSettings()
 }
 
-func (p *sMessageQueue) GetClient() client.IClient {
+func (p *sMessageQueueProcessor) GetClient() client.IClient {
 	return p.fClient
 }
 
-func (p *sMessageQueue) Run(pCtx context.Context) error {
+func (p *sMessageQueueProcessor) Run(pCtx context.Context) error {
 	if err := p.fState.Enable(nil); err != nil {
 		return utils.MergeErrors(ErrRunning, err)
 	}
@@ -106,7 +106,7 @@ func (p *sMessageQueue) Run(pCtx context.Context) error {
 	return utils.MergeErrors(errList...)
 }
 
-func (p *sMessageQueue) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
+func (p *sMessageQueueProcessor) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
 
 	if p.fRandPool == nil {
@@ -129,7 +129,7 @@ func (p *sMessageQueue) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGr
 	}
 }
 
-func (p *sMessageQueue) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
+func (p *sMessageQueueProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
 	for {
 		select {
@@ -145,7 +145,7 @@ func (p *sMessageQueue) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGr
 	}
 }
 
-func (p *sMessageQueue) SetVSettings(pVSettings IVSettings) {
+func (p *sMessageQueueProcessor) SetVSettings(pVSettings IVSettings) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -166,17 +166,22 @@ func (p *sMessageQueue) SetVSettings(pVSettings IVSettings) {
 	}
 }
 
-func (p *sMessageQueue) EnqueueMessage(pMsg []byte) error {
+func (p *sMessageQueueProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
-	p.fMainPool.fRawQueue <- pMsg
+	rawMsg, err := p.fClient.EncryptMessage(pPubKey, pBytes)
+	if err != nil {
+		atomic.AddInt64(&p.fMainPool.fCount, -1)
+		return utils.MergeErrors(ErrEncryptMessage, err)
+	}
+	p.fMainPool.fRawQueue <- rawMsg
 	return nil
 }
 
-func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessage {
+func (p *sMessageQueueProcessor) DequeueMessage(pCtx context.Context) net_message.IMessage {
 	if p.fRandPool == nil {
 		select {
 		case <-pCtx.Done():
@@ -216,7 +221,7 @@ func (p *sMessageQueue) DequeueMessage(pCtx context.Context) net_message.IMessag
 	}
 }
 
-func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg []byte) error {
+func (p *sMessageQueueProcessor) fillMainPool(pCtx context.Context, pMsg []byte) error {
 	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
 
@@ -244,7 +249,7 @@ func (p *sMessageQueue) fillMainPool(pCtx context.Context, pMsg []byte) error {
 	}
 }
 
-func (p *sMessageQueue) fillRandPool(pCtx context.Context) error {
+func (p *sMessageQueueProcessor) fillRandPool(pCtx context.Context) error {
 	incCount := atomic.AddInt64(&p.fRandPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetRandPoolCapacity() {
 		atomic.AddInt64(&p.fRandPool.fCount, -1)
@@ -290,14 +295,14 @@ func (p *sMessageQueue) fillRandPool(pCtx context.Context) error {
 	}
 }
 
-func (p *sMessageQueue) getVSettings() IVSettings {
+func (p *sMessageQueueProcessor) getVSettings() IVSettings {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
 	return p.fVSettings
 }
 
-func (p *sMessageQueue) vSettingsNotChanged(oldVSettings IVSettings) bool {
+func (p *sMessageQueueProcessor) vSettingsNotChanged(oldVSettings IVSettings) bool {
 	currVSettings := p.getVSettings()
 	return currVSettings.GetNetworkKey() == oldVSettings.GetNetworkKey()
 }

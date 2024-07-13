@@ -35,7 +35,6 @@ const (
 	CLogWarnIncorrectResponse
 
 	// ERRO
-	CLogErroEncryptPayload
 	CLogErroDatabaseGet
 	CLogErroDatabaseSet
 )

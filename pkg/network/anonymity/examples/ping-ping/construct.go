@@ -77,7 +77,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				}),
 			),
 		),
-		queue.NewMessageQueue(
+		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:      networkMask,
 				FWorkSizeBits:     workSize,

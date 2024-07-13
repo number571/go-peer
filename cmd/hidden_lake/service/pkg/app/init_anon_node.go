@@ -81,7 +81,7 @@ func (p *sApp) initAnonNode() error {
 				}),
 			),
 		),
-		queue.NewMessageQueue(
+		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:          hls_settings.CNetworkMask,
 				FWorkSizeBits:         cfgSettings.GetWorkSizeBits(),

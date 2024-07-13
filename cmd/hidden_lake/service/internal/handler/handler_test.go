@@ -206,7 +206,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		),
 		db,
 		testNewNetworkNode(addr),
-		queue.NewMessageQueue(
+		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:      networkMask,
 				FWorkSizeBits:     testutils.TCWorkSize,

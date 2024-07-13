@@ -60,7 +60,7 @@ func testSettings(t *testing.T, n int) {
 func TestQueueVoidDisabled(t *testing.T) {
 	t.Parallel()
 
-	queue := NewMessageQueue(
+	queue := NewMessageQueueProcessor(
 		NewSettings(&SSettings{
 			FNetworkMask:      1,
 			FWorkSizeBits:     10,
@@ -97,7 +97,7 @@ func TestRunStopQueue(t *testing.T) {
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
-	queue := NewMessageQueue(
+	queue := NewMessageQueueProcessor(
 		NewSettings(&SSettings{
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: 1,
@@ -120,7 +120,7 @@ func TestRunStopQueue(t *testing.T) {
 
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
-		sQueue := queue.(*sMessageQueue)
+		sQueue := queue.(*sMessageQueueProcessor)
 		if len(sQueue.fRandPool.fQueue) == int(sett.GetRandPoolCapacity()) {
 			return nil
 		}
@@ -141,17 +141,10 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
-	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
+	pubKey := client.GetPubKey()
+	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := queue.EnqueueMessage(msg); err != nil {
+		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error(err)
 			return
 		}
@@ -159,7 +152,7 @@ func TestRunStopQueue(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := queue.EnqueueMessage(msg); err != nil {
+		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			return
 		}
 	}
@@ -170,7 +163,7 @@ func TestRunStopQueue(t *testing.T) {
 func TestQueue(t *testing.T) {
 	t.Parallel()
 
-	queue := NewMessageQueue(
+	queue := NewMessageQueueProcessor(
 		NewSettings(&SSettings{
 			FNetworkMask:      1,
 			FWorkSizeBits:     10,
@@ -204,7 +197,7 @@ func TestQueue(t *testing.T) {
 	}
 }
 
-func testQueue(queue IMessageQueue) error {
+func testQueue(queue IMessageQueueProcessor) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
@@ -218,15 +211,9 @@ func testQueue(queue IMessageQueue) error {
 	}()
 
 	client := queue.GetClient()
-	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
-	)
-	if err != nil {
-		return err
-	}
-
-	if err := queue.EnqueueMessage(msg); err != nil {
+	pubKey := client.GetPubKey()
+	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
+	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err
 	}
 
@@ -257,37 +244,6 @@ func testQueue(queue IMessageQueue) error {
 					return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
 				}
 			}
-		}
-	}
-
-	msg2Tmp, err := client.EncryptMessage(
-		client.GetPubKey(),
-		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
-	)
-	if err != nil {
-		return err
-	}
-
-	msg2, err := message.LoadMessage(client.GetSettings(), msg2Tmp)
-	if err != nil {
-		return err
-	}
-
-	hash := msg2.GetEnck()
-	for i := 0; i < 3; i++ {
-		if err := queue.EnqueueMessage(msg2.ToBytes()); err != nil {
-			return err
-		}
-	}
-
-	for i := 0; i < 3; i++ {
-		netMsg := queue.DequeueMessage(ctx)
-		msg, err := message.LoadMessage(client.GetSettings(), netMsg.GetPayload().GetBody())
-		if err != nil {
-			return err
-		}
-		if !bytes.Equal(msg.GetEnck(), hash) {
-			return fmt.Errorf("enc_key of messages not equals (%d)", i)
 		}
 	}
 

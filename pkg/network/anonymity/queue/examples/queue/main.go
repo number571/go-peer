@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	q := queue.NewMessageQueue(
+	q := queue.NewMessageQueueProcessor(
 		queue.NewSettings(&queue.SSettings{
 			FQueuePeriod:      time.Second,
 			FMainPoolCapacity: 1 << 5,
@@ -45,14 +45,11 @@ func main() {
 	}()
 
 	for i := 0; i < 3; i++ {
-		msg, err := q.GetClient().EncryptMessage(
+		err := q.EnqueueMessage(
 			q.GetClient().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
-			panic(err)
-		}
-		if err := q.EnqueueMessage(msg); err != nil {
 			panic(err)
 		}
 	}
