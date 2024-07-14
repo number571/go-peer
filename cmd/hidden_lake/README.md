@@ -39,7 +39,7 @@ By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) netw
 > [!IMPORTANT]
 > The project is being actively developed, the implementation of some details may change over time. More information about the changes can be obtained from the [CHANGELOG.md](https://github.com/number571/go-peer/blob/master/CHANGELOG.md) file.
 
-Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT, HLM, HLF, HLL, HLE. The `main services` include only HLS. The `application services` are HLM and HLF. The `helper services` are HLT, HLL and HLE.
+Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT, HLM, HLF, HLR, HLL, HLE. The `main services` include only HLS. The `application services` are HLM, HLF and HLR. The `helper services` are HLT, HLL and HLE.
 
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [hidden_lake_anonymous_network_view.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "HLANv")
 

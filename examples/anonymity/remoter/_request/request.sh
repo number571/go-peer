@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' > file.txt && cat file.txt
 PUSH_FORMAT='{
     "receiver":"Bob",
     "req_data":{
