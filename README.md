@@ -473,7 +473,7 @@ To see the another side of communication, you need to do all the same operations
 
 > [github.com/number571/go-peer/cmd/hidden_lake/applications/remoter](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/remoter "HLR");
 
-<img src="_images/hlr_logo.png" alt="hlr_logo.png"/>
+<img src="cmd/hidden_lake/applications/remoter/_images/hlr_logo.png" alt="hlr_logo.png"/>
 
 The `Hidden Lake Remoter` this is a service that provides the ability to make remote calls on the anonymous network core (HLS) with theoretically provable anonymity.
 

@@ -69,7 +69,7 @@ connection: 127.0.0.1:9572
 
 ```bash
 $ ./hlr -path=/root
-# path = path to config and storage
+# path = path to config
 ```
 
 ## Example
