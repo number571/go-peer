@@ -140,9 +140,9 @@ Also, the composition of these works (without "The Hidden Lake anonymous network
 
 Basic | Applied | Helpers
 :-----------------------------:|:-----------------------------:|:------------------------------:
-[HL Service](#1-hidden-lake-service) | [HL Messenger](#2-hidden-lake-messenger) | [HL Traffic](#4-hidden-lake-traffic)
-[HL Composite](#8-hidden-lake-composite) | [HL Filesharer](#3-hidden-lake-filesharer) | [HL Loader](#5-hidden-lake-loader)
-[HL Adapters](#7-hidden-lake-adapters) | _ | [HL Encryptor](#6-hidden-lake-encryptor)
+[HL Service](#1-hidden-lake-service) | [HL Messenger](#2-hidden-lake-messenger) | [HL Traffic](#5-hidden-lake-traffic)
+[HL Composite](#9-hidden-lake-composite) | [HL Filesharer](#3-hidden-lake-filesharer) | [HL Loader](#6-hidden-lake-loader)
+[HL Adapters](#8-hidden-lake-adapters) | [HL Remoter](#4-hidden-lake-remoter) | [HL Encryptor](#7-hidden-lake-encryptor)
 
 ## 1. Hidden Lake Service
 
@@ -469,7 +469,83 @@ To see the another side of communication, you need to do all the same operations
 
 **[⬆ back to top](#installation)**
 
-## 4. Hidden Lake Traffic
+## 4. Hidden Lake Remoter
+
+> [github.com/number571/go-peer/cmd/hidden_lake/applications/remoter](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/applications/remoter "HLR");
+
+<img src="_images/hlr_logo.png" alt="hlr_logo.png"/>
+
+The `Hidden Lake Remoter` this is a service that provides the ability to make remote calls on the anonymous network core (HLS) with theoretically provable anonymity.
+
+> [!CAUTION]
+> This application can be extremely dangerous if the F2F option is disabled in the HLS application or if a private key known to many is used. Use HLR with caution.
+
+### How it works
+
+Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
+
+The server providing the remote access service is waiting for a request in the form of a command. The command does not depend on the operating system and therefore should have a small additional syntax separating the launch of the main command and its arguments.
+
+As an example, to create a file with the contents of "hello, world!" and then reading from the same file, you will need to run the following command:
+
+```bash
+bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' > file.txt && cat file.txt
+```
+
+The `[@remoter-separator]` label means that the arguments are separated for the main command.
+
+### Build and run
+
+Default build and run
+
+```bash 
+$ cd ./cmd/hidden_lake/applications/remoter
+$ make build # create hlr, hlr_[arch=amd64,arm64]_[os=linux,windows,darwin] and copy to ./bin
+$ make run # run ./bin/hlr
+
+> [INFO] 2023/06/03 15:30:31 HLR is running...
+> ...
+```
+
+Open port `9532` (HTTP, incoming).
+Creates `./hlr.yml` file.
+
+Default config `hlr.yml`
+
+```yaml
+settings:
+  exec_timeout_ms: 5000
+logging:
+- info
+- warn
+- erro
+address:
+  incoming: 127.0.0.1:9532
+connection: 127.0.0.1:9572
+```
+
+### Example
+
+The example will involve three nodes `recv_hlc, send_hls` and three repeaters `middle_hlt_1, middle_hlt_2, middle_hlt3_`. The three remaining nodes are used only for the successful connection of the two main nodes. In other words, HLT nodes are traffic relay nodes.
+
+Build and run nodes
+```bash
+$ cd examples/anonymity/remoter/routing
+$ make
+```
+
+Than run command
+```bash
+$ cd examples/anonymity/remoter
+$ make request # go run ./_request/main.go
+```
+
+Got response
+```json
+{"code":200,"head":{"Content-Type":"application/octet-stream","Hl-Service-Response-Mode":"on"},"body":"aGVsbG8sIHdvcmxkCg=="}
+```
+
+## 5. Hidden Lake Traffic
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic "HLT");
 
@@ -545,7 +621,7 @@ $ go run ./main.go r cb3c6558fe0cb64d0d2bad42dffc0f0d9b0f144bc24bb8f2ba06313af92
 
 **[⬆ back to top](#installation)**
 
-## 5. Hidden Lake Loader
+## 6. Hidden Lake Loader
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/loader](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/loader "HLL")
 
@@ -615,7 +691,7 @@ messages have been successfully transported
 
 **[⬆ back to top](#installation)**
 
-## 6. Hidden Lake Encryptor
+## 7. Hidden Lake Encryptor
 
 > [github.com/number571/go-peer/cmd/hidden_lake/helpers/encryptor](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/encryptor "HLE")
 
@@ -676,7 +752,7 @@ $ go run ./main.go d '5a8b4f0b388650fd...8d7cbd8fa01c008'
 
 **[⬆ back to top](#installation)**
 
-## 7. Hidden Lake Adapters
+## 8. Hidden Lake Adapters
 
 > [github.com/number571/go-peer/cmd/hidden_lake/adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters "HLA")
 
@@ -730,7 +806,7 @@ Similarly, you can use a more complex composition, as shown in the example `exam
 
 **[⬆ back to top](#installation)**
 
-## 8. Hidden Lake Composite
+## 9. Hidden Lake Composite
 
 > [github.com/number571/go-peer/cmd/hidden_lake/composite](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/composite "HLC")
 

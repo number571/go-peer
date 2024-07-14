@@ -4,7 +4,7 @@
 
 <img src="_images/hlf_logo.png" alt="hlf_logo.png"/>
 
-The `Hidden Lake Filesharer` is a file sharing service based on the Anonymous Network Core (HLS) with theoretically provable anonymity. A feature of this file sharing service is the anonymity of the fact of transactions (file downloads), taking into account the existence of a global observer.
+The `Hidden Lake Filesharer` is a file sharing service based on the anonymous network core (HLS) with theoretically provable anonymity. A feature of this file sharing service is the anonymity of the fact of transactions (file downloads), taking into account the existence of a global observer.
 
 HLF is an application that implements a graphical user interface (GUI) on a browser-based HTML/CSS/JS display. Most of the code is based on the bootstrap library https://getbootstrap.com/. GUI is adapted to the size of the window, so it can be used both in a desktop and in a smartphone.
 
@@ -75,7 +75,7 @@ $ ./hlf -path=/root
 
 ## Example
 
-The example will involve three nodes `node1_hlf, node2_hlf` and `middle_hlt_1, middle_hlt_2, middle_hlt3_`. Both nodes are a combination of HLS and HLF, where HLF plays the role of an application and services (as shown in `Figure 3` of the HLS readme). The three remaining nodes are used only for the successful connection of the two main nodes. In other words, HLT nodes are traffic relay nodes.
+The example will involve two nodes `node1_hlf, node2_hlf` and three repeaters `middle_hlt_1, middle_hlt_2, middle_hlt3_`. Both nodes are a combination of HLS and HLF, where HLF plays the role of an application and services (as shown in `Figure 3` of the HLS readme). The three remaining nodes are used only for the successful connection of the two main nodes. In other words, HLT nodes are traffic relay nodes.
 
 Build and run nodes
 ```bash
