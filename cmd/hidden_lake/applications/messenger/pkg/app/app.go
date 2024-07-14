@@ -33,9 +33,8 @@ var (
 type sApp struct {
 	fState state.IState
 
-	fConfig   config.IConfig
-	fPassword string
-	fPathTo   string
+	fConfig config.IConfig
+	fPathTo string
 
 	fDatabase       database.IKVDatabase
 	fIntServiceHTTP *http.Server
@@ -48,7 +47,6 @@ type sApp struct {
 
 func NewApp(
 	pCfg config.IConfig,
-	pPassword string,
 	pPathTo string,
 ) types.IRunner {
 	httpLogger := std_logger.NewStdLogger(pCfg.GetLogging(), http_logger.GetLogFunc())
@@ -57,7 +55,6 @@ func NewApp(
 	return &sApp{
 		fState:      state.NewBoolState(),
 		fConfig:     pCfg,
-		fPassword:   pPassword,
 		fPathTo:     pPathTo,
 		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,

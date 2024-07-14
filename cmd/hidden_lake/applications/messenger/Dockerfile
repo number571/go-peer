@@ -10,5 +10,4 @@ COPY ./ ./
 RUN go build -o hlm ./cmd/hidden_lake/applications/messenger/cmd/hlm
 
 ENV SERVICE_PATH="/mounted"
-ENV SERVICE_PASW="/mounted/pasw.key"
-CMD ./hlm -path="${SERVICE_PATH}" -pasw="${SERVICE_PASW}"
+CMD ./hlm -path="${SERVICE_PATH}"

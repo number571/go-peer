@@ -103,8 +103,8 @@ func decryptChunks(client client.IClient, encChunks []string) (string, []byte) {
 		if filename != fn {
 			panic("filename != fn")
 		}
-		if hasNotWritableCharacters(fn) {
-			panic("hasNotWritableCharacters(fn)")
+		if hasNotGraphicCharacters(fn) {
+			panic("hasNotGraphicCharacters(fn)")
 		}
 
 		if err := os.WriteFile(fmt.Sprintf("chunk_%d.dec", i), fb, 0644); err != nil {
@@ -144,7 +144,7 @@ func getChunks(suffix string) []string {
 	return result
 }
 
-func hasNotWritableCharacters(pS string) bool {
+func hasNotGraphicCharacters(pS string) bool {
 	for _, c := range pS {
 		if !unicode.IsGraphic(c) {
 			return true

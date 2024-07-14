@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"strings"
-	"unicode"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 )
@@ -44,13 +43,4 @@ func init() {
 
 func ReplaceTextToEmoji(pS string) string {
 	return gEmojiReplacer.Replace(pS)
-}
-
-func HasNotWritableCharacters(pS string) bool {
-	for _, c := range pS {
-		if !unicode.IsGraphic(c) {
-			return true
-		}
-	}
-	return false
 }

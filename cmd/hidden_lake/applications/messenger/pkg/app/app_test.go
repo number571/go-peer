@@ -14,7 +14,6 @@ import (
 
 const (
 	tcTestdataPath = "./testdata/"
-	tcPathKey      = "password.key" // nolint: gosec
 	tcPathConfig   = pkg_settings.CPathYML
 	tcPathDatabase = pkg_settings.CPathDB
 )
@@ -57,7 +56,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	app := NewApp(cfg, "", ".")
+	app := NewApp(cfg, ".")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -102,7 +101,7 @@ func TestInitApp(t *testing.T) {
 	testDeleteFiles(tcTestdataPath)
 	defer testDeleteFiles(tcTestdataPath)
 
-	if _, err := InitApp([]string{}, tcTestdataPath, tcTestdataPath+tcPathKey); err != nil {
+	if _, err := InitApp([]string{}, tcTestdataPath); err != nil {
 		t.Error(err)
 		return
 	}

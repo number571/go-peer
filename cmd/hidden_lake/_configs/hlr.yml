@@ -1,0 +1,9 @@
+settings:
+  exec_timeout_ms: 5000
+logging:
+- info
+- warn
+- erro
+address:
+  incoming: 127.0.0.1:9532
+connection: 127.0.0.1:9572

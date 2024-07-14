@@ -1,0 +1,9 @@
+settings:
+  exec_timeout_ms: 5000
+logging:
+- info
+- warn
+- erro
+address:
+  incoming: :9532
+connection: recv_hlc:9572

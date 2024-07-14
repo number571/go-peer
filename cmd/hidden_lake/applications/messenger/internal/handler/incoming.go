@@ -10,6 +10,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/msgbroker"
 	hlm_utils "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	"github.com/number571/go-peer/internal/api"
+	"github.com/number571/go-peer/internal/chars"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -92,7 +93,7 @@ func isValidMsgBytes(rawMsgBytes []byte) error {
 		if strMsg == "" {
 			return ErrMessageNull
 		}
-		if hlm_utils.HasNotWritableCharacters(strMsg) {
+		if chars.HasNotGraphicCharacters(strMsg) {
 			return ErrHasNotWritableChars
 		}
 		return nil

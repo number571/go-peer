@@ -64,7 +64,7 @@ connection: 127.0.0.1:9572
 ## Running options
 
 ```bash
-$ ./hlm -path=/root -pasw=/root/pasw.key
+$ ./hlm -path=/root
 # path = path to config and database files
 ```
 

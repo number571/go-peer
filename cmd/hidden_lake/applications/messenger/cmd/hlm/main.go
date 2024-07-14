@@ -24,7 +24,7 @@ func main() {
 		return
 	}
 
-	app, err := app.InitApp(args, ".", "./pasw.key")
+	app, err := app.InitApp(args, ".")
 	if err != nil {
 		panic(err)
 	}

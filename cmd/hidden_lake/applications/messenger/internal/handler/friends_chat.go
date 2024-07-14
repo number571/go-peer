@@ -14,6 +14,7 @@ import (
 	hlm_client "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/web"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
+	"github.com/number571/go-peer/internal/chars"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -167,7 +168,7 @@ func getMessageBytes(pR *http.Request) ([]byte, error) {
 		if strMsg == "" {
 			return nil, ErrMessageNull
 		}
-		if internal_utils.HasNotWritableCharacters(strMsg) {
+		if chars.HasNotGraphicCharacters(strMsg) {
 			return nil, ErrHasNotWritableChars
 		}
 		return wrapText(strMsg), nil

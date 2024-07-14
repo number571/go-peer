@@ -6,7 +6,7 @@ echo "
 Description=HiddenLakeComposite
 
 [Service]
-ExecStart=/root/hlc_amd64_linux -path=/root -priv=/root/priv.key -pasw=/root/pasw.key -parallel=1
+ExecStart=/root/hlc_amd64_linux -path=/root -priv=/root/priv.key -parallel=1
 Restart=always
 RestartSec=10
 

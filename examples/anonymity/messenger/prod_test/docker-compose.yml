@@ -7,7 +7,6 @@ services:
     environment:
       - SERVICE_PATH=examples/anonymity/messenger/prod_test/node1_hlm
       - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node1.key
-      - SERVICE_PASW=examples/anonymity/_keys/pasw/pasw_node1.key
     ports:
       - 8080:8080
   node2_hlc:
@@ -17,7 +16,6 @@ services:
     environment:
       - SERVICE_PATH=examples/anonymity/messenger/prod_test/node2_hlm
       - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node2.key
-      - SERVICE_PASW=examples/anonymity/_keys/pasw/pasw_node2.key
     ports:
       - 7070:7070
       - 7572:7572

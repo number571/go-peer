@@ -1,0 +1,9 @@
+logging:
+  - info
+  - warn
+  - erro
+services:
+  - hidden-lake-service
+  - hidden-lake-remoter
+  - hidden-lake-traffic
+  - hidden-lake-adapter=common

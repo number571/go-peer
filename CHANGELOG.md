@@ -6,6 +6,15 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/applications`: add new service 'remoter'
+
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/messenger`: delete passwords
+- Update `cmd/hidden_lake`: delete template service
+
 <!-- ... -->
 
 ## v1.6.16

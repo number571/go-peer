@@ -7,6 +7,7 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/internal/utils"
 	hlm_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/messenger/pkg/settings"
+	"github.com/number571/go-peer/internal/chars"
 )
 
 func isText(pBytes []byte) bool {
@@ -59,7 +60,7 @@ func unwrapFile(pBytes []byte, pEscape bool) (string, string) {
 		return "", ""
 	}
 	filename := string(splited[0])
-	if utils.HasNotWritableCharacters(filename) {
+	if chars.HasNotGraphicCharacters(filename) {
 		return "", ""
 	}
 	fileBytes := bytes.Join(splited[1:], []byte{hlm_settings.CIsFile})

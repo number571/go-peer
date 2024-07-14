@@ -12,7 +12,6 @@ import (
 func (p *sApp) initDatabase() error {
 	sett := database.NewSettings(&database.SSettings{
 		FPath:     filepath.Join(p.fPathTo, hlm_settings.CPathDB),
-		FPassword: p.fPassword,
 		FWorkSize: p.fConfig.GetSettings().GetWorkSizeBits(),
 	})
 	db, err := hlm_database.NewKeyValueDB(sett)
