@@ -6,4 +6,3 @@ logging:
 - erro
 address:
   incoming: :9532
-connection: recv_hlc:9572

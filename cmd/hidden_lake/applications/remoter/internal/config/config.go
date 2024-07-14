@@ -20,10 +20,9 @@ type SConfigSettings struct {
 type SConfig struct {
 	fLogging logger.ILogging
 
-	FSettings   *SConfigSettings `yaml:"settings"`
-	FLogging    []string         `yaml:"logging,omitempty"`
-	FAddress    *SAddress        `yaml:"address"`
-	FConnection string           `yaml:"connection"`
+	FSettings *SConfigSettings `yaml:"settings"`
+	FLogging  []string         `yaml:"logging,omitempty"`
+	FAddress  *SAddress        `yaml:"address"`
 }
 
 type SAddress struct {
@@ -114,10 +113,6 @@ func (p *SConfigSettings) GetExecTimeoutMS() uint64 {
 
 func (p *SConfig) GetAddress() IAddress {
 	return p.FAddress
-}
-
-func (p *SConfig) GetConnection() string {
-	return p.FConnection
 }
 
 func (p *SAddress) GetIncoming() string {

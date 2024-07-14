@@ -521,7 +521,6 @@ logging:
 - erro
 address:
   incoming: 127.0.0.1:9532
-connection: 127.0.0.1:9572
 ```
 
 ### Example

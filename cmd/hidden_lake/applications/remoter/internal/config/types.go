@@ -8,7 +8,6 @@ type IConfig interface {
 	GetSettings() IConfigSettings
 	GetAddress() IAddress
 	GetLogging() logger.ILogging
-	GetConnection() string
 }
 
 type IConfigSettings interface {

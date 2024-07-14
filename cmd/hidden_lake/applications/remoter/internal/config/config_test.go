@@ -6,12 +6,11 @@ import (
 )
 
 const (
-	tcExecTimeout       = 5000
-	tcConfigFile        = "config_test.txt"
-	tcLogging           = true
-	tcAddress1          = "test_address1"
-	tcAddress2          = "test_address2"
-	tcConnectionService = "test_connection"
+	tcExecTimeout = 5000
+	tcConfigFile  = "config_test.txt"
+	tcLogging     = true
+	tcAddress1    = "test_address1"
+	tcAddress2    = "test_address2"
 )
 
 func TestError(t *testing.T) {
@@ -30,8 +29,7 @@ func testConfigDefaultInit(configPath string) {
 		FSettings: &SConfigSettings{
 			FExecTimeoutMS: tcExecTimeout,
 		},
-		FLogging:    []string{"info", "erro"},
-		FConnection: tcConnectionService,
+		FLogging: []string{"info", "erro"},
 		FAddress: &SAddress{
 			FIncoming: tcAddress1,
 			FPPROF:    tcAddress2,
@@ -48,11 +46,6 @@ func TestConfig(t *testing.T) {
 	cfg, err := LoadConfig(tcConfigFile)
 	if err != nil {
 		t.Error(err)
-		return
-	}
-
-	if cfg.GetConnection() != tcConnectionService {
-		t.Error("connection.service is invalid")
 		return
 	}
 

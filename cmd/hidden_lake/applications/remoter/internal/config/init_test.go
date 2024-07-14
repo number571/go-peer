@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	hlr_settings "github.com/number571/go-peer/cmd/hidden_lake/applications/remoter/pkg/settings"
-	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
 const (
@@ -65,11 +64,6 @@ func TestInit(t *testing.T) {
 
 	if config3.GetAddress().GetIncoming() != hlr_settings.CDefaultIncomingAddress {
 		t.Error("got invalid field with exist config (3)")
-		return
-	}
-
-	if config3.GetConnection() != hls_settings.CDefaultHTTPAddress {
-		t.Error("got invalid field with exist config (4)")
 		return
 	}
 }
