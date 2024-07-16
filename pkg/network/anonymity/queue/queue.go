@@ -192,9 +192,8 @@ func (p *sMessageQueueProcessor) DequeueMessage(pCtx context.Context) net_messag
 		}
 	}
 
-	randQueuePeriod := time.Duration(
-		random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandQueuePeriod()+1),
-	)
+	randUint64 := random.NewCSPRNG().GetUint64()
+	randQueuePeriod := time.Duration(randUint64 % uint64(p.fSettings.GetRandQueuePeriod()+1))
 
 	select {
 	case <-pCtx.Done():
