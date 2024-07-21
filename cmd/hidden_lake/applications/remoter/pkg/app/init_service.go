@@ -13,7 +13,7 @@ func (p *sApp) initIncomingServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlr_settings.CExecPath,
-		handler.HandleIncomigHTTP(pCtx, p.fConfig, p.fHTTPLogger),
+		handler.HandleIncomigExecHTTP(pCtx, p.fConfig, p.fHTTPLogger),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{
