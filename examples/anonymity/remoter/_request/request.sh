@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' > file.txt && cat file.txt
+BASE64_BODY="$(\
+    echo -n 'bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' > file.txt && cat file.txt' | \
+    base64 -w 0 \
+)";
 PUSH_FORMAT='{
     "receiver":"Bob",
     "req_data":{
@@ -10,7 +13,7 @@ PUSH_FORMAT='{
         "head":{
             "Hl-Remoter-Password": "DpxJFjAlrs4HOWga0wk14mZqQSBo9DxK"
         },
-        "body":"YmFzaFtAcmVtb3Rlci1zZXBhcmF0b3JdLWNbQHJlbW90ZXItc2VwYXJhdG9yXWVjaG8gJ2hlbGxvLCB3b3JsZCcgPiBmaWxlLnR4dCAmJiBjYXQgZmlsZS50eHQ="
+        "body":"'${BASE64_BODY}'"
     }
 }';
 
