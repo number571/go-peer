@@ -18,12 +18,12 @@ func (p *sApp) initIncomingServiceHTTP(pCtx context.Context, pHlsClient hls_clie
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlf_settings.CLoadPath,
-		handler.HandleIncomigLoadHTTP(pCtx, p.fHTTPLogger, p.fStgPath, pHlsClient),
+		handler.HandleIncomingLoadHTTP(pCtx, p.fHTTPLogger, p.fStgPath, pHlsClient),
 	) // POST
 
 	mux.HandleFunc(
 		hlf_settings.CListPath,
-		handler.HandleIncomigListHTTP(p.fHTTPLogger, p.fConfig, p.fStgPath),
+		handler.HandleIncomingListHTTP(p.fHTTPLogger, p.fConfig, p.fStgPath),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{

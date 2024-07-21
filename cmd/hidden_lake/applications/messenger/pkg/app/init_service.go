@@ -24,7 +24,7 @@ func (p *sApp) initIncomingServiceHTTP(
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlm_settings.CPushPath,
-		handler.HandleIncomigPushHTTP(pCtx, p.fHTTPLogger, p.fDatabase, pMsgBroker, pHlsClient),
+		handler.HandleIncomingPushHTTP(pCtx, p.fHTTPLogger, p.fDatabase, pMsgBroker, pHlsClient),
 	) // POST
 
 	p.fIncServiceHTTP = &http.Server{

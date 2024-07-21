@@ -18,7 +18,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func HandleIncomigLoadHTTP(
+func HandleIncomingLoadHTTP(
 	pCtx context.Context,
 	pLogger logger.ILogger,
 	pStgPath string,

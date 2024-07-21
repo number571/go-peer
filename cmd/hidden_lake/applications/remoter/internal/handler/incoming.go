@@ -17,7 +17,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandleIncomigExecHTTP(pCtx context.Context, pConfig config.IConfig, pLogger logger.ILogger) http.HandlerFunc {
+func HandleIncomingExecHTTP(pCtx context.Context, pConfig config.IConfig, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		pW.Header().Set(hls_settings.CHeaderResponseMode, hls_settings.CHeaderResponseModeON)
 

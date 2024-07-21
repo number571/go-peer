@@ -13,7 +13,7 @@ func (p *sApp) initIncomingServiceHTTP(pCtx context.Context) {
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		hlr_settings.CExecPath,
-		handler.HandleIncomigExecHTTP(pCtx, p.fConfig, p.fHTTPLogger),
+		handler.HandleIncomingExecHTTP(pCtx, p.fConfig, p.fHTTPLogger),
 	) // POST
 
 	execTimeout := time.Duration(p.fConfig.GetSettings().GetExecTimeoutMS()) * time.Millisecond
