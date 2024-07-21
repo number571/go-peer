@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
@@ -20,6 +19,14 @@ import (
 	internal_anon_logger "github.com/number571/go-peer/internal/logger/anon"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
+
+var gIgnoreHeaders = map[string]struct{}{
+	hls_settings.CHeaderResponseMode: {}, // ignore HLS header
+	"Date":                           {}, // ignore due to deanonymization
+	"Content-Length":                 {}, // ignore redundant header
+	"date":                           {}, // [can be in lower case]
+	"content-length":                 {}, // [can be in lower case]
+}
 
 func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
@@ -129,14 +136,10 @@ func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IP
 func getResponseHead(pResp *http.Response) map[string]string {
 	headers := make(map[string]string)
 	for k := range pResp.Header {
-		switch strings.ToLower(k) {
-		case "date", "content-length": // ignore deanonymizing & redundant headers
+		if _, ok := gIgnoreHeaders[k]; ok {
 			continue
-		case strings.ToLower(hls_settings.CHeaderResponseMode): // delete HLS headers
-			continue
-		default:
-			headers[k] = pResp.Header.Get(k)
 		}
+		headers[k] = pResp.Header.Get(k)
 	}
 	return headers
 }
