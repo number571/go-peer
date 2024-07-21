@@ -29,7 +29,7 @@ func (p *sApp) initServiceHTTP() {
 
 	p.fServiceHTTP = &http.Server{
 		Addr:        p.fConfig.GetAddress().GetHTTP(),
-		Handler:     http.TimeoutHandler(mux, time.Minute/2, "timeout"),
+		Handler:     http.TimeoutHandler(mux, time.Minute, "timeout"),
 		ReadTimeout: (5 * time.Second),
 	}
 }
