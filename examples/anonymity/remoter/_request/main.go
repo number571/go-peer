@@ -18,6 +18,9 @@ const (
 			"method":"POST",
 			"host":"hidden-lake-remoter",
 			"path":"/exec",
+			"head":{
+				"Hl-Remoter-Password": "DpxJFjAlrs4HOWga0wk14mZqQSBo9DxK"
+			},
 			"body":"%s"
 		}
 	}`

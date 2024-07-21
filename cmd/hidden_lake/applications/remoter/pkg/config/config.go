@@ -9,6 +9,7 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
 			FExecTimeoutMS: sett.GetExecTimeoutMS(),
+			FPassword:      sett.GetPassword(),
 		},
 	}
 }

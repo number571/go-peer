@@ -15,6 +15,7 @@ var (
 
 type SConfigSettings struct {
 	FExecTimeoutMS uint64 `json:"exec_timeout_ms" yaml:"exec_timeout_ms"`
+	FPassword      string `json:"password" yaml:"password"`
 }
 
 type SConfig struct {
@@ -109,6 +110,10 @@ func (p *SConfig) GetSettings() IConfigSettings {
 
 func (p *SConfigSettings) GetExecTimeoutMS() uint64 {
 	return p.FExecTimeoutMS
+}
+
+func (p *SConfigSettings) GetPassword() string {
+	return p.FPassword
 }
 
 func (p *SConfig) GetAddress() IAddress {

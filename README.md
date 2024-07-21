@@ -515,6 +515,7 @@ Default config `hlr.yml`
 ```yaml
 settings:
   exec_timeout_ms: 5000
+  password: 4otg9sohTw8Lv8PheDZ7fOD5j5v5sU
 logging:
 - info
 - warn
@@ -541,7 +542,7 @@ $ make request # go run ./_request/main.go
 
 Got response
 ```json
-{"code":200,"head":{"Content-Type":"application/octet-stream","Hl-Service-Response-Mode":"on"},"body":"aGVsbG8sIHdvcmxkCg=="}
+{"code":200,"head":{"Content-Type":"application/octet-stream"},"body":"aGVsbG8sIHdvcmxkCg=="}
 ```
 
 ## 5. Hidden Lake Traffic

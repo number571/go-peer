@@ -12,6 +12,7 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	GetExecTimeoutMS() uint64
+	GetPassword() string
 }
 
 type IAddress interface {

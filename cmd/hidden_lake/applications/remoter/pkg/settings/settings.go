@@ -6,7 +6,8 @@ const (
 )
 
 const (
-	CPathYML = "hlr.yml"
+	CPathYML        = "hlr.yml"
+	CHeaderPassword = "Hl-Remoter-Password" // nolint: gosec
 )
 
 const (

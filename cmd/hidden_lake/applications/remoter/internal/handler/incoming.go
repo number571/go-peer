@@ -29,6 +29,13 @@ func HandleIncomigHTTP(pCtx context.Context, pConfig config.IConfig, pLogger log
 			return
 		}
 
+		sett := pConfig.GetSettings()
+		if pR.Header.Get(hlr_settings.CHeaderPassword) != sett.GetPassword() {
+			pLogger.PushWarn(logBuilder.WithMessage("forbidden"))
+			_ = api.Response(pW, http.StatusForbidden, "failed: request forbidden")
+			return
+		}
+
 		cmdBytes, err := io.ReadAll(pR.Body)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
@@ -43,7 +50,7 @@ func HandleIncomigHTTP(pCtx context.Context, pConfig config.IConfig, pLogger log
 			return
 		}
 
-		execTimeout := time.Duration(pConfig.GetSettings().GetExecTimeoutMS()) * time.Millisecond
+		execTimeout := time.Duration(sett.GetExecTimeoutMS()) * time.Millisecond
 		ctx, cancel := context.WithTimeout(pCtx, execTimeout)
 		defer cancel()
 

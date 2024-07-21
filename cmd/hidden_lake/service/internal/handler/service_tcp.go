@@ -132,6 +132,8 @@ func getResponseHead(pResp *http.Response) map[string]string {
 		switch strings.ToLower(k) {
 		case "date", "content-length": // ignore deanonymizing & redundant headers
 			continue
+		case strings.ToLower(hls_settings.CHeaderResponseMode): // delete HLS headers
+			continue
 		default:
 			headers[k] = pResp.Header.Get(k)
 		}
