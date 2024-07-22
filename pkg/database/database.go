@@ -34,13 +34,17 @@ func (p *sKVDatabase) GetSettings() ISettings {
 }
 
 func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
-	return p.fDB.Update(func(tx *bbolt.Tx) error {
+	err := p.fDB.Update(func(tx *bbolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte(cBucket))
 		if err != nil {
 			return err
 		}
 		return bucket.Put(pKey, pValue)
 	})
+	if err != nil {
+		return utils.MergeErrors(ErrSetValue, err)
+	}
+	return nil
 }
 
 func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
@@ -58,17 +62,24 @@ func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
 		copy(encValue, val)
 		return nil
 	})
-	return encValue, err
+	if err != nil {
+		return nil, utils.MergeErrors(ErrGetValue, err)
+	}
+	return encValue, nil
 }
 
 func (p *sKVDatabase) Del(pKey []byte) error {
-	return p.fDB.Update(func(tx *bbolt.Tx) error {
+	err := p.fDB.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket([]byte(cBucket))
 		if b == nil {
 			return nil
 		}
 		return b.Delete(pKey)
 	})
+	if err != nil {
+		return utils.MergeErrors(ErrDelValue, err)
+	}
+	return nil
 }
 
 func (p *sKVDatabase) Close() error {
