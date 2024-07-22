@@ -22,7 +22,6 @@ const (
 
 const (
 	CDefaultMessagesCapacity = (2 << 10) // count
-	CDefaultWorkSize         = 0         // bits
 	CDefaultLanguage         = ""        // ENG
 )
 

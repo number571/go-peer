@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/applications/messenger`: delete work_size_bits param
+
 <!-- ... -->
 
 ## v1.6.17

@@ -21,7 +21,6 @@ type SConfigSettings struct {
 	fLanguage language.ILanguage
 
 	FMessagesCapacity uint64 `json:"messages_capacity" yaml:"messages_capacity"`
-	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FLanguage         string `json:"language,omitempty" yaml:"language,omitempty"`
 }
 
@@ -83,10 +82,6 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 
 func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
-}
-
-func (p *SConfigSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
 }
 
 func (p *SConfigSettings) GetMessagesCapacity() uint64 {
