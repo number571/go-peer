@@ -31,17 +31,17 @@ func NewLogger(pSett ISettings, pLogFunc ILogFunc) ILogger {
 		fLogFunc:  pLogFunc,
 	}
 
-	outInfo := pSett.GetOutInfo()
+	outInfo := pSett.GetInfoWriter()
 	if outInfo != nil {
 		logger.fOutInfo = log.New(outInfo, fmt.Sprintf("%s[INFO] %s", colorCyan, colorReset), log.LstdFlags)
 	}
 
-	outWarn := pSett.GetOutWarn()
+	outWarn := pSett.GetWarnWriter()
 	if outWarn != nil {
 		logger.fOutWarn = log.New(outWarn, fmt.Sprintf("%s[WARN] %s", colorYellow, colorReset), log.LstdFlags)
 	}
 
-	outErro := pSett.GetOutErro()
+	outErro := pSett.GetErroWriter()
 	if outErro != nil {
 		logger.fOutErro = log.New(outErro, fmt.Sprintf("%s[ERRO] %s", colorRed, colorReset), log.LstdFlags)
 	}

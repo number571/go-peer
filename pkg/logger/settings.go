@@ -28,14 +28,14 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetOutInfo() io.Writer {
+func (p *sSettings) GetInfoWriter() io.Writer {
 	return p.FInfo
 }
 
-func (p *sSettings) GetOutWarn() io.Writer {
+func (p *sSettings) GetWarnWriter() io.Writer {
 	return p.FWarn
 }
 
-func (p *sSettings) GetOutErro() io.Writer {
+func (p *sSettings) GetErroWriter() io.Writer {
 	return p.FErro
 }

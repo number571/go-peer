@@ -16,7 +16,7 @@ type ILogger interface {
 }
 
 type ISettings interface {
-	GetOutInfo() io.Writer
-	GetOutWarn() io.Writer
-	GetOutErro() io.Writer
+	GetInfoWriter() io.Writer
+	GetWarnWriter() io.Writer
+	GetErroWriter() io.Writer
 }
