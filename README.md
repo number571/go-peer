@@ -480,6 +480,8 @@ The `Hidden Lake Remoter` this is a service that provides the ability to make re
 > [!CAUTION]
 > This application can be extremely dangerous if the F2F option is disabled in the HLS application or if a private key known to many is used. Use HLR with caution.
 
+> More information about HLM in the [habr.com/ru/post/701488](https://habr.com/ru/post/701488/ "Habr HLM")
+
 ### How it works
 
 Most of the code is a call to API functions from the HLS kernel. Thanks to this approach, implicit authorization of users is formed from the state of the anonymizing service.
