@@ -663,9 +663,7 @@ func (p *stLogging) HasErro() bool {
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
-			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
-			FWorkSize: testutils.TCWorkSize,
-			FPassword: "CIPHER",
+			FPath: fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
 		}),
 	)
 	if err != nil {

@@ -15,6 +15,4 @@ type IKVDatabase interface {
 
 type ISettings interface {
 	GetPath() string
-	GetWorkSize() uint64
-	GetPassword() string
 }

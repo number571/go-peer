@@ -7,10 +7,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
-
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (
@@ -56,9 +52,7 @@ func TestTryRecover(t *testing.T) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
+		FPath: dbPath,
 	}))
 	if err != nil {
 		t.Error(err)
@@ -71,40 +65,6 @@ func TestTryRecover(t *testing.T) {
 	}
 
 	store.Close()
-}
-
-func TestTryDecrypt(t *testing.T) {
-	t.Parallel()
-
-	cipher := symmetric.NewAESCipher([]byte("abcdefghijklmnopqrstuvwxyz123456"))
-	if _, err := tryDecrypt(cipher, []byte{1}, []byte{2}); err == nil {
-		t.Error("invalid size of encrypt data")
-		return
-	}
-
-	authKey := []byte("auth-key")
-	encData := cipher.EncryptBytes([]byte{})
-	resData := bytes.Join(
-		[][]byte{
-			hashing.NewHMACSHA256Hasher(
-				authKey,
-				encData,
-			).ToBytes(),
-			encData,
-		},
-		[]byte{},
-	)
-
-	if _, err := tryDecrypt(cipher, authKey, resData); err != nil {
-		t.Error("got error with encrypted empty slice: []")
-		return
-	}
-
-	resData[0] ^= 1
-	if _, err := tryDecrypt(cipher, authKey, resData); err == nil {
-		t.Error("succes decrypt with corrupted data")
-		return
-	}
 }
 
 func TestInvalidCreateDB(t *testing.T) {
@@ -122,46 +82,6 @@ func TestInvalidCreateDB(t *testing.T) {
 	}
 }
 
-func TestInvalidInitDB(t *testing.T) {
-	t.Parallel()
-
-	testIvalidInitDB(t, 5, []byte(cHashKey))
-	testIvalidInitDB(t, 6, []byte(cRandKey))
-}
-
-func testIvalidInitDB(t *testing.T, n int, key []byte) {
-	dbPath := fmt.Sprintf(tcPathDBTemplate, n)
-	defer os.RemoveAll(dbPath)
-
-	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
-	}))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	db := store.(*sKVDatabase)
-	if err := delDB(db.fDB, key); err != nil {
-		t.Error(err)
-		return
-	}
-
-	store.Close()
-
-	_, errx := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
-	}))
-	if errx == nil {
-		t.Error("success open database with incorrect param")
-		return
-	}
-}
-
 func TestCreateDB(t *testing.T) {
 	t.Parallel()
 
@@ -169,20 +89,13 @@ func TestCreateDB(t *testing.T) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
+		FPath: dbPath,
 	}))
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer store.Close()
-
-	if store.GetSettings().GetPassword() != "CIPHER" {
-		t.Error("[testCreate] incorrect default value = cipherKey")
-		return
-	}
 
 	if store.GetSettings().GetPath() != dbPath {
 		t.Error("[testCreate] incorrect default value = path")
@@ -207,9 +120,7 @@ func TestCipherKey(t *testing.T) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER1",
+		FPath: dbPath,
 	}))
 	if err != nil {
 		t.Error("[testCipherKey]", err)
@@ -221,17 +132,6 @@ func TestCipherKey(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	store.Close() // open this database with another key
-	_, err = NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER2",
-	}))
-	if err == nil {
-		t.Error("[testCipherKey] success read database by another cipher key")
-		return
-	}
 }
 
 func TestBasicDB(t *testing.T) {
@@ -241,9 +141,7 @@ func TestBasicDB(t *testing.T) {
 	defer os.RemoveAll(dbPath)
 
 	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath:     dbPath,
-		FWorkSize: testutils.TCWorkSize,
-		FPassword: "CIPHER",
+		FPath: dbPath,
 	}))
 	if err != nil {
 		t.Error("[testBasic]", err)
