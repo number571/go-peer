@@ -1,6 +1,6 @@
 package lru
 
-import "github.com/number571/go-peer/pkg/cache"
+import "github.com/number571/go-peer/pkg/storage/cache"
 
 type ILRUCache interface {
 	cache.ICache

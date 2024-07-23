@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 

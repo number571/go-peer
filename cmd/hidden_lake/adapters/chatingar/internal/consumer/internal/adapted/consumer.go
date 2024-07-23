@@ -10,9 +10,9 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
 	autils "github.com/number571/go-peer/cmd/hidden_lake/adapters/chatingar/internal/utils"
-	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/utils"
 )
 

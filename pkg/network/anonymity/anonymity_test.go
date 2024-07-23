@@ -11,16 +11,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
+	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/utils"
 
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/number571/go-peer/pkg/database"
+	"github.com/number571/go-peer/pkg/storage/database"
 )
 
 const (

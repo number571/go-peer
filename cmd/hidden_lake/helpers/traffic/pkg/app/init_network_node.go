@@ -3,9 +3,9 @@ package app
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/handler"
-	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage/cache/lru"
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )

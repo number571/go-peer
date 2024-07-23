@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters"
-	"github.com/number571/go-peer/pkg/database"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/utils"
 )
 

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/cache"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/utils"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"

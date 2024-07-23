@@ -11,10 +11,10 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/adapters/common/pkg/settings"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	"github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/database"
 	"github.com/number571/go-peer/pkg/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/state"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 )
 

@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/number571/go-peer/pkg/cache/lru"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	"github.com/number571/go-peer/pkg/utils"
 )
 
