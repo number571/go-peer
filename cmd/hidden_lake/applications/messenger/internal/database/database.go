@@ -13,8 +13,8 @@ type sKeyValueDB struct {
 	fDB    database.IKVDatabase
 }
 
-func NewKeyValueDB(pPath string) (IKVDatabase, error) {
-	db, err := database.NewKVDatabase(pPath)
+func NewKeyValueDB(pSettings database.ISettings) (IKVDatabase, error) {
+	db, err := database.NewKVDatabase(pSettings)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrCreateDB, err)
 	}

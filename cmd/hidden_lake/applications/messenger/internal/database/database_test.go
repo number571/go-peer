@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -30,7 +31,9 @@ func TestDatabase(t *testing.T) {
 	os.RemoveAll(tcPath)
 	defer os.RemoveAll(tcPath)
 
-	db, err := NewKeyValueDB(tcPath)
+	db, err := NewKeyValueDB(database.NewSettings(&database.SSettings{
+		FPath: tcPath,
+	}))
 	if err != nil {
 		t.Error(err)
 		return

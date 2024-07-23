@@ -13,10 +13,21 @@ func (err *SDatabaseError) Error() string {
 }
 
 var (
-	ErrOpenDB   = &SDatabaseError{"open database"}
-	ErrCloseDB  = &SDatabaseError{"close database"}
-	ErrNotFound = &SDatabaseError{"value not found"}
-	ErrSetValue = &SDatabaseError{"set value"}
-	ErrGetValue = &SDatabaseError{"get value"}
-	ErrDelValue = &SDatabaseError{"del value"}
+	ErrOpenDB               = &SDatabaseError{"open database"}
+	ErrGetSalt              = &SDatabaseError{"get salt value"}
+	ErrReadSalt             = &SDatabaseError{"read salt value"}
+	ErrReadRand             = &SDatabaseError{"read rand"}
+	ErrGetHashRand          = &SDatabaseError{"get hash rand"}
+	ErrReadHashRand         = &SDatabaseError{"read hash rand"}
+	ErrPushSalt             = &SDatabaseError{"push salt value"}
+	ErrPushRand             = &SDatabaseError{"push rand value"}
+	ErrPushHashRand         = &SDatabaseError{"push hash rand"}
+	ErrInvalidHash          = &SDatabaseError{"invalid hash"}
+	ErrSetValueDB           = &SDatabaseError{"set value to database"}
+	ErrGetValueDB           = &SDatabaseError{"get value from database"}
+	ErrDelValueDB           = &SDatabaseError{"del value from database"}
+	ErrNotFound             = &SDatabaseError{"value not found"}
+	ErrCloseDB              = &SDatabaseError{"close database"}
+	ErrInvalidEncryptedSize = &SDatabaseError{"invalid encrypted size"}
+	ErrInvalidDataHash      = &SDatabaseError{"invalid data hash"}
 )

@@ -26,7 +26,11 @@ var (
 
 func initDB() database.IKVDatabase {
 	var err error
-	db, err = database.NewKVDatabase(databasePath)
+	db, err = database.NewKVDatabase(
+		database.NewSettings(&database.SSettings{
+			FPath: databasePath,
+		}),
+	)
 	if err != nil {
 		panic(err)
 	}

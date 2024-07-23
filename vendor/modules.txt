@@ -4,6 +4,9 @@ github.com/g8rswimmer/error-chain
 # go.etcd.io/bbolt v1.3.5
 ## explicit
 go.etcd.io/bbolt
+# golang.org/x/crypto v0.12.0
+## explicit
+golang.org/x/crypto/pbkdf2
 # golang.org/x/net v0.14.0
 ## explicit
 golang.org/x/net/websocket

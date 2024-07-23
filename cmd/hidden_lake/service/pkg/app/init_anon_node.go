@@ -26,8 +26,11 @@ func (p *sApp) initAnonNode() error {
 		cfgSettings = cfg.GetSettings()
 	)
 
-	dbPath := filepath.Join(p.fPathTo, hls_settings.CPathDB)
-	kvDatabase, err := database.NewKVDatabase(dbPath)
+	kvDatabase, err := database.NewKVDatabase(
+		database.NewSettings(&database.SSettings{
+			FPath: filepath.Join(p.fPathTo, hls_settings.CPathDB),
+		}),
+	)
 	if err != nil {
 		return utils.MergeErrors(ErrOpenKVDatabase, err)
 	}

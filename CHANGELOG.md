@@ -9,8 +9,6 @@
 ### CHANGES
 
 - Update `cmd/hidden_lake/applications/messenger`: delete work_size_bits param
-- Update `pkg/database`: delete encryption
-- Update `pkg/crypto`: delete keybuilder
 
 <!-- ... -->
 

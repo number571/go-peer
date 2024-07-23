@@ -97,7 +97,11 @@ func newNode(serviceName, address string) anonymity.INode {
 }
 
 func newKVDatabase(serviceName string) database.IKVDatabase {
-	db, err := database.NewKVDatabase("./database_" + serviceName + ".db")
+	db, err := database.NewKVDatabase(
+		database.NewSettings(&database.SSettings{
+			FPath: "./database_" + serviceName + ".db",
+		}),
+	)
 	if err != nil {
 		panic(err)
 	}
