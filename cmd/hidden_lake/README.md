@@ -26,7 +26,10 @@
         	<img src="../../images/go-peer_badge.svg" alt="Go-Peer" />
 		</a>
         <a href="https://github.com/croqaz/awesome-decentralized">
-        	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome" />
+        	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome-Decentralized" />
+		</a>
+        <a href="https://github.com/redecentralize/alternative-internet">
+        	<img src="https://awesome.re/mentioned-badge.svg" alt="Alternative-Internet" />
 		</a>
 	</p>
 	About project
