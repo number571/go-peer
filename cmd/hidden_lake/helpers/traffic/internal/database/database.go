@@ -23,11 +23,7 @@ type sDatabase struct {
 }
 
 func NewDatabase(pSett ISettings) (IDatabase, error) {
-	kvDB, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: pSett.GetPath(),
-		}),
-	)
+	kvDB, err := database.NewKVDatabase(pSett.GetPath())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrCreateDB, err)
 	}

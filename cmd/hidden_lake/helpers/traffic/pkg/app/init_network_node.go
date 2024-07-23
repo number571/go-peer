@@ -30,11 +30,7 @@ func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 		conn.NewVSettings(&conn.SVSettings{
 			FNetworkKey: cfgSettings.GetNetworkKey(),
 		}),
-		lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: hls_settings.CNetworkQueueCapacity,
-			}),
-		),
+		lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 	).HandleFunc(
 		hls_settings.CNetworkMask,
 		handler.HandleServiceTCP(p.fConfig, pDatabase, p.fAnonLogger),

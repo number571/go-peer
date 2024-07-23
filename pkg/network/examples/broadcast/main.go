@@ -98,11 +98,7 @@ func newNode(serviceAddress string) network.INode {
 			FReadTimeout:  time.Minute,
 		}),
 		vSettings(),
-		lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: (1 << 10),
-			}),
-		),
+		lru.NewLRUCache(1<<10),
 	)
 }
 

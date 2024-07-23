@@ -71,11 +71,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				FConnSettings: newConnSettings(workSize, msgSize),
 			}),
 			newVSettings(networkKey),
-			lru.NewLRUCache(
-				lru.NewSettings(&lru.SSettings{
-					FCapacity: 1024,
-				}),
-			),
+			lru.NewLRUCache(1024),
 		),
 		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{
@@ -101,11 +97,7 @@ func newNode(serviceName, address string) anonymity.INode {
 }
 
 func newKVDatabase(serviceName string) database.IKVDatabase {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: "./database_" + serviceName + ".db",
-		}),
-	)
+	db, err := database.NewKVDatabase("./database_" + serviceName + ".db")
 	if err != nil {
 		panic(err)
 	}

@@ -14,23 +14,15 @@ const (
 )
 
 type sKVDatabase struct {
-	fSettings ISettings
-	fDB       *bbolt.DB
+	fDB *bbolt.DB
 }
 
-func NewKVDatabase(pSett ISettings) (IKVDatabase, error) {
-	db, err := bbolt.Open(pSett.GetPath(), 0600, &bbolt.Options{})
+func NewKVDatabase(pPath string) (IKVDatabase, error) {
+	db, err := bbolt.Open(pPath, 0600, &bbolt.Options{})
 	if err != nil {
 		return nil, utils.MergeErrors(ErrOpenDB, err)
 	}
-	return &sKVDatabase{
-		fSettings: pSett,
-		fDB:       db,
-	}, nil
-}
-
-func (p *sKVDatabase) GetSettings() ISettings {
-	return p.fSettings
+	return &sKVDatabase{db}, nil
 }
 
 func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {

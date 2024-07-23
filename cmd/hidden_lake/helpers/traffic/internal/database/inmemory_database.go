@@ -19,11 +19,7 @@ type sInMemoryDatabase struct {
 func NewInMemoryDatabase(pSett ISettings) (IDatabase, error) {
 	return &sInMemoryDatabase{
 		fSettings: pSett,
-		fLRUCache: lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: pSett.GetMessagesCapacity(),
-			}),
-		),
+		fLRUCache: lru.NewLRUCache(pSett.GetMessagesCapacity()),
 	}, nil
 }
 

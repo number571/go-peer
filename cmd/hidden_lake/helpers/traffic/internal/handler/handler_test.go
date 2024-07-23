@@ -143,11 +143,7 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 		conn.NewVSettings(&conn.SVSettings{
 			FNetworkKey: testutils.TCNetworkKey,
 		}),
-		lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: testutils.TCCapacity,
-			}),
-		),
+		lru.NewLRUCache(testutils.TCCapacity),
 	)
 
 	logger := logger.NewLogger(
@@ -202,10 +198,6 @@ func testNewNetworkNode(addr string) network.INode {
 		conn.NewVSettings(&conn.SVSettings{
 			FNetworkKey: testutils.TCNetworkKey,
 		}),
-		lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: testutils.TCCapacity,
-			}),
-		),
+		lru.NewLRUCache(testutils.TCCapacity),
 	)
 }

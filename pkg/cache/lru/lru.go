@@ -11,23 +11,17 @@ var (
 )
 
 type sLRUCache struct {
-	fSettings ISettings
-	fMutex    sync.RWMutex
-	fMap      map[string][]byte
-	fQueue    []string
-	fIndex    uint64
+	fMutex sync.RWMutex
+	fMap   map[string][]byte
+	fQueue []string
+	fIndex uint64
 }
 
-func NewLRUCache(pSettings ISettings) ILRUCache {
+func NewLRUCache(pCapacity uint64) ILRUCache {
 	return &sLRUCache{
-		fSettings: pSettings,
-		fQueue:    make([]string, pSettings.GetCapacity()),
-		fMap:      make(map[string][]byte, pSettings.GetCapacity()),
+		fQueue: make([]string, pCapacity),
+		fMap:   make(map[string][]byte, pCapacity),
 	}
-}
-
-func (p *sLRUCache) GetSettings() ISettings {
-	return p.fSettings
 }
 
 func (p *sLRUCache) GetIndex() uint64 {

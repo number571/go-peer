@@ -183,11 +183,7 @@ func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, cont
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: dbPath,
-		}),
-	)
+	db, err := database.NewKVDatabase(dbPath)
 	if err != nil {
 		panic(err)
 	}
@@ -243,10 +239,6 @@ func testNewNetworkNode(addr string) network.INode {
 			}),
 		}),
 		conn.NewVSettings(&conn.SVSettings{}),
-		lru.NewLRUCache(
-			lru.NewSettings(&lru.SSettings{
-				FCapacity: testutils.TCCapacity,
-			}),
-		),
+		lru.NewLRUCache(testutils.TCCapacity),
 	)
 }

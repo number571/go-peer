@@ -26,11 +26,8 @@ func (p *sApp) initAnonNode() error {
 		cfgSettings = cfg.GetSettings()
 	)
 
-	kvDatabase, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: filepath.Join(p.fPathTo, hls_settings.CPathDB),
-		}),
-	)
+	dbPath := filepath.Join(p.fPathTo, hls_settings.CPathDB)
+	kvDatabase, err := database.NewKVDatabase(dbPath)
 	if err != nil {
 		return utils.MergeErrors(ErrOpenKVDatabase, err)
 	}
@@ -75,11 +72,7 @@ func (p *sApp) initAnonNode() error {
 			conn.NewVSettings(&conn.SVSettings{
 				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
-			lru.NewLRUCache(
-				lru.NewSettings(&lru.SSettings{
-					FCapacity: hls_settings.CNetworkQueueCapacity,
-				}),
-			),
+			lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 		),
 		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{

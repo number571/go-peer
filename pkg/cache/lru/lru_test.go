@@ -8,42 +8,10 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
-func TestSettings(t *testing.T) {
-	t.Parallel()
-
-	for i := 0; i < 1; i++ {
-		testSettings(t, i)
-	}
-}
-
-func testSettings(t *testing.T, n int) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-	switch n {
-	case 0:
-		_ = NewSettings(&SSettings{})
-	default:
-	}
-}
-
 func TestLRUCache(t *testing.T) {
 	t.Parallel()
 
-	lruCache := NewLRUCache(
-		NewSettings(&SSettings{
-			FCapacity: 3,
-		}),
-	)
-
-	sett := lruCache.GetSettings()
-	if sett.GetCapacity() != 3 {
-		t.Error("got invalid value from settings")
-		return
-	}
+	lruCache := NewLRUCache(3)
 
 	if _, ok := lruCache.Get([]byte("unknown-key")); ok {
 		t.Error("success load unknown key")

@@ -661,11 +661,7 @@ func (p *stLogging) HasErro() bool {
 */
 
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisabled bool) (INode, context.CancelFunc) {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
-		}),
-	)
+	db, err := database.NewKVDatabase(fmt.Sprintf(tcPathDBTemplate, typeDB, numDB))
 	if err != nil {
 		panic(err)
 	}
@@ -704,11 +700,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 			conn.NewVSettings(&conn.SVSettings{
 				FNetworkKey: networkKey,
 			}),
-			lru.NewLRUCache(
-				lru.NewSettings(&lru.SSettings{
-					FCapacity: testutils.TCCapacity,
-				}),
-			),
+			lru.NewLRUCache(testutils.TCCapacity),
 		),
 		queue.NewMessageQueueProcessor(
 			queue.NewSettings(&queue.SSettings{

@@ -140,11 +140,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 				}),
 			}),
 			conn.NewVSettings(&conn.SVSettings{}),
-			lru.NewLRUCache(
-				lru.NewSettings(&lru.SSettings{
-					FCapacity: testutils.TCCapacity,
-				}),
-			),
+			lru.NewLRUCache(testutils.TCCapacity),
 		),
 	)
 }

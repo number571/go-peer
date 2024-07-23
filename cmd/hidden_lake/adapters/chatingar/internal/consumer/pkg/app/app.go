@@ -52,11 +52,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		adapted.NewAdaptedConsumer(
 			p.fPostID,
 			p.fSettings,
-			lru.NewLRUCache(
-				lru.NewSettings(&lru.SSettings{
-					FCapacity: (1 << 10),
-				}),
-			),
+			lru.NewLRUCache(1<<10),
 		),
 		p.fStdfLogger,
 		hlt_client.NewClient(

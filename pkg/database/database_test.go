@@ -24,36 +24,13 @@ func TestError(t *testing.T) {
 	}
 }
 
-func TestSettings(t *testing.T) {
-	t.Parallel()
-
-	for i := 0; i < 1; i++ {
-		testSettings(t, i)
-	}
-}
-
-func testSettings(t *testing.T, n int) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-	switch n { // nolint: gocritic
-	case 0:
-		_ = NewSettings(&SSettings{})
-	}
-}
-
 func TestTryRecover(t *testing.T) {
 	t.Parallel()
 
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath: dbPath,
-	}))
+	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error(err)
 		return
@@ -73,9 +50,7 @@ func TestInvalidCreateDB(t *testing.T) {
 	path := "./not_exist/path/to/database/57199u140291724y121291d1/database.db"
 	defer os.RemoveAll(path)
 
-	_, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath: path,
-	}))
+	_, err := NewKVDatabase(path)
 	if err == nil {
 		t.Error("success create database with incorrect path")
 		return
@@ -88,19 +63,12 @@ func TestCreateDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath: dbPath,
-	}))
+	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer store.Close()
-
-	if store.GetSettings().GetPath() != dbPath {
-		t.Error("[testCreate] incorrect default value = path")
-		return
-	}
 
 	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
 		t.Error(err)
@@ -119,9 +87,7 @@ func TestCipherKey(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath: dbPath,
-	}))
+	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error("[testCipherKey]", err)
 		return
@@ -140,9 +106,7 @@ func TestBasicDB(t *testing.T) {
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
 	defer os.RemoveAll(dbPath)
 
-	store, err := NewKVDatabase(NewSettings(&SSettings{
-		FPath: dbPath,
-	}))
+	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error("[testBasic]", err)
 		return
