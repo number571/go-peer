@@ -3,5 +3,6 @@
 // Package functions:
 // 1. HexEncode/HexDecode
 // 2. Uint64ToBytes/BytesToUint64
-// 3. Serialize/Deserialize
+// 3. SerializeJSON/DeserializeJSON
+// 4. SerializeYAML/DeserializeYAML
 package encoding

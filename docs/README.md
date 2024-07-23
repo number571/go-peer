@@ -27,7 +27,8 @@ Also, the composition of these works can be found in the book [The general theor
 6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
 7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
 8. [Hidden Lake Filesharer](https://habr.com/ru/articles/789968/ "Habr HLF")
-9. [Hidden Lake Adapter Chatingar](https://habr.com/ru/articles/800965/ "Habr HLA_chatingar")
+9. [Hidden Lake Remoter](https://habr.com/ru/articles/830130/ "Habr HLR")
+10. [Hidden Lake Adapter Chatingar](https://habr.com/ru/articles/800965/ "Habr HLA_chatingar")
 
 ### 4. Videos
 
@@ -48,7 +49,6 @@ Also, the composition of these works can be found in the book [The general theor
 5. HLE  = 955x
 6. HLF  = 954x
 7. HLR  = 953x
-8. HL_T = 950x
 
 ## Code style go-peer
 
