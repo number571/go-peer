@@ -11,12 +11,12 @@ default-config:
 build: default-config
 	$(GC) -o $(BINPATH)/hlr ./cmd/hlr
 
-	# for arch in amd64 arm64; \
-	# do \
-	# 	CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_linux ./cmd/hlr; \
-	# 	CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_windows.exe ./cmd/hlr; \
-	# 	CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_darwin ./cmd/hlr; \
-	# done;
+	for arch in amd64 arm64; \
+	do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_linux ./cmd/hlr; \
+		CGO_ENABLED=0 GOOS=windows GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_windows.exe ./cmd/hlr; \
+		CGO_ENABLED=0 GOOS=darwin GOARCH=$${arch} go build -o $(BINPATH)/hlr_$${arch}_darwin ./cmd/hlr; \
+	done;
 run:
 	./$(BINPATH)/hlr
 test:
