@@ -364,7 +364,7 @@ func (p *sClient) tInvalidEncryptPayload1(pRecv asymmetric.IPubKey, pPld payload
 func (p *sClient) tInvalidEncryptWithParams1(pRecv asymmetric.IPubKey, pPld payload.IPayload64, pPadd uint64) message.IMessage {
 	var (
 		rand    = random.NewCSPRNG()
-		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		salt    = rand.GetBytes(cSaltSize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
@@ -433,7 +433,7 @@ func (p *sClient) tInvalidEncryptWithParams2(
 ) (message.IMessage, error) {
 	var (
 		rand    = random.NewCSPRNG()
-		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		salt    = rand.GetBytes(cSaltSize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
@@ -501,7 +501,7 @@ func (p *sClient) tInvalidEncryptWithParams3(
 ) (message.IMessage, error) {
 	var (
 		rand    = random.NewCSPRNG()
-		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		salt    = rand.GetBytes(cSaltSize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
@@ -563,7 +563,7 @@ func (p *sClient) tInvalidEncryptWithParams4(
 ) (message.IMessage, error) {
 	var (
 		rand    = random.NewCSPRNG()
-		salt    = rand.GetBytes(symmetric.CAESKeySize)
+		salt    = rand.GetBytes(cSaltSize)
 		session = rand.GetBytes(symmetric.CAESKeySize)
 	)
 

@@ -11,6 +11,10 @@ import (
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
+const (
+	cSaltSize = 32 // bytes
+)
+
 var (
 	_ IClient = &sClient{}
 )
@@ -92,9 +96,9 @@ func (p *sClient) encryptWithParams(
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
-		rand    = random.NewCSPRNG()
-		salt    = rand.GetBytes(symmetric.CAESKeySize)
-		session = rand.GetBytes(symmetric.CAESKeySize)
+		rand = random.NewCSPRNG()
+		salt = rand.GetBytes(cSaltSize)
+		skey = rand.GetBytes(symmetric.CAESKeySize)
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
@@ -107,12 +111,12 @@ func (p *sClient) encryptWithParams(
 		[]byte{},
 	)).ToBytes()
 
-	encKey := pRecv.EncryptBytes(session)
+	encKey := pRecv.EncryptBytes(skey)
 	if encKey == nil {
 		return nil, ErrEncryptSymmetricKey
 	}
 
-	cipher := symmetric.NewAESCipher(session)
+	cipher := symmetric.NewAESCipher(skey)
 	return message.NewMessage(
 		encKey,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
@@ -134,13 +138,13 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 	}
 
 	// Decrypt session key by private key of receiver.
-	session := p.fPrivKey.DecryptBytes(msg.GetEnck())
-	if session == nil {
+	skey := p.fPrivKey.DecryptBytes(msg.GetEnck())
+	if skey == nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
 	// Decrypt data block by decrypted session key. Decode data block.
-	decJoiner := symmetric.NewAESCipher(session).DecryptBytes(msg.GetEncd())
+	decJoiner := symmetric.NewAESCipher(skey).DecryptBytes(msg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
