@@ -11,8 +11,7 @@ services:
       context: ./../../../../../
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
-      - SERVICE_PATH=examples/anonymity/echo_service/secret_channel/chatingar/recv_hls
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node1.key
+      - SERVICE_PATH=examples/anonymity/echo_service/secret_channel/chatingar/recv_hlc
     networks:
       - recv-local-network
       - hidden-lake
@@ -21,8 +20,7 @@ services:
       context: ./../../../../../
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
-      - SERVICE_PATH=examples/anonymity/echo_service/secret_channel/chatingar/send_hls
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node2.key
+      - SERVICE_PATH=examples/anonymity/echo_service/secret_channel/chatingar/send_hlc
     ports:
       - 7572:7572
     networks:

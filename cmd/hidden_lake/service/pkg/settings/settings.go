@@ -15,6 +15,7 @@ const (
 )
 
 const (
+	CPathKey = "hls.key"
 	CPathYML = "hls.yml"
 	CPathDB  = "hls.db"
 )

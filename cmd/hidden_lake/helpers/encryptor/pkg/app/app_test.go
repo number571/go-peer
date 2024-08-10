@@ -17,10 +17,9 @@ import (
 )
 
 const (
-	tcTestdataPath = "./testdata/"
-	tcPrivKey1024  = tcTestdataPath + "priv1024.key"
-	tcPrivKey4096  = tcTestdataPath + "priv4096.key"
-	tcPathConfig   = pkg_settings.CPathYML
+	tcTestdataPath1024 = "./testdata/1024"
+	tcTestdataPath4096 = "./testdata/4096"
+	tcPathConfig       = pkg_settings.CPathYML
 )
 
 func TestError(t *testing.T) {
@@ -122,25 +121,28 @@ func TestApp(t *testing.T) {
 func TestInitApp(t *testing.T) {
 	t.Parallel()
 
-	testDeleteFiles(tcTestdataPath)
-	defer testDeleteFiles(tcTestdataPath)
+	testDeleteFiles(tcTestdataPath1024)
+	testDeleteFiles(tcTestdataPath4096)
 
-	if _, err := InitApp([]string{}, tcTestdataPath, tcPrivKey4096, 1); err != nil {
+	defer testDeleteFiles(tcTestdataPath1024)
+	defer testDeleteFiles(tcTestdataPath4096)
+
+	if _, err := InitApp([]string{}, tcTestdataPath4096, 1); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if _, err := InitApp([]string{"parallel", "abc"}, tcTestdataPath, tcPrivKey4096, 1); err == nil {
+	if _, err := InitApp([]string{"parallel", "abc"}, tcTestdataPath4096, 1); err == nil {
 		t.Error("success init app with parallel=abc")
 		return
 	}
 
-	if _, err := InitApp([]string{}, tcTestdataPath, tcPrivKey1024, 1); err == nil {
+	if _, err := InitApp([]string{}, tcTestdataPath1024, 1); err == nil {
 		t.Error("success init app with diff key size")
 		return
 	}
 
-	if _, err := InitApp([]string{}, tcTestdataPath, "./not_exist/path/to/key/57199u140291724y121291d1/priv.key", 1); err == nil {
+	if _, err := InitApp([]string{}, "./not_exist/path/to/hle", 1); err == nil {
 		t.Error("success init app with undefined dir key")
 		return
 	}

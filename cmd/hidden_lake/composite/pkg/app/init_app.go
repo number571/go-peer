@@ -41,7 +41,6 @@ import (
 func InitApp(
 	pArgs []string,
 	pDefaultPath string,
-	pDefaultPrivPath string,
 	pDefaultParallel uint64,
 ) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
@@ -55,7 +54,6 @@ func InitApp(
 		cfg,
 		pArgs,
 		pDefaultPath,
-		pDefaultPrivPath,
 		pDefaultParallel,
 	)
 	if err != nil {
@@ -69,7 +67,6 @@ func getRunners(
 	pCfg config.IConfig,
 	pArgs []string,
 	pDefaultPath string,
-	pDefaultPrivPath string,
 	pDefaultParallel uint64,
 ) ([]types.IRunner, error) {
 	var (
@@ -91,9 +88,9 @@ func getRunners(
 
 		switch sName {
 		case hls_settings.CServiceFullName:
-			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultPrivPath, pDefaultParallel)
+			runner, err = hls_app.InitApp(pArgs, pDefaultPath, pDefaultParallel)
 		case hle_settings.CServiceFullName:
-			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultPrivPath, pDefaultParallel)
+			runner, err = hle_app.InitApp(pArgs, pDefaultPath, pDefaultParallel)
 		case hlt_settings.CServiceFullName:
 			runner, err = hlt_app.InitApp(pArgs, pDefaultPath)
 		case hll_settings.CServiceFullName:

@@ -749,8 +749,8 @@ Encrypt and decrypt message
 ```bash
 $ cd examples/encryptor/client_hle
 $ go run ./main.go e 'hello, world!'
-> 5a8b4f0b388650fd...8d7cbd8fa01c008
-$ go run ./main.go d '5a8b4f0b388650fd...8d7cbd8fa01c008'
+> 264412546dc14805...1802b47342f074d
+$ go run ./main.go d '264412546dc14805...1802b47342f074d'
 > hello, world!
 ```
 

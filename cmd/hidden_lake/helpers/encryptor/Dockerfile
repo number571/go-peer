@@ -10,6 +10,5 @@ COPY ./ ./
 RUN go build -o hle ./cmd/hidden_lake/helpers/encryptor/cmd/hle
 
 ENV SERVICE_PATH="/mounted"
-ENV SERVICE_PRIV="/mounted/priv.key"
 ENV SERVICE_PARALLEL="1"
-CMD ./hle -path="${SERVICE_PATH}" -priv="${SERVICE_PRIV}" -parallel="${SERVICE_PARALLEL}"
+CMD ./hle -path="${SERVICE_PATH}" -parallel="${SERVICE_PARALLEL}"

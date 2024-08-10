@@ -8,8 +8,9 @@
 
 ### CHANGES
 
-- Update `pkg/client/message`: delete LoadBytesJoiner32
 - Update `cmd/hidden_lake/applications/messenger`: delete work_size_bits param
+- Update `pkg/client/message`: delete LoadBytesJoiner32
+- Update `cmd/hidden_lake/service|cmd/hidden_lake/helpers/encryptor`: delete SERVICE_PRIV env arg
 
 <!-- ... -->
 

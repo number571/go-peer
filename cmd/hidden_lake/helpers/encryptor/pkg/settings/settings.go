@@ -6,6 +6,7 @@ const (
 )
 
 const (
+	CPathKey = "hle.key"
 	CPathYML = "hle.yml"
 )
 

@@ -6,7 +6,6 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/messenger/secret_channel/chatingar/node1_hlm
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node1.key
     ports:
       - 8080:8080
     networks:
@@ -17,7 +16,6 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/messenger/secret_channel/chatingar/node2_hlm
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node2.key
     ports:
       - 7070:7070
       - 7572:7572

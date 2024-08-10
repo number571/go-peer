@@ -15,7 +15,7 @@ import (
 )
 
 // initApp work with the raw data = read files, read args
-func InitApp(pArgs []string, pDefaultPath, pDefaultPrivPath string, pDefaultParallel uint64) (types.IRunner, error) {
+func InitApp(pArgs []string, pDefaultPath string, pDefaultParallel uint64) (types.IRunner, error) {
 	strParallel := flag.GetFlagValue(pArgs, "parallel", strconv.FormatUint(pDefaultParallel, 10))
 	setParallel, err := strconv.ParseUint(strParallel, 10, 64)
 	if err != nil {
@@ -28,8 +28,8 @@ func InitApp(pArgs []string, pDefaultPath, pDefaultPrivPath string, pDefaultPara
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
-	privPath := flag.GetFlagValue(pArgs, "priv", pDefaultPrivPath)
-	privKey, err := initapp.GetPrivKey(privPath, cfg.GetSettings().GetKeySizeBits())
+	keyPath := filepath.Join(inputPath, pkg_settings.CPathKey)
+	privKey, err := initapp.GetPrivKey(keyPath, cfg.GetSettings().GetKeySizeBits())
 	if err != nil {
 		return nil, utils.MergeErrors(ErrGetPrivateKey, err)
 	}

@@ -12,7 +12,6 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/echo_service/insecure/recv_hls
-      - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node1.key
     networks:
       - local-network
       - hidden-lake
@@ -22,7 +21,6 @@ services:
       dockerfile: cmd/hidden_lake/service/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/echo_service/insecure/send_hls
-      - SERVICE_PRIV=examples/anonymity/_keys/4096/priv_node2.key
     ports:
       - 7572:7572
     networks:

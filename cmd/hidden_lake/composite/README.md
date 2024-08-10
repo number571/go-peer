@@ -53,9 +53,8 @@ services:
 ## Running options
 
 ```bash
-$ ./hlc -path=/root -priv=/root/priv.key -parallel=1
-# path     = path to config and database files
-# key      = path to private key file
+$ ./hlc -path=/root -parallel=1
+# path     = path to config, database, key files
 # parallel = num of parallel functions for PoW algorithm
 ```
 

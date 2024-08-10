@@ -15,7 +15,6 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/remoter/secret_channel/common/recv_hlc
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node1.key
     networks:
       - hidden-lake
   send_hlc:
@@ -24,7 +23,6 @@ services:
       dockerfile: cmd/hidden_lake/composite/Dockerfile
     environment:
       - SERVICE_PATH=examples/anonymity/remoter/secret_channel/common/send_hlc
-      - SERVICE_PRIV=examples/anonymity/_keys/2048/priv_node2.key
     ports:
       - 7572:7572
     networks:
