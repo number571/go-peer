@@ -19,14 +19,17 @@ import (
 )
 
 const (
-	tcPubKey1023Bit = "PubKey{30818802818067D7C7F48CCCF318A504721D8521ED04DFD24DE947D50476212E279DADA7F627102D6140B922BC30E778BE7FD120E73D02C407E4D053D55C8F3CFACED11CCB8DC96539F51E34B32544EAB8812129BE7AD107E9A352E70F912962D6D0BABAB629F20332A3FBA66BC28D2944F44859959788428300F58DA0873A6796073B17CEEB0203010001}"
-	tcMessageSize   = (2 << 10)
-	tcKeySizeBits   = 1024
+	// tcMessageSize = (8 << 10)
+	// tcKeySizeBits = 4096
+	tcMessageSize = (2 << 10)
+	tcKeySizeBits = 1024
 )
 
 var (
+	// tgPrivKey = asymmetric.NewRSAPrivKey(tcKeySizeBits)
+	tgPrivKey = asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
+
 	tgMsgLimit = testNewClient().GetMessageLimit()
-	tgPrivKey  = asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	tgMessages = []string{
 		testutils.TcBody,
 		"",
@@ -150,9 +153,6 @@ func TestEncrypt(t *testing.T) {
 	client1 := testNewClient()
 	client2 := testNewClient()
 
-	_ = client1.GetSettings()
-	_ = client1.GetPrivKey()
-
 	pl := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
 	msg, err := client1.EncryptMessage(client2.GetPubKey(), pl.ToBytes())
 	if err != nil {
@@ -160,8 +160,9 @@ func TestEncrypt(t *testing.T) {
 		return
 	}
 
-	// os.WriteFile("test_binary.msg", msg.ToBytes(), 0644)
-	// os.WriteFile("test_string.msg", []byte(msg.ToString()), 0644)
+	// lMsg, _ := message.LoadMessage(client1.GetSettings(), msg)
+	// os.WriteFile("test_binary.msg", lMsg.ToBytes(), 0644)
+	// os.WriteFile("test_string.msg", []byte(lMsg.ToString()), 0644)
 
 	_, decMsg, err := client2.DecryptMessage(msg)
 	if err != nil {

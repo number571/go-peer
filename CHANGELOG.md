@@ -8,6 +8,7 @@
 
 ### CHANGES
 
+- Update `pkg/client/message`: delete LoadBytesJoiner32
 - Update `cmd/hidden_lake/applications/messenger`: delete work_size_bits param
 
 <!-- ... -->

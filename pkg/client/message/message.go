@@ -1,8 +1,9 @@
 package message
 
 import (
+	"bytes"
+
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 var (
@@ -24,8 +25,6 @@ func NewMessage(pEnck, pEncd []byte) IMessage {
 
 // Message can be created only with client module.
 func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
-	msg := new(sMessage)
-
 	var recvMsg []byte
 	switch x := pMsg.(type) {
 	case []byte:
@@ -33,22 +32,9 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	case string:
 		recvMsg = encoding.HexDecode(x)
 	default:
-		return nil, ErrUnknownType
+		return nil, ErrUnknownMessageType
 	}
-
-	wrapSlice, err := joiner.LoadBytesJoiner32(recvMsg)
-	if err != nil || len(wrapSlice) != 2 {
-		return nil, ErrLoadBytesJoiner
-	}
-
-	msg.fEnck = wrapSlice[0]
-	msg.fEncd = wrapSlice[1]
-
-	if !msg.isValid(psett) {
-		return nil, ErrInvalidMessage
-	}
-
-	return msg, nil
+	return loadMessage(psett, recvMsg)
 }
 
 func (p *sMessage) GetEnck() []byte {
@@ -60,18 +46,24 @@ func (p *sMessage) GetEncd() []byte {
 }
 
 func (p *sMessage) ToBytes() []byte {
-	return joiner.NewBytesJoiner32([][]byte{
-		p.fEnck,
-		p.fEncd,
-	})
+	return bytes.Join(
+		[][]byte{p.fEnck, p.fEncd},
+		[]byte{},
+	)
 }
 
 func (p *sMessage) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
 }
 
-func (p *sMessage) isValid(psett ISettings) bool {
-	return true &&
-		uint64(len(p.ToBytes())) == psett.GetMessageSizeBytes() &&
-		uint64(len(p.GetEnck())) == psett.GetKeySizeBits()/8
+func loadMessage(pSett ISettings, pBytes []byte) (IMessage, error) {
+	keySize := pSett.GetKeySizeBits() / 8
+	msgSize := pSett.GetMessageSizeBytes()
+	if keySize >= msgSize {
+		return nil, ErrKeySizeGteMessageSize
+	}
+	if uint64(len(pBytes)) != msgSize {
+		return nil, ErrLoadMessageBytes
+	}
+	return NewMessage(pBytes[:keySize], pBytes[keySize:]), nil
 }

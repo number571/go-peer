@@ -4,9 +4,9 @@
 /*
 	NETWORK MESSAGE FORMAT
 
-	E( K, P(HLMR) || HLMR || L(M) || M || R )
+	E( K, P(HLMR) || HLMR || L(M) || M || L(R) || R )
 	where
-		HLMR = H( K, L(M) || M || R )
+		HLMR = H( K, L(M) || M || L(R) || R )
 		where
 			H   - HMAC
 			K   - network key

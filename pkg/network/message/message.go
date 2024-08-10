@@ -33,8 +33,8 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte             // E( K, P(HLMR) || HLMR || L(M) || M || R )
-	fHash    []byte             // HLMR = H( K, L(M) || M || R )
+	fEncd    []byte             // E( K, P(HLMR) || HLMR || L(M) || M || L(R) || R )
+	fHash    []byte             // HLMR = H( K, L(M) || M || L(R) || R )
 	fRand    []byte             // R
 	fProof   uint64             // P(HLMR)
 	fPayload payload.IPayload32 // M
