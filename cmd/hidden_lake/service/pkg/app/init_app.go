@@ -23,7 +23,9 @@ func InitApp(pArgs []string, pDefaultPath string, pDefaultParallel uint64) (type
 	}
 
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
-	cfg, err := config.InitConfig(filepath.Join(inputPath, pkg_settings.CPathYML), nil)
+
+	cfgPath := filepath.Join(inputPath, pkg_settings.CPathYML)
+	cfg, err := config.InitConfig(cfgPath, nil)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}

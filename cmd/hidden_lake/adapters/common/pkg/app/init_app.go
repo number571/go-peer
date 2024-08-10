@@ -16,7 +16,8 @@ import (
 func InitApp(pArgs []string, pDefaultPath string) (types.IRunner, error) {
 	inputPath := strings.TrimSuffix(flag.GetFlagValue(pArgs, "path", pDefaultPath), "/")
 
-	cfg, err := config.InitConfig(filepath.Join(inputPath, settings.CPathYML), nil)
+	cfgPath := filepath.Join(inputPath, settings.CPathYML)
+	cfg, err := config.InitConfig(cfgPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("init config: %w", err)
 	}
