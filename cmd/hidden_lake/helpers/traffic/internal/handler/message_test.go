@@ -23,8 +23,9 @@ func TestHandleMessageAPI(t *testing.T) {
 	defer testAllFree(addr, srv, cancel, db)
 
 	client := testNewClient()
+	sharedKey := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
+		sharedKey,
 		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {
@@ -48,13 +49,8 @@ func TestHandleMessageAPI(t *testing.T) {
 		return
 	}
 
-	gotPubKey, decMsg, err := client.DecryptMessage(gotNetMsg.GetPayload().GetBody())
+	decMsg, err := client.DecryptMessage(sharedKey, gotNetMsg.GetPayload().GetBody())
 	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if gotPubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
 		t.Error(err)
 		return
 	}

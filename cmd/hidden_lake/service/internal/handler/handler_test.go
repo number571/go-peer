@@ -13,17 +13,27 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/friends"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
+)
+
+const (
+	tcShared1Key = "1BCDEFGHIJKLMNOPQRSTUVWXYZ123456"
+	tcShared2Key = "2BCDEFGHIJKLMNOPQRSTUVWXYZ123456"
+	tcShared3Key = "3BCDEFGHIJKLMNOPQRSTUVWXYZ123456"
+)
+
+var (
+	tcShared1KeyBytes = hashing.NewSHA256Hasher([]byte(tcShared1Key)).ToBytes()
 )
 
 const (
@@ -36,7 +46,6 @@ var (
 	tcConfig = fmt.Sprintf(`settings:
   message_size_bytes: 8192
   work_size_bits: 22
-  key_size_bits: %d
   fetch_timeout_ms: 60000
   queue_period_ms: 1000
   rand_message_size_bytes: 4096
@@ -60,10 +69,9 @@ services:
   test_service3: 
     host: test_address3
 `,
-		testutils.TcKeySize,
-		testutils.TgPubKeys[0],
-		testutils.TgPubKeys[1],
-		testutils.TgPubKeys[2],
+		tcShared1Key,
+		tcShared2Key,
+		tcShared3Key,
 	)
 )
 
@@ -153,7 +161,6 @@ func testRunService(ctx context.Context, wcfg config.IWrapper, node anonymity.IN
 	mux.HandleFunc(pkg_settings.CHandleConfigFriendsPath, HandleConfigFriendsAPI(wcfg, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkOnlinePath, HandleNetworkOnlineAPI(logger, node))
 	mux.HandleFunc(pkg_settings.CHandleNetworkRequestPath, HandleNetworkRequestAPI(ctx, cfg, logger, node))
-	mux.HandleFunc(pkg_settings.CHandleNetworkPubKeyPath, HandleNetworkPubKeyAPI(logger, node))
 
 	srv := &http.Server{
 		Addr:        addr,
@@ -185,9 +192,7 @@ func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, cont
 func testNewNode(dbPath, addr string) anonymity.INode {
 	db, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
-			FPath:     dbPath,
-			FWorkSize: testutils.TCWorkSize,
-			FPassword: "CIPHER",
+			FPath: dbPath,
 		}),
 	)
 	if err != nil {
@@ -216,14 +221,12 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 			}),
 			queue.NewVSettings(&queue.SVSettings{}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{
+				client.NewSettings(&client.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FKeySizeBits:      testutils.TcKeySize,
 				}),
-				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
 		),
-		asymmetric.NewListPubKeys(),
+		friends.NewListKeys(),
 	)
 	return node
 }

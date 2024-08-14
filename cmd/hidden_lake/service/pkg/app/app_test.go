@@ -11,7 +11,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -57,11 +57,6 @@ func TestInitApp(t *testing.T) {
 		return
 	}
 
-	if _, err := InitApp([]string{}, tcTestdataPath1024, 1); err == nil {
-		t.Error("success init app with diff key size")
-		return
-	}
-
 	if _, err := InitApp([]string{}, "./not_exist/path/to/hls", 1); err == nil {
 		t.Error("success init app with undefined dir key")
 		return
@@ -79,7 +74,6 @@ func TestApp(t *testing.T) {
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWorkSizeBits:     testutils.TCWorkSize,
-			FKeySizeBits:      testutils.TcKeySize,
 			FQueuePeriodMS:    testutils.TCQueuePeriod,
 			FFetchTimeoutMS:   testutils.TCFetchTimeout,
 			FNetworkKey:       "_",
@@ -89,7 +83,7 @@ func TestApp(t *testing.T) {
 			FHTTP: testutils.TgAddrs[15],
 		},
 		FFriends: map[string]string{
-			"Alice": testutils.TgPubKeys[0],
+			"Alice": encoding.HexEncode([]byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")),
 		},
 	})
 	if err != nil {
@@ -97,8 +91,7 @@ func TestApp(t *testing.T) {
 		return
 	}
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
-	app := NewApp(cfg, privKey, ".", 1)
+	app := NewApp(cfg, ".", 1)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -132,13 +125,13 @@ func TestApp(t *testing.T) {
 	}
 
 	// Check public key of node
-	pubKey, err := client.GetPubKey(context.Background())
+	index, err := client.GetIndex(context.Background())
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if pubKey.ToString() != privKey.GetPubKey().ToString() {
-		t.Errorf("public keys are not equals")
+	if index != pkg_settings.CServiceFullName {
+		t.Errorf("index failed")
 		return
 	}
 

@@ -12,7 +12,6 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -39,7 +38,7 @@ func TestHandleOnlineAPI(t *testing.T) {
 	)
 
 	_ = node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[13])
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
+	node.GetListKeys().AddKey(tcShared1KeyBytes)
 
 	testGetOnlines(t, client, node)
 	testDelOnline(t, client, testutils.TgAddrs[13])
@@ -114,7 +113,6 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FWorkSizeBits:     testutils.TCWorkSize,
-			FKeySizeBits:      testutils.TcKeySize,
 			FQueuePeriodMS:    testutils.TCQueuePeriod,
 			FFetchTimeoutMS:   testutils.TCFetchTimeout,
 		},
@@ -127,7 +125,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(config.NewWrapper(cfg)),
 	)
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
+	node.GetListKeys().AddKey(tcShared1KeyBytes)
 
 	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
 

@@ -2,7 +2,7 @@ package config
 
 import (
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/client"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -15,7 +15,7 @@ type IConfig interface {
 }
 
 type IConfigSettings interface {
-	message.ISettings
+	client.ISettings
 	net_message.ISettings
 
 	GetMessagesCapacity() uint64

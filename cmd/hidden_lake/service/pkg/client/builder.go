@@ -3,7 +3,7 @@ package client
 import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -17,8 +17,8 @@ func NewBuilder() IBuilder {
 	return &sBuilder{}
 }
 
-func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_settings.SFriend {
-	if pPubKey == nil {
+func (p *sBuilder) Friend(pAliasName string, pSharedKey []byte) *pkg_settings.SFriend {
+	if pSharedKey == nil {
 		// del friend
 		return &pkg_settings.SFriend{
 			FAliasName: pAliasName,
@@ -27,7 +27,7 @@ func (p *sBuilder) Friend(pAliasName string, pPubKey asymmetric.IPubKey) *pkg_se
 	// add friend
 	return &pkg_settings.SFriend{
 		FAliasName: pAliasName,
-		FPublicKey: pPubKey.ToString(),
+		FSharedKey: encoding.HexEncode(pSharedKey),
 	}
 }
 

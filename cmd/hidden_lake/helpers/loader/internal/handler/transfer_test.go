@@ -13,8 +13,6 @@ import (
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -112,18 +110,17 @@ func TestHandleTransferAPI(t *testing.T) {
 
 	// PUSH MESSAGES
 
-	msgSettings := message.NewSettings(
-		&message.SSettings{
+	msgSettings := client.NewSettings(
+		&client.SSettings{
 			FMessageSizeBytes: tcMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		},
 	)
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
-	client := client.NewClient(msgSettings, privKey)
+	client := client.NewClient(msgSettings)
 
+	sharedKey := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	for i := 0; i < 5; i++ {
 		encMsg, err := client.EncryptMessage(
-			privKey.GetPubKey(),
+			sharedKey,
 			payload.NewPayload64(
 				uint64(i),
 				[]byte("hello, world!"),
@@ -173,7 +170,7 @@ func TestHandleTransferAPI(t *testing.T) {
 			return
 		}
 
-		pubKey, decMsg, err := client.DecryptMessage(netMsg.GetPayload().GetBody())
+		decMsg, err := client.DecryptMessage(sharedKey, netMsg.GetPayload().GetBody())
 		if err != nil {
 			t.Error(err)
 			return
@@ -182,11 +179,6 @@ func TestHandleTransferAPI(t *testing.T) {
 		pld := payload.LoadPayload64(decMsg)
 		if pld.GetHead() != i {
 			t.Error("got bad index")
-			return
-		}
-
-		if pubKey.GetHasher().ToString() != client.GetPubKey().GetHasher().ToString() {
-			t.Error("got bad public key")
 			return
 		}
 	}

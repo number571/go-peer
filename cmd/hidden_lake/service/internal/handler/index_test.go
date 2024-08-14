@@ -10,7 +10,6 @@ import (
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -35,7 +34,7 @@ func TestErrorsAPI(t *testing.T) {
 		return
 	}
 
-	if err := client.AddFriend(context.Background(), "", asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])); err == nil {
+	if err := client.AddFriend(context.Background(), "", tcShared1KeyBytes); err == nil {
 		t.Error("success add friend with unknown host")
 		return
 	}
@@ -72,11 +71,6 @@ func TestErrorsAPI(t *testing.T) {
 
 	if _, err := client.GetOnlines(context.Background()); err == nil {
 		t.Error("success get onlines with unknown host")
-		return
-	}
-
-	if _, err := client.GetPubKey(context.Background()); err == nil {
-		t.Error("success get pub key with unknown host")
 		return
 	}
 

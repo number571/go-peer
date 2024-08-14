@@ -1,17 +1,14 @@
 package client
 
-import (
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-)
-
 type IClient interface {
-	GetSettings() message.ISettings
+	GetSettings() ISettings
 	GetMessageLimit() uint64
 
-	GetPubKey() asymmetric.IPubKey
-	GetPrivKey() asymmetric.IPrivKey
+	MessageIsValid([]byte) bool
+	EncryptMessage([]byte, []byte) ([]byte, error)
+	DecryptMessage([]byte, []byte) ([]byte, error)
+}
 
-	EncryptMessage(asymmetric.IPubKey, []byte) ([]byte, error)
-	DecryptMessage([]byte) (asymmetric.IPubKey, []byte, error)
+type ISettings interface {
+	GetMessageSizeBytes() uint64
 }

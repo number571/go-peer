@@ -16,7 +16,6 @@ var (
 
 type SConfigSettings struct {
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
-	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FMessagesCapacity     uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
@@ -101,10 +100,6 @@ func (p *SConfigSettings) GetNetworkKey() string {
 	return p.FNetworkKey
 }
 
-func (p *SConfigSettings) GetKeySizeBits() uint64 {
-	return p.FKeySizeBits
-}
-
 func (p *SConfigSettings) GetStorageEnabled() bool {
 	return p.FStorageEnabled
 }
@@ -112,8 +107,7 @@ func (p *SConfigSettings) GetStorageEnabled() bool {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FMessagesCapacity != 0 &&
-		p.FSettings.FKeySizeBits != 0
+		p.FSettings.FMessagesCapacity != 0
 }
 
 func (p *SConfig) initConfig() error {

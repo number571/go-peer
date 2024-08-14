@@ -9,7 +9,6 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
 			FMessageSizeBytes:     sett.GetMessageSizeBytes(),
-			FKeySizeBits:          sett.GetKeySizeBits(),
 			FWorkSizeBits:         sett.GetWorkSizeBits(),
 			FMessagesCapacity:     sett.GetMessagesCapacity(),
 			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),

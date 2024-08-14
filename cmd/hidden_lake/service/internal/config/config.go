@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/utils"
 )
@@ -20,7 +19,6 @@ type SConfigSettings struct {
 	fMutex sync.RWMutex
 
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
-	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FFetchTimeoutMS       uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
 	FQueuePeriodMS        uint64 `json:"queue_period_ms,omitempty" yaml:"queue_period_ms,omitempty"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
@@ -34,7 +32,6 @@ type SConfig struct {
 	fFilepath string
 	fMutex    sync.RWMutex
 	fLogging  logger.ILogging
-	fFriends  map[string]asymmetric.IPubKey
 
 	FSettings    *SConfigSettings     `yaml:"settings"`
 	FLogging     []string             `yaml:"logging,omitempty"`
@@ -102,10 +99,6 @@ func (p *SConfigSettings) GetWorkSizeBits() uint64 {
 	return p.FWorkSizeBits
 }
 
-func (p *SConfigSettings) GetKeySizeBits() uint64 {
-	return p.FKeySizeBits
-}
-
 func (p *SConfigSettings) GetFetchTimeoutMS() uint64 {
 	return p.FFetchTimeoutMS
 }
@@ -145,7 +138,6 @@ func (p *SConfig) isValid() bool {
 	}
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FKeySizeBits != 0 &&
 		p.FSettings.FFetchTimeoutMS != 0
 }
 
@@ -168,7 +160,7 @@ func (p *SConfig) initConfig() error {
 		return ErrInvalidConfig
 	}
 
-	if err := p.loadPubKeys(); err != nil {
+	if err := p.loadKeys(); err != nil {
 		return utils.MergeErrors(ErrLoadPublicKey, err)
 	}
 
@@ -188,36 +180,23 @@ func (p *SConfig) loadLogging() error {
 	return nil
 }
 
-func (p *SConfig) loadPubKeys() error {
-	p.fFriends = make(map[string]asymmetric.IPubKey)
-
+func (p *SConfig) loadKeys() error {
 	mapping := make(map[string]struct{})
-	for name, val := range p.FFriends {
+	for _, val := range p.FFriends {
 		if _, ok := mapping[val]; ok {
 			return ErrDuplicatePublicKey
 		}
 		mapping[val] = struct{}{}
-
-		pubKey := asymmetric.LoadRSAPubKey(val)
-		if pubKey == nil {
-			return ErrInvalidPublicKey
-		}
-
-		p.fFriends[name] = pubKey
-		if pubKey.GetSize() != p.FSettings.FKeySizeBits {
-			return ErrNotSupportedKeySize
-		}
 	}
-
 	return nil
 }
 
-func (p *SConfig) GetFriends() map[string]asymmetric.IPubKey {
+func (p *SConfig) GetFriends() map[string]string {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	result := make(map[string]asymmetric.IPubKey)
-	for k, v := range p.fFriends {
+	result := make(map[string]string)
+	for k, v := range p.FFriends {
 		result[k] = v
 	}
 	return result

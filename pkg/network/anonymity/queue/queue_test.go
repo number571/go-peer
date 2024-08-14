@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -73,11 +71,9 @@ func TestQueueVoidDisabled(t *testing.T) {
 			FNetworkKey: "network_key",
 		}),
 		client.NewClient(
-			message.NewSettings(&message.SSettings{
+			client.NewSettings(&client.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FKeySizeBits:      testutils.TcKeySize,
 			}),
-			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 		),
 	)
 
@@ -91,11 +87,9 @@ func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
 	client := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 	queue := NewMessageQueueProcessor(
 		NewSettings(&SSettings{
@@ -141,10 +135,10 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	pubKey := client.GetPubKey()
+	key := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := queue.EnqueueMessage(key, pldBytes); err != nil {
 			t.Error(err)
 			return
 		}
@@ -152,7 +146,7 @@ func TestRunStopQueue(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := queue.EnqueueMessage(key, pldBytes); err != nil {
 			return
 		}
 	}
@@ -177,11 +171,9 @@ func TestQueue(t *testing.T) {
 			FNetworkKey: "old_network_key",
 		}),
 		client.NewClient(
-			message.NewSettings(&message.SSettings{
+			client.NewSettings(&client.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FKeySizeBits:      testutils.TcKeySize,
 			}),
-			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 		),
 	)
 
@@ -210,10 +202,9 @@ func testQueue(queue IMessageQueueProcessor) error {
 		}
 	}()
 
-	client := queue.GetClient()
-	pubKey := client.GetPubKey()
+	key := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
-	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
+	if err := queue.EnqueueMessage(key, pldBytes); err != nil {
 		return err
 	}
 

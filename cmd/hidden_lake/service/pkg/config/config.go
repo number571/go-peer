@@ -12,7 +12,6 @@ func GetConfigSettings(pCfg config.IConfig, pClient client.IClient) SConfigSetti
 	return SConfigSettings{
 		SConfigSettings: config.SConfigSettings{
 			FMessageSizeBytes:     sett.GetMessageSizeBytes(),
-			FKeySizeBits:          sett.GetKeySizeBits(),
 			FWorkSizeBits:         sett.GetWorkSizeBits(),
 			FFetchTimeoutMS:       sett.GetFetchTimeoutMS(),
 			FQueuePeriodMS:        sett.GetQueuePeriodMS(),

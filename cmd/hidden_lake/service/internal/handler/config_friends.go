@@ -9,7 +9,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 )
@@ -30,10 +30,10 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 			friends := pWrapper.GetConfig().GetFriends()
 
 			listFriends := make([]pkg_settings.SFriend, 0, len(friends))
-			for name, pubKey := range friends {
+			for name, key := range friends {
 				listFriends = append(listFriends, pkg_settings.SFriend{
 					FAliasName: name,
-					FPublicKey: pubKey.ToString(),
+					FSharedKey: key,
 				})
 			}
 
@@ -65,29 +65,22 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 				return
 			}
 
-			pubKey := asymmetric.LoadRSAPubKey(vFriend.FPublicKey)
-			if pubKey == nil {
-				pLogger.PushWarn(logBuilder.WithMessage("decode_key"))
-				_ = api.Response(pW, http.StatusBadRequest, "failed: load public key")
-				return
-			}
-
-			friends[aliasName] = pubKey
+			friends[aliasName] = vFriend.FSharedKey
 			if err := pWrapper.GetEditor().UpdateFriends(friends); err != nil {
 				pLogger.PushWarn(logBuilder.WithMessage("update_friends"))
 				_ = api.Response(pW, http.StatusInternalServerError, "failed: update friends")
 				return
 			}
 
-			pNode.GetListPubKeys().AddPubKey(pubKey)
+			keyBytes := hashing.NewSHA256Hasher([]byte(vFriend.FSharedKey)).ToBytes()
+			pNode.GetListKeys().AddKey(keyBytes)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			_ = api.Response(pW, http.StatusOK, "success: update friends")
 			return
 
 		case http.MethodDelete:
-			pubKey, ok := friends[aliasName]
-			if !ok {
+			if _, ok := friends[aliasName]; !ok {
 				pLogger.PushWarn(logBuilder.WithMessage("get_friends"))
 				_ = api.Response(pW, http.StatusNotFound, "failed: friend does not exist")
 				return
@@ -101,7 +94,8 @@ func HandleConfigFriendsAPI(pWrapper config.IWrapper, pLogger logger.ILogger, pN
 				return
 			}
 
-			pNode.GetListPubKeys().DelPubKey(pubKey)
+			keyBytes := hashing.NewSHA256Hasher([]byte(vFriend.FSharedKey)).ToBytes()
+			pNode.GetListKeys().DelKey(keyBytes)
 
 			pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
 			_ = api.Response(pW, http.StatusOK, "success: delete friend")

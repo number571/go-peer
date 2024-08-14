@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -16,14 +15,15 @@ const (
 )
 
 func main() {
+	sharedKey := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	nodeService, nodeClient := runServiceNode(), runClientNode()
-	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
+	exchangeKey(nodeService, nodeClient, sharedKey)
 
 	ctx := context.Background()
 	for {
 		resp, _ := nodeClient.FetchPayload(
 			ctx,
-			pubKeyService,
+			sharedKey,
 			payload.NewPayload32(nodeRouter, []byte("hello, world!")),
 		)
 		fmt.Println(string(resp))
@@ -44,7 +44,7 @@ func runServiceNode() anonymity.INode {
 	ctx := context.Background()
 	node := newNode("snode", nodeAddress).HandleFunc(
 		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
+		func(_ context.Context, _ anonymity.INode, _ []byte, b []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: %s", string(b))), nil
 		},
 	)
@@ -56,12 +56,7 @@ func runServiceNode() anonymity.INode {
 	return node
 }
 
-func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
-	pubKey1 := node1.GetMessageQueue().GetClient().GetPubKey()
-	pubKey2 := node2.GetMessageQueue().GetClient().GetPubKey()
-
-	node1.GetListPubKeys().AddPubKey(pubKey2)
-	node2.GetListPubKeys().AddPubKey(pubKey1)
-
-	return pubKey1, pubKey2
+func exchangeKey(node1, node2 anonymity.INode, sharedKey []byte) {
+	node1.GetListKeys().AddKey(sharedKey)
+	node2.GetListKeys().AddKey(sharedKey)
 }

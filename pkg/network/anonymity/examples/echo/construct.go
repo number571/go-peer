@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/friends"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -85,14 +84,12 @@ func newNode(serviceName, address string) anonymity.INode {
 				FNetworkKey: networkKey,
 			}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FKeySizeBits:      keySize,
+				client.NewSettings(&client.SSettings{
 					FMessageSizeBytes: msgSize,
 				}),
-				asymmetric.NewRSAPrivKey(keySize),
 			),
 		),
-		asymmetric.NewListPubKeys(),
+		friends.NewListKeys(),
 	)
 }
 

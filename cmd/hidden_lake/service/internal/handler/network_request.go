@@ -11,7 +11,7 @@ import (
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
@@ -46,7 +46,7 @@ func HandleNetworkRequestAPI(
 			return
 		}
 
-		pubKey, req, errCode := unwrapRequest(pConfig, vRequest)
+		sharedKey, req, errCode := unwrapRequest(pConfig, vRequest)
 		switch errCode {
 		case cErrorNone:
 			// pass
@@ -65,7 +65,7 @@ func HandleNetworkRequestAPI(
 		switch pR.Method {
 		case http.MethodPut:
 			err := pNode.SendPayload(
-				pubKey,
+				sharedKey,
 				payload.NewPayload64(uint64(pkg_settings.CServiceMask), req.ToBytes()),
 			)
 			if err != nil {
@@ -81,7 +81,7 @@ func HandleNetworkRequestAPI(
 		case http.MethodPost:
 			respBytes, err := pNode.FetchPayload(
 				pCtx,
-				pubKey,
+				sharedKey,
 				payload.NewPayload32(pkg_settings.CServiceMask, req.ToBytes()),
 			)
 			if err != nil {
@@ -107,10 +107,10 @@ func HandleNetworkRequestAPI(
 func unwrapRequest(
 	pConfig config.IConfig,
 	pRequest pkg_settings.SRequest,
-) (asymmetric.IPubKey, request.IRequest, int) {
+) ([]byte, request.IRequest, int) {
 	friends := pConfig.GetFriends()
 
-	pubKey, ok := friends[pRequest.FReceiver]
+	key, ok := friends[pRequest.FReceiver]
 	if !ok {
 		return nil, nil, cErrorGetFriends
 	}
@@ -120,5 +120,6 @@ func unwrapRequest(
 		return nil, nil, cErrorDecodeData
 	}
 
-	return pubKey, req, cErrorNone
+	sharedKey := hashing.NewSHA256Hasher([]byte(key)).ToBytes()
+	return sharedKey, req, cErrorNone
 }

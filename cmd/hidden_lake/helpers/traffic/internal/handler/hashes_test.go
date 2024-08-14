@@ -9,8 +9,6 @@ import (
 
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
@@ -26,19 +24,15 @@ func TestHandleHashesAPI(t *testing.T) {
 	srv, cancel, wDB, hltClient := testAllRun(addr)
 	defer testAllFree(addr, srv, cancel, wDB)
 
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
-	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
-
 	client := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		privKey,
 	)
 
+	sharedKey := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	msg, err := client.EncryptMessage(
-		pubKey,
+		sharedKey,
 		payload.NewPayload64(0, []byte("hello")).ToBytes(),
 	)
 	if err != nil {

@@ -30,11 +30,6 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if settings.GetKeySizeBits() != testutils.TcKeySize {
-		t.Error("incorrect key size bits")
-		return
-	}
-
 	if settings.GetWorkSizeBits() != testutils.TCWorkSize {
 		t.Error("incorrect work size bits")
 		return

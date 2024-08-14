@@ -9,7 +9,6 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/utils"
 )
@@ -127,7 +126,7 @@ func (p *sRequester) BroadcastRequest(pCtx context.Context, pRequest *hls_settin
 	return nil
 }
 
-func (p *sRequester) GetFriends(pCtx context.Context) (map[string]asymmetric.IPubKey, error) {
+func (p *sRequester) GetFriends(pCtx context.Context) (map[string]string, error) {
 	res, err := api.Request(
 		pCtx,
 		p.fClient,
@@ -144,9 +143,9 @@ func (p *sRequester) GetFriends(pCtx context.Context) (map[string]asymmetric.IPu
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}
 
-	result := make(map[string]asymmetric.IPubKey, len(vFriends))
+	result := make(map[string]string, len(vFriends))
 	for _, friend := range vFriends {
-		result[friend.FAliasName] = asymmetric.LoadRSAPubKey(friend.FPublicKey)
+		result[friend.FAliasName] = friend.FSharedKey
 	}
 
 	return result, nil
@@ -260,24 +259,4 @@ func (p *sRequester) DelConnection(pCtx context.Context, pConnect string) error 
 		return utils.MergeErrors(ErrBadRequest, err)
 	}
 	return nil
-}
-
-func (p *sRequester) GetPubKey(pCtx context.Context) (asymmetric.IPubKey, error) {
-	res, err := api.Request(
-		pCtx,
-		p.fClient,
-		http.MethodGet,
-		fmt.Sprintf(cHandleNetworkPubKeyTemplate, p.fHost),
-		nil,
-	)
-	if err != nil {
-		return nil, utils.MergeErrors(ErrBadRequest, err)
-	}
-
-	pubKey := asymmetric.LoadRSAPubKey(string(res))
-	if pubKey == nil {
-		return nil, ErrInvalidPublicKey
-	}
-
-	return pubKey, nil
 }

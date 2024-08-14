@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
@@ -42,7 +42,7 @@ type sMainPool struct {
 type sRandPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
-	fReceiver asymmetric.IPubKey
+	fReceiver []byte
 }
 
 func NewMessageQueueProcessor(
@@ -63,7 +63,7 @@ func NewMessageQueueProcessor(
 	if pSettings.GetQueuePeriod() != 0 { // if QB=true
 		mq.fRandPool = &sRandPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetRandPoolCapacity()),
-			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
+			fReceiver: random.NewCSPRNG().GetBytes(symmetric.CAESKeySize),
 		}
 	}
 	return mq
@@ -166,13 +166,13 @@ func (p *sMessageQueueProcessor) SetVSettings(pVSettings IVSettings) {
 	}
 }
 
-func (p *sMessageQueueProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
+func (p *sMessageQueueProcessor) EnqueueMessage(pKey []byte, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
-	rawMsg, err := p.fClient.EncryptMessage(pPubKey, pBytes)
+	rawMsg, err := p.fClient.EncryptMessage(pKey, pBytes)
 	if err != nil {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return utils.MergeErrors(ErrEncryptMessage, err)

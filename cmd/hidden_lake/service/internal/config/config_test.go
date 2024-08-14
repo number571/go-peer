@@ -8,8 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	testutils "github.com/number571/go-peer/test/utils"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
@@ -24,8 +23,8 @@ const (
 	tcAddressTCP      = "test_address_tcp"
 	tcAddressHTTP     = "test_address_http"
 	tcAddressPPROF    = "test_address_pprof"
-	tcPubKeyAlias1    = "test_alias1"
-	tcPubKeyAlias2    = "test_alias2"
+	tcKeyAlias1       = "test_alias1"
+	tcKeyAlias2       = "test_alias2"
 	tcServiceName1    = "test_service1"
 	tcServiceName2    = "test_service2"
 	tcMessageSize     = (1 << 20)
@@ -41,9 +40,9 @@ var (
 		"test_connect1",
 		"test_connect2",
 	}
-	tgPubKeys = map[string]string{
-		tcPubKeyAlias1: testutils.TgPubKeys[0],
-		tcPubKeyAlias2: testutils.TgPubKeys[1],
+	tgKeys = map[string]string{
+		tcKeyAlias1: encoding.HexEncode([]byte("helloworld1672y8hdhf4328eh191d21")),
+		tcKeyAlias2: encoding.HexEncode([]byte("f4uhf278hd2u3d8u2fh438fhj39dj2ii")),
 	}
 	tgServices = map[string]string{
 		tcServiceName1: "test_address1",
@@ -55,7 +54,6 @@ const (
 	tcConfigTemplate = `settings:
   message_size_bytes: %d
   work_size_bits: %d
-  key_size_bits: %d
   fetch_timeout_ms: %d
   queue_period_ms: %d
   rand_queue_period_ms: %d
@@ -88,7 +86,6 @@ func testNewConfigString() string {
 		tcConfigTemplate,
 		tcMessageSize,
 		tcWorkSize,
-		testutils.TcKeySize,
 		tcFetchTimeout,
 		tcQueuePeriod,
 		tcQueueRandPeriod,
@@ -99,10 +96,10 @@ func testNewConfigString() string {
 		tcAddressPPROF,
 		tgConnects[0],
 		tgConnects[1],
-		tcPubKeyAlias1,
-		tgPubKeys[tcPubKeyAlias1],
-		tcPubKeyAlias2,
-		tgPubKeys[tcPubKeyAlias2],
+		tcKeyAlias1,
+		tgKeys[tcKeyAlias1],
+		tcKeyAlias2,
+		tgKeys[tcKeyAlias2],
 		tcServiceName1,
 		tgServices[tcServiceName1],
 		tcServiceName2,
@@ -179,15 +176,6 @@ func testIncorrectConfig(configFile string) error {
 		return errors.New("success load config with required fields (settings)")
 	}
 
-	cfg2Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "PubKey", "PubKey_v2"))
-	if err := os.WriteFile(configFile, cfg2Bytes, 0o600); err != nil {
-		return err
-	}
-
-	if _, err := LoadConfig(configFile); err == nil {
-		return errors.New("success load config with invalid fields (friends)")
-	}
-
 	cfg3Bytes := []byte(strings.ReplaceAll(testNewConfigString(), "erro", "erro_v2"))
 	if err := os.WriteFile(configFile, cfg3Bytes, 0o600); err != nil {
 		return err
@@ -197,8 +185,8 @@ func testIncorrectConfig(configFile string) error {
 		return errors.New("success load config with invalid fields (logging)")
 	}
 
-	pubKey1 := tgPubKeys[tcPubKeyAlias1]
-	pubKey2 := tgPubKeys[tcPubKeyAlias2]
+	pubKey1 := tgKeys[tcKeyAlias1]
+	pubKey2 := tgKeys[tcKeyAlias2]
 
 	cfg4Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, pubKey2))
 	if err := os.WriteFile(configFile, cfg4Bytes, 0o600); err != nil {
@@ -207,16 +195,6 @@ func testIncorrectConfig(configFile string) error {
 
 	if _, err := LoadConfig(configFile); err == nil {
 		return errors.New("success load config with invalid fields (duplicate publc keys)")
-	}
-
-	newPubKey := asymmetric.NewRSAPrivKey(512).GetPubKey().ToString()
-	cfg5Bytes := []byte(strings.ReplaceAll(testNewConfigString(), pubKey1, newPubKey))
-	if err := os.WriteFile(configFile, cfg5Bytes, 0o600); err != nil {
-		return err
-	}
-
-	if _, err := LoadConfig(configFile); err == nil {
-		return errors.New("success load config with invalid fields (diff key sizes)")
 	}
 
 	return nil
@@ -247,11 +225,6 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetMessageSizeBytes() != tcMessageSize {
 		t.Error("settings message size is invalid")
-		return
-	}
-
-	if cfg.GetSettings().GetKeySizeBits() != testutils.TcKeySize {
-		t.Error("settings key size is invalid")
 		return
 	}
 
@@ -338,11 +311,10 @@ func TestComplexConfig(t *testing.T) {
 		}
 	}
 
-	for name, pubStr := range tgPubKeys {
+	for name, keyStr := range tgKeys {
 		v1 := cfg.GetFriends()[name]
-		pubKey := asymmetric.LoadRSAPubKey(pubStr)
-		if pubKey.GetHasher().ToString() != v1.GetHasher().ToString() {
-			t.Errorf("public key is invalid '%s'", v1)
+		if keyStr != v1 {
+			t.Errorf("key is invalid '%s'", v1)
 			return
 		}
 	}

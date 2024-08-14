@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 	"github.com/number571/go-peer/cmd/hidden_lake/service/pkg/response"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -34,7 +34,7 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 	return func(
 		pCtx context.Context,
 		pNode anonymity.INode,
-		pSender asymmetric.IPubKey,
+		pSender []byte,
 		pReqBytes []byte,
 	) ([]byte, error) {
 		logger := pNode.GetLogger()
@@ -42,24 +42,9 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 
 		// enrich logger
 		logBuilder.
-			WithSize(len(pReqBytes)).
-			WithPubKey(pSender)
+			WithSize(len(pReqBytes))
 
 		cfg := pCfgW.GetConfig()
-		friends := cfg.GetFriends()
-
-		// append public key to list of friends if f2f option is disabled
-		if cfg.GetSettings().GetF2FDisabled() && !inFriendsList(friends, pSender) {
-			// update config state with new friend
-			friends[pSender.GetHasher().ToString()] = pSender
-			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
-				logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
-				return nil, utils.MergeErrors(ErrUpdateFriends, err)
-			}
-			// update list of friends and continue read request
-			pNode.GetListPubKeys().AddPubKey(pSender)
-			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
-		}
 
 		// load request from message's body
 		loadReq, err := request.LoadRequest(pReqBytes)
@@ -91,7 +76,7 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 		for key, val := range loadReq.GetHead() {
 			pushReq.Header.Set(key, val)
 		}
-		pushReq.Header.Set(hls_settings.CHeaderPublicKey, pSender.ToString())
+		pushReq.Header.Set(hls_settings.CHeaderSenderKey, encoding.HexEncode(pSender))
 
 		// send request and receive response from service
 		resp, err := httpClient.Do(pushReq)
@@ -122,15 +107,6 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 			return nil, ErrInvalidResponseMode
 		}
 	}
-}
-
-func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IPubKey) bool {
-	for _, pubKey := range pFriends {
-		if bytes.Equal(pubKey.ToBytes(), pPubKey.ToBytes()) {
-			return true
-		}
-	}
-	return false
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

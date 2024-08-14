@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	cLogTemplate = "service=%s type=%s hash=%08X...%08X addr=%08X...%08X proof=%010d size=%04dB conn=%s"
+	cLogTemplate = "service=%s type=%s hash=%08X...%08X proof=%010d size=%04dB conn=%s"
 )
 
 func GetLogFunc() logger.ILogFunc {
@@ -41,11 +41,6 @@ func getLog(logStrType string, pLogGetter anon_logger.ILogGetter) string {
 		conn = x.GetSocket().RemoteAddr().String()
 	}
 
-	addr := make([]byte, hashing.CSHA256Size)
-	if x := pLogGetter.GetPubKey(); x != nil {
-		addr = x.GetHasher().ToBytes()
-	}
-
 	hash := make([]byte, hashing.CSHA256Size)
 	if x := pLogGetter.GetHash(); x != nil {
 		copy(hash, x)
@@ -56,7 +51,6 @@ func getLog(logStrType string, pLogGetter anon_logger.ILogGetter) string {
 		pLogGetter.GetService(),
 		logStrType,
 		hash[:4], hash[len(hash)-4:],
-		addr[:4], addr[len(addr)-4:],
 		pLogGetter.GetProof(),
 		pLogGetter.GetSize(),
 		conn,

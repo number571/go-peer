@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/internal/api"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
@@ -19,6 +18,7 @@ import (
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
+	"github.com/number571/go-peer/pkg/client"
 )
 
 func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger logger.ILogger) network.IHandlerF {
@@ -34,9 +34,10 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 			WithProof(pNetMsg.GetProof()).
 			WithSize(len(pNetMsg.ToBytes()))
 
-		if _, err := message.LoadMessage(pCfg.GetSettings(), pNetMsg.GetPayload().GetBody()); err != nil {
+		client := client.NewClient(pCfg.GetSettings())
+		if !client.MessageIsValid(pNetMsg.GetPayload().GetBody()) {
 			pLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-			return utils.MergeErrors(ErrLoadMessage, err)
+			return ErrLoadMessage
 		}
 
 		// check message from in database queue

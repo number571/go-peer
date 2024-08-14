@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/number571/go-peer/internal/flag"
-	"github.com/number571/go-peer/internal/initapp"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -30,11 +29,5 @@ func InitApp(pArgs []string, pDefaultPath string, pDefaultParallel uint64) (type
 		return nil, utils.MergeErrors(ErrInitConfig, err)
 	}
 
-	keyPath := filepath.Join(inputPath, pkg_settings.CPathKey)
-	privKey, err := initapp.GetPrivKey(keyPath, cfg.GetSettings().GetKeySizeBits())
-	if err != nil {
-		return nil, utils.MergeErrors(ErrGetPrivateKey, err)
-	}
-
-	return NewApp(cfg, privKey, inputPath, setParallel), nil
+	return NewApp(cfg, inputPath, setParallel), nil
 }

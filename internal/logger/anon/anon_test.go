@@ -6,13 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 var (
@@ -101,6 +99,5 @@ func testNewAnonLogger() anon_logger.ILogBuilder {
 		WithHash(encoding.HexDecode(tcHash)).
 		WithProof(12345).
 		WithSize(1024).
-		WithPubKey(asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])).
 		WithConn(&tsConn{})
 }

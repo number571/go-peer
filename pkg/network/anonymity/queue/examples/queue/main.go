@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -27,11 +27,9 @@ func main() {
 		}),
 		queue.NewVSettings(&queue.SVSettings{}),
 		client.NewClient(
-			message.NewSettings(&message.SSettings{
+			client.NewSettings(&client.SSettings{
 				FMessageSizeBytes: (1 << 12),
-				FKeySizeBits:      keySize,
 			}),
-			asymmetric.NewRSAPrivKey(1024),
 		),
 	)
 
@@ -44,9 +42,10 @@ func main() {
 		}
 	}()
 
+	key := random.NewCSPRNG().GetBytes(symmetric.CAESKeySize)
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPubKey(),
+			key,
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -59,11 +58,11 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		msg, err := message.LoadMessage(q.GetClient().GetSettings(), netMsg.GetPayload().GetBody())
-		if err != nil {
-			panic(err)
+		msg := netMsg.GetPayload().GetBody()
+		if !q.GetClient().MessageIsValid(msg) {
+			panic("message is invalid")
 		}
-		pubKey, decMsg, err := q.GetClient().DecryptMessage(msg.ToBytes())
+		decMsg, err := q.GetClient().DecryptMessage(key, msg)
 		if err != nil {
 			panic(err)
 		}
@@ -73,9 +72,6 @@ func main() {
 		}
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
-		}
-		if pubKey.GetHasher().ToString() != q.GetClient().GetPubKey().GetHasher().ToString() {
-			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))
 	}

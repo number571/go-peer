@@ -9,7 +9,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	hls_client "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -54,8 +53,8 @@ func testGetFriends(t *testing.T, client hls_client.IClient, cfg config.IConfig)
 			t.Errorf("undefined friend '%s'", k)
 			return
 		}
-		if v.ToString() != v1.ToString() {
-			t.Errorf("public keys not equals for '%s'", k)
+		if v != v1 {
+			t.Errorf("shared keys not equals for '%s'", k)
 			return
 		}
 	}
@@ -65,7 +64,7 @@ func testAddFriend(t *testing.T, client hls_client.IClient, aliasName string) {
 	err := client.AddFriend(
 		context.Background(),
 		aliasName,
-		asymmetric.LoadRSAPubKey(testutils.TgPubKeys[3]),
+		[]byte("IEFJ938JF983JF93I4FJ3OIFSDMDMKGD"),
 	)
 	if err != nil {
 		t.Error(err)

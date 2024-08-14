@@ -15,13 +15,12 @@ const (
 )
 
 const (
-	CPathKey = "hls.key"
 	CPathYML = "hls.yml"
 	CPathDB  = "hls.db"
 )
 
 const (
-	CHeaderPublicKey    = "Hl-Service-Public-Key"
+	CHeaderSenderKey    = "Hl-Service-Sender-Key"
 	CHeaderResponseMode = "Hl-Service-Response-Mode"
 )
 

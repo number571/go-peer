@@ -15,8 +15,6 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/closer"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -120,7 +118,6 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 			FMessageSizeBytes:     testutils.TCMessageSize,
 			FWorkSizeBits:         testutils.TCWorkSize,
 			FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
-			FKeySizeBits:          testutils.TcKeySize,
 			FNetworkKey:           testutils.TCNetworkKey,
 			FMessagesCapacity:     testutils.TCCapacity,
 		},
@@ -169,13 +166,10 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 }
 
 func testNewClient() client.IClient {
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
 	return client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		privKey,
 	)
 }
 

@@ -22,8 +22,9 @@ func TestHandlePointerAPI(t *testing.T) {
 	defer testAllFree(addr, srv, cancel, db)
 
 	client := testNewClient()
+	sharedKey := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
+		sharedKey,
 		payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes(),
 	)
 	if err != nil {

@@ -10,7 +10,6 @@ import (
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/config"
 	"github.com/number571/go-peer/internal/closer"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -39,7 +38,6 @@ type sApp struct {
 	fCfgW       config.IWrapper
 	fNode       anonymity.INode
 	fConnKeeper connkeeper.IConnKeeper
-	fPrivKey    asymmetric.IPrivKey
 
 	fAnonLogger logger.ILogger
 	fHTTPLogger logger.ILogger
@@ -51,7 +49,6 @@ type sApp struct {
 
 func NewApp(
 	pCfg config.IConfig,
-	pPrivKey asymmetric.IPrivKey,
 	pPathTo string,
 	pParallel uint64,
 ) types.IRunner {
@@ -68,7 +65,6 @@ func NewApp(
 		fPathTo:     pPathTo,
 		fParallel:   pParallel,
 		fCfgW:       config.NewWrapper(pCfg),
-		fPrivKey:    pPrivKey,
 		fAnonLogger: anonLogger,
 		fHTTPLogger: httpLogger,
 		fStdfLogger: stdfLogger,

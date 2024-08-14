@@ -4,7 +4,7 @@ import "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/request"
 
 type SFriend struct {
 	FAliasName string `json:"alias_name"`
-	FPublicKey string `json:"public_key"`
+	FSharedKey string `json:"shared_key"`
 }
 
 type SRequest struct {

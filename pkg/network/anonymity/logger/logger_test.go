@@ -3,10 +3,6 @@ package logger
 import (
 	"bytes"
 	"testing"
-
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (
@@ -19,12 +15,10 @@ const (
 func TestLogger(t *testing.T) {
 	t.Parallel()
 
-	pubKey := asymmetric.LoadRSAPubKey(testutils.TgPubKeys[0])
 	builder := NewLogBuilder(tcService).
 		WithConn(nil).
 		WithHash([]byte(tcHash)).
 		WithProof(tcProof).
-		WithPubKey(pubKey).
 		WithSize(tcSize).
 		WithType(CLogInfoExist)
 
@@ -46,11 +40,6 @@ func TestLogger(t *testing.T) {
 
 	if getter.GetProof() != tcProof {
 		t.Error("getter.GetProof() != tcProof")
-		return
-	}
-
-	if getter.GetPubKey().GetHasher().ToString() != pubKey.GetHasher().ToString() {
-		t.Error("getter.GetPubKey().GetHasher().ToString() != pubKey.GetHasher().ToString()")
 		return
 	}
 

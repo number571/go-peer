@@ -12,11 +12,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
+	"github.com/number571/go-peer/pkg/network/anonymity/friends"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
@@ -26,6 +25,10 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
+)
+
+var (
+	sharedKey = []byte("QB_shared_secret_for_friends_key")
 )
 
 const (
@@ -117,7 +120,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+				sharedKey,
 				payload.NewPayload32(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -147,15 +150,15 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], cancels[:], 1)
 
-	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
-	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
+	nodes[0].GetListKeys().DelKey(sharedKey)
+	nodes[1].GetListKeys().DelKey(sharedKey)
 
 	ctx := context.Background()
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		sharedKey,
 		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody)),
 	)
 	if err != nil {
@@ -178,7 +181,7 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ []byte, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
@@ -186,7 +189,7 @@ func TestFetchPayload(t *testing.T) {
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		sharedKey,
 		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
@@ -196,7 +199,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		sharedKey,
 		payload.NewPayload32(testutils.TcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -224,7 +227,7 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ []byte, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
@@ -232,7 +235,7 @@ func TestBroadcastPayload(t *testing.T) {
 	)
 
 	err := nodes[0].SendPayload(
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		sharedKey,
 		payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
@@ -241,7 +244,7 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 
 	err1 := nodes[0].SendPayload(
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		sharedKey,
 		payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -274,14 +277,13 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody))
 
 	overheadBody := random.NewCSPRNG().GetBytes(testutils.TCMessageSize + 1)
 	overPld := payload.NewPayload64(uint64(testutils.TcHead), overheadBody)
-	if err := node.enqueuePayload(logBuilder, pubKey, overPld); err == nil {
+	if err := node.enqueuePayload(logBuilder, sharedKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
 	}
@@ -292,7 +294,7 @@ func TestEnqueuePayload(t *testing.T) {
 	).ToBytes()
 
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQueue.EnqueueMessage(sharedKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -300,7 +302,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	// after full queue
 	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
-		if err := node.enqueuePayload(logBuilder, pubKey, pld); err != nil {
+		if err := node.enqueuePayload(logBuilder, sharedKey, pld); err != nil {
 			return
 		}
 	}
@@ -317,7 +319,6 @@ func TestHandleWrapper(t *testing.T) {
 	node := _node.(*sNode)
 	handler := node.networkHandler
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPubKey()
 
 	// // ignore add public key (f2f_disabled=true)
 	// node.GetListPubKeys().AddPubKey(pubKey)
@@ -326,7 +327,7 @@ func TestHandleWrapper(t *testing.T) {
 	sett := net_message.NewSettings(&net_message.SSettings{})
 
 	msg, err := client.EncryptMessage(
-		pubKey,
+		sharedKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
 			[]byte(tcMsgBody),
@@ -348,7 +349,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	msgWithoutPld, err := client.EncryptMessage(pubKey, []byte{123})
+	msgWithoutPld, err := client.EncryptMessage(sharedKey, []byte{123})
 	if err != nil {
 		t.Error(err)
 		return
@@ -362,13 +363,13 @@ func TestHandleWrapper(t *testing.T) {
 
 	node.HandleFunc(
 		111,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ []byte, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error")
 		},
 	)
 
 	msg2, err := client.EncryptMessage(
-		pubKey,
+		sharedKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -386,7 +387,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg3, err := client.EncryptMessage(
-		pubKey,
+		sharedKey,
 		payload.NewPayload64(
 			uint64(111),
 			[]byte("?"+tcMsgBody),
@@ -404,7 +405,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg4, err := client.EncryptMessage(
-		pubKey,
+		sharedKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(false), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -445,7 +446,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
+		sharedKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -506,9 +507,7 @@ func TestRecvSendMessage(t *testing.T) {
 		return
 	}
 
-	client := node.fQueue.GetClient()
-	pubKey := client.GetPubKey()
-	actionKey := newActionKey(pubKey, sAction(111).setType(true))
+	actionKey := newActionKey(sharedKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
 	action, ok := node.getAction(actionKey)
@@ -542,7 +541,7 @@ func TestRecvSendMessage(t *testing.T) {
 	).ToBytes()
 
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQueue.EnqueueMessage(sharedKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -551,7 +550,7 @@ func TestRecvSendMessage(t *testing.T) {
 	hasError := false
 	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQueue.EnqueueMessage(sharedKey, pldBytes); err != nil {
 			hasError = true
 			break
 		}
@@ -579,13 +578,13 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}
 
-	nodes[0].GetListPubKeys().AddPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
-	nodes[1].GetListPubKeys().AddPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
+	nodes[0].GetListKeys().AddKey(sharedKey)
+	nodes[1].GetListKeys().AddKey(sharedKey)
 
 	for _, node := range nodes {
 		node.HandleFunc(
 			testutils.TcHead,
-			func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ []byte, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
 			},
@@ -663,9 +662,7 @@ func (p *stLogging) HasErro() bool {
 func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisabled bool) (INode, context.CancelFunc) {
 	db, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
-			FPath:     fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
-			FWorkSize: testutils.TCWorkSize,
-			FPassword: "CIPHER",
+			FPath: fmt.Sprintf(tcPathDBTemplate, typeDB, numDB),
 		}),
 	)
 	if err != nil {
@@ -722,14 +719,12 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 				FNetworkKey: networkKey,
 			}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{
+				client.NewSettings(&client.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FKeySizeBits:      testutils.TcKeySize,
 				}),
-				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
 		),
-		asymmetric.NewListPubKeys(),
+		friends.NewListKeys(),
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()

@@ -35,11 +35,6 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if sett.GetKeySizeBits() != testutils.TcKeySize {
-		t.Error("invalid key size")
-		return
-	}
-
 	if sett.GetQueuePeriodMS() != 1000 {
 		t.Error("invalid queue period")
 		return

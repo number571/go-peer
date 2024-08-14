@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
+	"github.com/number571/go-peer/pkg/network/anonymity/friends"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
@@ -36,11 +36,9 @@ func (p *sApp) initAnonNode() error {
 	}
 
 	client := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: cfgSettings.GetMessageSizeBytes(),
-			FKeySizeBits:      p.fPrivKey.GetSize(),
 		}),
-		p.fPrivKey,
 	)
 	if client.GetMessageLimit() <= encoding.CSizeUint64 {
 		return utils.MergeErrors(ErrMessageSizeLimit, err)
@@ -93,10 +91,11 @@ func (p *sApp) initAnonNode() error {
 			}),
 			client,
 		),
-		func() asymmetric.IListPubKeys {
-			f2f := asymmetric.NewListPubKeys()
-			for _, pubKey := range cfg.GetFriends() {
-				f2f.AddPubKey(pubKey)
+		func() friends.IListKeys {
+			f2f := friends.NewListKeys()
+			for _, key := range cfg.GetFriends() {
+				sharedKey := hashing.NewSHA256Hasher([]byte(key)).ToBytes()
+				f2f.AddKey(sharedKey)
 			}
 			return f2f
 		}(),

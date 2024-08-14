@@ -9,12 +9,14 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
+)
+
+var (
+	tcSharedKey = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456")
 )
 
 const (
@@ -173,11 +175,9 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 	}()
 
 	cl := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
 	pushHashes := make([][]byte, 0, messagesCapacity+1)
@@ -243,11 +243,9 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 	}()
 
 	clTest := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: (10 << 10),
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
 	msgTest, err := newNetworkMessage(clTest, "some-another-key")
@@ -262,11 +260,9 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 	}
 
 	cl := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
 	msg1, err := newNetworkMessage(cl, testutils.TCNetworkKey)
@@ -326,11 +322,9 @@ func TestDatabase(t *testing.T) {
 	}()
 
 	cl := client.NewClient(
-		message.NewSettings(&message.SSettings{
+		client.NewSettings(&client.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
 
 	putHashes := make([][]byte, 0, 3)
@@ -382,14 +376,9 @@ func TestDatabase(t *testing.T) {
 			return
 		}
 
-		pubKey, decMsg, err := cl.DecryptMessage(loadNetMsg.GetPayload().GetBody())
+		decMsg, err := cl.DecryptMessage(tcSharedKey, loadNetMsg.GetPayload().GetBody())
 		if err != nil {
 			t.Error(err)
-			return
-		}
-
-		if pubKey.GetHasher().ToString() != cl.GetPubKey().GetHasher().ToString() {
-			t.Error("load public key != init public key")
 			return
 		}
 
@@ -413,7 +402,7 @@ func TestDatabase(t *testing.T) {
 
 func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_message.IMessage, error) {
 	msg, err := cl.EncryptMessage(
-		cl.GetPubKey(),
+		tcSharedKey,
 		payload.NewPayload64(uint64(testutils.TcHead), []byte(data)).ToBytes(),
 	)
 	if err != nil {
