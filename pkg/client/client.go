@@ -83,13 +83,13 @@ func (p *sClient) encryptWithParams(pKey []byte, pMsg []byte, pPadd uint64) ([]b
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pKey []byte, pMsg []byte) ([]byte, error) {
 	if !p.MessageIsValid(pMsg) {
-		return nil, errors.New("message is invalid")
+		return nil, errors.New("message is invalid") // nolint: goerr113
 	}
 
 	ciph := symmetric.NewAESCipher(pKey)
 	dmsg := ciph.DecryptBytes(pMsg)
 	if dmsg == nil {
-		return nil, errors.New("decrypt message")
+		return nil, errors.New("decrypt message") // nolint: goerr113
 	}
 
 	var (
@@ -99,12 +99,12 @@ func (p *sClient) DecryptMessage(pKey []byte, pMsg []byte) ([]byte, error) {
 
 	check := hashing.NewHMACSHA256Hasher(pKey, data).ToBytes()
 	if !bytes.Equal(check, hash) {
-		return nil, errors.New("hash message")
+		return nil, errors.New("hash message") // nolint: goerr113
 	}
 
 	dataWrapper, err := joiner.LoadBytesJoiner32(data)
 	if err != nil || len(dataWrapper) != 2 {
-		return nil, errors.New("payload")
+		return nil, errors.New("payload") // nolint: goerr113
 	}
 
 	return dataWrapper[0], nil

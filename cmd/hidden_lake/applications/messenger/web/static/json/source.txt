@@ -1,2 +1,0 @@
-emoji.json: https://gist.github.com/oliveratgithub/0bf11a9aff0d6da7b46f1490f86a71eb
-* remove two rows with void strings in the "shortname" fields

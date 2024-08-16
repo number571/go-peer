@@ -2,6 +2,7 @@ package anon
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -50,7 +51,7 @@ func (p *tsAddr) String() string  { return "192.168.0.1:2000" }
 const (
 	tcService = "TST"
 	tcHash    = "96cb1f0968adba001ebc216708a02c8d2817b1a77fad1206012c22716a9b130b"
-	tcFmtLog  = "service=TST type=ENQRQ hash=96CB1F09...6A9B130B addr=6245E00D...327047E9 proof=0000012345 size=1024B conn=192.168.0.1:2000"
+	tcFmtLog  = "service=TST type=ENQRQ hash=96CB1F09...6A9B130B proof=0000012345 size=1024B conn=192.168.0.1:2000"
 )
 
 func TestLoggerPanic(t *testing.T) {
@@ -89,6 +90,9 @@ func TestLogger(t *testing.T) {
 
 	logFunc := GetLogFunc()
 	if l := logFunc(logger); l != tcFmtLog {
+		fmt.Println(l)
+		fmt.Println(tcFmtLog)
+
 		t.Error("result fmtLog != tcFmtLog")
 		return
 	}

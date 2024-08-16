@@ -31,7 +31,6 @@ const (
 
 const (
 	CDefaultMessageSize     = (8 << 10) // 8192-B
-	CDefaultKeySize         = (4 << 10) // 4096-b
 	CDefaultFetchTimeout    = 60_000    // 60 seconds
 	CDefaultQueuePeriod     = 5_000     // 5 seconds
 	CDefaultWorkSize        = 0         // bits

@@ -205,12 +205,12 @@ func (p *sNode) tryDecryptMessage(pEncMsg []byte) ([]byte, []byte, error) {
 	for _, key := range p.fFriends.GetKeys() {
 		decMsg, err := client.DecryptMessage(key, pEncMsg)
 		if err != nil {
-			return nil, nil, err
+			continue
 		}
-		return key, decMsg, nil
+		return key, decMsg, nil // nolint: staticcheck
 	}
 
-	return nil, nil, errors.New("undecrypted")
+	return nil, nil, errors.New("undecrypted") // nolint: goerr113
 }
 
 func (p *sNode) networkHandler(
