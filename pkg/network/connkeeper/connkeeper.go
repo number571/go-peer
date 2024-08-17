@@ -55,6 +55,7 @@ func (p *sConnKeeper) Run(pCtx context.Context) error {
 
 func (p *sConnKeeper) tryConnectToAll(pCtx context.Context) {
 	chConnected := make(chan struct{})
+
 	go func() {
 		connList := p.fSettings.GetConnections()
 		mapConns := p.fNode.GetConnections()

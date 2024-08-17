@@ -155,7 +155,6 @@ func (p *sConn) recvHeadBytes(
 		if err != nil {
 			return 0, err
 		}
-		break
 	}
 
 	msgSizeBytes := [encoding.CSizeUint32]byte{}

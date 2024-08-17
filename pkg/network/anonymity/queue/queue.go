@@ -239,7 +239,6 @@ func (p *sMessageQueueProcessor) fillMainPool(pCtx context.Context, pMsg []byte)
 	select {
 	case <-pCtx.Done():
 		return pCtx.Err()
-
 	case netMsg := <-chNetMsg:
 		if p.vSettingsNotChanged(oldVSettings) {
 			p.fMainPool.fQueue <- netMsg
@@ -270,6 +269,7 @@ func (p *sMessageQueueProcessor) fillRandPool(pCtx context.Context) error {
 
 	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
+
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			net_message.NewSettings(&net_message.SSettings{
@@ -285,7 +285,6 @@ func (p *sMessageQueueProcessor) fillRandPool(pCtx context.Context) error {
 	select {
 	case <-pCtx.Done():
 		return pCtx.Err()
-
 	case netMsg := <-chNetMsg:
 		if p.vSettingsNotChanged(oldVSettings) {
 			p.fRandPool.fQueue <- netMsg

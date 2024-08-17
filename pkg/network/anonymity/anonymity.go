@@ -86,7 +86,9 @@ func (p *sNode) Run(pCtx context.Context) error {
 	for {
 		select {
 		case <-pCtx.Done():
-			return <-chErr
+			return pCtx.Err()
+		case err := <-chErr:
+			return utils.MergeErrors(ErrProcessRun, err)
 		default:
 			netMsg := p.fQueue.DequeueMessage(pCtx)
 			if netMsg == nil {
