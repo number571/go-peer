@@ -23,4 +23,5 @@ var (
 	ErrDecodePayload        = &SClientError{"decode payload"}
 	ErrEncryptSymmetricKey  = &SClientError{"encrypt symmetric key"}
 	ErrDecodeBytesJoiner    = &SClientError{"decode bytes joiner"}
+	ErrInvalidPubKeySize    = &SClientError{"invalid pub key size"}
 )

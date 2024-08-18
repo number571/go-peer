@@ -708,7 +708,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 			}),
 			lru.NewLRUCache(testutils.TCCapacity),
 		),
-		queue.NewMessageQueueProcessor(
+		queue.NewQBTaskProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:          networkMask,
 				FWorkSizeBits:         testutils.TCWorkSize,

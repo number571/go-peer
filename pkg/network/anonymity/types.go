@@ -28,7 +28,7 @@ type INode interface {
 	GetSettings() ISettings
 	GetKVDatabase() database.IKVDatabase
 	GetNetworkNode() network.INode
-	GetMessageQueue() queue.IMessageQueueProcessor
+	GetMessageQueue() queue.IQBTaskProcessor
 	GetListPubKeys() asymmetric.IListPubKeys
 
 	SendPayload(asymmetric.IPubKey, payload.IPayload64) error

@@ -47,7 +47,7 @@
 ### CHANGES
 
 - Update `pkg/network/anonymity`: delete GetRetryEnqueue
-- Update `pkg/network/anonymity/queue`: change EnqueueMessage, rename IMessageQueue -> IMessageQueueProcessor
+- Update `pkg/network/anonymity/queue`: change EnqueueMessage, rename IMessageQueue -> IQBTaskProcessor
 - Update `pkg/network/anonymity/queue`: delete GetQBTDisabled
 - Update `cmd/hidden_lake/service`: qbt_disabled=true -> queue_period_ms=0
 - Update `cmd/hidden_lake/service`: append fetch_timeout_ms param

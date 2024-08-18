@@ -33,7 +33,7 @@ type sNode struct {
 	fLogger        logger.ILogger
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
-	fQueue         queue.IMessageQueueProcessor
+	fQueue         queue.IQBTaskProcessor
 	fFriends       asymmetric.IListPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
@@ -44,7 +44,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
-	pQueue queue.IMessageQueueProcessor,
+	pQueue queue.IQBTaskProcessor,
 	pFriends asymmetric.IListPubKeys,
 ) INode {
 	return &sNode{
@@ -124,7 +124,7 @@ func (p *sNode) GetNetworkNode() network.INode {
 	return p.fNetwork
 }
 
-func (p *sNode) GetMessageQueue() queue.IMessageQueueProcessor {
+func (p *sNode) GetMessageQueue() queue.IQBTaskProcessor {
 	return p.fQueue
 }
 

@@ -83,6 +83,10 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte,
 		resultSize   = uint64(len(pMsg))
 	)
 
+	if pRecv.GetSize() != p.GetPubKey().GetSize() {
+		return nil, ErrInvalidPubKeySize
+	}
+
 	if resultSize > msgLimitSize {
 		return nil, ErrLimitMessageSize
 	}
