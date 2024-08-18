@@ -728,6 +728,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int, f2fDisa
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
+			asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
 		),
 		asymmetric.NewListPubKeys(),
 	)

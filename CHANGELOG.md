@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/network/anonymity/queue`: deleted key auto generation -> add param pReceiver
+
 <!-- ... -->
 
 ## v1.6.18

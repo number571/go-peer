@@ -49,8 +49,14 @@ func NewMessageQueueProcessor(
 	pSettings ISettings,
 	pVSettings IVSettings,
 	pClient client.IClient,
+	pReceiver asymmetric.IPubKey,
 ) IMessageQueueProcessor {
-	mq := &sMessageQueueProcessor{
+	if pSettings.GetQueuePeriod() != 0 {
+		if pClient.GetPubKey().GetSize() != pReceiver.GetSize() {
+			panic("pClient.GetPubKey().GetSize() != pReceiver.GetSize()")
+		}
+	}
+	return &sMessageQueueProcessor{
 		fState:     state.NewBoolState(),
 		fSettings:  pSettings,
 		fVSettings: pVSettings,
@@ -59,14 +65,11 @@ func NewMessageQueueProcessor(
 			fQueue:    make(chan net_message.IMessage, pSettings.GetMainPoolCapacity()),
 			fRawQueue: make(chan []byte, pSettings.GetMainPoolCapacity()),
 		},
-	}
-	if pSettings.GetQueuePeriod() != 0 { // if QB=true
-		mq.fRandPool = &sRandPool{
+		fRandPool: &sRandPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetRandPoolCapacity()),
-			fReceiver: asymmetric.NewRSAPrivKey(pClient.GetPrivKey().GetSize()).GetPubKey(),
-		}
+			fReceiver: pReceiver,
+		},
 	}
-	return mq
 }
 
 func (p *sMessageQueueProcessor) GetSettings() ISettings {
@@ -109,7 +112,7 @@ func (p *sMessageQueueProcessor) Run(pCtx context.Context) error {
 func (p *sMessageQueueProcessor) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
 
-	if p.fRandPool == nil {
+	if p.fSettings.GetQueuePeriod() == 0 { // if QB=false
 		<-pCtx.Done()
 		chErr <- pCtx.Err()
 		return
@@ -158,7 +161,7 @@ func (p *sMessageQueueProcessor) SetVSettings(pVSettings IVSettings) {
 		<-p.fMainPool.fQueue
 	}
 
-	if p.fRandPool != nil {
+	if p.fSettings.GetQueuePeriod() != 0 { // if QB=true
 		for len(p.fRandPool.fQueue) > 0 {
 			atomic.AddInt64(&p.fRandPool.fCount, -1)
 			<-p.fRandPool.fQueue
@@ -182,7 +185,7 @@ func (p *sMessageQueueProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pByt
 }
 
 func (p *sMessageQueueProcessor) DequeueMessage(pCtx context.Context) net_message.IMessage {
-	if p.fRandPool == nil {
+	if p.fSettings.GetQueuePeriod() == 0 { // if QB=false
 		select {
 		case <-pCtx.Done():
 			return nil

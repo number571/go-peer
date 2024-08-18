@@ -79,6 +79,7 @@ func TestQueueVoidDisabled(t *testing.T) {
 			}),
 			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 		),
+		asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
 	)
 
 	if err := testQueue(queue); err != nil {
@@ -106,6 +107,7 @@ func TestRunStopQueue(t *testing.T) {
 		}),
 		NewVSettings(&SVSettings{}),
 		client,
+		asymmetric.NewRSAPrivKey(client.GetPrivKey().GetSize()).GetPubKey(),
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -183,6 +185,7 @@ func TestQueue(t *testing.T) {
 			}),
 			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 		),
+		asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
 	)
 
 	sett := queue.GetSettings()

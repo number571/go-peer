@@ -33,6 +33,7 @@ func main() {
 			}),
 			asymmetric.NewRSAPrivKey(1024),
 		),
+		asymmetric.NewRSAPrivKey(1024).GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())

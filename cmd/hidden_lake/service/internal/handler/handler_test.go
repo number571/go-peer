@@ -222,6 +222,7 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 				}),
 				asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 			),
+			asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
 		),
 		asymmetric.NewListPubKeys(),
 	)

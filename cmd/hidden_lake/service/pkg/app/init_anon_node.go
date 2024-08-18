@@ -92,6 +92,7 @@ func (p *sApp) initAnonNode() error {
 				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
 			client,
+			asymmetric.NewRSAPrivKey(client.GetPrivKey().GetSize()).GetPubKey(),
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()

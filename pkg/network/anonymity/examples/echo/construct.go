@@ -91,6 +91,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				}),
 				asymmetric.NewRSAPrivKey(keySize),
 			),
+			asymmetric.NewRSAPrivKey(keySize).GetPubKey(),
 		),
 		asymmetric.NewListPubKeys(),
 	)
