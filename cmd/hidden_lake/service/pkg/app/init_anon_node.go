@@ -1,12 +1,14 @@
 package app
 
 import (
+	"errors"
 	"path/filepath"
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/service/internal/handler"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -19,6 +21,19 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/pkg/client"
 )
+
+const (
+	cPPKKey = "__PSD_PUB_KEY__"
+)
+
+func init() {
+	// The hls.db file stores only message hashes.
+	// If the other parameters have the same size as the hashes,
+	// then there will be a chance of overwriting.
+	if len(cPPKKey) == hashing.CSHA256Size {
+		panic("len(cPPKKey) == hashing.CSHA256Size")
+	}
+}
 
 func (p *sApp) initAnonNode() error {
 	var (
@@ -33,6 +48,11 @@ func (p *sApp) initAnonNode() error {
 	)
 	if err != nil {
 		return utils.MergeErrors(ErrOpenKVDatabase, err)
+	}
+
+	psdPubKey, err := getPsdPubKey(kvDatabase, cfgSettings.GetKeySizeBits())
+	if err != nil {
+		return utils.MergeErrors(ErrGetPsdPubKey, err)
 	}
 
 	client := client.NewClient(
@@ -92,7 +112,7 @@ func (p *sApp) initAnonNode() error {
 				FNetworkKey: cfgSettings.GetNetworkKey(),
 			}),
 			client,
-			asymmetric.NewRSAPrivKey(client.GetPrivKey().GetSize()).GetPubKey(),
+			psdPubKey,
 		),
 		func() asymmetric.IListPubKeys {
 			f2f := asymmetric.NewListPubKeys()
@@ -107,4 +127,23 @@ func (p *sApp) initAnonNode() error {
 	)
 
 	return nil
+}
+
+func getPsdPubKey(pDB database.IKVDatabase, pKeySize uint64) (asymmetric.IPubKey, error) {
+	ppk, err := pDB.Get([]byte(cPPKKey))
+	if err == nil {
+		pubKey := asymmetric.LoadRSAPubKey(ppk)
+		if pubKey == nil {
+			return nil, ErrInvalidPsdPubKey
+		}
+		return pubKey, nil
+	}
+	if errors.Is(err, database.ErrNotFound) {
+		pubKey := asymmetric.NewRSAPrivKey(pKeySize).GetPubKey()
+		if err := pDB.Set([]byte(cPPKKey), pubKey.ToBytes()); err != nil {
+			return nil, ErrSetPsdPubKey
+		}
+		return pubKey, nil
+	}
+	return nil, utils.MergeErrors(err, ErrReadKVDatabase)
 }

@@ -24,5 +24,9 @@ var (
 	ErrGetParallel      = &SAppError{"get parallel"}
 	ErrCreateAnonNode   = &SAppError{"create anon node"}
 	ErrOpenKVDatabase   = &SAppError{"open kv database"}
+	ErrReadKVDatabase   = &SAppError{"read kv database"}
 	ErrMessageSizeLimit = &SAppError{"message size limit"}
+	ErrInvalidPsdPubKey = &SAppError{"invalid psd public key"}
+	ErrGetPsdPubKey     = &SAppError{"get psd pub key"}
+	ErrSetPsdPubKey     = &SAppError{"set psd pub key"}
 )

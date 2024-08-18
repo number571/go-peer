@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/service`: save pseudo public key of receiver into database
+
 ### CHANGES
 
 - Update `pkg/network/anonymity/queue`: deleted key auto generation -> add param pReceiver
