@@ -16,10 +16,10 @@ EOL - End of Line (Enter)
 ```bash
 $ go run . -salt="service-name" -work=24
 master-key
-EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ=
+EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ0
 ```
 
 ```bash
 $ echo "master-key" | go run . -salt="service-name" -work=24
-EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ=
+EvCqIyPVq9ydjspox6GqN63ggT0xrUfNFnFgwAy1odQ0
 ```

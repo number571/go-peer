@@ -8,7 +8,10 @@ import (
 	"os"
 
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
-	"github.com/number571/go-peer/pkg/crypto/symmetric"
+)
+
+const (
+	cKeySize = 33 // bytes
 )
 
 func main() {
@@ -17,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	keyBuilder := keybuilder.NewKeyBuilder(1<<(*workParam), []byte(*saltParam))
-	gotPassword := keyBuilder.Build(readUntilEOL(), symmetric.CAESKeySize)
+	gotPassword := keyBuilder.Build(readUntilEOL(), cKeySize)
 
 	fmt.Println(base64.URLEncoding.EncodeToString(gotPassword))
 }
