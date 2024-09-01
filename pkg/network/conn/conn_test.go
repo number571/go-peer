@@ -132,6 +132,7 @@ func TestClosedConn(t *testing.T) {
 	defer testFreeService(listener)
 
 	conn, err := NewConn(
+		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
@@ -193,6 +194,7 @@ func TestInvalidConn(t *testing.T) {
 	t.Parallel()
 
 	_, err := NewConn(
+		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
@@ -388,6 +390,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	defer testFreeService(listener)
 
 	conn, err := NewConn(
+		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,
 			FLimitMessageSizeBytes: testutils.TCMessageSize,

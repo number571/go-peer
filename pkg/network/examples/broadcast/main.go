@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 
-	conn, err := conn.NewConn(connSettings(), vSettings(), serviceAddress)
+	conn, err := conn.NewConn(context.Background(), connSettings(), vSettings(), serviceAddress)
 	if err != nil {
 		panic(err)
 	}
