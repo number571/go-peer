@@ -131,7 +131,7 @@ func TestClosedConn(t *testing.T) {
 	listener := testNewService(t, testutils.TgAddrs[30], "")
 	defer testFreeService(listener)
 
-	conn, err := NewConn(
+	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,
@@ -193,7 +193,7 @@ func TestClosedConn(t *testing.T) {
 func TestInvalidConn(t *testing.T) {
 	t.Parallel()
 
-	_, err := NewConn(
+	_, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,
@@ -389,7 +389,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	listener := testNewService(t, pAddr, pNetworkKey)
 	defer testFreeService(listener)
 
-	conn, err := NewConn(
+	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
 			FWorkSizeBits:          testutils.TCWorkSize,

@@ -208,7 +208,7 @@ func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	}
 
 	sett := p.fSettings.GetConnSettings()
-	conn, err := conn.NewConn(pCtx, sett, p.getVSettings(), pAddress)
+	conn, err := conn.Connect(pCtx, sett, p.getVSettings(), pAddress)
 	if err != nil {
 		return utils.MergeErrors(ErrAddConnections, err)
 	}

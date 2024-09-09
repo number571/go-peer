@@ -25,7 +25,7 @@ type sConn struct {
 	fVSettings IVSettings
 }
 
-func NewConn(pCtx context.Context, pSett ISettings, pVSett IVSettings, pAddr string) (IConn, error) {
+func Connect(pCtx context.Context, pSett ISettings, pVSett IVSettings, pAddr string) (IConn, error) {
 	dialer := &net.Dialer{Timeout: pSett.GetDialTimeout()}
 	conn, err := dialer.DialContext(pCtx, "tcp", pAddr)
 	if err != nil {

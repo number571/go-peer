@@ -41,7 +41,7 @@ func main() {
 	}()
 	time.Sleep(time.Second) // wait
 
-	conn, err := conn.NewConn(context.Background(), connSettings(), vSettings(), serviceAddress)
+	conn, err := conn.Connect(context.Background(), connSettings(), vSettings(), serviceAddress)
 	if err != nil {
 		panic(err)
 	}
