@@ -69,7 +69,6 @@ func (p *sApp) initAnonNode() error {
 	p.fNode = anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  hls_settings.CServiceName,
-			FF2FDisabled:  cfgSettings.GetF2FDisabled(),
 			FNetworkMask:  hls_settings.CNetworkMask,
 			FFetchTimeout: time.Duration(cfgSettings.GetFetchTimeoutMS()) * time.Millisecond,
 		}),

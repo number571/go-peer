@@ -26,7 +26,6 @@ type IConfigSettings interface {
 	GetQueuePeriodMS() uint64
 	GetRandQueuePeriodMS() uint64
 	GetRandMessageSizeBytes() uint64
-	GetF2FDisabled() bool
 }
 
 type IConfig interface {

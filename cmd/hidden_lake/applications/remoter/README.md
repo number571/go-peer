@@ -7,7 +7,7 @@
 The `Hidden Lake Remoter` this is a service that provides the ability to make remote calls on the anonymous network core (HLS) with theoretically provable anonymity.
 
 > [!CAUTION]
-> This application can be extremely dangerous if the F2F option is disabled in the HLS application or if a private key known to many is used. Use HLR with caution.
+> This application can be extremely dangerous. Use HLR with caution.
 
 > More information about HLR in the [habr.com/ru/articles/830130](https://habr.com/ru/articles/830130/ "Habr HLR")
 

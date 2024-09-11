@@ -46,20 +46,6 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 			WithPubKey(pSender)
 
 		cfg := pCfgW.GetConfig()
-		friends := cfg.GetFriends()
-
-		// append public key to list of friends if f2f option is disabled
-		if cfg.GetSettings().GetF2FDisabled() && !inFriendsList(friends, pSender) {
-			// update config state with new friend
-			friends[pSender.GetHasher().ToString()] = pSender
-			if err := pCfgW.GetEditor().UpdateFriends(friends); err != nil {
-				logger.PushErro(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
-				return nil, utils.MergeErrors(ErrUpdateFriends, err)
-			}
-			// update list of friends and continue read request
-			pNode.GetListPubKeys().AddPubKey(pSender)
-			logger.PushInfo(logBuilder.WithType(internal_anon_logger.CLogBaseAppendNewFriend))
-		}
 
 		// load request from message's body
 		loadReq, err := request.LoadRequest(pReqBytes)
@@ -122,15 +108,6 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 			return nil, ErrInvalidResponseMode
 		}
 	}
-}
-
-func inFriendsList(pFriends map[string]asymmetric.IPubKey, pPubKey asymmetric.IPubKey) bool {
-	for _, pubKey := range pFriends {
-		if bytes.Equal(pubKey.ToBytes(), pPubKey.ToBytes()) {
-			return true
-		}
-	}
-	return false
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {

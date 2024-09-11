@@ -29,7 +29,6 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 				FRandQueuePeriodMS:    hls_settings.CDefaultRandQueuePeriod,
 				FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
 				FNetworkKey:           hls_settings.CDefaultNetworkKey,
-				FF2FDisabled:          hls_settings.CDefaultF2FDisabled,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},
 			FAddress: &SAddress{

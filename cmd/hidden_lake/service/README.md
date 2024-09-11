@@ -224,7 +224,6 @@ settings:
   queue_period_ms: 5000
   rand_queue_period_ms: 5000
   rand_message_size_bytes: 4096
-  f2f_disabled: true
   network_key: hls-network-key
 logging:
   - info

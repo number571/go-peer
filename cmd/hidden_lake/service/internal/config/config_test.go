@@ -61,7 +61,6 @@ const (
   rand_queue_period_ms: %d
   rand_message_size_bytes: %d
   network_key: %s
-  f2f_disabled: true
 logging:
   - info
   - erro
@@ -272,11 +271,6 @@ func TestComplexConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetRandMessageSizeBytes() != tcLimitVoidSize {
 		t.Error("settings rand message size is invalid")
-		return
-	}
-
-	if !cfg.GetSettings().GetF2FDisabled() {
-		t.Error("settings f2f disabled is invalid")
 		return
 	}
 

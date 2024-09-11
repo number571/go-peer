@@ -38,7 +38,6 @@ const (
 	CDefaultWorkSize        = 0         // bits
 	CDefaultRandQueuePeriod = 0         // 0 seconds
 	CDefaultRandMessageSize = 0         // 0 bytes
-	CDefaultF2FDisabled     = false     // friend-to-friend
 	CDefaultNetworkKey      = ""
 )
 

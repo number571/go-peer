@@ -244,15 +244,9 @@ func (p *sNode) networkHandler(
 
 	// check sender's public key in f2f list
 	if !p.fFriends.InPubKeys(sender) {
-		// if f2f=enabled:
 		// ignore reading message from unknown public key
-		if !p.fSettings.GetF2FDisabled() {
-			p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
-			return nil
-		}
-		// if f2f=disabled:
-		// continue to read a message from unknown public key
-		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoPassF2FOption))
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
+		return nil
 	}
 
 	// get payload from decrypted message

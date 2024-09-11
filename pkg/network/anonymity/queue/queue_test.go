@@ -31,7 +31,7 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
 }
@@ -54,37 +54,11 @@ func testSettings(t *testing.T, n int) {
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
-	}
-}
-
-func TestQueueVoidDisabled(t *testing.T) {
-	t.Parallel()
-
-	queue := NewQBTaskProcessor(
-		NewSettings(&SSettings{
-			FNetworkMask:      1,
-			FWorkSizeBits:     10,
+	case 2:
+		_ = NewSettings(&SSettings{
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: testutils.TCQueueCapacity,
-			FParallel:         1,
-			FRandQueuePeriod:  100 * time.Millisecond,
-		}),
-		NewVSettings(&SVSettings{
-			FNetworkKey: "network_key",
-		}),
-		client.NewClient(
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FKeySizeBits:      testutils.TcKeySize,
-			}),
-			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
-		),
-		asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
-	)
-
-	if err := testQueue(queue); err != nil {
-		t.Error(err)
-		return
+		})
 	}
 }
 

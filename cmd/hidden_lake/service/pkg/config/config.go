@@ -19,7 +19,6 @@ func GetConfigSettings(pCfg config.IConfig, pClient client.IClient) SConfigSetti
 			FRandQueuePeriodMS:    sett.GetRandQueuePeriodMS(),
 			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),
 			FNetworkKey:           sett.GetNetworkKey(),
-			FF2FDisabled:          sett.GetF2FDisabled(),
 		},
 		// encoding.CSizeUint64 = payload64.Head()
 		FLimitMessageSizeBytes: msgLimit - encoding.CSizeUint64,

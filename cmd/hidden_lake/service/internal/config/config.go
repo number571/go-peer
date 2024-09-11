@@ -27,7 +27,6 @@ type SConfigSettings struct {
 	FRandQueuePeriodMS    uint64 `json:"rand_queue_period_ms,omitempty" yaml:"rand_queue_period_ms,omitempty"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
-	FF2FDisabled          bool   `json:"f2f_disabled,omitempty" yaml:"f2f_disabled,omitempty"`
 }
 
 type SConfig struct {
@@ -127,10 +126,6 @@ func (p *SConfigSettings) GetNetworkKey() string {
 	defer p.fMutex.RUnlock()
 
 	return p.FNetworkKey
-}
-
-func (p *SConfigSettings) GetF2FDisabled() bool {
-	return p.FF2FDisabled
 }
 
 func (p *SConfig) GetSettings() IConfigSettings {

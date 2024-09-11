@@ -37,7 +37,6 @@ type INode interface {
 
 type ISettings interface {
 	GetServiceName() string
-	GetF2FDisabled() bool
 	GetNetworkMask() uint32
 	GetFetchTimeout() time.Duration
 }

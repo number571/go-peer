@@ -34,8 +34,11 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
-	if p.FQueuePeriod != 0 && p.FRandPoolCapacity == 0 {
-		panic(`p.FQueuePeriod != 0 && p.FRandPoolCapacity == 0`)
+	if p.FQueuePeriod == 0 {
+		panic(`p.FQueuePeriod != 0`)
+	}
+	if p.FRandPoolCapacity == 0 {
+		panic(`p.FRandPoolCapacity == 0`)
 	}
 	if p.FMainPoolCapacity == 0 {
 		panic(`p.FMainPoolCapacity == 0`)

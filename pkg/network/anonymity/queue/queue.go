@@ -51,10 +51,8 @@ func NewQBTaskProcessor(
 	pClient client.IClient,
 	pReceiver asymmetric.IPubKey,
 ) IQBTaskProcessor {
-	if pSettings.GetQueuePeriod() != 0 {
-		if pClient.GetPubKey().GetSize() != pReceiver.GetSize() {
-			panic("pClient.GetPubKey().GetSize() != pReceiver.GetSize()")
-		}
+	if pClient.GetPubKey().GetSize() != pReceiver.GetSize() {
+		panic("pClient.GetPubKey().GetSize() != pReceiver.GetSize()")
 	}
 	return &sQBTaskProcessor{
 		fState:     state.NewBoolState(),
@@ -112,12 +110,6 @@ func (p *sQBTaskProcessor) Run(pCtx context.Context) error {
 func (p *sQBTaskProcessor) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
 	defer pWg.Done()
 
-	if p.fSettings.GetQueuePeriod() == 0 { // if QB=false
-		<-pCtx.Done()
-		chErr <- pCtx.Err()
-		return
-	}
-
 	for {
 		select {
 		case <-pCtx.Done():
@@ -161,11 +153,9 @@ func (p *sQBTaskProcessor) SetVSettings(pVSettings IVSettings) {
 		<-p.fMainPool.fQueue
 	}
 
-	if p.fSettings.GetQueuePeriod() != 0 { // if QB=true
-		for len(p.fRandPool.fQueue) > 0 {
-			atomic.AddInt64(&p.fRandPool.fCount, -1)
-			<-p.fRandPool.fQueue
-		}
+	for len(p.fRandPool.fQueue) > 0 {
+		atomic.AddInt64(&p.fRandPool.fCount, -1)
+		<-p.fRandPool.fQueue
 	}
 }
 
@@ -185,23 +175,13 @@ func (p *sQBTaskProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []b
 }
 
 func (p *sQBTaskProcessor) DequeueMessage(pCtx context.Context) net_message.IMessage {
-	if p.fSettings.GetQueuePeriod() == 0 { // if QB=false
-		select {
-		case <-pCtx.Done():
-			return nil
-		case x := <-p.fMainPool.fQueue:
-			atomic.AddInt64(&p.fMainPool.fCount, -1)
-			return x
-		}
-	}
-
-	randUint64 := random.NewCSPRNG().GetUint64()
-	randQueuePeriod := time.Duration(randUint64 % uint64(p.fSettings.GetRandQueuePeriod()+1))
+	queuePeriod := p.fSettings.GetQueuePeriod()
+	addRandPeriod := time.Duration(random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandQueuePeriod()+1))
 
 	select {
 	case <-pCtx.Done():
 		return nil
-	case <-time.After(p.fSettings.GetQueuePeriod() + randQueuePeriod):
+	case <-time.After(queuePeriod + addRandPeriod):
 		select {
 		case x := <-p.fMainPool.fQueue:
 			// the main queue is checked first
