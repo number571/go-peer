@@ -99,7 +99,7 @@ func testStartNodeHLS() (anonymity.INode, context.CancelFunc, error) {
 
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
-		HandleServiceTCP(config.NewWrapper(cfg)),
+		HandleServiceTCP(cfg),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 

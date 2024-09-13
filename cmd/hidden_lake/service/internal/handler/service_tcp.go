@@ -20,17 +20,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 )
 
-var gIgnoreHeaders = map[string]struct{}{
-	hls_settings.CHeaderResponseMode: {}, // ignore HLS header
-	"Date":                           {}, // ignore due to deanonymization
-	"Content-Length":                 {}, // ignore redundant header
-	"date":                           {}, // [can be in lower case]
-	"content-length":                 {}, // [can be in lower case]
-}
-
-func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
-	httpClient := &http.Client{Timeout: time.Minute}
-
+func HandleServiceTCP(pCfg config.IConfig) anonymity.IHandlerF {
 	return func(
 		pCtx context.Context,
 		pNode anonymity.INode,
@@ -45,8 +35,6 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 			WithSize(len(pReqBytes)).
 			WithPubKey(pSender)
 
-		cfg := pCfgW.GetConfig()
-
 		// load request from message's body
 		loadReq, err := request.LoadRequest(pReqBytes)
 		if err != nil {
@@ -55,7 +43,7 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 		}
 
 		// get service's address by hostname
-		service, ok := cfg.GetService(loadReq.GetHost())
+		service, ok := pCfg.GetService(loadReq.GetHost())
 		if !ok {
 			logger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnUndefinedService))
 			return nil, ErrUndefinedService
@@ -80,6 +68,7 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 		pushReq.Header.Set(hls_settings.CHeaderPublicKey, pSender.ToString())
 
 		// send request and receive response from service
+		httpClient := &http.Client{Timeout: time.Minute}
 		resp, err := httpClient.Do(pushReq)
 		if err != nil {
 			logger.PushWarn(logBuilder.WithType(internal_anon_logger.CLogWarnRequestToService))
@@ -111,7 +100,7 @@ func HandleServiceTCP(pCfgW config.IWrapper) anonymity.IHandlerF {
 }
 
 func getResponseHead(pResp *http.Response) map[string]string {
-	headers := make(map[string]string)
+	headers := make(map[string]string, len(pResp.Header))
 	for k := range pResp.Header {
 		if _, ok := gIgnoreHeaders[k]; ok {
 			continue

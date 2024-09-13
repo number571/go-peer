@@ -133,7 +133,7 @@ func testNewPushNode(cfgPath, dbPath string) (anonymity.INode, context.CancelFun
 
 	node.HandleFunc(
 		hls_settings.CServiceMask,
-		HandleServiceTCP(config.NewWrapper(cfg)),
+		HandleServiceTCP(cfg),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 

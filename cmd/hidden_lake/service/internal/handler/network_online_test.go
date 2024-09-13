@@ -125,7 +125,7 @@ func testOnlinePushNode(cfgPath, dbPath string) (anonymity.INode, context.Cancel
 
 	node.HandleFunc(
 		pkg_settings.CServiceMask,
-		HandleServiceTCP(config.NewWrapper(cfg)),
+		HandleServiceTCP(cfg),
 	)
 	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
 

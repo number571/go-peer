@@ -122,7 +122,7 @@ func (p *sApp) initAnonNode() error {
 		}(),
 	).HandleFunc(
 		hls_settings.CServiceMask,
-		handler.HandleServiceTCP(p.fCfgW),
+		handler.HandleServiceTCP(cfg),
 	)
 
 	return nil
