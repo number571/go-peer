@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -65,7 +66,7 @@ func loadResponse(pStatusCode int, pReader io.ReadCloser) ([]byte, error) {
 	}
 
 	if pStatusCode != http.StatusOK {
-		return nil, ErrBadStatusCode
+		return nil, utils.MergeErrors(ErrBadStatusCode, fmt.Errorf("status code: %d", pStatusCode)) // nolint:goerr113
 	}
 
 	return resp, nil

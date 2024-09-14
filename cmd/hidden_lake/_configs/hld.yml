@@ -1,0 +1,10 @@
+settings: {}
+logging:
+- info
+- warn
+- erro
+address:
+  http: 127.0.0.1:9521
+services:
+  hidden-lake-messenger: 127.0.0.1:9592
+  hidden-lake-filesharer: 127.0.0.1:9542

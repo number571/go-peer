@@ -47,7 +47,9 @@ func HandleIncomingPushHTTP(
 
 		fPubKey := asymmetric.LoadRSAPubKey(pR.Header.Get(hls_settings.CHeaderPublicKey))
 		if fPubKey == nil {
-			panic("public key is nil (invalid data from HLS)!")
+			pLogger.PushErro(logBuilder.WithMessage("load_pubkey"))
+			_ = api.Response(pW, http.StatusForbidden, "failed: load public key")
+			return
 		}
 
 		if err := isValidMsgBytes(rawMsgBytes); err != nil {

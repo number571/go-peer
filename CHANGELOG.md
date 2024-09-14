@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/hidden_lake/helpers`: add new service HLD (distributor)
+
 ### CHANGES
 
 - Update `cmd/tools/pmanager`: delete constant from crypto/symmetric package, update keySize 32 -> 33 bytes
