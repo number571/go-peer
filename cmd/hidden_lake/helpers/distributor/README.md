@@ -1,3 +1,0 @@
-# HLD
-
-> Hidden Lake Distributor
