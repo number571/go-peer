@@ -43,7 +43,7 @@ func (p *sSettings) GetMessagesCapacity() uint64 {
 	return p.FMessagesCapacity
 }
 
-func (p sSettings) GetTimestampWindow() time.Duration {
+func (p *sSettings) GetTimestampWindow() time.Duration {
 	return p.FTimestampWindow
 }
 

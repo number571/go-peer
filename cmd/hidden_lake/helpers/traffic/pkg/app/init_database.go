@@ -17,6 +17,7 @@ func (p *sApp) initDatabase() error {
 		FNetworkKey:       cfgSettings.GetNetworkKey(),
 		FWorkSizeBits:     cfgSettings.GetWorkSizeBits(),
 		FMessagesCapacity: cfgSettings.GetMessagesCapacity(),
+		FTimestampWindow:  cfgSettings.GetTimestampWindow(),
 	})
 
 	var (

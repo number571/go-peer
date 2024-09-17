@@ -15,9 +15,9 @@ var (
 )
 
 type SConfigSettings struct {
-	FTimestampWindowS uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FMessagesCapacity uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FTimestampWindowS uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FNetworkKey       string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 

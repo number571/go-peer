@@ -20,12 +20,12 @@ var (
 type SConfigSettings struct {
 	fMutex sync.RWMutex
 
-	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FFetchTimeoutMS       uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
-	FQueuePeriodMS        uint64 `json:"queue_period_ms,omitempty" yaml:"queue_period_ms,omitempty"`
+	FQueuePeriodMS        uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FRandQueuePeriodMS    uint64 `json:"rand_queue_period_ms,omitempty" yaml:"rand_queue_period_ms,omitempty"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
@@ -151,6 +151,7 @@ func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
 		p.FSettings.FKeySizeBits != 0 &&
+		p.FSettings.FQueuePeriodMS != 0 &&
 		p.FSettings.FFetchTimeoutMS != 0
 }
 
