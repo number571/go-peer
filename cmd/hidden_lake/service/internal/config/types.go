@@ -22,7 +22,6 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
-	GetTimestampWindowS() uint64
 	GetFetchTimeoutMS() uint64
 	GetQueuePeriodMS() uint64
 	GetRandQueuePeriodMS() uint64

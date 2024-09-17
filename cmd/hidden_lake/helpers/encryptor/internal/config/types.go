@@ -17,7 +17,6 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
-	GetTimestampWindowS() uint64
 	GetRandMessageSizeBytes() uint64
 }
 

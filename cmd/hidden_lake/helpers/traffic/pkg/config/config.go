@@ -13,7 +13,6 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 			FWorkSizeBits:         sett.GetWorkSizeBits(),
 			FMessagesCapacity:     sett.GetMessagesCapacity(),
 			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),
-			FTimestampWindowS:     sett.GetTimestampWindowS(),
 			FNetworkKey:           sett.GetNetworkKey(),
 			FStorageEnabled:       sett.GetStorageEnabled(),
 		},

@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"time"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -15,10 +14,9 @@ var (
 )
 
 type SConfigSettings struct {
-	FTimestampWindowS uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
-	FWorkSizeBits     uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FNetworkKey       string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
-	FWaitTimeMS       uint64 `json:"wait_time_ms" yaml:"wait_time_ms"`
+	FWorkSizeBits uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
+	FNetworkKey   string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
+	FWaitTimeMS   uint64 `json:"wait_time_ms" yaml:"wait_time_ms"`
 }
 
 type SConfig struct {
@@ -115,14 +113,6 @@ func (p *SConfig) GetSettings() IConfigSettings {
 
 func (p *SConfig) GetLogging() logger.ILogging {
 	return p.fLogging
-}
-
-func (p *SConfigSettings) GetTimestampWindow() time.Duration {
-	return time.Duration(p.FTimestampWindowS) * time.Second
-}
-
-func (p *SConfigSettings) GetTimestampWindowS() uint64 {
-	return p.FTimestampWindowS
 }
 
 func (p *SConfigSettings) GetWaitTimeMS() uint64 {

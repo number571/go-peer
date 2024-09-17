@@ -1,8 +1,6 @@
 package message
 
 import (
-	"time"
-
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -12,7 +10,6 @@ type IMessage interface {
 
 	GetHash() []byte
 	GetRand() []byte
-	GetTime() uint64
 	GetProof() uint64
 
 	// payload = head(32bit) || body(Nbit)
@@ -26,7 +23,6 @@ type IConstructSettings interface {
 }
 
 type ISettings interface {
-	GetTimestampWindow() time.Duration
 	GetWorkSizeBits() uint64
 	GetNetworkKey() string
 }

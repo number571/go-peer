@@ -27,7 +27,6 @@ type ISettings interface {
 	GetLimitMessageSizeBytes() uint64
 	GetWorkSizeBits() uint64
 
-	GetTimestampWindow() time.Duration
 	GetDialTimeout() time.Duration
 	GetReadTimeout() time.Duration
 	GetWriteTimeout() time.Duration

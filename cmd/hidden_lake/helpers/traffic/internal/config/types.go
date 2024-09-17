@@ -18,7 +18,6 @@ type IConfigSettings interface {
 	message.ISettings
 	net_message.ISettings
 
-	GetTimestampWindowS() uint64
 	GetMessagesCapacity() uint64
 	GetRandMessageSizeBytes() uint64
 	GetStorageEnabled() bool

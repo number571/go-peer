@@ -3,7 +3,6 @@ package message
 import (
 	"bytes"
 	"testing"
-	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
@@ -20,11 +19,10 @@ var (
 )
 
 const (
-	tcTimestampWindow = 5
-	tcLimitVoid       = 128
-	tcHead            = 12345
-	tcBody            = "hello, world!"
-	tcNetworkKey      = "network_key_1"
+	tcLimitVoid  = 128
+	tcHead       = 12345
+	tcBody       = "hello, world!"
+	tcNetworkKey = "network_key_1"
 )
 
 type sInvalidPayload struct{}
@@ -57,7 +55,6 @@ func TestMessage(t *testing.T) {
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
-		FTimestampWindow:      time.Minute,
 		FWorkSizeBits:         testutils.TCWorkSize,
 		FNetworkKey:           tcNetworkKey,
 		FRandMessageSizeBytes: tcLimitVoid,
@@ -95,10 +92,6 @@ func TestMessage(t *testing.T) {
 	voidSize := encoding.Uint32ToBytes(uint32(len(voidBytes)))
 	payloadRandBytes := bytes.Join(
 		[][]byte{
-			func() []byte {
-				bytes := encoding.Uint64ToBytes(msg.GetTime())
-				return bytes[:]
-			}(),
 			payloadSize[:],
 			pld.ToBytes(),
 			voidSize[:],

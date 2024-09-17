@@ -20,7 +20,6 @@ func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 			FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetRandMessageSizeBytes(),
-				FTimestampWindow:       cfgSettings.GetTimestampWindow(),
 				FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 				FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 				FDialTimeout:           hls_settings.CConnDialTimeout,

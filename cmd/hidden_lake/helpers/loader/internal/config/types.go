@@ -17,7 +17,6 @@ type IConfig interface {
 type IConfigSettings interface {
 	net_message.ISettings
 
-	GetTimestampWindowS() uint64
 	GetMessagesCapacity() uint64
 }
 

@@ -21,7 +21,6 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
-				FTimestampWindowS:     hls_settings.CDefaultTimestampWindowS,
 				FMessageSizeBytes:     hls_settings.CDefaultMessageSizeBytes,
 				FWorkSizeBits:         hls_settings.CDefaultWorkSizeBits,
 				FKeySizeBits:          hls_settings.CDefaultKeySizeBits,

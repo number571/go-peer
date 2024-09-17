@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"sync"
-	"time"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -25,7 +24,6 @@ type SConfigSettings struct {
 	FFetchTimeoutMS       uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
 	FQueuePeriodMS        uint64 `json:"queue_period_ms" yaml:"queue_period_ms"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FRandQueuePeriodMS    uint64 `json:"rand_queue_period_ms,omitempty" yaml:"rand_queue_period_ms,omitempty"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
@@ -93,14 +91,6 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	return cfg, nil
-}
-
-func (p *SConfigSettings) GetTimestampWindow() time.Duration {
-	return time.Duration(p.FTimestampWindowS) * time.Second
-}
-
-func (p *SConfigSettings) GetTimestampWindowS() uint64 {
-	return p.FTimestampWindowS
 }
 
 func (p *SConfigSettings) GetMessageSizeBytes() uint64 {

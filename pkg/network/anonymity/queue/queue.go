@@ -178,26 +178,28 @@ func (p *sQBTaskProcessor) DequeueMessage(pCtx context.Context) net_message.IMes
 	queuePeriod := p.fSettings.GetQueuePeriod()
 	addRandPeriod := time.Duration(random.NewCSPRNG().GetUint64() % uint64(p.fSettings.GetRandQueuePeriod()+1))
 
-	select {
-	case <-pCtx.Done():
-		return nil
-	case <-time.After(queuePeriod + addRandPeriod):
+	for {
 		select {
-		case x := <-p.fMainPool.fQueue:
-			// the main queue is checked first
-			atomic.AddInt64(&p.fMainPool.fCount, -1)
-			return x
-		default:
-			// take an existing message from any ready queue
+		case <-pCtx.Done():
+			return nil
+		case <-time.After(queuePeriod + addRandPeriod):
 			select {
-			case <-pCtx.Done():
-				return nil
 			case x := <-p.fMainPool.fQueue:
+				// the main queue is checked first
 				atomic.AddInt64(&p.fMainPool.fCount, -1)
 				return x
-			case x := <-p.fRandPool.fQueue:
-				atomic.AddInt64(&p.fRandPool.fCount, -1)
-				return x
+			default:
+				// take an existing message from any ready queue
+				select {
+				case <-pCtx.Done():
+					return nil
+				case x := <-p.fMainPool.fQueue:
+					atomic.AddInt64(&p.fMainPool.fCount, -1)
+					return x
+				case x := <-p.fRandPool.fQueue:
+					atomic.AddInt64(&p.fRandPool.fCount, -1)
+					return x
+				}
 			}
 		}
 	}
