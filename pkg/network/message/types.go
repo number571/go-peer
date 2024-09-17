@@ -7,10 +7,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-const (
-	CWithoutTimestamp = time.Duration(0)
-)
-
 type IMessage interface {
 	types.IConverter
 
@@ -30,6 +26,7 @@ type IConstructSettings interface {
 }
 
 type ISettings interface {
+	GetTimestampWindow() time.Duration
 	GetWorkSizeBits() uint64
 	GetNetworkKey() string
 }

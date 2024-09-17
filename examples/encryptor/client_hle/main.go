@@ -57,7 +57,7 @@ func main() {
 
 		fmt.Println(netMsg.ToString())
 	case "d", "decrypt":
-		netMsg, err := net_message.LoadMessage(netSett, net_message.CWithoutTimestamp, string(os.Args[2]))
+		netMsg, err := net_message.LoadMessage(netSett, string(os.Args[2]))
 		if err != nil {
 			panic(err)
 		}

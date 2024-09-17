@@ -36,7 +36,6 @@ func HandleMessageDecryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pCl
 
 		netMsg, err := net_message.LoadMessage(
 			pConfig.GetSettings(),
-			net_message.CWithoutTimestamp,
 			string(msgStringAsBytes),
 		)
 		if err != nil {

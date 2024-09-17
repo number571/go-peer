@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"sync"
+	"time"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -19,6 +20,7 @@ var (
 type SConfigSettings struct {
 	fMutex sync.RWMutex
 
+	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FFetchTimeoutMS       uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
@@ -26,7 +28,6 @@ type SConfigSettings struct {
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FRandQueuePeriodMS    uint64 `json:"rand_queue_period_ms,omitempty" yaml:"rand_queue_period_ms,omitempty"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
-	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 }
 
@@ -92,6 +93,10 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 	}
 
 	return cfg, nil
+}
+
+func (p *SConfigSettings) GetTimestampWindow() time.Duration {
+	return time.Duration(p.FTimestampWindowS) * time.Second
 }
 
 func (p *SConfigSettings) GetTimestampWindowS() uint64 {

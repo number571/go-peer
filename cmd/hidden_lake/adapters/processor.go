@@ -102,7 +102,7 @@ func produceHandler(
 			return
 		}
 
-		msg, err := net_message.LoadMessage(pSettings, net_message.CWithoutTimestamp, string(msgStrAsBytes))
+		msg, err := net_message.LoadMessage(pSettings, string(msgStrAsBytes))
 		if err != nil {
 			pLogger.PushWarn(err.Error())
 			_ = api.Response(w, http.StatusNotAcceptable, "failed: read message")

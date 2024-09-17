@@ -92,10 +92,11 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_
 
 	// try unpack message from bytes
 	sett := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-		FNetworkKey:   p.getVSettings().GetNetworkKey(),
+		FTimestampWindow: p.fSettings.GetTimestampWindow(),
+		FWorkSizeBits:    p.fSettings.GetWorkSizeBits(),
+		FNetworkKey:      p.getVSettings().GetNetworkKey(),
 	})
-	msg, err := net_message.LoadMessage(sett, p.fSettings.GetTimestampWindow(), dataBytes)
+	msg, err := net_message.LoadMessage(sett, dataBytes)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
 	}

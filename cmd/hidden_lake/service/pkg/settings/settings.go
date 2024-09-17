@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	CDefaultTimestampWindowS     = 60        // 60 seconds
+	CDefaultTimestampWindowS     = 0         // turn off
 	CDefaultMessageSizeBytes     = (8 << 10) // 8192-B
 	CDefaultKeySizeBits          = (4 << 10) // 4096-b
 	CDefaultFetchTimeoutMS       = 60_000    // 60 seconds

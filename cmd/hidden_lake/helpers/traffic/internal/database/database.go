@@ -72,7 +72,7 @@ func (p *sDatabase) Push(pMsg net_message.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	if _, err := net_message.LoadMessage(p.fSettings, net_message.CWithoutTimestamp, pMsg.ToBytes()); err != nil {
+	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
 		return utils.MergeErrors(ErrLoadMessage, err)
 	}
 
@@ -123,7 +123,7 @@ func (p *sDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 		return nil, ErrMessageIsNotExist
 	}
 
-	msg, err := net_message.LoadMessage(p.Settings(), net_message.CWithoutTimestamp, data)
+	msg, err := net_message.LoadMessage(p.Settings(), data)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrLoadMessage, err)
 	}

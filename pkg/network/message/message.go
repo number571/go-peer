@@ -86,7 +86,7 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	}
 }
 
-func LoadMessage(pSett ISettings, pTSWindow time.Duration, pData interface{}) (IMessage, error) {
+func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	var msgBytes []byte
 
 	switch x := pData.(type) {
@@ -121,12 +121,12 @@ func LoadMessage(pSett ISettings, pTSWindow time.Duration, pData interface{}) (I
 		return arr
 	}())
 
-	if pTSWindow != 0 {
+	if tsWindow := pSett.GetTimestampWindow(); tsWindow != 0 {
 		gotTimestamp := time.Unix(int64(timestamp), 0)
 		switch nowTimestamp := time.Now().UTC(); {
-		case gotTimestamp.After(nowTimestamp.Add(pTSWindow)):
+		case gotTimestamp.After(nowTimestamp.Add(tsWindow)):
 			fallthrough
-		case gotTimestamp.Before(nowTimestamp.Add(-pTSWindow)):
+		case gotTimestamp.Before(nowTimestamp.Add(-tsWindow)):
 			return nil, ErrInvalidTimestamp
 		}
 	}

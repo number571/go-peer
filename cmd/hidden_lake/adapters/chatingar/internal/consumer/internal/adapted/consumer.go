@@ -114,7 +114,7 @@ func (p *sAdaptedConsumer) loadMessage(pCtx context.Context) (net_message.IMessa
 	}
 
 	for _, v := range messagesDTO.Comments {
-		msg, err := net_message.LoadMessage(p.fSettings, net_message.CWithoutTimestamp, v.Body)
+		msg, err := net_message.LoadMessage(p.fSettings, v.Body)
 		if err != nil {
 			continue
 		}

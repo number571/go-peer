@@ -77,7 +77,7 @@ func (p *sRequester) EncryptMessage(pCtx context.Context, pPubKey asymmetric.IPu
 		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
-	msg, err := net_message.LoadMessage(p.fParams, net_message.CWithoutTimestamp, string(resp))
+	msg, err := net_message.LoadMessage(p.fParams, string(resp))
 	if err != nil {
 		return nil, utils.MergeErrors(ErrDecodeResponse, err)
 	}

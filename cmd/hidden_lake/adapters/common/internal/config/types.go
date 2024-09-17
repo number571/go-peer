@@ -15,6 +15,8 @@ type IConfig interface {
 
 type IConfigSettings interface {
 	net_message.ISettings
+
+	GetTimestampWindowS() uint64
 	GetWaitTimeMS() uint64
 }
 

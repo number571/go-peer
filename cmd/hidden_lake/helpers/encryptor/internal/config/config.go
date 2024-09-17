@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"time"
 
 	logger "github.com/number571/go-peer/internal/logger/std"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -14,6 +15,7 @@ var (
 )
 
 type SConfigSettings struct {
+	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
@@ -126,6 +128,14 @@ func (p *SAddress) GetPPROF() string {
 
 func (p *SConfigSettings) GetRandMessageSizeBytes() uint64 {
 	return p.FRandMessageSizeBytes
+}
+
+func (p *SConfigSettings) GetTimestampWindow() time.Duration {
+	return time.Duration(p.FTimestampWindowS) * time.Second
+}
+
+func (p *SConfigSettings) GetTimestampWindowS() uint64 {
+	return p.FTimestampWindowS
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {

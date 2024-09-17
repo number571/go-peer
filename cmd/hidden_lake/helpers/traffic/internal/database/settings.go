@@ -1,5 +1,7 @@
 package database
 
+import "time"
+
 var (
 	_ ISettings = &sSettings{}
 )
@@ -10,6 +12,7 @@ type sSettings struct {
 	FNetworkKey       string
 	FWorkSizeBits     uint64
 	FMessagesCapacity uint64
+	FTimestampWindow  time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -18,6 +21,7 @@ func NewSettings(pSett *SSettings) ISettings {
 		FNetworkKey:       pSett.FNetworkKey,
 		FWorkSizeBits:     pSett.FWorkSizeBits,
 		FMessagesCapacity: pSett.FMessagesCapacity,
+		FTimestampWindow:  pSett.FTimestampWindow,
 	}).mustNotNull()
 }
 
@@ -37,6 +41,10 @@ func (p *sSettings) GetPath() string {
 
 func (p *sSettings) GetMessagesCapacity() uint64 {
 	return p.FMessagesCapacity
+}
+
+func (p sSettings) GetTimestampWindow() time.Duration {
+	return p.FTimestampWindow
 }
 
 func (p *sSettings) GetNetworkKey() string {

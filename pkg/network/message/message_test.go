@@ -57,6 +57,7 @@ func TestMessage(t *testing.T) {
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewSettings(&SSettings{
+		FTimestampWindow:      time.Minute,
 		FWorkSizeBits:         testutils.TCWorkSize,
 		FNetworkKey:           tcNetworkKey,
 		FRandMessageSizeBytes: tcLimitVoid,
@@ -68,7 +69,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg, err := LoadMessage(sett, time.Minute, msgTmp.ToBytes())
+	msg, err := LoadMessage(sett, msgTmp.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
@@ -128,7 +129,7 @@ func TestMessage(t *testing.T) {
 		if msgN.GetProof() == 0 {
 			continue
 		}
-		msgL, err := LoadMessage(newSett, 0, msgN.ToBytes())
+		msgL, err := LoadMessage(newSett, msgN.ToBytes())
 		if err != nil {
 			t.Error(err)
 			return
@@ -148,7 +149,7 @@ func TestMessage(t *testing.T) {
 		break
 	}
 
-	msg1, err := LoadMessage(sett, time.Minute, msg.ToBytes())
+	msg1, err := LoadMessage(sett, msg.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
@@ -158,7 +159,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg2, err := LoadMessage(sett, time.Minute, msg.ToString())
+	msg2, err := LoadMessage(sett, msg.ToString())
 	if err != nil {
 		t.Error(err)
 		return
@@ -170,34 +171,34 @@ func TestMessage(t *testing.T) {
 
 	msg3 := NewMessage(sett, pld).(*sMessage)
 	msg3.fEncd[0] ^= 1
-	if _, err := LoadMessage(sett, time.Minute, msg3.ToBytes()); err == nil {
+	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
 		t.Error("success load with invalid encd")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, struct{}{}); err == nil {
+	if _, err := LoadMessage(sett, struct{}{}); err == nil {
 		t.Error("success load with unknown type of message")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, []byte{1}); err == nil {
+	if _, err := LoadMessage(sett, []byte{1}); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, []byte{1}); err == nil {
+	if _, err := LoadMessage(sett, []byte{1}); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
 	randBytes := random.NewCSPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
-	if _, err := LoadMessage(sett, time.Minute, randBytes); err == nil {
+	if _, err := LoadMessage(sett, randBytes); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
 	prng := random.NewCSPRNG()
-	if _, err := LoadMessage(sett, time.Minute, prng.GetBytes(64)); err == nil {
+	if _, err := LoadMessage(sett, prng.GetBytes(64)); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
@@ -209,22 +210,22 @@ func TestMessage(t *testing.T) {
 		},
 		[]byte{},
 	)
-	if _, err := LoadMessage(sett, time.Minute, msgBytes); err == nil {
+	if _, err := LoadMessage(sett, msgBytes); err == nil {
 		t.Error("success load incorrect payload")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett, tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 1")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett, tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 2")
 		return
 	}
 
-	if _, err := LoadMessage(sett, time.Minute, tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett, tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 3")
 		return
 	}

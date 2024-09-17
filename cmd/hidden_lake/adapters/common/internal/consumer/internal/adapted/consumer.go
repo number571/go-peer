@@ -93,7 +93,7 @@ func (p *sAdaptedConsumer) loadMessageFromService(pCtx context.Context, pID uint
 		return nil, ErrInvalidResponse
 	}
 
-	msg, err := net_message.LoadMessage(p.fSettings, net_message.CWithoutTimestamp, string(msgStringAsBytes[1:]))
+	msg, err := net_message.LoadMessage(p.fSettings, string(msgStringAsBytes[1:]))
 	if err != nil {
 		return nil, utils.MergeErrors(ErrDecodeMessage, err)
 	}
