@@ -1,8 +1,14 @@
 package message
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
+)
+
+const (
+	CWithoutTimestamp = time.Duration(0)
 )
 
 type IMessage interface {
@@ -10,6 +16,7 @@ type IMessage interface {
 
 	GetHash() []byte
 	GetRand() []byte
+	GetTime() uint64
 	GetProof() uint64
 
 	// payload = head(32bit) || body(Nbit)

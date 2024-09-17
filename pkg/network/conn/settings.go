@@ -13,6 +13,7 @@ type sSettings struct {
 	FNetworkKey            string
 	FWorkSizeBits          uint64
 	FLimitMessageSizeBytes uint64
+	FTimestampWindow       time.Duration
 	FWaitReadTimeout       time.Duration
 	FDialTimeout           time.Duration
 	FReadTimeout           time.Duration
@@ -24,6 +25,7 @@ func NewSettings(pSett *SSettings) ISettings {
 		FNetworkKey:            pSett.FNetworkKey,
 		FWorkSizeBits:          pSett.FWorkSizeBits,
 		FLimitMessageSizeBytes: pSett.FLimitMessageSizeBytes,
+		FTimestampWindow:       pSett.FTimestampWindow,
 		FWaitReadTimeout:       pSett.FWaitReadTimeout,
 		FDialTimeout:           pSett.FDialTimeout,
 		FReadTimeout:           pSett.FReadTimeout,
@@ -56,6 +58,10 @@ func (p *sSettings) GetWorkSizeBits() uint64 {
 
 func (p *sSettings) GetLimitMessageSizeBytes() uint64 {
 	return p.FLimitMessageSizeBytes
+}
+
+func (p *sSettings) GetTimestampWindow() time.Duration {
+	return p.FTimestampWindow
 }
 
 func (p *sSettings) GetWaitReadTimeout() time.Duration {

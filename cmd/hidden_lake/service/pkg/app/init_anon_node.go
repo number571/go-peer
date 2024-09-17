@@ -84,6 +84,7 @@ func (p *sApp) initAnonNode() error {
 				FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetRandMessageSizeBytes(),
+					FTimestampWindow:       time.Duration(cfgSettings.GetTimestampWindowS()) * time.Second,
 					FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 					FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 					FDialTimeout:           hls_settings.CConnDialTimeout,

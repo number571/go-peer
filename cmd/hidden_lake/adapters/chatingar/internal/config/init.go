@@ -16,7 +16,7 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
-				FWorkSizeBits: hls_settings.CDefaultWorkSize,
+				FWorkSizeBits: hls_settings.CDefaultWorkSizeBits,
 				FNetworkKey:   hls_settings.CDefaultNetworkKey,
 				FWaitTimeMS:   hla_settings.CDefaultWaitTimeMS,
 			},

@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
@@ -13,19 +14,21 @@ import (
 )
 
 const (
-	// IV + Proof + Hash + (2 x Payload32Head) + Payload32Head
-	// 16 + 8 + 32 + 2x4 + 4 = 68 additional bytes to origin message
+	// IV + Proof + Hash + Timestamp + (2xPayload32Head)=[len(data)+len(void)] + Payload32Head=[head]
+	// 16 + 8 + 32 + 8 + 2x4 + 4 = 76 additional bytes to origin message
 	CMessageHeadSize = 0 +
 		1*symmetric.CAESBlockSize +
 		1*encoding.CSizeUint64 +
 		1*hashing.CSHA256Size +
+		1*encoding.CSizeUint64 +
 		2*encoding.CSizeUint32 +
 		1*encoding.CSizeUint32
 )
 
 const (
-	cProofIndex = encoding.CSizeUint64
-	cHashIndex  = cProofIndex + hashing.CSHA256Size
+	cProofIndex     = encoding.CSizeUint64
+	cHashIndex      = cProofIndex + hashing.CSHA256Size
+	cTimestampIndex = cHashIndex + encoding.CSizeUint64
 )
 
 var (
@@ -33,18 +36,31 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte             // E( K, P(HLMR) || HLMR || L(M) || M || L(R) || R )
-	fHash    []byte             // HLMR = H( K, L(M) || M || L(R) || R )
+	fEncd    []byte             // E( K, P(HTLMR) || HTLMR || T || L(M) || M || L(R) || R )
+	fHash    []byte             // HTLMR = H( K, T || L(M) || M || L(R) || R )
 	fRand    []byte             // R
-	fProof   uint64             // P(HLMR)
+	fTime    uint64             // T
+	fProof   uint64             // P(HTLMR)
 	fPayload payload.IPayload32 // M
 }
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
 
+	timestamp := uint64(time.Now().UTC().Unix())
 	randBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
+
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), randBytes})
+	bytesJoiner = bytes.Join(
+		[][]byte{
+			func() []byte {
+				bytes := encoding.Uint64ToBytes(timestamp)
+				return bytes[:]
+			}(),
+			bytesJoiner,
+		},
+		[]byte{},
+	)
 
 	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
@@ -64,12 +80,13 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 		)),
 		fHash:    hash,
 		fRand:    randBytes,
+		fTime:    timestamp,
 		fProof:   proof,
 		fPayload: pPld,
 	}
 }
 
-func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
+func LoadMessage(pSett ISettings, pTSWindow time.Duration, pData interface{}) (IMessage, error) {
 	var msgBytes []byte
 
 	switch x := pData.(type) {
@@ -98,7 +115,23 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	bytesSlice, err := joiner.LoadBytesJoiner32(dBytes[cHashIndex:])
+	timestamp := encoding.BytesToUint64(func() [encoding.CSizeUint64]byte {
+		arr := [encoding.CSizeUint64]byte{}
+		copy(arr[:], dBytes[cHashIndex:cTimestampIndex])
+		return arr
+	}())
+
+	if pTSWindow != 0 {
+		gotTimestamp := time.Unix(int64(timestamp), 0)
+		switch nowTimestamp := time.Now().UTC(); {
+		case gotTimestamp.After(nowTimestamp.Add(pTSWindow)):
+			fallthrough
+		case gotTimestamp.Before(nowTimestamp.Add(-pTSWindow)):
+			return nil, ErrInvalidTimestamp
+		}
+	}
+
+	bytesSlice, err := joiner.LoadBytesJoiner32(dBytes[cTimestampIndex:])
 	if err != nil || len(bytesSlice) != 2 {
 		return nil, ErrDecodeBytesJoiner
 	}
@@ -117,6 +150,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		fEncd:    msgBytes,
 		fHash:    hash,
 		fRand:    bytesSlice[1],
+		fTime:    timestamp,
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -128,6 +162,10 @@ func (p *sMessage) GetProof() uint64 {
 
 func (p *sMessage) GetHash() []byte {
 	return p.fHash
+}
+
+func (p *sMessage) GetTime() uint64 {
+	return p.fTime
 }
 
 func (p *sMessage) GetRand() []byte {

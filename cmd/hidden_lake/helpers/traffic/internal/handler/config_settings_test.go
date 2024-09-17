@@ -50,7 +50,7 @@ func TestHandleConfigSettingsAPI(t *testing.T) {
 		return
 	}
 
-	if settings.GetRandMessageSizeBytes() != hls_settings.CDefaultRandMessageSize {
+	if settings.GetRandMessageSizeBytes() != hls_settings.CDefaultRandMessageSizeBytes {
 		t.Error("incorrect rand message size bytes")
 		return
 	}

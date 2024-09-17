@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/network/message`: add timestamp
+
 ### CHANGES
 
 - Update `cmd/tools/pmanager`: delete constant from crypto/symmetric package, update keySize 32 -> 33 bytes

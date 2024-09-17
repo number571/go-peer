@@ -695,6 +695,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FLimitMessageSizeBytes: testutils.TCMessageSize + limitVoidSize,
 					FWorkSizeBits:          testutils.TCWorkSize,
+					FTimestampWindow:       time.Hour,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,

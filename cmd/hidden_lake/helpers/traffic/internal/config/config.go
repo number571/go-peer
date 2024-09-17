@@ -20,6 +20,7 @@ type SConfigSettings struct {
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
 	FMessagesCapacity     uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
+	FTimestampWindowS     uint64 `json:"timestamp_window_s,omitempty" yaml:"timestamp_window_s,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FStorageEnabled       bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
 }
@@ -79,6 +80,10 @@ func LoadConfig(pFilepath string) (IConfig, error) {
 
 func (p *SConfig) GetSettings() IConfigSettings {
 	return p.FSettings
+}
+
+func (p *SConfigSettings) GetTimestampWindowS() uint64 {
+	return p.FTimestampWindowS
 }
 
 func (p *SConfigSettings) GetMessageSizeBytes() uint64 {

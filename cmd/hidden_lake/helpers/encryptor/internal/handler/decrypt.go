@@ -34,7 +34,11 @@ func HandleMessageDecryptAPI(pConfig config.IConfig, pLogger logger.ILogger, pCl
 			return
 		}
 
-		netMsg, err := net_message.LoadMessage(pConfig.GetSettings(), string(msgStringAsBytes))
+		netMsg, err := net_message.LoadMessage(
+			pConfig.GetSettings(),
+			net_message.CWithoutTimestamp,
+			string(msgStringAsBytes),
+		)
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("decode_net_message"))
 			_ = api.Response(pW, http.StatusNotAcceptable, "failed: decode network message")

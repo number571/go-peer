@@ -19,5 +19,6 @@ var (
 	ErrDecodeBytesJoiner  = &SMessageError{"decode bytes joiner"}
 	ErrInvalidPayloadSize = &SMessageError{"got invalid payload size"}
 	ErrInvalidAuthHash    = &SMessageError{"got invalid auth hash"}
+	ErrInvalidTimestamp   = &SMessageError{"got invalid timestamp"}
 	ErrDecodePayload      = &SMessageError{"decode payload"}
 )

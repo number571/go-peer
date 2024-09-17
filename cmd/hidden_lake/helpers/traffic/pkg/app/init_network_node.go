@@ -1,6 +1,8 @@
 package app
 
 import (
+	"time"
+
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/handler"
 	"github.com/number571/go-peer/pkg/network"
@@ -20,6 +22,7 @@ func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 			FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetRandMessageSizeBytes(),
+				FTimestampWindow:       time.Duration(cfgSettings.GetTimestampWindowS()) * time.Second,
 				FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 				FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 				FDialTimeout:           hls_settings.CConnDialTimeout,

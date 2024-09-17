@@ -119,7 +119,7 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 		FSettings: &config.SConfigSettings{
 			FMessageSizeBytes:     testutils.TCMessageSize,
 			FWorkSizeBits:         testutils.TCWorkSize,
-			FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
+			FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSizeBytes,
 			FKeySizeBits:          testutils.TcKeySize,
 			FNetworkKey:           testutils.TCNetworkKey,
 			FMessagesCapacity:     testutils.TCCapacity,

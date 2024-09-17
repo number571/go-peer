@@ -21,13 +21,14 @@ func InitConfig(cfgPath string, initCfg *SConfig) (IConfig, error) {
 	if initCfg == nil {
 		initCfg = &SConfig{
 			FSettings: &SConfigSettings{
-				FMessageSizeBytes:     hls_settings.CDefaultMessageSize,
-				FWorkSizeBits:         hls_settings.CDefaultWorkSize,
-				FKeySizeBits:          hls_settings.CDefaultKeySize,
-				FFetchTimeoutMS:       hls_settings.CDefaultFetchTimeout,
-				FQueuePeriodMS:        hls_settings.CDefaultQueuePeriod,
-				FRandQueuePeriodMS:    hls_settings.CDefaultRandQueuePeriod,
-				FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSize,
+				FTimestampWindowS:     hls_settings.CDefaultTimestampWindowS,
+				FMessageSizeBytes:     hls_settings.CDefaultMessageSizeBytes,
+				FWorkSizeBits:         hls_settings.CDefaultWorkSizeBits,
+				FKeySizeBits:          hls_settings.CDefaultKeySizeBits,
+				FFetchTimeoutMS:       hls_settings.CDefaultFetchTimeoutMS,
+				FQueuePeriodMS:        hls_settings.CDefaultQueuePeriodMS,
+				FRandQueuePeriodMS:    hls_settings.CDefaultRandQueuePeriodMS,
+				FRandMessageSizeBytes: hls_settings.CDefaultRandMessageSizeBytes,
 				FNetworkKey:           hls_settings.CDefaultNetworkKey,
 			},
 			FLogging: []string{logger.CLogInfo, logger.CLogWarn, logger.CLogErro},

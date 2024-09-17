@@ -40,7 +40,7 @@ func (p *sInMemoryDatabase) Hash(i uint64) ([]byte, error) {
 }
 
 func (p *sInMemoryDatabase) Push(pMsg net_message.IMessage) error {
-	if _, err := net_message.LoadMessage(p.fSettings, pMsg.ToBytes()); err != nil {
+	if _, err := net_message.LoadMessage(p.fSettings, net_message.CWithoutTimestamp, pMsg.ToBytes()); err != nil {
 		return utils.MergeErrors(ErrLoadMessage, err)
 	}
 
@@ -61,7 +61,7 @@ func (p *sInMemoryDatabase) Load(pHash []byte) (net_message.IMessage, error) {
 		return nil, ErrMessageIsNotExist
 	}
 
-	msg, err := net_message.LoadMessage(p.fSettings, msgBytes)
+	msg, err := net_message.LoadMessage(p.fSettings, net_message.CWithoutTimestamp, msgBytes)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrLoadMessage, err)
 	}

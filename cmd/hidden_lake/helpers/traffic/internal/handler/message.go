@@ -64,6 +64,7 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDatabase datab
 					FNetworkKey:   pNode.GetVSettings().GetNetworkKey(),
 					FWorkSizeBits: pNode.GetSettings().GetConnSettings().GetWorkSizeBits(),
 				}),
+				net_message.CWithoutTimestamp,
 				string(msgStringAsBytes),
 			)
 			if err != nil {

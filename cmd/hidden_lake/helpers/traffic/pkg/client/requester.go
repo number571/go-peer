@@ -114,7 +114,7 @@ func (p *sRequester) GetMessage(pCtx context.Context, pHash string) (net_message
 		return nil, utils.MergeErrors(ErrBadRequest, err)
 	}
 
-	msg, err := net_message.LoadMessage(p.fParams, string(resp))
+	msg, err := net_message.LoadMessage(p.fParams, net_message.CWithoutTimestamp, string(resp))
 	if err != nil {
 		return nil, utils.MergeErrors(ErrDecodeMessage, err)
 	}
