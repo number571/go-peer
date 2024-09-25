@@ -19,15 +19,15 @@ Also, the composition of these works can be found in the book [The general theor
 
 ### 3. Habr
 
-1. [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
-2. [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
-3. [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
-4. [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
-5. [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
-6. [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
-7. [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
-8. [Hidden Lake Filesharer](https://habr.com/ru/articles/789968/ "Habr HLF")
-9. [Hidden Lake Remoter](https://habr.com/ru/articles/830130/ "Habr HLR")
+1.  [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
+2.  [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
+3.  [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
+4.  [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
+5.  [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
+6.  [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
+7.  [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
+8.  [Hidden Lake Filesharer](https://habr.com/ru/articles/789968/ "Habr HLF")
+9.  [Hidden Lake Remoter](https://habr.com/ru/articles/830130/ "Habr HLR")
 10. [Hidden Lake Adapter Chatingar](https://habr.com/ru/articles/800965/ "Habr HLA_chatingar")
 
 ### 4. Videos
@@ -49,7 +49,6 @@ Also, the composition of these works can be found in the book [The general theor
 5. HLE  = 955x
 6. HLF  = 954x
 7. HLR  = 953x
-8. HLD  = 952x
 
 ## Code style go-peer
 
