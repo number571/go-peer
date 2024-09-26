@@ -73,7 +73,7 @@ func newNode(serviceName, address string) anonymity.INode {
 			newVSettings(networkKey),
 			lru.NewLRUCache(1024),
 		),
-		queue.NewQBTaskProcessor(
+		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:      networkMask,
 				FWorkSizeBits:     workSize,

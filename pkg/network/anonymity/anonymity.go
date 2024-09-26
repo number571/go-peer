@@ -2,6 +2,7 @@ package anonymity
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -33,7 +34,7 @@ type sNode struct {
 	fLogger        logger.ILogger
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
-	fQueue         queue.IQBTaskProcessor
+	fQueue         queue.IQBProblemProcessor
 	fFriends       asymmetric.IListPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
@@ -44,7 +45,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
-	pQueue queue.IQBTaskProcessor,
+	pQueue queue.IQBProblemProcessor,
 	pFriends asymmetric.IListPubKeys,
 ) INode {
 	return &sNode{
@@ -124,7 +125,7 @@ func (p *sNode) GetNetworkNode() network.INode {
 	return p.fNetwork
 }
 
-func (p *sNode) GetMessageQueue() queue.IQBTaskProcessor {
+func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 	return p.fQueue
 }
 
@@ -229,6 +230,7 @@ func (p *sNode) networkHandler(
 		if err != nil {
 			return utils.MergeErrors(ErrStoreHashWithBroadcast, err)
 		}
+		// hash already exist in database
 		return nil
 	}
 
@@ -383,9 +385,11 @@ func (p *sNode) storeHashWithBroadcast(
 	pNetMsg net_message.IMessage,
 ) (bool, error) {
 	// try push hash into database
-	hashIsSaved, err := p.storeHashIntoDatabase(pLogBuilder, pNetMsg.GetHash())
-	if err != nil || !hashIsSaved {
+	if err := p.storeHashIntoDatabase(pLogBuilder, pNetMsg.GetHash()); err != nil {
 		// internal logger
+		if errors.Is(err, ErrHashAlreadyExist) {
+			return false, nil
+		}
 		return false, err
 	}
 
@@ -401,20 +405,20 @@ func (p *sNode) storeHashWithBroadcast(
 	return true, nil
 }
 
-func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) (bool, error) {
+func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) error {
 	// check already received data by hash
 	if _, err := p.fKVDatavase.Get(pHash); err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
-		return false, nil
+		return utils.MergeErrors(ErrHashAlreadyExist, err)
 	}
 
 	// set hash to database with new address
 	if err := p.fKVDatavase.Set(pHash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-		return false, utils.MergeErrors(ErrSetHashIntoDB, err)
+		return utils.MergeErrors(ErrSetHashIntoDB, err)
 	}
 
-	return true, nil
+	return nil
 }
 
 func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {

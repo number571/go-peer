@@ -72,7 +72,7 @@ func TestRunStopQueue(t *testing.T) {
 		}),
 		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
 	)
-	queue := NewQBTaskProcessor(
+	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: 1,
@@ -96,7 +96,7 @@ func TestRunStopQueue(t *testing.T) {
 
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
-		sQueue := queue.(*sQBTaskProcessor)
+		sQueue := queue.(*sQBProblemProcessor)
 		if len(sQueue.fRandPool.fQueue) == int(sett.GetRandPoolCapacity()) {
 			return nil
 		}
@@ -139,7 +139,7 @@ func TestRunStopQueue(t *testing.T) {
 func TestQueue(t *testing.T) {
 	t.Parallel()
 
-	queue := NewQBTaskProcessor(
+	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
 			FNetworkMask:      1,
 			FWorkSizeBits:     10,
@@ -174,7 +174,7 @@ func TestQueue(t *testing.T) {
 	}
 }
 
-func testQueue(queue IQBTaskProcessor) error {
+func testQueue(queue IQBProblemProcessor) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()

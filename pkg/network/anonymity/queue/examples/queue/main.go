@@ -19,7 +19,7 @@ const (
 )
 
 func main() {
-	q := queue.NewQBTaskProcessor(
+	q := queue.NewQBProblemProcessor(
 		queue.NewSettings(&queue.SSettings{
 			FQueuePeriod:      time.Second,
 			FMainPoolCapacity: 1 << 5,

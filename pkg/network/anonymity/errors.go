@@ -27,4 +27,5 @@ var (
 	ErrFetchResponse          = &SAnonymityError{"fetch response"}
 	ErrRunning                = &SAnonymityError{"node running"}
 	ErrProcessRun             = &SAnonymityError{"process run"}
+	ErrHashAlreadyExist       = &SAnonymityError{"hash already exist"}
 )

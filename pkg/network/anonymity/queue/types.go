@@ -11,7 +11,7 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-type IQBTaskProcessor interface {
+type IQBProblemProcessor interface {
 	types.IRunner
 
 	SetVSettings(IVSettings)

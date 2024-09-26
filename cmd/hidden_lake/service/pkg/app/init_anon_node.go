@@ -96,7 +96,7 @@ func (p *sApp) initAnonNode() error {
 			}),
 			lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 		),
-		queue.NewQBTaskProcessor(
+		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FNetworkMask:          hls_settings.CNetworkMask,
 				FWorkSizeBits:         cfgSettings.GetWorkSizeBits(),
