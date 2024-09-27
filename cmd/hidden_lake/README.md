@@ -35,16 +35,22 @@
 	About project
 </h2>
 
+> [!IMPORTANT]
+> The project is being actively developed, the implementation of some details may change over time. More information about the changes can be obtained from the [CHANGELOG.md](https://github.com/number571/go-peer/blob/master/CHANGELOG.md) file.
+
 The `Hidden Lake` is an anonymous network built on a `micro-service` architecture. At the heart of HL is the core - `HLS` (service), which generates anonymizing traffic and combines many other services (for example, `HLT` and `HLM`). Thus, Hidden Lake is not a whole and monolithic solution, but a composition of several combined services.
 
 By default, the anonymous Hidden Lake network is a `friend-to-friend` (F2F) network, which means building trusted communications. Due to this approach, members of the HL network can avoid `spam` in their direction, as well as `possible attacks` if vulnerabilities are found in the code.
 
-> [!IMPORTANT]
-> The project is being actively developed, the implementation of some details may change over time. More information about the changes can be obtained from the [CHANGELOG.md](https://github.com/number571/go-peer/blob/master/CHANGELOG.md) file.
-
-Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT, HLM, HLF, HLR, HLL, HLE. The `main services` include only HLS. The `application services` are HLM, HLF and HLR. The `helper services` are HLT, HLL and HLE.
-
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [hidden_lake_anonymous_network_view.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "HLANv")
+
+## List of applications
+
+Basic | Applied | Helpers
+:-----------------------------:|:-----------------------------:|:------------------------------:
+[HL Service](service) | [HL Messenger](applications/messenger) | [HL Traffic](helpers/traffic)
+[HL Composite](composite) | [HL Filesharer](applications/filesharer) | [HL Loader](helpers/loader)
+[HL Adapters](adapters) | [HL Remoter](applications/remoter) | [HL Encryptor](helpers/encryptor)
 
 ## Coverage map
 
@@ -52,7 +58,7 @@ Currently, the anonymous Hidden Lake network consists of six services: HLS, HLT,
 
 ## How it works
 
-The anonymous Hidden Lake network is an `abstract` network. This means that regardless of the system in which it is located and regardless of the number of nodes, as well as their location, the HL network remains anonymous. This property is achieved due to a theoretically provable `queue-based` task. Its algorithm can be described as follows.
+The anonymous Hidden Lake network is an `abstract` network. This means that regardless of the system in which it is located and regardless of the number of nodes, as well as their location, the HL network remains anonymous. This property is achieved due to a theoretically provable `queue-based` problem. Its algorithm can be described as follows.
 
 1. Each message is `encrypted` with the recipient's key,
 2. The message is sent during the period `= T` to all network participants,
@@ -94,7 +100,7 @@ On the basis of this characteristic, methods of possible application also begin 
 1. Due to the property of abstracting from network communications, the anonymous Hidden Lake network can be `integrated` into any other network (including a centralized one) where group communication is possible. In such a case, the HL software implementation provides for the essence of [adapters](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/adapters) that must be able to adapt to a specific execution environment, hiding and obscuring the generated parasitic traffic,
 2. Due to the `theoretically provable anonymity` and independence of nodes among themselves in choosing the period of packet generation, the network can be used in military affairs, ensuring not only the confidentiality of transmitted data, but also the confidentiality of metadata in the face of the activity of actions,
 3. The Hidden Lake network can be used as a `communication platform` for applications that are heterogeneous in nature. This is made possible by the go-peer protocol, which does not define any application use. As a result, you can create your own applications at several levels: either at the go-peer library level or at the HL services level ([example](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat)),
-4. Due to problems with scaling at the level of the `QB-task` itself, the network is difficult to deploy in a global space, which nevertheless does not indicate a local field of action. Hidden Lake can protect `local networks` in a more efficient way due to the existence of small groups of participants that do not vary greatly in number. This may be a relevant solution in the context of the existence of critical areas of a local organization.
+4. Due to problems with scaling at the level of the `QB-problem` itself, the network is difficult to deploy in a global space, which nevertheless does not indicate a local field of action. Hidden Lake can protect `local networks` in a more efficient way due to the existence of small groups of participants that do not vary greatly in number. This may be a relevant solution in the context of the existence of critical areas of a local organization.
 
 ## Possible launch modes
 
