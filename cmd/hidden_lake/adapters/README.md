@@ -22,7 +22,7 @@ Since the adapters are capable of performing the same functions as the source pr
 
 Build and run nodes
 ```bash
-$ cd examples/anonymity/echo_service/secret_channel
+$ cd examples/anonymity/echo_service/secret_channel/common
 $ make
 ```
 
