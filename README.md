@@ -151,14 +151,12 @@ The difference between the old version of Hidden Lake and the new one is in the 
 3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library
 4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all
 
-**[⬆ back to top](#installation)**
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=number571/go-peer&type=Date)](https://star-history.com/#number571/go-peer&Date)
 
-**[⬆ back to top](#installation)**
-
 ## License
 
 Licensed under the MIT License. See [LICENSE](LICENSE) for the full license text.
+
+**[⬆ back to top](#installation)**
