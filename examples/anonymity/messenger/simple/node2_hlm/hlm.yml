@@ -1,0 +1,11 @@
+settings:
+  messages_capacity: 2048
+  work_size_bits: 20
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :7070
+  incoming: :7071
+connection: node2_hlc:7572

@@ -35,7 +35,7 @@ func main() {
 	}()
 
 	receiver := "Bob"
-	message := fmt.Sprintf("bash%[1]s-c%[1]secho 'hello, world' > file.txt && cat file.txt", hlr_settings.CExecSeparator)
+	message := fmt.Sprintf("bash%[1]s-c%[1]secho 'hello, world' >> file.txt && cat file.txt", hlr_settings.CExecSeparator)
 
 	sendMessage(receiver, []byte(message))
 }

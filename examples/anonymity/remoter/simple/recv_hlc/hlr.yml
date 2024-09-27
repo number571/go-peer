@@ -1,0 +1,9 @@
+settings:
+  exec_timeout_ms: 5000
+  password: DpxJFjAlrs4HOWga0wk14mZqQSBo9DxK
+logging:
+- info
+- warn
+- erro
+address:
+  incoming: :9532

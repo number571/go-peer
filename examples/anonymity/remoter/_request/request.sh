@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASE64_BODY="$(\
-    echo -n 'bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' > file.txt && cat file.txt' | \
+    echo -n 'bash[@remoter-separator]-c[@remoter-separator]echo 'hello, world' >> file.txt && cat file.txt' | \
     base64 -w 0 \
 )";
 PUSH_FORMAT='{

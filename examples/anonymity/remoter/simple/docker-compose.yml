@@ -1,0 +1,23 @@
+version: "3"
+services:
+  recv_hlc:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/composite/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/remoter/simple/recv_hlc
+    networks:
+      - hidden-lake
+  send_hls:
+    build:
+      context: ./../../../../
+      dockerfile: cmd/hidden_lake/service/Dockerfile
+    environment:
+      - SERVICE_PATH=examples/anonymity/remoter/simple/send_hls
+    ports:
+      - 7572:7572
+    networks:
+      - hidden-lake
+networks:
+  hidden-lake:
+    driver: bridge

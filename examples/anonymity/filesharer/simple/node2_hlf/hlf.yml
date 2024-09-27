@@ -1,0 +1,11 @@
+settings:
+  page_offset: 10
+  retry_num: 2
+logging:
+- info
+- warn
+- erro
+address:
+  interface: :7070
+  incoming: :7071
+connection: node2_hlc:7572
