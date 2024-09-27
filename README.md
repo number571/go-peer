@@ -96,12 +96,12 @@ All cmd programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux
 > [!IMPORTANT]
 > All dependencies are loaded into the go-peer project once using the `go mod vendor` command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
 
-1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/database`);
-2. Go library [golang.org/x/net](https://golang.org/x/net "x/net") (used by `cmd/hidden_lake/applications/messenger`);
-3. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`);
-4. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`);
-5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`);
-6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger|filesharer`);
+1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/database`)
+2. Go library [golang.org/x/net](https://golang.org/x/net "x/net") (used by `cmd/hidden_lake/applications/messenger`)
+3. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`)
+4. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`)
+5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`)
+6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger|filesharer`)
 
 ### Makefile
 
@@ -132,10 +132,10 @@ Also, the composition of these works (without "The Hidden Lake anonymous network
 
 ## Library based applications
 
-1. Anonymous network «[Hidden Lake](cmd/hidden_lake)»,
-2. Console messenger «[secpy-chat](cmd/secpy_chat)» based on Hidden Lake services `HLT`, `HLE`,
-3. Generator of asymmetric keys «[keygen](cmd/tools/keygen)» in `PrivKey{hex}`, `PubKey{hex}` format,
-3. Serverless and stateless password manager «[pmanager](cmd/tools/pmanager)».
+1. Anonymous network «[Hidden Lake](cmd/hidden_lake)»
+2. Console messenger «[secpy-chat](cmd/secpy_chat)» based on Hidden Lake services `HLT`, `HLE`
+3. Generator of asymmetric keys «[tkeygen](cmd/tools/keygen)» in `PrivKey{hex}`, `PubKey{hex}` format
+3. Serverless and stateless password manager «[tpmanager](cmd/tools/pmanager)»
 
 ## Deprecated applications
 
