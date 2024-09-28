@@ -71,7 +71,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 5. The `network/anonymity/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client`, `client/message` and `network/message` modules.
 6. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
-> Examples of works in the directory [github.com/number571/go-peer/examples](https://github.com/number571/go-peer/tree/master/examples "Examples");
+> Examples of works in the directories [pkg/client/examples](pkg/client/examples/), [pkg/network/examples](pkg/network/examples/), [pkg/network/anonymity/queue/examples](pkg/network/anonymity/queue/examples/), [pkg/network/anonymity/examples](pkg/network/anonymity/examples/);
 
 ## Coverage map
 
@@ -137,7 +137,7 @@ Also, the composition of these works (without "The Hidden Lake anonymous network
 3. Generator of asymmetric keys «[tkeygen](cmd/tools/keygen)» in `PrivKey{hex}`, `PubKey{hex}` format
 3. Serverless and stateless password manager «[tpmanager](cmd/tools/pmanager)»
 
-## Deprecated applications
+### Deprecated applications
 
 Previously, some applications (such as HL, HLS, HES) were developed separately from the go-peer platform. Currently, these applications are outdated because they did not keep up with go-peer updates and were based on poor architectural solutions.
 

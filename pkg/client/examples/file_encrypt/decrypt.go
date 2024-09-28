@@ -1,154 +1,48 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"log"
+	"errors"
+	"io"
 	"os"
-	"strings"
-	"unicode"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
-func decryptFile(client client.IClient, decPrefix string) {
-	encChunks := getChunks(".enc")
-	filename, hash := decryptChunks(client, encChunks)
-	mergeDecryptedChunks(decPrefix, filename, hash, len(encChunks))
-}
+func decrypt(client client.IClient, outFilename, inFilename string) error {
+	msgSize := client.GetSettings().GetMessageSizeBytes()
 
-func mergeDecryptedChunks(decPrefix, filename string, hash []byte, chunkCount int) {
-	resultFilename := decPrefix + filename
-
-	outputFile, err := os.Create(resultFilename)
+	infile, err := os.Open(inFilename)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer outputFile.Close()
+	defer infile.Close()
 
-	for i := 0; i < chunkCount; i++ {
-		chunkBytes, err := os.ReadFile(fmt.Sprintf("chunk_%d.dec", i))
+	outfile, err := os.Create(outFilename)
+	if err != nil {
+		return err
+	}
+	defer infile.Close()
+
+	buf := make([]byte, msgSize)
+	for i := 0; ; i++ {
+		n, err := infile.Read(buf)
 		if err != nil {
-			panic(err)
-		}
-		if _, err := outputFile.Write(chunkBytes); err != nil {
-			panic(err)
-		}
-	}
-
-	if !bytes.Equal(getFileHash(resultFilename), hash) {
-		panic("!bytes.Equal(getFileHash(resultFilename), hash)")
-	}
-}
-
-func decryptChunks(client client.IClient, encChunks []string) (string, []byte) {
-	headSize := hashing.CSHA256Size + (2 * encoding.CSizeUint64) + 1 + 1
-	hashes := make([][]byte, 0, len(encChunks))
-
-	filename := ""
-
-	for _, ec := range encChunks {
-		encBytes, err := os.ReadFile(ec)
-		if err != nil {
-			panic(err)
-		}
-
-		_, decMsg, err := client.DecryptMessage(encBytes)
-		if err != nil {
-			panic(err)
-		}
-
-		pld := payload.LoadPayload64(decMsg)
-		if pld == nil {
-			panic("payload = nil")
-		}
-
-		if pld.GetHead() != payloadHead {
-			panic("pld.GetHead() != payloadHead")
-		}
-
-		body := pld.GetBody()
-		if len(body) < headSize {
-			panic("len(body) < headSize")
-		}
-
-		hashes = append(hashes, body[:hashing.CSHA256Size])
-
-		bufNum := [encoding.CSizeUint64]byte{}
-		copy(bufNum[:], body[hashing.CSHA256Size:hashing.CSHA256Size+encoding.CSizeUint64])
-		i := encoding.BytesToUint64(bufNum)
-
-		copy(bufNum[:], body[hashing.CSHA256Size+encoding.CSizeUint64:hashing.CSHA256Size+2*encoding.CSizeUint64])
-		count := encoding.BytesToUint64(bufNum)
-
-		if count != uint64(len(encChunks)) {
-			panic("count != uint64(len(encChunks))")
-		}
-
-		fileInfo := body[hashing.CSHA256Size+2*encoding.CSizeUint64:]
-		index := bytes.Index(fileInfo, []byte{0x00})
-		if index == -1 {
-			panic("index == -1")
-		}
-
-		fn := string(fileInfo[:index])
-		fb := fileInfo[index+1:]
-
-		if filename == "" {
-			filename = fn
-		}
-		if filename != fn {
-			panic("filename != fn")
-		}
-		if hasNotGraphicCharacters(fn) {
-			panic("hasNotGraphicCharacters(fn)")
-		}
-
-		if err := os.WriteFile(fmt.Sprintf("chunk_%d.dec", i), fb, 0644); err != nil {
-			panic(err)
-		}
-	}
-
-	if len(hashes) == 0 {
-		panic("len(hashes) == 0")
-	}
-	for i := 0; i < len(hashes); i++ {
-		for j := i + 1; j < len(hashes)-1; j++ {
-			if !bytes.Equal(hashes[i], hashes[j]) {
-				panic("!bytes.Equal(hashes[i], hashes[j])")
+			if errors.Is(err, io.EOF) {
+				break
 			}
+			return err
+		}
+		if uint64(n) != msgSize {
+			return errors.New("uint64(n) != msgSize")
+		}
+		_, chunk, err := client.DecryptMessage(buf[:n])
+		if err != nil {
+			return err
+		}
+		if _, err := outfile.Write(chunk); err != nil {
+			return err
 		}
 	}
 
-	return filename, hashes[0]
-}
-
-func getChunks(suffix string) []string {
-	entries, err := os.ReadDir("./")
-	if err != nil {
-		log.Fatal(err)
-	}
-	result := make([]string, 0, len(entries))
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		if strings.HasPrefix(name, "chunk_") && strings.HasSuffix(name, suffix) {
-			result = append(result, name)
-		}
-	}
-	return result
-}
-
-func hasNotGraphicCharacters(pS string) bool {
-	for _, c := range pS {
-		if !unicode.IsGraphic(c) {
-			return true
-		}
-	}
-	return false
+	return nil
 }

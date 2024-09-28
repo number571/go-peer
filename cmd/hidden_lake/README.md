@@ -106,7 +106,7 @@ On the basis of this characteristic, methods of possible application also begin 
 
 The anonymous Hidden Lake network has different launch modes depending on the environment in which it is located.
 
-1. Classic direct communication. In this communication mode, the nodes are connected to each other directly. This method is convenient only if at least one of the nodes has a public IP address that goes beyond NAT. [Example](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/default).
+1. Classic direct communication. In this communication mode, the nodes are connected to each other directly. This method is convenient only if at least one of the nodes has a public IP address that goes beyond NAT. [Example](https://github.com/number571/go-peer/tree/master/examples/anonymity/echo_service/simple).
 
 <p align="center"><img src="_images/launch_mode_1.jpg" alt="launch_mode_1.jpg"/></p>
 <p align="center">Figure 4. The direct communication launch mode.</p>

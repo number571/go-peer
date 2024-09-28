@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func getFileHash(filename string) []byte {
+func fileHash(filename string) []byte {
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)

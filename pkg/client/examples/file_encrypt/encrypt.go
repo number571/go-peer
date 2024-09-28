@@ -1,84 +1,45 @@
 package main
 
 import (
-	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
-const (
-	payloadHead = 0x01
-)
+func encrypt(client client.IClient, outFilename, inFilename string) error {
+	msgLimit := client.GetMessageLimit()
 
-func encryptFile(client client.IClient, receiver asymmetric.IPubKey, filename string) {
-	msgLimit := client.GetMessageLimit() - encoding.CSizeUint64
-	headSize := hashing.CSHA256Size + (2 * encoding.CSizeUint64) + uint64(len(filename)) + 1
-	if msgLimit <= headSize {
-		panic("msgLimit <= headSize")
-	}
-
-	inputFile, err := os.Open(filename)
+	infile, err := os.Open(inFilename)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer inputFile.Close()
+	defer infile.Close()
 
-	hash := getFileHash(filename)
-	count := getChunksCount(filename, msgLimit, headSize)
+	outfile, err := os.Create(outFilename)
+	if err != nil {
+		return err
+	}
+	defer infile.Close()
 
-	buf := make([]byte, msgLimit-headSize)
+	buf := make([]byte, msgLimit)
 	for i := 0; ; i++ {
-		n, err := inputFile.Read(buf)
+		n, err := infile.Read(buf)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			panic(err)
+			return err
 		}
-		if n == 0 {
-			break
-		}
-
-		iBytes := encoding.Uint64ToBytes(uint64(i))
-		countBytes := encoding.Uint64ToBytes(uint64(count))
-
-		msg, err := client.EncryptMessage(
-			receiver,
-			payload.NewPayload64(
-				payloadHead,
-				bytes.Join(
-					[][]byte{
-						hash,
-						iBytes[:],
-						countBytes[:],
-						[]byte(filename),
-						{0x00},
-						buf[:n],
-					},
-					[]byte{},
-				),
-			).ToBytes(),
-		)
+		chunk, err := client.EncryptMessage(client.GetPubKey(), buf[:n])
 		if err != nil {
-			panic(err)
+			return err
 		}
-
-		outputFile, err := os.Create(fmt.Sprintf("chunk_%d.enc", i))
-		if err != nil {
-			panic(err)
-		}
-		_, errW := outputFile.Write(msg)
-		errC := outputFile.Close()
-		if errW != nil || errC != nil {
-			panic(errW)
+		if _, err := outfile.Write(chunk); err != nil {
+			return err
 		}
 	}
+
+	return nil
 }
