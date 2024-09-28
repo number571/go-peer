@@ -71,7 +71,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 5. The `network/anonymity/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client`, `client/message` and `network/message` modules.
 6. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
-> Examples of works in the directories [pkg/client/examples](pkg/client/examples/), [pkg/network/examples](pkg/network/examples/), [pkg/network/anonymity/queue/examples](pkg/network/anonymity/queue/examples/), [pkg/network/anonymity/examples](pkg/network/anonymity/examples/);
+> Examples of works in the directories [pkg/client/examples](pkg/client/examples/), [pkg/network/examples](pkg/network/examples/), [pkg/network/anonymity/examples](pkg/network/anonymity/examples/), [pkg/network/anonymity/queue/examples](pkg/network/anonymity/queue/examples/);
 
 ## Coverage map
 
