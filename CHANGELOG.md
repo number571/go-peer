@@ -13,6 +13,10 @@
 - Update `pkg/network/anonymity`: delete f2f_disabled=true option (insecure)
 - Update `pkg/network/anonymity/queue`: delete queue_period=0 option (insecure)
 
+### BUG FIXES
+
+- Update `cmd/hidden_lake/applications/remoter`: append _daemon directory
+
 <!-- ... -->
 
 ## v1.6.19
