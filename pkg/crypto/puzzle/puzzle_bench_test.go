@@ -1,10 +1,11 @@
 package puzzle
 
 import (
-	"math/rand"
 	"runtime"
 	"testing"
 	"time"
+
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 /*
@@ -63,7 +64,7 @@ func BenchmarkPuzzleSequence(b *testing.B) {
 			b.StopTimer()
 			randomBytes := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
-				randomBytes = append(randomBytes, testPseudoRandomBytes(i))
+				randomBytes = append(randomBytes, testutils.PseudoRandomBytes(i))
 			}
 			b.StartTimer()
 
@@ -136,7 +137,7 @@ func BenchmarkPuzzleParallel(b *testing.B) {
 			parallel := uint64(runtime.GOMAXPROCS(0))
 			randomBytes := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
-				randomBytes = append(randomBytes, testPseudoRandomBytes(i))
+				randomBytes = append(randomBytes, testutils.PseudoRandomBytes(i))
 			}
 			b.StartTimer()
 
@@ -149,13 +150,4 @@ func BenchmarkPuzzleParallel(b *testing.B) {
 			b.Logf("Timer (N=%d): %s", b.N, end)
 		})
 	}
-}
-
-func testPseudoRandomBytes(pSeed int) []byte {
-	r := rand.New(rand.NewSource(int64(pSeed))) //nolint:gosec
-	result := make([]byte, 0, 16)
-	for i := 0; i < 16; i++ {
-		result = append(result, byte(r.Intn(256)))
-	}
-	return result
 }

@@ -2,8 +2,18 @@ package testutils
 
 import (
 	_ "embed"
+	"math/rand"
 	"time"
 )
+
+func PseudoRandomBytes(pSeed int) []byte {
+	r := rand.New(rand.NewSource(int64(pSeed))) //nolint:gosec
+	result := make([]byte, 0, 16)
+	for i := 0; i < 16; i++ {
+		result = append(result, byte(r.Intn(256)))
+	}
+	return result
+}
 
 func TryN(n int, t time.Duration, f func() error) error {
 	var resErr error

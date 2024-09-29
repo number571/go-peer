@@ -1,7 +1,6 @@
 package client
 
 import (
-	"math/rand"
 	"testing"
 	"time"
 
@@ -99,7 +98,7 @@ func BenchmarkClient(b *testing.B) {
 			encMessages := make([][]byte, b.N)
 			randomBytes := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
-				randomBytes = append(randomBytes, testPseudoRandomBytes(i))
+				randomBytes = append(randomBytes, testutils.PseudoRandomBytes(i))
 			}
 			b.StartTimer()
 
@@ -133,13 +132,4 @@ func BenchmarkClient(b *testing.B) {
 			b.Logf("Timer_Decrypt(N=%d): %s", b.N, endDec)
 		})
 	}
-}
-
-func testPseudoRandomBytes(pSeed int) []byte {
-	r := rand.New(rand.NewSource(int64(pSeed))) //nolint:gosec
-	result := make([]byte, 0, 16)
-	for i := 0; i < 16; i++ {
-		result = append(result, byte(r.Intn(256)))
-	}
-	return result
 }

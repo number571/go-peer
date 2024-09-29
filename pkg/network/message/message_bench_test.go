@@ -1,12 +1,12 @@
 package message
 
 import (
-	"math/rand"
 	"runtime"
 	"testing"
 	"time"
 
 	"github.com/number571/go-peer/pkg/payload"
+	testutils "github.com/number571/go-peer/test/utils"
 )
 
 /*
@@ -84,7 +84,7 @@ func BenchmarkMessageSequence(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				randomPayloads = append(
 					randomPayloads,
-					payload.NewPayload32(1, testPseudoRandomBytes(i)),
+					payload.NewPayload32(1, testutils.PseudoRandomBytes(i)),
 				)
 			}
 			b.StartTimer()
@@ -194,7 +194,7 @@ func BenchmarkMessageParallel(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				randomPayloads = append(
 					randomPayloads,
-					payload.NewPayload32(1, testPseudoRandomBytes(i)),
+					payload.NewPayload32(1, testutils.PseudoRandomBytes(i)),
 				)
 			}
 			b.StartTimer()
@@ -221,13 +221,4 @@ func BenchmarkMessageParallel(b *testing.B) {
 			b.Logf("Timer_Load(N=%d): %s", b.N, endLoad)
 		})
 	}
-}
-
-func testPseudoRandomBytes(pSeed int) []byte {
-	r := rand.New(rand.NewSource(int64(pSeed))) //nolint:gosec
-	result := make([]byte, 0, 16)
-	for i := 0; i < 16; i++ {
-		result = append(result, byte(r.Intn(256)))
-	}
-	return result
 }
