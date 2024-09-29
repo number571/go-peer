@@ -101,7 +101,7 @@ func testStartNodeHLS() (anonymity.INode, context.CancelFunc, error) {
 		pkg_settings.CServiceMask,
 		HandleServiceTCP(cfg),
 	)
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024).GetPubKey())
 
 	go func() {
 		_ = node.GetNetworkNode().Listen(ctx)
@@ -119,7 +119,7 @@ func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 	if node == nil {
 		return nil, cancel, errors.New("node is not running")
 	}
-	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey())
+	node.GetListPubKeys().AddPubKey(asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024).GetPubKey())
 
 	if err := node.GetNetworkNode().AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
 		return nil, cancel, err
@@ -135,7 +135,7 @@ func testStartClientHLS() (anonymity.INode, context.CancelFunc, error) {
 			ToBytes(),
 	)
 
-	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
+	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024).GetPubKey()
 	respBytes, err := node.FetchPayload(ctx, pubKey, pld)
 	if err != nil {
 		return node, cancel, err

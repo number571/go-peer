@@ -29,7 +29,7 @@ func TestHandleEncryptDecryptAPI(t *testing.T) {
 	)
 
 	// same private key in the HLE
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	pubKey := privKey.GetPubKey()
 
 	data := []byte("hello, world!")

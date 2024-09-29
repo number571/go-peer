@@ -177,7 +177,7 @@ func testDatabaseHashes(t *testing.T, numDB int, dbConstruct func(pSett ISetting
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 
 	pushHashes := make([][]byte, 0, messagesCapacity+1)
@@ -247,7 +247,7 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 			FMessageSizeBytes: (10 << 10),
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 
 	msgTest, err := newNetworkMessage(clTest, "some-another-key")
@@ -266,7 +266,7 @@ func testDatabasePush(t *testing.T, numDB int, dbConstruct func(pSett ISettings)
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 
 	msg1, err := newNetworkMessage(cl, testutils.TCNetworkKey)
@@ -330,7 +330,7 @@ func TestDatabase(t *testing.T) {
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 
 	putHashes := make([][]byte, 0, 3)

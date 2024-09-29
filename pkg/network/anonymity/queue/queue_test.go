@@ -70,7 +70,7 @@ func TestRunStopQueue(t *testing.T) {
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
@@ -157,7 +157,7 @@ func TestQueue(t *testing.T) {
 				FMessageSizeBytes: testutils.TCMessageSize,
 				FKeySizeBits:      testutils.TcKeySize,
 			}),
-			asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+			asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 		),
 		asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
 	)

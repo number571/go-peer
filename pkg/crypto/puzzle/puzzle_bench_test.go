@@ -8,23 +8,26 @@ import (
 )
 
 /*
+goos: linux
+goarch: amd64
+pkg: github.com/number571/go-peer/pkg/crypto/puzzle
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkPuzzleSequence/20-bit-12            100         463347150 ns/op
---- BENCH: BenchmarkPuzzleSequence/20-bit-12
-    puzzle_bench_test.go:68: Timer: 1.284413537s
-    puzzle_bench_test.go:68: Timer: 46.334699469s
-BenchmarkPuzzleSequence/21-bit-12            100         852326526 ns/op
---- BENCH: BenchmarkPuzzleSequence/21-bit-12
-    puzzle_bench_test.go:68: Timer: 2.093841036s
-    puzzle_bench_test.go:68: Timer: 1m25.232636438s
-BenchmarkPuzzleSequence/22-bit-12            100        1644269096 ns/op
---- BENCH: BenchmarkPuzzleSequence/22-bit-12
-    puzzle_bench_test.go:68: Timer: 6.710678809s
-    puzzle_bench_test.go:68: Timer: 2m44.426894314s
-BenchmarkPuzzleSequence/23-bit-12            100        3301111606 ns/op
---- BENCH: BenchmarkPuzzleSequence/23-bit-12
-    puzzle_bench_test.go:68: Timer: 6.587686655s
-    puzzle_bench_test.go:68: Timer: 5m30.111137125s
+BenchmarkPuzzleSequence/worksize=20-bit-12                   100         506621461 ns/op
+--- BENCH: BenchmarkPuzzleSequence/worksize=20-bit-12
+    puzzle_bench_test.go:76: Timer (N=1): 1.763921125s
+    puzzle_bench_test.go:76: Timer (N=100): 50.662125541s
+BenchmarkPuzzleSequence/worksize=21-bit-12                   100         976490983 ns/op
+--- BENCH: BenchmarkPuzzleSequence/worksize=21-bit-12
+    puzzle_bench_test.go:76: Timer (N=1): 2.12864995s
+    puzzle_bench_test.go:76: Timer (N=100): 1m37.649082179s
+BenchmarkPuzzleSequence/worksize=22-bit-12                   100        2024441365 ns/op
+--- BENCH: BenchmarkPuzzleSequence/worksize=22-bit-12
+    puzzle_bench_test.go:76: Timer (N=1): 8.13175731s
+    puzzle_bench_test.go:76: Timer (N=100): 3m22.444115905s
+BenchmarkPuzzleSequence/worksize=23-bit-12                   100        4016088869 ns/op
+--- BENCH: BenchmarkPuzzleSequence/worksize=23-bit-12
+    puzzle_bench_test.go:76: Timer (N=1): 7.829686992s
+    puzzle_bench_test.go:76: Timer (N=100): 6m41.608867925s
 PASS
 */
 
@@ -35,19 +38,19 @@ func BenchmarkPuzzleSequence(b *testing.B) {
 		function func([]byte, uint64) uint64
 	}{
 		{
-			name:     "20-bit",
+			name:     "worksize=20-bit",
 			function: NewPoWPuzzle(20).ProofBytes,
 		},
 		{
-			name:     "21-bit",
+			name:     "worksize=21-bit",
 			function: NewPoWPuzzle(21).ProofBytes,
 		},
 		{
-			name:     "22-bit",
+			name:     "worksize=22-bit",
 			function: NewPoWPuzzle(22).ProofBytes,
 		},
 		{
-			name:     "23-bit",
+			name:     "worksize=23-bit",
 			function: NewPoWPuzzle(23).ProofBytes,
 		},
 	}
@@ -76,23 +79,26 @@ func BenchmarkPuzzleSequence(b *testing.B) {
 }
 
 /*
+goos: linux
+goarch: amd64
+pkg: github.com/number571/go-peer/pkg/crypto/puzzle
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkPuzzleParallel/20-bit-parallel-12                   100         133510360 ns/op
---- BENCH: BenchmarkPuzzleParallel/20-bit-parallel-12
-    puzzle_bench_test.go:138: Timer: 454.959149ms
-    puzzle_bench_test.go:138: Timer: 13.351011892s
-BenchmarkPuzzleParallel/21-bit-parallel-12                   100         259375494 ns/op
---- BENCH: BenchmarkPuzzleParallel/21-bit-parallel-12
-    puzzle_bench_test.go:138: Timer: 559.685167ms
-    puzzle_bench_test.go:138: Timer: 25.937523604s
-BenchmarkPuzzleParallel/22-bit-parallel-12                   100         541665877 ns/op
---- BENCH: BenchmarkPuzzleParallel/22-bit-parallel-12
-    puzzle_bench_test.go:138: Timer: 2.213373592s
-    puzzle_bench_test.go:138: Timer: 54.166558401s
-BenchmarkPuzzleParallel/23-bit-parallel-12                   100        1081891382 ns/op
---- BENCH: BenchmarkPuzzleParallel/23-bit-parallel-12
-    puzzle_bench_test.go:138: Timer: 2.219345242s
-    puzzle_bench_test.go:138: Timer: 1m48.189016302s
+BenchmarkPuzzleParallel/worksize=20-bit-12                   100         204043739 ns/op
+--- BENCH: BenchmarkPuzzleParallel/worksize=20-bit-12
+    puzzle_bench_test.go:146: Timer (N=1): 412.979992ms
+    puzzle_bench_test.go:146: Timer (N=100): 20.404154197s
+BenchmarkPuzzleParallel/worksize=21-bit-12                   100         324186197 ns/op
+--- BENCH: BenchmarkPuzzleParallel/worksize=21-bit-12
+    puzzle_bench_test.go:146: Timer (N=1): 846.078102ms
+    puzzle_bench_test.go:146: Timer (N=100): 32.418596955s
+BenchmarkPuzzleParallel/worksize=22-bit-12                   100         605896906 ns/op
+--- BENCH: BenchmarkPuzzleParallel/worksize=22-bit-12
+    puzzle_bench_test.go:146: Timer (N=1): 2.838539071s
+    puzzle_bench_test.go:146: Timer (N=100): 1m0.58966026s
+BenchmarkPuzzleParallel/worksize=23-bit-12                   100        1287749115 ns/op
+--- BENCH: BenchmarkPuzzleParallel/worksize=23-bit-12
+    puzzle_bench_test.go:146: Timer (N=1): 2.509988782s
+    puzzle_bench_test.go:146: Timer (N=100): 2m8.774882439s
 PASS
 */
 
@@ -103,19 +109,19 @@ func BenchmarkPuzzleParallel(b *testing.B) {
 		function func([]byte, uint64) uint64
 	}{
 		{
-			name:     "20-bit-parallel",
+			name:     "worksize=20-bit",
 			function: NewPoWPuzzle(20).ProofBytes,
 		},
 		{
-			name:     "21-bit-parallel",
+			name:     "worksize=21-bit",
 			function: NewPoWPuzzle(21).ProofBytes,
 		},
 		{
-			name:     "22-bit-parallel",
+			name:     "worksize=22-bit",
 			function: NewPoWPuzzle(22).ProofBytes,
 		},
 		{
-			name:     "23-bit-parallel",
+			name:     "worksize=23-bit",
 			function: NewPoWPuzzle(23).ProofBytes,
 		},
 	}

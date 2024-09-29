@@ -33,7 +33,7 @@ func TestHandlePubKeyAPI(t *testing.T) {
 		return
 	}
 
-	pubKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024).GetPubKey()
+	pubKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024).GetPubKey()
 	if !bytes.Equal(gotPubKey.ToBytes(), pubKey.ToBytes()) {
 		t.Error("public keys not equals")
 		return

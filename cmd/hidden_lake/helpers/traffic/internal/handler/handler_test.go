@@ -169,7 +169,7 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 }
 
 func testNewClient() client.IClient {
-	privKey := asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024)
+	privKey := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024)
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,

@@ -36,7 +36,7 @@ func testRunService(addr string) *http.Server {
 			FMessageSizeBytes: testutils.TCMessageSize,
 			FKeySizeBits:      testutils.TcKeySize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.Tc1PrivKey1024),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
 	)
 
 	mux.HandleFunc(settings.CHandleIndexPath, HandleIndexAPI(logger))
