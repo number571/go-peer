@@ -80,7 +80,7 @@ func main() {
 
 	time.Sleep(time.Second)
 
-	if err := checkMessages(ctx, netMsgSettings, msgSettings); err != nil {
+	if err := checkMessages(ctx, netMsgSettings.GetSettings(), msgSettings); err != nil {
 		panic(err)
 	}
 
@@ -93,7 +93,7 @@ func pushMessages(ctx context.Context, netMsgSettings net_message.IConstructSett
 		hlt_client.NewRequester(
 			"http://"+hltHost1,
 			&http.Client{Timeout: time.Minute / 2},
-			netMsgSettings,
+			netMsgSettings.GetSettings(),
 		),
 	)
 

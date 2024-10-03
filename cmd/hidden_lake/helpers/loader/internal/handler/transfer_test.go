@@ -87,14 +87,14 @@ func TestHandleTransferAPI(t *testing.T) {
 		}),
 	})
 
-	cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)
+	cancel1, hltClient1, err := testCreateHLT(netMsgSettings.GetSettings(), tcNameHLT1, tgProducer)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer cancel1()
 
-	cancel2, hltClient2, err := testCreateHLT(netMsgSettings, tcNameHLT2, tgConsumer)
+	cancel2, hltClient2, err := testCreateHLT(netMsgSettings.GetSettings(), tcNameHLT2, tgConsumer)
 	if err != nil {
 		t.Error(err)
 		return

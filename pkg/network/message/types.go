@@ -17,7 +17,7 @@ type IMessage interface {
 }
 
 type IConstructSettings interface {
-	ISettings
+	GetSettings() ISettings
 	GetParallel() uint64
 	GetRandMessageSizeBytes() uint64
 }

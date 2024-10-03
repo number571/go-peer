@@ -21,7 +21,7 @@ type IConn interface {
 }
 
 type ISettings interface {
-	net_message.ISettings
+	GetMessageSettings() net_message.ISettings
 	GetLimitMessageSizeBytes() uint64
 	GetDialTimeout() time.Duration
 	GetReadTimeout() time.Duration

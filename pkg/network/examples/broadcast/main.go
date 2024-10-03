@@ -39,7 +39,7 @@ func main() {
 		context.Background(),
 		message.NewMessage(
 			message.NewConstructSettings(&message.SConstructSettings{
-				FSettings: node4.GetSettings().GetConnSettings(),
+				FSettings: node4.GetSettings().GetConnSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(
 				serviceHeader,

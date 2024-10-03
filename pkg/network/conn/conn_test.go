@@ -172,7 +172,7 @@ func TestClosedConn(t *testing.T) {
 	}
 
 	sett := message.NewConstructSettings(&message.SConstructSettings{
-		FSettings: conn.GetSettings(),
+		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
 	pld := payload.NewPayload32(1, []byte("aaa"))
@@ -437,7 +437,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	}
 
 	msgSett := message.NewConstructSettings(&message.SConstructSettings{
-		FSettings: conn.GetSettings(),
+		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))

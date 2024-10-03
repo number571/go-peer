@@ -12,10 +12,6 @@ import (
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
-const (
-	tcNewNetworkKey = "abc_network_key"
-)
-
 var (
 	tgNewConnections = []string{"a", "b", "c", "b"}
 	tgNewFriends     = map[string]asymmetric.IPubKey{
@@ -92,23 +88,8 @@ func TestEditor(t *testing.T) {
 	config := wrapper.GetConfig()
 	editor := wrapper.GetEditor()
 
-	beforeNetworkKey := config.GetSettings().GetNetworkKey()
 	beforeConnections := config.GetConnections()
 	beforeFriends := config.GetFriends()
-
-	if err := editor.UpdateNetworkKey(tcNewNetworkKey); err != nil {
-		t.Error(err)
-		return
-	}
-	afterNetworkKey := config.GetSettings().GetNetworkKey()
-	if beforeNetworkKey == afterNetworkKey {
-		t.Error("beforeNetworkKey == afterNetworkKey")
-		return
-	}
-	if afterNetworkKey != tcNewNetworkKey {
-		t.Error("afterNetworkKey != tcNewNetworkKey")
-		return
-	}
 
 	if err := editor.UpdateConnections(tgNewConnections); err != nil {
 		t.Error(err)
@@ -184,11 +165,6 @@ func TestIncorrectFilepathEditor(t *testing.T) {
 	editor := wrapper.GetEditor()
 
 	config.fFilepath = random.NewCSPRNG().GetString(32)
-
-	if err := editor.UpdateNetworkKey(tcNewNetworkKey); err == nil {
-		t.Error("success update network key with incorrect filepath")
-		return
-	}
 
 	if err := editor.UpdateConnections(tgNewConnections); err == nil {
 		t.Error("success update connections with incorrect filepath")

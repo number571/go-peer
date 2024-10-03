@@ -58,12 +58,8 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetNetworkKey() string {
-	return p.FMessageSettings.GetNetworkKey()
-}
-
-func (p *sSettings) GetWorkSizeBits() uint64 {
-	return p.FMessageSettings.GetWorkSizeBits()
+func (p *sSettings) GetMessageSettings() net_message.ISettings {
+	return p.FMessageSettings
 }
 
 func (p *sSettings) GetLimitMessageSizeBytes() uint64 {

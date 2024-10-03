@@ -154,7 +154,7 @@ func TestBroadcast(t *testing.T) {
 				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
 			)
 			sett := message.NewConstructSettings(&message.SConstructSettings{
-				FSettings: nodes[0].GetSettings().GetConnSettings(),
+				FSettings: nodes[0].GetSettings().GetConnSettings().GetMessageSettings(),
 			})
 			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld))
 		}(i)
@@ -289,7 +289,7 @@ func TestHandleMessage(t *testing.T) {
 
 	ctx := context.Background()
 	sett := message.NewConstructSettings(&message.SConstructSettings{
-		FSettings: node.GetSettings().GetConnSettings(),
+		FSettings: node.GetSettings().GetConnSettings().GetMessageSettings(),
 	})
 
 	node.HandleFunc(1, nil)
@@ -348,7 +348,7 @@ func TestContextCancel(t *testing.T) {
 
 	headHandle := testutils.TcHead
 	sett := message.NewConstructSettings(&message.SConstructSettings{
-		FSettings: node2.GetSettings().GetConnSettings(),
+		FSettings: node2.GetSettings().GetConnSettings().GetMessageSettings(),
 	})
 
 	go func() {

@@ -24,7 +24,7 @@ var handler = func(ctx context.Context, node network.INode, c conn.IConn, msg me
 		ctx,
 		message.NewMessage(
 			message.NewConstructSettings(&message.SConstructSettings{
-				FSettings: node.GetSettings().GetConnSettings(),
+				FSettings: node.GetSettings().GetConnSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(serviceHeader, []byte(resp)),
 		),
@@ -43,7 +43,7 @@ func main() {
 		ctx,
 		message.NewMessage(
 			message.NewConstructSettings(&message.SConstructSettings{
-				FSettings: conn.GetSettings(),
+				FSettings: conn.GetSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(serviceHeader, []byte("hello, world!")),
 		),

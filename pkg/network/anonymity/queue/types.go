@@ -22,7 +22,7 @@ type IQBProblemProcessor interface {
 }
 
 type ISettings interface {
-	net_message.IConstructSettings
+	GetMessageConstructSettings() net_message.IConstructSettings
 	GetNetworkMask() uint32
 	GetMainPoolCapacity() uint64
 	GetRandPoolCapacity() uint64

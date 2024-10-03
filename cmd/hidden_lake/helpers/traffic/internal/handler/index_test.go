@@ -23,13 +23,13 @@ func TestErrorsAPI(t *testing.T) {
 		hlt_client.NewRequester(
 			"http://"+testutils.TcUnknownHost,
 			&http.Client{Timeout: time.Second},
-			testNetworkMessageSettings(),
+			testNetworkMessageSettings().GetSettings(),
 		),
 	)
 
 	pld := payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody))
 	sett := message.NewConstructSettings(&message.SConstructSettings{
-		FSettings: testNetworkMessageSettings(),
+		FSettings: testNetworkMessageSettings().GetSettings(),
 	})
 	if err := client.PutMessage(context.Background(), message.NewMessage(sett, pld)); err == nil {
 		t.Error("success put message with unknown host")

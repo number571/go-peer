@@ -71,7 +71,7 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDataba
 		hlt_client.NewRequester(
 			"http://"+addr,
 			&http.Client{Timeout: time.Minute},
-			testNetworkMessageSettings(),
+			testNetworkMessageSettings().GetSettings(),
 		),
 	)
 
@@ -170,7 +170,7 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings:       testNetworkMessageSettings(),
+				FMessageSettings:       testNetworkMessageSettings().GetSettings(),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,

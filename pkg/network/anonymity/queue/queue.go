@@ -182,7 +182,7 @@ func (p *sQBProblemProcessor) fillMainPool(pCtx context.Context, pMsg []byte) er
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			p.fSettings,
+			p.fSettings.GetMessageConstructSettings(),
 			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
 		)
 	}()
@@ -219,7 +219,7 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			p.fSettings,
+			p.fSettings.GetMessageConstructSettings(),
 			payload.NewPayload32(p.fSettings.GetNetworkMask(), msg),
 		)
 	}()

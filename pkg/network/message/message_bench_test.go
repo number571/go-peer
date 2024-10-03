@@ -108,7 +108,7 @@ func BenchmarkMessageSequence(b *testing.B) {
 
 			nowLoad := time.Now()
 			for i := 0; i < b.N; i++ {
-				_, err := LoadMessage(t.sett, messages[i].ToBytes())
+				_, err := LoadMessage(t.sett.GetSettings(), messages[i].ToBytes())
 				if err != nil {
 					b.Error(err)
 					return
@@ -226,7 +226,7 @@ func BenchmarkMessageParallel(b *testing.B) {
 
 			nowLoad := time.Now()
 			for i := 0; i < b.N; i++ {
-				_, err := LoadMessage(t.sett, messages[i].ToBytes())
+				_, err := LoadMessage(t.sett.GetSettings(), messages[i].ToBytes())
 				if err != nil {
 					b.Error(err)
 					return

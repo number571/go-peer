@@ -36,7 +36,7 @@ var handler = func(id string) network.IHandlerF {
 			ctx,
 			message.NewMessage(
 				message.NewConstructSettings(&message.SConstructSettings{
-					FSettings: n.GetSettings().GetConnSettings(),
+					FSettings: n.GetSettings().GetConnSettings().GetMessageSettings(),
 				}),
 				payload.NewPayload32(serviceHeader, []byte(fmt.Sprintf("%d", num+1))),
 			),
@@ -55,7 +55,7 @@ func main() {
 	ctx := context.Background()
 	msg := message.NewMessage(
 		message.NewConstructSettings(&message.SConstructSettings{
-			FSettings: node1.GetSettings().GetConnSettings(),
+			FSettings: node1.GetSettings().GetConnSettings().GetMessageSettings(),
 		}),
 		payload.NewPayload32(serviceHeader, []byte("0")),
 	)

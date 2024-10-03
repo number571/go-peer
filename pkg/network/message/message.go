@@ -42,14 +42,15 @@ type sMessage struct {
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
+	sett := pSett.GetSettings()
 
 	randBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), randBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewAESCipher(key)

@@ -17,8 +17,6 @@ var (
 )
 
 type SConfigSettings struct {
-	fMutex sync.RWMutex
-
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FFetchTimeoutMS       uint64 `json:"fetch_timeout_ms" yaml:"fetch_timeout_ms"`
@@ -122,9 +120,6 @@ func (p *SConfigSettings) GetRandMessageSizeBytes() uint64 {
 }
 
 func (p *SConfigSettings) GetNetworkKey() string {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
 	return p.FNetworkKey
 }
 

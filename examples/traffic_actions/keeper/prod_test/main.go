@@ -64,7 +64,7 @@ func main() {
 			hlt_client.NewRequester(
 				"http://"+addrHLT[0],
 				&http.Client{Timeout: 5 * time.Second},
-				netSett,
+				netSett.GetSettings(),
 			),
 		)
 

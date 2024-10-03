@@ -45,12 +45,8 @@ func (p *sConstructSettings) mustNotNull() IConstructSettings {
 	return p
 }
 
-func (p *sConstructSettings) GetNetworkKey() string {
-	return p.FSettings.GetNetworkKey()
-}
-
-func (p *sConstructSettings) GetWorkSizeBits() uint64 {
-	return p.FSettings.GetWorkSizeBits()
+func (p *sConstructSettings) GetSettings() ISettings {
+	return p.FSettings
 }
 
 func (p *sConstructSettings) GetParallel() uint64 {

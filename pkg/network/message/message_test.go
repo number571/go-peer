@@ -81,7 +81,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg, err := LoadMessage(sett, msgTmp.ToBytes())
+	msg, err := LoadMessage(sett.GetSettings(), msgTmp.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
@@ -139,7 +139,7 @@ func TestMessage(t *testing.T) {
 		if msgN.GetProof() == 0 {
 			continue
 		}
-		msgL, err := LoadMessage(newSett, msgN.ToBytes())
+		msgL, err := LoadMessage(newSett.GetSettings(), msgN.ToBytes())
 		if err != nil {
 			t.Error(err)
 			return
@@ -159,7 +159,7 @@ func TestMessage(t *testing.T) {
 		break
 	}
 
-	msg1, err := LoadMessage(sett, msg.ToBytes())
+	msg1, err := LoadMessage(sett.GetSettings(), msg.ToBytes())
 	if err != nil {
 		t.Error(err)
 		return
@@ -169,7 +169,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	msg2, err := LoadMessage(sett, msg.ToString())
+	msg2, err := LoadMessage(sett.GetSettings(), msg.ToString())
 	if err != nil {
 		t.Error(err)
 		return
@@ -181,34 +181,34 @@ func TestMessage(t *testing.T) {
 
 	msg3 := NewMessage(sett, pld).(*sMessage)
 	msg3.fEncd[0] ^= 1
-	if _, err := LoadMessage(sett, msg3.ToBytes()); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), msg3.ToBytes()); err == nil {
 		t.Error("success load with invalid encd")
 		return
 	}
 
-	if _, err := LoadMessage(sett, struct{}{}); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), struct{}{}); err == nil {
 		t.Error("success load with unknown type of message")
 		return
 	}
 
-	if _, err := LoadMessage(sett, []byte{1}); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), []byte{1}); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
-	if _, err := LoadMessage(sett, []byte{1}); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), []byte{1}); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
 	randBytes := random.NewCSPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
-	if _, err := LoadMessage(sett, randBytes); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), randBytes); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
 	prng := random.NewCSPRNG()
-	if _, err := LoadMessage(sett, prng.GetBytes(64)); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), prng.GetBytes(64)); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
@@ -220,22 +220,22 @@ func TestMessage(t *testing.T) {
 		},
 		[]byte{},
 	)
-	if _, err := LoadMessage(sett, msgBytes); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), msgBytes); err == nil {
 		t.Error("success load incorrect payload")
 		return
 	}
 
-	if _, err := LoadMessage(sett, tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 1")
 		return
 	}
 
-	if _, err := LoadMessage(sett, tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 2")
 		return
 	}
 
-	if _, err := LoadMessage(sett, tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
+	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
 		t.Error("success load invalid message 3")
 		return
 	}
@@ -243,7 +243,7 @@ func TestMessage(t *testing.T) {
 
 func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
-	sett := pSett
+	sett := pSett.GetSettings()
 
 	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
@@ -269,7 +269,7 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 
 func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
-	sett := pSett
+	sett := pSett.GetSettings()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
@@ -301,7 +301,7 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 
 func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
-	sett := pSett
+	sett := pSett.GetSettings()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})

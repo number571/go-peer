@@ -53,8 +53,8 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetWorkSizeBits() uint64 {
-	return p.FMessageConstructSettings.GetWorkSizeBits()
+func (p *sSettings) GetMessageConstructSettings() net_message.IConstructSettings {
+	return p.FMessageConstructSettings
 }
 
 func (p *sSettings) GetParallel() uint64 {
@@ -63,10 +63,6 @@ func (p *sSettings) GetParallel() uint64 {
 
 func (p *sSettings) GetRandMessageSizeBytes() uint64 {
 	return p.FMessageConstructSettings.GetRandMessageSizeBytes()
-}
-
-func (p *sSettings) GetNetworkKey() string {
-	return p.FMessageConstructSettings.GetNetworkKey()
 }
 
 func (p *sSettings) GetNetworkMask() uint32 {

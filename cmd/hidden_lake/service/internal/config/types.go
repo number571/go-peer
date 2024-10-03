@@ -13,7 +13,6 @@ type IWrapper interface {
 }
 
 type IEditor interface {
-	UpdateNetworkKey(string) error
 	UpdateConnections([]string) error
 	UpdateFriends(map[string]asymmetric.IPubKey) error
 }

@@ -77,7 +77,7 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_
 	}
 
 	// try unpack message from bytes
-	msg, err := net_message.LoadMessage(p.fSettings, dataBytes)
+	msg, err := net_message.LoadMessage(p.fSettings.GetMessageSettings(), dataBytes)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
 	}

@@ -60,7 +60,7 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDatabase datab
 			}
 
 			netMsg, err := net_message.LoadMessage(
-				pNode.GetSettings().GetConnSettings(),
+				pNode.GetSettings().GetConnSettings().GetMessageSettings(),
 				string(msgStringAsBytes),
 			)
 			if err != nil {
