@@ -19,16 +19,13 @@ func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 			FReadTimeout:  hls_settings.CNetworkReadTimeout,
 			FWriteTimeout: hls_settings.CNetworkWriteTimeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSettings:       cfgSettings,
 				FLimitMessageSizeBytes: cfgSettings.GetMessageSizeBytes() + cfgSettings.GetRandMessageSizeBytes(),
-				FWorkSizeBits:          cfgSettings.GetWorkSizeBits(),
 				FWaitReadTimeout:       hls_settings.CConnWaitReadTimeout,
 				FDialTimeout:           hls_settings.CConnDialTimeout,
 				FReadTimeout:           hls_settings.CNetworkReadTimeout,
 				FWriteTimeout:          hls_settings.CNetworkWriteTimeout,
 			}),
-		}),
-		conn.NewVSettings(&conn.SVSettings{
-			FNetworkKey: cfgSettings.GetNetworkKey(),
 		}),
 		lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 	).HandleFunc(

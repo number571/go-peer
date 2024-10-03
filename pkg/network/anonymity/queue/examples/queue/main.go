@@ -25,7 +25,6 @@ func main() {
 			FMainPoolCapacity: 1 << 5,
 			FRandPoolCapacity: 1 << 5,
 		}),
-		queue.NewVSettings(&queue.SVSettings{}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
 				FMessageSizeBytes: (1 << 12),

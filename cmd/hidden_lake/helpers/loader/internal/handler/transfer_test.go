@@ -80,9 +80,11 @@ func TestHandleTransferAPI(t *testing.T) {
 
 	// INIT SERVICES
 
-	netMsgSettings := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: testutils.TCWorkSize,
-		FNetworkKey:   testutils.TCNetworkKey,
+	netMsgSettings := net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{
+			FWorkSizeBits: testutils.TCWorkSize,
+			FNetworkKey:   testutils.TCNetworkKey,
+		}),
 	})
 
 	cancel1, hltClient1, err := testCreateHLT(netMsgSettings, tcNameHLT1, tgProducer)

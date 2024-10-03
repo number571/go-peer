@@ -134,14 +134,15 @@ func TestClosedConn(t *testing.T) {
 	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		testutils.TgAddrs[30],
 	)
 	if err != nil {
@@ -154,9 +155,8 @@ func TestClosedConn(t *testing.T) {
 		return
 	}
 
-	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
-		FNetworkKey:   conn.GetVSettings().GetNetworkKey(),
+	sett := message.NewConstructSettings(&message.SConstructSettings{
+		FSettings: conn.GetSettings(),
 	})
 
 	pld := payload.NewPayload32(1, []byte("aaa"))
@@ -196,14 +196,15 @@ func TestInvalidConn(t *testing.T) {
 	_, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		"INVALID_ADDRESS",
 	)
 	if err == nil {
@@ -218,14 +219,15 @@ func TestReadMessage(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		rawConn,
 	).(*sConn)
 
@@ -270,14 +272,15 @@ func TestRecvDataBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		rawConn,
 	).(*sConn)
 
@@ -311,14 +314,15 @@ func TestSendBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		rawConn,
 	).(*sConn)
 
@@ -342,14 +346,15 @@ func TestRecvHeadBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		rawConn,
 	).(*sConn)
 
@@ -392,14 +397,15 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FWorkSizeBits:          testutils.TCWorkSize,
+			FMessageSettings: message.NewSettings(&message.SSettings{
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		NewVSettings(&SVSettings{}),
 		pAddr,
 	)
 	if err != nil {
@@ -414,13 +420,12 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		return
 	}
 
-	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits: conn.GetSettings().GetWorkSizeBits(),
-		FNetworkKey:   pNetworkKey,
+	msgSett := message.NewConstructSettings(&message.SConstructSettings{
+		FSettings: conn.GetSettings(),
 	})
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
-	msg := message.NewMessage(sett, pld)
+	msg := message.NewMessage(msgSett, pld)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
 		t.Error(err)
@@ -458,20 +463,18 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 
 			conn := LoadConn(
 				NewSettings(&SSettings{
-					FWorkSizeBits:          testutils.TCWorkSize,
+					FMessageSettings: message.NewSettings(&message.SSettings{
+						FWorkSizeBits: testutils.TCWorkSize,
+						FNetworkKey:   pNetworkKey,
+					}),
 					FLimitMessageSizeBytes: testutils.TCMessageSize,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
-				NewVSettings(&SVSettings{}),
 				aconn,
 			)
-
-			conn.SetVSettings(NewVSettings(&SVSettings{
-				FNetworkKey: pNetworkKey,
-			}))
 
 			readCh := make(chan struct{})
 			go func() { <-readCh }()

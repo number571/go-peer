@@ -50,9 +50,11 @@ func init() {
 }
 
 func main() {
-	netMsgSettings := net_message.NewSettings(&net_message.SSettings{
-		FNetworkKey:   networkKey,
-		FWorkSizeBits: workSize,
+	netMsgSettings := net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   networkKey,
+			FWorkSizeBits: workSize,
+		}),
 	})
 
 	msgSettings := message.NewSettings(&message.SSettings{

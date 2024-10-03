@@ -322,7 +322,9 @@ func TestHandleWrapper(t *testing.T) {
 	node.GetListPubKeys().AddPubKey(pubKey)
 
 	ctx := context.Background()
-	sett := net_message.NewSettings(&net_message.SSettings{})
+	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{}),
+	})
 
 	msg, err := client.EncryptMessage(
 		pubKey,
@@ -455,7 +457,10 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
-	sett := net_message.NewSettings(&net_message.SSettings{})
+	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{}),
+	})
+
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
@@ -672,7 +677,6 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 	}
 	parallel := uint64(1)
 	networkMask := uint32(1)
-	networkKey := "old_network_key"
 	limitVoidSize := uint64(10_000)
 	node := NewNode(
 		NewSettings(&SSettings{
@@ -693,31 +697,31 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+						FWorkSizeBits: testutils.TCWorkSize,
+					}),
 					FLimitMessageSizeBytes: testutils.TCMessageSize + limitVoidSize,
-					FWorkSizeBits:          testutils.TCWorkSize,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			conn.NewVSettings(&conn.SVSettings{
-				FNetworkKey: networkKey,
-			}),
 			lru.NewLRUCache(testutils.TCCapacity),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
-				FNetworkMask:          networkMask,
-				FWorkSizeBits:         testutils.TCWorkSize,
-				FMainPoolCapacity:     testutils.TCQueueCapacity,
-				FRandPoolCapacity:     testutils.TCQueueCapacity,
-				FParallel:             parallel,
-				FRandMessageSizeBytes: limitVoidSize,
-				FQueuePeriod:          time.Second,
-			}),
-			queue.NewVSettings(&queue.SVSettings{
-				FNetworkKey: networkKey,
+				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+					FSettings: net_message.NewSettings(&net_message.SSettings{
+						FWorkSizeBits: testutils.TCWorkSize,
+					}),
+					FParallel:             parallel,
+					FRandMessageSizeBytes: limitVoidSize,
+				}),
+				FNetworkMask:      networkMask,
+				FMainPoolCapacity: testutils.TCQueueCapacity,
+				FRandPoolCapacity: testutils.TCQueueCapacity,
+				FQueuePeriod:      time.Second,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{

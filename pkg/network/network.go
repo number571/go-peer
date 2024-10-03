@@ -20,7 +20,6 @@ var (
 type sNode struct {
 	fMutex        sync.RWMutex
 	fSettings     ISettings
-	fVSettings    conn.IVSettings
 	fListener     net.Listener
 	fCacheSetter  cache.ICacheSetter
 	fConnections  map[string]conn.IConn
@@ -32,12 +31,10 @@ type sNode struct {
 // Redirects messages to handle routers by keys.
 func NewNode(
 	pSettings ISettings,
-	pVSettings conn.IVSettings,
 	pCacheSetter cache.ICacheSetter,
 ) INode {
 	return &sNode{
 		fSettings:     pSettings,
-		fVSettings:    pVSettings,
 		fCacheSetter:  pCacheSetter,
 		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
 		fHandleRoutes: make(map[uint32]IHandlerF, 64),
@@ -47,22 +44,6 @@ func NewNode(
 // Return settings interface.
 func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
-}
-
-func (p *sNode) GetVSettings() conn.IVSettings {
-	return p.getVSettings()
-}
-
-func (p *sNode) SetVSettings(pVSettings conn.IVSettings) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	for id, conn := range p.fConnections {
-		delete(p.fConnections, id)
-		_ = conn.Close()
-	}
-
-	p.fVSettings = pVSettings
 }
 
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
@@ -146,8 +127,7 @@ func (p *sNode) Listen(pCtx context.Context) error {
 				continue
 			}
 
-			sett := p.fSettings.GetConnSettings()
-			conn := conn.LoadConn(sett, p.getVSettings(), tconn)
+			conn := conn.LoadConn(p.fSettings.GetConnSettings(), tconn)
 			address := tconn.RemoteAddr().String()
 
 			p.setConnection(address, conn)
@@ -208,7 +188,7 @@ func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	}
 
 	sett := p.fSettings.GetConnSettings()
-	conn, err := conn.Connect(pCtx, sett, p.getVSettings(), pAddress)
+	conn, err := conn.Connect(pCtx, sett, pAddress)
 	if err != nil {
 		return utils.MergeErrors(ErrAddConnections, err)
 	}
@@ -364,11 +344,4 @@ func (p *sNode) getListener() net.Listener {
 	defer p.fMutex.RUnlock()
 
 	return p.fListener
-}
-
-func (p *sNode) getVSettings() conn.IVSettings {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	return p.fVSettings
 }

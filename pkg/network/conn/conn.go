@@ -19,39 +19,25 @@ var (
 )
 
 type sConn struct {
-	fMutex     sync.RWMutex
-	fSocket    net.Conn
-	fSettings  ISettings
-	fVSettings IVSettings
+	fMutex    sync.RWMutex
+	fSocket   net.Conn
+	fSettings ISettings
 }
 
-func Connect(pCtx context.Context, pSett ISettings, pVSett IVSettings, pAddr string) (IConn, error) {
+func Connect(pCtx context.Context, pSett ISettings, pAddr string) (IConn, error) {
 	dialer := &net.Dialer{Timeout: pSett.GetDialTimeout()}
 	conn, err := dialer.DialContext(pCtx, "tcp", pAddr)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrCreateConnection, err)
 	}
-	return LoadConn(pSett, pVSett, conn), nil
+	return LoadConn(pSett, conn), nil
 }
 
-func LoadConn(pSett ISettings, pVSett IVSettings, pConn net.Conn) IConn {
+func LoadConn(pSett ISettings, pConn net.Conn) IConn {
 	return &sConn{
-		fSocket:    pConn,
-		fSettings:  pSett,
-		fVSettings: pVSett,
+		fSocket:   pConn,
+		fSettings: pSett,
 	}
-}
-
-func (p *sConn) GetVSettings() IVSettings {
-	return p.getVSettings()
-}
-
-// not used from pkg/network
-func (p *sConn) SetVSettings(pVSettings IVSettings) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fVSettings = pVSettings
 }
 
 func (p *sConn) GetSettings() ISettings {
@@ -91,11 +77,7 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_
 	}
 
 	// try unpack message from bytes
-	sett := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: p.fSettings.GetWorkSizeBits(),
-		FNetworkKey:   p.getVSettings().GetNetworkKey(),
-	})
-	msg, err := net_message.LoadMessage(sett, dataBytes)
+	msg, err := net_message.LoadMessage(p.fSettings, dataBytes)
 	if err != nil {
 		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
 	}
@@ -209,11 +191,4 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeou
 	}
 
 	return dataRaw, nil
-}
-
-func (p *sConn) getVSettings() IVSettings {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	return p.fVSettings
 }

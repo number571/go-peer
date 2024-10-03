@@ -2,6 +2,8 @@ package queue
 
 import (
 	"time"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -10,32 +12,36 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FNetworkMask          uint32
-	FWorkSizeBits         uint64
-	FMainPoolCapacity     uint64
-	FRandPoolCapacity     uint64
-	FParallel             uint64
-	FRandMessageSizeBytes uint64
-	FQueuePeriod          time.Duration
-	FRandQueuePeriod      time.Duration
+	FMessageConstructSettings net_message.IConstructSettings
+	FNetworkMask              uint32
+	FMainPoolCapacity         uint64
+	FRandPoolCapacity         uint64
+	FQueuePeriod              time.Duration
+	FRandQueuePeriod          time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkMask:          pSett.FNetworkMask,
-		FWorkSizeBits:         pSett.FWorkSizeBits,
-		FMainPoolCapacity:     pSett.FMainPoolCapacity,
-		FRandPoolCapacity:     pSett.FRandPoolCapacity,
-		FParallel:             pSett.FParallel,
-		FRandMessageSizeBytes: pSett.FRandMessageSizeBytes,
-		FQueuePeriod:          pSett.FQueuePeriod,
-		FRandQueuePeriod:      pSett.FRandQueuePeriod,
+		FMessageConstructSettings: func() net_message.IConstructSettings {
+			if pSett.FMessageConstructSettings == nil {
+				return net_message.NewConstructSettings(&net_message.SConstructSettings{})
+			}
+			return pSett.FMessageConstructSettings
+		}(),
+		FNetworkMask:      pSett.FNetworkMask,
+		FMainPoolCapacity: pSett.FMainPoolCapacity,
+		FRandPoolCapacity: pSett.FRandPoolCapacity,
+		FQueuePeriod:      pSett.FQueuePeriod,
+		FRandQueuePeriod:  pSett.FRandQueuePeriod,
 	}).mustNotNull()
 }
 
 func (p *sSettings) mustNotNull() ISettings {
+	if p.FMessageConstructSettings == nil {
+		panic(`p.FMessageConstructSettings == nil`)
+	}
 	if p.FQueuePeriod == 0 {
-		panic(`p.FQueuePeriod != 0`)
+		panic(`p.FQueuePeriod == 0`)
 	}
 	if p.FRandPoolCapacity == 0 {
 		panic(`p.FRandPoolCapacity == 0`)
@@ -47,16 +53,24 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetNetworkMask() uint32 {
-	return p.FNetworkMask
-}
-
 func (p *sSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
+	return p.FMessageConstructSettings.GetWorkSizeBits()
 }
 
 func (p *sSettings) GetParallel() uint64 {
-	return p.FParallel
+	return p.FMessageConstructSettings.GetParallel()
+}
+
+func (p *sSettings) GetRandMessageSizeBytes() uint64 {
+	return p.FMessageConstructSettings.GetRandMessageSizeBytes()
+}
+
+func (p *sSettings) GetNetworkKey() string {
+	return p.FMessageConstructSettings.GetNetworkKey()
+}
+
+func (p *sSettings) GetNetworkMask() uint32 {
+	return p.FNetworkMask
 }
 
 func (p *sSettings) GetMainPoolCapacity() uint64 {
@@ -73,8 +87,4 @@ func (p *sSettings) GetQueuePeriod() time.Duration {
 
 func (p *sSettings) GetRandQueuePeriod() time.Duration {
 	return p.FRandQueuePeriod
-}
-
-func (p *sSettings) GetRandMessageSizeBytes() uint64 {
-	return p.FRandMessageSizeBytes
 }

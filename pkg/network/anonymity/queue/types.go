@@ -14,9 +14,6 @@ import (
 type IQBProblemProcessor interface {
 	types.IRunner
 
-	SetVSettings(IVSettings)
-	GetVSettings() IVSettings
-
 	GetSettings() ISettings
 	GetClient() client.IClient
 
@@ -25,16 +22,10 @@ type IQBProblemProcessor interface {
 }
 
 type ISettings interface {
+	net_message.IConstructSettings
 	GetNetworkMask() uint32
-	GetWorkSizeBits() uint64
-	GetParallel() uint64
 	GetMainPoolCapacity() uint64
 	GetRandPoolCapacity() uint64
 	GetQueuePeriod() time.Duration
 	GetRandQueuePeriod() time.Duration
-	GetRandMessageSizeBytes() uint64
-}
-
-type IVSettings interface {
-	GetNetworkKey() string
 }

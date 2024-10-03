@@ -12,6 +12,7 @@
 - Update `pkg/network/conn`: add context to NewConn function, rename NewConn -> Connect
 - Update `pkg/network/anonymity`: delete f2f_disabled=true option (insecure)
 - Update `pkg/network/anonymity/queue`: delete queue_period=0 option (insecure)
+- Update `pkg/network|pkg/network/anonymity/queue`: delete IVSettings
 
 ### BUG FIXES
 

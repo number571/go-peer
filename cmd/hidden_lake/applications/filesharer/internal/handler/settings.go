@@ -56,12 +56,6 @@ func SettingsPage(
 		}
 
 		switch pR.FormValue("method") {
-		case http.MethodPatch:
-			networkKey := strings.TrimSpace(pR.FormValue("network_key"))
-			if err := pHlsClient.SetNetworkKey(pCtx, networkKey); err != nil {
-				ErrorPage(pLogger, cfg, "set_network_key", "update network key")(pW, pR)
-				return
-			}
 		case http.MethodPut:
 			strLang := strings.TrimSpace(pR.FormValue("language"))
 			ilang, err := language.ToILanguage(strLang)

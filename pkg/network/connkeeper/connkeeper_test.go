@@ -10,6 +10,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -131,7 +132,9 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 				FReadTimeout:  time.Minute,
 				FWriteTimeout: time.Minute,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FWorkSizeBits:          testutils.TCWorkSize,
+					FMessageSettings: message.NewSettings(&message.SSettings{
+						FWorkSizeBits: testutils.TCWorkSize,
+					}),
 					FLimitMessageSizeBytes: testutils.TCMessageSize,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
@@ -139,7 +142,6 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			conn.NewVSettings(&conn.SVSettings{}),
 			lru.NewLRUCache(testutils.TCCapacity),
 		),
 	)

@@ -2,6 +2,8 @@ package conn
 
 import (
 	"time"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -10,19 +12,22 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FNetworkKey            string
-	FWorkSizeBits          uint64
 	FLimitMessageSizeBytes uint64
 	FWaitReadTimeout       time.Duration
 	FDialTimeout           time.Duration
 	FReadTimeout           time.Duration
 	FWriteTimeout          time.Duration
+	FMessageSettings       net_message.ISettings
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FNetworkKey:            pSett.FNetworkKey,
-		FWorkSizeBits:          pSett.FWorkSizeBits,
+		FMessageSettings: func() net_message.ISettings {
+			if pSett.FMessageSettings == nil {
+				return net_message.NewSettings(&net_message.SSettings{})
+			}
+			return pSett.FMessageSettings
+		}(),
 		FLimitMessageSizeBytes: pSett.FLimitMessageSizeBytes,
 		FWaitReadTimeout:       pSett.FWaitReadTimeout,
 		FDialTimeout:           pSett.FDialTimeout,
@@ -32,6 +37,9 @@ func NewSettings(pSett *SSettings) ISettings {
 }
 
 func (p *sSettings) mustNotNull() ISettings {
+	if p.FMessageSettings == nil {
+		panic(`p.FMessageSettings == nil`)
+	}
 	if p.FLimitMessageSizeBytes == 0 {
 		panic(`p.FLimitMessageSizeBytes == 0`)
 	}
@@ -50,8 +58,12 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
+func (p *sSettings) GetNetworkKey() string {
+	return p.FMessageSettings.GetNetworkKey()
+}
+
 func (p *sSettings) GetWorkSizeBits() uint64 {
-	return p.FWorkSizeBits
+	return p.FMessageSettings.GetWorkSizeBits()
 }
 
 func (p *sSettings) GetLimitMessageSizeBytes() uint64 {

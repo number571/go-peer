@@ -23,9 +23,6 @@ type INode interface {
 	Listen(context.Context) error
 	HandleFunc(uint32, IHandlerF) INode
 
-	SetVSettings(conn.IVSettings)
-	GetVSettings() conn.IVSettings
-
 	GetSettings() ISettings
 	GetConnections() map[string]conn.IConn
 

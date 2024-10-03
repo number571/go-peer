@@ -33,9 +33,11 @@ func main() {
 		FKeySizeBits:      4096,
 	})
 
-	netSett := net_message.NewSettings(&net_message.SSettings{
-		FWorkSizeBits: 22,
-		FNetworkKey:   "j2BR39JfDf7Bajx3",
+	netSett := net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{
+			FWorkSizeBits: 22,
+			FNetworkKey:   "j2BR39JfDf7Bajx3",
+		}),
 	})
 
 	readPrivKey, err := os.ReadFile("../_keys/priv.key")

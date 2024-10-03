@@ -49,26 +49,34 @@ func BenchmarkMessageSequence(b *testing.B) {
 	}{
 		{
 			name: "worksize=20-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 20,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 20,
+				}),
 			}),
 		},
 		{
 			name: "worksize=21-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 21,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 21,
+				}),
 			}),
 		},
 		{
 			name: "worksize=22-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 22,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 22,
+				}),
 			}),
 		},
 		{
 			name: "worksize=23-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 23,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 23,
+				}),
 			}),
 		},
 	}
@@ -155,30 +163,38 @@ func BenchmarkMessageParallel(b *testing.B) {
 	}{
 		{
 			name: "worksize=20-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 20,
-				FParallel:     gomaxprocs,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 20,
+				}),
+				FParallel: gomaxprocs,
 			}),
 		},
 		{
 			name: "worksize=21-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 21,
-				FParallel:     gomaxprocs,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 21,
+				}),
+				FParallel: gomaxprocs,
 			}),
 		},
 		{
 			name: "worksize=22-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 22,
-				FParallel:     gomaxprocs,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 22,
+				}),
+				FParallel: gomaxprocs,
 			}),
 		},
 		{
 			name: "worksize=23-bit",
-			sett: NewSettings(&SSettings{
-				FWorkSizeBits: 23,
-				FParallel:     gomaxprocs,
+			sett: NewConstructSettings(&SConstructSettings{
+				FSettings: NewSettings(&SSettings{
+					FWorkSizeBits: 23,
+				}),
+				FParallel: gomaxprocs,
 			}),
 		},
 	}

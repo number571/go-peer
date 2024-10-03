@@ -42,14 +42,6 @@ func (p *sClient) GetSettings(pCtx context.Context) (config.IConfigSettings, err
 	return res, nil
 }
 
-func (p *sClient) SetNetworkKey(pCtx context.Context, pNetworkKey string) error {
-	err := p.fRequester.SetNetworkKey(pCtx, pNetworkKey)
-	if err != nil {
-		return fmt.Errorf("set network key (client): %w", err)
-	}
-	return nil
-}
-
 func (p *sClient) BroadcastRequest(pCtx context.Context, pRecv string, pData request.IRequest) error {
 	if err := p.fRequester.BroadcastRequest(pCtx, p.fBuilder.Request(pRecv, pData)); err != nil {
 		return fmt.Errorf("broadcast request (client): %w", err)

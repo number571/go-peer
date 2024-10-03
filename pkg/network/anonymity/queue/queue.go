@@ -22,12 +22,10 @@ var (
 )
 
 type sQBProblemProcessor struct {
-	fMutex sync.RWMutex
 	fState state.IState
 
-	fSettings  ISettings
-	fVSettings IVSettings
-	fClient    client.IClient
+	fSettings ISettings
+	fClient   client.IClient
 
 	fMainPool *sMainPool
 	fRandPool *sRandPool
@@ -47,7 +45,6 @@ type sRandPool struct {
 
 func NewQBProblemProcessor(
 	pSettings ISettings,
-	pVSettings IVSettings,
 	pClient client.IClient,
 	pReceiver asymmetric.IPubKey,
 ) IQBProblemProcessor {
@@ -55,10 +52,9 @@ func NewQBProblemProcessor(
 		panic("pClient.GetPubKey().GetSize() != pReceiver.GetSize()")
 	}
 	return &sQBProblemProcessor{
-		fState:     state.NewBoolState(),
-		fSettings:  pSettings,
-		fVSettings: pVSettings,
-		fClient:    pClient,
+		fState:    state.NewBoolState(),
+		fSettings: pSettings,
+		fClient:   pClient,
 		fMainPool: &sMainPool{
 			fQueue:    make(chan net_message.IMessage, pSettings.GetMainPoolCapacity()),
 			fRawQueue: make(chan []byte, pSettings.GetMainPoolCapacity()),
@@ -72,10 +68,6 @@ func NewQBProblemProcessor(
 
 func (p *sQBProblemProcessor) GetSettings() ISettings {
 	return p.fSettings
-}
-
-func (p *sQBProblemProcessor) GetVSettings() IVSettings {
-	return p.getVSettings()
 }
 
 func (p *sQBProblemProcessor) GetClient() client.IClient {
@@ -140,25 +132,6 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.
 	}
 }
 
-func (p *sQBProblemProcessor) SetVSettings(pVSettings IVSettings) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fVSettings = pVSettings
-
-	// clear all old queue state
-	// not clear fMainPool.RawQueue
-	for len(p.fMainPool.fQueue) > 0 {
-		atomic.AddInt64(&p.fMainPool.fCount, -1)
-		<-p.fMainPool.fQueue
-	}
-
-	for len(p.fRandPool.fQueue) > 0 {
-		atomic.AddInt64(&p.fRandPool.fCount, -1)
-		<-p.fRandPool.fQueue
-	}
-}
-
 func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
@@ -206,17 +179,10 @@ func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) net_message.I
 }
 
 func (p *sQBProblemProcessor) fillMainPool(pCtx context.Context, pMsg []byte) error {
-	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
-
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits:         p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:           oldVSettings.GetNetworkKey(),
-				FParallel:             p.fSettings.GetParallel(),
-				FRandMessageSizeBytes: p.fSettings.GetRandMessageSizeBytes(),
-			}),
+			p.fSettings,
 			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
 		)
 	}()
@@ -225,9 +191,7 @@ func (p *sQBProblemProcessor) fillMainPool(pCtx context.Context, pMsg []byte) er
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case netMsg := <-chNetMsg:
-		if p.vSettingsNotChanged(oldVSettings) {
-			p.fMainPool.fQueue <- netMsg
-		}
+		p.fMainPool.fQueue <- netMsg
 		return nil
 	}
 }
@@ -252,17 +216,10 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 		panic(err)
 	}
 
-	oldVSettings := p.getVSettings()
 	chNetMsg := make(chan net_message.IMessage)
-
 	go func() {
 		chNetMsg <- net_message.NewMessage(
-			net_message.NewSettings(&net_message.SSettings{
-				FWorkSizeBits:         p.fSettings.GetWorkSizeBits(),
-				FNetworkKey:           oldVSettings.GetNetworkKey(),
-				FParallel:             p.fSettings.GetParallel(),
-				FRandMessageSizeBytes: p.fSettings.GetRandMessageSizeBytes(),
-			}),
+			p.fSettings,
 			payload.NewPayload32(p.fSettings.GetNetworkMask(), msg),
 		)
 	}()
@@ -271,21 +228,7 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case netMsg := <-chNetMsg:
-		if p.vSettingsNotChanged(oldVSettings) {
-			p.fRandPool.fQueue <- netMsg
-		}
+		p.fRandPool.fQueue <- netMsg
 		return nil
 	}
-}
-
-func (p *sQBProblemProcessor) getVSettings() IVSettings {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	return p.fVSettings
-}
-
-func (p *sQBProblemProcessor) vSettingsNotChanged(oldVSettings IVSettings) bool {
-	currVSettings := p.getVSettings()
-	return currVSettings.GetNetworkKey() == oldVSettings.GetNetworkKey()
 }

@@ -28,9 +28,7 @@ func TestHandleNetworkKeyAPI(t *testing.T) {
 		),
 	)
 
-	networkKey := "test_network_key"
-	testSetNetworkKey(t, client, networkKey)
-	testGetNetworkKey(t, client, networkKey)
+	testGetNetworkKey(t, client, "test")
 }
 
 func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
@@ -42,13 +40,6 @@ func testGetNetworkKey(t *testing.T, client hls_client.IClient, networkKey strin
 
 	if settings.GetNetworkKey() != networkKey {
 		t.Error("got network key != networkKey")
-		return
-	}
-}
-
-func testSetNetworkKey(t *testing.T, client hls_client.IClient, networkKey string) {
-	if err := client.SetNetworkKey(context.Background(), networkKey); err != nil {
-		t.Error(err)
 		return
 	}
 }

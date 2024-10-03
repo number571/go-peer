@@ -20,6 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
@@ -208,13 +209,16 @@ func testNewNode(dbPath, addr string) anonymity.INode {
 		testNewNetworkNode(addr),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
+				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+					FSettings: net_message.NewSettings(&net_message.SSettings{
+						FWorkSizeBits: testutils.TCWorkSize,
+					}),
+				}),
 				FNetworkMask:      networkMask,
-				FWorkSizeBits:     testutils.TCWorkSize,
 				FMainPoolCapacity: testutils.TCQueueCapacity,
 				FRandPoolCapacity: testutils.TCQueueCapacity,
 				FQueuePeriod:      500 * time.Millisecond,
 			}),
-			queue.NewVSettings(&queue.SVSettings{}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
@@ -237,7 +241,9 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:          testutils.TCWorkSize,
+				FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+					FWorkSizeBits: testutils.TCWorkSize,
+				}),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -245,7 +251,6 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		conn.NewVSettings(&conn.SVSettings{}),
 		lru.NewLRUCache(testutils.TCCapacity),
 	)
 }

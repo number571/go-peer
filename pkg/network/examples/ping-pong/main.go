@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
 	"strconv"
 	"time"
 
@@ -12,7 +10,6 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
 )
 
 const (
@@ -20,53 +17,7 @@ const (
 	serviceAddress = ":8080"
 )
 
-func main() {
-	var (
-		service1 = newNode(serviceAddress)
-		service2 = newNode("")
-	)
-	defer func() {
-		if err := service1.Close(); err != nil {
-			panic(err)
-		}
-		if err := service2.Close(); err != nil {
-			panic(err)
-		}
-	}()
-
-	service1.HandleFunc(serviceHeader, handler("#1"))
-	service2.HandleFunc(serviceHeader, handler("#2"))
-
-	ctx := context.Background()
-	go func() {
-		err := service1.Listen(ctx)
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			panic(err)
-		}
-	}()
-
-	time.Sleep(time.Second) // wait
-
-	if err := service2.AddConnection(ctx, serviceAddress); err != nil {
-		panic(err)
-	}
-
-	msg := message.NewMessage(
-		message.NewSettings(&message.SSettings{
-			FNetworkKey:   service2.GetVSettings().GetNetworkKey(),
-			FWorkSizeBits: service2.GetSettings().GetConnSettings().GetWorkSizeBits(),
-		}),
-		payload.NewPayload32(
-			serviceHeader,
-			[]byte("0"),
-		),
-	)
-	service2.BroadcastMessage(ctx, msg)
-
-	select {}
-}
-
-func handler(serviceName string) network.IHandlerF {
+var handler = func(id string) network.IHandlerF {
 	return func(ctx context.Context, n network.INode, _ conn.IConn, msg message.IMessage) error {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 
@@ -80,18 +31,14 @@ func handler(serviceName string) network.IHandlerF {
 			val = "pong"
 		}
 
-		fmt.Printf("service '%s' got '%s#%d'\n", serviceName, val, num)
+		fmt.Printf("'%s' got '%s#%d'\n", id, val, num)
 		n.BroadcastMessage(
 			ctx,
 			message.NewMessage(
-				message.NewSettings(&message.SSettings{
-					FNetworkKey:   n.GetVSettings().GetNetworkKey(),
-					FWorkSizeBits: n.GetSettings().GetConnSettings().GetWorkSizeBits(),
+				message.NewConstructSettings(&message.SConstructSettings{
+					FSettings: n.GetSettings().GetConnSettings(),
 				}),
-				payload.NewPayload32(
-					serviceHeader,
-					[]byte(fmt.Sprintf("%d", num+1)),
-				),
+				payload.NewPayload32(serviceHeader, []byte(fmt.Sprintf("%d", num+1))),
 			),
 		)
 
@@ -99,30 +46,38 @@ func handler(serviceName string) network.IHandlerF {
 	}
 }
 
-func newNode(serviceAddress string) network.INode {
-	return network.NewNode(
-		network.NewSettings(&network.SSettings{
-			FAddress:      serviceAddress,
-			FMaxConnects:  2,
-			FConnSettings: connSettings(),
-			FWriteTimeout: time.Minute,
-			FReadTimeout:  time.Minute,
-		}),
-		vSettings(),
-		lru.NewLRUCache(1<<10),
+func main() {
+	var (
+		_     = runServiceNode("node1")
+		node1 = runClientNode("node2")
 	)
+
+	ctx := context.Background()
+	msg := message.NewMessage(
+		message.NewConstructSettings(&message.SConstructSettings{
+			FSettings: node1.GetSettings().GetConnSettings(),
+		}),
+		payload.NewPayload32(serviceHeader, []byte("0")),
+	)
+	node1.BroadcastMessage(ctx, msg)
+
+	select {}
 }
 
-func vSettings() conn.IVSettings {
-	return conn.NewVSettings(&conn.SVSettings{})
+func runClientNode(id string) network.INode {
+	ctx := context.Background()
+	node := newNode("").HandleFunc(serviceHeader, handler(id))
+
+	node.AddConnection(ctx, serviceAddress)
+	return node
 }
 
-func connSettings() conn.ISettings {
-	return conn.NewSettings(&conn.SSettings{
-		FLimitMessageSizeBytes: (1 << 10),
-		FWaitReadTimeout:       time.Hour,
-		FDialTimeout:           time.Minute,
-		FReadTimeout:           time.Minute,
-		FWriteTimeout:          time.Minute,
-	})
+func runServiceNode(id string) network.INode {
+	ctx := context.Background()
+	node := newNode(serviceAddress).HandleFunc(serviceHeader, handler(id))
+
+	go func() { _ = node.Listen(ctx) }()
+
+	time.Sleep(time.Second) // wait listener
+	return node
 }

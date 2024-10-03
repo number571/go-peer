@@ -31,8 +31,10 @@ func TestErrorsAPI(t *testing.T) {
 	}
 
 	pld := payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody))
-	sett := message.NewSettings(&message.SSettings{
-		FWorkSizeBits: testutils.TCWorkSize,
+	sett := message.NewConstructSettings(&message.SConstructSettings{
+		FSettings: message.NewSettings(&message.SSettings{
+			FWorkSizeBits: testutils.TCWorkSize,
+		}),
 	})
 	if _, _, err := client.DecryptMessage(context.Background(), message.NewMessage(sett, pld)); err == nil {
 		t.Error("success decrypt message with unknown host")

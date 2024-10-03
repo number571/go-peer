@@ -80,20 +80,6 @@ func (p *sRequester) GetSettings(pCtx context.Context) (config.IConfigSettings, 
 	return cfgSettings, nil
 }
 
-func (p *sRequester) SetNetworkKey(pCtx context.Context, pNetworkKey string) error {
-	_, err := api.Request(
-		pCtx,
-		p.fClient,
-		http.MethodPost,
-		fmt.Sprintf(cHandleConfigSettingsTemplate, p.fHost),
-		pNetworkKey,
-	)
-	if err != nil {
-		return utils.MergeErrors(ErrBadRequest, err)
-	}
-	return nil
-}
-
 func (p *sRequester) FetchRequest(pCtx context.Context, pRequest *hls_settings.SRequest) (response.IResponse, error) {
 	res, err := api.Request(
 		pCtx,

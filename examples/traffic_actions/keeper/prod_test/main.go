@@ -52,9 +52,11 @@ func main() {
 	client := client.NewClient(sett, privKey)
 
 	for i, addrHLT := range gAddrHLTs {
-		netSett := net_message.NewSettings(&net_message.SSettings{
-			FWorkSizeBits: cWrkSize,
-			FNetworkKey:   addrHLT[1],
+		netSett := net_message.NewConstructSettings(&net_message.SConstructSettings{
+			FSettings: net_message.NewSettings(&net_message.SSettings{
+				FWorkSizeBits: cWrkSize,
+				FNetworkKey:   addrHLT[1],
+			}),
 		})
 
 		hltClient := hlt_client.NewClient(

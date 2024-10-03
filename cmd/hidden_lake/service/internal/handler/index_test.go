@@ -85,11 +85,6 @@ func TestErrorsAPI(t *testing.T) {
 		return
 	}
 
-	if err := client.SetNetworkKey(context.Background(), "test"); err == nil {
-		t.Error("success set network key with unknown host")
-		return
-	}
-
 	if err := client.DelOnline(context.Background(), "test"); err == nil {
 		t.Error("success del online key with unknown host")
 		return

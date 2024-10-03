@@ -54,9 +54,11 @@ func TestMessage(t *testing.T) {
 	t.Parallel()
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
-	sett := NewSettings(&SSettings{
-		FWorkSizeBits:         testutils.TCWorkSize,
-		FNetworkKey:           tcNetworkKey,
+	sett := NewConstructSettings(&SConstructSettings{
+		FSettings: NewSettings(&SSettings{
+			FWorkSizeBits: testutils.TCWorkSize,
+			FNetworkKey:   tcNetworkKey,
+		}),
 		FRandMessageSizeBytes: tcLimitVoid,
 	})
 
@@ -112,9 +114,11 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	newSett := NewSettings(&SSettings{
-		FWorkSizeBits: testutils.TCWorkSize,
-		FNetworkKey:   tcNetworkKey,
+	newSett := NewConstructSettings(&SConstructSettings{
+		FSettings: NewSettings(&SSettings{
+			FWorkSizeBits: testutils.TCWorkSize,
+			FNetworkKey:   tcNetworkKey,
+		}),
 	})
 
 	for i := 0; i < 10; i++ {
@@ -226,11 +230,12 @@ func TestMessage(t *testing.T) {
 
 func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
+	sett := pSett
 
-	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewAESCipher(key)
@@ -251,16 +256,17 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 
 func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
+	sett := pSett
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
 	hash[0] ^= 1
 
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewAESCipher(key)
@@ -282,14 +288,15 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 
 func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	prng := random.NewCSPRNG()
+	sett := pSett
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
+	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
 	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewAESCipher(key)

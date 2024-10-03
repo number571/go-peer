@@ -14,6 +14,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -61,28 +62,47 @@ func newNode(serviceName, address string) anonymity.INode {
 				)
 			},
 		),
-		newKVDatabase(serviceName),
+		func() database.IKVDatabase {
+			db, err := database.NewKVDatabase(
+				database.NewSettings(&database.SSettings{
+					FPath: "./database_" + serviceName + ".db",
+				}),
+			)
+			if err != nil {
+				panic(err)
+			}
+			return db
+		}(),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      address,
 				FMaxConnects:  256,
 				FReadTimeout:  time.Minute,
 				FWriteTimeout: time.Minute,
-				FConnSettings: newConnSettings(workSize, msgSize),
+				FConnSettings: conn.NewSettings(&conn.SSettings{
+					FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+						FWorkSizeBits: workSize,
+					}),
+					FLimitMessageSizeBytes: msgSize,
+					FWaitReadTimeout:       time.Hour,
+					FDialTimeout:           time.Minute,
+					FReadTimeout:           time.Minute,
+					FWriteTimeout:          time.Minute,
+				}),
 			}),
-			newVSettings(networkKey),
 			lru.NewLRUCache(1024),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
+				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+					FSettings: net_message.NewSettings(&net_message.SSettings{
+						FWorkSizeBits: workSize,
+					}),
+				}),
 				FNetworkMask:      networkMask,
-				FWorkSizeBits:     workSize,
 				FQueuePeriod:      2 * time.Second,
 				FMainPoolCapacity: 32,
 				FRandPoolCapacity: 32,
-			}),
-			queue.NewVSettings(&queue.SVSettings{
-				FNetworkKey: networkKey,
 			}),
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
@@ -95,33 +115,4 @@ func newNode(serviceName, address string) anonymity.INode {
 		),
 		asymmetric.NewListPubKeys(),
 	)
-}
-
-func newKVDatabase(serviceName string) database.IKVDatabase {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: "./database_" + serviceName + ".db",
-		}),
-	)
-	if err != nil {
-		panic(err)
-	}
-	return db
-}
-
-func newVSettings(nKey string) conn.IVSettings {
-	return conn.NewVSettings(&conn.SVSettings{
-		FNetworkKey: nKey,
-	})
-}
-
-func newConnSettings(wSize uint64, mSize uint64) conn.ISettings {
-	return conn.NewSettings(&conn.SSettings{
-		FLimitMessageSizeBytes: mSize + 4096,
-		FWorkSizeBits:          wSize,
-		FWaitReadTimeout:       time.Hour,
-		FDialTimeout:           time.Minute,
-		FReadTimeout:           time.Minute,
-		FWriteTimeout:          time.Minute,
-	})
 }

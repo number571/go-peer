@@ -420,9 +420,11 @@ func newNetworkMessageWithData(cl client.IClient, networkKey, data string) (net_
 		return nil, err
 	}
 	netMsg := net_message.NewMessage(
-		net_message.NewSettings(&net_message.SSettings{
-			FNetworkKey:   networkKey,
-			FWorkSizeBits: testutils.TCWorkSize,
+		net_message.NewConstructSettings(&net_message.SConstructSettings{
+			FSettings: net_message.NewSettings(&net_message.SSettings{
+				FNetworkKey:   networkKey,
+				FWorkSizeBits: testutils.TCWorkSize,
+			}),
 		}),
 		payload.NewPayload32(0, msg),
 	)

@@ -282,7 +282,7 @@ and put result to "hex_data" HLS API
 ```
 1. GET/POST/DELETE /api/config/connects
 2. GET/POST/DELETE /api/config/friends
-3. GET/POST        /api/config/settings
+3. GET             /api/config/settings
 4. GET/DELETE      /api/network/online
 5. POST/PUT        /api/network/request
 6. GET             /api/network/pubkey
@@ -417,23 +417,6 @@ Content-Length: 120
 
 ```json
 {"message_size_bytes":8192,"queue_period_ms":5000,"key_size_bits":4096,"work_size_bits":22}
-```
-
-#### 3.2. POST Request
-
-```bash
-curl -i -X POST -H 'Accept: application/json' http://localhost:9572/api/config/settings --data "used_network_key"'
-```
-
-#### 3.2. POST Response
-
-```
-HTTP/1.1 200 OK
-Date: Sun, 06 Aug 2023 23:22:49 GMT
-Content-Length: 24
-Content-Type: text/plain; charset=utf-8
-
-success: set network key
 ```
 
 ### 4. /api/network/online

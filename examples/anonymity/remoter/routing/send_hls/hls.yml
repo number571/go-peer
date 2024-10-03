@@ -6,6 +6,7 @@ settings:
   queue_period_ms: 5000
   rand_queue_period_ms: 5000
   rand_message_size_bytes: 4096
+  network_key: oMj49BD8he1n8bfq
 logging:
   - info
   - warn

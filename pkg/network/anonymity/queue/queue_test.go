@@ -74,12 +74,13 @@ func TestRunStopQueue(t *testing.T) {
 	)
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: 1,
-			FParallel:         1,
 			FQueuePeriod:      100 * time.Millisecond,
 		}),
-		NewVSettings(&SVSettings{}),
 		client,
 		asymmetric.NewRSAPrivKey(client.GetPrivKey().GetSize()).GetPubKey(),
 	)
@@ -141,16 +142,16 @@ func TestQueue(t *testing.T) {
 
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{
+					FWorkSizeBits: 10,
+				}),
+			}),
 			FNetworkMask:      1,
-			FWorkSizeBits:     10,
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: testutils.TCQueueCapacity,
-			FParallel:         1,
 			FQueuePeriod:      100 * time.Millisecond,
 			FRandQueuePeriod:  100 * time.Millisecond,
-		}),
-		NewVSettings(&SVSettings{
-			FNetworkKey: "old_network_key",
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
@@ -197,29 +198,16 @@ func testQueue(queue IQBProblemProcessor) error {
 	// wait minimum one generated message
 	time.Sleep(300 * time.Millisecond)
 
-	// clear old messages
-	newNetworkKey := "new_network_key"
-	queue.SetVSettings(NewVSettings(&SVSettings{
-		FNetworkKey: newNetworkKey,
-	}))
-
-	nVSettings := queue.GetVSettings()
-	if nVSettings.GetNetworkKey() != newNetworkKey {
-		return errors.New("incorrect set variable settings")
+	// auto fill queue enabled only if QB=true
+	msgs := make([]net_message.IMessage, 0, 3)
+	for i := 0; i < 3; i++ {
+		msgs = append(msgs, queue.DequeueMessage(ctx))
 	}
 
-	// auto fill queue enabled only if QB=true
-	if queue.GetSettings().GetQueuePeriod() != 0 {
-		msgs := make([]net_message.IMessage, 0, 3)
-		for i := 0; i < 3; i++ {
-			msgs = append(msgs, queue.DequeueMessage(ctx))
-		}
-
-		for i := 0; i < len(msgs)-1; i++ {
-			for j := i + 1; j < len(msgs); j++ {
-				if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
-					return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
-				}
+	for i := 0; i < len(msgs)-1; i++ {
+		for j := i + 1; j < len(msgs); j++ {
+			if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
+				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
 			}
 		}
 	}

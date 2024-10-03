@@ -43,9 +43,11 @@ func TestError(t *testing.T) {
 }
 
 func testNetworkMessageSettings() net_message.IConstructSettings {
-	return net_message.NewSettings(&net_message.SSettings{
-		FNetworkKey:   testutils.TCNetworkKey,
-		FWorkSizeBits: testutils.TCWorkSize,
+	return net_message.NewConstructSettings(&net_message.SConstructSettings{
+		FSettings: net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   testutils.TCNetworkKey,
+			FWorkSizeBits: testutils.TCWorkSize,
+		}),
 	})
 }
 
@@ -126,26 +128,7 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 		},
 	}
 
-	node := network.NewNode(
-		network.NewSettings(&network.SSettings{
-			FMaxConnects:  testutils.TCMaxConnects,
-			FReadTimeout:  time.Minute,
-			FWriteTimeout: time.Minute,
-			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:          testutils.TCWorkSize,
-				FLimitMessageSizeBytes: testutils.TCMessageSize,
-				FWaitReadTimeout:       time.Hour,
-				FDialTimeout:           time.Minute,
-				FReadTimeout:           time.Minute,
-				FWriteTimeout:          time.Minute,
-			}),
-		}),
-		conn.NewVSettings(&conn.SVSettings{
-			FNetworkKey: testutils.TCNetworkKey,
-		}),
-		lru.NewLRUCache(testutils.TCCapacity),
-	)
-
+	node := testNewNetworkNode("")
 	logger := logger.NewLogger(
 		logger.NewSettings(&logger.SSettings{}),
 		func(_ logger.ILogArg) string { return "" },
@@ -187,16 +170,13 @@ func testNewNetworkNode(addr string) network.INode {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FWorkSizeBits:          testutils.TCWorkSize,
+				FMessageSettings:       testNetworkMessageSettings(),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
 				FWriteTimeout:          time.Minute,
 			}),
-		}),
-		conn.NewVSettings(&conn.SVSettings{
-			FNetworkKey: testutils.TCNetworkKey,
 		}),
 		lru.NewLRUCache(testutils.TCCapacity),
 	)
