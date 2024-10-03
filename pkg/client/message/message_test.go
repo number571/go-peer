@@ -52,6 +52,24 @@ func testSettings(t *testing.T, n int) {
 	}
 }
 
+func TestPanicLoadMessage(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	params := NewSettings(&SSettings{
+		FMessageSizeBytes: 64,
+		FKeySizeBits:      testutils.TcKeySize,
+	})
+
+	_, _ = loadMessage(params, []byte{123})
+}
+
 func TestInvalidMessage(t *testing.T) {
 	t.Parallel()
 

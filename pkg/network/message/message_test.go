@@ -50,6 +50,19 @@ func TestError(t *testing.T) {
 	}
 }
 
+func TestSettings(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = (&sConstructSettings{}).mustNotNull()
+}
+
 func TestMessage(t *testing.T) {
 	t.Parallel()
 

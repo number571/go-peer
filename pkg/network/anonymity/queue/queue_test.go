@@ -28,12 +28,57 @@ func TestError(t *testing.T) {
 	}
 }
 
+func TestPanicNewQBProblemProcessor(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	client := client.NewClient(
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: testutils.TCMessageSize,
+			FKeySizeBits:      testutils.TcKeySize,
+		}),
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
+	)
+	_ = NewQBProblemProcessor(
+		NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: 1,
+			FQueuePeriod:      100 * time.Millisecond,
+		}),
+		client,
+		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2048).GetPubKey(),
+	)
+}
+
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
 	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	// check FMessageConstructSettings
+	_ = (&sSettings{
+		FMainPoolCapacity: testutils.TCQueueCapacity,
+		FRandPoolCapacity: testutils.TCQueueCapacity,
+		FQueuePeriod:      500 * time.Millisecond,
+	}).mustNotNull()
 }
 
 func testSettings(t *testing.T, n int) {

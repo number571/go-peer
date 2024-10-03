@@ -2,6 +2,7 @@
 package testutils
 
 import (
+	"bytes"
 	_ "embed"
 	"errors"
 	"testing"
@@ -9,6 +10,24 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
+
+func TestPseudoRandomBytes(t *testing.T) {
+	t.Parallel()
+
+	r1 := PseudoRandomBytes(1)
+	r2 := PseudoRandomBytes(1)
+	r3 := PseudoRandomBytes(2)
+
+	if len(r1) != 16 && len(r2) != 16 && len(r3) != 16 {
+		t.Error("len(r1) != 16 && len(r2) != 16 && len(r3) != 16")
+		return
+	}
+
+	if !bytes.Equal(r1, r2) || bytes.Equal(r1, r3) {
+		t.Error("!bytes.Equal(r1, r2) || bytes.Equal(r1, r3)")
+		return
+	}
+}
 
 func TestTryN(t *testing.T) {
 	t.Parallel()

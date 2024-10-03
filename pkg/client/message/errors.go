@@ -13,7 +13,6 @@ func (err *SMessageError) Error() string {
 }
 
 var (
-	ErrUnknownMessageType    = &SMessageError{"unknown type of message"}
-	ErrLoadMessageBytes      = &SMessageError{"load message bytes"}
-	ErrKeySizeGteMessageSize = &SMessageError{"key size >= message size"}
+	ErrUnknownMessageType = &SMessageError{"unknown type of message"}
+	ErrLoadMessageBytes   = &SMessageError{"load message bytes"}
 )

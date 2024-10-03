@@ -60,7 +60,7 @@ func loadMessage(pSett ISettings, pBytes []byte) (IMessage, error) {
 	keySize := pSett.GetKeySizeBits() / 8
 	msgSize := pSett.GetMessageSizeBytes()
 	if keySize >= msgSize {
-		return nil, ErrKeySizeGteMessageSize
+		panic("keySize >= msgSize")
 	}
 	if uint64(len(pBytes)) != msgSize {
 		return nil, ErrLoadMessageBytes

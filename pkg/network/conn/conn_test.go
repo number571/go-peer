@@ -77,6 +77,22 @@ func TestSettings(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		testSettings(t, i)
 	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	// check FMessageSettings
+	_ = (&sSettings{
+		FLimitMessageSizeBytes: testutils.TCMessageSize,
+		FWaitReadTimeout:       time.Hour,
+		FDialTimeout:           time.Minute,
+		FReadTimeout:           time.Minute,
+		FWriteTimeout:          time.Minute,
+	}).mustNotNull()
 }
 
 func testSettings(t *testing.T, n int) {

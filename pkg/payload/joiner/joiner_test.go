@@ -30,6 +30,11 @@ func TestError(t *testing.T) {
 }
 
 func TestJoiner32(t *testing.T) {
+	if _, err := LoadBytesJoiner32([]byte{1}); err == nil {
+		t.Error("success load invalid bytes")
+		return
+	}
+
 	joinerBytes := NewBytesJoiner32(tgSlice)
 
 	slice, err := LoadBytesJoiner32(joinerBytes)

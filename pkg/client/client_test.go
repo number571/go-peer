@@ -154,6 +154,12 @@ func TestEncrypt(t *testing.T) {
 	client2 := testNewClient()
 
 	pl := payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
+	pubKey2048 := asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2048).GetPubKey()
+	if _, err := client1.EncryptMessage(pubKey2048, pl.ToBytes()); err == nil {
+		t.Error("success encrypt message with diff size public keys")
+		return
+	}
+
 	msg, err := client1.EncryptMessage(client2.GetPubKey(), pl.ToBytes())
 	if err != nil {
 		t.Error(err)
