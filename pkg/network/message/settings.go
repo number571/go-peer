@@ -20,12 +20,7 @@ type sSettings struct {
 
 func NewConstructSettings(pSett *SConstructSettings) IConstructSettings {
 	return (&sConstructSettings{
-		FSettings: func() ISettings {
-			if pSett.FSettings == nil {
-				return NewSettings(&SSettings{})
-			}
-			return pSett.FSettings
-		}(),
+		FSettings:             pSett.FSettings,
 		FParallel:             pSett.FParallel,
 		FRandMessageSizeBytes: pSett.FRandMessageSizeBytes,
 	}).mustNotNull()

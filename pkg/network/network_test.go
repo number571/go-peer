@@ -55,6 +55,7 @@ func testSettings(t *testing.T, n int) {
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSettings:       message.NewSettings(&message.SSettings{}),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -68,6 +69,7 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects:  testutils.TCMaxConnects,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSettings:       message.NewSettings(&message.SSettings{}),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -81,6 +83,7 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects: testutils.TCMaxConnects,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSettings:       message.NewSettings(&message.SSettings{}),
 				FLimitMessageSizeBytes: testutils.TCMessageSize,
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,

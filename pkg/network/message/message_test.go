@@ -53,14 +53,22 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
+	for i := 0; i < 1; i++ {
+		testSettings(t, i)
+	}
+}
+
+func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("nothing panics")
 			return
 		}
 	}()
-
-	_ = (&sConstructSettings{}).mustNotNull()
+	switch n { // nolint: gocritic
+	case 0:
+		_ = NewConstructSettings(&SConstructSettings{})
+	}
 }
 
 func TestMessage(t *testing.T) {

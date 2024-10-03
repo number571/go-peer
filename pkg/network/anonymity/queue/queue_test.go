@@ -62,23 +62,9 @@ func TestPanicNewQBProblemProcessor(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		testSettings(t, i)
 	}
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	// check FMessageConstructSettings
-	_ = (&sSettings{
-		FMainPoolCapacity: testutils.TCQueueCapacity,
-		FRandPoolCapacity: testutils.TCQueueCapacity,
-		FQueuePeriod:      500 * time.Millisecond,
-	}).mustNotNull()
 }
 
 func testSettings(t *testing.T, n int) {
@@ -91,18 +77,33 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FRandPoolCapacity: testutils.TCQueueCapacity,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FMainPoolCapacity: testutils.TCQueueCapacity,
 			FRandPoolCapacity: testutils.TCQueueCapacity,
+		})
+	case 3:
+		_ = NewSettings(&SSettings{
+			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FQueuePeriod:      500 * time.Millisecond,
 		})
 	}
 }

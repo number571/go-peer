@@ -74,25 +74,9 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 6; i++ {
 		testSettings(t, i)
 	}
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	// check FMessageSettings
-	_ = (&sSettings{
-		FLimitMessageSizeBytes: testutils.TCMessageSize,
-		FWaitReadTimeout:       time.Hour,
-		FDialTimeout:           time.Minute,
-		FReadTimeout:           time.Minute,
-		FWriteTimeout:          time.Minute,
-	}).mustNotNull()
 }
 
 func testSettings(t *testing.T, n int) {
@@ -105,6 +89,7 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
+			FMessageSettings: message.NewSettings(&message.SSettings{}),
 			FWaitReadTimeout: time.Hour,
 			FDialTimeout:     time.Minute,
 			FReadTimeout:     time.Minute,
@@ -112,6 +97,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
+			FMessageSettings:       message.NewSettings(&message.SSettings{}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -119,6 +105,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
+			FMessageSettings:       message.NewSettings(&message.SSettings{}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
@@ -126,6 +113,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
+			FMessageSettings:       message.NewSettings(&message.SSettings{}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
@@ -133,8 +121,17 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 4:
 		_ = NewSettings(&SSettings{
+			FMessageSettings:       message.NewSettings(&message.SSettings{}),
 			FLimitMessageSizeBytes: testutils.TCMessageSize,
 			FWaitReadTimeout:       time.Hour,
+			FReadTimeout:           time.Minute,
+			FWriteTimeout:          time.Minute,
+		})
+	case 5:
+		_ = NewSettings(&SSettings{
+			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FWaitReadTimeout:       time.Hour,
+			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		})

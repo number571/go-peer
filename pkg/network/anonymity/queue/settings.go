@@ -22,17 +22,12 @@ type sSettings struct {
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FMessageConstructSettings: func() net_message.IConstructSettings {
-			if pSett.FMessageConstructSettings == nil {
-				return net_message.NewConstructSettings(&net_message.SConstructSettings{})
-			}
-			return pSett.FMessageConstructSettings
-		}(),
-		FNetworkMask:      pSett.FNetworkMask,
-		FMainPoolCapacity: pSett.FMainPoolCapacity,
-		FRandPoolCapacity: pSett.FRandPoolCapacity,
-		FQueuePeriod:      pSett.FQueuePeriod,
-		FRandQueuePeriod:  pSett.FRandQueuePeriod,
+		FMessageConstructSettings: pSett.FMessageConstructSettings,
+		FNetworkMask:              pSett.FNetworkMask,
+		FMainPoolCapacity:         pSett.FMainPoolCapacity,
+		FRandPoolCapacity:         pSett.FRandPoolCapacity,
+		FQueuePeriod:              pSett.FQueuePeriod,
+		FRandQueuePeriod:          pSett.FRandQueuePeriod,
 	}).mustNotNull()
 }
 
@@ -55,14 +50,6 @@ func (p *sSettings) mustNotNull() ISettings {
 
 func (p *sSettings) GetMessageConstructSettings() net_message.IConstructSettings {
 	return p.FMessageConstructSettings
-}
-
-func (p *sSettings) GetParallel() uint64 {
-	return p.FMessageConstructSettings.GetParallel()
-}
-
-func (p *sSettings) GetRandMessageSizeBytes() uint64 {
-	return p.FMessageConstructSettings.GetRandMessageSizeBytes()
 }
 
 func (p *sSettings) GetNetworkMask() uint32 {

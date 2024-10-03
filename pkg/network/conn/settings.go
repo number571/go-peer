@@ -22,12 +22,7 @@ type sSettings struct {
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
-		FMessageSettings: func() net_message.ISettings {
-			if pSett.FMessageSettings == nil {
-				return net_message.NewSettings(&net_message.SSettings{})
-			}
-			return pSett.FMessageSettings
-		}(),
+		FMessageSettings:       pSett.FMessageSettings,
 		FLimitMessageSizeBytes: pSett.FLimitMessageSizeBytes,
 		FWaitReadTimeout:       pSett.FWaitReadTimeout,
 		FDialTimeout:           pSett.FDialTimeout,

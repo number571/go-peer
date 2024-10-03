@@ -12,24 +12,27 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
+	FConnSettings conn.ISettings
 	FAddress      string
 	FMaxConnects  uint64
 	FReadTimeout  time.Duration
 	FWriteTimeout time.Duration
-	FConnSettings conn.ISettings
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
+		FConnSettings: pSett.FConnSettings,
 		FAddress:      pSett.FAddress,
 		FMaxConnects:  pSett.FMaxConnects,
 		FReadTimeout:  pSett.FReadTimeout,
 		FWriteTimeout: pSett.FWriteTimeout,
-		FConnSettings: pSett.FConnSettings,
 	}).mustNotNull()
 }
 
 func (p *sSettings) mustNotNull() ISettings {
+	if p.FConnSettings == nil {
+		panic(`p.FConnSettings == nil`)
+	}
 	if p.FMaxConnects == 0 {
 		panic(`p.FMaxConnects == 0`)
 	}
@@ -38,9 +41,6 @@ func (p *sSettings) mustNotNull() ISettings {
 	}
 	if p.FWriteTimeout == 0 {
 		panic(`p.FWriteTimeout == 0`)
-	}
-	if p.FConnSettings == nil {
-		panic(`p.FConnSettings == nil`)
 	}
 	return p
 }

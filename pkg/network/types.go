@@ -33,9 +33,9 @@ type INode interface {
 }
 
 type ISettings interface {
+	GetConnSettings() conn.ISettings
 	GetAddress() string
 	GetMaxConnects() uint64
 	GetReadTimeout() time.Duration
 	GetWriteTimeout() time.Duration
-	GetConnSettings() conn.ISettings
 }
