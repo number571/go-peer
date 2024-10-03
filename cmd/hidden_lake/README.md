@@ -234,7 +234,7 @@ queue_period_ms: 5000
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
                 <td>on</td>
-                <td>100_000</td>
+                <td>30_000</td>
             </tr>
             <tr>
                 <td>4</td>

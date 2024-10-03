@@ -27,6 +27,7 @@ const (
 	cPrivKeyPath = "../_keys/priv.key"
 )
 
+// for i in {1..100}; do echo $i; go run .; done;
 var gAddrHLTs = [][2]string{
 	{"94.103.91.81:9582", "8Jkl93Mdk93md1bz"},
 	{"195.133.1.126:9582", "kf92j74Nof92n9F4"},
@@ -82,6 +83,7 @@ func main() {
 			payload.NewPayload32(hls_settings.CNetworkMask, msg),
 		)
 
+		start := time.Now()
 		if err := hltClient.PutMessage(ctx, netMsg); err != nil {
 			fmt.Printf("%d. %s: %s\n", i+1, addrHLT[0], err)
 			continue
@@ -92,12 +94,13 @@ func main() {
 			fmt.Printf("%d. %s: %s\n", i+1, addrHLT[0], err)
 			continue
 		}
+		respTime := time.Since(start)
 
 		if !bytes.Equal(netMsg.ToBytes(), gotNetMsg.ToBytes()) {
 			fmt.Printf("%d. %s: !bytes.Equal(netMsg.ToBytes(), gotNetMsg.ToBytes())\n", i+1, addrHLT[0])
 			continue
 		}
 
-		fmt.Printf("%d. HLT server '%s' is working properly;\n", i+1, addrHLT[0])
+		fmt.Printf("%d. HLT server '%s' is working properly (response_time=%s);\n", i+1, addrHLT[0], respTime)
 	}
 }
