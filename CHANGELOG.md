@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `cmd/hidden_lake/helpers/traffic`: database now only store hashes, messages stores in memory
+- Update `cmd/hidden_lake/helpers/traffic`: rename "storage_enabled" -> "database_enabled"
+
 <!-- ... -->
 
 ## v1.6.20

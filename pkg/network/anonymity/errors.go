@@ -14,6 +14,7 @@ func (err *SAnonymityError) Error() string {
 
 var (
 	ErrSetHashIntoDB          = &SAnonymityError{"set hash into database"}
+	ErrGetHashFromDB          = &SAnonymityError{"get hash from database"}
 	ErrNilDB                  = &SAnonymityError{"database is nil"}
 	ErrRetryLimit             = &SAnonymityError{"retry limit"}
 	ErrEnqueueMessage         = &SAnonymityError{"enqueue message"}

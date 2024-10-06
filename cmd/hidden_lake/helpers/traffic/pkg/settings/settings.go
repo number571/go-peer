@@ -24,7 +24,7 @@ const (
 )
 
 const (
-	CDefaultStorageEnabled = false
+	CDefaultDatabaseEnabled = false
 )
 
 const (

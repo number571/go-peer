@@ -407,17 +407,20 @@ func (p *sNode) storeHashWithBroadcast(
 
 func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) error {
 	// check already received data by hash
-	if _, err := p.fKVDatavase.Get(pHash); err == nil {
+	_, err := p.fKVDatavase.Get(pHash)
+	if err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
-		return utils.MergeErrors(ErrHashAlreadyExist, err)
+		return ErrHashAlreadyExist
 	}
-
+	if !errors.Is(err, database.ErrNotFound) {
+		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
+		return utils.MergeErrors(ErrGetHashFromDB, err)
+	}
 	// set hash to database with new address
 	if err := p.fKVDatavase.Set(pHash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 		return utils.MergeErrors(ErrSetHashIntoDB, err)
 	}
-
 	return nil
 }
 

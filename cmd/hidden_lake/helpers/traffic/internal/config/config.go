@@ -21,7 +21,7 @@ type SConfigSettings struct {
 	FMessagesCapacity     uint64 `json:"messages_capacity" yaml:"messages_capacity"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
-	FStorageEnabled       bool   `json:"storage_enabled,omitempty" yaml:"storage_enabled,omitempty"`
+	FDatabaseEnabled      bool   `json:"database_enabled,omitempty" yaml:"database_enabled,omitempty"`
 }
 
 type SConfig struct {
@@ -105,8 +105,8 @@ func (p *SConfigSettings) GetKeySizeBits() uint64 {
 	return p.FKeySizeBits
 }
 
-func (p *SConfigSettings) GetStorageEnabled() bool {
-	return p.FStorageEnabled
+func (p *SConfigSettings) GetDatabaseEnabled() bool {
+	return p.FDatabaseEnabled
 }
 
 func (p *SConfig) isValid() bool {

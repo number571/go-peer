@@ -9,12 +9,13 @@ import (
 	"sync"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/connkeeper"
 	"github.com/number571/go-peer/pkg/state"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -37,7 +38,8 @@ type sApp struct {
 	fPathTo     string
 	fConfig     config.IConfig
 	fNode       network.INode
-	fDatabase   database.IDatabase
+	fStorage    storage.IMessageStorage
+	fDatabase   database.IKVDatabase
 	fConnKeeper connkeeper.IConnKeeper
 
 	fAnonLogger logger.ILogger
@@ -105,8 +107,9 @@ func (p *sApp) enable(pCtx context.Context) state.IStateF {
 		if err := p.initDatabase(); err != nil {
 			return utils.MergeErrors(ErrInitDB, err)
 		}
+		p.initStorage(p.fDatabase)
 
-		p.initNetworkNode(p.fDatabase)
+		p.initNetworkNode(p.fStorage)
 		p.initConnKeeper(p.fNode)
 
 		p.initServicePPROF()
@@ -137,8 +140,8 @@ func (p *sApp) stop() error {
 	err := closer.CloseAll([]types.ICloser{
 		p.fServiceHTTP,
 		p.fServicePPROF,
-		p.fDatabase,
 		p.fNode,
+		p.fDatabase,
 	})
 	if err != nil {
 		return utils.MergeErrors(ErrClose, err)

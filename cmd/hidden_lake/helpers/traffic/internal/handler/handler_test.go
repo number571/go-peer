@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	hlt_client "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/client"
 	pkg_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
@@ -23,6 +23,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/connkeeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -51,20 +52,26 @@ func testNetworkMessageSettings() net_message.IConstructSettings {
 	})
 }
 
-func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDatabase, hlt_client.IClient) {
-	db, err := database.NewDatabase(
+func testAllRun(addr string) (*http.Server, context.CancelFunc, storage.IMessageStorage, hlt_client.IClient) {
+	db, err := database.NewKVDatabase(
 		database.NewSettings(&database.SSettings{
-			FPath:             fmt.Sprintf(databaseTemplate, addr),
-			FNetworkKey:       testutils.TCNetworkKey,
-			FWorkSizeBits:     testutils.TCWorkSize,
-			FMessagesCapacity: testutils.TCCapacity,
+			FPath: fmt.Sprintf(databaseTemplate, addr),
 		}),
 	)
 	if err != nil {
-		return nil, nil, nil, nil
+		panic(err)
 	}
 
-	srv, _, cancel := testRunService(db, addr, "")
+	stg := storage.NewMessageStorage(
+		net_message.NewSettings(&net_message.SSettings{
+			FNetworkKey:   testutils.TCNetworkKey,
+			FWorkSizeBits: testutils.TCWorkSize,
+		}),
+		db,
+		lru.NewLRUCache(testutils.TCCapacity),
+	)
+
+	srv, _, cancel := testRunService(stg, addr, "")
 
 	hltClient := hlt_client.NewClient(
 		hlt_client.NewBuilder(),
@@ -76,18 +83,18 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, database.IDataba
 	)
 
 	time.Sleep(200 * time.Millisecond)
-	return srv, cancel, db, hltClient
+	return srv, cancel, stg, hltClient
 }
 
-func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, db database.IDatabase) {
+func testAllFree(addr string, srv *http.Server, cancel context.CancelFunc, db storage.IMessageStorage) {
+	cancel()
 	defer func() {
 		os.RemoveAll(fmt.Sprintf(databaseTemplate, addr))
 	}()
-	cancel()
-	_ = closer.CloseAll([]types.ICloser{srv, db})
+	_ = closer.CloseAll([]types.ICloser{srv, db.GetKVDatabase()})
 }
 
-func testRunService(db database.IDatabase, addr string, addrNode string) (*http.Server, connkeeper.IConnKeeper, context.CancelFunc) {
+func testRunService(stg storage.IMessageStorage, addr string, addrNode string) (*http.Server, connkeeper.IConnKeeper, context.CancelFunc) {
 	mux := http.NewServeMux()
 
 	connKeeperSettings := &connkeeper.SSettings{
@@ -135,9 +142,9 @@ func testRunService(db database.IDatabase, addr string, addrNode string) (*http.
 	)
 
 	mux.HandleFunc(pkg_settings.CHandleIndexPath, HandleIndexAPI(logger))
-	mux.HandleFunc(pkg_settings.CHandleStoragePointerPath, HandlePointerAPI(db, logger))
-	mux.HandleFunc(pkg_settings.CHandleStorageHashesPath, HandleHashesAPI(db, logger))
-	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleMessageAPI(ctx, cfg, db, logger, logger, node))
+	mux.HandleFunc(pkg_settings.CHandleStoragePointerPath, HandlePointerAPI(stg, logger))
+	mux.HandleFunc(pkg_settings.CHandleStorageHashesPath, HandleHashesAPI(stg, logger))
+	mux.HandleFunc(pkg_settings.CHandleNetworkMessagePath, HandleMessageAPI(ctx, cfg, stg, logger, logger, node))
 	mux.HandleFunc(pkg_settings.CHandleConfigSettings, HandleConfigSettingsAPI(cfg, logger))
 
 	srv := &http.Server{

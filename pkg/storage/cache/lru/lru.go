@@ -35,13 +35,20 @@ func (p *sLRUCache) GetKey(i uint64) ([]byte, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	queueLen := uint64(len(p.fQueue))
-	if queueLen <= i {
+	if uint64(len(p.fQueue)) <= i {
 		return nil, false
 	}
 
 	hash := encoding.HexDecode(p.fQueue[i])
-	return hash, hash != nil
+	return hash, len(hash) != 0
+}
+
+func (p *sLRUCache) Get(pKey []byte) ([]byte, bool) {
+	p.fMutex.RLock()
+	defer p.fMutex.RUnlock()
+
+	val, ok := p.fMap[encoding.HexEncode(pKey)]
+	return val, ok
 }
 
 func (p *sLRUCache) Set(pKey, pValue []byte) bool {
@@ -64,12 +71,4 @@ func (p *sLRUCache) Set(pKey, pValue []byte) bool {
 	// increment queue index
 	p.fIndex = (p.fIndex + 1) % uint64(len(p.fQueue))
 	return true
-}
-
-func (p *sLRUCache) Get(pKey []byte) ([]byte, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	val, ok := p.fMap[encoding.HexEncode(pKey)]
-	return val, ok
 }

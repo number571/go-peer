@@ -20,7 +20,7 @@ type IConfigSettings interface {
 
 	GetMessagesCapacity() uint64
 	GetRandMessageSizeBytes() uint64
-	GetStorageEnabled() bool
+	GetDatabaseEnabled() bool
 }
 
 type IAddress interface {

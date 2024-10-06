@@ -17,11 +17,15 @@ import (
 	"github.com/number571/go-peer/pkg/utils"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 )
 
-func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger logger.ILogger) network.IHandlerF {
+func HandleServiceTCP(
+	pCfg config.IConfig,
+	pStorage storage.IMessageStorage,
+	pLogger logger.ILogger,
+) network.IHandlerF {
 	httpClient := &http.Client{Timeout: time.Minute}
 
 	return func(pCtx context.Context, pNode network.INode, pConn conn.IConn, pNetMsg net_message.IMessage) error {
@@ -39,9 +43,9 @@ func HandleServiceTCP(pCfg config.IConfig, pDatabase database.IDatabase, pLogger
 			return utils.MergeErrors(ErrLoadMessage, err)
 		}
 
-		// check message from in database queue
-		if err := pDatabase.Push(pNetMsg); err != nil {
-			if errors.Is(err, database.ErrMessageIsExist) {
+		// check message from in storage queue
+		if err := pStorage.Push(pNetMsg); err != nil {
+			if errors.Is(err, storage.ErrMessageIsExist) || errors.Is(err, storage.ErrHashAlreadyExist) {
 				pLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoExist))
 				return nil
 			}

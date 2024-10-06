@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/handler"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache/lru"
@@ -10,7 +10,7 @@ import (
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 )
 
-func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
+func (p *sApp) initNetworkNode(pStorage storage.IMessageStorage) {
 	cfgSettings := p.fConfig.GetSettings()
 	p.fNode = network.NewNode(
 		network.NewSettings(&network.SSettings{
@@ -30,6 +30,6 @@ func (p *sApp) initNetworkNode(pDatabase database.IDatabase) {
 		lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 	).HandleFunc(
 		hls_settings.CNetworkMask,
-		handler.HandleServiceTCP(p.fConfig, pDatabase, p.fAnonLogger),
+		handler.HandleServiceTCP(p.fConfig, pStorage, p.fAnonLogger),
 	)
 }

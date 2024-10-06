@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandleHashesAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http.HandlerFunc {
+func HandleHashesAPI(pStorage storage.IMessageStorage, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
@@ -30,7 +30,7 @@ func HandleHashesAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http.
 			return
 		}
 
-		hash, err := pDatabase.Hash(uint64(id))
+		hash, err := pStorage.Hash(uint64(id))
 		if err != nil {
 			pLogger.PushWarn(logBuilder.WithMessage("get_hashes"))
 			_ = api.Response(pW, http.StatusNotAcceptable, "failed: load size from DB")

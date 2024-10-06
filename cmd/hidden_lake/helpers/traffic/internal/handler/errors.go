@@ -13,7 +13,9 @@ func (err *SHandlerError) Error() string {
 }
 
 var (
-	ErrLoadMessage   = &SHandlerError{"load message"}
-	ErrDatabaseNull  = &SHandlerError{"database null"}
-	ErrPushMessageDB = &SHandlerError{"push message db"}
+	ErrLoadMessage      = &SHandlerError{"load message"}
+	ErrDatabaseNull     = &SHandlerError{"database null"}
+	ErrPushMessageDB    = &SHandlerError{"push message db"}
+	ErrHashAlreadyExist = &SHandlerError{"hash already exist"}
+	ErrSetHashIntoDB    = &SHandlerError{"set hash into database"}
 )

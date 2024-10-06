@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/config"
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	hls_settings "github.com/number571/go-peer/cmd/hidden_lake/service/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
@@ -17,8 +17,14 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDatabase database.IDatabase, pHTTPLogger, pAnonLogger logger.ILogger, pNode network.INode) http.HandlerFunc {
-	tcpHandler := HandleServiceTCP(pCfg, pDatabase, pAnonLogger)
+func HandleMessageAPI(
+	pCtx context.Context,
+	pCfg config.IConfig,
+	pStorage storage.IMessageStorage,
+	pHTTPLogger, pAnonLogger logger.ILogger,
+	pNode network.INode,
+) http.HandlerFunc {
+	tcpHandler := HandleServiceTCP(pCfg, pStorage, pAnonLogger)
 
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
@@ -40,7 +46,7 @@ func HandleMessageAPI(pCtx context.Context, pCfg config.IConfig, pDatabase datab
 				return
 			}
 
-			msg, err := pDatabase.Load(hash)
+			msg, err := pStorage.Load(hash)
 			if err != nil {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("load_hash"))
 				_ = api.Response(pW, http.StatusNotFound, "failed: load message")

@@ -14,7 +14,7 @@ func GetConfigSettings(pCfg config.IConfig) SConfigSettings {
 			FMessagesCapacity:     sett.GetMessagesCapacity(),
 			FRandMessageSizeBytes: sett.GetRandMessageSizeBytes(),
 			FNetworkKey:           sett.GetNetworkKey(),
-			FStorageEnabled:       sett.GetStorageEnabled(),
+			FDatabaseEnabled:      sett.GetDatabaseEnabled(),
 		},
 	}
 }

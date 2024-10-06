@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/database"
+	"github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/internal/storage"
 	hlt_settings "github.com/number571/go-peer/cmd/hidden_lake/helpers/traffic/pkg/settings"
 	"github.com/number571/go-peer/internal/api"
 	http_logger "github.com/number571/go-peer/internal/logger/http"
 	"github.com/number571/go-peer/pkg/logger"
 )
 
-func HandlePointerAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http.HandlerFunc {
+func HandlePointerAPI(pStorage storage.IMessageStorage, pLogger logger.ILogger) http.HandlerFunc {
 	return func(pW http.ResponseWriter, pR *http.Request) {
 		logBuilder := http_logger.NewLogBuilder(hlt_settings.CServiceName, pR)
 
@@ -22,6 +22,6 @@ func HandlePointerAPI(pDatabase database.IDatabase, pLogger logger.ILogger) http
 		}
 
 		pLogger.PushInfo(logBuilder.WithMessage(http_logger.CLogSuccess))
-		_ = api.Response(pW, http.StatusOK, strconv.FormatUint(pDatabase.Pointer(), 10))
+		_ = api.Response(pW, http.StatusOK, strconv.FormatUint(pStorage.Pointer(), 10))
 	}
 }
