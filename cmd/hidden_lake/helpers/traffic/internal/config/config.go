@@ -18,7 +18,7 @@ type SConfigSettings struct {
 	FMessageSizeBytes     uint64 `json:"message_size_bytes" yaml:"message_size_bytes"`
 	FKeySizeBits          uint64 `json:"key_size_bits" yaml:"key_size_bits"`
 	FWorkSizeBits         uint64 `json:"work_size_bits,omitempty" yaml:"work_size_bits,omitempty"`
-	FMessagesCapacity     uint64 `json:"messages_capacity" yaml:"messages_capacity"`
+	FMessagesCapacity     uint64 `json:"messages_capacity,omitempty" yaml:"messages_capacity,omitempty"`
 	FRandMessageSizeBytes uint64 `json:"rand_message_size_bytes,omitempty" yaml:"rand_message_size_bytes,omitempty"`
 	FNetworkKey           string `json:"network_key,omitempty" yaml:"network_key,omitempty"`
 	FDatabaseEnabled      bool   `json:"database_enabled,omitempty" yaml:"database_enabled,omitempty"`
@@ -112,7 +112,6 @@ func (p *SConfigSettings) GetDatabaseEnabled() bool {
 func (p *SConfig) isValid() bool {
 	return true &&
 		p.FSettings.FMessageSizeBytes != 0 &&
-		p.FSettings.FMessagesCapacity != 0 &&
 		p.FSettings.FKeySizeBits != 0
 }
 

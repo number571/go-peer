@@ -8,9 +8,9 @@ import (
 
 func (p *sApp) initStorage(pDatabase database.IKVDatabase) {
 	cfgSettings := p.fConfig.GetSettings()
-	p.fStorage = storage.NewMessageStorage(
-		cfgSettings,
-		pDatabase,
-		lru.NewLRUCache(cfgSettings.GetMessagesCapacity()),
-	)
+	lruCache := newVoidLRUCache()
+	if mcap := cfgSettings.GetMessagesCapacity(); mcap != 0 {
+		lruCache = lru.NewLRUCache(mcap)
+	}
+	p.fStorage = storage.NewMessageStorage(cfgSettings, pDatabase, lruCache)
 }

@@ -8,20 +8,21 @@ import (
 )
 
 const (
-	tcConfigFile  = "config_test.txt"
-	tcLogging     = true
-	tcStorage     = true
-	tcNetwork     = "test_network"
-	tcAddress1    = "test_address1"
-	tcAddress2    = "test_address2"
-	tcAddress3    = "test_address3"
-	tcConnection1 = "test_connection1"
-	tcConnection2 = "test_connection2"
-	tcConsumer1   = "test_consumer1"
-	tcConsumer2   = "test_consumer2"
-	tcMessageSize = (1 << 20)
-	tcWorkSize    = 22
-	tcCapMessages = 1000
+	tcConfigFile      = "config_test.txt"
+	tcLogging         = true
+	tcStorage         = true
+	tcNetwork         = "test_network"
+	tcAddress1        = "test_address1"
+	tcAddress2        = "test_address2"
+	tcAddress3        = "test_address3"
+	tcConnection1     = "test_connection1"
+	tcConnection2     = "test_connection2"
+	tcConsumer1       = "test_consumer1"
+	tcConsumer2       = "test_consumer2"
+	tcMessageSize     = (1 << 20)
+	tcWorkSize        = 22
+	tcCapMessages     = 1000
+	tcDatabaseEnabled = true
 )
 
 func TestError(t *testing.T) {
@@ -43,6 +44,7 @@ func testConfigDefaultInit(configPath string) {
 			FMessagesCapacity: tcCapMessages,
 			FNetworkKey:       tcNetwork,
 			FKeySizeBits:      testutils.TcKeySize,
+			FDatabaseEnabled:  true,
 		},
 		FLogging: []string{"info", "erro"},
 		FAddress: &SAddress{
@@ -85,6 +87,11 @@ func TestConfig(t *testing.T) {
 
 	if cfg.GetSettings().GetMessagesCapacity() != tcCapMessages {
 		t.Error("settings cap messages is invalid")
+		return
+	}
+
+	if cfg.GetSettings().GetDatabaseEnabled() != tcDatabaseEnabled {
+		t.Error("settings database enabled is invalid")
 		return
 	}
 
