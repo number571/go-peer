@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/state"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/types"
 )
 
@@ -52,7 +52,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 		adapted.NewAdaptedConsumer(
 			p.fPostID,
 			p.fSettings,
-			lru.NewLRUCache(1<<10),
+			cache.NewLRUCache(1<<10),
 		),
 		p.fStdfLogger,
 		hlt_client.NewClient(

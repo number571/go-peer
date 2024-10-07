@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -433,7 +433,7 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 				FWriteTimeout:          timeout,
 			}),
 		}),
-		lru.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(testutils.TCCapacity),
 	)
 }
 

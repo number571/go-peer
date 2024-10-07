@@ -19,7 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 	testutils "github.com/number571/go-peer/test/utils"
 
@@ -707,7 +707,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			lru.NewLRUCache(testutils.TCCapacity),
+			cache.NewLRUCache(testutils.TCCapacity),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{

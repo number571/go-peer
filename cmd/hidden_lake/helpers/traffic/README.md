@@ -4,7 +4,7 @@
 
 <img src="_images/hlt_logo.png" alt="hlt_logo.png"/>
 
-The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time. Can act as a TURN server for HLS's or other P2P nodes with go-peer protocol.
+The `Hidden Lake Traffic` is an application that saves traffic passed through HLS. The saved traffic can be used by other applications when they were offline. HLT provides an API for loading and unloading messages. Messages are stored in the inmemory database based on the "ring" structure. Thus, new messages will overwrite the old ones after some time. Can act as a TURN server for HLS's or other P2P nodes with GP/12 protocol.
 
 > More information about HLT in the [habr.com/ru/post/717184](https://habr.com/ru/post/717184/ "Habr HLT")
 

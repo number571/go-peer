@@ -11,6 +11,7 @@
 - Update `cmd/hidden_lake/helpers/traffic`: database now only store hashes, messages stores in memory
 - Update `cmd/hidden_lake/helpers/traffic`: rename "storage_enabled" -> "database_enabled"
 - Update `cmd/hidden_lake/helpers/traffic`: "messages_capacity" can be = 0
+- Update `pkg/storage/cache`: cache/lru/lru.go -> cache/lru.go
 
 <!-- ... -->
 

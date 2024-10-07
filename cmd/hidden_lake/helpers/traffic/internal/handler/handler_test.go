@@ -22,7 +22,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/network/connkeeper"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -68,7 +68,7 @@ func testAllRun(addr string) (*http.Server, context.CancelFunc, storage.IMessage
 			FWorkSizeBits: testutils.TCWorkSize,
 		}),
 		db,
-		lru.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(testutils.TCCapacity),
 	)
 
 	srv, _, cancel := testRunService(stg, addr, "")
@@ -185,6 +185,6 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		lru.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(testutils.TCCapacity),
 	)
 }

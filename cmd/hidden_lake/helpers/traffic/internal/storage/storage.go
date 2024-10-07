@@ -5,7 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/utils"
 )
@@ -17,13 +17,13 @@ var (
 type sMessageStorage struct {
 	fSettings net_message.ISettings
 	fDatabase database.IKVDatabase
-	fLRUCache lru.ILRUCache
+	fLRUCache cache.ILRUCache
 }
 
 func NewMessageStorage(
 	pSettings net_message.ISettings,
 	pDatabase database.IKVDatabase,
-	pLRUCache lru.ILRUCache,
+	pLRUCache cache.ILRUCache,
 ) IMessageStorage {
 	return &sMessageStorage{
 		fSettings: pSettings,
@@ -40,7 +40,7 @@ func (p *sMessageStorage) GetKVDatabase() database.IKVDatabase {
 	return p.fDatabase
 }
 
-func (p *sMessageStorage) GetLRUCache() lru.ILRUCache {
+func (p *sMessageStorage) GetLRUCache() cache.ILRUCache {
 	return p.fLRUCache
 }
 

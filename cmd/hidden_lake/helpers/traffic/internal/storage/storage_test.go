@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -37,7 +37,7 @@ func TestStorageLoad(t *testing.T) {
 			FNetworkKey:   testutils.TCNetworkKey,
 		}),
 		hlt_database.NewVoidKVDatabase(),
-		lru.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(testutils.TCCapacity),
 	)
 
 	if _, err := db.Load([]byte("abc")); err == nil {
@@ -68,7 +68,7 @@ func TestStorageHashes(t *testing.T) {
 			FNetworkKey:   testutils.TCNetworkKey,
 		}),
 		hlt_database.NewVoidKVDatabase(),
-		lru.NewLRUCache(messagesCapacity),
+		cache.NewLRUCache(messagesCapacity),
 	)
 
 	cl := client.NewClient(
@@ -123,7 +123,7 @@ func TestStoragePush(t *testing.T) {
 			FNetworkKey:   testutils.TCNetworkKey,
 		}),
 		hlt_database.NewVoidKVDatabase(),
-		lru.NewLRUCache(1),
+		cache.NewLRUCache(1),
 	)
 
 	clTest := client.NewClient(
@@ -196,7 +196,7 @@ func TestStorage(t *testing.T) {
 			FNetworkKey:   testutils.TCNetworkKey,
 		}),
 		hlt_database.NewVoidKVDatabase(),
-		lru.NewLRUCache(4),
+		cache.NewLRUCache(4),
 	)
 
 	cl := client.NewClient(

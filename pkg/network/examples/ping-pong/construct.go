@@ -5,7 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 )
 
 func newNode(serviceAddress string) network.INode {
@@ -23,6 +23,6 @@ func newNode(serviceAddress string) network.INode {
 			FWriteTimeout: time.Minute,
 			FReadTimeout:  time.Minute,
 		}),
-		lru.NewLRUCache(1<<10),
+		cache.NewLRUCache(1<<10),
 	)
 }

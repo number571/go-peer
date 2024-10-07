@@ -13,7 +13,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/utils"
 
@@ -85,7 +85,7 @@ func (p *sApp) initAnonNode() error {
 					FWriteTimeout:          hls_settings.CNetworkWriteTimeout,
 				}),
 			}),
-			lru.NewLRUCache(hls_settings.CNetworkQueueCapacity),
+			cache.NewLRUCache(hls_settings.CNetworkQueueCapacity),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{

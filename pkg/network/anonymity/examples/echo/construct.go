@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
 
@@ -90,7 +90,7 @@ func newNode(serviceName, address string) anonymity.INode {
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			lru.NewLRUCache(1024),
+			cache.NewLRUCache(1024),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{

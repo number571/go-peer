@@ -21,7 +21,7 @@ import (
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
-	"github.com/number571/go-peer/pkg/storage/cache/lru"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -251,6 +251,6 @@ func testNewNetworkNode(addr string) network.INode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		lru.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(testutils.TCCapacity),
 	)
 }
