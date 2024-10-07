@@ -26,17 +26,4 @@ func TestVoidKVDatabase(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	sett := db.GetSettings()
-	if sett.GetPassword() != "" {
-		t.Error("password is not null")
-		return
-	}
-	if sett.GetWorkSize() != 0 {
-		t.Error("work size is not null")
-		return
-	}
-	if sett.GetPath() != "_" {
-		t.Error("path is not null")
-		return
-	}
 }

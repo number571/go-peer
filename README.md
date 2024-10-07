@@ -69,7 +69,6 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 3. The `network` module is a decentralized communication between network nodes. Allows you to delimit networks and give information a random appearance using the network key.
 4. The `network/anonymity` module to ensure anonymity based on the fifth^ stage. Presents the main functions for working with the network on top of the `network` and `network/anonymity/queue` modules.
 5. The `network/anonymity/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `client`, `client/message` and `network/message` modules.
-6. The `storage/database` module is a `key-value` database with the functions of value encryption and key hashing.
 
 > Examples of works in the directories [pkg/client/examples](pkg/client/examples/), [pkg/network/examples](pkg/network/examples/), [pkg/network/anonymity/examples](pkg/network/anonymity/examples/), [pkg/network/anonymity/queue/examples](pkg/network/anonymity/queue/examples/);
 

@@ -26,8 +26,8 @@ type INode interface {
 
 	GetSettings() ISettings
 	GetCacheSetter() cache.ICacheSetter
-	GetConnections() map[string]conn.IConn
 
+	GetConnections() map[string]conn.IConn
 	AddConnection(context.Context, string) error
 	DelConnection(string) error
 

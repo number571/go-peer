@@ -14,11 +14,7 @@ func (p *sApp) initDatabase() error {
 		p.fDatabase = hlt_database.NewVoidKVDatabase()
 		return nil
 	}
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: filepath.Join(p.fPathTo, hlt_settings.CPathDB),
-		}),
-	)
+	db, err := database.NewKVDatabase(filepath.Join(p.fPathTo, hlt_settings.CPathDB))
 	if err != nil {
 		return fmt.Errorf("init database: %w", err)
 	}

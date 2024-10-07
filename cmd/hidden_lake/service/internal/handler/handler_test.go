@@ -184,13 +184,7 @@ func testRunNewNode(dbPath, addr string) (anonymity.INode, context.Context, cont
 }
 
 func testNewNode(dbPath, addr string) anonymity.INode {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath:     dbPath,
-			FWorkSize: testutils.TCWorkSize,
-			FPassword: "CIPHER",
-		}),
-	)
+	db, err := database.NewKVDatabase(dbPath)
 	if err != nil {
 		panic(err)
 	}

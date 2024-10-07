@@ -48,11 +48,7 @@ func (p *sApp) Run(pCtx context.Context) error {
 	}
 	defer func() { _ = p.fState.Disable(nil) }()
 
-	kvDB, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: settings.CPathDB,
-		}),
-	)
+	kvDB, err := database.NewKVDatabase(settings.CPathDB)
 	if err != nil {
 		return err
 	}

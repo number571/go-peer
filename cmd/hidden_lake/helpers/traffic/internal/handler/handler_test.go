@@ -53,11 +53,7 @@ func testNetworkMessageSettings() net_message.IConstructSettings {
 }
 
 func testAllRun(addr string) (*http.Server, context.CancelFunc, storage.IMessageStorage, hlt_client.IClient) {
-	db, err := database.NewKVDatabase(
-		database.NewSettings(&database.SSettings{
-			FPath: fmt.Sprintf(databaseTemplate, addr),
-		}),
-	)
+	db, err := database.NewKVDatabase(fmt.Sprintf(databaseTemplate, addr))
 	if err != nil {
 		panic(err)
 	}

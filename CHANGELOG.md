@@ -13,6 +13,7 @@
 - Update `cmd/hidden_lake/helpers/traffic`: "messages_capacity" can be = 0
 - Update `pkg/storage/cache`: cache/lru/lru.go -> cache/lru.go
 - Update `internal/api`: Request success if "200 >= code < 300" (old version only code=200)
+- Update `pkg/storage/database`: delete encryption
 
 <!-- ... -->
 
