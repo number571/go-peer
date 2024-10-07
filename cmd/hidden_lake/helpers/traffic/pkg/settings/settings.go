@@ -11,11 +11,6 @@ const (
 )
 
 const (
-	CDefaultHashesWindow     = (2 << 10)
-	CDefaultMessagesCapacity = (2 << 10)
-)
-
-const (
 	CHandleIndexPath          = "/api/index"
 	CHandleStoragePointerPath = "/api/storage/pointer"
 	CHandleStorageHashesPath  = "/api/storage/hashes"
@@ -24,7 +19,8 @@ const (
 )
 
 const (
-	CDefaultDatabaseEnabled = false
+	CDefaultMessagesCapacity = 0
+	CDefaultDatabaseEnabled  = false
 )
 
 const (

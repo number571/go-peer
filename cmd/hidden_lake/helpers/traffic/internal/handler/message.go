@@ -40,9 +40,9 @@ func HandleMessageAPI(
 			query := pR.URL.Query()
 
 			hash := encoding.HexDecode(query.Get("hash"))
-			if hash == nil {
+			if len(hash) == 0 {
 				pHTTPLogger.PushWarn(logBuilder.WithMessage(http_logger.CLogDecodeBody))
-				_ = api.Response(pW, http.StatusNotFound, "failed: decode message")
+				_ = api.Response(pW, http.StatusTeapot, "failed: decode hash")
 				return
 			}
 
@@ -79,6 +79,12 @@ func HandleMessageAPI(
 				pHTTPLogger.PushWarn(logBuilder.WithMessage("network_mask"))
 				_ = api.Response(pW, http.StatusLocked, "failed: network mask")
 				return
+			}
+
+			if !pNode.GetCacheSetter().Set(netMsg.GetHash(), []byte{}) {
+				pHTTPLogger.PushInfo(logBuilder.WithMessage("hash_already_exist"))
+				_ = api.Response(pW, http.StatusAccepted, "accepted: hash already exist")
+				return // hash of message already in queue
 			}
 
 			if err := tcpHandler(pCtx, pNode, nil, netMsg); err != nil {

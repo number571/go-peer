@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/types"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -24,6 +25,7 @@ type INode interface {
 	HandleFunc(uint32, IHandlerF) INode
 
 	GetSettings() ISettings
+	GetCacheSetter() cache.ICacheSetter
 	GetConnections() map[string]conn.IConn
 
 	AddConnection(context.Context, string) error

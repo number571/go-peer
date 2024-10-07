@@ -10,6 +10,10 @@ const (
 )
 
 const (
+	CDefaultMessagesCapacity = (2 << 10) // count
+)
+
+const (
 	CDefaultHTTPAddress = "127.0.0.1:9561"
 )
 

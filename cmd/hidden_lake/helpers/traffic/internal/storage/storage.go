@@ -61,9 +61,6 @@ func (p *sMessageStorage) Push(pMsg net_message.IMessage) error {
 		return utils.MergeErrors(ErrLoadMessage, err)
 	}
 	hash := pMsg.GetHash()
-	if ok := p.fLRUCache.Set(hash, pMsg.ToBytes()); !ok {
-		return ErrMessageIsExist
-	}
 	_, err := p.fDatabase.Get(hash)
 	if err == nil {
 		return ErrHashAlreadyExist
@@ -73,6 +70,9 @@ func (p *sMessageStorage) Push(pMsg net_message.IMessage) error {
 	}
 	if err := p.fDatabase.Set(hash, []byte{}); err != nil {
 		return utils.MergeErrors(ErrSetHashIntoDB, err)
+	}
+	if ok := p.fLRUCache.Set(hash, pMsg.ToBytes()); !ok {
+		return ErrMessageIsExist
 	}
 	return nil
 }

@@ -46,6 +46,10 @@ func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
 }
 
+func (p *sNode) GetCacheSetter() cache.ICacheSetter {
+	return p.fCacheSetter
+}
+
 // Puts the hash of the message in the buffer and sends the message to all connections of the node.
 func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage) error {
 	connections := p.GetConnections()

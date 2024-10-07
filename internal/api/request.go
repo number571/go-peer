@@ -64,10 +64,8 @@ func loadResponse(pStatusCode int, pReader io.ReadCloser) ([]byte, error) {
 	if err != nil {
 		return nil, utils.MergeErrors(ErrReadResponse, err)
 	}
-
-	if pStatusCode != http.StatusOK {
+	if pStatusCode < 200 || pStatusCode >= 300 {
 		return nil, utils.MergeErrors(ErrBadStatusCode, fmt.Errorf("status code: %d", pStatusCode)) // nolint:goerr113
 	}
-
 	return resp, nil
 }
