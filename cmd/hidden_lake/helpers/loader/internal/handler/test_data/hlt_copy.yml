@@ -4,6 +4,6 @@ settings:
   messages_capacity: 2048
   work_size_bits: %d
   network_key: %s
-  storage_enabled: true
+  database_enabled: true
 address:
   http: '%s'

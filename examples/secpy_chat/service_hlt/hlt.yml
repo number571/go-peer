@@ -4,7 +4,7 @@ settings:
   work_size_bits: 22
   messages_capacity: 2048
   network_key: j2BR39JfDf7Bajx3
-  storage_enabled: true
+  database_enabled: true
 logging:
   - info
   - warn
