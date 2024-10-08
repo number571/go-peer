@@ -31,6 +31,9 @@
         <a href="https://github.com/redecentralize/alternative-internet">
         	<img src="https://awesome.re/mentioned-badge.svg" alt="Alternative-Internet" />
 		</a>
+        <a href="https://github.com/number571/awesome-anonymity">
+        	<img src="https://awesome.re/mentioned-badge.svg" alt="Awesome-Anonymity" />
+		</a>
 	</p>
 	About project
 </h2>
