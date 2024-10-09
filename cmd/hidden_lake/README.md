@@ -47,14 +47,6 @@ The Hidden Lake is a `friend-to-friend` (F2F) network, which means building trus
 
 > More information about HL in the [hidden_lake_anonymous_network.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN") and here [hidden_lake_anonymous_network_view.pdf](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "HLANv")
 
-## List of applications
-
-Basic | Applied | Helpers
-:-----------------------------:|:-----------------------------:|:------------------------------:
-[HL Service](service) | [HL Messenger](applications/messenger) | [HL Traffic](helpers/traffic)
-[HL Composite](composite) | [HL Filesharer](applications/filesharer) | [HL Loader](helpers/loader)
-[HL Adapters](adapters) | [HL Remoter](applications/remoter) | [HL Encryptor](helpers/encryptor)
-
 ## Coverage map
 
 <p align="center"><img src="_test/result/coverage.svg" alt="coverage.svg"/></p>
@@ -104,6 +96,14 @@ On the basis of this characteristic, methods of possible application also begin 
 2. Due to the `theoretically provable anonymity` and independence of nodes among themselves in choosing the period of packet generation, the network can be used in military affairs, ensuring not only the confidentiality of transmitted data, but also the confidentiality of metadata in the face of the activity of actions,
 3. The Hidden Lake network can be used as a `communication platform` for applications that are heterogeneous in nature. This is made possible by the `GP/12` protocol, which does not define any application use. As a result, you can create your own applications at several levels: either at the go-peer library level or at the HL services level ([example](https://github.com/number571/go-peer/tree/master/cmd/secpy_chat)),
 4. Due to problems with scaling at the level of the `QB-problem` itself, the network is difficult to deploy in a global space, which nevertheless does not indicate a local field of action. Hidden Lake can protect `local networks` in a more efficient way due to the existence of small groups of participants that do not vary greatly in number. This may be a relevant solution in the context of the existence of critical areas of a local organization.
+
+## List of applications
+
+Basic | Applied | Helpers
+:-----------------------------:|:-----------------------------:|:------------------------------:
+[HL Service](service) | [HL Messenger](applications/messenger) | [HL Traffic](helpers/traffic)
+[HL Composite](composite) | [HL Filesharer](applications/filesharer) | [HL Loader](helpers/loader)
+[HL Adapters](adapters) | [HL Remoter](applications/remoter) | [HL Encryptor](helpers/encryptor)
 
 ## Possible launch modes
 
