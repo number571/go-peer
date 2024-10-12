@@ -192,7 +192,8 @@ queue_period_ms: 5000
                 <th>Characteristics</th>
                 <th>Expired time</th>
                 <th>Logging</th>
-                <th>Storage size</th>
+                <th>DB-hash</th>
+                <th>STG-size</th>
             </tr>
             <tr>
                 <td>1</td>
@@ -207,7 +208,8 @@ queue_period_ms: 5000
                 <td>1x4.0GHz, 1.0GB RAM, 30GB HDD</td>
                 <td>±eternal</td>
                 <td>off</td>
-                <td>300_000</td>
+                <td>on</td>
+                <td>30_000</td>
             </tr>
             <tr>
                 <td>2</td>
@@ -222,7 +224,8 @@ queue_period_ms: 5000
                 <td>1x2.2GHz, 0.5GB RAM, 10GB HDD</td>
                 <td>±28.07.2027</td>
                 <td>off</td>
-                <td>300_000</td>
+                <td>off</td>
+                <td>10_000</td>
             </tr>
             <tr>
                 <td>3</td>
@@ -237,7 +240,8 @@ queue_period_ms: 5000
                 <td>1x2.5GHz, 1.0GB RAM, 5GB VNMe</td>
                 <td>±07.08.2027</td>
                 <td>on</td>
-                <td>30_000</td>
+                <td>off</td>
+                <td>10_000</td>
             </tr>
             <tr>
                 <td>4</td>
@@ -252,7 +256,8 @@ queue_period_ms: 5000
                 <td>1x3.1GHz, 2.0GB RAM, 300GB HDD</td>
                 <td>±10.12.2024</td>
                 <td>off</td>
-                <td>1_000_000</td>
+                <td>on</td>
+                <td>30_000</td>
             </tr>
         </table>
     </td>
