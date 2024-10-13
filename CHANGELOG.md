@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `docs`: move hidden_lake works to https://github.com/number571/hidden-lake repository
+
 <!-- ... -->
 
 ## v1.6.21

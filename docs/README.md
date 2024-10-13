@@ -8,14 +8,12 @@
 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
 3. [Abstract anonymous networks](https://github.com/number571/go-peer/blob/master/docs/abstract_anonymous_networks.pdf "AAN")
 4. [Decentralized key exchange protocol](https://github.com/number571/go-peer/blob/master/docs/decentralized_key_exchange_protocol.pdf "DKEP")
-5. [The Hidden Lake anonymous network](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "HLAN")
 
 Also, the composition of these works can be found in the book [The general theory of anonymous communications](https://ridero.ru/books/obshaya_teoriya_anonimnykh_kommunikacii/). This book can be purchased in a tangible form on the [Ozon](https://www.ozon.ru/product/obshchaya-teoriya-anonimnyh-kommunikatsiy-vtoroe-izdanie-kovalenko-a-g-1193224608/) and [Wildberries](https://www.wildberries.ru/catalog/177390621/detail.aspx) marketplaces. You can download the book in digital form for free [here](https://github.com/number571/go-peer/blob/master/docs/general_theory_of_anonymous_communications.pdf).
 
 ### 2. Presentations
 
-1. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network.pdf "Presentation HLAN")
-2. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "Presentation GA")
+1. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "Presentation GA")
 
 ### 3. Habr
 
@@ -34,11 +32,6 @@ Also, the composition of these works can be found in the book [The general theor
 
 1. [Hidden Lake Messenger](https://www.youtube.com/watch?v=o2J6ewvBKmg "Video HLM")
 2. [Create node in the Hidden Lake](https://www.youtube.com/watch?v=GBmQfy16AuA&t=18s "Video HL")
-
-### 5. Schemes
-
-1. [Hidden Lake proto](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_message_layers.svg "HLp")
-2. [Hidden Lake modes](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_launch_modes.svg "HLm")
 
 ## Default applications ports
 
