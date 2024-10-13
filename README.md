@@ -59,9 +59,6 @@
 	About project
 </h2>
 
-> [!WARNING]
-> The go-peer package and the Hidden Lake anonymous network are under `active development`. New versions may not be compatible with the old ones. As a result, it is necessary to use the latest release versions in order to keep up to date.
-
 The `go-peer` library contains a large number of functions necessary to ensure the security of transmitted or stored information, as well as for the anonymity of nodes in the decentralized form. The library can be divided into several main `pkg` modules:
 
 1. The `crypto` module represents cryptographic primitives: 1) asymmetric encryption, decryption; 2) asymmetric signing and signature verification; 3) symmetric encryption and decryption; 4) hashing; 5) key building; 6) computational problems (puzzles); 7) cryptographically stable pseudorandom number generator.
@@ -96,11 +93,9 @@ All cmd programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux
 > All dependencies are loaded into the go-peer project once using the `go mod vendor` command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
 
 1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/database`)
-2. Go library [golang.org/x/net](https://golang.org/x/net "x/net") (used by `cmd/hidden_lake/applications/messenger`)
-3. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`)
-4. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`)
-5. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`)
-6. CSS/JS library [getbootstrap.com](https://getbootstrap.com "bootstrap") (used by `cmd/hidden_lake/applications/messenger|filesharer`)
+2. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`)
+3. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`)
+4. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`)
 
 ### Makefile
 
@@ -123,32 +118,16 @@ Also, the composition of these works (without "The Hidden Lake anonymous network
 
 1. Find bugs, vulnerabilities, and errors in the code
 2. Suggest improvements, ask questions, create issues
-3. Create anonymizing nodes (HLS) in the Hidden Lake network
-4. Create new relay nodes (HLT) in the Hidden Lake network
-5. Append new theoretical works or update current
-6. Create new secure / anonymity applications
-7. Popularize technology and applications
+3. Append new theoretical works or update current
+4. Create new secure / anonymity applications
+5. Popularize technology and applications
 
 ## Library based applications
 
-1. Anonymous network «[Hidden Lake](cmd/hidden_lake)»
-2. Console messenger «[secpy-chat](cmd/secpy_chat)» based on Hidden Lake services `HLT`, `HLE`
+1. Anonymous network «[Hidden Lake](https://github.com/number571/hidden-lake)»
+2. Console messenger «[secpy-chat](https://github.com/number571/secpy-chat)» based on Hidden Lake services `HLT`, `HLE`
 3. Generator of asymmetric keys «[tkeygen](cmd/tools/keygen)» in `PrivKey{hex}`, `PubKey{hex}` format
 3. Serverless and stateless password manager «[tpmanager](cmd/tools/pmanager)»
-
-### Deprecated applications
-
-Previously, some applications (such as HL, HLS, HES) were developed separately from the go-peer platform. Currently, these applications are outdated because they did not keep up with go-peer updates and were based on poor architectural solutions.
-
-* [github.com/number571/hidden-lake](https://github.com/number571/hidden-lake "HL"); New version in the [cmd/hidden_lake](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake)
-* [github.com/number571/hls](https://github.com/number571/hls "HLS"); New version in the [cmd/hidden_lake/service](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/service)
-* [github.com/number571/hes](https://github.com/number571/hes "HES"); It can be implemented using [HLT](https://github.com/number571/go-peer/tree/master/cmd/hidden_lake/helpers/traffic)
-
-The difference between the old version of Hidden Lake and the new one is in the following details:
-1. The new version is based on a model of theoretically provable anonymity (QB networks), while the old version was based on onion routing
-2. The old version was a monolith, incorporating both transport logic, anonymizing, and applied. The new version is already based on the micro service architecture
-3. The new version is located inside the go-peer framework (in the cmd directory), while the old one used go-peer as a library
-4. The main anonymizing and transport functions in the new version of Hidden Lake (at the level of the go-peer framework) have been covered by tests and verified for security. In the old version, there were no tests at all
 
 ## Star History
 

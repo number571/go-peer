@@ -1,9 +1,0 @@
-settings:
-  message_size_bytes: 4096
-  key_size_bits: 2048
-  work_size_bits: 22
-address:
-  tcp: :8581
-  http: :8582
-consumers:
-  - recv_hlc:8082/adapter

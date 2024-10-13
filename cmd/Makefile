@@ -2,8 +2,6 @@
 
 default: build 
 build:
-	make -C ./hidden_lake build
 	make -C ./tools build
 clean:
-	make -C ./hidden_lake clean
 	make -C ./tools clean

@@ -12,7 +12,6 @@ _TEST_RESULT_PATH=./test/result
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
 _GO_TEST_LIST=\
 	go list ./... | \
-	grep -v /examples/ | \
 	grep -v /cmd/
 
 .PHONY: default clean go-fmt-vet \
@@ -26,7 +25,6 @@ default: lint-run test-run
 clean:
 	make -C ./bin clean 
 	make -C ./cmd clean 
-	make -C ./examples clean
 
 go-fmt-vet:
 	go fmt ./...
@@ -61,20 +59,16 @@ test-run:
 ### TEST COVERAGE
 
 test-coverage:
-	make test-coverage -C cmd/hidden_lake/
 	go test -coverpkg=./... -coverprofile=$(_TEST_RESULT_PATH)/coverage.out -count=1 `$(_GO_TEST_LIST)`
 	$(_CHECK_ERROR)
 
 test-coverage-view:
-	make test-coverage-view -C cmd/hidden_lake/
 	go tool cover -html=$(_TEST_RESULT_PATH)/coverage.out
 
 test-coverage-treemap:
-	make test-coverage-treemap -C cmd/hidden_lake/
 	go-cover-treemap -coverprofile=$(_TEST_RESULT_PATH)/coverage.out > $(_TEST_RESULT_PATH)/coverage.svg
 
 test-coverage-badge: 
-	make test-coverage-badge -C cmd/hidden_lake/
 	$(eval _COVERAGE_FLOOR=go tool cover -func=$(_TEST_RESULT_PATH)/coverage.out | grep total: | grep -oP '([0-9])+(?=\.[0-9]+)')
 	if [ `${_COVERAGE_FLOOR}` -lt 60 ]; then \
 		cat $(_TEST_UTILS_PATH)/badge_coverage_template.svg | sed -e "s/{{.color}}/dc143c/g;s/{{.percent}}/`${_COVERAGE_FLOOR}`/g" > $(_TEST_RESULT_PATH)/badge_coverage.svg; \
