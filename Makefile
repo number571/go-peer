@@ -12,6 +12,7 @@ _TEST_RESULT_PATH=./test/result
 _CHECK_ERROR=if [ $$? != 0 ]; then exit 1; fi
 _GO_TEST_LIST=\
 	go list ./... | \
+	grep -v /examples/ | \
 	grep -v /cmd/
 
 .PHONY: default clean go-fmt-vet \
