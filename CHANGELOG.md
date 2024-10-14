@@ -8,7 +8,8 @@
 
 ### CHANGES
 
-- Update `docs`: move hidden_lake works to https://github.com/number571/hidden-lake repository
+- Update `cmd`: move hidden_lake & secpy_chat to https://github.com/number571/hidden-lake and https://github.com/number571/secpy-chat repositories
+- Update `docs`: move hidden_lake docx, pptx, pdf works to https://github.com/number571/hidden-lake repository
 
 <!-- ... -->
 
