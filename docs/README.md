@@ -1,8 +1,8 @@
 # Docs
 
-## Papers, presentations, videos
+## Material
 
-### 1. Main
+### 1. Papers
 
 1. [Theory of the structure of hidden systems](https://github.com/number571/go-peer/blob/master/docs/theory_of_the_structure_of_hidden_systems.pdf "TotSoHS")
 2. [Monolithic cryptographic protocol](https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf "MCP")
@@ -14,12 +14,10 @@ Also, the composition of these works can be found in the book [The general theor
 ### 2. Presentations
 
 1. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "Presentation GA")
-2. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "Presentation HL")
 
 ### 3. Videos
 
-1. [Hidden Lake Messenger](https://www.youtube.com/watch?v=o2J6ewvBKmg "Video HLM")
-2. [Create node in the Hidden Lake](https://www.youtube.com/watch?v=GBmQfy16AuA&t=18s "Video HL")
+1. [DC/EI/QB networks & HLM](https://www.youtube.com/watch?v=o2J6ewvBKmg)
 
 ## Code style
 
