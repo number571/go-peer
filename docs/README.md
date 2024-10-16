@@ -1,6 +1,6 @@
 # Docs
 
-## Theoretical works
+## Papers, presentations, videos
 
 ### 1. Main
 
@@ -14,42 +14,20 @@ Also, the composition of these works can be found in the book [The general theor
 ### 2. Presentations
 
 1. [Grok anonymity](https://github.com/number571/go-peer/blob/master/docs/grok_anonymity.pdf "Presentation GA")
+2. [Hidden Lake](https://github.com/number571/go-peer/blob/master/docs/hidden_lake_anonymous_network_view.pdf "Presentation HL")
 
-### 3. Habr
-
-1.  [Hidden Lake Service](https://habr.com/ru/post/696504/ "Habr HLS")
-2.  [Hidden Lake Messenger](https://habr.com/ru/post/701488/ "Habr HLM")
-3.  [Hidden Lake Traffic](https://habr.com/ru/post/717184/ "Habr HLT")
-4.  [Hidden Lake Adapters](https://habr.com/ru/post/720544/ "Habr HLA")
-5.  [Micro-Anonymous Network](https://habr.com/ru/articles/745256/ "Habr MA")
-6.  [Entropy Increase Networks](https://habr.com/ru/articles/743630/ "Habr EIN")
-7.  [Create node in the Hidden Lake](https://habr.com/ru/articles/765464/ "Habr HL")
-8.  [Hidden Lake Filesharer](https://habr.com/ru/articles/789968/ "Habr HLF")
-9.  [Hidden Lake Remoter](https://habr.com/ru/articles/830130/ "Habr HLR")
-10. [Hidden Lake Adapter Chatingar](https://habr.com/ru/articles/800965/ "Habr HLA_chatingar")
-
-### 4. Videos
+### 3. Videos
 
 1. [Hidden Lake Messenger](https://www.youtube.com/watch?v=o2J6ewvBKmg "Video HLM")
 2. [Create node in the Hidden Lake](https://www.youtube.com/watch?v=GBmQfy16AuA&t=18s "Video HL")
 
-## Default applications ports
-
-1. HLS  = 957x
-2. HLT  = 958x
-3. HLM  = 959x
-4. HLL  = 956x
-5. HLE  = 955x
-6. HLF  = 954x
-7. HLR  = 953x
-
-## Code style go-peer
+## Code style
 
 In the course of editing the project, some code styles may be added, some edited. Therefore, the current state of the project may not fully adhere to the code style, but you need to strive for it.
 
 ### 1. Prefixes
 
-The name of the global constants must begin with the prefix 'c' or 'C'.
+The name of the global constants must begin with the prefix 'c' (internal) or 'C' (external).
 ```go
 const (
     cInternalConst = 1
@@ -57,7 +35,7 @@ const (
 )
 ```
 
-The name of the global variables must begin with the prefix 'g' or 'G'. The exception is errors with the prefix 'err' or 'Err'.
+The name of the global variables must begin with the prefix 'g' (internal) or 'G' (external). The exception is errors with the prefix 'err' or 'Err'.
 ```go
 var (
     gInternalVariable = 1
@@ -65,7 +43,7 @@ var (
 )
 ```
 
-The name of the global structs must begin with the prefix 's' or 'S'. Also fields in the structure must begin with the prefix 'f' or 'F'.
+The name of the global structs must begin with the prefix 's' (internal) or 'S' (external). Also fields in the structure must begin with the prefix 'f' or 'F'.
 ```go
 type (
     sInternalStruct struct{
@@ -77,7 +55,7 @@ type (
 )
 ```
 
-The name of the global interfaces must begin with the prefix 'i' or 'I'. Also type functions must begin with the prefix 'i' or 'I'.
+The name of the global interfaces must begin with the prefix 'i' (internal) or 'I' (external). Also type functions must begin with the prefix 'i' or 'I'.
 ```go
 type (
     iInternalInterface interface{}
@@ -90,13 +68,13 @@ type (
 )
 ```
 
-The name of the function parameters must begin with the prefix 'p' or 'P'. Also method's object must be equal 'p'. The exception of this code style is test files.
+The name of the function parameters must begin with the prefix 'p'. Also method's object must be equal 'p'. The exception of this code style is test files.
 ```go
 func f(pK, pV int) {}
 func (p *sObject) m() {}
 ```
 
-The name of the global constants, variables, structures, fields, interfaces in the test environment must begin with prefix 't' or 'T'.
+The name of the global constants, variables, structures, fields, interfaces in the test environment must begin with prefix 't' (internal) or 'T' (external).
 ```go
 const (
     tcInternalConst = 1
