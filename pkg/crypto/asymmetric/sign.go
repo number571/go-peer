@@ -25,7 +25,7 @@ type sDilithiumM3PrivKey struct {
 }
 
 type sDilithiumM3PubKey struct {
-	fPubKey *dilithium.PublicKey
+	fK *dilithium.PublicKey
 }
 
 func NewSignPrivKey() ISignPrivKey {
@@ -88,9 +88,9 @@ func (p *sDilithiumM3PrivKey) SignBytes(pMsg []byte) []byte {
 }
 
 func (p *sDilithiumM3PubKey) VerifyBytes(pMsg, pSign []byte) bool {
-	return dilithium.Verify(p.fPubKey, pMsg, pSign)
+	return dilithium.Verify(p.fK, pMsg, pSign)
 }
 
 func (p *sDilithiumM3PubKey) ToBytes() []byte {
-	return p.fPubKey.Bytes()
+	return p.fK.Bytes()
 }
