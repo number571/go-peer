@@ -35,7 +35,7 @@ func BenchmarkClient(b *testing.B) {
 		client IClient
 	}{
 		{
-			name: "key=768-bit",
+			name: "kyber=768-bit,dilithium=mode3",
 			client: NewClient(
 				message.NewSettings(&message.SSettings{
 					FEncKeySizeBytes:  asymmetric.CKEncSize,

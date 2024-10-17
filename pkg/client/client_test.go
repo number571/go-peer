@@ -48,4 +48,5 @@ func TestClient(t *testing.T) {
 	}
 
 	// fmt.Println(client.GetMessageLimit())
+	// fmt.Println(len(client.GetPrivKeyChain().GetPubKeyChain().ToString()))
 }
