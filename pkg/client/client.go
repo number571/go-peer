@@ -4,8 +4,8 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/payload/joiner"
@@ -21,24 +21,21 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings   message.ISettings
-	fPrivKey    asymmetric.IPrivKey
-	fStructSize uint64
+	fSettings     message.ISettings
+	fPrivKeyChain quantum.IPrivKeyChain
+	fStructSize   uint64
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(pSett message.ISettings, pPrivKey asymmetric.IPrivKey) IClient {
-	if pSett.GetKeySizeBits() != pPrivKey.GetSize() {
-		panic("settings key size != got key size")
-	}
-
+func NewClient(pSett message.ISettings, pPrivKeyChain quantum.IPrivKeyChain) IClient {
 	client := &sClient{
-		fSettings: pSett,
-		fPrivKey:  pPrivKey,
+		fSettings:     pSett,
+		fPrivKeyChain: pPrivKeyChain,
 	}
 
-	encMsg, err := client.encryptWithParams(client.GetPubKey(), []byte{}, 0)
+	kemPubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
+	encMsg, err := client.encryptWithParams(kemPubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -60,14 +57,9 @@ func (p *sClient) GetMessageLimit() uint64 {
 	return maxMsgSize - p.fStructSize
 }
 
-// Get public key from client object.
-func (p *sClient) GetPubKey() asymmetric.IPubKey {
-	return p.fPrivKey.GetPubKey()
-}
-
 // Get private key from client object.
-func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
-	return p.fPrivKey
+func (p *sClient) GetPrivKeyChain() quantum.IPrivKeyChain {
+	return p.fPrivKeyChain
 }
 
 // Get settings from client object.
@@ -77,15 +69,11 @@ func (p *sClient) GetSettings() message.ISettings {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
+func (p *sClient) EncryptMessage(pRecv quantum.IKEMPubKey, pMsg []byte) ([]byte, error) {
 	var (
 		msgLimitSize = p.GetMessageLimit()
 		resultSize   = uint64(len(pMsg))
 	)
-
-	if pRecv.GetSize() != p.GetPubKey().GetSize() {
-		return nil, ErrInvalidPubKeySize
-	}
 
 	if resultSize > msgLimitSize {
 		return nil, ErrLimitMessageSize
@@ -95,39 +83,39 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte,
 }
 
 func (p *sClient) encryptWithParams(
-	pRecv asymmetric.IPubKey,
+	pRecv quantum.IKEMPubKey,
 	pMsg []byte,
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
-		rand = random.NewCSPRNG()
-		salt = rand.GetBytes(cSaltSize)
-		skey = rand.GetBytes(symmetric.CAESKeySize)
+		signer = p.fPrivKeyChain.GetSignerPrivKey()
+		rand   = random.NewCSPRNG()
+		salt   = rand.GetBytes(cSaltSize)
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			p.GetPubKey().GetHasher().ToBytes(),
-			pRecv.GetHasher().ToBytes(),
+			signer.GetPubKey().ToBytes(),
+			pRecv.ToBytes(),
 			data,
 		},
 		[]byte{},
 	)).ToBytes()
 
-	encKey := pRecv.EncryptBytes(skey)
-	if encKey == nil {
+	ct, sk, err := pRecv.Encapsulate()
+	if err != nil {
 		return nil, ErrEncryptSymmetricKey
 	}
 
-	cipher := symmetric.NewAESCipher(skey)
+	cipher := symmetric.NewAESCipher(sk)
 	return message.NewMessage(
-		encKey,
+		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			p.GetPubKey().ToBytes(),
+			signer.GetPubKey().ToBytes(),
 			salt,
 			hash,
-			p.fPrivKey.SignBytes(hash),
+			signer.SignBytes(hash),
 			data,
 		})),
 	).ToBytes(), nil
@@ -135,15 +123,16 @@ func (p *sClient) encryptWithParams(
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error) {
+func (p *sClient) DecryptMessage(pMsg []byte) (quantum.ISignerPubKey, []byte, error) {
 	msg, err := message.LoadMessage(p.fSettings, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
-	skey := p.fPrivKey.DecryptBytes(msg.GetEnck())
-	if skey == nil {
+	kemPrivKey := p.fPrivKeyChain.GetKEMPrivKey()
+	skey, err := kemPrivKey.Decapsulate(msg.GetEnck())
+	if err != nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
 
@@ -164,16 +153,16 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 	)
 
 	// Load public key and check standart size.
-	pubKey := asymmetric.LoadRSAPubKey(pkey)
-	if pubKey == nil || pubKey.GetSize() != p.GetPubKey().GetSize() {
+	signerPubKey := quantum.LoadSignerPubKey(pkey)
+	if signerPubKey == nil { // || pubKey.GetSize() != p.GetPubKey().GetSize()
 		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACSHA256Hasher(salt, bytes.Join(
 		[][]byte{
-			pubKey.GetHasher().ToBytes(),
-			p.GetPubKey().GetHasher().ToBytes(),
+			signerPubKey.ToBytes(),
+			kemPrivKey.GetPubKey().ToBytes(),
 			data,
 		},
 		[]byte{},
@@ -183,7 +172,7 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 	}
 
 	// Verify sign by public key of sender and hash of message.
-	if !pubKey.VerifyBytes(hash, sign) {
+	if !signerPubKey.VerifyBytes(hash, sign) {
 		return nil, nil, ErrInvalidHashSign
 	}
 
@@ -194,5 +183,5 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 	}
 
 	// Return public key of sender with payload.
-	return pubKey, payloadWrapper[0], nil
+	return signerPubKey, payloadWrapper[0], nil
 }

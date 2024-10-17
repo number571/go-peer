@@ -11,7 +11,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -26,37 +26,6 @@ func TestError(t *testing.T) {
 		t.Error("incorrect err.Error()")
 		return
 	}
-}
-
-func TestPanicNewQBProblemProcessor(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	client := client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
-		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
-	)
-	_ = NewQBProblemProcessor(
-		NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
-			}),
-			FMainPoolCapacity: testutils.TCQueueCapacity,
-			FRandPoolCapacity: 1,
-			FQueuePeriod:      100 * time.Millisecond,
-		}),
-		client,
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey2048).GetPubKey(),
-	)
 }
 
 func TestSettings(t *testing.T) {
@@ -114,9 +83,12 @@ func TestRunStopQueue(t *testing.T) {
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FKeySizeBits:      testutils.TcKeySize,
+			FEncKeySizeBytes:  quantum.CCiphertextSize,
 		}),
-		asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
+		quantum.NewPrivKeyChain(
+			quantum.NewKEMPrivKey(),
+			quantum.NewSignerPrivKey(),
+		),
 	)
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
@@ -128,7 +100,7 @@ func TestRunStopQueue(t *testing.T) {
 			FQueuePeriod:      100 * time.Millisecond,
 		}),
 		client,
-		asymmetric.NewRSAPrivKey(client.GetPrivKey().GetSize()).GetPubKey(),
+		quantum.NewKEMPrivKey().GetPubKey(),
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -164,7 +136,7 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	pubKey := client.GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
@@ -202,11 +174,14 @@ func TestQueue(t *testing.T) {
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FKeySizeBits:      testutils.TcKeySize,
+				FEncKeySizeBytes:  quantum.CCiphertextSize,
 			}),
-			asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
+			quantum.NewPrivKeyChain(
+				quantum.NewKEMPrivKey(),
+				quantum.NewSignerPrivKey(),
+			),
 		),
-		asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
+		quantum.NewKEMPrivKey().GetPubKey(),
 	)
 
 	sett := queue.GetSettings()
@@ -235,7 +210,7 @@ func testQueue(queue IQBProblemProcessor) error {
 	}()
 
 	client := queue.GetClient()
-	pubKey := client.GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err

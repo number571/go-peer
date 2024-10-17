@@ -2,16 +2,15 @@ package client
 
 import (
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 )
 
 type IClient interface {
 	GetSettings() message.ISettings
 	GetMessageLimit() uint64
 
-	GetPubKey() asymmetric.IPubKey
-	GetPrivKey() asymmetric.IPrivKey
+	GetPrivKeyChain() quantum.IPrivKeyChain
 
-	EncryptMessage(asymmetric.IPubKey, []byte) ([]byte, error)
-	DecryptMessage([]byte) (asymmetric.IPubKey, []byte, error)
+	EncryptMessage(quantum.IKEMPubKey, []byte) ([]byte, error)
+	DecryptMessage([]byte) (quantum.ISignerPubKey, []byte, error)
 }

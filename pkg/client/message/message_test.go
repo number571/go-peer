@@ -47,7 +47,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FKeySizeBits: testutils.TcKeySize,
+			FEncKeySizeBytes: testutils.TcKeySize,
 		})
 	}
 }
@@ -64,7 +64,7 @@ func TestPanicLoadMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: 64,
-		FKeySizeBits:      testutils.TcKeySize,
+		FEncKeySizeBytes:  testutils.TcKeySize / 8,
 	})
 
 	_, _ = loadMessage(params, []byte{123})
@@ -75,7 +75,7 @@ func TestInvalidMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
-		FKeySizeBits:      testutils.TcKeySize,
+		FEncKeySizeBytes:  testutils.TcKeySize / 8,
 	})
 
 	if _, err := LoadMessage(params, struct{}{}); err == nil {
@@ -100,7 +100,7 @@ func TestMessage(t *testing.T) {
 
 	params := NewSettings(&SSettings{
 		FMessageSizeBytes: (2 << 10),
-		FKeySizeBits:      testutils.TcKeySize,
+		FEncKeySizeBytes:  testutils.TcKeySize / 8,
 	})
 
 	msg1, err := LoadMessage(params, testutils.TGBinaryMessage)

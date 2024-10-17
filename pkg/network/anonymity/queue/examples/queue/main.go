@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -8,8 +9,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
+	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -21,18 +23,24 @@ const (
 func main() {
 	q := queue.NewQBProblemProcessor(
 		queue.NewSettings(&queue.SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FQueuePeriod:      time.Second,
 			FMainPoolCapacity: 1 << 5,
 			FRandPoolCapacity: 1 << 5,
 		}),
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: (1 << 12),
-				FKeySizeBits:      keySize,
+				FMessageSizeBytes: (8 << 10),
+				FEncKeySizeBytes:  quantum.CCiphertextSize,
 			}),
-			asymmetric.NewRSAPrivKey(1024),
+			quantum.NewPrivKeyChain(
+				quantum.NewKEMPrivKey(),
+				quantum.NewSignerPrivKey(),
+			),
 		),
-		asymmetric.NewRSAPrivKey(1024).GetPubKey(),
+		quantum.NewKEMPrivKey().GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -46,7 +54,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPubKey(),
+			q.GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -74,7 +82,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if pubKey.GetHasher().ToString() != q.GetClient().GetPubKey().GetHasher().ToString() {
+		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKeyChain().GetSignerPrivKey().GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

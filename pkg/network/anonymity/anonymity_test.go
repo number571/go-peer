@@ -13,7 +13,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -117,7 +117,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+				nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 				payload.NewPayload32(testutils.TcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -147,15 +147,15 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], cancels[:], 1)
 
-	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
-	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
+	nodes[0].GetListPubKeyChains().DelPubKeyChain(nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
+	nodes[1].GetListPubKeyChains().DelPubKeyChain(nodes[0].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
 
 	ctx := context.Background()
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody)),
 	)
 	if err != nil {
@@ -178,7 +178,7 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ quantum.IKEMPubKey, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
@@ -186,7 +186,7 @@ func TestFetchPayload(t *testing.T) {
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
@@ -196,7 +196,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(testutils.TcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -224,7 +224,7 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ quantum.IKEMPubKey, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
@@ -232,7 +232,8 @@ func TestBroadcastPayload(t *testing.T) {
 	)
 
 	err := nodes[0].SendPayload(
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		context.Background(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
 	)
 	if err == nil {
@@ -241,7 +242,8 @@ func TestBroadcastPayload(t *testing.T) {
 	}
 
 	err1 := nodes[0].SendPayload(
-		nodes[1].GetMessageQueue().GetClient().GetPubKey(),
+		context.Background(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -274,7 +276,7 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPubKey()
+	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody))
@@ -317,9 +319,9 @@ func TestHandleWrapper(t *testing.T) {
 	node := _node.(*sNode)
 	handler := node.networkHandler
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
 
-	node.GetListPubKeys().AddPubKey(pubKey)
+	node.GetListPubKeyChains().AddPubKeyChain(client.GetPrivKeyChain().GetPubKeyChain())
 
 	ctx := context.Background()
 	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
@@ -363,7 +365,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	node.HandleFunc(
 		111,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ quantum.IKEMPubKey, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error")
 		},
 	)
@@ -446,7 +448,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	msg, err := client.EncryptMessage(
-		client.GetPubKey(),
+		client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -511,7 +513,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
 	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
@@ -583,13 +585,13 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}
 
-	nodes[0].GetListPubKeys().AddPubKey(nodes[1].GetMessageQueue().GetClient().GetPubKey())
-	nodes[1].GetListPubKeys().AddPubKey(nodes[0].GetMessageQueue().GetClient().GetPubKey())
+	nodes[0].GetListPubKeyChains().AddPubKeyChain(nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
+	nodes[1].GetListPubKeyChains().AddPubKeyChain(nodes[0].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
 
 	for _, node := range nodes {
 		node.HandleFunc(
 			testutils.TcHead,
-			func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ quantum.IKEMPubKey, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
 			},
@@ -720,13 +722,16 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: testutils.TCMessageSize,
-					FKeySizeBits:      testutils.TcKeySize,
+					FEncKeySizeBytes:  quantum.CCiphertextSize,
 				}),
-				asymmetric.LoadRSAPrivKey(testutils.TcPrivKey1024),
+				quantum.NewPrivKeyChain(
+					quantum.NewKEMPrivKey(),
+					quantum.NewSignerPrivKey(),
+				),
 			),
-			asymmetric.NewRSAPrivKey(testutils.TcKeySize).GetPubKey(),
+			quantum.NewKEMPrivKey().GetPubKey(),
 		),
-		asymmetric.NewListPubKeys(),
+		quantum.NewListPubKeyChains(),
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()

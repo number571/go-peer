@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -35,7 +36,7 @@ type sNode struct {
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
-	fFriends       asymmetric.IListPubKeys
+	fFriends       quantum.IListPubKeyChains
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -46,7 +47,7 @@ func NewNode(
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
-	pFriends asymmetric.IListPubKeys,
+	pFriends quantum.IListPubKeyChains,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -101,7 +102,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 			// update logger state
 			p.enrichLogger(logBuilder, netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPubKey())
+				WithPubKey(p.fQueue.GetClient().GetPrivKeyChain().GetSignerPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
@@ -130,7 +131,7 @@ func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
+func (p *sNode) GetListPubKeyChains() quantum.IListPubKeyChains {
 	return p.fFriends
 }
 
@@ -141,7 +142,8 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 
 // Send message without response waiting.
 func (p *sNode) SendPayload(
-	pRecv asymmetric.IPubKey,
+	_ context.Context,
+	pRecv quantum.IKEMPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -156,7 +158,7 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv asymmetric.IPubKey,
+	pRecv quantum.IKEMPubKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewCSPRNG().GetUint64())
@@ -245,7 +247,8 @@ func (p *sNode) networkHandler(
 	logBuilder.WithPubKey(sender)
 
 	// check sender's public key in f2f list
-	if !p.fFriends.InPubKeys(sender) {
+	keychain, ok := p.fFriends.GetPubKeyChain(sender)
+	if !ok {
 		// ignore reading message from unknown public key
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
 		return nil
@@ -260,13 +263,13 @@ func (p *sNode) networkHandler(
 	}
 
 	// do request or response action
-	return p.handleDoAction(pCtx, logBuilder, sender, pld)
+	return p.handleDoAction(pCtx, logBuilder, keychain.GetKEMPubKey(), pld)
 }
 
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender quantum.IKEMPubKey,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -290,7 +293,7 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender quantum.IKEMPubKey,
 	pAction iAction,
 	pBody []byte,
 ) {
@@ -309,7 +312,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender quantum.IKEMPubKey,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -343,7 +346,7 @@ func (p *sNode) handleRequest(
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv asymmetric.IPubKey,
+	pRecv quantum.IKEMPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -354,7 +357,7 @@ func (p *sNode) enqueuePayload(
 		client := p.fQueue.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPubKey()).
+			WithPubKey(client.GetPrivKeyChain().GetSignerPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
@@ -461,7 +464,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey asymmetric.IPubKey, pAction iAction) string {
-	pubKeyAddr := pPubKey.GetHasher().ToString()
+func newActionKey(pPubKey quantum.IKEMPubKey, pAction iAction) string {
+	pubKeyAddr := hashing.NewSHA256Hasher(pPubKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

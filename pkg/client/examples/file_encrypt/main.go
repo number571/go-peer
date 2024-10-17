@@ -5,7 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 )
 
 func main() {
@@ -22,16 +22,14 @@ func main() {
 }
 
 func newClient() client.IClient {
-	privKey := asymmetric.NewRSAPrivKey(1024)
 	return client.NewClient(
-		newSettings(privKey.GetSize()),
-		privKey,
+		message.NewSettings(&message.SSettings{
+			FMessageSizeBytes: (8 << 10),
+			FEncKeySizeBytes:  quantum.CCiphertextSize,
+		}),
+		quantum.NewPrivKeyChain(
+			quantum.NewKEMPrivKey(),
+			quantum.NewSignerPrivKey(),
+		),
 	)
-}
-
-func newSettings(size uint64) message.ISettings {
-	return message.NewSettings(&message.SSettings{
-		FMessageSizeBytes: (8 << 10),
-		FKeySizeBits:      size,
-	})
 }

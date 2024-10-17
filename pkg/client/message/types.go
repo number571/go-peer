@@ -12,6 +12,6 @@ type IMessage interface {
 }
 
 type ISettings interface {
-	GetKeySizeBits() uint64
+	GetEncKeySizeBytes() uint64
 	GetMessageSizeBytes() uint64
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
@@ -40,17 +40,14 @@ type sMainPool struct {
 type sRandPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
-	fReceiver asymmetric.IPubKey
+	fReceiver quantum.IKEMPubKey
 }
 
 func NewQBProblemProcessor(
 	pSettings ISettings,
 	pClient client.IClient,
-	pReceiver asymmetric.IPubKey,
+	pReceiver quantum.IKEMPubKey,
 ) IQBProblemProcessor {
-	if pClient.GetPubKey().GetSize() != pReceiver.GetSize() {
-		panic("pClient.GetPubKey().GetSize() != pReceiver.GetSize()")
-	}
 	return &sQBProblemProcessor{
 		fState:    state.NewBoolState(),
 		fSettings: pSettings,
@@ -132,7 +129,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.
 	}
 }
 
-func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
+func (p *sQBProblemProcessor) EnqueueMessage(pPubKey quantum.IKEMPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
