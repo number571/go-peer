@@ -9,6 +9,7 @@ type IListPubKeyChains interface {
 
 type IPrivKeyChain interface {
 	ToString() string
+
 	GetPubKeyChain() IPubKeyChain
 	GetKEncPrivKey() IKEncPrivKey
 	GetSignPrivKey() ISignPrivKey
@@ -16,6 +17,7 @@ type IPrivKeyChain interface {
 
 type IPubKeyChain interface {
 	ToString() string
+
 	GetKEncPubKey() IKEncPubKey
 	GetSignPubKey() ISignPubKey
 }
@@ -23,21 +25,25 @@ type IPubKeyChain interface {
 type IKEncPrivKey interface {
 	ToBytes() []byte
 	GetPubKey() IKEncPubKey
+
 	Decapsulate([]byte) ([]byte, error)
 }
 
 type IKEncPubKey interface {
-	Encapsulate() ([]byte, []byte, error)
 	ToBytes() []byte
+
+	Encapsulate() ([]byte, []byte, error)
 }
 
 type ISignPrivKey interface {
 	ToBytes() []byte
 	GetPubKey() ISignPubKey
+
 	SignBytes([]byte) []byte
 }
 
 type ISignPubKey interface {
 	ToBytes() []byte
+
 	VerifyBytes([]byte, []byte) bool
 }
