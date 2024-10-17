@@ -1,4 +1,4 @@
-package quantum
+package asymmetric
 
 import (
 	"sync"
@@ -23,11 +23,11 @@ func NewListPubKeyChains() IListPubKeyChains {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sListPubKeyChains) GetPubKeyChain(pSignerPubKey ISignerPubKey) (IPubKeyChain, bool) {
+func (p *sListPubKeyChains) GetPubKeyChain(pSignPubKey ISignPubKey) (IPubKeyChain, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	keychain, ok := p.fMapping[hashkey(pSignerPubKey)]
+	keychain, ok := p.fMapping[hashkey(pSignPubKey)]
 	return keychain, ok
 }
 
@@ -49,7 +49,7 @@ func (p *sListPubKeyChains) AddPubKeyChain(pPubKeyChain IPubKeyChain) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fMapping[hashkey(pPubKeyChain.GetSignerPubKey())] = pPubKeyChain
+	p.fMapping[hashkey(pPubKeyChain.GetSignPubKey())] = pPubKeyChain
 }
 
 // Delete public key from list of friends.
@@ -57,11 +57,11 @@ func (p *sListPubKeyChains) DelPubKeyChain(pPubKeyChain IPubKeyChain) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	delete(p.fMapping, hashkey(pPubKeyChain.GetSignerPubKey()))
+	delete(p.fMapping, hashkey(pPubKeyChain.GetSignPubKey()))
 }
 
-func hashkey(pSignerPubKey ISignerPubKey) string {
-	return hashing.NewSHA256Hasher(
-		pSignerPubKey.ToBytes(),
+func hashkey(pSignPubKey ISignPubKey) string {
+	return hashing.NewHasher(
+		pSignPubKey.ToBytes(),
 	).ToString()
 }

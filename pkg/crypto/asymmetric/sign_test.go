@@ -1,4 +1,4 @@
-package quantum
+package asymmetric
 
 import (
 	"testing"
@@ -7,11 +7,11 @@ import (
 func TestSigner(t *testing.T) {
 	t.Parallel()
 
-	privKey := NewSignerPrivKey()
-	privKey = LoadSignerPrivKey(privKey.ToBytes())
+	privKey := NewSignPrivKey()
+	privKey = LoadSignPrivKey(privKey.ToBytes())
 
 	pubKey := privKey.GetPubKey()
-	pubKey = LoadSignerPubKey(pubKey.ToBytes())
+	pubKey = LoadSignPubKey(pubKey.ToBytes())
 
 	msg := []byte("hello, world!")
 	sign := privKey.SignBytes(msg)

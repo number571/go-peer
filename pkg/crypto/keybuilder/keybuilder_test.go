@@ -10,7 +10,7 @@ import (
 
 const (
 	tcKeySize = 32
-	tcHash    = "8d47725f8604cb2e8f1be5e0b49ef143ea62625dd37ea4ce5f24501a32591784"
+	tcHash    = "0aac5a0a082dcbc64befb61c798549126cd6b4075081debc6636c53c941c5cb0"
 )
 
 func TestKeyBuilder(t *testing.T) {

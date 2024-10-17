@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -16,16 +17,16 @@ const (
 	// IV + Proof + Hash + (2xPayload32Head)=[len(data)+len(void)] + Payload32Head=[head]
 	// 16 + 8 + 32 + 2x4 + 4 = 68 additional bytes to origin message
 	CMessageHeadSize = 0 +
-		1*symmetric.CAESBlockSize +
+		1*symmetric.CCipherBlockSize +
 		1*encoding.CSizeUint64 +
-		1*hashing.CSHA256Size +
+		1*hashing.CHasherSize +
 		2*encoding.CSizeUint32 +
 		1*encoding.CSizeUint32
 )
 
 const (
 	cProofIndex = encoding.CSizeUint64
-	cHashIndex  = cProofIndex + hashing.CSHA256Size
+	cHashIndex  = cProofIndex + hashing.CHasherSize
 )
 
 var (
@@ -41,19 +42,20 @@ type sMessage struct {
 }
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewCSPRNG()
+	prng := random.NewRandom()
 	sett := pSett.GetSettings()
 
 	randBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), randBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
-	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(sett.GetNetworkKey(), symmetric.CCipherKeySize)
+	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewAESCipher(key)
+	cipher := symmetric.NewCipher(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
@@ -86,8 +88,9 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidHeaderSize
 	}
 
-	key := hashing.NewSHA256Hasher([]byte(pSett.GetNetworkKey())).ToBytes()
-	dBytes := symmetric.NewAESCipher(key).DecryptBytes(msgBytes)
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(pSett.GetNetworkKey(), symmetric.CCipherKeySize)
+	dBytes := symmetric.NewCipher(key).DecryptBytes(msgBytes)
 
 	proofArr := [encoding.CSizeUint64]byte{}
 	copy(proofArr[:], dBytes[:cProofIndex])
@@ -104,7 +107,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrDecodeBytesJoiner
 	}
 
-	newHash := hashing.NewHMACSHA256Hasher(key, dBytes[cHashIndex:]).ToBytes()
+	newHash := hashing.NewHMACHasher(key, dBytes[cHashIndex:]).ToBytes()
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}

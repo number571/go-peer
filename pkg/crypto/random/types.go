@@ -1,6 +1,6 @@
 package random
 
-type IPRNG interface {
+type IRandom interface {
 	GetString(uint64) string
 	GetBytes(uint64) []byte
 	GetUint64() uint64

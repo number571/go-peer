@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -15,7 +15,7 @@ type sLogBuilder struct {
 	fHash    []byte
 	fProof   uint64
 	fSize    uint64
-	fPubKey  quantum.ISignerPubKey
+	fPubKey  asymmetric.ISignPubKey
 	fConn    conn.IConn
 
 	fGetter ILogGetter
@@ -48,7 +48,7 @@ func (p *sLogBuilder) WithProof(pProof uint64) ILogBuilder {
 	return p
 }
 
-func (p *sLogBuilder) WithPubKey(pPubKey quantum.ISignerPubKey) ILogBuilder {
+func (p *sLogBuilder) WithPubKey(pPubKey asymmetric.ISignPubKey) ILogBuilder {
 	p.fPubKey = pPubKey
 	return p
 }

@@ -44,7 +44,7 @@ func TestTryN(t *testing.T) {
 		1000,
 		10*time.Millisecond,
 		func() error {
-			if random.NewCSPRNG().GetBool() {
+			if random.NewRandom().GetBool() {
 				return errors.New("some error")
 			}
 			return nil

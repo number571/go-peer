@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -16,7 +16,7 @@ import (
 type IHandlerF func(
 	context.Context,
 	INode,
-	quantum.IKEMPubKey,
+	asymmetric.IKEncPubKey,
 	[]byte,
 ) ([]byte, error)
 
@@ -29,10 +29,10 @@ type INode interface {
 	GetKVDatabase() database.IKVDatabase
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IQBProblemProcessor
-	GetListPubKeyChains() quantum.IListPubKeyChains
+	GetListPubKeyChains() asymmetric.IListPubKeyChains
 
-	SendPayload(context.Context, quantum.IKEMPubKey, payload.IPayload64) error
-	FetchPayload(context.Context, quantum.IKEMPubKey, payload.IPayload32) ([]byte, error)
+	SendPayload(context.Context, asymmetric.IKEncPubKey, payload.IPayload64) error
+	FetchPayload(context.Context, asymmetric.IKEncPubKey, payload.IPayload32) ([]byte, error)
 }
 
 type ISettings interface {

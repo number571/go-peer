@@ -18,7 +18,7 @@ func TestAESKeySize(t *testing.T) {
 			return
 		}
 	}()
-	_ = NewAESCipher([]byte{123})
+	_ = NewCipher([]byte{123})
 }
 
 func TestAESEncrypt(t *testing.T) {
@@ -28,7 +28,7 @@ func TestAESEncrypt(t *testing.T) {
 		msg = []byte("hello, world!")
 	)
 
-	cipher := NewAESCipher(tgKey)
+	cipher := NewCipher(tgKey)
 
 	emsg := cipher.EncryptBytes(msg)
 

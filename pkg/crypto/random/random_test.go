@@ -8,7 +8,7 @@ import (
 func TestCSPRNG(t *testing.T) {
 	t.Parallel()
 
-	r := NewCSPRNG()
+	r := NewRandom()
 
 	if bytes.Equal(r.GetBytes(8), r.GetBytes(8)) {
 		t.Error("bytes in random equals")
@@ -28,7 +28,7 @@ func TestCSPRNG(t *testing.T) {
 func TestCSPRNGBool(t *testing.T) {
 	t.Parallel()
 
-	r := NewCSPRNG()
+	r := NewRandom()
 	for i := 0; i < 1000; i++ {
 		t1 := r.GetBool()
 		t2 := r.GetBool()

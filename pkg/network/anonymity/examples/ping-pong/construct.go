@@ -7,7 +7,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity"
@@ -103,15 +103,15 @@ func newNode(serviceName, address string) anonymity.INode {
 			client.NewClient(
 				message.NewSettings(&message.SSettings{
 					FMessageSizeBytes: msgSize,
-					FEncKeySizeBytes:  quantum.CCiphertextSize,
+					FEncKeySizeBytes:  asymmetric.CKEncSize,
 				}),
-				quantum.NewPrivKeyChain(
-					quantum.NewKEMPrivKey(),
-					quantum.NewSignerPrivKey(),
+				asymmetric.NewPrivKeyChain(
+					asymmetric.NewKEncPrivKey(),
+					asymmetric.NewSignPrivKey(),
 				),
 			),
-			quantum.NewKEMPrivKey().GetPubKey(),
+			asymmetric.NewKEncPrivKey().GetPubKey(),
 		),
-		quantum.NewListPubKeyChains(),
+		asymmetric.NewListPubKeyChains(),
 	)
 }

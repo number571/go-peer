@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -25,9 +25,9 @@ PASS
 
 // go test -bench=BenchmarkClient -benchtime=100x -timeout 99999s
 func BenchmarkClient(b *testing.B) {
-	privKeyChain := quantum.NewPrivKeyChain(
-		quantum.NewKEMPrivKey(),
-		quantum.NewSignerPrivKey(),
+	privKeyChain := asymmetric.NewPrivKeyChain(
+		asymmetric.NewKEncPrivKey(),
+		asymmetric.NewSignPrivKey(),
 	)
 
 	benchTable := []struct {
@@ -38,7 +38,7 @@ func BenchmarkClient(b *testing.B) {
 			name: "key=768-bit",
 			client: NewClient(
 				message.NewSettings(&message.SSettings{
-					FEncKeySizeBytes:  quantum.CCiphertextSize,
+					FEncKeySizeBytes:  asymmetric.CKEncSize,
 					FMessageSizeBytes: (8 << 10),
 				}),
 				privKeyChain,
@@ -62,7 +62,7 @@ func BenchmarkClient(b *testing.B) {
 			nowEnc := time.Now()
 			for i := 0; i < b.N; i++ {
 				encMsg, err := t.client.EncryptMessage(
-					t.client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
+					t.client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
 					randomBytes[i],
 				)
 				if err != nil {

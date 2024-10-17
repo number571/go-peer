@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 const (
@@ -94,19 +92,19 @@ func TestBasicDB(t *testing.T) {
 	}
 	defer store.Close()
 
-	secret1 := asymmetric.NewRSAPrivKey(512).ToBytes()
-	if err := store.Set([]byte("KEY"), secret1); err != nil {
+	data1 := []byte("hello, world!")
+	if err := store.Set([]byte("KEY"), data1); err != nil {
 		t.Error(err)
 		return
 	}
 
-	secret2, err := store.Get([]byte("KEY"))
+	data2, err := store.Get([]byte("KEY"))
 	if err != nil {
 		t.Error("[testBasic]", err)
 		return
 	}
 
-	if !bytes.Equal(secret1, secret2) {
+	if !bytes.Equal(data1, data2) {
 		t.Error("[testBasic] saved and loaded values not equals")
 		return
 	}

@@ -13,18 +13,18 @@ const (
 )
 
 var (
-	_ IPRNG = &sCSPRNG{}
+	_ IRandom = &sRandom{}
 )
 
-type sCSPRNG struct {
+type sRandom struct {
 }
 
-func NewCSPRNG() IPRNG {
-	return &sCSPRNG{}
+func NewRandom() IRandom {
+	return &sRandom{}
 }
 
 // Generates a cryptographically strong pseudo-random bytes.
-func (p *sCSPRNG) GetBytes(n uint64) []byte {
+func (p *sRandom) GetBytes(n uint64) []byte {
 	slice := make([]byte, n)
 	if _, err := rand.Read(slice); err != nil {
 		panic(err) // 'return nil' is insecure
@@ -47,7 +47,7 @@ func (p *sCSPRNG) GetBytes(n uint64) []byte {
 	security[p=128] = random(32) hex_byte
 	security[p=128] = random(21.(3)) cur_byte
 */
-func (p *sCSPRNG) GetString(n uint64) string {
+func (p *sRandom) GetString(n uint64) string {
 	result := strings.Builder{}
 	result.Grow(int(n))
 
@@ -60,13 +60,13 @@ func (p *sCSPRNG) GetString(n uint64) string {
 }
 
 // Generate cryptographically strong pseudo-random uint64 number.
-func (p *sCSPRNG) GetUint64() uint64 {
+func (p *sRandom) GetUint64() uint64 {
 	res := [encoding.CSizeUint64]byte{}
 	copy(res[:], p.GetBytes(encoding.CSizeUint64))
 	return encoding.BytesToUint64(res)
 }
 
 // Generate cryptographically strong pseudo-random bool value.
-func (p *sCSPRNG) GetBool() bool {
+func (p *sRandom) GetBool() bool {
 	return p.GetBytes(1)[0]%2 == 0
 }

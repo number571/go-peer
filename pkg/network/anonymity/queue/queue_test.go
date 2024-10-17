@@ -11,7 +11,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -83,11 +83,11 @@ func TestRunStopQueue(t *testing.T) {
 	client := client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: testutils.TCMessageSize,
-			FEncKeySizeBytes:  quantum.CCiphertextSize,
+			FEncKeySizeBytes:  asymmetric.CKEncSize,
 		}),
-		quantum.NewPrivKeyChain(
-			quantum.NewKEMPrivKey(),
-			quantum.NewSignerPrivKey(),
+		asymmetric.NewPrivKeyChain(
+			asymmetric.NewKEncPrivKey(),
+			asymmetric.NewSignPrivKey(),
 		),
 	)
 	queue := NewQBProblemProcessor(
@@ -100,7 +100,7 @@ func TestRunStopQueue(t *testing.T) {
 			FQueuePeriod:      100 * time.Millisecond,
 		}),
 		client,
-		quantum.NewKEMPrivKey().GetPubKey(),
+		asymmetric.NewKEncPrivKey().GetPubKey(),
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -136,7 +136,7 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	for i := 0; i < testutils.TCQueueCapacity; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
@@ -174,14 +174,14 @@ func TestQueue(t *testing.T) {
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
 				FMessageSizeBytes: testutils.TCMessageSize,
-				FEncKeySizeBytes:  quantum.CCiphertextSize,
+				FEncKeySizeBytes:  asymmetric.CKEncSize,
 			}),
-			quantum.NewPrivKeyChain(
-				quantum.NewKEMPrivKey(),
-				quantum.NewSignerPrivKey(),
+			asymmetric.NewPrivKeyChain(
+				asymmetric.NewKEncPrivKey(),
+				asymmetric.NewSignPrivKey(),
 			),
 		),
-		quantum.NewKEMPrivKey().GetPubKey(),
+		asymmetric.NewKEncPrivKey().GetPubKey(),
 	)
 
 	sett := queue.GetSettings()
@@ -210,7 +210,7 @@ func testQueue(queue IQBProblemProcessor) error {
 	}()
 
 	client := queue.GetClient()
-	pubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -123,8 +124,9 @@ func TestMessage(t *testing.T) {
 		[]byte{},
 	)
 
-	key := hashing.NewSHA256Hasher([]byte(tcNetworkKey)).ToBytes()
-	newHash := hashing.NewHMACSHA256Hasher(key, payloadRandBytes).ToBytes()
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
+	newHash := hashing.NewHMACHasher(key, payloadRandBytes).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Error("payload hash not equal hash of message")
 		return
@@ -209,13 +211,13 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	randBytes := random.NewCSPRNG().GetBytes(encoding.CSizeUint64 + hashing.CSHA256Size)
+	randBytes := random.NewRandom().GetBytes(encoding.CSizeUint64 + hashing.CHasherSize)
 	if _, err := LoadMessage(sett.GetSettings(), randBytes); err == nil {
 		t.Error("success load incorrect message")
 		return
 	}
 
-	prng := random.NewCSPRNG()
+	prng := random.NewRandom()
 	if _, err := LoadMessage(sett.GetSettings(), prng.GetBytes(64)); err == nil {
 		t.Error("success load incorrect message")
 		return
@@ -224,7 +226,7 @@ func TestMessage(t *testing.T) {
 	msgBytes := bytes.Join(
 		[][]byte{
 			{}, // pass payload
-			hashing.NewSHA256Hasher([]byte{}).ToBytes(),
+			hashing.NewHasher([]byte{}).ToBytes(),
 		},
 		[]byte{},
 	)
@@ -253,13 +255,14 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
 	sett := pSett.GetSettings()
 
-	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
-	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
+	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewAESCipher(key)
+	cipher := symmetric.NewCipher(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
@@ -276,21 +279,22 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 }
 
 func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewCSPRNG()
+	prng := random.NewRandom()
 	sett := pSett.GetSettings()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
-	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
+	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
 
 	hash[0] ^= 1
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewAESCipher(key)
+	cipher := symmetric.NewCipher(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
@@ -308,19 +312,20 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 }
 
 func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewCSPRNG()
+	prng := random.NewRandom()
 	sett := pSett.GetSettings()
 
 	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})
 
-	key := hashing.NewSHA256Hasher([]byte(sett.GetNetworkKey())).ToBytes()
-	hash := hashing.NewHMACSHA256Hasher(key, bytesJoiner).ToBytes()
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
+	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewAESCipher(key)
+	cipher := symmetric.NewCipher(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{

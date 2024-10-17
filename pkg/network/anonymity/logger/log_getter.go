@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
@@ -39,7 +39,7 @@ func (p *sLogGetter) GetSize() uint64 {
 	return p.fLogBuilder.fSize
 }
 
-func (p *sLogGetter) GetPubKey() quantum.ISignerPubKey {
+func (p *sLogGetter) GetPubKey() asymmetric.ISignPubKey {
 	return p.fLogBuilder.fPubKey
 }
 

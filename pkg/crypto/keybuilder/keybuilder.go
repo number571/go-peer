@@ -1,7 +1,7 @@
 package keybuilder
 
 import (
-	"crypto/sha256"
+	"crypto/sha512"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -28,6 +28,6 @@ func (p *sKeyBuilder) Build(pPassword string, pKeyLen uint64) []byte {
 		p.fSalt,
 		int(p.fIterN),
 		int(pKeyLen),
-		sha256.New,
+		sha512.New,
 	)
 }

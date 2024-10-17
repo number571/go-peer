@@ -12,17 +12,17 @@ var (
 )
 
 const (
-	CAESBlockSize = aes.BlockSize
-	CAESKeySize   = 32
+	CCipherBlockSize = aes.BlockSize
+	CCipherKeySize   = 32
 )
 
 type sAESCipher struct {
 	fBlock cipher.Block
 }
 
-func NewAESCipher(pKey []byte) ICipher {
-	if len(pKey) != CAESKeySize {
-		panic("len(pKey) != CAESKeySize")
+func NewCipher(pKey []byte) ICipher {
+	if len(pKey) != CCipherKeySize {
+		panic("len(pKey) != CCipherKeySize")
 	}
 	block, _ := aes.NewCipher(pKey)
 	return &sAESCipher{
@@ -32,7 +32,7 @@ func NewAESCipher(pKey []byte) ICipher {
 
 func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {
 	blockSize := p.fBlock.BlockSize()
-	iv := random.NewCSPRNG().GetBytes(uint64(blockSize))
+	iv := random.NewRandom().GetBytes(uint64(blockSize))
 
 	stream := cipher.NewCFBEncrypter(p.fBlock, iv)
 	result := make([]byte, len(pMsg)+len(iv))

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 func TestClient(t *testing.T) {
@@ -15,15 +15,15 @@ func TestClient(t *testing.T) {
 	client := NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: (8 << 10),
-			FEncKeySizeBytes:  quantum.CCiphertextSize,
+			FEncKeySizeBytes:  asymmetric.CKEncSize,
 		}),
-		quantum.NewPrivKeyChain(
-			quantum.NewKEMPrivKey(),
-			quantum.NewSignerPrivKey(),
+		asymmetric.NewPrivKeyChain(
+			asymmetric.NewKEncPrivKey(),
+			asymmetric.NewSignPrivKey(),
 		),
 	)
 
-	kemPubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
+	kemPubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
 	enc, err := client.EncryptMessage(kemPubKey, msg)
@@ -32,13 +32,13 @@ func TestClient(t *testing.T) {
 		return
 	}
 
-	signerPubKey := client.GetPrivKeyChain().GetSignerPrivKey().GetPubKey()
-	gotSignerPubKey, dec, err := client.DecryptMessage(enc)
+	signerPubKey := client.GetPrivKeyChain().GetSignPrivKey().GetPubKey()
+	gotSignPubKey, dec, err := client.DecryptMessage(enc)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if !bytes.Equal(signerPubKey.ToBytes(), gotSignerPubKey.ToBytes()) {
+	if !bytes.Equal(signerPubKey.ToBytes(), gotSignPubKey.ToBytes()) {
 		t.Error("invalid decrypt signer key")
 		return
 	}

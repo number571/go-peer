@@ -1,32 +1,43 @@
 package asymmetric
 
-import (
-	"github.com/number571/go-peer/pkg/crypto"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/types"
-)
-
-type IListPubKeys interface {
-	InPubKeys(IPubKey) bool
-	GetPubKeys() []IPubKey
-	AddPubKey(IPubKey)
-	DelPubKey(IPubKey)
+type IListPubKeyChains interface {
+	AllPubKeyChains() []IPubKeyChain
+	GetPubKeyChain(ISignPubKey) (IPubKeyChain, bool)
+	AddPubKeyChain(IPubKeyChain)
+	DelPubKeyChain(IPubKeyChain)
 }
 
-type IPubKey interface {
-	crypto.IEncrypter
-	types.IConverter
-	GetSize() uint64
-
-	GetHasher() hashing.IHasher
-	VerifyBytes([]byte, []byte) bool
+type IPrivKeyChain interface {
+	ToString() string
+	GetPubKeyChain() IPubKeyChain
+	GetKEncPrivKey() IKEncPrivKey
+	GetSignPrivKey() ISignPrivKey
 }
 
-type IPrivKey interface {
-	crypto.IDecrypter
-	types.IConverter
-	GetSize() uint64
+type IPubKeyChain interface {
+	ToString() string
+	GetKEncPubKey() IKEncPubKey
+	GetSignPubKey() ISignPubKey
+}
 
+type IKEncPrivKey interface {
+	ToBytes() []byte
+	GetPubKey() IKEncPubKey
+	Decapsulate([]byte) ([]byte, error)
+}
+
+type IKEncPubKey interface {
+	Encapsulate() ([]byte, []byte, error)
+	ToBytes() []byte
+}
+
+type ISignPrivKey interface {
+	ToBytes() []byte
+	GetPubKey() ISignPubKey
 	SignBytes([]byte) []byte
-	GetPubKey() IPubKey
+}
+
+type ISignPubKey interface {
+	ToBytes() []byte
+	VerifyBytes([]byte, []byte) bool
 }

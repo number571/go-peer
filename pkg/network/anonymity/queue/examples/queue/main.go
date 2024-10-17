@@ -9,7 +9,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
@@ -33,14 +33,14 @@ func main() {
 		client.NewClient(
 			message.NewSettings(&message.SSettings{
 				FMessageSizeBytes: (8 << 10),
-				FEncKeySizeBytes:  quantum.CCiphertextSize,
+				FEncKeySizeBytes:  asymmetric.CKEncSize,
 			}),
-			quantum.NewPrivKeyChain(
-				quantum.NewKEMPrivKey(),
-				quantum.NewSignerPrivKey(),
+			asymmetric.NewPrivKeyChain(
+				asymmetric.NewKEncPrivKey(),
+				asymmetric.NewSignPrivKey(),
 			),
 		),
-		quantum.NewKEMPrivKey().GetPubKey(),
+		asymmetric.NewKEncPrivKey().GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -54,7 +54,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
+			q.GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -82,7 +82,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKeyChain().GetSignerPrivKey().GetPubKey().ToBytes()) {
+		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKeyChain().GetSignPrivKey().GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

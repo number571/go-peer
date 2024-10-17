@@ -41,7 +41,7 @@ func (p *tsConn) Read(b []byte) (n int, err error) {
 	if p.cancelBody {
 		return 0, errors.New("some error1") // nolint: goerr113
 	}
-	bodyBytes := random.NewCSPRNG().GetBytes(p.bodySize)
+	bodyBytes := random.NewRandom().GetBytes(p.bodySize)
 	n = copy(b, bodyBytes)
 	return n, nil
 }

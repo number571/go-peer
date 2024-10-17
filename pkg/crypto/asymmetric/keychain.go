@@ -1,4 +1,4 @@
-package quantum
+package asymmetric
 
 import (
 	"encoding/hex"
@@ -18,17 +18,17 @@ var (
 )
 
 type sPrivKeyChain struct {
-	fKEM         IKEMPrivKey
-	fSigner      ISignerPrivKey
+	fKEM         IKEncPrivKey
+	fSigner      ISignPrivKey
 	fPubKeyChain IPubKeyChain
 }
 
 type sPubKeyChain struct {
-	fKEM    IKEMPubKey
-	fSigner ISignerPubKey
+	fKEM    IKEncPubKey
+	fSigner ISignPubKey
 }
 
-func NewPrivKeyChain(pKEM IKEMPrivKey, pSigner ISignerPrivKey) IPrivKeyChain {
+func NewPrivKeyChain(pKEM IKEncPrivKey, pSigner ISignPrivKey) IPrivKeyChain {
 	return &sPrivKeyChain{
 		fKEM:         pKEM,
 		fSigner:      pSigner,
@@ -61,7 +61,7 @@ func LoadPrivKeyChain(pKeychain string) IPrivKeyChain {
 	if err != nil {
 		return nil
 	}
-	kemPrivKey := LoadKEMPrivKey(pbytesKEM)
+	kemPrivKey := LoadKEncPrivKey(pbytesKEM)
 	if kemPrivKey == nil {
 		return nil
 	}
@@ -70,7 +70,7 @@ func LoadPrivKeyChain(pKeychain string) IPrivKeyChain {
 	if err != nil {
 		return nil
 	}
-	signerPrivKey := LoadSignerPrivKey(pbytesSigner)
+	signerPrivKey := LoadSignPrivKey(pbytesSigner)
 	if signerPrivKey == nil {
 		return nil
 	}
@@ -82,15 +82,15 @@ func (p *sPrivKeyChain) ToString() string {
 	return fmt.Sprintf("%s%X;%X%s", cPrivKeyPrefix, p.fKEM.ToBytes(), p.fSigner.ToBytes(), cKeySuffix)
 }
 
-func (p *sPrivKeyChain) GetKEMPrivKey() IKEMPrivKey {
+func (p *sPrivKeyChain) GetKEncPrivKey() IKEncPrivKey {
 	return p.fKEM
 }
 
-func (p *sPrivKeyChain) GetSignerPrivKey() ISignerPrivKey {
+func (p *sPrivKeyChain) GetSignPrivKey() ISignPrivKey {
 	return p.fSigner
 }
 
-func NewPubKeyChain(pKEM IKEMPubKey, pSigner ISignerPubKey) IPubKeyChain {
+func NewPubKeyChain(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKeyChain {
 	return &sPubKeyChain{
 		fKEM:    pKEM,
 		fSigner: pSigner,
@@ -118,7 +118,7 @@ func LoadPubKeyChain(pKeychain string) IPubKeyChain {
 	if err != nil {
 		return nil
 	}
-	kemPubKey := LoadKEMPubKey(pbytesKEM)
+	kemPubKey := LoadKEncPubKey(pbytesKEM)
 	if kemPubKey == nil {
 		return nil
 	}
@@ -127,7 +127,7 @@ func LoadPubKeyChain(pKeychain string) IPubKeyChain {
 	if err != nil {
 		return nil
 	}
-	signerPubKey := LoadSignerPubKey(pbytesSigner)
+	signerPubKey := LoadSignPubKey(pbytesSigner)
 	if signerPubKey == nil {
 		return nil
 	}
@@ -139,11 +139,11 @@ func (p *sPubKeyChain) ToString() string {
 	return fmt.Sprintf("%s%X;%X%s", cPubKeyPrefix, p.fKEM.ToBytes(), p.fSigner.ToBytes(), cKeySuffix)
 }
 
-func (p *sPubKeyChain) GetKEMPubKey() IKEMPubKey {
+func (p *sPubKeyChain) GetKEncPubKey() IKEncPubKey {
 	return p.fKEM
 }
 
-func (p *sPubKeyChain) GetSignerPubKey() ISignerPubKey {
+func (p *sPubKeyChain) GetSignPubKey() ISignPubKey {
 	return p.fSigner
 }
 

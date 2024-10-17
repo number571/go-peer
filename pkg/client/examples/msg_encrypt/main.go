@@ -5,7 +5,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/client/message"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -16,7 +16,7 @@ func main() {
 	)
 
 	msg, err := client1.EncryptMessage(
-		client2.GetPrivKeyChain().GetKEMPrivKey().GetPubKey(),
+		client2.GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload64(0x0, []byte("hello, world!")).ToBytes(),
 	)
 	if err != nil {
@@ -37,11 +37,11 @@ func newClient() client.IClient {
 	return client.NewClient(
 		message.NewSettings(&message.SSettings{
 			FMessageSizeBytes: (8 << 10),
-			FEncKeySizeBytes:  quantum.CCiphertextSize,
+			FEncKeySizeBytes:  asymmetric.CKEncSize,
 		}),
-		quantum.NewPrivKeyChain(
-			quantum.NewKEMPrivKey(),
-			quantum.NewSignerPrivKey(),
+		asymmetric.NewPrivKeyChain(
+			asymmetric.NewKEncPrivKey(),
+			asymmetric.NewSignPrivKey(),
 		),
 	)
 }

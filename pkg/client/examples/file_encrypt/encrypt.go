@@ -32,7 +32,7 @@ func encrypt(client client.IClient, outFilename, inFilename string) error {
 			}
 			return err
 		}
-		kemPubKey := client.GetPrivKeyChain().GetKEMPrivKey().GetPubKey()
+		kemPubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
 		chunk, err := client.EncryptMessage(kemPubKey, buf[:n])
 		if err != nil {
 			return err

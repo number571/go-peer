@@ -1,35 +1,35 @@
 package hashing
 
 import (
-	"crypto/sha256"
+	"crypto/sha512"
 
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
-	_ IHasher = &sSHA256Hasher{}
+	_ IHasher = &sSHA512Hasher{}
 )
 
 const (
-	CSHA256Size = sha256.Size
+	CHasherSize = sha512.Size
 )
 
-type sSHA256Hasher struct {
+type sSHA512Hasher struct {
 	fHash []byte
 }
 
-func NewSHA256Hasher(pData []byte) IHasher {
-	h := sha256.New()
+func NewHasher(pData []byte) IHasher {
+	h := sha512.New()
 	h.Write(pData)
-	return &sSHA256Hasher{
+	return &sSHA512Hasher{
 		fHash: h.Sum(nil),
 	}
 }
 
-func (p *sSHA256Hasher) ToString() string {
+func (p *sSHA512Hasher) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
 }
 
-func (p *sSHA256Hasher) ToBytes() []byte {
+func (p *sSHA512Hasher) ToBytes() []byte {
 	return p.fHash
 }

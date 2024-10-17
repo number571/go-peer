@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/quantum"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pubKey quantum.IKEMPubKey, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IKEncPubKey, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 
@@ -73,12 +73,12 @@ func runServiceNode() anonymity.INode {
 	return node
 }
 
-func exchangeKeys(node1, node2 anonymity.INode) (quantum.IKEMPubKey, quantum.IKEMPubKey) {
+func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEncPubKey, asymmetric.IKEncPubKey) {
 	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
 	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
 
 	node1.GetListPubKeyChains().AddPubKeyChain(pubKey2)
 	node2.GetListPubKeyChains().AddPubKeyChain(pubKey1)
 
-	return pubKey1.GetKEMPubKey(), pubKey2.GetKEMPubKey()
+	return pubKey1.GetKEncPubKey(), pubKey2.GetKEncPubKey()
 }

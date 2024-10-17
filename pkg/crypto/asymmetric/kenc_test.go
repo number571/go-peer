@@ -1,4 +1,4 @@
-package quantum
+package asymmetric
 
 import (
 	"bytes"
@@ -8,11 +8,11 @@ import (
 func TestKEM(t *testing.T) {
 	t.Parallel()
 
-	privKey := NewKEMPrivKey()
-	privKey = LoadKEMPrivKey(privKey.ToBytes())
+	privKey := NewKEncPrivKey()
+	privKey = LoadKEncPrivKey(privKey.ToBytes())
 
 	pubKey := privKey.GetPubKey()
-	pubKey = LoadKEMPubKey(pubKey.ToBytes())
+	pubKey = LoadKEncPubKey(pubKey.ToBytes())
 
 	ct, ss1, err := pubKey.Encapsulate()
 	if err != nil {

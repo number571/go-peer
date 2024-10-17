@@ -2,31 +2,31 @@ package hashing
 
 import (
 	"crypto/hmac"
-	"crypto/sha256"
+	"crypto/sha512"
 
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
-	_ IHasher = &sHMACSHA256Hasher{}
+	_ IHasher = &sHMACSHA512Hasher{}
 )
 
-type sHMACSHA256Hasher struct {
+type sHMACSHA512Hasher struct {
 	fHash []byte
 }
 
-func NewHMACSHA256Hasher(pKey []byte, pData []byte) IHasher {
-	h := hmac.New(sha256.New, pKey)
+func NewHMACHasher(pKey []byte, pData []byte) IHasher {
+	h := hmac.New(sha512.New, pKey)
 	h.Write(pData)
-	return &sHMACSHA256Hasher{
+	return &sHMACSHA512Hasher{
 		fHash: h.Sum(nil),
 	}
 }
 
-func (p *sHMACSHA256Hasher) ToString() string {
+func (p *sHMACSHA512Hasher) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
 }
 
-func (p *sHMACSHA256Hasher) ToBytes() []byte {
+func (p *sHMACSHA512Hasher) ToBytes() []byte {
 	return p.fHash
 }

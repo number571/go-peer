@@ -8,13 +8,13 @@ import (
 )
 
 var tgSlice = [][]byte{
-	random.NewCSPRNG().GetBytes(456),
+	random.NewRandom().GetBytes(456),
 	[]byte("hello"),
 	[]byte("world->571"),
-	random.NewCSPRNG().GetBytes(571),
+	random.NewRandom().GetBytes(571),
 	[]byte("qwerty"),
 	{},
-	random.NewCSPRNG().GetBytes(123),
+	random.NewRandom().GetBytes(123),
 	{},
 }
 

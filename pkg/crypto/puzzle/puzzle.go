@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	cHashSizeInBits = hashing.CSHA256Size * 8
+	cHashSizeInBits = hashing.CHasherSize * 8
 )
 
 var (
@@ -62,7 +62,7 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 					return
 				default:
 					bNonce := encoding.Uint64ToBytes(nonce)
-					hash := hashing.NewSHA256Hasher(bytes.Join(
+					hash := hashing.NewHasher(bytes.Join(
 						[][]byte{packHash, bNonce[:]},
 						[]byte{},
 					)).ToBytes()
@@ -93,7 +93,7 @@ func (p *sPoWPuzzle) VerifyBytes(pPackHash []byte, pNonce uint64) bool {
 
 	target.Lsh(target, cHashSizeInBits-uint(p.fDiff))
 	bNonce := encoding.Uint64ToBytes(pNonce)
-	hash := hashing.NewSHA256Hasher(bytes.Join(
+	hash := hashing.NewHasher(bytes.Join(
 		[][]byte{packHash, bNonce[:]},
 		[]byte{},
 	)).ToBytes()

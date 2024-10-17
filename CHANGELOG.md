@@ -6,10 +6,15 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/crypto`: update asymmetric: RSA -> Kyber768/DilithiumM3
+
 ### CHANGES
 
 - Update `cmd`: move hidden_lake & secpy_chat to https://github.com/number571/hidden-lake and https://github.com/number571/secpy-chat repositories
 - Update `docs`: move hidden_lake docx, pptx, pdf works to https://github.com/number571/hidden-lake repository
+- Update `pkg/crypto`: change name of construct functions to abstract names 
 
 <!-- ... -->
 

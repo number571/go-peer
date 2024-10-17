@@ -29,7 +29,7 @@ func TestPuzzle(t *testing.T) {
 		msg    = []byte("hello, world!")
 	)
 
-	hash := hashing.NewSHA256Hasher(msg).ToBytes()
+	hash := hashing.NewHasher(msg).ToBytes()
 	proof := puzzle.ProofBytes(hash, 1)
 
 	if !puzzle.VerifyBytes(hash, proof) {

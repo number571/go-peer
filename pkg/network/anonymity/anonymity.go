@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client/message"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/crypto/quantum"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -36,7 +36,7 @@ type sNode struct {
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
-	fFriends       quantum.IListPubKeyChains
+	fFriends       asymmetric.IListPubKeyChains
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -47,7 +47,7 @@ func NewNode(
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
-	pFriends quantum.IListPubKeyChains,
+	pFriends asymmetric.IListPubKeyChains,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -102,7 +102,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 			// update logger state
 			p.enrichLogger(logBuilder, netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPrivKeyChain().GetSignerPrivKey().GetPubKey())
+				WithPubKey(p.fQueue.GetClient().GetPrivKeyChain().GetSignPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
@@ -131,7 +131,7 @@ func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetListPubKeyChains() quantum.IListPubKeyChains {
+func (p *sNode) GetListPubKeyChains() asymmetric.IListPubKeyChains {
 	return p.fFriends
 }
 
@@ -143,7 +143,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
-	pRecv quantum.IKEMPubKey,
+	pRecv asymmetric.IKEncPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -158,10 +158,10 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv quantum.IKEMPubKey,
+	pRecv asymmetric.IKEncPubKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
-	headAction := sAction(random.NewCSPRNG().GetUint64())
+	headAction := sAction(random.NewRandom().GetUint64())
 	actionKey := newActionKey(pRecv, headAction)
 
 	p.setAction(actionKey)
@@ -263,13 +263,13 @@ func (p *sNode) networkHandler(
 	}
 
 	// do request or response action
-	return p.handleDoAction(pCtx, logBuilder, keychain.GetKEMPubKey(), pld)
+	return p.handleDoAction(pCtx, logBuilder, keychain.GetKEncPubKey(), pld)
 }
 
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender quantum.IKEMPubKey,
+	pSender asymmetric.IKEncPubKey,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -293,7 +293,7 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender quantum.IKEMPubKey,
+	pSender asymmetric.IKEncPubKey,
 	pAction iAction,
 	pBody []byte,
 ) {
@@ -312,7 +312,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender quantum.IKEMPubKey,
+	pSender asymmetric.IKEncPubKey,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -346,7 +346,7 @@ func (p *sNode) handleRequest(
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv quantum.IKEMPubKey,
+	pRecv asymmetric.IKEncPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -357,7 +357,7 @@ func (p *sNode) enqueuePayload(
 		client := p.fQueue.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPrivKeyChain().GetSignerPrivKey().GetPubKey()).
+			WithPubKey(client.GetPrivKeyChain().GetSignPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
@@ -464,7 +464,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey quantum.IKEMPubKey, pAction iAction) string {
-	pubKeyAddr := hashing.NewSHA256Hasher(pPubKey.ToBytes()).ToBytes()
+func newActionKey(pPubKey asymmetric.IKEncPubKey, pAction iAction) string {
+	pubKeyAddr := hashing.NewHasher(pPubKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }
