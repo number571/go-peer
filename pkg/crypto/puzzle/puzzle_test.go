@@ -6,7 +6,6 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestPuzzleDiffSize(t *testing.T) {
@@ -25,7 +24,7 @@ func TestPuzzle(t *testing.T) {
 	t.Parallel()
 
 	var (
-		puzzle = NewPoWPuzzle(testutils.TCWorkSize)
+		puzzle = NewPoWPuzzle(10)
 		msg    = []byte("hello, world!")
 	)
 

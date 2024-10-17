@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/encoding"
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 const (
@@ -21,13 +20,13 @@ func TestKeyBuilder(t *testing.T) {
 		salt = []byte("it's a salt!")
 	)
 
-	hash := NewKeyBuilder(1<<testutils.TCWorkSize, salt).Build(pasw, tcKeySize)
+	hash := NewKeyBuilder(1<<10, salt).Build(pasw, tcKeySize)
 	if encoding.HexEncode(hash) != tcHash {
 		t.Error("hash is correct?")
 		return
 	}
 
-	if !bytes.Equal(hash, NewKeyBuilder(1<<testutils.TCWorkSize, salt).Build(pasw, tcKeySize)) {
+	if !bytes.Equal(hash, NewKeyBuilder(1<<10, salt).Build(pasw, tcKeySize)) {
 		t.Error("hash is not determined")
 		return
 	}

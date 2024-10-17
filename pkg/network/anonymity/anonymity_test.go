@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
@@ -30,8 +29,13 @@ import (
 
 const (
 	tcPathDBTemplate = "database_test_%d_%d.db"
-	tcMsgBody        = "hello, world!"
 	tcIter           = 10
+	tcWorkSize       = 10
+	tcHead           = 123
+	tcQueueCap       = 16
+	tcMsgSize        = (8 << 10)
+	tcMsgBody        = "hello, world!"
+	tcLargeBody      = "abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc"
 )
 
 func TestError(t *testing.T) {
@@ -112,13 +116,13 @@ func TestComplexFetchPayload(t *testing.T) {
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			defer wg.Done()
-			reqBody := fmt.Sprintf("%s (%d)", testutils.TcBody, i)
+			reqBody := fmt.Sprintf("%s (%d)", tcMsgBody, i)
 
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
 				nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-				payload.NewPayload32(testutils.TcHead, []byte(reqBody)),
+				payload.NewPayload32(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -139,7 +143,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	t.Parallel()
 
 	// 3 seconds for wait
-	addresses := [2]string{testutils.TgAddrs[31], testutils.TgAddrs[32]}
+	addresses := [2]string{testutils.TgAddrs[10], testutils.TgAddrs[11]}
 	nodes, cancels := testNewNodes(t, 3*time.Second, addresses, 1)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
@@ -156,7 +160,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcBody)),
+		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err != nil {
 		return
@@ -168,7 +172,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 func TestFetchPayload(t *testing.T) {
 	t.Parallel()
 
-	addresses := [2]string{testutils.TgAddrs[35], testutils.TgAddrs[36]}
+	addresses := [2]string{testutils.TgAddrs[12], testutils.TgAddrs[13]}
 	nodes, cancels := testNewNodes(t, time.Minute, addresses, 4)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
@@ -177,7 +181,7 @@ func TestFetchPayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 4)
 
 	nodes[1].HandleFunc(
-		testutils.TcHead,
+		tcHead,
 		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
@@ -187,7 +191,7 @@ func TestFetchPayload(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload32(testutils.TcHead, []byte(testutils.TcLargeBody)),
+		payload.NewPayload32(tcHead, []byte(tcLargeBody)),
 	)
 	if err == nil {
 		t.Error("success fetch payload with large body")
@@ -197,7 +201,7 @@ func TestFetchPayload(t *testing.T) {
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload32(testutils.TcHead, []byte(tcMsgBody)),
+		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
@@ -213,7 +217,7 @@ func TestFetchPayload(t *testing.T) {
 func TestBroadcastPayload(t *testing.T) {
 	t.Parallel()
 
-	addresses := [2]string{testutils.TgAddrs[33], testutils.TgAddrs[34]}
+	addresses := [2]string{testutils.TgAddrs[14], testutils.TgAddrs[15]}
 	nodes, cancels := testNewNodes(t, time.Minute, addresses, 3)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
@@ -223,7 +227,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
-		testutils.TcHead,
+		tcHead,
 		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
@@ -234,7 +238,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err := nodes[0].SendPayload(
 		context.Background(),
 		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcLargeBody)),
+		payload.NewPayload64(uint64(tcHead), []byte(tcLargeBody)),
 	)
 	if err == nil {
 		t.Error("success broadcast payload with large body")
@@ -244,7 +248,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err1 := nodes[0].SendPayload(
 		context.Background(),
 		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody)),
+		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
 		t.Error(err1)
@@ -267,7 +271,7 @@ func TestBroadcastPayload(t *testing.T) {
 func TestEnqueuePayload(t *testing.T) {
 	t.Parallel()
 
-	addresses := [2]string{testutils.TgAddrs[38], testutils.TgAddrs[39]}
+	addresses := [2]string{testutils.TgAddrs[16], testutils.TgAddrs[17]}
 	nodes, cancels := testNewNodes(t, time.Minute, addresses, 8)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
@@ -279,21 +283,21 @@ func TestEnqueuePayload(t *testing.T) {
 	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
-	pld := payload.NewPayload64(uint64(testutils.TcHead), []byte(tcMsgBody))
+	pld := payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody))
 
-	overheadBody := random.NewRandom().GetBytes(testutils.TCMessageSize + 1)
-	overPld := payload.NewPayload64(uint64(testutils.TcHead), overheadBody)
+	overheadBody := random.NewRandom().GetBytes(tcMsgSize + 1)
+	overPld := payload.NewPayload64(uint64(tcHead), overheadBody)
 	if err := node.enqueuePayload(logBuilder, pubKey, overPld); err == nil {
 		t.Error("success with overhead message")
 		return
 	}
 
 	pldBytes := payload.NewPayload64(
-		joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+		joinHead(sAction(1).setType(true), tcHead).uint64(),
 		[]byte(tcMsgBody),
 	).ToBytes()
 
-	for i := 0; i < testutils.TCQueueCapacity; i++ {
+	for i := 0; i < tcQueueCap; i++ {
 		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
@@ -301,7 +305,7 @@ func TestEnqueuePayload(t *testing.T) {
 	}
 
 	// after full queue
-	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
+	for i := 0; i < 2*tcQueueCap; i++ {
 		if err := node.enqueuePayload(logBuilder, pubKey, pld); err != nil {
 			return
 		}
@@ -331,7 +335,7 @@ func TestHandleWrapper(t *testing.T) {
 	msg, err := client.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+			joinHead(sAction(1).setType(true), tcHead).uint64(),
 			[]byte(tcMsgBody),
 		).ToBytes(),
 	)
@@ -543,11 +547,11 @@ func TestRecvSendMessage(t *testing.T) {
 
 	msgBody := "hello, world!"
 	pldBytes := payload.NewPayload64(
-		joinHead(sAction(1).setType(true), testutils.TcHead).uint64(),
+		joinHead(sAction(1).setType(true), tcHead).uint64(),
 		[]byte(msgBody),
 	).ToBytes()
 
-	for i := 0; i < testutils.TCQueueCapacity; i++ {
+	for i := 0; i < tcQueueCap; i++ {
 		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
@@ -590,7 +594,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 
 	for _, node := range nodes {
 		node.HandleFunc(
-			testutils.TcHead,
+			tcHead,
 			func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
@@ -689,45 +693,42 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
 				FAddress:      addr,
-				FMaxConnects:  testutils.TCMaxConnects,
+				FMaxConnects:  16,
 				FReadTimeout:  timeWait,
 				FWriteTimeout: timeWait,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSettings: net_message.NewSettings(&net_message.SSettings{
-						FWorkSizeBits: testutils.TCWorkSize,
+						FWorkSizeBits: tcWorkSize,
 					}),
-					FLimitMessageSizeBytes: testutils.TCMessageSize + limitVoidSize,
+					FLimitMessageSizeBytes: tcMsgSize + limitVoidSize,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			cache.NewLRUCache(testutils.TCCapacity),
+			cache.NewLRUCache(1024),
 		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 					FSettings: net_message.NewSettings(&net_message.SSettings{
-						FWorkSizeBits: testutils.TCWorkSize,
+						FWorkSizeBits: tcWorkSize,
 					}),
 					FParallel:             parallel,
 					FRandMessageSizeBytes: limitVoidSize,
 				}),
 				FNetworkMask:      networkMask,
-				FMainPoolCapacity: testutils.TCQueueCapacity,
-				FRandPoolCapacity: testutils.TCQueueCapacity,
+				FMainPoolCapacity: tcQueueCap,
+				FRandPoolCapacity: tcQueueCap,
 				FQueuePeriod:      time.Second,
 			}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: testutils.TCMessageSize,
-					FEncKeySizeBytes:  asymmetric.CKEncSize,
-				}),
 				asymmetric.NewPrivKeyChain(
 					asymmetric.NewKEncPrivKey(),
 					asymmetric.NewSignPrivKey(),
 				),
+				tcMsgSize,
 			),
 			asymmetric.NewKEncPrivKey().GetPubKey(),
 		),

@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -35,14 +34,8 @@ func BenchmarkClient(b *testing.B) {
 		client IClient
 	}{
 		{
-			name: "kyber=768-bit,dilithium=mode3",
-			client: NewClient(
-				message.NewSettings(&message.SSettings{
-					FEncKeySizeBytes:  asymmetric.CKEncSize,
-					FMessageSizeBytes: (8 << 10),
-				}),
-				privKeyChain,
-			),
+			name:   "kyber=768-bit,dilithium=mode3",
+			client: NewClient(privKeyChain, (8 << 10)),
 		},
 	}
 

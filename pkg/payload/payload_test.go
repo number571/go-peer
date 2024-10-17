@@ -3,14 +3,12 @@ package payload
 import (
 	"bytes"
 	"testing"
-
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 func TestPayload64(t *testing.T) {
 	t.Parallel()
 
-	pl := NewPayload64(uint64(testutils.TcHead), []byte(testutils.TcBody))
+	pl := NewPayload64(uint64(1), []byte("hello, world!"))
 
 	decPl := LoadPayload64(pl.ToBytes())
 	if decPl == nil {
@@ -38,7 +36,7 @@ func TestPayload64(t *testing.T) {
 func TestPayload32(t *testing.T) {
 	t.Parallel()
 
-	pl := NewPayload32(testutils.TcHead, []byte(testutils.TcBody))
+	pl := NewPayload32(1, []byte("hello, world!"))
 
 	decPl := LoadPayload32(pl.ToBytes())
 	if decPl == nil {

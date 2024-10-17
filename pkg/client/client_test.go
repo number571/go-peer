@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -13,14 +12,11 @@ func TestClient(t *testing.T) {
 	t.Parallel()
 
 	client := NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: (8 << 10),
-			FEncKeySizeBytes:  asymmetric.CKEncSize,
-		}),
 		asymmetric.NewPrivKeyChain(
 			asymmetric.NewKEncPrivKey(),
 			asymmetric.NewSignPrivKey(),
 		),
+		(8 << 10),
 	)
 
 	kemPubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
@@ -31,6 +27,9 @@ func TestClient(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	// os.WriteFile("test_binary.msg", enc, 0600)
+	// os.WriteFile("test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
 	signerPubKey := client.GetPrivKeyChain().GetSignPrivKey().GetPubKey()
 	gotSignPubKey, dec, err := client.DecryptMessage(enc)

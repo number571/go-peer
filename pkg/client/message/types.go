@@ -10,8 +10,3 @@ type IMessage interface {
 	GetEnck() []byte
 	GetEncd() []byte
 }
-
-type ISettings interface {
-	GetEncKeySizeBytes() uint64
-	GetMessageSizeBytes() uint64
-}

@@ -21,16 +21,16 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fSettings     message.ISettings
 	fPrivKeyChain asymmetric.IPrivKeyChain
+	fMessageSize  uint64
 	fStructSize   uint64
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(pSett message.ISettings, pPrivKeyChain asymmetric.IPrivKeyChain) IClient {
+func NewClient(pPrivKeyChain asymmetric.IPrivKeyChain, pMessageSize uint64) IClient {
 	client := &sClient{
-		fSettings:     pSett,
+		fMessageSize:  pMessageSize,
 		fPrivKeyChain: pPrivKeyChain,
 	}
 
@@ -41,16 +41,20 @@ func NewClient(pSett message.ISettings, pPrivKeyChain asymmetric.IPrivKeyChain) 
 	}
 
 	client.fStructSize = uint64(len(encMsg))
-	if limit := client.GetMessageLimit(); limit == 0 {
-		panic("the message size is lower than struct size")
+	if limit := client.GetPayloadLimit(); limit == 0 {
+		panic("the payload size is lower than struct size")
 	}
 
 	return client
 }
 
+func (p *sClient) GetMessageSize() uint64 {
+	return p.fMessageSize
+}
+
 // Message is raw bytes of body payload without payload head.
-func (p *sClient) GetMessageLimit() uint64 {
-	maxMsgSize := p.fSettings.GetMessageSizeBytes()
+func (p *sClient) GetPayloadLimit() uint64 {
+	maxMsgSize := p.fMessageSize
 	if maxMsgSize <= p.fStructSize {
 		return 0
 	}
@@ -62,24 +66,19 @@ func (p *sClient) GetPrivKeyChain() asymmetric.IPrivKeyChain {
 	return p.fPrivKeyChain
 }
 
-// Get settings from client object.
-func (p *sClient) GetSettings() message.ISettings {
-	return p.fSettings
-}
-
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
 func (p *sClient) EncryptMessage(pRecv asymmetric.IKEncPubKey, pMsg []byte) ([]byte, error) {
 	var (
-		msgLimitSize = p.GetMessageLimit()
+		payloadLimit = p.GetPayloadLimit()
 		resultSize   = uint64(len(pMsg))
 	)
 
-	if resultSize > msgLimitSize {
+	if resultSize > payloadLimit {
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithParams(pRecv, pMsg, msgLimitSize-resultSize)
+	return p.encryptWithParams(pRecv, pMsg, payloadLimit-resultSize)
 }
 
 func (p *sClient) encryptWithParams(
@@ -124,7 +123,7 @@ func (p *sClient) encryptWithParams(
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.ISignPubKey, []byte, error) {
-	msg, err := message.LoadMessage(p.fSettings, pMsg)
+	msg, err := message.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}

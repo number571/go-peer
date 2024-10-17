@@ -9,7 +9,7 @@ import (
 )
 
 func encrypt(client client.IClient, outFilename, inFilename string) error {
-	msgLimit := client.GetMessageLimit()
+	pldLimit := client.GetPayloadLimit()
 
 	infile, err := os.Open(inFilename)
 	if err != nil {
@@ -23,7 +23,7 @@ func encrypt(client client.IClient, outFilename, inFilename string) error {
 	}
 	defer infile.Close()
 
-	buf := make([]byte, msgLimit)
+	buf := make([]byte, pldLimit)
 	for i := 0; ; i++ {
 		n, err := infile.Read(buf)
 		if err != nil {

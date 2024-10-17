@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/payload/joiner"
-	testutils "github.com/number571/go-peer/test/utils"
 )
 
 var (
@@ -22,6 +21,7 @@ var (
 const (
 	tcLimitVoid  = 128
 	tcHead       = 12345
+	tcWorkSize   = 10
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key_1"
 )
@@ -78,7 +78,7 @@ func TestMessage(t *testing.T) {
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewConstructSettings(&SConstructSettings{
 		FSettings: NewSettings(&SSettings{
-			FWorkSizeBits: testutils.TCWorkSize,
+			FWorkSizeBits: tcWorkSize,
 			FNetworkKey:   tcNetworkKey,
 		}),
 		FRandMessageSizeBytes: tcLimitVoid,
@@ -139,7 +139,7 @@ func TestMessage(t *testing.T) {
 
 	newSett := NewConstructSettings(&SConstructSettings{
 		FSettings: NewSettings(&SSettings{
-			FWorkSizeBits: testutils.TCWorkSize,
+			FWorkSizeBits: tcWorkSize,
 			FNetworkKey:   tcNetworkKey,
 		}),
 	})

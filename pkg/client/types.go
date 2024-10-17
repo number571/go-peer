@@ -1,13 +1,12 @@
 package client
 
 import (
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 type IClient interface {
-	GetSettings() message.ISettings
-	GetMessageLimit() uint64
+	GetMessageSize() uint64
+	GetPayloadLimit() uint64
 
 	GetPrivKeyChain() asymmetric.IPrivKeyChain
 

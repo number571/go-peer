@@ -19,8 +19,10 @@ import (
 )
 
 const (
-	tcHead = 12345
-	tcBody = "hello, world!"
+	tcMsgSize  = (8 << 10)
+	tcWorkSize = 10
+	tcHead     = 12345
+	tcBody     = "hello, world!"
 )
 
 type tsConn struct {
@@ -98,7 +100,7 @@ func testSettings(t *testing.T, n int) {
 	case 1:
 		_ = NewSettings(&SSettings{
 			FMessageSettings:       message.NewSettings(&message.SSettings{}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
@@ -106,7 +108,7 @@ func testSettings(t *testing.T, n int) {
 	case 2:
 		_ = NewSettings(&SSettings{
 			FMessageSettings:       message.NewSettings(&message.SSettings{}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
@@ -114,7 +116,7 @@ func testSettings(t *testing.T, n int) {
 	case 3:
 		_ = NewSettings(&SSettings{
 			FMessageSettings:       message.NewSettings(&message.SSettings{}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -122,14 +124,14 @@ func testSettings(t *testing.T, n int) {
 	case 4:
 		_ = NewSettings(&SSettings{
 			FMessageSettings:       message.NewSettings(&message.SSettings{}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		})
 	case 5:
 		_ = NewSettings(&SSettings{
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -141,22 +143,22 @@ func testSettings(t *testing.T, n int) {
 func TestClosedConn(t *testing.T) {
 	t.Parallel()
 
-	listener := testNewService(t, testutils.TgAddrs[30], "")
+	listener := testNewService(t, testutils.TgAddrs[8], "")
 	defer testFreeService(listener)
 
 	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
 			FWriteTimeout:          time.Minute,
 		}),
-		testutils.TgAddrs[30],
+		testutils.TgAddrs[8],
 	)
 	if err != nil {
 		t.Error(err)
@@ -210,9 +212,9 @@ func TestInvalidConn(t *testing.T) {
 		context.Background(),
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -233,9 +235,9 @@ func TestReadMessage(t *testing.T) {
 	conn := LoadConn(
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -286,9 +288,9 @@ func TestRecvDataBytes(t *testing.T) {
 	conn := LoadConn(
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -328,9 +330,9 @@ func TestSendBytes(t *testing.T) {
 	conn := LoadConn(
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -360,9 +362,9 @@ func TestRecvHeadBytes(t *testing.T) {
 	conn := LoadConn(
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -399,8 +401,8 @@ func TestRecvHeadBytes(t *testing.T) {
 func TestConnWithNetworkKey(t *testing.T) {
 	t.Parallel()
 
-	testConn(t, testutils.TgAddrs[17], "")
-	// testConn(t, testutils.TgAddrs[17], "hello, world!")
+	testConn(t, testutils.TgAddrs[9], "")
+	// testConn(t, testutils.TgAddrs[9], "hello, world!")
 }
 
 func testConn(t *testing.T, pAddr, pNetworkKey string) {
@@ -411,9 +413,9 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		context.Background(),
 		NewSettings(&SSettings{
 			FMessageSettings: message.NewSettings(&message.SSettings{
-				FWorkSizeBits: testutils.TCWorkSize,
+				FWorkSizeBits: tcWorkSize,
 			}),
-			FLimitMessageSizeBytes: testutils.TCMessageSize,
+			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -477,10 +479,10 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 			conn := LoadConn(
 				NewSettings(&SSettings{
 					FMessageSettings: message.NewSettings(&message.SSettings{
-						FWorkSizeBits: testutils.TCWorkSize,
+						FWorkSizeBits: tcWorkSize,
 						FNetworkKey:   pNetworkKey,
 					}),
-					FLimitMessageSizeBytes: testutils.TCMessageSize,
+					FLimitMessageSizeBytes: tcMsgSize,
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,

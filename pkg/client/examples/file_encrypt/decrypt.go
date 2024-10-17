@@ -9,8 +9,6 @@ import (
 )
 
 func decrypt(client client.IClient, outFilename, inFilename string) error {
-	msgSize := client.GetSettings().GetMessageSizeBytes()
-
 	infile, err := os.Open(inFilename)
 	if err != nil {
 		return err
@@ -23,7 +21,7 @@ func decrypt(client client.IClient, outFilename, inFilename string) error {
 	}
 	defer infile.Close()
 
-	buf := make([]byte, msgSize)
+	buf := make([]byte, client.GetMessageSize())
 	for i := 0; ; i++ {
 		n, err := infile.Read(buf)
 		if err != nil {
@@ -32,7 +30,7 @@ func decrypt(client client.IClient, outFilename, inFilename string) error {
 			}
 			return err
 		}
-		if uint64(n) != msgSize {
+		if uint64(n) != client.GetMessageSize() {
 			return errors.New("uint64(n) != msgSize")
 		}
 		_, chunk, err := client.DecryptMessage(buf[:n])

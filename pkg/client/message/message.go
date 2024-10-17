@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -17,6 +18,9 @@ type sMessage struct {
 }
 
 func NewMessage(pEnck, pEncd []byte) IMessage {
+	if len(pEnck) != asymmetric.CKEncSize {
+		panic(`len(pEnck) != asymmetric.CKEncSize`)
+	}
 	return &sMessage{
 		fEnck: pEnck,
 		fEncd: pEncd,
@@ -24,7 +28,11 @@ func NewMessage(pEnck, pEncd []byte) IMessage {
 }
 
 // Message can be created only with client module.
-func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
+func LoadMessage(pSize uint64, pMsg interface{}) (IMessage, error) {
+	kSize := uint64(asymmetric.CKEncSize)
+	if kSize >= pSize {
+		return nil, ErrSizeMessageBytes
+	}
 	var recvMsg []byte
 	switch x := pMsg.(type) {
 	case []byte:
@@ -34,7 +42,10 @@ func LoadMessage(psett ISettings, pMsg interface{}) (IMessage, error) {
 	default:
 		return nil, ErrUnknownMessageType
 	}
-	return loadMessage(psett, recvMsg)
+	if uint64(len(recvMsg)) != pSize {
+		return nil, ErrLoadMessageBytes
+	}
+	return NewMessage(recvMsg[:kSize], recvMsg[kSize:]), nil
 }
 
 func (p *sMessage) GetEnck() []byte {
@@ -54,16 +65,4 @@ func (p *sMessage) ToBytes() []byte {
 
 func (p *sMessage) ToString() string {
 	return encoding.HexEncode(p.ToBytes())
-}
-
-func loadMessage(pSett ISettings, pBytes []byte) (IMessage, error) {
-	keySize := pSett.GetEncKeySizeBytes()
-	msgSize := pSett.GetMessageSizeBytes()
-	if keySize >= msgSize {
-		panic("keySize >= msgSize")
-	}
-	if uint64(len(pBytes)) != msgSize {
-		return nil, ErrLoadMessageBytes
-	}
-	return NewMessage(pBytes[:keySize], pBytes[keySize:]), nil
 }

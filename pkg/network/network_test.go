@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	tcIter     = 100
-	tcTimeWait = time.Minute
+	tcBodyTemplate = "hello, world: %d!"
+	tcIter         = 100
+	tcTimeWait     = time.Minute
 )
 
 func TestError(t *testing.T) {
@@ -56,7 +57,7 @@ func testSettings(t *testing.T, n int) {
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -66,11 +67,11 @@ func testSettings(t *testing.T, n int) {
 	case 1:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FMaxConnects:  testutils.TCMaxConnects,
+			FMaxConnects:  16,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -80,11 +81,11 @@ func testSettings(t *testing.T, n int) {
 	case 2:
 		_ = NewSettings(&SSettings{
 			FAddress:     "test",
-			FMaxConnects: testutils.TCMaxConnects,
+			FMaxConnects: 16,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -94,7 +95,7 @@ func testSettings(t *testing.T, n int) {
 	case 3:
 		_ = NewSettings(&SSettings{
 			FAddress:      "test",
-			FMaxConnects:  testutils.TCMaxConnects,
+			FMaxConnects:  16,
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 		})
@@ -116,7 +117,7 @@ func TestBroadcast(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(4 * tcIter)
 
-	headHandle := testutils.TcHead
+	headHandle := uint32(123)
 	handleF := func(pCtx context.Context, node INode, _ conn.IConn, pMsg message.IMessage) error {
 		defer func() {
 			_ = node.BroadcastMessage(pCtx, pMsg)
@@ -154,7 +155,7 @@ func TestBroadcast(t *testing.T) {
 		go func(i int) {
 			pld := payload.NewPayload32(
 				headHandle,
-				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
+				[]byte(fmt.Sprintf(tcBodyTemplate, i)),
 			)
 			sett := message.NewConstructSettings(&message.SConstructSettings{
 				FSettings: nodes[0].GetSettings().GetConnSettings().GetMessageSettings(),
@@ -182,7 +183,7 @@ func TestBroadcast(t *testing.T) {
 			continue
 		}
 		for i := 0; i < tcIter; i++ {
-			val := fmt.Sprintf(testutils.TcBodyTemplate, i)
+			val := fmt.Sprintf(tcBodyTemplate, i)
 			flag, ok := mapp[node][val]
 			if !ok {
 				t.Errorf("result value '%s' undefined", val)
@@ -201,8 +202,8 @@ func TestNodeConnection(t *testing.T) {
 
 	var (
 		node1 = newTestNode("", 2).(*sNode)
-		node2 = newTestNode(testutils.TgAddrs[27], 1)
-		node3 = newTestNode(testutils.TgAddrs[28], testutils.TCMaxConnects)
+		node2 = newTestNode(testutils.TgAddrs[4], 1)
+		node3 = newTestNode(testutils.TgAddrs[5], 16)
 	)
 	defer testFreeNodes([]INode{node1, node2, node3})
 
@@ -242,27 +243,27 @@ func TestNodeConnection(t *testing.T) {
 		return
 	}
 
-	if err := node1.AddConnection(ctx, testutils.TgAddrs[27]); err != nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := node1.AddConnection(ctx, testutils.TgAddrs[27]); err == nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[4]); err == nil {
 		t.Error("success add already exist connection")
 		return
 	}
 
-	if err := node1.AddConnection(ctx, testutils.TgAddrs[28]); err != nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[5]); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if err := node1.AddConnection(ctx, testutils.TgAddrs[28]); err == nil {
+	if err := node1.AddConnection(ctx, testutils.TgAddrs[5]); err == nil {
 		t.Error("success add second connection with limit = 1")
 		return
 	}
 
-	if err := node3.AddConnection(ctx, testutils.TgAddrs[27]); err != nil {
+	if err := node3.AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
 		t.Error(err)
 		return
 	}
@@ -287,7 +288,7 @@ func TestNodeConnection(t *testing.T) {
 func TestHandleMessage(t *testing.T) {
 	t.Parallel()
 
-	node := newTestNode("", testutils.TCMaxConnects).(*sNode)
+	node := newTestNode("", 16).(*sNode)
 	defer testFreeNodes([]INode{node})
 
 	ctx := context.Background()
@@ -324,8 +325,8 @@ func TestHandleMessage(t *testing.T) {
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	gotSett := newTestNode("", testutils.TCMaxConnects).GetSettings()
-	if gotSett.GetMaxConnects() != testutils.TCMaxConnects {
+	gotSett := newTestNode("", 16).GetSettings()
+	if gotSett.GetMaxConnects() != 16 {
 		t.Error("invalid setting's value")
 	}
 }
@@ -333,8 +334,8 @@ func TestNodeSettings(t *testing.T) {
 func TestContextCancel(t *testing.T) {
 	t.Parallel()
 
-	node1 := newTestNode(testutils.TgAddrs[16], testutils.TCMaxConnects)
-	node2 := newTestNode("", testutils.TCMaxConnects)
+	node1 := newTestNode(testutils.TgAddrs[6], 16)
+	node2 := newTestNode("", 16)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -342,14 +343,14 @@ func TestContextCancel(t *testing.T) {
 	go func() { _ = node1.Listen(ctx) }()
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
-		return node2.AddConnection(ctx, testutils.TgAddrs[16])
+		return node2.AddConnection(ctx, testutils.TgAddrs[6])
 	})
 	if err1 != nil {
 		t.Error(err1)
 		return
 	}
 
-	headHandle := testutils.TcHead
+	headHandle := uint32(123)
 	sett := message.NewConstructSettings(&message.SConstructSettings{
 		FSettings: node2.GetSettings().GetConnSettings().GetMessageSettings(),
 	})
@@ -358,7 +359,7 @@ func TestContextCancel(t *testing.T) {
 		for i := 0; i < 1000; i++ {
 			pld := payload.NewPayload32(
 				headHandle,
-				[]byte(fmt.Sprintf(testutils.TcBodyTemplate, i)),
+				[]byte(fmt.Sprintf(tcBodyTemplate, i)),
 			)
 			if err := node2.BroadcastMessage(ctx, message.NewMessage(sett, pld)); err != nil {
 				return
@@ -375,7 +376,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i] = newTestNode(addrs[i], testutils.TCMaxConnects)
+		nodes[i] = newTestNode(addrs[i], 16)
 	}
 
 	ctx := context.Background()
@@ -407,7 +408,7 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 		}
 		mapp[node] = make(map[string]bool)
 		for i := 0; i < tcIter; i++ {
-			mapp[node][fmt.Sprintf(testutils.TcBodyTemplate, i)] = false
+			mapp[node][fmt.Sprintf(tcBodyTemplate, i)] = false
 		}
 	}
 
@@ -424,16 +425,16 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 			FWriteTimeout: timeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings: message.NewSettings(&message.SSettings{
-					FWorkSizeBits: testutils.TCWorkSize,
+					FWorkSizeBits: 10,
 				}),
-				FLimitMessageSizeBytes: testutils.TCMessageSize,
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           timeout,
 				FWriteTimeout:          timeout,
 			}),
 		}),
-		cache.NewLRUCache(testutils.TCCapacity),
+		cache.NewLRUCache(1024),
 	)
 }
 

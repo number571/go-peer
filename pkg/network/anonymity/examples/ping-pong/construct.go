@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -101,14 +100,11 @@ func newNode(serviceName, address string) anonymity.INode {
 				FRandPoolCapacity: 32,
 			}),
 			client.NewClient(
-				message.NewSettings(&message.SSettings{
-					FMessageSizeBytes: msgSize,
-					FEncKeySizeBytes:  asymmetric.CKEncSize,
-				}),
 				asymmetric.NewPrivKeyChain(
 					asymmetric.NewKEncPrivKey(),
 					asymmetric.NewSignPrivKey(),
 				),
+				msgSize,
 			),
 			asymmetric.NewKEncPrivKey().GetPubKey(),
 		),

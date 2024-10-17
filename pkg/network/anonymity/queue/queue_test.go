@@ -10,11 +10,16 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
+)
+
+const (
+	tcQueueCap = 16
+	tcMsgSize  = (8 << 10)
+	tcMsgBody  = "hello, world!"
 )
 
 func TestError(t *testing.T) {
@@ -49,7 +54,7 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FRandPoolCapacity: tcQueueCap,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
 	case 1:
@@ -57,7 +62,7 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FMainPoolCapacity: tcQueueCap,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
 	case 2:
@@ -65,13 +70,13 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FMainPoolCapacity: testutils.TCQueueCapacity,
-			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FMainPoolCapacity: tcQueueCap,
+			FRandPoolCapacity: tcQueueCap,
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
-			FMainPoolCapacity: testutils.TCQueueCapacity,
-			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FMainPoolCapacity: tcQueueCap,
+			FRandPoolCapacity: tcQueueCap,
 			FQueuePeriod:      500 * time.Millisecond,
 		})
 	}
@@ -81,21 +86,18 @@ func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
 	client := client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: testutils.TCMessageSize,
-			FEncKeySizeBytes:  asymmetric.CKEncSize,
-		}),
 		asymmetric.NewPrivKeyChain(
 			asymmetric.NewKEncPrivKey(),
 			asymmetric.NewSignPrivKey(),
 		),
+		tcMsgSize,
 	)
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FMainPoolCapacity: testutils.TCQueueCapacity,
+			FMainPoolCapacity: tcQueueCap,
 			FRandPoolCapacity: 1,
 			FQueuePeriod:      100 * time.Millisecond,
 		}),
@@ -137,8 +139,8 @@ func TestRunStopQueue(t *testing.T) {
 	}()
 
 	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
-	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
-	for i := 0; i < testutils.TCQueueCapacity; i++ {
+	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
+	for i := 0; i < tcQueueCap; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error(err)
 			return
@@ -146,7 +148,7 @@ func TestRunStopQueue(t *testing.T) {
 	}
 
 	// after full queue
-	for i := 0; i < 2*testutils.TCQueueCapacity; i++ {
+	for i := 0; i < 2*tcQueueCap; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 			return
 		}
@@ -166,27 +168,24 @@ func TestQueue(t *testing.T) {
 				}),
 			}),
 			FNetworkMask:      1,
-			FMainPoolCapacity: testutils.TCQueueCapacity,
-			FRandPoolCapacity: testutils.TCQueueCapacity,
+			FMainPoolCapacity: tcQueueCap,
+			FRandPoolCapacity: tcQueueCap,
 			FQueuePeriod:      100 * time.Millisecond,
 			FRandQueuePeriod:  100 * time.Millisecond,
 		}),
 		client.NewClient(
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: testutils.TCMessageSize,
-				FEncKeySizeBytes:  asymmetric.CKEncSize,
-			}),
 			asymmetric.NewPrivKeyChain(
 				asymmetric.NewKEncPrivKey(),
 				asymmetric.NewSignPrivKey(),
 			),
+			tcMsgSize,
 		),
 		asymmetric.NewKEncPrivKey().GetPubKey(),
 	)
 
 	sett := queue.GetSettings()
-	if sett.GetMainPoolCapacity() != testutils.TCQueueCapacity {
-		t.Error("sett.GetMainCapacity() != testutils.TCQueueCapacity")
+	if sett.GetMainPoolCapacity() != tcQueueCap {
+		t.Error("sett.GetMainCapacity() != tcQueueCap")
 		return
 	}
 
@@ -211,7 +210,7 @@ func testQueue(queue IQBProblemProcessor) error {
 
 	client := queue.GetClient()
 	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
-	pldBytes := payload.NewPayload64(0, []byte(testutils.TcBody)).ToBytes()
+	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err
 	}

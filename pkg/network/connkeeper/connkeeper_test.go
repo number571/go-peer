@@ -48,7 +48,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
+			FConnections: func() []string { return []string{testutils.TgAddrs[7]} },
 		})
 	}
 }
@@ -123,32 +123,32 @@ func TestConnKeeper(t *testing.T) {
 func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 	return NewConnKeeper(
 		NewSettings(&SSettings{
-			FConnections: func() []string { return []string{testutils.TgAddrs[18]} },
+			FConnections: func() []string { return []string{testutils.TgAddrs[7]} },
 			FDuration:    pDuration,
 		}),
 		network.NewNode(
 			network.NewSettings(&network.SSettings{
-				FMaxConnects:  testutils.TCMaxConnects,
+				FMaxConnects:  16,
 				FReadTimeout:  time.Minute,
 				FWriteTimeout: time.Minute,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
 					FMessageSettings: message.NewSettings(&message.SSettings{
-						FWorkSizeBits: testutils.TCWorkSize,
+						FWorkSizeBits: 10,
 					}),
-					FLimitMessageSizeBytes: testutils.TCMessageSize,
+					FLimitMessageSizeBytes: (8 << 10),
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
-			cache.NewLRUCache(testutils.TCCapacity),
+			cache.NewLRUCache(1024),
 		),
 	)
 }
 
 func testNewService(t *testing.T) net.Listener {
-	listener, err := net.Listen("tcp", testutils.TgAddrs[18])
+	listener, err := net.Listen("tcp", testutils.TgAddrs[7])
 	if err != nil {
 		t.Error(err)
 		return nil

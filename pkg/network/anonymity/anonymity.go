@@ -220,7 +220,7 @@ func (p *sNode) networkHandler(
 	encMsg := pNetMsg.GetPayload().GetBody()
 
 	// load encrypted message without decryption try
-	if _, err := message.LoadMessage(client.GetSettings(), encMsg); err != nil {
+	if _, err := message.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
 		// problem from sender's side
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 		return utils.MergeErrors(ErrLoadMessage, err)

@@ -31,14 +31,11 @@ func main() {
 			FRandPoolCapacity: 1 << 5,
 		}),
 		client.NewClient(
-			message.NewSettings(&message.SSettings{
-				FMessageSizeBytes: (8 << 10),
-				FEncKeySizeBytes:  asymmetric.CKEncSize,
-			}),
 			asymmetric.NewPrivKeyChain(
 				asymmetric.NewKEncPrivKey(),
 				asymmetric.NewSignPrivKey(),
 			),
+			(8<<10),
 		),
 		asymmetric.NewKEncPrivKey().GetPubKey(),
 	)
@@ -67,7 +64,7 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		msg, err := message.LoadMessage(q.GetClient().GetSettings(), netMsg.GetPayload().GetBody())
+		msg, err := message.LoadMessage(q.GetClient().GetMessageSize(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)
 		}

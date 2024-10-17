@@ -4,7 +4,6 @@ import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
@@ -23,13 +22,10 @@ func main() {
 
 func newClient() client.IClient {
 	return client.NewClient(
-		message.NewSettings(&message.SSettings{
-			FMessageSizeBytes: (8 << 10),
-			FEncKeySizeBytes:  asymmetric.CKEncSize,
-		}),
 		asymmetric.NewPrivKeyChain(
 			asymmetric.NewKEncPrivKey(),
 			asymmetric.NewSignPrivKey(),
 		),
+		(8 << 10),
 	)
 }
