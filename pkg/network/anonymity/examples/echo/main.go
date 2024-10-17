@@ -44,7 +44,7 @@ func runServiceNode() anonymity.INode {
 	ctx := context.Background()
 	node := newNode("snode", nodeAddress).HandleFunc(
 		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ asymmetric.IKEncPubKey, b []byte) ([]byte, error) {
+		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKeyChain, b []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: %s", string(b))), nil
 		},
 	)

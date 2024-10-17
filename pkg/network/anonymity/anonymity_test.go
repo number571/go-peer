@@ -178,7 +178,7 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IKEncPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
@@ -224,7 +224,7 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		testutils.TcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IKEncPubKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
@@ -365,7 +365,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	node.HandleFunc(
 		111,
-		func(_ context.Context, _ INode, _ asymmetric.IKEncPubKey, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error")
 		},
 	)
@@ -591,7 +591,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	for _, node := range nodes {
 		node.HandleFunc(
 			testutils.TcHead,
-			func(_ context.Context, _ INode, _ asymmetric.IKEncPubKey, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
 			},

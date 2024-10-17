@@ -21,5 +21,6 @@ func TestSigner(t *testing.T) {
 		return
 	}
 
+	// fmt.Println(len(privKey.ToBytes()))
 	// fmt.Println(len(pubKey.ToBytes()), len(sign))
 }

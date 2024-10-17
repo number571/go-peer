@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IKEncPubKey, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKeyChain, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 
@@ -31,7 +31,7 @@ var (
 		numBytes = encoding.Uint64ToBytes(num + 1)
 		_ = n.SendPayload(
 			ctx,
-			pubKey,
+			pubKey.GetKEncPubKey(),
 			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 		)
 		return nil, nil

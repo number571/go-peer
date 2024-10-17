@@ -16,7 +16,7 @@ import (
 type IHandlerF func(
 	context.Context,
 	INode,
-	asymmetric.IKEncPubKey,
+	asymmetric.IPubKeyChain,
 	[]byte,
 ) ([]byte, error)
 

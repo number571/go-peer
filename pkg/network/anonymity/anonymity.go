@@ -263,13 +263,13 @@ func (p *sNode) networkHandler(
 	}
 
 	// do request or response action
-	return p.handleDoAction(pCtx, logBuilder, keychain.GetKEncPubKey(), pld)
+	return p.handleDoAction(pCtx, logBuilder, keychain, pld)
 }
 
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IKEncPubKey,
+	pSender asymmetric.IPubKeyChain,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -293,12 +293,12 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IKEncPubKey,
+	pSender asymmetric.IPubKeyChain,
 	pAction iAction,
 	pBody []byte,
 ) {
 	// get session by payload head
-	actionKey := newActionKey(pSender, pAction)
+	actionKey := newActionKey(pSender.GetKEncPubKey(), pAction)
 	action, ok := p.getAction(actionKey)
 	if !ok {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
@@ -312,7 +312,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IKEncPubKey,
+	pSender asymmetric.IPubKeyChain,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -339,7 +339,7 @@ func (p *sNode) handleRequest(
 	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
 		pLogBuilder,
-		pSender,
+		pSender.GetKEncPubKey(),
 		payload.NewPayload64(newHead, resp),
 	)
 }

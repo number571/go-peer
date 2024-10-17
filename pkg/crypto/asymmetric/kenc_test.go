@@ -26,10 +26,11 @@ func TestKEM(t *testing.T) {
 		return
 	}
 
-	// fmt.Println(len(pubKey.ToBytes()), len(ct), len(ss1))
-
 	if !bytes.Equal(ss1, ss2) {
 		t.Error("invalid shared secret")
 		return
 	}
+
+	// fmt.Println(len(privKey.ToBytes()))
+	// fmt.Println(len(pubKey.ToBytes()), len(ct), len(ss1))
 }
