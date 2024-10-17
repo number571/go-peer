@@ -9,7 +9,9 @@ import (
 )
 
 const (
-	CSignSize = dilithium.SignatureSize
+	CSignPrivKeySize = dilithium.PrivateKeySize
+	CSignPubKeySize  = dilithium.PublicKeySize
+	CSignSize        = dilithium.SignatureSize
 )
 
 var (

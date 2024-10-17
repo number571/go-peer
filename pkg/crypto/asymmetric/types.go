@@ -1,5 +1,10 @@
 package asymmetric
 
+import (
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/types"
+)
+
 type IListPubKeyChains interface {
 	AllPubKeyChains() []IPubKeyChain
 	GetPubKeyChain(ISignPubKey) (IPubKeyChain, bool)
@@ -8,7 +13,7 @@ type IListPubKeyChains interface {
 }
 
 type IPrivKeyChain interface {
-	ToString() string
+	types.IConverter
 
 	GetPubKeyChain() IPubKeyChain
 	GetKEncPrivKey() IKEncPrivKey
@@ -16,7 +21,8 @@ type IPrivKeyChain interface {
 }
 
 type IPubKeyChain interface {
-	ToString() string
+	types.IConverter
+	GetHasher() hashing.IHasher
 
 	GetKEncPubKey() IKEncPubKey
 	GetSignPubKey() ISignPubKey

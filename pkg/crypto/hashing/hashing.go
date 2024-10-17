@@ -15,19 +15,22 @@ const (
 )
 
 type sSHA512Hasher struct {
-	fHash []byte
+	fHash    []byte
+	fHashStr string
 }
 
 func NewHasher(pData []byte) IHasher {
 	h := sha512.New()
 	h.Write(pData)
+	s := h.Sum(nil)
 	return &sSHA512Hasher{
-		fHash: h.Sum(nil),
+		fHash:    s,
+		fHashStr: encoding.HexEncode(s),
 	}
 }
 
 func (p *sSHA512Hasher) ToString() string {
-	return encoding.HexEncode(p.ToBytes())
+	return p.fHashStr
 }
 
 func (p *sSHA512Hasher) ToBytes() []byte {

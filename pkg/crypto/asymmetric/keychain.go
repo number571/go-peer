@@ -1,9 +1,12 @@
 package asymmetric
 
 import (
-	"encoding/hex"
+	"bytes"
 	"fmt"
 	"strings"
+
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 const (
@@ -26,6 +29,7 @@ type sPrivKeyChain struct {
 type sPubKeyChain struct {
 	fKEM    IKEncPubKey
 	fSigner ISignPubKey
+	fHasher hashing.IHasher
 }
 
 func NewPrivKeyChain(pKEM IKEncPrivKey, pSigner ISignPrivKey) IPrivKeyChain {
@@ -40,37 +44,37 @@ func (p *sPrivKeyChain) GetPubKeyChain() IPubKeyChain {
 	return p.fPubKeyChain
 }
 
-func LoadPrivKeyChain(pKeychain string) IPrivKeyChain {
-	x := skipSpaceChars(pKeychain)
-	if !strings.HasPrefix(x, cPrivKeyPrefix) {
-		return nil
-	}
-	x = strings.TrimPrefix(x, cPrivKeyPrefix)
+func LoadPrivKeyChain(pKeychain interface{}) IPrivKeyChain {
+	pKeychainBytes := []byte{}
 
-	if !strings.HasSuffix(x, cKeySuffix) {
-		return nil
+	switch x := pKeychain.(type) {
+	case string:
+		s := skipSpaceChars(x)
+		if !strings.HasPrefix(s, cPrivKeyPrefix) {
+			return nil
+		}
+		s = strings.TrimPrefix(s, cPrivKeyPrefix)
+		if !strings.HasSuffix(s, cKeySuffix) {
+			return nil
+		}
+		s = strings.TrimSuffix(s, cKeySuffix)
+		pKeychainBytes = encoding.HexDecode(s)
+	case []byte:
+		pKeychainBytes = x
+	default:
+		panic("unknown type private key chain")
 	}
-	x = strings.TrimSuffix(x, cKeySuffix)
 
-	splited := strings.Split(x, ";")
-	if len(splited) != 2 {
+	if len(pKeychainBytes) != (CKEncPrivKeySize + CSignPrivKeySize) {
 		return nil
 	}
 
-	pbytesKEM, err := hex.DecodeString(splited[0])
-	if err != nil {
-		return nil
-	}
-	kemPrivKey := LoadKEncPrivKey(pbytesKEM)
+	kemPrivKey := LoadKEncPrivKey(pKeychainBytes[:CKEncPrivKeySize])
 	if kemPrivKey == nil {
 		return nil
 	}
 
-	pbytesSigner, err := hex.DecodeString(splited[1])
-	if err != nil {
-		return nil
-	}
-	signerPrivKey := LoadSignPrivKey(pbytesSigner)
+	signerPrivKey := LoadSignPrivKey(pKeychainBytes[CKEncPrivKeySize:])
 	if signerPrivKey == nil {
 		return nil
 	}
@@ -78,8 +82,12 @@ func LoadPrivKeyChain(pKeychain string) IPrivKeyChain {
 	return NewPrivKeyChain(kemPrivKey, signerPrivKey)
 }
 
+func (p *sPrivKeyChain) ToBytes() []byte {
+	return bytes.Join([][]byte{p.fKEM.ToBytes(), p.fSigner.ToBytes()}, []byte{})
+}
+
 func (p *sPrivKeyChain) ToString() string {
-	return fmt.Sprintf("%s%X;%X%s", cPrivKeyPrefix, p.fKEM.ToBytes(), p.fSigner.ToBytes(), cKeySuffix)
+	return fmt.Sprintf("%s%X%s", cPrivKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
 func (p *sPrivKeyChain) GetKEncPrivKey() IKEncPrivKey {
@@ -91,43 +99,45 @@ func (p *sPrivKeyChain) GetSignPrivKey() ISignPrivKey {
 }
 
 func NewPubKeyChain(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKeyChain {
-	return &sPubKeyChain{
+	pubKeyChain := &sPubKeyChain{
 		fKEM:    pKEM,
 		fSigner: pSigner,
 	}
+	pubKeyChain.fHasher = hashing.NewHasher(pubKeyChain.ToBytes())
+	return pubKeyChain
 }
 
-func LoadPubKeyChain(pKeychain string) IPubKeyChain {
-	x := skipSpaceChars(pKeychain)
-	if !strings.HasPrefix(x, cPubKeyPrefix) {
-		return nil
-	}
-	x = strings.TrimPrefix(x, cPubKeyPrefix)
+func LoadPubKeyChain(pKeychain interface{}) IPubKeyChain {
+	pKeychainBytes := []byte{}
 
-	if !strings.HasSuffix(x, cKeySuffix) {
-		return nil
+	switch x := pKeychain.(type) {
+	case string:
+		s := skipSpaceChars(x)
+		if !strings.HasPrefix(s, cPubKeyPrefix) {
+			return nil
+		}
+		s = strings.TrimPrefix(s, cPubKeyPrefix)
+		if !strings.HasSuffix(s, cKeySuffix) {
+			return nil
+		}
+		s = strings.TrimSuffix(s, cKeySuffix)
+		pKeychainBytes = encoding.HexDecode(s)
+	case []byte:
+		pKeychainBytes = x
+	default:
+		panic("unknown type public key chain")
 	}
-	x = strings.TrimSuffix(x, cKeySuffix)
 
-	splited := strings.Split(x, ";")
-	if len(splited) != 2 {
+	if len(pKeychainBytes) != (CKEncPubKeySize + CSignPubKeySize) {
 		return nil
 	}
 
-	pbytesKEM, err := hex.DecodeString(splited[0])
-	if err != nil {
-		return nil
-	}
-	kemPubKey := LoadKEncPubKey(pbytesKEM)
+	kemPubKey := LoadKEncPubKey(pKeychainBytes[:CKEncPubKeySize])
 	if kemPubKey == nil {
 		return nil
 	}
 
-	pbytesSigner, err := hex.DecodeString(splited[1])
-	if err != nil {
-		return nil
-	}
-	signerPubKey := LoadSignPubKey(pbytesSigner)
+	signerPubKey := LoadSignPubKey(pKeychainBytes[CKEncPubKeySize:])
 	if signerPubKey == nil {
 		return nil
 	}
@@ -135,8 +145,16 @@ func LoadPubKeyChain(pKeychain string) IPubKeyChain {
 	return NewPubKeyChain(kemPubKey, signerPubKey)
 }
 
+func (p *sPubKeyChain) GetHasher() hashing.IHasher {
+	return p.fHasher
+}
+
+func (p *sPubKeyChain) ToBytes() []byte {
+	return bytes.Join([][]byte{p.fKEM.ToBytes(), p.fSigner.ToBytes()}, []byte{})
+}
+
 func (p *sPubKeyChain) ToString() string {
-	return fmt.Sprintf("%s%X;%X%s", cPubKeyPrefix, p.fKEM.ToBytes(), p.fSigner.ToBytes(), cKeySuffix)
+	return fmt.Sprintf("%s%X%s", cPubKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
 func (p *sPubKeyChain) GetKEncPubKey() IKEncPubKey {

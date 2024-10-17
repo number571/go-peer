@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	CKEncSize = kyber.CiphertextSize
+	CKEncPrivKeySize = kyber.PrivateKeySize
+	CKEncPubKeySize  = kyber.PublicKeySize
+	CKEncSize        = kyber.CiphertextSize
 )
 
 var (
