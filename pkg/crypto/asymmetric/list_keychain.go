@@ -61,7 +61,5 @@ func (p *sListPubKeys) DelPubKey(pPubKey IPubKey) {
 }
 
 func hashkey(pSignPubKey ISignPubKey) string {
-	return hashing.NewHasher(
-		pSignPubKey.ToBytes(),
-	).ToString()
+	return hashing.NewHasher(pSignPubKey.ToBytes()).ToString()
 }

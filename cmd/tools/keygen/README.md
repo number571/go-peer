@@ -4,5 +4,5 @@
 
 ```bash
 usage: 
-    ./main -size=[key-size]
+    go run .
 ```
