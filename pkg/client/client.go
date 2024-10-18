@@ -87,15 +87,15 @@ func (p *sClient) encryptWithParams(
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
-		signer = p.fPrivKey.GetDSAPrivKey()
-		rand   = random.NewRandom()
-		salt   = rand.GetBytes(cSaltSize)
+		rand = random.NewRandom()
+		salt = rand.GetBytes(cSaltSize)
+		sign = p.fPrivKey.GetDSAPrivKey()
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			signer.GetPubKey().ToBytes(),
+			sign.GetPubKey().ToBytes(),
 			pRecv.ToBytes(),
 			data,
 		},
@@ -111,10 +111,10 @@ func (p *sClient) encryptWithParams(
 	return message.NewMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			signer.GetPubKey().ToBytes(),
+			sign.GetPubKey().ToBytes(),
 			salt,
 			hash,
-			signer.SignBytes(hash),
+			sign.SignBytes(hash),
 			data,
 		})),
 	).ToBytes(), nil
