@@ -1,7 +1,7 @@
 package database
 
 const (
-	errPrefix = "pkg/database = "
+	errPrefix = "pkg/storage/database = "
 )
 
 type SDatabaseError struct {
