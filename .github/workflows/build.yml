@@ -15,10 +15,10 @@ jobs:
     - name: Golang installing v1.23...
       run: wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz && tar -C /opt -xzf go1.23.0.linux-amd64.tar.gz
     - name: Go-peer version
-      run: export PATH=$PATH:$(go env GOPATH)/bin && go version
+      run: export PATH=$PATH:/opt/go/bin && go version
     - name: Go-peer downloading...
       run: git clone --depth=1 https://github.com/number571/go-peer.git
     - name: Go-peer deps installing...
-      run: export PATH=$PATH:$(go env GOPATH)/bin && make install-deps -C go-peer
+      run: export PATH=$PATH:/opt/go/bin && make install-deps -C go-peer
     - name: Go-peer lint/test running...
-      run: export PATH=$PATH:$(go env GOPATH)/bin && make -C go-peer
+      run: export PATH=$PATH:/opt/go/bin && make -C go-peer
