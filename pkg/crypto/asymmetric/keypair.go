@@ -73,17 +73,10 @@ func LoadPrivKey(pKeychain interface{}) IPrivKey {
 		return nil
 	}
 
-	kemPrivKey := LoadKEMPrivKey(keychainBytes[:CKEMPrivKeySize])
-	if kemPrivKey == nil {
-		return nil
-	}
-
-	signerPrivKey := LoadDSAPrivKey(keychainBytes[CKEMPrivKeySize:])
-	if signerPrivKey == nil {
-		return nil
-	}
-
-	return newPrivKey(kemPrivKey, signerPrivKey)
+	return newPrivKey(
+		LoadKEMPrivKey(keychainBytes[:CKEMPrivKeySize]),
+		LoadDSAPrivKey(keychainBytes[CKEMPrivKeySize:]),
+	)
 }
 
 func (p *sPrivKey) ToBytes() []byte {
@@ -136,17 +129,10 @@ func LoadPubKey(pKeychain interface{}) IPubKey {
 		return nil
 	}
 
-	kemPubKey := LoadKEMPubKey(keychainBytes[:CKEMPubKeySize])
-	if kemPubKey == nil {
-		return nil
-	}
-
-	signerPubKey := LoadDSAPubKey(keychainBytes[CKEMPubKeySize:])
-	if signerPubKey == nil {
-		return nil
-	}
-
-	return NewPubKey(kemPubKey, signerPubKey)
+	return NewPubKey(
+		LoadKEMPubKey(keychainBytes[:CKEMPubKeySize]),
+		LoadDSAPubKey(keychainBytes[CKEMPubKeySize:]),
+	)
 }
 
 func (p *sPubKey) GetHasher() hashing.IHasher {
