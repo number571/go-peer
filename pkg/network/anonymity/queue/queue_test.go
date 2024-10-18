@@ -115,7 +115,7 @@ func TestRunStopQueue(t *testing.T) {
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
 		sQueue := queue.(*sQBProblemProcessor)
-		if len(sQueue.fRandPool.fQueue) == int(sett.GetRandPoolCapacity()) {
+		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetRandPoolCapacity() {
 			return nil
 		}
 		return errors.New("len(void queue) != max capacity")

@@ -35,7 +35,7 @@ go-fmt-vet:
 ### INSTALL
 
 install-deps:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.0
 	go install github.com/nikolaydubina/go-cover-treemap@v1.4.2
 
 ### LINT
