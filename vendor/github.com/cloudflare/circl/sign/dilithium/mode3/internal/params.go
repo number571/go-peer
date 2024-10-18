@@ -3,13 +3,13 @@
 package internal
 
 const (
-	Name          = "Dilithium5"
-	K             = 8
-	L             = 7
-	Eta           = 2
-	DoubleEtaBits = 3
-	Omega         = 75
-	Tau           = 60
+	Name          = "Dilithium3"
+	K             = 6
+	L             = 5
+	Eta           = 4
+	DoubleEtaBits = 4
+	Omega         = 55
+	Tau           = 49
 	Gamma1Bits    = 19
 	Gamma2        = 261888
 	NIST          = false

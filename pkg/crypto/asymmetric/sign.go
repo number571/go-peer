@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 
 	"github.com/cloudflare/circl/sign"
-	dilithium "github.com/cloudflare/circl/sign/dilithium/mode5"
+	dilithium "github.com/cloudflare/circl/sign/dilithium/mode3"
 )
 
 const (

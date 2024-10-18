@@ -1,5 +1,3 @@
-// Code generated from mode3/internal/vec.go by gen.go
-
 package internal
 
 import (

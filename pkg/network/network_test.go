@@ -57,7 +57,7 @@ func testSettings(t *testing.T, n int) {
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: (10 << 10),
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -71,7 +71,7 @@ func testSettings(t *testing.T, n int) {
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: (10 << 10),
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -85,7 +85,7 @@ func testSettings(t *testing.T, n int) {
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
 				FMessageSettings:       message.NewSettings(&message.SSettings{}),
-				FLimitMessageSizeBytes: (10 << 10),
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           time.Minute,
@@ -427,7 +427,7 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 				FMessageSettings: message.NewSettings(&message.SSettings{
 					FWorkSizeBits: 10,
 				}),
-				FLimitMessageSizeBytes: (10 << 10),
+				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
 				FReadTimeout:           timeout,

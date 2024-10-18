@@ -1,18 +1,18 @@
 // Code generated from pkg.templ.go. DO NOT EDIT.
 
-// kyber1024 implements the IND-CPA-secure Public Key Encryption
-// scheme Kyber1024.CPAPKE as submitted to round 3 of the NIST PQC competition
+// kyber768 implements the IND-CPA-secure Public Key Encryption
+// scheme Kyber768.CPAPKE as submitted to round 3 of the NIST PQC competition
 // and described in
 //
 // https://pq-crystals.org/kyber/data/kyber-specification-round3.pdf
-package kyber1024
+package kyber768
 
 import (
 	cryptoRand "crypto/rand"
 	"io"
 
 	"github.com/cloudflare/circl/kem"
-	"github.com/cloudflare/circl/pke/kyber/kyber1024/internal"
+	"github.com/cloudflare/circl/pke/kyber/kyber768/internal"
 )
 
 const (
@@ -35,10 +35,10 @@ const (
 	PlaintextSize = internal.PlaintextSize
 )
 
-// PublicKey is the type of Kyber1024.CPAPKE public key
+// PublicKey is the type of Kyber768.CPAPKE public key
 type PublicKey internal.PublicKey
 
-// PrivateKey is the type of Kyber1024.CPAPKE private key
+// PrivateKey is the type of Kyber768.CPAPKE private key
 type PrivateKey internal.PrivateKey
 
 // GenerateKey generates a public/private key pair using entropy from rand.

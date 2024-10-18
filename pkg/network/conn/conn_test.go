@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	tcMsgSize  = (10 << 10)
+	tcMsgSize  = (8 << 10)
 	tcWorkSize = 10
 	tcHead     = 12345
 	tcBody     = "hello, world!"

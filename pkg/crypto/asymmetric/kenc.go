@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 
 	"github.com/cloudflare/circl/kem"
-	kyber "github.com/cloudflare/circl/kem/kyber/kyber1024"
+	kyber "github.com/cloudflare/circl/kem/kyber/kyber768"
 )
 
 const (
