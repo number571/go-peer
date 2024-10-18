@@ -10,6 +10,6 @@ type IClient interface {
 
 	GetPrivKey() asymmetric.IPrivKey
 
-	EncryptMessage(asymmetric.IKEncPubKey, []byte) ([]byte, error)
-	DecryptMessage([]byte) (asymmetric.ISignPubKey, []byte, error)
+	EncryptMessage(asymmetric.IKEMPubKey, []byte) ([]byte, error)
+	DecryptMessage([]byte) (asymmetric.IDSAPubKey, []byte, error)
 }

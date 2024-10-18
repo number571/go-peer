@@ -4,74 +4,74 @@ import (
 	"crypto/rand"
 
 	"github.com/cloudflare/circl/kem"
-	kyber "github.com/cloudflare/circl/kem/kyber/kyber768"
+	mlkem "github.com/cloudflare/circl/kem/mlkem/mlkem768"
 )
 
 const (
-	CKEncPrivKeySize = kyber.PrivateKeySize
-	CKEncPubKeySize  = kyber.PublicKeySize
-	CKEncSize        = kyber.CiphertextSize
+	CKEMPrivKeySize = mlkem.PrivateKeySize
+	CKEMPubKeySize  = mlkem.PublicKeySize
+	CKEncSize       = mlkem.CiphertextSize
 )
 
 var (
-	_ IKEncPrivKey = &sKyber768PrivKey{}
-	_ IKEncPubKey  = &sKyber768PubKey{}
+	_ IKEMPrivKey = &sKyber768PrivKey{}
+	_ IKEMPubKey  = &sKyber768PubKey{}
 )
 
 type sKyber768PrivKey struct {
-	fPrivKey *kyber.PrivateKey
+	fPrivKey *mlkem.PrivateKey
 	fPubKey  *sKyber768PubKey
 }
 
 type sKyber768PubKey struct {
-	fK *kyber.PublicKey
+	fK *mlkem.PublicKey
 }
 
-func NewKEncPrivKey() IKEncPrivKey {
-	_, privKey, err := kyber.GenerateKeyPair(rand.Reader)
+func NewKEMPrivKey() IKEMPrivKey {
+	_, privKey, err := mlkem.GenerateKeyPair(rand.Reader)
 	if err != nil {
 		panic(err)
 	}
-	return newKEncPrivKey(privKey)
+	return newKEMPrivKey(privKey)
 }
 
-func newKEncPrivKey(privKey kem.PrivateKey) *sKyber768PrivKey {
-	pk, ok := privKey.(*kyber.PrivateKey)
+func newKEMPrivKey(privKey kem.PrivateKey) *sKyber768PrivKey {
+	pk, ok := privKey.(*mlkem.PrivateKey)
 	if !ok {
 		return nil
 	}
 	return &sKyber768PrivKey{
 		fPrivKey: pk,
-		fPubKey:  newKEncPubKey(privKey.Public()),
+		fPubKey:  newKEMPubKey(privKey.Public()),
 	}
 }
 
-func newKEncPubKey(pubKey kem.PublicKey) *sKyber768PubKey {
-	pk, ok := pubKey.(*kyber.PublicKey)
+func newKEMPubKey(pubKey kem.PublicKey) *sKyber768PubKey {
+	pk, ok := pubKey.(*mlkem.PublicKey)
 	if !ok {
 		return nil
 	}
 	return &sKyber768PubKey{pk}
 }
 
-func LoadKEncPrivKey(pBytes []byte) IKEncPrivKey {
-	privKey, err := kyber.Scheme().UnmarshalBinaryPrivateKey(pBytes)
+func LoadKEMPrivKey(pBytes []byte) IKEMPrivKey {
+	privKey, err := mlkem.Scheme().UnmarshalBinaryPrivateKey(pBytes)
 	if err != nil {
 		return nil
 	}
-	return newKEncPrivKey(privKey)
+	return newKEMPrivKey(privKey)
 }
 
-func LoadKEncPubKey(pBytes []byte) IKEncPubKey {
-	pubKey, err := kyber.Scheme().UnmarshalBinaryPublicKey(pBytes)
+func LoadKEMPubKey(pBytes []byte) IKEMPubKey {
+	pubKey, err := mlkem.Scheme().UnmarshalBinaryPublicKey(pBytes)
 	if err != nil {
 		return nil
 	}
-	return newKEncPubKey(pubKey)
+	return newKEMPubKey(pubKey)
 }
 
 func (p *sKyber768PubKey) Encapsulate() ([]byte, []byte, error) {
-	return kyber.Scheme().Encapsulate(p.fK)
+	return mlkem.Scheme().Encapsulate(p.fK)
 }
 
 func (p *sKyber768PubKey) ToBytes() []byte {
@@ -82,12 +82,12 @@ func (p *sKyber768PubKey) ToBytes() []byte {
 	return b
 }
 
-func (p *sKyber768PrivKey) GetPubKey() IKEncPubKey {
+func (p *sKyber768PrivKey) GetPubKey() IKEMPubKey {
 	return p.fPubKey
 }
 
 func (p *sKyber768PrivKey) Decapsulate(pCiphertext []byte) ([]byte, error) {
-	return kyber.Scheme().Decapsulate(p.fPrivKey, pCiphertext)
+	return mlkem.Scheme().Decapsulate(p.fPrivKey, pCiphertext)
 }
 
 func (p *sKyber768PrivKey) ToBytes() []byte {

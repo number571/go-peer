@@ -21,22 +21,22 @@ var (
 )
 
 type sPrivKey struct {
-	fKEM    IKEncPrivKey
-	fSigner ISignPrivKey
+	fKEM    IKEMPrivKey
+	fSigner IDSAPrivKey
 	fPubKey IPubKey
 }
 
 type sPubKey struct {
-	fKEM    IKEncPubKey
-	fSigner ISignPubKey
+	fKEM    IKEMPubKey
+	fSigner IDSAPubKey
 	fHasher hashing.IHasher
 }
 
 func NewPrivKey() IPrivKey {
-	return newPrivKey(NewKEncPrivKey(), NewSignPrivKey())
+	return newPrivKey(NewKEMPrivKey(), NewDSAPrivKey())
 }
 
-func newPrivKey(pKEM IKEncPrivKey, pSign ISignPrivKey) IPrivKey {
+func newPrivKey(pKEM IKEMPrivKey, pSign IDSAPrivKey) IPrivKey {
 	return &sPrivKey{
 		fKEM:    pKEM,
 		fSigner: pSign,
@@ -69,16 +69,16 @@ func LoadPrivKey(pKeychain interface{}) IPrivKey {
 		panic("unknown type private key chain")
 	}
 
-	if len(keychainBytes) != (CKEncPrivKeySize + CSignPrivKeySize) {
+	if len(keychainBytes) != (CKEMPrivKeySize + CDSAPrivKeySize) {
 		return nil
 	}
 
-	kemPrivKey := LoadKEncPrivKey(keychainBytes[:CKEncPrivKeySize])
+	kemPrivKey := LoadKEMPrivKey(keychainBytes[:CKEMPrivKeySize])
 	if kemPrivKey == nil {
 		return nil
 	}
 
-	signerPrivKey := LoadSignPrivKey(keychainBytes[CKEncPrivKeySize:])
+	signerPrivKey := LoadDSAPrivKey(keychainBytes[CKEMPrivKeySize:])
 	if signerPrivKey == nil {
 		return nil
 	}
@@ -94,15 +94,15 @@ func (p *sPrivKey) ToString() string {
 	return fmt.Sprintf("%s%X%s", cPrivKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
-func (p *sPrivKey) GetKEncPrivKey() IKEncPrivKey {
+func (p *sPrivKey) GetKEMPrivKey() IKEMPrivKey {
 	return p.fKEM
 }
 
-func (p *sPrivKey) GetSignPrivKey() ISignPrivKey {
+func (p *sPrivKey) GetDSAPrivKey() IDSAPrivKey {
 	return p.fSigner
 }
 
-func NewPubKey(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKey {
+func NewPubKey(pKEM IKEMPubKey, pSigner IDSAPubKey) IPubKey {
 	pubKeyChain := &sPubKey{
 		fKEM:    pKEM,
 		fSigner: pSigner,
@@ -132,16 +132,16 @@ func LoadPubKey(pKeychain interface{}) IPubKey {
 		panic("unknown type public key chain")
 	}
 
-	if len(keychainBytes) != (CKEncPubKeySize + CSignPubKeySize) {
+	if len(keychainBytes) != (CKEMPubKeySize + CDSAPubKeySize) {
 		return nil
 	}
 
-	kemPubKey := LoadKEncPubKey(keychainBytes[:CKEncPubKeySize])
+	kemPubKey := LoadKEMPubKey(keychainBytes[:CKEMPubKeySize])
 	if kemPubKey == nil {
 		return nil
 	}
 
-	signerPubKey := LoadSignPubKey(keychainBytes[CKEncPubKeySize:])
+	signerPubKey := LoadDSAPubKey(keychainBytes[CKEMPubKeySize:])
 	if signerPubKey == nil {
 		return nil
 	}
@@ -161,11 +161,11 @@ func (p *sPubKey) ToString() string {
 	return fmt.Sprintf("%s%X%s", cPubKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
-func (p *sPubKey) GetKEncPubKey() IKEncPubKey {
+func (p *sPubKey) GetKEMPubKey() IKEMPubKey {
 	return p.fKEM
 }
 
-func (p *sPubKey) GetSignPubKey() ISignPubKey {
+func (p *sPubKey) GetDSAPubKey() IDSAPubKey {
 	return p.fSigner
 }
 

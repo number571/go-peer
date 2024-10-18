@@ -8,22 +8,22 @@ import (
 func TestPrivKey(t *testing.T) {
 	t.Parallel()
 
-	kemPrivKey := NewKEncPrivKey()
-	signerPrivKey := NewSignPrivKey()
+	kemPrivKey := NewKEMPrivKey()
+	signerPrivKey := NewDSAPrivKey()
 
 	keychain := newPrivKey(kemPrivKey, signerPrivKey)
-	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEncPrivKey().ToBytes()) {
+	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEMPrivKey().ToBytes()) {
 		t.Error("invalid kem priv key (1)")
 	}
-	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetSignPrivKey().ToBytes()) {
+	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetDSAPrivKey().ToBytes()) {
 		t.Error("invalid signer priv key (1)")
 	}
 
 	keychain = LoadPrivKey(keychain.ToString())
-	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEncPrivKey().ToBytes()) {
+	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEMPrivKey().ToBytes()) {
 		t.Error("invalid kem priv key (2)")
 	}
-	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetSignPrivKey().ToBytes()) {
+	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetDSAPrivKey().ToBytes()) {
 		t.Error("invalid signer priv key (2)")
 	}
 
@@ -33,22 +33,22 @@ func TestPrivKey(t *testing.T) {
 func TestPubKey(t *testing.T) {
 	t.Parallel()
 
-	kemPubKey := NewKEncPrivKey().GetPubKey()
-	signerPubKey := NewSignPrivKey().GetPubKey()
+	kemPubKey := NewKEMPrivKey().GetPubKey()
+	signerPubKey := NewDSAPrivKey().GetPubKey()
 
 	keychain := NewPubKey(kemPubKey, signerPubKey)
-	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEncPubKey().ToBytes()) {
+	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEMPubKey().ToBytes()) {
 		t.Error("invalid kem pub key (1)")
 	}
-	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetSignPubKey().ToBytes()) {
+	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetDSAPubKey().ToBytes()) {
 		t.Error("invalid signer pub key (1)")
 	}
 
 	keychain = LoadPubKey(keychain.ToString())
-	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEncPubKey().ToBytes()) {
+	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEMPubKey().ToBytes()) {
 		t.Error("invalid kem pub key (2)")
 	}
-	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetSignPubKey().ToBytes()) {
+	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetDSAPubKey().ToBytes()) {
 		t.Error("invalid signer pub key (2)")
 	}
 

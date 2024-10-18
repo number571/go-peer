@@ -34,7 +34,7 @@ func main() {
 			asymmetric.NewPrivKey(),
 			(8<<10),
 		),
-		asymmetric.NewKEncPrivKey().GetPubKey(),
+		asymmetric.NewKEMPrivKey().GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -48,7 +48,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+			q.GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -76,7 +76,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetSignPrivKey().GetPubKey().ToBytes()) {
+		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetDSAPrivKey().GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

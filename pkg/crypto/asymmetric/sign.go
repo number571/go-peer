@@ -5,73 +5,73 @@ import (
 	"crypto/rand"
 
 	"github.com/cloudflare/circl/sign"
-	dilithium "github.com/cloudflare/circl/sign/dilithium/mode3"
+	mldsa "github.com/cloudflare/circl/sign/mldsa/mldsa65"
 )
 
 const (
-	CSignPrivKeySize = dilithium.PrivateKeySize
-	CSignPubKeySize  = dilithium.PublicKeySize
-	CSignSize        = dilithium.SignatureSize
+	CDSAPrivKeySize = mldsa.PrivateKeySize
+	CDSAPubKeySize  = mldsa.PublicKeySize
+	CSignSize       = mldsa.SignatureSize
 )
 
 var (
-	_ ISignPrivKey = &sDilithiumM3PrivKey{}
-	_ ISignPubKey  = &sDilithiumM3PubKey{}
+	_ IDSAPrivKey = &sDilithiumM3PrivKey{}
+	_ IDSAPubKey  = &sDilithiumM3PubKey{}
 )
 
 type sDilithiumM3PrivKey struct {
-	fPrivKey *dilithium.PrivateKey
+	fPrivKey *mldsa.PrivateKey
 	fPubKey  *sDilithiumM3PubKey
 }
 
 type sDilithiumM3PubKey struct {
-	fK *dilithium.PublicKey
+	fK *mldsa.PublicKey
 }
 
-func NewSignPrivKey() ISignPrivKey {
-	_, privKey, err := dilithium.GenerateKey(rand.Reader)
+func NewDSAPrivKey() IDSAPrivKey {
+	_, privKey, err := mldsa.GenerateKey(rand.Reader)
 	if err != nil {
 		panic(err)
 	}
-	return newSignPrivKey(privKey)
+	return newDSAPrivKey(privKey)
 }
 
-func LoadSignPrivKey(pBytes []byte) ISignPrivKey {
-	privKey, err := dilithium.Scheme().UnmarshalBinaryPrivateKey(pBytes)
+func LoadDSAPrivKey(pBytes []byte) IDSAPrivKey {
+	privKey, err := mldsa.Scheme().UnmarshalBinaryPrivateKey(pBytes)
 	if err != nil {
 		return nil
 	}
-	return newSignPrivKey(privKey)
+	return newDSAPrivKey(privKey)
 }
 
-func LoadSignPubKey(pBytes []byte) ISignPubKey {
-	pubKey, err := dilithium.Scheme().UnmarshalBinaryPublicKey(pBytes)
+func LoadDSAPubKey(pBytes []byte) IDSAPubKey {
+	pubKey, err := mldsa.Scheme().UnmarshalBinaryPublicKey(pBytes)
 	if err != nil {
 		return nil
 	}
-	return newSignPubKey(pubKey)
+	return newDSAPubKey(pubKey)
 }
 
-func newSignPrivKey(privKey sign.PrivateKey) *sDilithiumM3PrivKey {
-	pk, ok := privKey.(*dilithium.PrivateKey)
+func newDSAPrivKey(privKey sign.PrivateKey) *sDilithiumM3PrivKey {
+	pk, ok := privKey.(*mldsa.PrivateKey)
 	if !ok {
 		return nil
 	}
 	return &sDilithiumM3PrivKey{
 		fPrivKey: pk,
-		fPubKey:  newSignPubKey(privKey.Public()),
+		fPubKey:  newDSAPubKey(privKey.Public()),
 	}
 }
 
-func newSignPubKey(pubKey crypto.PublicKey) *sDilithiumM3PubKey {
-	pk, ok := pubKey.(*dilithium.PublicKey)
+func newDSAPubKey(pubKey crypto.PublicKey) *sDilithiumM3PubKey {
+	pk, ok := pubKey.(*mldsa.PublicKey)
 	if !ok {
 		return nil
 	}
 	return &sDilithiumM3PubKey{pk}
 }
 
-func (p *sDilithiumM3PrivKey) GetPubKey() ISignPubKey {
+func (p *sDilithiumM3PrivKey) GetPubKey() IDSAPubKey {
 	return p.fPubKey
 }
 
@@ -88,7 +88,7 @@ func (p *sDilithiumM3PrivKey) SignBytes(pMsg []byte) []byte {
 }
 
 func (p *sDilithiumM3PubKey) VerifyBytes(pMsg, pSign []byte) bool {
-	return dilithium.Verify(p.fK, pMsg, pSign)
+	return mldsa.Verify(p.fK, pMsg, nil, pSign)
 }
 
 func (p *sDilithiumM3PubKey) ToBytes() []byte {

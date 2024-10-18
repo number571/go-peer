@@ -31,7 +31,7 @@ func BenchmarkClient(b *testing.B) {
 		client IClient
 	}{
 		{
-			name:   "kyber=768-bit,dilithium=mode3",
+			name:   "mlkem=768,mldsa=65",
 			client: NewClient(privKeyChain, (8 << 10)),
 		},
 	}
@@ -52,7 +52,7 @@ func BenchmarkClient(b *testing.B) {
 			nowEnc := time.Now()
 			for i := 0; i < b.N; i++ {
 				encMsg, err := t.client.EncryptMessage(
-					t.client.GetPrivKey().GetKEncPrivKey().GetPubKey(),
+					t.client.GetPrivKey().GetKEMPrivKey().GetPubKey(),
 					randomBytes[i],
 				)
 				if err != nil {

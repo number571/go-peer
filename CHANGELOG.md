@@ -8,7 +8,7 @@
 
 ### IMPROVEMENTS
 
-- Update `pkg/crypto`: update asymmetric: RSA -> Kyber768/DilithiumM3
+- Update `pkg/crypto`: update asymmetric: RSA -> ML-KEM768/ML-DSA65
 
 ### CHANGES
 

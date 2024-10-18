@@ -7,7 +7,7 @@ import (
 
 type IListPubKeys interface {
 	AllPubKeys() []IPubKey
-	GetPubKey(ISignPubKey) (IPubKey, bool)
+	GetPubKey(IDSAPubKey) (IPubKey, bool)
 	AddPubKey(IPubKey)
 	DelPubKey(IPubKey)
 }
@@ -16,39 +16,39 @@ type IPrivKey interface {
 	types.IConverter
 
 	GetPubKey() IPubKey
-	GetKEncPrivKey() IKEncPrivKey
-	GetSignPrivKey() ISignPrivKey
+	GetKEMPrivKey() IKEMPrivKey
+	GetDSAPrivKey() IDSAPrivKey
 }
 
 type IPubKey interface {
 	types.IConverter
 	GetHasher() hashing.IHasher
 
-	GetKEncPubKey() IKEncPubKey
-	GetSignPubKey() ISignPubKey
+	GetKEMPubKey() IKEMPubKey
+	GetDSAPubKey() IDSAPubKey
 }
 
-type IKEncPrivKey interface {
+type IKEMPrivKey interface {
 	ToBytes() []byte
-	GetPubKey() IKEncPubKey
+	GetPubKey() IKEMPubKey
 
 	Decapsulate([]byte) ([]byte, error)
 }
 
-type IKEncPubKey interface {
+type IKEMPubKey interface {
 	ToBytes() []byte
 
 	Encapsulate() ([]byte, []byte, error)
 }
 
-type ISignPrivKey interface {
+type IDSAPrivKey interface {
 	ToBytes() []byte
-	GetPubKey() ISignPubKey
+	GetPubKey() IDSAPubKey
 
 	SignBytes([]byte) []byte
 }
 
-type ISignPubKey interface {
+type IDSAPubKey interface {
 	ToBytes() []byte
 
 	VerifyBytes([]byte, []byte) bool

@@ -31,7 +31,7 @@ var (
 		numBytes = encoding.Uint64ToBytes(num + 1)
 		_ = n.SendPayload(
 			ctx,
-			pubKey.GetKEncPubKey(),
+			pubKey.GetKEMPubKey(),
 			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 		)
 		return nil, nil
@@ -73,12 +73,12 @@ func runServiceNode() anonymity.INode {
 	return node
 }
 
-func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEncPubKey, asymmetric.IKEncPubKey) {
+func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEMPubKey, asymmetric.IKEMPubKey) {
 	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
 	node1.GetListPubKeys().AddPubKey(pubKey2)
 	node2.GetListPubKeys().AddPubKey(pubKey1)
 
-	return pubKey1.GetKEncPubKey(), pubKey2.GetKEncPubKey()
+	return pubKey1.GetKEMPubKey(), pubKey2.GetKEMPubKey()
 }

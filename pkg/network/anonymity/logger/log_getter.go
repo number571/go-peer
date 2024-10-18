@@ -39,7 +39,7 @@ func (p *sLogGetter) GetSize() uint64 {
 	return p.fLogBuilder.fSize
 }
 
-func (p *sLogGetter) GetPubKey() asymmetric.ISignPubKey {
+func (p *sLogGetter) GetPubKey() asymmetric.IDSAPubKey {
 	return p.fLogBuilder.fPubKey
 }
 

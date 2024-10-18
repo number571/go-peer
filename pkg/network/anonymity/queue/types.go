@@ -17,7 +17,7 @@ type IQBProblemProcessor interface {
 	GetSettings() ISettings
 	GetClient() client.IClient
 
-	EnqueueMessage(asymmetric.IKEncPubKey, []byte) error
+	EnqueueMessage(asymmetric.IKEMPubKey, []byte) error
 	DequeueMessage(context.Context) net_message.IMessage
 }
 

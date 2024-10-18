@@ -40,13 +40,13 @@ type sMainPool struct {
 type sRandPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
-	fReceiver asymmetric.IKEncPubKey
+	fReceiver asymmetric.IKEMPubKey
 }
 
 func NewQBProblemProcessor(
 	pSettings ISettings,
 	pClient client.IClient,
-	pReceiver asymmetric.IKEncPubKey,
+	pReceiver asymmetric.IKEMPubKey,
 ) IQBProblemProcessor {
 	return &sQBProblemProcessor{
 		fState:    state.NewBoolState(),
@@ -129,7 +129,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.
 	}
 }
 
-func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IKEncPubKey, pBytes []byte) error {
+func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IKEMPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)

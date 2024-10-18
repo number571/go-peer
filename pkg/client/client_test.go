@@ -16,7 +16,7 @@ func TestClient(t *testing.T) {
 		(8 << 10),
 	)
 
-	kemPubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
+	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
 	enc, err := client.EncryptMessage(kemPubKey, msg)
@@ -28,13 +28,13 @@ func TestClient(t *testing.T) {
 	// _ = os.WriteFile("message/test_binary.msg", enc, 0600)
 	// _ = os.WriteFile("message/test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
-	signerPubKey := client.GetPrivKey().GetSignPrivKey().GetPubKey()
-	gotSignPubKey, dec, err := client.DecryptMessage(enc)
+	signerPubKey := client.GetPrivKey().GetDSAPrivKey().GetPubKey()
+	gotDSAPubKey, dec, err := client.DecryptMessage(enc)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if !bytes.Equal(signerPubKey.ToBytes(), gotSignPubKey.ToBytes()) {
+	if !bytes.Equal(signerPubKey.ToBytes(), gotDSAPubKey.ToBytes()) {
 		t.Error("invalid decrypt signer key")
 		return
 	}

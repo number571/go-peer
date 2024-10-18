@@ -23,11 +23,11 @@ func NewListPubKeys() IListPubKeys {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sListPubKeys) GetPubKey(pSignPubKey ISignPubKey) (IPubKey, bool) {
+func (p *sListPubKeys) GetPubKey(pDSAPubKey IDSAPubKey) (IPubKey, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	keychain, ok := p.fMapping[hashkey(pSignPubKey)]
+	keychain, ok := p.fMapping[hashkey(pDSAPubKey)]
 	return keychain, ok
 }
 
@@ -49,7 +49,7 @@ func (p *sListPubKeys) AddPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fMapping[hashkey(pPubKey.GetSignPubKey())] = pPubKey
+	p.fMapping[hashkey(pPubKey.GetDSAPubKey())] = pPubKey
 }
 
 // Delete public key from list of friends.
@@ -57,9 +57,9 @@ func (p *sListPubKeys) DelPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	delete(p.fMapping, hashkey(pPubKey.GetSignPubKey()))
+	delete(p.fMapping, hashkey(pPubKey.GetDSAPubKey()))
 }
 
-func hashkey(pSignPubKey ISignPubKey) string {
-	return hashing.NewHasher(pSignPubKey.ToBytes()).ToString()
+func hashkey(pDSAPubKey IDSAPubKey) string {
+	return hashing.NewHasher(pDSAPubKey.ToBytes()).ToString()
 }

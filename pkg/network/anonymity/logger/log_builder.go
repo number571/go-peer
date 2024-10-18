@@ -15,7 +15,7 @@ type sLogBuilder struct {
 	fHash    []byte
 	fProof   uint64
 	fSize    uint64
-	fPubKey  asymmetric.ISignPubKey
+	fPubKey  asymmetric.IDSAPubKey
 	fConn    conn.IConn
 
 	fGetter ILogGetter
@@ -48,7 +48,7 @@ func (p *sLogBuilder) WithProof(pProof uint64) ILogBuilder {
 	return p
 }
 
-func (p *sLogBuilder) WithPubKey(pPubKey asymmetric.ISignPubKey) ILogBuilder {
+func (p *sLogBuilder) WithPubKey(pPubKey asymmetric.IDSAPubKey) ILogBuilder {
 	p.fPubKey = pPubKey
 	return p
 }

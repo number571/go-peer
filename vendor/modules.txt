@@ -2,16 +2,16 @@
 ## explicit; go 1.22.0
 github.com/cloudflare/circl/internal/sha3
 github.com/cloudflare/circl/kem
-github.com/cloudflare/circl/kem/kyber/kyber768
+github.com/cloudflare/circl/kem/mlkem/mlkem768
 github.com/cloudflare/circl/pke/kyber/internal/common
 github.com/cloudflare/circl/pke/kyber/internal/common/params
 github.com/cloudflare/circl/pke/kyber/kyber768
 github.com/cloudflare/circl/pke/kyber/kyber768/internal
 github.com/cloudflare/circl/sign
-github.com/cloudflare/circl/sign/dilithium/mode3
-github.com/cloudflare/circl/sign/dilithium/mode3/internal
 github.com/cloudflare/circl/sign/internal/dilithium
 github.com/cloudflare/circl/sign/internal/dilithium/params
+github.com/cloudflare/circl/sign/mldsa/mldsa65
+github.com/cloudflare/circl/sign/mldsa/mldsa65/internal
 github.com/cloudflare/circl/simd/keccakf1600
 # github.com/g8rswimmer/error-chain v1.0.0
 ## explicit

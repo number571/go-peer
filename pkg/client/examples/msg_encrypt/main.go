@@ -15,7 +15,7 @@ func main() {
 	)
 
 	msg, err := client1.EncryptMessage(
-		client2.GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		client2.GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(0x0, []byte("hello, world!")).ToBytes(),
 	)
 	if err != nil {

@@ -3,7 +3,7 @@
 package internal
 
 const (
-	Name          = "Dilithium3"
+	Name          = "ML-DSA-65"
 	K             = 6
 	L             = 5
 	Eta           = 4
@@ -12,7 +12,7 @@ const (
 	Tau           = 49
 	Gamma1Bits    = 19
 	Gamma2        = 261888
-	NIST          = false
-	TRSize        = 32
-	CTildeSize    = 32
+	NIST          = true
+	TRSize        = 64
+	CTildeSize    = 48
 )

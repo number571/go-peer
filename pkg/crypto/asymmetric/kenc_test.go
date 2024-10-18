@@ -8,11 +8,11 @@ import (
 func TestKEM(t *testing.T) {
 	t.Parallel()
 
-	privKey := NewKEncPrivKey()
-	privKey = LoadKEncPrivKey(privKey.ToBytes())
+	privKey := NewKEMPrivKey()
+	privKey = LoadKEMPrivKey(privKey.ToBytes())
 
 	pubKey := privKey.GetPubKey()
-	pubKey = LoadKEncPubKey(pubKey.ToBytes())
+	pubKey = LoadKEMPubKey(pubKey.ToBytes())
 
 	ct, ss1, err := pubKey.Encapsulate()
 	if err != nil {

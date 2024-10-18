@@ -102,7 +102,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 			// update logger state
 			p.enrichLogger(logBuilder, netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetSignPrivKey().GetPubKey())
+				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetDSAPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
@@ -143,7 +143,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
-	pRecv asymmetric.IKEncPubKey,
+	pRecv asymmetric.IKEMPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -158,7 +158,7 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv asymmetric.IKEncPubKey,
+	pRecv asymmetric.IKEMPubKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewRandom().GetUint64())
@@ -298,7 +298,7 @@ func (p *sNode) handleResponse(
 	pBody []byte,
 ) {
 	// get session by payload head
-	actionKey := newActionKey(pSender.GetKEncPubKey(), pAction)
+	actionKey := newActionKey(pSender.GetKEMPubKey(), pAction)
 	action, ok := p.getAction(actionKey)
 	if !ok {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
@@ -339,14 +339,14 @@ func (p *sNode) handleRequest(
 	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
 		pLogBuilder,
-		pSender.GetKEncPubKey(),
+		pSender.GetKEMPubKey(),
 		payload.NewPayload64(newHead, resp),
 	)
 }
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv asymmetric.IKEncPubKey,
+	pRecv asymmetric.IKEMPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -357,7 +357,7 @@ func (p *sNode) enqueuePayload(
 		client := p.fQueue.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPrivKey().GetSignPrivKey().GetPubKey()).
+			WithPubKey(client.GetPrivKey().GetDSAPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
@@ -464,7 +464,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey asymmetric.IKEncPubKey, pAction iAction) string {
+func newActionKey(pPubKey asymmetric.IKEMPubKey, pAction iAction) string {
 	pubKeyAddr := hashing.NewHasher(pPubKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

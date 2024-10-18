@@ -121,7 +121,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 				payload.NewPayload32(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -159,7 +159,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err != nil {
@@ -191,7 +191,7 @@ func TestFetchPayload(t *testing.T) {
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -201,7 +201,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -239,7 +239,7 @@ func TestBroadcastPayload(t *testing.T) {
 	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -249,7 +249,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	err1 := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -282,7 +282,7 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey()
+	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody))
@@ -325,7 +325,7 @@ func TestHandleWrapper(t *testing.T) {
 	node := _node.(*sNode)
 	handler := node.networkHandler
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
 
 	node.GetListPubKeys().AddPubKey(client.GetPrivKey().GetPubKey())
 
@@ -454,7 +454,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	msg, err := client.EncryptMessage(
-		client.GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		client.GetPrivKey().GetKEMPrivKey().GetPubKey(),
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -519,7 +519,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
 	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
@@ -729,7 +729,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 				asymmetric.NewPrivKey(),
 				tcMsgSize,
 			),
-			asymmetric.NewKEncPrivKey().GetPubKey(),
+			asymmetric.NewKEMPrivKey().GetPubKey(),
 		),
 		asymmetric.NewListPubKeys(),
 	)

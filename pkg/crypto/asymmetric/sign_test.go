@@ -7,11 +7,11 @@ import (
 func TestSigner(t *testing.T) {
 	t.Parallel()
 
-	privKey := NewSignPrivKey()
-	privKey = LoadSignPrivKey(privKey.ToBytes())
+	privKey := NewDSAPrivKey()
+	privKey = LoadDSAPrivKey(privKey.ToBytes())
 
 	pubKey := privKey.GetPubKey()
-	pubKey = LoadSignPubKey(pubKey.ToBytes())
+	pubKey = LoadDSAPubKey(pubKey.ToBytes())
 
 	msg := []byte("hello, world!")
 	sign := privKey.SignBytes(msg)

@@ -34,7 +34,7 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		fPrivKey:     pPrivKey,
 	}
 
-	kemPubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
+	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
 	encMsg, err := client.encryptWithParams(kemPubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
@@ -68,7 +68,7 @@ func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptMessage(pRecv asymmetric.IKEncPubKey, pMsg []byte) ([]byte, error) {
+func (p *sClient) EncryptMessage(pRecv asymmetric.IKEMPubKey, pMsg []byte) ([]byte, error) {
 	var (
 		payloadLimit = p.GetPayloadLimit()
 		resultSize   = uint64(len(pMsg))
@@ -82,12 +82,12 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IKEncPubKey, pMsg []byte) ([]b
 }
 
 func (p *sClient) encryptWithParams(
-	pRecv asymmetric.IKEncPubKey,
+	pRecv asymmetric.IKEMPubKey,
 	pMsg []byte,
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
-		signer = p.fPrivKey.GetSignPrivKey()
+		signer = p.fPrivKey.GetDSAPrivKey()
 		rand   = random.NewRandom()
 		salt   = rand.GetBytes(cSaltSize)
 	)
@@ -122,14 +122,14 @@ func (p *sClient) encryptWithParams(
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.ISignPubKey, []byte, error) {
+func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, error) {
 	msg, err := message.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
-	kemPrivKey := p.fPrivKey.GetKEncPrivKey()
+	kemPrivKey := p.fPrivKey.GetKEMPrivKey()
 	skey, err := kemPrivKey.Decapsulate(msg.GetEnck())
 	if err != nil {
 		return nil, nil, ErrDecryptCipherKey
@@ -152,7 +152,7 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.ISignPubKey, []byte, e
 	)
 
 	// Load public key and check standart size.
-	signerPubKey := asymmetric.LoadSignPubKey(pkey)
+	signerPubKey := asymmetric.LoadDSAPubKey(pkey)
 	if signerPubKey == nil { // || pubKey.GetSize() != p.GetPubKey().GetSize()
 		return nil, nil, ErrDecodePublicKey
 	}
