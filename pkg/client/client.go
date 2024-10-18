@@ -153,7 +153,7 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, er
 
 	// Load public key and check standart size.
 	signerPubKey := asymmetric.LoadDSAPubKey(pkey)
-	if signerPubKey == nil { // || pubKey.GetSize() != p.GetPubKey().GetSize()
+	if signerPubKey == nil {
 		return nil, nil, ErrDecodePublicKey
 	}
 
