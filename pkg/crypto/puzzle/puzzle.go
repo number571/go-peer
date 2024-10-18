@@ -23,8 +23,8 @@ type sPoWPuzzle struct {
 }
 
 func NewPoWPuzzle(pDiff uint64) IPuzzle {
-	if pDiff >= math.MaxUint8 {
-		panic("diff >= 256")
+	if pDiff > math.MaxUint8 {
+		panic("diff > 256")
 	}
 	return &sPoWPuzzle{
 		fDiff: uint8(pDiff),
