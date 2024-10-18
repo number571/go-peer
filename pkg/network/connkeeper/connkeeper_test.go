@@ -135,7 +135,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 					FMessageSettings: message.NewSettings(&message.SSettings{
 						FWorkSizeBits: 10,
 					}),
-					FLimitMessageSizeBytes: (8 << 10),
+					FLimitMessageSizeBytes: (10 << 10),
 					FWaitReadTimeout:       time.Hour,
 					FDialTimeout:           time.Minute,
 					FReadTimeout:           time.Minute,

@@ -18,7 +18,7 @@ import (
 
 const (
 	tcQueueCap = 16
-	tcMsgSize  = (8 << 10)
+	tcMsgSize  = (10 << 10)
 	tcMsgBody  = "hello, world!"
 )
 

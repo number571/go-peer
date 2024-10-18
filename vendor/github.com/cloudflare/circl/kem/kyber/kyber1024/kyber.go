@@ -1,11 +1,11 @@
 // Code generated from pkg.templ.go. DO NOT EDIT.
 
-// Package kyber768 implements the IND-CCA2 secure key encapsulation mechanism
-// Kyber768.CCAKEM as submitted to round 3 of the NIST PQC competition and
+// Package kyber1024 implements the IND-CCA2 secure key encapsulation mechanism
+// Kyber1024.CCAKEM as submitted to round 3 of the NIST PQC competition and
 // described in
 //
 // https://pq-crystals.org/kyber/data/kyber-specification-round3.pdf
-package kyber768
+package kyber1024
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	cryptoRand "crypto/rand"
 	"github.com/cloudflare/circl/internal/sha3"
 	"github.com/cloudflare/circl/kem"
-	cpapke "github.com/cloudflare/circl/pke/kyber/kyber768"
+	cpapke "github.com/cloudflare/circl/pke/kyber/kyber1024"
 )
 
 const (
@@ -38,14 +38,14 @@ const (
 	PrivateKeySize = cpapke.PrivateKeySize + cpapke.PublicKeySize + 64
 )
 
-// Type of a Kyber768.CCAKEM public key
+// Type of a Kyber1024.CCAKEM public key
 type PublicKey struct {
 	pk *cpapke.PublicKey
 
 	hpk [32]byte // H(pk)
 }
 
-// Type of a Kyber768.CCAKEM private key
+// Type of a Kyber1024.CCAKEM private key
 type PrivateKey struct {
 	sk  *cpapke.PrivateKey
 	pk  *cpapke.PublicKey
@@ -270,7 +270,7 @@ var sch kem.Scheme = &scheme{}
 // Scheme returns a KEM interface.
 func Scheme() kem.Scheme { return sch }
 
-func (*scheme) Name() string               { return "Kyber768" }
+func (*scheme) Name() string               { return "Kyber1024" }
 func (*scheme) PublicKeySize() int         { return PublicKeySize }
 func (*scheme) PrivateKeySize() int        { return PrivateKeySize }
 func (*scheme) SeedSize() int              { return KeySeedSize }

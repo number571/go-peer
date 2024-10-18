@@ -17,7 +17,7 @@ type sHMACSHA512Hasher struct {
 }
 
 func NewHMACHasher(pKey []byte, pData []byte) IHasher {
-	h := hmac.New(sha512.New, pKey)
+	h := hmac.New(sha512.New384, pKey)
 	h.Write(pData)
 	s := h.Sum(nil)
 	return &sHMACSHA512Hasher{

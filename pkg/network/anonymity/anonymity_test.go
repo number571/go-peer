@@ -34,7 +34,7 @@ const (
 	tcWorkSize       = 10
 	tcHead           = 123
 	tcQueueCap       = 16
-	tcMsgSize        = (8 << 10)
+	tcMsgSize        = (10 << 10)
 	tcMsgBody        = "hello, world!"
 )
 

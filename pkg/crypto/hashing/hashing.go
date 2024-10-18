@@ -11,7 +11,7 @@ var (
 )
 
 const (
-	CHasherSize = sha512.Size
+	CHasherSize = sha512.Size384
 )
 
 type sSHA512Hasher struct {
@@ -20,7 +20,7 @@ type sSHA512Hasher struct {
 }
 
 func NewHasher(pData []byte) IHasher {
-	h := sha512.New()
+	h := sha512.New384()
 	h.Write(pData)
 	s := h.Sum(nil)
 	return &sSHA512Hasher{
