@@ -32,7 +32,7 @@ func BenchmarkClient(b *testing.B) {
 	}{
 		{
 			name:   "kyber=1024-bit,dilithium=mode5",
-			client: NewClient(privKeyChain, (10 << 10)),
+			client: NewClient(privKeyChain, (8 << 10)),
 		},
 	}
 

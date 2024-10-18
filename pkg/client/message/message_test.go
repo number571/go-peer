@@ -66,7 +66,7 @@ func TestInvalidMessage(t *testing.T) {
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
-	msgSize := uint64(10 << 10)
+	msgSize := uint64(8 << 10)
 
 	msg1, err := LoadMessage(msgSize, tgBinaryMessage)
 	if err != nil {

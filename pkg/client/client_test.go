@@ -13,7 +13,7 @@ func TestClient(t *testing.T) {
 
 	client := NewClient(
 		asymmetric.NewPrivKey(),
-		(10 << 10),
+		(8 << 10),
 	)
 
 	kemPubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()

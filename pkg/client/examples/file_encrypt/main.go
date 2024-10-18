@@ -23,6 +23,6 @@ func main() {
 func newClient() client.IClient {
 	return client.NewClient(
 		asymmetric.NewPrivKey(),
-		(10 << 10),
+		(8 << 10),
 	)
 }
