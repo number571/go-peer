@@ -12,19 +12,22 @@ var (
 )
 
 type sHMACSHA512Hasher struct {
-	fHash []byte
+	fHash    []byte
+	fHashStr string
 }
 
 func NewHMACHasher(pKey []byte, pData []byte) IHasher {
 	h := hmac.New(sha512.New, pKey)
 	h.Write(pData)
+	s := h.Sum(nil)
 	return &sHMACSHA512Hasher{
-		fHash: h.Sum(nil),
+		fHash:    s,
+		fHashStr: encoding.HexEncode(s),
 	}
 }
 
 func (p *sHMACSHA512Hasher) ToString() string {
-	return encoding.HexEncode(p.ToBytes())
+	return p.fHashStr
 }
 
 func (p *sHMACSHA512Hasher) ToBytes() []byte {

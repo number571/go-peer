@@ -12,14 +12,11 @@ func TestClient(t *testing.T) {
 	t.Parallel()
 
 	client := NewClient(
-		asymmetric.NewPrivKeyChain(
-			asymmetric.NewKEncPrivKey(),
-			asymmetric.NewSignPrivKey(),
-		),
+		asymmetric.NewPrivKey(),
 		(8 << 10),
 	)
 
-	kemPubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	kemPubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
 	enc, err := client.EncryptMessage(kemPubKey, msg)
@@ -31,7 +28,7 @@ func TestClient(t *testing.T) {
 	// os.WriteFile("test_binary.msg", enc, 0600)
 	// os.WriteFile("test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
-	signerPubKey := client.GetPrivKeyChain().GetSignPrivKey().GetPubKey()
+	signerPubKey := client.GetPrivKey().GetSignPrivKey().GetPubKey()
 	gotSignPubKey, dec, err := client.DecryptMessage(enc)
 	if err != nil {
 		t.Error(err)
@@ -46,6 +43,6 @@ func TestClient(t *testing.T) {
 		return
 	}
 
-	// fmt.Println(client.GetMessageLimit())
-	// fmt.Println(len(client.GetPrivKeyChain().GetPubKeyChain().ToString()))
+	// fmt.Println(client.GetPayloadLimit(), client.GetMessageSize())
+	// fmt.Println(len(client.GetPrivKey().GetPubKey().ToString()))
 }

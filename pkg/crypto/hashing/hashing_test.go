@@ -1,8 +1,11 @@
 package hashing
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
-func TestSHA256(t *testing.T) {
+func TestHasher(t *testing.T) {
 	t.Parallel()
 
 	msg := []byte("hello, world!")
@@ -18,9 +21,11 @@ func TestSHA256(t *testing.T) {
 		t.Error("bit didn't change the result ")
 		return
 	}
+
+	fmt.Println(hash)
 }
 
-func TestHMACSHA256(t *testing.T) {
+func TestHMACSHasher(t *testing.T) {
 	t.Parallel()
 
 	key := []byte("secret key")

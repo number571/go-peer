@@ -44,7 +44,7 @@ func runServiceNode() anonymity.INode {
 	ctx := context.Background()
 	node := newNode("snode", nodeAddress).HandleFunc(
 		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKeyChain, b []byte) ([]byte, error) {
+		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: %s", string(b))), nil
 		},
 	)
@@ -57,11 +57,11 @@ func runServiceNode() anonymity.INode {
 }
 
 func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEncPubKey, asymmetric.IKEncPubKey) {
-	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
-	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
+	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
-	node1.GetListPubKeyChains().AddPubKeyChain(pubKey2)
-	node2.GetListPubKeyChains().AddPubKeyChain(pubKey1)
+	node1.GetListPubKeys().AddPubKey(pubKey2)
+	node2.GetListPubKeys().AddPubKey(pubKey1)
 
 	return pubKey1.GetKEncPubKey(), pubKey2.GetKEncPubKey()
 }

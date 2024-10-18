@@ -31,10 +31,7 @@ func main() {
 			FRandPoolCapacity: 1 << 5,
 		}),
 		client.NewClient(
-			asymmetric.NewPrivKeyChain(
-				asymmetric.NewKEncPrivKey(),
-				asymmetric.NewSignPrivKey(),
-			),
+			asymmetric.NewPrivKey(),
 			(8<<10),
 		),
 		asymmetric.NewKEncPrivKey().GetPubKey(),
@@ -51,7 +48,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+			q.GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -79,7 +76,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKeyChain().GetSignPrivKey().GetPubKey().ToBytes()) {
+		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetSignPrivKey().GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

@@ -9,7 +9,7 @@ var (
 	tgKey = []byte("it is a large key with 256 bits!")
 )
 
-func TestAESKeySize(t *testing.T) {
+func TestKeySize(t *testing.T) {
 	t.Parallel()
 
 	defer func() {
@@ -21,7 +21,7 @@ func TestAESKeySize(t *testing.T) {
 	_ = NewCipher([]byte{123})
 }
 
-func TestAESEncrypt(t *testing.T) {
+func TestEncrypt(t *testing.T) {
 	t.Parallel()
 
 	var (

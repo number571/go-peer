@@ -16,36 +16,40 @@ const (
 )
 
 var (
-	_ IPrivKeyChain = &sPrivKeyChain{}
-	_ IPubKeyChain  = &sPubKeyChain{}
+	_ IPrivKey = &sPrivKey{}
+	_ IPubKey  = &sPubKey{}
 )
 
-type sPrivKeyChain struct {
-	fKEM         IKEncPrivKey
-	fSigner      ISignPrivKey
-	fPubKeyChain IPubKeyChain
+type sPrivKey struct {
+	fKEM    IKEncPrivKey
+	fSigner ISignPrivKey
+	fPubKey IPubKey
 }
 
-type sPubKeyChain struct {
+type sPubKey struct {
 	fKEM    IKEncPubKey
 	fSigner ISignPubKey
 	fHasher hashing.IHasher
 }
 
-func NewPrivKeyChain(pKEM IKEncPrivKey, pSigner ISignPrivKey) IPrivKeyChain {
-	return &sPrivKeyChain{
-		fKEM:         pKEM,
-		fSigner:      pSigner,
-		fPubKeyChain: NewPubKeyChain(pKEM.GetPubKey(), pSigner.GetPubKey()),
+func NewPrivKey() IPrivKey {
+	return newPrivKey(NewKEncPrivKey(), NewSignPrivKey())
+}
+
+func newPrivKey(pKEM IKEncPrivKey, pSign ISignPrivKey) IPrivKey {
+	return &sPrivKey{
+		fKEM:    pKEM,
+		fSigner: pSign,
+		fPubKey: NewPubKey(pKEM.GetPubKey(), pSign.GetPubKey()),
 	}
 }
 
-func (p *sPrivKeyChain) GetPubKeyChain() IPubKeyChain {
-	return p.fPubKeyChain
+func (p *sPrivKey) GetPubKey() IPubKey {
+	return p.fPubKey
 }
 
-func LoadPrivKeyChain(pKeychain interface{}) IPrivKeyChain {
-	pKeychainBytes := []byte{}
+func LoadPrivKey(pKeychain interface{}) IPrivKey {
+	keychainBytes := []byte{} // nolint: staticcheck
 
 	switch x := pKeychain.(type) {
 	case string:
@@ -58,48 +62,48 @@ func LoadPrivKeyChain(pKeychain interface{}) IPrivKeyChain {
 			return nil
 		}
 		s = strings.TrimSuffix(s, cKeySuffix)
-		pKeychainBytes = encoding.HexDecode(s)
+		keychainBytes = encoding.HexDecode(s)
 	case []byte:
-		pKeychainBytes = x
+		keychainBytes = x
 	default:
 		panic("unknown type private key chain")
 	}
 
-	if len(pKeychainBytes) != (CKEncPrivKeySize + CSignPrivKeySize) {
+	if len(keychainBytes) != (CKEncPrivKeySize + CSignPrivKeySize) {
 		return nil
 	}
 
-	kemPrivKey := LoadKEncPrivKey(pKeychainBytes[:CKEncPrivKeySize])
+	kemPrivKey := LoadKEncPrivKey(keychainBytes[:CKEncPrivKeySize])
 	if kemPrivKey == nil {
 		return nil
 	}
 
-	signerPrivKey := LoadSignPrivKey(pKeychainBytes[CKEncPrivKeySize:])
+	signerPrivKey := LoadSignPrivKey(keychainBytes[CKEncPrivKeySize:])
 	if signerPrivKey == nil {
 		return nil
 	}
 
-	return NewPrivKeyChain(kemPrivKey, signerPrivKey)
+	return newPrivKey(kemPrivKey, signerPrivKey)
 }
 
-func (p *sPrivKeyChain) ToBytes() []byte {
+func (p *sPrivKey) ToBytes() []byte {
 	return bytes.Join([][]byte{p.fKEM.ToBytes(), p.fSigner.ToBytes()}, []byte{})
 }
 
-func (p *sPrivKeyChain) ToString() string {
+func (p *sPrivKey) ToString() string {
 	return fmt.Sprintf("%s%X%s", cPrivKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
-func (p *sPrivKeyChain) GetKEncPrivKey() IKEncPrivKey {
+func (p *sPrivKey) GetKEncPrivKey() IKEncPrivKey {
 	return p.fKEM
 }
 
-func (p *sPrivKeyChain) GetSignPrivKey() ISignPrivKey {
+func (p *sPrivKey) GetSignPrivKey() ISignPrivKey {
 	return p.fSigner
 }
 
-func NewPubKeyChain(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKeyChain {
-	pubKeyChain := &sPubKeyChain{
+func NewPubKey(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKey {
+	pubKeyChain := &sPubKey{
 		fKEM:    pKEM,
 		fSigner: pSigner,
 	}
@@ -107,8 +111,8 @@ func NewPubKeyChain(pKEM IKEncPubKey, pSigner ISignPubKey) IPubKeyChain {
 	return pubKeyChain
 }
 
-func LoadPubKeyChain(pKeychain interface{}) IPubKeyChain {
-	pKeychainBytes := []byte{}
+func LoadPubKey(pKeychain interface{}) IPubKey {
+	keychainBytes := []byte{} // nolint: staticcheck
 
 	switch x := pKeychain.(type) {
 	case string:
@@ -121,47 +125,47 @@ func LoadPubKeyChain(pKeychain interface{}) IPubKeyChain {
 			return nil
 		}
 		s = strings.TrimSuffix(s, cKeySuffix)
-		pKeychainBytes = encoding.HexDecode(s)
+		keychainBytes = encoding.HexDecode(s)
 	case []byte:
-		pKeychainBytes = x
+		keychainBytes = x
 	default:
 		panic("unknown type public key chain")
 	}
 
-	if len(pKeychainBytes) != (CKEncPubKeySize + CSignPubKeySize) {
+	if len(keychainBytes) != (CKEncPubKeySize + CSignPubKeySize) {
 		return nil
 	}
 
-	kemPubKey := LoadKEncPubKey(pKeychainBytes[:CKEncPubKeySize])
+	kemPubKey := LoadKEncPubKey(keychainBytes[:CKEncPubKeySize])
 	if kemPubKey == nil {
 		return nil
 	}
 
-	signerPubKey := LoadSignPubKey(pKeychainBytes[CKEncPubKeySize:])
+	signerPubKey := LoadSignPubKey(keychainBytes[CKEncPubKeySize:])
 	if signerPubKey == nil {
 		return nil
 	}
 
-	return NewPubKeyChain(kemPubKey, signerPubKey)
+	return NewPubKey(kemPubKey, signerPubKey)
 }
 
-func (p *sPubKeyChain) GetHasher() hashing.IHasher {
+func (p *sPubKey) GetHasher() hashing.IHasher {
 	return p.fHasher
 }
 
-func (p *sPubKeyChain) ToBytes() []byte {
+func (p *sPubKey) ToBytes() []byte {
 	return bytes.Join([][]byte{p.fKEM.ToBytes(), p.fSigner.ToBytes()}, []byte{})
 }
 
-func (p *sPubKeyChain) ToString() string {
+func (p *sPubKey) ToString() string {
 	return fmt.Sprintf("%s%X%s", cPubKeyPrefix, p.ToBytes(), cKeySuffix)
 }
 
-func (p *sPubKeyChain) GetKEncPubKey() IKEncPubKey {
+func (p *sPubKey) GetKEncPubKey() IKEncPubKey {
 	return p.fKEM
 }
 
-func (p *sPubKeyChain) GetSignPubKey() ISignPubKey {
+func (p *sPubKey) GetSignPubKey() ISignPubKey {
 	return p.fSigner
 }
 

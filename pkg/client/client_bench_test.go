@@ -13,28 +13,25 @@ goos: linux
 goarch: amd64
 pkg: github.com/number571/go-peer/pkg/client
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkClient/key=768-bit-12              1000            130936 ns/op
---- BENCH: BenchmarkClient/key=768-bit-12
-    client_bench_test.go:76: Timer_Encrypt(N=1): 262.661µs
-    client_bench_test.go:89: Timer_Decrypt(N=1): 177.422µs
-    client_bench_test.go:76: Timer_Encrypt(N=1000): 232.488768ms
-    client_bench_test.go:89: Timer_Decrypt(N=1000): 130.916195ms
+BenchmarkClient/kyber=1024-bit,dilithium=mode5-12                   1000            202959 ns/op
+--- BENCH: BenchmarkClient/kyber=1024-bit,dilithium=mode5-12
+    client_bench_test.go:69: Timer_Encrypt(N=1): 408.06µs
+    client_bench_test.go:82: Timer_Decrypt(N=1): 303.304µs
+    client_bench_test.go:69: Timer_Encrypt(N=1000): 311.165267ms
+    client_bench_test.go:82: Timer_Decrypt(N=1000): 202.925571ms
 PASS
 */
 
-// go test -bench=BenchmarkClient -benchtime=100x -timeout 99999s
+// go test -bench=BenchmarkClient -benchtime=1000x -timeout 99999s
 func BenchmarkClient(b *testing.B) {
-	privKeyChain := asymmetric.NewPrivKeyChain(
-		asymmetric.NewKEncPrivKey(),
-		asymmetric.NewSignPrivKey(),
-	)
+	privKeyChain := asymmetric.NewPrivKey()
 
 	benchTable := []struct {
 		name   string
 		client IClient
 	}{
 		{
-			name:   "kyber=768-bit,dilithium=mode3",
+			name:   "kyber=1024-bit,dilithium=mode5",
 			client: NewClient(privKeyChain, (8 << 10)),
 		},
 	}
@@ -55,7 +52,7 @@ func BenchmarkClient(b *testing.B) {
 			nowEnc := time.Now()
 			for i := 0; i < b.N; i++ {
 				encMsg, err := t.client.EncryptMessage(
-					t.client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+					t.client.GetPrivKey().GetKEncPrivKey().GetPubKey(),
 					randomBytes[i],
 				)
 				if err != nil {

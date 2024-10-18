@@ -86,10 +86,7 @@ func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
 	client := client.NewClient(
-		asymmetric.NewPrivKeyChain(
-			asymmetric.NewKEncPrivKey(),
-			asymmetric.NewSignPrivKey(),
-		),
+		asymmetric.NewPrivKey(),
 		tcMsgSize,
 	)
 	queue := NewQBProblemProcessor(
@@ -138,7 +135,7 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	for i := 0; i < tcQueueCap; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
@@ -174,10 +171,7 @@ func TestQueue(t *testing.T) {
 			FRandQueuePeriod:  100 * time.Millisecond,
 		}),
 		client.NewClient(
-			asymmetric.NewPrivKeyChain(
-				asymmetric.NewKEncPrivKey(),
-				asymmetric.NewSignPrivKey(),
-			),
+			asymmetric.NewPrivKey(),
 			tcMsgSize,
 		),
 		asymmetric.NewKEncPrivKey().GetPubKey(),
@@ -209,7 +203,7 @@ func testQueue(queue IQBProblemProcessor) error {
 	}()
 
 	client := queue.GetClient()
-	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err

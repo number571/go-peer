@@ -16,7 +16,7 @@ import (
 type IHandlerF func(
 	context.Context,
 	INode,
-	asymmetric.IPubKeyChain,
+	asymmetric.IPubKey,
 	[]byte,
 ) ([]byte, error)
 
@@ -29,7 +29,7 @@ type INode interface {
 	GetKVDatabase() database.IKVDatabase
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IQBProblemProcessor
-	GetListPubKeyChains() asymmetric.IListPubKeyChains
+	GetListPubKeys() asymmetric.IListPubKeys
 
 	SendPayload(context.Context, asymmetric.IKEncPubKey, payload.IPayload64) error
 	FetchPayload(context.Context, asymmetric.IKEncPubKey, payload.IPayload32) ([]byte, error)

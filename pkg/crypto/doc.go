@@ -1,4 +1,5 @@
-// Package crypto represents wrapper functions and interfaces over cryptographic primitives.
+// Package crypto represents wrapper functions and interfaces over cryptographic primitives
+// with hardcode 192-bit security.
 //
 // A package consists of many sub-packages:
 // 1. quantum - asymmetric KEM, message signing,

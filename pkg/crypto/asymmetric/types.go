@@ -5,22 +5,22 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IListPubKeyChains interface {
-	AllPubKeyChains() []IPubKeyChain
-	GetPubKeyChain(ISignPubKey) (IPubKeyChain, bool)
-	AddPubKeyChain(IPubKeyChain)
-	DelPubKeyChain(IPubKeyChain)
+type IListPubKeys interface {
+	AllPubKeys() []IPubKey
+	GetPubKey(ISignPubKey) (IPubKey, bool)
+	AddPubKey(IPubKey)
+	DelPubKey(IPubKey)
 }
 
-type IPrivKeyChain interface {
+type IPrivKey interface {
 	types.IConverter
 
-	GetPubKeyChain() IPubKeyChain
+	GetPubKey() IPubKey
 	GetKEncPrivKey() IKEncPrivKey
 	GetSignPrivKey() ISignPrivKey
 }
 
-type IPubKeyChain interface {
+type IPubKey interface {
 	types.IConverter
 	GetHasher() hashing.IHasher
 

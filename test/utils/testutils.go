@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	_ "embed"
 	"math/rand"
 	"time"
 )

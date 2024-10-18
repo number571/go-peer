@@ -21,20 +21,20 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fPrivKeyChain asymmetric.IPrivKeyChain
-	fMessageSize  uint64
-	fStructSize   uint64
+	fPrivKey     asymmetric.IPrivKey
+	fMessageSize uint64
+	fStructSize  uint64
 }
 
 // Create client by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(pPrivKeyChain asymmetric.IPrivKeyChain, pMessageSize uint64) IClient {
+func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 	client := &sClient{
-		fMessageSize:  pMessageSize,
-		fPrivKeyChain: pPrivKeyChain,
+		fMessageSize: pMessageSize,
+		fPrivKey:     pPrivKey,
 	}
 
-	kemPubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	kemPubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 	encMsg, err := client.encryptWithParams(kemPubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
@@ -62,8 +62,8 @@ func (p *sClient) GetPayloadLimit() uint64 {
 }
 
 // Get private key from client object.
-func (p *sClient) GetPrivKeyChain() asymmetric.IPrivKeyChain {
-	return p.fPrivKeyChain
+func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
+	return p.fPrivKey
 }
 
 // Encrypt message with public key of receiver.
@@ -87,7 +87,7 @@ func (p *sClient) encryptWithParams(
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
-		signer = p.fPrivKeyChain.GetSignPrivKey()
+		signer = p.fPrivKey.GetSignPrivKey()
 		rand   = random.NewRandom()
 		salt   = rand.GetBytes(cSaltSize)
 	)
@@ -129,7 +129,7 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.ISignPubKey, []byte, e
 	}
 
 	// Decrypt session key by private key of receiver.
-	kemPrivKey := p.fPrivKeyChain.GetKEncPrivKey()
+	kemPrivKey := p.fPrivKey.GetKEncPrivKey()
 	skey, err := kemPrivKey.Decapsulate(msg.GetEnck())
 	if err != nil {
 		return nil, nil, ErrDecryptCipherKey

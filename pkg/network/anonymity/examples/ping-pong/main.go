@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKeyChain, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKey, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 
@@ -74,11 +74,11 @@ func runServiceNode() anonymity.INode {
 }
 
 func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEncPubKey, asymmetric.IKEncPubKey) {
-	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
-	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain()
+	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
-	node1.GetListPubKeyChains().AddPubKeyChain(pubKey2)
-	node2.GetListPubKeyChains().AddPubKeyChain(pubKey1)
+	node1.GetListPubKeys().AddPubKey(pubKey2)
+	node2.GetListPubKeys().AddPubKey(pubKey1)
 
 	return pubKey1.GetKEncPubKey(), pubKey2.GetKEncPubKey()
 }

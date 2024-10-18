@@ -14,6 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/anonymity/queue"
@@ -35,7 +36,6 @@ const (
 	tcQueueCap       = 16
 	tcMsgSize        = (8 << 10)
 	tcMsgBody        = "hello, world!"
-	tcLargeBody      = "abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc"
 )
 
 func TestError(t *testing.T) {
@@ -121,7 +121,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
 				payload.NewPayload32(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -151,15 +151,15 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], cancels[:], 1)
 
-	nodes[0].GetListPubKeyChains().DelPubKeyChain(nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
-	nodes[1].GetListPubKeyChains().DelPubKeyChain(nodes[0].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
+	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
 
 	ctx := context.Background()
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err != nil {
@@ -182,16 +182,17 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		tcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
 
+	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload32(tcHead, []byte(tcLargeBody)),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
 		t.Error("success fetch payload with large body")
@@ -200,7 +201,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -228,17 +229,18 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		tcHead,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
 		},
 	)
 
+	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
-		payload.NewPayload64(uint64(tcHead), []byte(tcLargeBody)),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
+		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
 		t.Error("success broadcast payload with large body")
@@ -247,7 +249,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	err1 := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -280,7 +282,7 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEncPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody))
@@ -323,9 +325,9 @@ func TestHandleWrapper(t *testing.T) {
 	node := _node.(*sNode)
 	handler := node.networkHandler
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 
-	node.GetListPubKeyChains().AddPubKeyChain(client.GetPrivKeyChain().GetPubKeyChain())
+	node.GetListPubKeys().AddPubKey(client.GetPrivKey().GetPubKey())
 
 	ctx := context.Background()
 	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
@@ -369,7 +371,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	node.HandleFunc(
 		111,
-		func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error")
 		},
 	)
@@ -452,7 +454,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	msg, err := client.EncryptMessage(
-		client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+		client.GetPrivKey().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -517,7 +519,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKeyChain().GetKEncPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetKEncPrivKey().GetPubKey()
 	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
@@ -589,13 +591,13 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}
 
-	nodes[0].GetListPubKeyChains().AddPubKeyChain(nodes[1].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
-	nodes[1].GetListPubKeyChains().AddPubKeyChain(nodes[0].GetMessageQueue().GetClient().GetPrivKeyChain().GetPubKeyChain())
+	nodes[0].GetListPubKeys().AddPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	nodes[1].GetListPubKeys().AddPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
 
 	for _, node := range nodes {
 		node.HandleFunc(
 			tcHead,
-			func(_ context.Context, _ INode, _ asymmetric.IPubKeyChain, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ asymmetric.IPubKey, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
 			},
@@ -724,15 +726,12 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 				FQueuePeriod:      time.Second,
 			}),
 			client.NewClient(
-				asymmetric.NewPrivKeyChain(
-					asymmetric.NewKEncPrivKey(),
-					asymmetric.NewSignPrivKey(),
-				),
+				asymmetric.NewPrivKey(),
 				tcMsgSize,
 			),
 			asymmetric.NewKEncPrivKey().GetPubKey(),
 		),
-		asymmetric.NewListPubKeyChains(),
+		asymmetric.NewListPubKeys(),
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()

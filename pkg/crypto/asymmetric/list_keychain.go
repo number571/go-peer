@@ -7,23 +7,23 @@ import (
 )
 
 var (
-	_ IListPubKeyChains = &sListPubKeyChains{}
+	_ IListPubKeys = &sListPubKeys{}
 )
 
 // F2F connection mode.
-type sListPubKeyChains struct {
+type sListPubKeys struct {
 	fMutex   sync.RWMutex
-	fMapping map[string]IPubKeyChain
+	fMapping map[string]IPubKey
 }
 
-func NewListPubKeyChains() IListPubKeyChains {
-	return &sListPubKeyChains{
-		fMapping: make(map[string]IPubKeyChain),
+func NewListPubKeys() IListPubKeys {
+	return &sListPubKeys{
+		fMapping: make(map[string]IPubKey),
 	}
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sListPubKeyChains) GetPubKeyChain(pSignPubKey ISignPubKey) (IPubKeyChain, bool) {
+func (p *sListPubKeys) GetPubKey(pSignPubKey ISignPubKey) (IPubKey, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
@@ -32,11 +32,11 @@ func (p *sListPubKeyChains) GetPubKeyChain(pSignPubKey ISignPubKey) (IPubKeyChai
 }
 
 // Get a list of friends public keys.
-func (p *sListPubKeyChains) AllPubKeyChains() []IPubKeyChain {
+func (p *sListPubKeys) AllPubKeys() []IPubKey {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	list := make([]IPubKeyChain, 0, len(p.fMapping))
+	list := make([]IPubKey, 0, len(p.fMapping))
 	for _, pub := range p.fMapping {
 		list = append(list, pub)
 	}
@@ -45,19 +45,19 @@ func (p *sListPubKeyChains) AllPubKeyChains() []IPubKeyChain {
 }
 
 // Add public key to list of friends.
-func (p *sListPubKeyChains) AddPubKeyChain(pPubKeyChain IPubKeyChain) {
+func (p *sListPubKeys) AddPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	p.fMapping[hashkey(pPubKeyChain.GetSignPubKey())] = pPubKeyChain
+	p.fMapping[hashkey(pPubKey.GetSignPubKey())] = pPubKey
 }
 
 // Delete public key from list of friends.
-func (p *sListPubKeyChains) DelPubKeyChain(pPubKeyChain IPubKeyChain) {
+func (p *sListPubKeys) DelPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	delete(p.fMapping, hashkey(pPubKeyChain.GetSignPubKey()))
+	delete(p.fMapping, hashkey(pPubKey.GetSignPubKey()))
 }
 
 func hashkey(pSignPubKey ISignPubKey) string {

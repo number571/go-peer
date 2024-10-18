@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestPrivKeyChain(t *testing.T) {
+func TestPrivKey(t *testing.T) {
 	t.Parallel()
 
 	kemPrivKey := NewKEncPrivKey()
 	signerPrivKey := NewSignPrivKey()
 
-	keychain := NewPrivKeyChain(kemPrivKey, signerPrivKey)
+	keychain := newPrivKey(kemPrivKey, signerPrivKey)
 	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEncPrivKey().ToBytes()) {
 		t.Error("invalid kem priv key (1)")
 	}
@@ -19,7 +19,7 @@ func TestPrivKeyChain(t *testing.T) {
 		t.Error("invalid signer priv key (1)")
 	}
 
-	keychain = LoadPrivKeyChain(keychain.ToString())
+	keychain = LoadPrivKey(keychain.ToString())
 	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEncPrivKey().ToBytes()) {
 		t.Error("invalid kem priv key (2)")
 	}
@@ -27,16 +27,16 @@ func TestPrivKeyChain(t *testing.T) {
 		t.Error("invalid signer priv key (2)")
 	}
 
-	// fmt.Println(keychain.ToString())
+	// fmt.Println("priv.key", len(keychain.ToString()))
 }
 
-func TestPubKeyChain(t *testing.T) {
+func TestPubKey(t *testing.T) {
 	t.Parallel()
 
 	kemPubKey := NewKEncPrivKey().GetPubKey()
 	signerPubKey := NewSignPrivKey().GetPubKey()
 
-	keychain := NewPubKeyChain(kemPubKey, signerPubKey)
+	keychain := NewPubKey(kemPubKey, signerPubKey)
 	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEncPubKey().ToBytes()) {
 		t.Error("invalid kem pub key (1)")
 	}
@@ -44,7 +44,7 @@ func TestPubKeyChain(t *testing.T) {
 		t.Error("invalid signer pub key (1)")
 	}
 
-	keychain = LoadPubKeyChain(keychain.ToString())
+	keychain = LoadPubKey(keychain.ToString())
 	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEncPubKey().ToBytes()) {
 		t.Error("invalid kem pub key (2)")
 	}
@@ -52,5 +52,5 @@ func TestPubKeyChain(t *testing.T) {
 		t.Error("invalid signer pub key (2)")
 	}
 
-	// fmt.Println(keychain.ToString())
+	// fmt.Println("pub.key", len(keychain.ToString()))
 }

@@ -100,14 +100,11 @@ func newNode(serviceName, address string) anonymity.INode {
 				FRandPoolCapacity: 32,
 			}),
 			client.NewClient(
-				asymmetric.NewPrivKeyChain(
-					asymmetric.NewKEncPrivKey(),
-					asymmetric.NewSignPrivKey(),
-				),
+				asymmetric.NewPrivKey(),
 				msgSize,
 			),
 			asymmetric.NewKEncPrivKey().GetPubKey(),
 		),
-		asymmetric.NewListPubKeyChains(),
+		asymmetric.NewListPubKeys(),
 	)
 }

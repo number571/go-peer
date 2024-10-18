@@ -15,7 +15,7 @@ func main() {
 	)
 
 	msg, err := client1.EncryptMessage(
-		client2.GetPrivKeyChain().GetKEncPrivKey().GetPubKey(),
+		client2.GetPrivKey().GetKEncPrivKey().GetPubKey(),
 		payload.NewPayload64(0x0, []byte("hello, world!")).ToBytes(),
 	)
 	if err != nil {
@@ -34,10 +34,7 @@ func main() {
 
 func newClient() client.IClient {
 	return client.NewClient(
-		asymmetric.NewPrivKeyChain(
-			asymmetric.NewKEncPrivKey(),
-			asymmetric.NewSignPrivKey(),
-		),
+		asymmetric.NewPrivKey(),
 		(8 << 10),
 	)
 }

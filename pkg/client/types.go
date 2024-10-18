@@ -8,7 +8,7 @@ type IClient interface {
 	GetMessageSize() uint64
 	GetPayloadLimit() uint64
 
-	GetPrivKeyChain() asymmetric.IPrivKeyChain
+	GetPrivKey() asymmetric.IPrivKey
 
 	EncryptMessage(asymmetric.IKEncPubKey, []byte) ([]byte, error)
 	DecryptMessage([]byte) (asymmetric.ISignPubKey, []byte, error)

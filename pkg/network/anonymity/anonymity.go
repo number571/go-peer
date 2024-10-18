@@ -36,7 +36,7 @@ type sNode struct {
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
-	fFriends       asymmetric.IListPubKeyChains
+	fFriends       asymmetric.IListPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -47,7 +47,7 @@ func NewNode(
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
-	pFriends asymmetric.IListPubKeyChains,
+	pFriends asymmetric.IListPubKeys,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -102,7 +102,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 			// update logger state
 			p.enrichLogger(logBuilder, netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPrivKeyChain().GetSignPrivKey().GetPubKey())
+				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetSignPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
@@ -131,7 +131,7 @@ func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetListPubKeyChains() asymmetric.IListPubKeyChains {
+func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
 	return p.fFriends
 }
 
@@ -247,7 +247,7 @@ func (p *sNode) networkHandler(
 	logBuilder.WithPubKey(sender)
 
 	// check sender's public key in f2f list
-	keychain, ok := p.fFriends.GetPubKeyChain(sender)
+	keychain, ok := p.fFriends.GetPubKey(sender)
 	if !ok {
 		// ignore reading message from unknown public key
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
@@ -269,7 +269,7 @@ func (p *sNode) networkHandler(
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKeyChain,
+	pSender asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -293,7 +293,7 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKeyChain,
+	pSender asymmetric.IPubKey,
 	pAction iAction,
 	pBody []byte,
 ) {
@@ -312,7 +312,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKeyChain,
+	pSender asymmetric.IPubKey,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -357,7 +357,7 @@ func (p *sNode) enqueuePayload(
 		client := p.fQueue.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPrivKeyChain().GetSignPrivKey().GetPubKey()).
+			WithPubKey(client.GetPrivKey().GetSignPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
