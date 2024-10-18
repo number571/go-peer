@@ -1,7 +1,6 @@
 package gopeer
 
 import (
-	"bytes"
 	_ "embed"
 	"regexp"
 	"strings"
@@ -10,14 +9,14 @@ import (
 
 var (
 	//go:embed CHANGELOG.md
-	tgBinaryCHANGELOG []byte
+	tgCHANGELOG string
 )
 
 func TestGoPeerVersion(t *testing.T) {
 	t.Parallel()
 
 	re := regexp.MustCompile(`##\s+(v\d+\.\d+\.\d+~?)\s+`)
-	match := re.FindAllStringSubmatch(string(tgBinaryCHANGELOG), -1)
+	match := re.FindAllStringSubmatch(tgCHANGELOG, -1)
 	if len(match) < 2 {
 		t.Error("versions not found")
 		return
@@ -50,7 +49,7 @@ func TestGoPeerVersion(t *testing.T) {
 		}
 	}
 
-	if bytes.Count(tgBinaryCHANGELOG, []byte("*??? ??, ????*")) != 1 {
+	if strings.Count(tgCHANGELOG, "*??? ??, ????*") != 1 {
 		t.Error("is there no new version or more than one new version?")
 		return
 	}
