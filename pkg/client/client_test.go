@@ -8,6 +8,30 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
+func TestPanicNewClient(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewClient(asymmetric.NewPrivKey(), 8)
+}
+
+func TestError(t *testing.T) {
+	t.Parallel()
+
+	str := "value"
+	err := &SClientError{str}
+	if err.Error() != errPrefix+str {
+		t.Error("incorrect err.Error()")
+		return
+	}
+}
+
 func TestClient(t *testing.T) {
 	t.Parallel()
 

@@ -10,9 +10,17 @@ func TestKEM(t *testing.T) {
 
 	privKey := NewKEMPrivKey()
 	privKey = LoadKEMPrivKey(privKey.ToBytes())
+	if pk := LoadKEMPrivKey([]byte{123}); pk != nil {
+		t.Error("success load kem priv key")
+		return
+	}
 
 	pubKey := privKey.GetPubKey()
 	pubKey = LoadKEMPubKey(pubKey.ToBytes())
+	if pk := LoadKEMPubKey([]byte{123}); pk != nil {
+		t.Error("success load kem pub key")
+		return
+	}
 
 	ct, ss1, err := pubKey.Encapsulate()
 	if err != nil {

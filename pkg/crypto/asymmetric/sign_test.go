@@ -9,9 +9,17 @@ func TestSigner(t *testing.T) {
 
 	privKey := NewDSAPrivKey()
 	privKey = LoadDSAPrivKey(privKey.ToBytes())
+	if pk := LoadDSAPrivKey([]byte{123}); pk != nil {
+		t.Error("success load dsa priv key")
+		return
+	}
 
 	pubKey := privKey.GetPubKey()
 	pubKey = LoadDSAPubKey(pubKey.ToBytes())
+	if pk := LoadDSAPubKey([]byte{123}); pk != nil {
+		t.Error("success load dsa pub key")
+		return
+	}
 
 	msg := []byte("hello, world!")
 	sign := privKey.SignBytes(msg)

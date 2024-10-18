@@ -36,7 +36,7 @@ type sNode struct {
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
-	fFriends       asymmetric.IListPubKeys
+	fFriends       asymmetric.IMapPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -47,7 +47,7 @@ func NewNode(
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
-	pFriends asymmetric.IListPubKeys,
+	pFriends asymmetric.IMapPubKeys,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -131,7 +131,7 @@ func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetListPubKeys() asymmetric.IListPubKeys {
+func (p *sNode) GetMapPubKeys() asymmetric.IMapPubKeys {
 	return p.fFriends
 }
 
@@ -237,17 +237,17 @@ func (p *sNode) networkHandler(
 	}
 
 	// try decrypt message
-	sender, decMsg, err := client.DecryptMessage(encMsg)
+	dsaPubKey, decMsg, err := client.DecryptMessage(encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
 	}
 
 	// enrich logger
-	logBuilder.WithPubKey(sender)
+	logBuilder.WithPubKey(dsaPubKey)
 
 	// check sender's public key in f2f list
-	keychain, ok := p.fFriends.GetPubKey(sender)
+	kemPubKey, ok := p.fFriends.GetPubKey(dsaPubKey)
 	if !ok {
 		// ignore reading message from unknown public key
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
@@ -263,6 +263,7 @@ func (p *sNode) networkHandler(
 	}
 
 	// do request or response action
+	keychain := asymmetric.NewPubKey(kemPubKey, dsaPubKey)
 	return p.handleDoAction(pCtx, logBuilder, keychain, pld)
 }
 

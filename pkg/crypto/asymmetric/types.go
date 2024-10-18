@@ -5,11 +5,10 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IListPubKeys interface {
-	AllPubKeys() []IPubKey
-	GetPubKey(IDSAPubKey) (IPubKey, bool)
-	AddPubKey(IPubKey)
-	DelPubKey(IPubKey)
+type IMapPubKeys interface {
+	SetPubKey(IDSAPubKey, IKEMPubKey)
+	GetPubKey(IDSAPubKey) (IKEMPubKey, bool)
+	DelPubKey(IDSAPubKey)
 }
 
 type IPrivKey interface {

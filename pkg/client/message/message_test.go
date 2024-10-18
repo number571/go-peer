@@ -61,6 +61,11 @@ func TestInvalidMessage(t *testing.T) {
 		t.Error("success load invalid message")
 		return
 	}
+
+	if _, err := LoadMessage(1, msgBytes); err == nil {
+		t.Error("success load message with keysize > msgsize")
+		return
+	}
 }
 
 func TestMessage(t *testing.T) {

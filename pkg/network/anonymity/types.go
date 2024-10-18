@@ -29,7 +29,7 @@ type INode interface {
 	GetKVDatabase() database.IKVDatabase
 	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IQBProblemProcessor
-	GetListPubKeys() asymmetric.IListPubKeys
+	GetMapPubKeys() asymmetric.IMapPubKeys
 
 	SendPayload(context.Context, asymmetric.IKEMPubKey, payload.IPayload64) error
 	FetchPayload(context.Context, asymmetric.IKEMPubKey, payload.IPayload32) ([]byte, error)

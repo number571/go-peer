@@ -75,10 +75,7 @@ func (p *sKyber768PubKey) Encapsulate() ([]byte, []byte, error) {
 }
 
 func (p *sKyber768PubKey) ToBytes() []byte {
-	b, err := p.fK.MarshalBinary()
-	if err != nil {
-		panic(err)
-	}
+	b, _ := p.fK.MarshalBinary()
 	return b
 }
 
@@ -91,9 +88,6 @@ func (p *sKyber768PrivKey) Decapsulate(pCiphertext []byte) ([]byte, error) {
 }
 
 func (p *sKyber768PrivKey) ToBytes() []byte {
-	b, err := p.fPrivKey.MarshalBinary()
-	if err != nil {
-		panic(err)
-	}
+	b, _ := p.fPrivKey.MarshalBinary()
 	return b
 }

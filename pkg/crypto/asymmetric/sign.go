@@ -80,10 +80,7 @@ func (p *sDilithiumM3PrivKey) ToBytes() []byte {
 }
 
 func (p *sDilithiumM3PrivKey) SignBytes(pMsg []byte) []byte {
-	sign, err := p.fPrivKey.Sign(rand.Reader, pMsg, crypto.Hash(0))
-	if err != nil {
-		panic(err)
-	}
+	sign, _ := p.fPrivKey.Sign(rand.Reader, pMsg, crypto.Hash(0))
 	return sign
 }
 

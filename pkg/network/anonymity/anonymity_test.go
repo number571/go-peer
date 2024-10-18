@@ -151,8 +151,8 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], cancels[:], 1)
 
-	nodes[0].GetListPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
-	nodes[1].GetListPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey().GetDSAPubKey())
+	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey().GetDSAPubKey())
 
 	ctx := context.Background()
 
@@ -325,9 +325,12 @@ func TestHandleWrapper(t *testing.T) {
 	node := _node.(*sNode)
 	handler := node.networkHandler
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
 
-	node.GetListPubKeys().AddPubKey(client.GetPrivKey().GetPubKey())
+	privKey := client.GetPrivKey()
+	kemPubKey := privKey.GetKEMPrivKey().GetPubKey()
+	dsaPubKey := privKey.GetDSAPrivKey().GetPubKey()
+
+	node.GetMapPubKeys().SetPubKey(dsaPubKey, kemPubKey)
 
 	ctx := context.Background()
 	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
@@ -335,7 +338,7 @@ func TestHandleWrapper(t *testing.T) {
 	})
 
 	msg, err := client.EncryptMessage(
-		pubKey,
+		kemPubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), tcHead).uint64(),
 			[]byte(tcMsgBody),
@@ -357,7 +360,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	msgWithoutPld, err := client.EncryptMessage(pubKey, []byte{123})
+	msgWithoutPld, err := client.EncryptMessage(kemPubKey, []byte{123})
 	if err != nil {
 		t.Error(err)
 		return
@@ -377,7 +380,7 @@ func TestHandleWrapper(t *testing.T) {
 	)
 
 	msg2, err := client.EncryptMessage(
-		pubKey,
+		kemPubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -395,7 +398,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg3, err := client.EncryptMessage(
-		pubKey,
+		kemPubKey,
 		payload.NewPayload64(
 			uint64(111),
 			[]byte("?"+tcMsgBody),
@@ -413,7 +416,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg4, err := client.EncryptMessage(
-		pubKey,
+		kemPubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(false), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -591,8 +594,11 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}
 
-	nodes[0].GetListPubKeys().AddPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
-	nodes[1].GetListPubKeys().AddPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	pubKey1 := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey0 := nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+
+	nodes[0].GetMapPubKeys().SetPubKey(pubKey1.GetDSAPubKey(), pubKey1.GetKEMPubKey())
+	nodes[1].GetMapPubKeys().SetPubKey(pubKey0.GetDSAPubKey(), pubKey0.GetKEMPubKey())
 
 	for _, node := range nodes {
 		node.HandleFunc(
@@ -731,7 +737,7 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 			),
 			asymmetric.NewKEMPrivKey().GetPubKey(),
 		),
-		asymmetric.NewListPubKeys(),
+		asymmetric.NewMapPubKeys(),
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()
