@@ -35,14 +35,13 @@ go-fmt-vet:
 ### INSTALL
 
 install-deps:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.58.0
 	go install github.com/nikolaydubina/go-cover-treemap@v1.4.2
 
 ### LINT
 
 lint-run: clean go-fmt-vet
-	# add 'gosec' after fix 'integer overflow conversion' bug
-	golangci-lint run -E "unconvert,gosimple,goconst,gocyclo,err113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+	golangci-lint run -E "gosec,unconvert,gosimple,goconst,gocyclo,err113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
 
 ### TEST
 # example run: make test-run N=10
