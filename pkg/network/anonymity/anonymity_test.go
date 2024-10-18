@@ -13,6 +13,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
@@ -52,7 +53,7 @@ func TestError(t *testing.T) {
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	node, cancels := testNewNode(time.Minute, "", 9, 0)
+	node, cancels := testNewNodeWithDB(time.Minute, "", &tsDatabase{})
 	defer testFreeNodes([]INode{node}, []context.CancelFunc{cancels}, 9)
 
 	sett := node.GetSettings()
@@ -61,6 +62,16 @@ func TestNodeSettings(t *testing.T) {
 		return
 	}
 	_ = node.GetLogger()
+
+	_node := node.(*sNode)
+	err := _node.storeHashIntoDatabase(
+		anon_logger.NewLogBuilder("_"),
+		hashing.NewHasher([]byte{}).ToBytes(),
+	)
+	if err == nil {
+		t.Error("success store hash into database without correct set function")
+		return
+	}
 }
 
 func TestSettings(t *testing.T) {
@@ -678,11 +689,7 @@ func (p *stLogging) HasErro() bool {
 }
 */
 
-func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode, context.CancelFunc) {
-	db, err := database.NewKVDatabase(fmt.Sprintf(tcPathDBTemplate, typeDB, numDB))
-	if err != nil {
-		panic(err)
-	}
+func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatabase) (INode, context.CancelFunc) {
 	parallel := uint64(1)
 	networkMask := uint32(1)
 	limitVoidSize := uint64(10_000)
@@ -744,6 +751,14 @@ func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode,
 	return node, cancel
 }
 
+func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode, context.CancelFunc) {
+	db, err := database.NewKVDatabase(fmt.Sprintf(tcPathDBTemplate, typeDB, numDB))
+	if err != nil {
+		panic(err)
+	}
+	return testNewNodeWithDB(timeWait, addr, db)
+}
+
 func testFreeNodes(nodes []INode, cancels []context.CancelFunc, typeDB int) {
 	for i, node := range nodes {
 		node.GetKVDatabase().Close()
@@ -768,3 +783,10 @@ func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsg
 		),
 	)
 }
+
+type tsDatabase struct{}
+
+func (p *tsDatabase) Get([]byte) ([]byte, error) { return nil, database.ErrNotFound }
+func (p *tsDatabase) Set([]byte, []byte) error   { return errors.New("some error") }
+func (p *tsDatabase) Del([]byte) error           { return nil }
+func (p *tsDatabase) Close() error               { return nil }

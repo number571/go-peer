@@ -22,26 +22,6 @@ func TestError(t *testing.T) {
 	}
 }
 
-func TestTryRecover(t *testing.T) {
-	t.Parallel()
-
-	dbPath := fmt.Sprintf(tcPathDBTemplate, 4)
-	defer os.RemoveAll(dbPath)
-
-	store, err := NewKVDatabase(dbPath)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
-		t.Error(err)
-		return
-	}
-
-	store.Close()
-}
-
 func TestInvalidCreateDB(t *testing.T) {
 	t.Parallel()
 
@@ -51,6 +31,35 @@ func TestInvalidCreateDB(t *testing.T) {
 	_, err := NewKVDatabase(path)
 	if err == nil {
 		t.Error("success create database with incorrect path")
+		return
+	}
+}
+
+func TestClosedDB(t *testing.T) {
+	t.Parallel()
+
+	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
+	defer os.RemoveAll(dbPath)
+
+	db, err := NewKVDatabase(dbPath)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer db.Close()
+
+	if err := db.Close(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	if err := db.Set([]byte("KEY"), []byte("VALUE")); err == nil {
+		t.Error("success set with closed db")
+		return
+	}
+
+	if err := db.Del([]byte("KEY")); err == nil {
+		t.Error("success del with closed db")
 		return
 	}
 }
@@ -77,6 +86,11 @@ func TestCreateDB(t *testing.T) {
 		t.Error(err)
 		return
 	}
+
+	if err := store.Close(); err != nil {
+		t.Error(err)
+		return
+	}
 }
 
 func TestBasicDB(t *testing.T) {
@@ -91,6 +105,16 @@ func TestBasicDB(t *testing.T) {
 		return
 	}
 	defer store.Close()
+
+	if _, err := store.Get([]byte("KEY")); err == nil {
+		t.Error("[testBasic] success get with bucket=nil")
+		return
+	}
+
+	if err := store.Del([]byte("KEY")); err != nil {
+		t.Error("[testBasic]", err) // without error if bucket=nil
+		return
+	}
 
 	data1 := []byte("hello, world!")
 	if err := store.Set([]byte("KEY"), data1); err != nil {

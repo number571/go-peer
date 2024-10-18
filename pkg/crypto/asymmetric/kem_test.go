@@ -3,7 +3,23 @@ package asymmetric
 import (
 	"bytes"
 	"testing"
+
+	"github.com/cloudflare/circl/kem"
 )
+
+func TestNewKEM(t *testing.T) {
+	t.Parallel()
+
+	if pk := newKEMPrivKey(&tsPrivateKeyKEM{}); pk != nil {
+		t.Error("success get another kem privkey (not mlkem768)")
+		return
+	}
+
+	if pk := newKEMPubKey(&tsPublicKeyKEM{}); pk != nil {
+		t.Error("success get another kem pubkey (not mlkem768)")
+		return
+	}
+}
 
 func TestKEM(t *testing.T) {
 	t.Parallel()
@@ -42,3 +58,20 @@ func TestKEM(t *testing.T) {
 	// fmt.Println(len(privKey.ToBytes()))
 	// fmt.Println(len(pubKey.ToBytes()), len(ct), len(ss1))
 }
+
+var (
+	_ kem.PrivateKey = &tsPrivateKeyKEM{}
+	_ kem.PublicKey  = &tsPublicKeyKEM{}
+)
+
+type tsPrivateKeyKEM struct{}
+type tsPublicKeyKEM struct{}
+
+func (p *tsPrivateKeyKEM) Scheme() kem.Scheme             { return nil }
+func (p *tsPrivateKeyKEM) MarshalBinary() ([]byte, error) { return nil, nil }
+func (p *tsPrivateKeyKEM) Equal(kem.PrivateKey) bool      { return false }
+func (p *tsPrivateKeyKEM) Public() kem.PublicKey          { return nil }
+
+func (p *tsPublicKeyKEM) Scheme() kem.Scheme             { return nil }
+func (p *tsPublicKeyKEM) MarshalBinary() ([]byte, error) { return nil, nil }
+func (p *tsPublicKeyKEM) Equal(kem.PublicKey) bool       { return false }
