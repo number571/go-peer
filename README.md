@@ -81,7 +81,7 @@ $ go get github.com/number571/go-peer
 
 ## Requirements
 
-1. Go version `>= 1.16`
+1. Go version `>= 1.23`
 
 ## Releases
 
@@ -89,13 +89,11 @@ All cmd programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux
 
 ## Dependencies
 
-> [!IMPORTANT]
-> All dependencies are loaded into the go-peer project once using the `go mod vendor` command (for the Go language) or simply by installing (for other languages) and saved in it. This is done for security purposes, provided that dependency creators can modify the code in older versions.
-
 1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/database`)
 2. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`)
 3. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`)
 4. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`)
+5. Go library [github.com/cloudflare/circl](https://github.com/cloudflare/circl "circl") (used by `pkg/crypto/asymmetric`)
 
 ### Makefile
 
