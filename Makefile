@@ -41,7 +41,7 @@ install-deps:
 ### LINT
 
 lint-run: clean go-fmt-vet
-	golangci-lint run -E "gas,unconvert,gosimple,goconst,gocyclo,goerr113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
+	golangci-lint run -E "gosec,unconvert,gosimple,goconst,gocyclo,err113,ineffassign,unparam,unused,bodyclose,noctx,perfsprint,prealloc,gocritic,govet,revive,staticcheck,errcheck,errorlint,nestif,maintidx"
 
 ### TEST
 # example run: make test-run N=10
