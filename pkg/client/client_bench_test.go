@@ -13,12 +13,12 @@ goos: linux
 goarch: amd64
 pkg: github.com/number571/go-peer/pkg/client
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkClient/kyber=1024-bit,dilithium=mode5-12                   1000            202959 ns/op
---- BENCH: BenchmarkClient/kyber=1024-bit,dilithium=mode5-12
-    client_bench_test.go:69: Timer_Encrypt(N=1): 408.06µs
-    client_bench_test.go:82: Timer_Decrypt(N=1): 303.304µs
-    client_bench_test.go:69: Timer_Encrypt(N=1000): 311.165267ms
-    client_bench_test.go:82: Timer_Decrypt(N=1000): 202.925571ms
+BenchmarkClient/kyber=768-bit,dilithium=mode3-12                    1000            132328 ns/op
+--- BENCH: BenchmarkClient/kyber=768-bit,dilithium=mode3-12
+    client_bench_test.go:66: Timer_Encrypt(N=1): 280.196µs
+    client_bench_test.go:79: Timer_Decrypt(N=1): 155.822µs
+    client_bench_test.go:66: Timer_Encrypt(N=1000): 254.339142ms
+    client_bench_test.go:79: Timer_Decrypt(N=1000): 132.305197ms
 PASS
 */
 
@@ -31,7 +31,7 @@ func BenchmarkClient(b *testing.B) {
 		client IClient
 	}{
 		{
-			name:   "kyber=1024-bit,dilithium=mode5",
+			name:   "kyber=768-bit,dilithium=mode3",
 			client: NewClient(privKeyChain, (8 << 10)),
 		},
 	}
