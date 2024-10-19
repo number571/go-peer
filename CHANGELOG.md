@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `cmd/tools`: add keysplit app
+
 <!-- ... -->
 
 ## v1.7.0

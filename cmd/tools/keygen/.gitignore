@@ -1,3 +1,2 @@
-priv.key
-pub.key 
+*.key
 tkeygen
