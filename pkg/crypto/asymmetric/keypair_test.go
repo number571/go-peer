@@ -16,6 +16,19 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestPanicNewPrivKey(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewPrivKeyFromSeed([]byte{1, 2, 3})
+}
+
 func TestPanicLoadPrivKey(t *testing.T) {
 	t.Parallel()
 

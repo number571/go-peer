@@ -29,6 +29,19 @@ func TestNewKEM(t *testing.T) {
 	}
 }
 
+func TestPanicNewKEMPrivKey(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewKEMPrivKeyFromSeed([]byte{1, 2, 3})
+}
+
 func TestKEM(t *testing.T) {
 	t.Parallel()
 

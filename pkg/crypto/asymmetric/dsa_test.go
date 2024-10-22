@@ -30,6 +30,19 @@ func TestNewDSA(t *testing.T) {
 	}
 }
 
+func TestPanicNewDSAPrivKey(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewDSAPrivKeyFromSeed([]byte{1, 2, 3})
+}
+
 func TestSigner(t *testing.T) {
 	t.Parallel()
 
