@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	CKEMPrivKeySize = mlkem.PrivateKeySize
-	CKEMPubKeySize  = mlkem.PublicKeySize
-	CKEncSize       = mlkem.CiphertextSize
+	CKEMPrivKeySize    = mlkem.PrivateKeySize
+	CKEMPubKeySize     = mlkem.PublicKeySize
+	CKEMKeySeedSize    = mlkem.KeySeedSize
+	CKEMCiphertextSize = mlkem.CiphertextSize
 )
 
 var (
@@ -25,6 +26,14 @@ type sKyber768PrivKey struct {
 
 type sKyber768PubKey struct {
 	fK *mlkem.PublicKey
+}
+
+func NewKEMPrivKeyFromSeed(pSeed []byte) IKEMPrivKey {
+	if len(pSeed) != CKEMKeySeedSize {
+		panic("len(pSeed) != CKEMKeySeedSize")
+	}
+	_, privKey := mlkem.NewKeyFromSeed(pSeed)
+	return newKEMPrivKey(privKey)
 }
 
 func NewKEMPrivKey() IKEMPrivKey {

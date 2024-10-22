@@ -32,6 +32,16 @@ type sPubKey struct {
 	fHasher hashing.IHasher
 }
 
+func NewPrivKeyFromSeed(pSeed []byte) IPrivKey {
+	if len(pSeed) != CKEMKeySeedSize+CDSAKeySeedSize {
+		panic("len(pSeed) != CKEMKeySeedSize+CDSAKeySeedSize")
+	}
+	return newPrivKey(
+		NewKEMPrivKeyFromSeed(pSeed[:CKEMKeySeedSize]),
+		NewDSAPrivKeyFromSeed(pSeed[CKEMKeySeedSize:]),
+	)
+}
+
 func NewPrivKey() IPrivKey {
 	return newPrivKey(NewKEMPrivKey(), NewDSAPrivKey())
 }

@@ -11,7 +11,8 @@ import (
 const (
 	CDSAPrivKeySize = mldsa.PrivateKeySize
 	CDSAPubKeySize  = mldsa.PublicKeySize
-	CSignSize       = mldsa.SignatureSize
+	CDSAKeySeedSize = mldsa.SeedSize
+	CDSASignSize    = mldsa.SignatureSize
 )
 
 var (
@@ -26,6 +27,16 @@ type sDilithiumM3PrivKey struct {
 
 type sDilithiumM3PubKey struct {
 	fK *mldsa.PublicKey
+}
+
+func NewDSAPrivKeyFromSeed(pSeed []byte) IDSAPrivKey {
+	if len(pSeed) != CDSAKeySeedSize {
+		panic("len(pSeed) != CDSAKeySeedSize")
+	}
+	arr := &[mldsa.SeedSize]byte{}
+	copy(arr[:], pSeed)
+	_, privKey := mldsa.NewKeyFromSeed(arr)
+	return newDSAPrivKey(privKey)
 }
 
 func NewDSAPrivKey() IDSAPrivKey {

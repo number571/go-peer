@@ -9,6 +9,7 @@
 ### IMPROVEMENTS
 
 - Update `cmd/tools`: add keysplit app
+- Update `pkg/crypto/asymmetric`: add NewPrivKeyFromSeed
 
 <!-- ... -->
 
