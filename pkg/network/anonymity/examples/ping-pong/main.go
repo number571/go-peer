@@ -77,8 +77,8 @@ func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IKEMPubKey, asymmetr
 	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
-	node1.GetMapPubKeys().SetPubKey(pubKey2.GetDSAPubKey(), pubKey1.GetKEMPubKey())
-	node2.GetMapPubKeys().SetPubKey(pubKey1.GetDSAPubKey(), pubKey1.GetKEMPubKey())
+	node1.GetMapPubKeys().SetPubKey(pubKey2)
+	node2.GetMapPubKeys().SetPubKey(pubKey1)
 
 	return pubKey1.GetKEMPubKey(), pubKey2.GetKEMPubKey()
 }

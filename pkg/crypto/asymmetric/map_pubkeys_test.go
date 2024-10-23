@@ -1,7 +1,6 @@
 package asymmetric
 
 import (
-	"bytes"
 	"testing"
 )
 
@@ -17,18 +16,16 @@ func TestMapPubKeys(t *testing.T) {
 	}
 
 	for _, pk := range pubKeys {
-		list.SetPubKey(pk.GetDSAPubKey(), pk.GetKEMPubKey())
+		list.SetPubKey(pk)
 	}
 
-	dsaPubKey := pubKeys[1].GetDSAPubKey()
-	pk, ok := list.GetPubKey(dsaPubKey)
-	if !ok || !bytes.Equal(pk.ToBytes(), pubKeys[1].GetKEMPubKey().ToBytes()) {
+	if ok := list.InPubKeys(pubKeys[1]); !ok {
 		t.Error("get invalid pub key")
 		return
 	}
 
-	list.DelPubKey(dsaPubKey)
-	if _, ok := list.GetPubKey(dsaPubKey); ok {
+	list.DelPubKey(pubKeys[1])
+	if ok := list.InPubKeys(pubKeys[1]); ok {
 		t.Error("get success deleted pub key")
 		return
 	}

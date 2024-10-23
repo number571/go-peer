@@ -130,14 +130,14 @@ func TestClient(t *testing.T) {
 	// _ = os.WriteFile("message/test_binary.msg", enc, 0600)
 	// _ = os.WriteFile("message/test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
-	signerPubKey := client.GetPrivKey().GetDSAPrivKey().GetPubKey()
-	gotDSAPubKey, dec, err := client.DecryptMessage(enc)
+	pubKey := client.GetPrivKey().GetPubKey()
+	gotPubKey, dec, err := client.DecryptMessage(enc)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if !bytes.Equal(signerPubKey.ToBytes(), gotDSAPubKey.ToBytes()) {
-		t.Error("invalid decrypt signer key")
+	if !bytes.Equal(pubKey.ToBytes(), gotPubKey.ToBytes()) {
+		t.Error("invalid decrypt key")
 		return
 	}
 	if !bytes.Equal(msg, dec) {

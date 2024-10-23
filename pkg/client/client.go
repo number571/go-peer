@@ -89,13 +89,13 @@ func (p *sClient) encryptWithParams(
 	var (
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
-		sign = p.fPrivKey.GetDSAPrivKey()
+		pkey = p.fPrivKey.GetPubKey().ToBytes()
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			sign.GetPubKey().ToBytes(),
+			pkey,
 			pRecv.ToBytes(),
 			data,
 		},
@@ -111,10 +111,10 @@ func (p *sClient) encryptWithParams(
 	return message.NewMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			sign.GetPubKey().ToBytes(),
+			pkey,
 			salt,
 			hash,
-			sign.SignBytes(hash),
+			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
 			data,
 		})),
 	).ToBytes(), nil
@@ -122,7 +122,7 @@ func (p *sClient) encryptWithParams(
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, error) {
+func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error) {
 	msg, err := message.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
@@ -152,15 +152,15 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, er
 	)
 
 	// Load public key and check standart size.
-	signerPubKey := asymmetric.LoadDSAPubKey(pkey)
-	if signerPubKey == nil {
+	pubKey := asymmetric.LoadPubKey(pkey)
+	if pubKey == nil {
 		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			signerPubKey.ToBytes(),
+			pubKey.ToBytes(),
 			kemPrivKey.GetPubKey().ToBytes(),
 			data,
 		},
@@ -171,7 +171,7 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, er
 	}
 
 	// Verify sign by public key of sender and hash of message.
-	if !signerPubKey.VerifyBytes(hash, sign) {
+	if !pubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
 		return nil, nil, ErrInvalidHashSign
 	}
 
@@ -182,5 +182,5 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IDSAPubKey, []byte, er
 	}
 
 	// Return public key of sender with payload.
-	return signerPubKey, payloadWrapper[0], nil
+	return pubKey, payloadWrapper[0], nil
 }

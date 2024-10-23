@@ -11,6 +11,10 @@
 - Update `cmd/tools`: add keysplit app
 - Update `pkg/crypto/asymmetric`: add NewPrivKeyFromSeed
 
+### CHANGES
+
+- Update `pkg/client`: update interface IClient: DecryptMessage
+
 <!-- ... -->
 
 ## v1.7.0

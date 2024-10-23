@@ -162,8 +162,8 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], cancels[:], 1)
 
-	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey().GetDSAPubKey())
-	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey().GetDSAPubKey())
+	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
 
 	ctx := context.Background()
 
@@ -339,9 +339,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	privKey := client.GetPrivKey()
 	kemPubKey := privKey.GetKEMPrivKey().GetPubKey()
-	dsaPubKey := privKey.GetDSAPrivKey().GetPubKey()
-
-	node.GetMapPubKeys().SetPubKey(dsaPubKey, kemPubKey)
+	node.GetMapPubKeys().SetPubKey(privKey.GetPubKey())
 
 	ctx := context.Background()
 	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
@@ -608,8 +606,8 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	pubKey1 := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 	pubKey0 := nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
-	nodes[0].GetMapPubKeys().SetPubKey(pubKey1.GetDSAPubKey(), pubKey1.GetKEMPubKey())
-	nodes[1].GetMapPubKeys().SetPubKey(pubKey0.GetDSAPubKey(), pubKey0.GetKEMPubKey())
+	nodes[0].GetMapPubKeys().SetPubKey(pubKey1)
+	nodes[1].GetMapPubKeys().SetPubKey(pubKey0)
 
 	for _, node := range nodes {
 		node.HandleFunc(

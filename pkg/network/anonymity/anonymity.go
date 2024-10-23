@@ -237,18 +237,17 @@ func (p *sNode) networkHandler(
 	}
 
 	// try decrypt message
-	dsaPubKey, decMsg, err := client.DecryptMessage(encMsg)
+	pubKey, decMsg, err := client.DecryptMessage(encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
 	}
 
 	// enrich logger
-	logBuilder.WithPubKey(dsaPubKey)
+	logBuilder.WithPubKey(pubKey.GetDSAPubKey())
 
 	// check sender's public key in f2f list
-	kemPubKey, ok := p.fFriends.GetPubKey(dsaPubKey)
-	if !ok {
+	if ok := p.fFriends.InPubKeys(pubKey); !ok {
 		// ignore reading message from unknown public key
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
 		return nil
@@ -263,8 +262,7 @@ func (p *sNode) networkHandler(
 	}
 
 	// do request or response action
-	keychain := asymmetric.NewPubKey(kemPubKey, dsaPubKey)
-	return p.handleDoAction(pCtx, logBuilder, keychain, pld)
+	return p.handleDoAction(pCtx, logBuilder, pubKey, pld)
 }
 
 func (p *sNode) handleDoAction(

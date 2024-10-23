@@ -6,9 +6,9 @@ import (
 )
 
 type IMapPubKeys interface {
-	SetPubKey(IDSAPubKey, IKEMPubKey)
-	GetPubKey(IDSAPubKey) (IKEMPubKey, bool)
-	DelPubKey(IDSAPubKey)
+	InPubKeys(IPubKey) bool
+	SetPubKey(IPubKey)
+	DelPubKey(IPubKey)
 }
 
 type IPrivKey interface {
