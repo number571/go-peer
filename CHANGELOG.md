@@ -16,6 +16,7 @@
 
 - Update `cmd/tools`: add keysplit app
 - Update `pkg/crypto/asymmetric`: add NewPrivKeyFromSeed
+- Update `cmd/tools/pmanager`: hide input password for UNIX like systems
 
 ### CHANGES
 
