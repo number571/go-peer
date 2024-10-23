@@ -15,20 +15,21 @@ func main() {
 	)
 
 	msg, err := client1.EncryptMessage(
-		client2.GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		client2.GetPrivKey().GetPubKey(),
 		payload.NewPayload64(0x0, []byte("hello, world!")).ToBytes(),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	pubKey, decMsg, err := client2.DecryptMessage(msg)
+	mapKeys := asymmetric.NewMapPubKeys(client1.GetPrivKey().GetPubKey())
+	pubKey, decMsg, err := client2.DecryptMessage(mapKeys, msg)
 	if err != nil {
 		panic(err)
 	}
 
 	pld := payload.LoadPayload64(decMsg)
-	fmt.Printf("Message: '%s';\nSender's public key: '%X';\n", string(pld.GetBody()), pubKey.ToBytes())
+	fmt.Printf("Message: '%s';\nSender's public key: '%s';\n", string(pld.GetBody()), pubKey.ToString())
 	fmt.Printf("Encrypted message: '%x'\n", msg)
 }
 

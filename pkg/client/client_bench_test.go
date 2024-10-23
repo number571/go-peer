@@ -13,18 +13,22 @@ goos: linux
 goarch: amd64
 pkg: github.com/number571/go-peer/pkg/client
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkClient/kyber=768-bit,dilithium=mode3-12                    1000            132328 ns/op
---- BENCH: BenchmarkClient/kyber=768-bit,dilithium=mode3-12
-    client_bench_test.go:66: Timer_Encrypt(N=1): 280.196µs
-    client_bench_test.go:79: Timer_Decrypt(N=1): 155.822µs
-    client_bench_test.go:66: Timer_Encrypt(N=1000): 254.339142ms
-    client_bench_test.go:79: Timer_Decrypt(N=1000): 132.305197ms
+BenchmarkClient/mlkem=768,mldsa=65-12              10000             94239 ns/op
+--- BENCH: BenchmarkClient/mlkem=768,mldsa=65-12
+    client_bench_test.go:67: Timer_Encrypt(N=1): 207.249µs
+    client_bench_test.go:80: Timer_Decrypt(N=1): 131.503µs
+    client_bench_test.go:67: Timer_Encrypt(N=10000): 2.376859383s
+    client_bench_test.go:80: Timer_Decrypt(N=10000): 942.366433ms
 PASS
 */
 
 // go test -bench=BenchmarkClient -benchtime=1000x -timeout 99999s
 func BenchmarkClient(b *testing.B) {
-	privKeyChain := asymmetric.NewPrivKey()
+	privKey := asymmetric.NewPrivKey()
+	pubKey := privKey.GetPubKey()
+
+	mapKeys := asymmetric.NewMapPubKeys()
+	mapKeys.SetPubKey(pubKey)
 
 	benchTable := []struct {
 		name   string
@@ -32,7 +36,7 @@ func BenchmarkClient(b *testing.B) {
 	}{
 		{
 			name:   "mlkem=768,mldsa=65",
-			client: NewClient(privKeyChain, (8 << 10)),
+			client: NewClient(privKey, (8 << 10)),
 		},
 	}
 
@@ -51,10 +55,7 @@ func BenchmarkClient(b *testing.B) {
 
 			nowEnc := time.Now()
 			for i := 0; i < b.N; i++ {
-				encMsg, err := t.client.EncryptMessage(
-					t.client.GetPrivKey().GetKEMPrivKey().GetPubKey(),
-					randomBytes[i],
-				)
+				encMsg, err := t.client.EncryptMessage(pubKey, randomBytes[i])
 				if err != nil {
 					b.Error(err)
 					return
@@ -68,7 +69,7 @@ func BenchmarkClient(b *testing.B) {
 
 			nowDec := time.Now()
 			for i := 0; i < b.N; i++ {
-				_, _, err := t.client.DecryptMessage(encMessages[i])
+				_, _, err := t.client.DecryptMessage(mapKeys, encMessages[i])
 				if err != nil {
 					b.Error(err)
 					return

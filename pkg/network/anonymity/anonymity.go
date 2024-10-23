@@ -102,7 +102,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 			// update logger state
 			p.enrichLogger(logBuilder, netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetDSAPrivKey().GetPubKey())
+				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
@@ -143,7 +143,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
-	pRecv asymmetric.IKEMPubKey,
+	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -158,7 +158,7 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv asymmetric.IKEMPubKey,
+	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewRandom().GetUint64())
@@ -237,21 +237,14 @@ func (p *sNode) networkHandler(
 	}
 
 	// try decrypt message
-	pubKey, decMsg, err := client.DecryptMessage(encMsg)
+	pubKey, decMsg, err := client.DecryptMessage(p.fFriends, encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
 	}
 
 	// enrich logger
-	logBuilder.WithPubKey(pubKey.GetDSAPubKey())
-
-	// check sender's public key in f2f list
-	if ok := p.fFriends.InPubKeys(pubKey); !ok {
-		// ignore reading message from unknown public key
-		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnNotFriend))
-		return nil
-	}
+	logBuilder.WithPubKey(pubKey)
 
 	// get payload from decrypted message
 	pld := payload.LoadPayload64(decMsg)
@@ -297,7 +290,7 @@ func (p *sNode) handleResponse(
 	pBody []byte,
 ) {
 	// get session by payload head
-	actionKey := newActionKey(pSender.GetKEMPubKey(), pAction)
+	actionKey := newActionKey(pSender, pAction)
 	action, ok := p.getAction(actionKey)
 	if !ok {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
@@ -338,14 +331,14 @@ func (p *sNode) handleRequest(
 	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
 		pLogBuilder,
-		pSender.GetKEMPubKey(),
+		pSender,
 		payload.NewPayload64(newHead, resp),
 	)
 }
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv asymmetric.IKEMPubKey,
+	pRecv asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -356,7 +349,7 @@ func (p *sNode) enqueuePayload(
 		client := p.fQueue.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPrivKey().GetDSAPrivKey().GetPubKey()).
+			WithPubKey(client.GetPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
@@ -463,7 +456,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey asymmetric.IKEMPubKey, pAction iAction) string {
+func newActionKey(pPubKey asymmetric.IPubKey, pAction iAction) string {
 	pubKeyAddr := hashing.NewHasher(pPubKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

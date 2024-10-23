@@ -31,8 +31,8 @@ type INode interface {
 	GetMessageQueue() queue.IQBProblemProcessor
 	GetMapPubKeys() asymmetric.IMapPubKeys
 
-	SendPayload(context.Context, asymmetric.IKEMPubKey, payload.IPayload64) error
-	FetchPayload(context.Context, asymmetric.IKEMPubKey, payload.IPayload32) ([]byte, error)
+	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload64) error
+	FetchPayload(context.Context, asymmetric.IPubKey, payload.IPayload32) ([]byte, error)
 }
 
 type ISettings interface {

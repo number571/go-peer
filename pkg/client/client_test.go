@@ -59,22 +59,22 @@ func TestInvalidKeys(t *testing.T) {
 	t.Parallel()
 
 	_client := NewClient(asymmetric.NewPrivKey(), (8 << 10)).(*sClient)
-	if _, err := _client.encryptWithParams(&tsKEMPubKey{}, []byte("hello"), 0); err == nil {
+	if _, err := _client.encryptWithParams(&tsPubKey{}, []byte("hello"), 0); err == nil {
 		t.Error("success encrypt with invalid pubkey")
 		return
 	}
 
-	kemPubKey := _client.GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := _client.GetPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
-	enc, err := _client.EncryptMessage(kemPubKey, msg)
+	enc, err := _client.EncryptMessage(pubKey, msg)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	_client.fPrivKey = &tsPrivKey{}
-	if _, _, err := _client.DecryptMessage(enc); err == nil {
+	if _, _, err := _client.DecryptMessage(nil, enc); err == nil {
 		t.Error("success decrypt with invalid privkey")
 		return
 	}
@@ -85,29 +85,31 @@ func TestInvalidClient(t *testing.T) {
 
 	msgsize := uint64(8 << 10)
 	client := NewClient(asymmetric.NewPrivKey(), msgsize)
-	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetPubKey()
 
 	_client := client.(*sClient)
 	msg1 := []byte("hello")
 	pad1 := client.GetPayloadLimit() - uint64(len(msg1)) + 2*encoding.CSizeUint32
 
-	enc1, err := _client.tcEncryptWithParamsInvalidMessageBytes(kemPubKey, msg1, pad1)
+	enc1, err := _client.encryptWithParams(pubKey, msg1, pad1)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client.DecryptMessage(enc1); err == nil {
+
+	mapKeys := asymmetric.NewMapPubKeys(pubKey)
+	if _, _, err := client.DecryptMessage(mapKeys, enc1); err == nil {
 		t.Error("success decrypt message with invalid bytes structure (without joiner)")
 		return
 	}
 
 	pad2 := client.GetPayloadLimit() - uint64(len(msg1)) + asymmetric.CDSAPubKeySize - 3
-	enc2, err := _client.tcEncryptWithParamsInvalidDSAPublicKey(kemPubKey, msg1, pad2)
+	enc2, err := tcEncryptWithParamsInvalidPKID(_client, pubKey, msg1, pad2)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if _, _, err := client.DecryptMessage(enc2); err == nil {
+	if _, _, err := client.DecryptMessage(mapKeys, enc2); err == nil {
 		t.Error("success decrypt message with invalid dsa public key")
 		return
 	}
@@ -118,10 +120,10 @@ func TestClient(t *testing.T) {
 
 	client := NewClient(asymmetric.NewPrivKey(), (8 << 10))
 
-	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
-	enc, err := client.EncryptMessage(kemPubKey, msg)
+	enc, err := client.EncryptMessage(pubKey, msg)
 	if err != nil {
 		t.Error(err)
 		return
@@ -130,8 +132,7 @@ func TestClient(t *testing.T) {
 	// _ = os.WriteFile("message/test_binary.msg", enc, 0600)
 	// _ = os.WriteFile("message/test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
-	pubKey := client.GetPrivKey().GetPubKey()
-	gotPubKey, dec, err := client.DecryptMessage(enc)
+	gotPubKey, dec, err := client.DecryptMessage(asymmetric.NewMapPubKeys(pubKey), enc)
 	if err != nil {
 		t.Error(err)
 		return
@@ -154,36 +155,36 @@ func TestDecrypt(t *testing.T) {
 
 	client := NewClient(asymmetric.NewPrivKey(), (8 << 10))
 
-	if _, _, err := client.DecryptMessage([]byte{123}); err == nil {
+	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), []byte{123}); err == nil {
 		t.Error("success decrypt with invalid ciphertext (1)")
 		return
 	}
 
-	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetPubKey()
 	msg := []byte("hello, world!")
 
-	enc, err := client.EncryptMessage(kemPubKey, msg)
+	enc, err := client.EncryptMessage(pubKey, msg)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	enc[0] ^= 1
-	if _, _, err := client.DecryptMessage(enc); err == nil {
+	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (2)")
 		return
 	}
 
 	enc[0] ^= 1
 	enc[len(enc)-1] ^= 1
-	if _, _, err := client.DecryptMessage(enc); err == nil {
+	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (3)")
 		return
 	}
 
 	enc[len(enc)-1] ^= 1
 	enc[len(enc)-2000] ^= 1
-	if _, _, err := client.DecryptMessage(enc); err == nil {
+	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (4)")
 		return
 	}
@@ -198,10 +199,17 @@ var (
 )
 
 type tsPrivKey struct{}
+type tsPubKey struct{}
 type tsKEMPubKey struct{}
 type tsDSAPubKey struct{}
 type tsKEMPrivKey struct{}
 type tsDSAPrivKey struct{}
+
+func (p *tsPubKey) ToString() string                    { return "" }
+func (p *tsPubKey) ToBytes() []byte                     { return nil }
+func (p *tsPubKey) GetHasher() hashing.IHasher          { return hashing.NewHasher([]byte{}) }
+func (p *tsPubKey) GetKEMPubKey() asymmetric.IKEMPubKey { return &tsKEMPubKey{} }
+func (p *tsPubKey) GetDSAPubKey() asymmetric.IDSAPubKey { return &tsDSAPubKey{} }
 
 func (p *tsPrivKey) ToString() string                      { return "" }
 func (p *tsPrivKey) ToBytes() []byte                       { return nil }
@@ -225,67 +233,29 @@ func (p *tsDSAPrivKey) SignBytes([]byte) []byte          { return nil }
 func (p *tsDSAPubKey) ToBytes() []byte                 { return nil }
 func (p *tsDSAPubKey) VerifyBytes([]byte, []byte) bool { return false }
 
-func (p *sClient) tcEncryptWithParamsInvalidMessageBytes(
-	pRecv asymmetric.IKEMPubKey,
+func tcEncryptWithParamsInvalidPKID(
+	p *sClient,
+	pRecv asymmetric.IPubKey,
 	pMsg []byte,
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
-		sign = p.fPrivKey.GetDSAPrivKey()
-	)
-
-	data := bytes.Join([][]byte{pMsg, rand.GetBytes(pPadd)}, []byte{})
-	hash := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{
-			sign.GetPubKey().ToBytes(),
-			pRecv.ToBytes(),
-			data,
-		},
-		[]byte{},
-	)).ToBytes()
-
-	ct, sk, err := pRecv.Encapsulate()
-	if err != nil {
-		return nil, ErrEncryptSymmetricKey
-	}
-
-	cipher := symmetric.NewCipher(sk)
-	return message.NewMessage(
-		ct,
-		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			sign.GetPubKey().ToBytes(),
-			salt,
-			hash,
-			sign.SignBytes(hash),
-			data,
-		})),
-	).ToBytes(), nil
-}
-
-func (p *sClient) tcEncryptWithParamsInvalidDSAPublicKey(
-	pRecv asymmetric.IKEMPubKey,
-	pMsg []byte,
-	pPadd uint64,
-) ([]byte, error) {
-	var (
-		rand = random.NewRandom()
-		salt = rand.GetBytes(cSaltSize)
-		sign = p.fPrivKey.GetDSAPrivKey()
+		pkid = p.fPrivKey.GetPubKey().GetHasher().ToBytes()
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			sign.GetPubKey().ToBytes(),
+			pkid,
 			pRecv.ToBytes(),
 			data,
 		},
 		[]byte{},
 	)).ToBytes()
 
-	ct, sk, err := pRecv.Encapsulate()
+	ct, sk, err := pRecv.GetKEMPubKey().Encapsulate()
 	if err != nil {
 		return nil, ErrEncryptSymmetricKey
 	}
@@ -297,7 +267,7 @@ func (p *sClient) tcEncryptWithParamsInvalidDSAPublicKey(
 			[]byte("123"),
 			salt,
 			hash,
-			sign.SignBytes(hash),
+			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
 			data,
 		})),
 	).ToBytes(), nil

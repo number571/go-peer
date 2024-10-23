@@ -103,7 +103,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				asymmetric.NewPrivKey(),
 				msgSize,
 			),
-			asymmetric.NewKEMPrivKey().GetPubKey(),
+			asymmetric.NewPrivKey().GetPubKey(),
 		),
 		asymmetric.NewMapPubKeys(),
 	)

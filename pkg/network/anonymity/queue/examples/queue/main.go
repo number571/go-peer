@@ -34,7 +34,7 @@ func main() {
 			asymmetric.NewPrivKey(),
 			(8<<10),
 		),
-		asymmetric.NewKEMPrivKey().GetPubKey(),
+		asymmetric.NewPrivKey().GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -48,7 +48,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+			q.GetClient().GetPrivKey().GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -65,7 +65,10 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		pubKey, decMsg, err := q.GetClient().DecryptMessage(msg.ToBytes())
+		pubKey, decMsg, err := q.GetClient().DecryptMessage(
+			asymmetric.NewMapPubKeys(q.GetClient().GetPrivKey().GetPubKey()),
+			msg.ToBytes(),
+		)
 		if err != nil {
 			panic(err)
 		}

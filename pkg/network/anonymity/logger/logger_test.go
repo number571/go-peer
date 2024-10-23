@@ -17,7 +17,7 @@ const (
 func TestLogger(t *testing.T) {
 	t.Parallel()
 
-	pubKey := asymmetric.NewPrivKey().GetPubKey().GetDSAPubKey()
+	pubKey := asymmetric.NewPrivKey().GetPubKey()
 	builder := NewLogBuilder(tcService).
 		WithConn(nil).
 		WithHash([]byte(tcHash)).

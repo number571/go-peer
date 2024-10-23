@@ -47,7 +47,7 @@ type ILogBuilder interface {
 	WithProof(uint64) ILogBuilder
 	WithHash([]byte) ILogBuilder
 	WithConn(conn.IConn) ILogBuilder
-	WithPubKey(asymmetric.IDSAPubKey) ILogBuilder
+	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }
 
 type ILogGetterFactory interface {
@@ -61,5 +61,5 @@ type ILogGetter interface {
 	GetProof() uint64
 	GetHash() []byte
 	GetConn() conn.IConn
-	GetPubKey() asymmetric.IDSAPubKey
+	GetPubKey() asymmetric.IPubKey
 }

@@ -132,7 +132,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 				payload.NewPayload32(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -170,7 +170,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err != nil {
@@ -202,7 +202,7 @@ func TestFetchPayload(t *testing.T) {
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -212,7 +212,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -250,7 +250,7 @@ func TestBroadcastPayload(t *testing.T) {
 	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -260,7 +260,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	err1 := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -293,7 +293,7 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody))
@@ -338,7 +338,7 @@ func TestHandleWrapper(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	privKey := client.GetPrivKey()
-	kemPubKey := privKey.GetKEMPrivKey().GetPubKey()
+	pubKey := privKey.GetPubKey()
 	node.GetMapPubKeys().SetPubKey(privKey.GetPubKey())
 
 	ctx := context.Background()
@@ -347,7 +347,7 @@ func TestHandleWrapper(t *testing.T) {
 	})
 
 	msg, err := client.EncryptMessage(
-		kemPubKey,
+		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), tcHead).uint64(),
 			[]byte(tcMsgBody),
@@ -369,7 +369,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	msgWithoutPld, err := client.EncryptMessage(kemPubKey, []byte{123})
+	msgWithoutPld, err := client.EncryptMessage(pubKey, []byte{123})
 	if err != nil {
 		t.Error(err)
 		return
@@ -389,7 +389,7 @@ func TestHandleWrapper(t *testing.T) {
 	)
 
 	msg2, err := client.EncryptMessage(
-		kemPubKey,
+		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -407,7 +407,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg3, err := client.EncryptMessage(
-		kemPubKey,
+		pubKey,
 		payload.NewPayload64(
 			uint64(111),
 			[]byte("?"+tcMsgBody),
@@ -425,7 +425,7 @@ func TestHandleWrapper(t *testing.T) {
 	}
 
 	msg4, err := client.EncryptMessage(
-		kemPubKey,
+		pubKey,
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(false), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -466,7 +466,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	client := node.fQueue.GetClient()
 
 	msg, err := client.EncryptMessage(
-		client.GetPrivKey().GetKEMPrivKey().GetPubKey(),
+		client.GetPrivKey().GetPubKey(),
 		payload.NewPayload64(
 			joinHead(sAction(1).setType(true), 111).uint64(),
 			[]byte(tcMsgBody),
@@ -531,7 +531,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	client := node.fQueue.GetClient()
-	pubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
+	pubKey := client.GetPrivKey().GetPubKey()
 	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
 	node.setAction(actionKey)
@@ -740,7 +740,7 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 				asymmetric.NewPrivKey(),
 				tcMsgSize,
 			),
-			asymmetric.NewKEMPrivKey().GetPubKey(),
+			asymmetric.NewPrivKey().GetPubKey(),
 		),
 		asymmetric.NewMapPubKeys(),
 	)

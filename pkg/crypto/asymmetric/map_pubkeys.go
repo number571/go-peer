@@ -3,7 +3,7 @@ package asymmetric
 import (
 	"sync"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -13,30 +13,29 @@ var (
 // F2F connection mode.
 type sMapPubKeys struct {
 	fMutex   sync.RWMutex
-	fMapping map[string]struct{}
+	fMapping map[string]IPubKey
 }
 
-func NewMapPubKeys() IMapPubKeys {
-	return &sMapPubKeys{
-		fMapping: make(map[string]struct{}),
+func NewMapPubKeys(pPubKeys ...IPubKey) IMapPubKeys {
+	mapPubKeys := &sMapPubKeys{
+		fMapping: make(map[string]IPubKey, 256),
 	}
-}
-
-// Add public key to list of friends.
-func (p *sMapPubKeys) SetPubKey(pPubKey IPubKey) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fMapping[hashkey(pPubKey)] = struct{}{}
+	for _, pk := range pPubKeys {
+		mapPubKeys.SetPubKey(pk)
+	}
+	return mapPubKeys
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sMapPubKeys) InPubKeys(pPubKey IPubKey) bool {
+func (p *sMapPubKeys) GetPubKey(pHash []byte) IPubKey {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	_, ok := p.fMapping[hashkey(pPubKey)]
-	return ok
+	pubKey, ok := p.fMapping[encoding.HexEncode(pHash)]
+	if !ok {
+		return nil
+	}
+	return pubKey
 }
 
 // Delete public key from list of friends.
@@ -44,9 +43,13 @@ func (p *sMapPubKeys) DelPubKey(pPubKey IPubKey) {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
-	delete(p.fMapping, hashkey(pPubKey))
+	delete(p.fMapping, pPubKey.GetHasher().ToString())
 }
 
-func hashkey(pPubKey IPubKey) string {
-	return hashing.NewHasher(pPubKey.ToBytes()).ToString()
+// Add public key to list of friends.
+func (p *sMapPubKeys) SetPubKey(pPubKey IPubKey) {
+	p.fMutex.Lock()
+	defer p.fMutex.Unlock()
+
+	p.fMapping[pPubKey.GetHasher().ToString()] = pPubKey
 }

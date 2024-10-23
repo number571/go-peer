@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- Update `pkg/client`: update interface IClient: EncryptMessage, DecryptMessage
+
 <!-- ... -->
 
 ## v1.7.1

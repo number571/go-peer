@@ -6,9 +6,12 @@ import (
 	"os"
 
 	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 )
 
 func decrypt(client client.IClient, outFilename, inFilename string) error {
+	mapKeys := asymmetric.NewMapPubKeys(client.GetPrivKey().GetPubKey())
+
 	infile, err := os.Open(inFilename)
 	if err != nil {
 		return err
@@ -33,7 +36,7 @@ func decrypt(client client.IClient, outFilename, inFilename string) error {
 		if uint64(n) != client.GetMessageSize() {
 			return errors.New("uint64(n) != msgSize")
 		}
-		_, chunk, err := client.DecryptMessage(buf[:n])
+		_, chunk, err := client.DecryptMessage(mapKeys, buf[:n])
 		if err != nil {
 			return err
 		}

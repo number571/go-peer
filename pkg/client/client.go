@@ -34,8 +34,8 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		fPrivKey:     pPrivKey,
 	}
 
-	kemPubKey := client.GetPrivKey().GetKEMPrivKey().GetPubKey()
-	encMsg, err := client.encryptWithParams(kemPubKey, []byte{}, 0)
+	pubKey := client.GetPrivKey().GetPubKey()
+	encMsg, err := client.encryptWithParams(pubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +68,7 @@ func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptMessage(pRecv asymmetric.IKEMPubKey, pMsg []byte) ([]byte, error) {
+func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
 	var (
 		payloadLimit = p.GetPayloadLimit()
 		resultSize   = uint64(len(pMsg))
@@ -82,27 +82,27 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IKEMPubKey, pMsg []byte) ([]by
 }
 
 func (p *sClient) encryptWithParams(
-	pRecv asymmetric.IKEMPubKey,
+	pRecv asymmetric.IPubKey,
 	pMsg []byte,
 	pPadd uint64,
 ) ([]byte, error) {
 	var (
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
-		pkey = p.fPrivKey.GetPubKey().ToBytes()
+		pkid = p.fPrivKey.GetPubKey().GetHasher().ToBytes()
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			pkey,
+			pkid,
 			pRecv.ToBytes(),
 			data,
 		},
 		[]byte{},
 	)).ToBytes()
 
-	ct, sk, err := pRecv.Encapsulate()
+	ct, sk, err := pRecv.GetKEMPubKey().Encapsulate()
 	if err != nil {
 		return nil, ErrEncryptSymmetricKey
 	}
@@ -111,7 +111,7 @@ func (p *sClient) encryptWithParams(
 	return message.NewMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			pkey,
+			pkid,
 			salt,
 			hash,
 			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
@@ -122,15 +122,14 @@ func (p *sClient) encryptWithParams(
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error) {
+func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
 	msg, err := message.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
-	kemPrivKey := p.fPrivKey.GetKEMPrivKey()
-	skey, err := kemPrivKey.Decapsulate(msg.GetEnck())
+	skey, err := p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
 	if err != nil {
 		return nil, nil, ErrDecryptCipherKey
 	}
@@ -144,34 +143,33 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 
 	// Decode wrapped data.
 	var (
-		pkey = decSlice[0]
+		pkid = decSlice[0]
 		salt = decSlice[1]
 		hash = decSlice[2]
 		sign = decSlice[3]
 		data = decSlice[4]
 	)
 
-	// Load public key and check standart size.
-	pubKey := asymmetric.LoadPubKey(pkey)
-	if pubKey == nil {
+	sPubKey := pMapPubKeys.GetPubKey(pkid)
+	if sPubKey == nil {
 		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			pubKey.ToBytes(),
-			kemPrivKey.GetPubKey().ToBytes(),
+			sPubKey.ToBytes(),
+			p.fPrivKey.GetPubKey().ToBytes(),
 			data,
 		},
 		[]byte{},
 	)).ToBytes()
-	if !bytes.Equal(check, hash) {
+	if bytes.Equal(check, hash) {
 		return nil, nil, ErrInvalidDataHash
 	}
 
 	// Verify sign by public key of sender and hash of message.
-	if !pubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
+	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
 		return nil, nil, ErrInvalidHashSign
 	}
 
@@ -182,5 +180,5 @@ func (p *sClient) DecryptMessage(pMsg []byte) (asymmetric.IPubKey, []byte, error
 	}
 
 	// Return public key of sender with payload.
-	return pubKey, payloadWrapper[0], nil
+	return sPubKey, payloadWrapper[0], nil
 }
