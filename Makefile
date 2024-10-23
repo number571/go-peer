@@ -52,8 +52,7 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		# recommended to add an option -shuffle=on if [go version >= 1.17]; \
-		go test -race -cover -count=1 `$(_GO_TEST_LIST)`; \
+		go test -race -cover -count=1 -shuffle=on `$(_GO_TEST_LIST)`; \
 		$(_CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
