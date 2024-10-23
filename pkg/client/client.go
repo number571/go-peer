@@ -94,11 +94,7 @@ func (p *sClient) encryptWithParams(
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{
-			pkid,
-			pRecv.ToBytes(),
-			data,
-		},
+		[][]byte{pkid, pRecv.ToBytes(), data},
 		[]byte{},
 	)).ToBytes()
 

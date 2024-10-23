@@ -20,8 +20,6 @@ var (
 	ErrDecodePayloadWrapper = &SClientError{"decode payload wrapper"}
 	ErrInvalidDataHash      = &SClientError{"invalid data hash"}
 	ErrInvalidHashSign      = &SClientError{"invalid hash sign"}
-	ErrDecodePayload        = &SClientError{"decode payload"}
 	ErrEncryptSymmetricKey  = &SClientError{"encrypt symmetric key"}
 	ErrDecodeBytesJoiner    = &SClientError{"decode bytes joiner"}
-	ErrInvalidPubKeySize    = &SClientError{"invalid pub key size"}
 )
