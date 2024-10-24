@@ -89,12 +89,12 @@ func (p *sClient) encryptWithParams(
 	var (
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
-		pkid = p.fPrivKey.GetPubKey().GetHasher().ToBytes()
+		pkey = p.fPrivKey.GetPubKey()
 	)
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{pkid, pRecv.GetHasher().ToBytes(), data},
+		[][]byte{pkey.ToBytes(), pRecv.ToBytes(), data},
 		[]byte{},
 	)).ToBytes()
 
@@ -107,7 +107,7 @@ func (p *sClient) encryptWithParams(
 	return message.NewMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			pkid,
+			pkey.GetHasher().ToBytes(),
 			salt,
 			hash,
 			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
@@ -155,8 +155,8 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			sPubKey.GetHasher().ToBytes(),
-			p.fPrivKey.GetPubKey().GetHasher().ToBytes(),
+			sPubKey.ToBytes(),
+			p.fPrivKey.GetPubKey().ToBytes(),
 			data,
 		},
 		[]byte{},
