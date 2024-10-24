@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `cmd/tools/keysplit`: deleted
+
 <!-- ... -->
 
 ## v1.7.2
