@@ -94,7 +94,7 @@ func (p *sClient) encryptWithParams(
 
 	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
 	hash := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{pkid, pRecv.ToBytes(), data},
+		[][]byte{pkid, pRecv.GetHasher().ToBytes(), data},
 		[]byte{},
 	)).ToBytes()
 
@@ -146,6 +146,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		data = decSlice[4]
 	)
 
+	// Get public key from map by pkid (hash)
 	sPubKey := pMapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
 		return nil, nil, ErrDecodePublicKey
@@ -154,13 +155,13 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
 		[][]byte{
-			sPubKey.ToBytes(),
-			p.fPrivKey.GetPubKey().ToBytes(),
+			sPubKey.GetHasher().ToBytes(),
+			p.fPrivKey.GetPubKey().GetHasher().ToBytes(),
 			data,
 		},
 		[]byte{},
 	)).ToBytes()
-	if bytes.Equal(check, hash) {
+	if !bytes.Equal(check, hash) {
 		return nil, nil, ErrInvalidDataHash
 	}
 
