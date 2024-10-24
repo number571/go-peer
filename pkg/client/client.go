@@ -154,11 +154,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{
-			sPubKey.ToBytes(),
-			p.fPrivKey.GetPubKey().ToBytes(),
-			data,
-		},
+		[][]byte{sPubKey.ToBytes(), p.fPrivKey.GetPubKey().ToBytes(), data},
 		[]byte{},
 	)).ToBytes()
 	if !bytes.Equal(check, hash) {
