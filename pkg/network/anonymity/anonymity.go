@@ -36,7 +36,7 @@ type sNode struct {
 	fKVDatavase    database.IKVDatabase
 	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
-	fFriends       asymmetric.IMapPubKeys
+	fMapPubKeys    asymmetric.IMapPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -47,7 +47,7 @@ func NewNode(
 	pKVDatavase database.IKVDatabase,
 	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
-	pFriends asymmetric.IMapPubKeys,
+	pMapPubKeys asymmetric.IMapPubKeys,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -56,7 +56,7 @@ func NewNode(
 		fKVDatavase:    pKVDatavase,
 		fNetwork:       pNetwork,
 		fQueue:         pQueue,
-		fFriends:       pFriends,
+		fMapPubKeys:    pMapPubKeys,
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
 		fHandleActions: make(map[string]chan []byte, 64),
 	}
@@ -132,7 +132,7 @@ func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
 
 // Return f2f structure.
 func (p *sNode) GetMapPubKeys() asymmetric.IMapPubKeys {
-	return p.fFriends
+	return p.fMapPubKeys
 }
 
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
@@ -237,7 +237,7 @@ func (p *sNode) networkHandler(
 	}
 
 	// try decrypt message
-	pubKey, decMsg, err := client.DecryptMessage(p.fFriends, encMsg)
+	pubKey, decMsg, err := client.DecryptMessage(p.fMapPubKeys, encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
