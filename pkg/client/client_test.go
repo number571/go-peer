@@ -169,22 +169,29 @@ func TestDecrypt(t *testing.T) {
 		return
 	}
 
+	mapKeys := asymmetric.NewMapPubKeys(pubKey)
+
+	if _, _, err := client.DecryptMessage(mapKeys, enc); err != nil {
+		t.Error(err)
+		return
+	}
+
 	enc[0] ^= 1
-	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
+	if _, _, err := client.DecryptMessage(mapKeys, enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (2)")
 		return
 	}
 
 	enc[0] ^= 1
 	enc[len(enc)-1] ^= 1
-	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
+	if _, _, err := client.DecryptMessage(mapKeys, enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (3)")
 		return
 	}
 
 	enc[len(enc)-1] ^= 1
-	enc[len(enc)-2000] ^= 1
-	if _, _, err := client.DecryptMessage(asymmetric.NewMapPubKeys(), enc); err == nil {
+	enc[asymmetric.CKEMCiphertextSize+symmetric.CCipherBlockSize+2*encoding.CSizeUint32+hashing.CHasherSize+1] ^= 1
+	if _, _, err := client.DecryptMessage(mapKeys, enc); err == nil {
 		t.Error("success decrypt with invalid ciphertext (4)")
 		return
 	}

@@ -109,9 +109,9 @@ func (p *sClient) encryptWithParams(
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
 			pkey.GetHasher().ToBytes(),
 			salt,
+			data,
 			hash,
 			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
-			data,
 		})),
 	).ToBytes(), nil
 }
@@ -141,9 +141,9 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	var (
 		pkid = decSlice[0]
 		salt = decSlice[1]
-		hash = decSlice[2]
-		sign = decSlice[3]
-		data = decSlice[4]
+		data = decSlice[2]
+		hash = decSlice[3]
+		sign = decSlice[4]
 	)
 
 	// Get public key from map by pkid (hash)
