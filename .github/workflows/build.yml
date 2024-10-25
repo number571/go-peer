@@ -2,25 +2,18 @@ name: build
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
+    branches: ["master", "develop"]
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-    - name: Applications installing...
-      run: sudo apt-get update && sudo apt-get install -y wget gcc make git
-    - name: Set up Go 1.23
-      uses: actions/setup-go@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v2
       with:
           go-version: 1.23.0
-    - name: Go-peer version
-      run: export PATH=$PATH:$(go env GOPATH)/bin && go version
-    - name: Go-peer downloading...
-      run: git clone --depth=1 https://github.com/number571/go-peer.git
+    - name: Applications installing...
+      run: sudo apt-get update && sudo apt-get install -y wget
     - name: Go-peer deps installing...
-      run: export PATH=$PATH:$(go env GOPATH)/bin && make install-deps -C go-peer
+      run: export PATH=$PATH:$(go env GOPATH)/bin && make install-deps
     - name: Go-peer lint/test running...
-      run: export PATH=$PATH:$(go env GOPATH)/bin && make -C go-peer
+      run: export PATH=$PATH:$(go env GOPATH)/bin && make
