@@ -43,22 +43,19 @@ type sRandPool struct {
 	fReceiver asymmetric.IPubKey
 }
 
-func NewQBProblemProcessor(
-	pSettings ISettings,
-	pClient client.IClient,
-	pReceiver asymmetric.IPubKey,
-) IQBProblemProcessor {
+func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProblemProcessor {
+	poolCap := pSettings.GetPoolCapacity()
 	return &sQBProblemProcessor{
 		fState:    state.NewBoolState(),
 		fSettings: pSettings,
 		fClient:   pClient,
 		fMainPool: &sMainPool{
-			fQueue:    make(chan net_message.IMessage, pSettings.GetMainPoolCapacity()),
-			fRawQueue: make(chan []byte, pSettings.GetMainPoolCapacity()),
+			fQueue:    make(chan net_message.IMessage, poolCap[0]),
+			fRawQueue: make(chan []byte, poolCap[0]),
 		},
 		fRandPool: &sRandPool{
-			fQueue:    make(chan net_message.IMessage, pSettings.GetRandPoolCapacity()),
-			fReceiver: pReceiver,
+			fQueue:    make(chan net_message.IMessage, poolCap[1]),
+			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
 		},
 	}
 }
@@ -72,57 +69,52 @@ func (p *sQBProblemProcessor) GetClient() client.IClient {
 }
 
 func (p *sQBProblemProcessor) Run(pCtx context.Context) error {
+	ctx, cancel := context.WithCancel(pCtx)
+	defer cancel()
+
 	if err := p.fState.Enable(nil); err != nil {
 		return utils.MergeErrors(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(nil) }()
 
-	const numProcs = 2
-	chBufErr := make(chan error, numProcs)
-
 	wg := sync.WaitGroup{}
-	wg.Add(numProcs)
+	wg.Add(2)
 
-	go p.runRandPoolFiller(pCtx, &wg, chBufErr)
-	go p.runMainPoolFiller(pCtx, &wg, chBufErr)
+	go p.runRandPoolFiller(ctx, cancel, &wg)
+	go p.runMainPoolFiller(ctx, cancel, &wg)
 
 	wg.Wait()
-	close(chBufErr)
-
-	errList := make([]error, 0, numProcs)
-	for err := range chBufErr {
-		errList = append(errList, err)
-	}
-	return utils.MergeErrors(errList...)
+	return ctx.Err()
 }
 
-func (p *sQBProblemProcessor) runRandPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
-	defer pWg.Done()
-
+func (p *sQBProblemProcessor) runRandPoolFiller(pCtx context.Context, pCancel func(), pWG *sync.WaitGroup) {
+	defer func() {
+		pWG.Done()
+		pCancel()
+	}()
 	for {
 		select {
 		case <-pCtx.Done():
-			chErr <- pCtx.Err()
 			return
 		default:
 			if err := p.fillRandPool(pCtx); err != nil {
-				chErr <- err
 				return
 			}
 		}
 	}
 }
 
-func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.WaitGroup, chErr chan<- error) {
-	defer pWg.Done()
+func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel func(), pWG *sync.WaitGroup) {
+	defer func() {
+		pWG.Done()
+		pCancel()
+	}()
 	for {
 		select {
 		case <-pCtx.Done():
-			chErr <- pCtx.Err()
 			return
-		case x := <-p.fMainPool.fRawQueue:
-			if err := p.fillMainPool(pCtx, x); err != nil {
-				chErr <- err
+		case msg := <-p.fMainPool.fRawQueue:
+			if err := p.pushMessage(pCtx, p.fMainPool.fQueue, msg); err != nil {
 				return
 			}
 		}
@@ -131,7 +123,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pWg *sync.
 
 func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
-	if uint64(incCount) > p.fSettings.GetMainPoolCapacity() {
+	if uint64(incCount) > uint64(cap(p.fMainPool.fQueue)) {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
@@ -145,14 +137,11 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 }
 
 func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) net_message.IMessage {
-	queuePeriod := p.fSettings.GetQueuePeriod()
-	addRandPeriod := time.Duration(random.NewRandom().GetUint64() % uint64(p.fSettings.GetRandQueuePeriod()+1))
-
 	for {
 		select {
 		case <-pCtx.Done():
 			return nil
-		case <-time.After(queuePeriod + addRandPeriod):
+		case <-time.After(p.fSettings.GetQueuePeriod()):
 			select {
 			case x := <-p.fMainPool.fQueue:
 				// the main queue is checked first
@@ -175,27 +164,9 @@ func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) net_message.I
 	}
 }
 
-func (p *sQBProblemProcessor) fillMainPool(pCtx context.Context, pMsg []byte) error {
-	chNetMsg := make(chan net_message.IMessage)
-	go func() {
-		chNetMsg <- net_message.NewMessage(
-			p.fSettings.GetMessageConstructSettings(),
-			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
-		)
-	}()
-
-	select {
-	case <-pCtx.Done():
-		return pCtx.Err()
-	case netMsg := <-chNetMsg:
-		p.fMainPool.fQueue <- netMsg
-		return nil
-	}
-}
-
 func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	incCount := atomic.AddInt64(&p.fRandPool.fCount, 1)
-	if uint64(incCount) > p.fSettings.GetRandPoolCapacity() {
+	if uint64(incCount) > uint64(cap(p.fRandPool.fQueue)) {
 		atomic.AddInt64(&p.fRandPool.fCount, -1)
 		select {
 		case <-pCtx.Done():
@@ -204,7 +175,6 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 			return nil
 		}
 	}
-
 	msg, err := p.fClient.EncryptMessage(
 		p.fRandPool.fReceiver,
 		random.NewRandom().GetBytes(encoding.CSizeUint64),
@@ -212,20 +182,22 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	if err != nil {
 		panic(err)
 	}
+	return p.pushMessage(pCtx, p.fRandPool.fQueue, msg)
+}
 
+func (p *sQBProblemProcessor) pushMessage(pCtx context.Context, pQueue chan<- net_message.IMessage, pMsg []byte) error {
 	chNetMsg := make(chan net_message.IMessage)
 	go func() {
 		chNetMsg <- net_message.NewMessage(
 			p.fSettings.GetMessageConstructSettings(),
-			payload.NewPayload32(p.fSettings.GetNetworkMask(), msg),
+			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
 		)
 	}()
-
 	select {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	case netMsg := <-chNetMsg:
-		p.fRandPool.fQueue <- netMsg
+		pQueue <- netMsg
 		return nil
 	}
 }

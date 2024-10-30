@@ -9,6 +9,8 @@
 ### CHANGES
 
 - `cmd/tools/keysplit`: deleted
+- `pkg/crypto/asymmetric`: append bench NewPrivKey
+- `pkg/network/anonymity/queue`: delete GetRandQueuePeriod
 
 <!-- ... -->
 

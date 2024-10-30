@@ -26,15 +26,13 @@ func main() {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FQueuePeriod:      time.Second,
-			FMainPoolCapacity: 1 << 5,
-			FRandPoolCapacity: 1 << 5,
+			FQueuePeriod:  time.Second,
+			FPoolCapacity: [2]uint64{1 << 5, 1 << 5},
 		}),
 		client.NewClient(
 			asymmetric.NewPrivKey(),
 			(8<<10),
 		),
-		asymmetric.NewPrivKey().GetPubKey(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())

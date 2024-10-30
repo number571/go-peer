@@ -36,7 +36,7 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 3; i++ {
 		testSettings(t, i)
 	}
 }
@@ -54,30 +54,19 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FRandPoolCapacity: tcQueueCap,
-			FQueuePeriod:      500 * time.Millisecond,
+			FQueuePeriod: 500 * time.Millisecond,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FMainPoolCapacity: tcQueueCap,
-			FQueuePeriod:      500 * time.Millisecond,
+			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
-			}),
-			FMainPoolCapacity: tcQueueCap,
-			FRandPoolCapacity: tcQueueCap,
-		})
-	case 3:
-		_ = NewSettings(&SSettings{
-			FMainPoolCapacity: tcQueueCap,
-			FRandPoolCapacity: tcQueueCap,
-			FQueuePeriod:      500 * time.Millisecond,
+			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePeriod:  500 * time.Millisecond,
 		})
 	}
 }
@@ -94,12 +83,10 @@ func TestRunStopQueue(t *testing.T) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FMainPoolCapacity: tcQueueCap,
-			FRandPoolCapacity: 1,
-			FQueuePeriod:      100 * time.Millisecond,
+			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePeriod:  100 * time.Millisecond,
 		}),
 		client,
-		asymmetric.NewPrivKey().GetPubKey(),
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -115,7 +102,7 @@ func TestRunStopQueue(t *testing.T) {
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
 		sQueue := queue.(*sQBProblemProcessor)
-		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetRandPoolCapacity() {
+		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetPoolCapacity()[0] {
 			return nil
 		}
 		return errors.New("len(void queue) != max capacity")
@@ -164,21 +151,18 @@ func TestQueue(t *testing.T) {
 					FWorkSizeBits: 10,
 				}),
 			}),
-			FNetworkMask:      1,
-			FMainPoolCapacity: tcQueueCap,
-			FRandPoolCapacity: tcQueueCap,
-			FQueuePeriod:      100 * time.Millisecond,
-			FRandQueuePeriod:  100 * time.Millisecond,
+			FNetworkMask:  1,
+			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePeriod:  100 * time.Millisecond,
 		}),
 		client.NewClient(
 			asymmetric.NewPrivKey(),
 			tcMsgSize,
 		),
-		asymmetric.NewPrivKey().GetPubKey(),
 	)
 
 	sett := queue.GetSettings()
-	if sett.GetMainPoolCapacity() != tcQueueCap {
+	if sett.GetPoolCapacity() != [2]uint64{tcQueueCap, tcQueueCap} {
 		t.Error("sett.GetMainCapacity() != tcQueueCap")
 		return
 	}

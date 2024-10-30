@@ -14,20 +14,16 @@ type SSettings sSettings
 type sSettings struct {
 	FMessageConstructSettings net_message.IConstructSettings
 	FNetworkMask              uint32
-	FMainPoolCapacity         uint64
-	FRandPoolCapacity         uint64
+	FPoolCapacity             [2]uint64
 	FQueuePeriod              time.Duration
-	FRandQueuePeriod          time.Duration
 }
 
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FMessageConstructSettings: pSett.FMessageConstructSettings,
 		FNetworkMask:              pSett.FNetworkMask,
-		FMainPoolCapacity:         pSett.FMainPoolCapacity,
-		FRandPoolCapacity:         pSett.FRandPoolCapacity,
+		FPoolCapacity:             pSett.FPoolCapacity,
 		FQueuePeriod:              pSett.FQueuePeriod,
-		FRandQueuePeriod:          pSett.FRandQueuePeriod,
 	}).mustNotNull()
 }
 
@@ -38,11 +34,8 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FQueuePeriod == 0 {
 		panic(`p.FQueuePeriod == 0`)
 	}
-	if p.FRandPoolCapacity == 0 {
-		panic(`p.FRandPoolCapacity == 0`)
-	}
-	if p.FMainPoolCapacity == 0 {
-		panic(`p.FMainPoolCapacity == 0`)
+	if p.FPoolCapacity[0] == 0 || p.FPoolCapacity[1] == 0 {
+		panic(`p.FPoolCapacity[0] == 0 || p.FPoolCapacity[1] == 0`)
 	}
 	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandQueuePeriod, p.FLimitVoidSizeBytes can be = 0
 	return p
@@ -56,18 +49,10 @@ func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
 }
 
-func (p *sSettings) GetMainPoolCapacity() uint64 {
-	return p.FMainPoolCapacity
-}
-
-func (p *sSettings) GetRandPoolCapacity() uint64 {
-	return p.FRandPoolCapacity
+func (p *sSettings) GetPoolCapacity() [2]uint64 {
+	return p.FPoolCapacity
 }
 
 func (p *sSettings) GetQueuePeriod() time.Duration {
 	return p.FQueuePeriod
-}
-
-func (p *sSettings) GetRandQueuePeriod() time.Duration {
-	return p.FRandQueuePeriod
 }
