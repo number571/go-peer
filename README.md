@@ -92,8 +92,7 @@ All cmd programs are compiled for {`amd64`, `arm64`} ARCH and {`windows`, `linux
 1. Go library [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt "bbolt") (used by `pkg/storage/database`)
 2. Go library [golang.org/x/crypto](https://golang.org/x/crypto "x/crypto") (used by `pkg/crypto/keybuilder`)
 3. Go library [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2 "yaml.v2") (used by `pkg/encoding`)
-4. Go library [github.com/g8rswimmer/error-chain](https://github.com/g8rswimmer/error-chain "error-chain") (used by `pkg/utils`)
-5. Go library [github.com/cloudflare/circl](https://github.com/cloudflare/circl "circl") (used by `pkg/crypto/asymmetric`)
+4. Go library [github.com/cloudflare/circl](https://github.com/cloudflare/circl "circl") (used by `pkg/crypto/asymmetric`)
 
 ### Makefile
 
