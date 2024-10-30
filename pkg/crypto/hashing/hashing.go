@@ -20,12 +20,10 @@ type sSHA512Hasher struct {
 }
 
 func NewHasher(pData []byte) IHasher {
-	h := sha512.New384()
-	h.Write(pData)
-	s := h.Sum(nil)
+	s := sha512.Sum384(pData)
 	return &sSHA512Hasher{
-		fHash:    s,
-		fHashStr: encoding.HexEncode(s),
+		fHash:    s[:],
+		fHashStr: encoding.HexEncode(s[:]),
 	}
 }
 
