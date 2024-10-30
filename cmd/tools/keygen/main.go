@@ -9,7 +9,6 @@ import (
 	"runtime"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 )
@@ -20,8 +19,10 @@ func main() {
 
 	seedBytes := random.NewRandom().GetBytes(asymmetric.CKeySeedSize)
 	if *seed {
-		keyBuilder := keybuilder.NewKeyBuilder(0, []byte{})
-		seedBytes = keyBuilder.Build(readUntilEOL(), asymmetric.CKeySeedSize)
+		seedBytes = encoding.HexDecode(readUntilEOL())
+		if len(seedBytes) != asymmetric.CKeySeedSize {
+			panic("len(seedBytes) != asymmetric.CKeySeedSize")
+		}
 	}
 
 	priv := asymmetric.NewPrivKeyFromSeed(seedBytes)
