@@ -1,9 +1,8 @@
 package state
 
 import (
+	"errors"
 	"sync"
-
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -29,7 +28,7 @@ func (p *sState) Enable(f IStateF) error {
 
 	if f != nil {
 		if err := f(); err != nil {
-			return utils.MergeErrors(ErrFuncEnable, err)
+			return errors.Join(ErrFuncEnable, err)
 		}
 	}
 
@@ -47,7 +46,7 @@ func (p *sState) Disable(f IStateF) error {
 
 	if f != nil {
 		if err := f(); err != nil {
-			return utils.MergeErrors(ErrFuncDisable, err)
+			return errors.Join(ErrFuncDisable, err)
 		}
 	}
 

@@ -1,7 +1,8 @@
 package database
 
 import (
-	"github.com/number571/go-peer/pkg/utils"
+	"errors"
+
 	"go.etcd.io/bbolt"
 )
 
@@ -20,7 +21,7 @@ type sKVDatabase struct {
 func NewKVDatabase(pPath string) (IKVDatabase, error) {
 	db, err := bbolt.Open(pPath, 0600, &bbolt.Options{})
 	if err != nil {
-		return nil, utils.MergeErrors(ErrOpenDB, err)
+		return nil, errors.Join(ErrOpenDB, err)
 	}
 
 	return &sKVDatabase{fDB: db}, nil
@@ -28,7 +29,7 @@ func NewKVDatabase(pPath string) (IKVDatabase, error) {
 
 func (p *sKVDatabase) Set(pKey []byte, pValue []byte) error {
 	if err := setDB(p.fDB, pKey, pValue); err != nil {
-		return utils.MergeErrors(ErrSetValueDB, err)
+		return errors.Join(ErrSetValueDB, err)
 	}
 	return nil
 }
@@ -46,7 +47,7 @@ func setDB(pDB *bbolt.DB, pKey []byte, pValue []byte) error {
 func (p *sKVDatabase) Get(pKey []byte) ([]byte, error) {
 	value, err := getDB(p.fDB, pKey)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrGetValueDB, err)
+		return nil, errors.Join(ErrGetValueDB, err)
 	}
 	return value, nil
 }
@@ -71,7 +72,7 @@ func getDB(pDB *bbolt.DB, pKey []byte) ([]byte, error) {
 
 func (p *sKVDatabase) Del(pKey []byte) error {
 	if err := delDB(p.fDB, pKey); err != nil {
-		return utils.MergeErrors(ErrDelValueDB, err)
+		return errors.Join(ErrDelValueDB, err)
 	}
 	return nil
 }
@@ -88,7 +89,7 @@ func delDB(pDB *bbolt.DB, pKey []byte) error {
 
 func (p *sKVDatabase) Close() error {
 	if err := p.fDB.Close(); err != nil {
-		return utils.MergeErrors(ErrCloseDB, err)
+		return errors.Join(ErrCloseDB, err)
 	}
 	return nil
 }

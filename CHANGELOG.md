@@ -12,6 +12,7 @@
 - `pkg/crypto/asymmetric`: append bench NewPrivKey
 - `pkg/network/anonymity/queue`: delete GetRandQueuePeriod
 - `cmd/tools/keygen`: add 'seed' param to generate private key
+- `pkg/utils`: deleted
 
 <!-- ... -->
 

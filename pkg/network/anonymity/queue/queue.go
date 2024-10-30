@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -12,7 +13,6 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
-	"github.com/number571/go-peer/pkg/utils"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -73,7 +73,7 @@ func (p *sQBProblemProcessor) Run(pCtx context.Context) error {
 	defer cancel()
 
 	if err := p.fState.Enable(nil); err != nil {
-		return utils.MergeErrors(ErrRunning, err)
+		return errors.Join(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(nil) }()
 
@@ -130,7 +130,7 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 	rawMsg, err := p.fClient.EncryptMessage(pPubKey, pBytes)
 	if err != nil {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
-		return utils.MergeErrors(ErrEncryptMessage, err)
+		return errors.Join(ErrEncryptMessage, err)
 	}
 	p.fMainPool.fRawQueue <- rawMsg
 	return nil

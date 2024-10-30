@@ -3,13 +3,13 @@ package conn
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload/joiner"
-	"github.com/number571/go-peer/pkg/utils"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -28,7 +28,7 @@ func Connect(pCtx context.Context, pSett ISettings, pAddr string) (IConn, error)
 	dialer := &net.Dialer{Timeout: pSett.GetDialTimeout()}
 	conn, err := dialer.DialContext(pCtx, "tcp", pAddr)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrCreateConnection, err)
+		return nil, errors.Join(ErrCreateConnection, err)
 	}
 	return LoadConn(pSett, conn), nil
 }
@@ -58,7 +58,7 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg net_message.IMessage) er
 
 	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pMsg.ToBytes()})
 	if err := p.sendBytes(pCtx, bytesJoiner); err != nil {
-		return utils.MergeErrors(ErrSendPayloadBytes, err)
+		return errors.Join(ErrSendPayloadBytes, err)
 	}
 
 	return nil
@@ -68,18 +68,18 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_
 	// large wait read deadline => the connection has not sent anything yet
 	msgSize, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadTimeout())
 	if err != nil {
-		return nil, utils.MergeErrors(ErrReadHeaderBytes, err)
+		return nil, errors.Join(ErrReadHeaderBytes, err)
 	}
 
 	dataBytes, err := p.recvDataBytes(pCtx, msgSize, p.fSettings.GetReadTimeout())
 	if err != nil {
-		return nil, utils.MergeErrors(ErrReadBodyBytes, err)
+		return nil, errors.Join(ErrReadBodyBytes, err)
 	}
 
 	// try unpack message from bytes
 	msg, err := net_message.LoadMessage(p.fSettings.GetMessageSettings(), dataBytes)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrInvalidMessageBytes, err)
+		return nil, errors.Join(ErrInvalidMessageBytes, err)
 	}
 
 	return msg, nil
@@ -93,12 +93,12 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 			return pCtx.Err()
 		default:
 			if err := p.fSocket.SetWriteDeadline(time.Now().Add(p.fSettings.GetWriteTimeout())); err != nil {
-				return utils.MergeErrors(ErrSetWriteDeadline, err)
+				return errors.Join(ErrSetWriteDeadline, err)
 			}
 
 			n, err := p.fSocket.Write(pBytes[:bytesPtr])
 			if err != nil {
-				return utils.MergeErrors(ErrWriteToSocket, err)
+				return errors.Join(ErrWriteToSocket, err)
 			}
 
 			bytesPtr -= uint64(n)
@@ -124,7 +124,7 @@ func (p *sConn) recvHeadBytes(
 	go func() {
 		headBytes, err = p.recvDataBytes(pCtx, encoding.CSizeUint32, pInitTimeout)
 		if err != nil {
-			chErr <- utils.MergeErrors(ErrReadHeaderBlock, err)
+			chErr <- errors.Join(ErrReadHeaderBlock, err)
 			return
 		}
 		chErr <- nil
@@ -159,7 +159,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeou
 	dataRaw := make([]byte, 0, pMustLen)
 
 	if err := p.fSocket.SetReadDeadline(time.Now().Add(pInitTimeout)); err != nil {
-		return nil, utils.MergeErrors(ErrSetReadDeadline, err)
+		return nil, errors.Join(ErrSetReadDeadline, err)
 	}
 
 	mustLen := pMustLen
@@ -171,7 +171,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeou
 			buffer := make([]byte, mustLen)
 			n, err := p.fSocket.Read(buffer)
 			if err != nil {
-				return nil, utils.MergeErrors(ErrReadFromSocket, err)
+				return nil, errors.Join(ErrReadFromSocket, err)
 			}
 
 			dataRaw = bytes.Join(
@@ -185,7 +185,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeou
 			mustLen -= uint32(n)
 
 			if err := p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout())); err != nil {
-				return nil, utils.MergeErrors(ErrSetReadDeadline, err)
+				return nil, errors.Join(ErrSetReadDeadline, err)
 			}
 		}
 	}

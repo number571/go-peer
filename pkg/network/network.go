@@ -2,13 +2,13 @@ package network
 
 import (
 	"context"
+	"errors"
 	"net"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
-	"github.com/number571/go-peer/pkg/utils"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -91,7 +91,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage
 				if err == nil {
 					return
 				}
-				listErr[i] = utils.MergeErrors(ErrBroadcastMessage, err)
+				listErr[i] = errors.Join(ErrBroadcastMessage, err)
 			}
 
 			// if got error -> delete connection
@@ -102,7 +102,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage
 	}
 
 	wg.Wait()
-	return utils.MergeErrors(listErr...)
+	return errors.Join(listErr...)
 }
 
 // Opens a tcp connection to receive data from outside.
@@ -111,7 +111,7 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage
 func (p *sNode) Listen(pCtx context.Context) error {
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
-		return utils.MergeErrors(ErrCreateListener, err)
+		return errors.Join(ErrCreateListener, err)
 	}
 	defer listener.Close()
 
@@ -123,7 +123,7 @@ func (p *sNode) Listen(pCtx context.Context) error {
 		default:
 			tconn, err := p.getListener().Accept()
 			if err != nil {
-				return utils.MergeErrors(ErrListenerAccept, err)
+				return errors.Join(ErrListenerAccept, err)
 			}
 
 			if p.hasMaxConnSize() {
@@ -155,7 +155,7 @@ func (p *sNode) Close() error {
 		listErr = append(listErr, conn.Close())
 	}
 
-	return utils.MergeErrors(listErr...)
+	return errors.Join(listErr...)
 }
 
 // Saves the function to the map by key for subsequent redirection.
@@ -194,7 +194,7 @@ func (p *sNode) AddConnection(pCtx context.Context, pAddress string) error {
 	sett := p.fSettings.GetConnSettings()
 	conn, err := conn.Connect(pCtx, sett, pAddress)
 	if err != nil {
-		return utils.MergeErrors(ErrAddConnections, err)
+		return errors.Join(ErrAddConnections, err)
 	}
 
 	p.setConnection(pAddress, conn)
@@ -216,7 +216,7 @@ func (p *sNode) DelConnection(pAddress string) error {
 	delete(p.fConnections, pAddress)
 
 	if err := conn.Close(); err != nil {
-		return utils.MergeErrors(ErrCloseConnection, err)
+		return errors.Join(ErrCloseConnection, err)
 	}
 
 	return nil

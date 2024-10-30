@@ -18,7 +18,6 @@ import (
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
-	"github.com/number571/go-peer/pkg/utils"
 
 	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
@@ -71,7 +70,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 		return nil
 	}
 	if err := p.fState.Enable(enableFunc); err != nil {
-		return utils.MergeErrors(ErrRunning, err)
+		return errors.Join(ErrRunning, err)
 	}
 
 	defer func() {
@@ -90,7 +89,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		case err := <-chErr:
-			return utils.MergeErrors(ErrProcessRun, err)
+			return errors.Join(ErrProcessRun, err)
 		default:
 			netMsg := p.fQueue.DequeueMessage(pCtx)
 			if netMsg == nil {
@@ -149,7 +148,7 @@ func (p *sNode) SendPayload(
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 	if err := p.enqueuePayload(logBuilder, pRecv, pPld); err != nil {
 		// internal logger
-		return utils.MergeErrors(ErrEnqueuePayload, err)
+		return errors.Join(ErrEnqueuePayload, err)
 	}
 	return nil
 }
@@ -175,12 +174,12 @@ func (p *sNode) FetchPayload(
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 	if err := p.enqueuePayload(logBuilder, pRecv, newPld); err != nil {
 		// internal logger
-		return nil, utils.MergeErrors(ErrEnqueuePayload, err)
+		return nil, errors.Join(ErrEnqueuePayload, err)
 	}
 
 	resp, err := p.recvResponse(pCtx, actionKey)
 	if err != nil {
-		return nil, utils.MergeErrors(ErrFetchResponse, err)
+		return nil, errors.Join(ErrFetchResponse, err)
 	}
 
 	return resp, nil
@@ -223,14 +222,14 @@ func (p *sNode) networkHandler(
 	if _, err := message.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
 		// problem from sender's side
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-		return utils.MergeErrors(ErrLoadMessage, err)
+		return errors.Join(ErrLoadMessage, err)
 	}
 
 	// try store hash of message
 	if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pNetMsg); !ok {
 		// internal logger
 		if err != nil {
-			return utils.MergeErrors(ErrStoreHashWithBroadcast, err)
+			return errors.Join(ErrStoreHashWithBroadcast, err)
 		}
 		// hash already exist in database
 		return nil
@@ -355,7 +354,7 @@ func (p *sNode) enqueuePayload(
 
 	if err := p.fQueue.EnqueueMessage(pRecv, pldBytes); err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
-		return utils.MergeErrors(ErrEnqueueMessage, err)
+		return errors.Join(ErrEnqueueMessage, err)
 	}
 
 	p.fLogger.PushInfo(pLogBuilder.WithType(logType))
@@ -409,12 +408,12 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 	}
 	if !errors.Is(err, database.ErrNotFound) {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogErroDatabaseGet))
-		return utils.MergeErrors(ErrGetHashFromDB, err)
+		return errors.Join(ErrGetHashFromDB, err)
 	}
 	// set hash to database with new address
 	if err := p.fKVDatavase.Set(pHash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
-		return utils.MergeErrors(ErrSetHashIntoDB, err)
+		return errors.Join(ErrSetHashIntoDB, err)
 	}
 	return nil
 }

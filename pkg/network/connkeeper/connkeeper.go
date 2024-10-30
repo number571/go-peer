@@ -2,12 +2,12 @@ package connkeeper
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/state"
-	"github.com/number571/go-peer/pkg/utils"
 )
 
 var (
@@ -38,7 +38,7 @@ func (p *sConnKeeper) GetSettings() ISettings {
 
 func (p *sConnKeeper) Run(pCtx context.Context) error {
 	if err := p.fState.Enable(nil); err != nil {
-		return utils.MergeErrors(ErrRunning, err)
+		return errors.Join(ErrRunning, err)
 	}
 	defer func() { _ = p.fState.Disable(nil) }()
 

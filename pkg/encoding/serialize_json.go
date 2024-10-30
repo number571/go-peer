@@ -2,8 +2,7 @@ package encoding
 
 import (
 	"encoding/json"
-
-	"github.com/number571/go-peer/pkg/utils"
+	"errors"
 )
 
 func SerializeJSON(pData interface{}) []byte {
@@ -13,7 +12,7 @@ func SerializeJSON(pData interface{}) []byte {
 
 func DeserializeJSON(pData []byte, pRes interface{}) error {
 	if err := json.Unmarshal(pData, pRes); err != nil {
-		return utils.MergeErrors(ErrDeserialize, err)
+		return errors.Join(ErrDeserialize, err)
 	}
 	return nil
 }
