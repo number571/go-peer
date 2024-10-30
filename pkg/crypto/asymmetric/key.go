@@ -10,6 +10,12 @@ import (
 )
 
 const (
+	CKeySeedSize = CKEMKeySeedSize + CDSAKeySeedSize
+	CPrivKeySize = CKEMPrivKeySize + CDSAPrivKeySize
+	CPubKeySize  = CKEMPubKeySize + CDSAPubKeySize
+)
+
+const (
 	cPrivKeyPrefix = "PrivKey{"
 	cPubKeyPrefix  = "PubKey{"
 	cKeySuffix     = "}"
@@ -33,8 +39,8 @@ type sPubKey struct {
 }
 
 func NewPrivKeyFromSeed(pSeed []byte) IPrivKey {
-	if len(pSeed) != CKEMKeySeedSize+CDSAKeySeedSize {
-		panic("len(pSeed) != CKEMKeySeedSize+CDSAKeySeedSize")
+	if len(pSeed) != CKeySeedSize {
+		panic("len(pSeed) != CKeySeedSize")
 	}
 	return newPrivKey(
 		NewKEMPrivKeyFromSeed(pSeed[:CKEMKeySeedSize]),
@@ -79,7 +85,7 @@ func LoadPrivKey(pKeychain interface{}) IPrivKey {
 		panic("unknown type private key chain")
 	}
 
-	if len(keychainBytes) != (CKEMPrivKeySize + CDSAPrivKeySize) {
+	if len(keychainBytes) != CPrivKeySize {
 		return nil
 	}
 
@@ -135,7 +141,7 @@ func LoadPubKey(pKeychain interface{}) IPubKey {
 		panic("unknown type public key chain")
 	}
 
-	if len(keychainBytes) != (CKEMPubKeySize + CDSAPubKeySize) {
+	if len(keychainBytes) != CPubKeySize {
 		return nil
 	}
 

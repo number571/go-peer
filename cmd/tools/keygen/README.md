@@ -4,5 +4,12 @@
 
 ```bash
 usage: 
-    go run .
+    go run . [-seed]
+```
+
+## Example
+
+```bash
+go run . -seed
+<priv-key-seed>
 ```
