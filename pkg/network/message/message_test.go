@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 var (
@@ -101,32 +100,9 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	voidBytes := msg.GetRand()
-	if len(voidBytes) > tcLimitVoid {
-		t.Error("got length void bytes > limit")
-		return
-	}
-
-	if (len(msg.ToBytes()) - len(voidBytes)) != len(msg.GetPayload().GetBody())+CMessageHeadSize {
-		t.Error("invalid message size in bytes with void")
-		return
-	}
-
-	payloadSize := encoding.Uint32ToBytes(uint32(len(pld.ToBytes())))
-	voidSize := encoding.Uint32ToBytes(uint32(len(voidBytes)))
-	payloadRandBytes := bytes.Join(
-		[][]byte{
-			payloadSize[:],
-			pld.ToBytes(),
-			voidSize[:],
-			voidBytes,
-		},
-		[]byte{},
-	)
-
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
-	newHash := hashing.NewHMACHasher(key, payloadRandBytes).ToBytes()
+	newHash := hashing.NewHMACHasher(key, pld.ToBytes()).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Error("payload hash not equal hash of message")
 		return
@@ -244,46 +220,12 @@ func TestMessage(t *testing.T) {
 		t.Error("success load invalid message 2")
 		return
 	}
-
-	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage3(sett, pld).ToBytes()); err == nil {
-		t.Error("success load invalid message 3")
-		return
-	}
 }
 
 func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes()})
 	sett := pSett.GetSettings()
 
-	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
-	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
-	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
-
-	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
-	proofBytes := encoding.Uint64ToBytes(proof)
-
-	cipher := symmetric.NewCipher(key)
-	return &sMessage{
-		fEncd: cipher.EncryptBytes(bytes.Join(
-			[][]byte{
-				proofBytes[:],
-				hash,
-				bytesJoiner,
-			},
-			[]byte{},
-		)),
-		fHash:    hash,
-		fProof:   proof,
-		fPayload: pPld,
-	}
-}
-
-func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewRandom()
-	sett := pSett.GetSettings()
-
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
-	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), voidBytes})
+	bytesJoiner := pPld.ToBytes()
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
@@ -305,18 +247,15 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			[]byte{},
 		)),
 		fHash:    hash,
-		fRand:    voidBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}
 }
 
-func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewRandom()
+func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	sett := pSett.GetSettings()
 
-	voidBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
-	bytesJoiner := joiner.NewBytesJoiner32([][]byte{nil, voidBytes})
+	bytesJoiner := []byte{}
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
@@ -336,7 +275,6 @@ func tNewInvalidMessage3(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			[]byte{},
 		)),
 		fHash:    hash,
-		fRand:    voidBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}

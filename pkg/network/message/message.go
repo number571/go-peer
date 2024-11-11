@@ -6,21 +6,18 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
-	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
-	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
 const (
-	// IV + Proof + Hash + (2xPayload32Head)=[len(data)+len(void)] + Payload32Head=[head]
-	// 16 + 8 + 48 + 2x4 + 4 = 84 additional bytes to origin message
+	// IV + Proof + Hash + Payload32Head=[head]
+	// 16 + 8 + 48 + 4 = 76 additional bytes to origin message
 	CMessageHeadSize = 0 +
 		1*symmetric.CCipherBlockSize +
 		1*encoding.CSizeUint64 +
 		1*hashing.CHasherSize +
-		2*encoding.CSizeUint32 +
 		1*encoding.CSizeUint32
 )
 
@@ -34,23 +31,19 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte             // E( K, P(HLMR) || HLMR || L(M) || M || L(R) || R )
-	fHash    []byte             // HLMR = H( K, L(M) || M || L(R) || R )
-	fRand    []byte             // R
-	fProof   uint64             // P(HLMR)
+	fEncd    []byte             // E( K, P(HM) || HM || M )
+	fHash    []byte             // HM = H( K, M )
+	fProof   uint64             // P(HM)
 	fPayload payload.IPayload32 // M
 }
 
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
-	prng := random.NewRandom()
 	sett := pSett.GetSettings()
-
-	randBytes := prng.GetBytes(prng.GetUint64() % (pSett.GetRandMessageSizeBytes() + 1))
-	bytesJoiner := joiner.NewBytesJoiner32([][]byte{pPld.ToBytes(), randBytes})
+	pldBytes := pPld.ToBytes()
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(sett.GetNetworkKey(), symmetric.CCipherKeySize)
-	hash := hashing.NewHMACHasher(key, bytesJoiner).ToBytes()
+	hash := hashing.NewHMACHasher(key, pldBytes).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
@@ -61,12 +54,11 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 			[][]byte{
 				proofBytes[:],
 				hash,
-				bytesJoiner,
+				pldBytes,
 			},
 			[]byte{},
 		)),
 		fHash:    hash,
-		fRand:    randBytes,
 		fProof:   proof,
 		fPayload: pPld,
 	}
@@ -102,17 +94,12 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	bytesSlice, err := joiner.LoadBytesJoiner32(dBytes[cHashIndex:])
-	if err != nil || len(bytesSlice) != 2 {
-		return nil, ErrDecodeBytesJoiner
-	}
-
 	newHash := hashing.NewHMACHasher(key, dBytes[cHashIndex:]).ToBytes()
 	if !bytes.Equal(hash, newHash) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payload := payload.LoadPayload32(bytesSlice[0])
+	payload := payload.LoadPayload32(dBytes[cHashIndex:])
 	if payload == nil {
 		return nil, ErrDecodePayload
 	}
@@ -120,7 +107,6 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	return &sMessage{
 		fEncd:    msgBytes,
 		fHash:    hash,
-		fRand:    bytesSlice[1],
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -132,10 +118,6 @@ func (p *sMessage) GetProof() uint64 {
 
 func (p *sMessage) GetHash() []byte {
 	return p.fHash
-}
-
-func (p *sMessage) GetRand() []byte {
-	return p.fRand
 }
 
 func (p *sMessage) GetPayload() payload.IPayload32 {
