@@ -10,6 +10,7 @@
 
 - `pkg/crypto/hashing`: doOnce encoding.HexEncode -> ToString method
 - `pkg/network/message`: delete GetRand, GetRandMessageSizeBytes
+- `pkg/network/anonymity`: delete GetNetworkMask
 
 <!-- ... -->
 

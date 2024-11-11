@@ -37,6 +37,5 @@ type INode interface {
 
 type ISettings interface {
 	GetServiceName() string
-	GetNetworkMask() uint32
 	GetFetchTimeout() time.Duration
 }

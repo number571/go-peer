@@ -774,7 +774,7 @@ func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsg
 	return net_message.NewMessage(
 		pSett,
 		payload.NewPayload32(
-			p.fSettings.GetNetworkMask(),
+			p.fQueue.GetSettings().GetNetworkMask(),
 			pMsgBytes,
 		),
 	)

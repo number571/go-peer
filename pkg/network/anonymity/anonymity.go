@@ -62,11 +62,10 @@ func NewNode(
 }
 
 func (p *sNode) Run(pCtx context.Context) error {
+	networkMask := p.fQueue.GetSettings().GetNetworkMask()
+
 	enableFunc := func() error {
-		p.fNetwork.HandleFunc(
-			p.fSettings.GetNetworkMask(),
-			p.networkHandler,
-		)
+		p.fNetwork.HandleFunc(networkMask, p.networkHandler)
 		return nil
 	}
 	if err := p.fState.Enable(enableFunc); err != nil {
@@ -75,7 +74,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 	defer func() {
 		disableFunc := func() error {
-			p.fNetwork.HandleFunc(p.fSettings.GetNetworkMask(), nil)
+			p.fNetwork.HandleFunc(networkMask, nil)
 			return nil
 		}
 		_ = p.fState.Disable(disableFunc)
