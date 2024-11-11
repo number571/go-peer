@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/crypto/hashing`: doOnce encoding.HexEncode -> ToString method
+
 <!-- ... -->
 
 ## v1.7.3
