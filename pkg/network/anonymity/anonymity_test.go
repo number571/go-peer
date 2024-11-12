@@ -77,7 +77,7 @@ func TestNodeSettings(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 1; i++ {
 		testSettings(t, i)
 	}
 }
@@ -89,22 +89,9 @@ func testSettings(t *testing.T, n int) {
 			return
 		}
 	}()
-	switch n {
+	switch n { // nolint: gocritic
 	case 0:
-		_ = NewSettings(&SSettings{
-			FNetworkMask:  1,
-			FFetchTimeout: time.Second,
-		})
-	case 1:
-		_ = NewSettings(&SSettings{
-			FServiceName:  "TEST",
-			FFetchTimeout: time.Second,
-		})
-	case 2:
-		_ = NewSettings(&SSettings{
-			FServiceName: "TEST",
-			FNetworkMask: 1,
-		})
+		_ = NewSettings(&SSettings{})
 	}
 }
 
@@ -694,7 +681,6 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:  "TEST",
-			FNetworkMask:  networkMask,
 			FFetchTimeout: timeWait,
 		}),
 		// internal_std_logger.NewStdLogger(&stLogging{}, internal_anon_logger.GetLogFunc()),

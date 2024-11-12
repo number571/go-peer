@@ -30,7 +30,6 @@ func newNode(serviceName, address string) anonymity.INode {
 	return anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  serviceName,
-			FNetworkMask:  networkMask,
 			FFetchTimeout: time.Minute,
 		}),
 		logger.NewLogger(
