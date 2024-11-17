@@ -1,7 +1,6 @@
 package hashing
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -21,8 +20,6 @@ func TestHasher(t *testing.T) {
 		t.Error("bit didn't change the result ")
 		return
 	}
-
-	fmt.Println(hash)
 }
 
 func TestHMACSHasher(t *testing.T) {
