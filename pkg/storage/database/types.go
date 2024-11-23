@@ -1,11 +1,9 @@
 package database
 
-import (
-	"github.com/number571/go-peer/pkg/types"
-)
+import "io"
 
 type IKVDatabase interface {
-	types.ICloser
+	io.Closer
 
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)

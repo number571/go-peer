@@ -8,6 +8,7 @@
 
 ### CHANGES
 
+- `pkg/types`: delete ICloser
 - `pkg/logger`: delete GetSettings
 - `pkg/network/anonymity/logger`: change interfaces
 

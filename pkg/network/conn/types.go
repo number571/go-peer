@@ -2,16 +2,15 @@ package conn
 
 import (
 	"context"
+	"io"
 	"net"
 	"time"
-
-	"github.com/number571/go-peer/pkg/types"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IConn interface {
-	types.ICloser
+	io.Closer
 
 	GetSettings() ISettings
 	GetSocket() net.Conn
