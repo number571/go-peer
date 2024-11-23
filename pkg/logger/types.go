@@ -8,8 +8,6 @@ type (
 )
 
 type ILogger interface {
-	GetSettings() ISettings
-
 	PushInfo(ILogArg)
 	PushWarn(ILogArg)
 	PushErro(ILogArg)

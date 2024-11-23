@@ -39,17 +39,10 @@ func newNode(serviceName, address string) anonymity.INode {
 				FErro: os.Stdout,
 			}),
 			func(ia logger.ILogArg) string {
-				logGetterFactory, ok := ia.(anon_logger.ILogGetterFactory)
+				logGetter, ok := ia.(anon_logger.ILogGetter)
 				if !ok {
 					panic("got invalid log arg")
 				}
-
-				logGetter := logGetterFactory.Get()
-				if logGetter.GetHash() == nil {
-					// request with null hash from sender
-					return ""
-				}
-
 				return fmt.Sprintf(
 					"name=%s code=%02x hash=%X proof=%08d bytes=%d",
 					logGetter.GetService(),

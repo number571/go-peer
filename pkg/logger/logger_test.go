@@ -21,13 +21,12 @@ const (
 func TestLoggerSettings(t *testing.T) {
 	t.Parallel()
 
-	logger := NewLogger(
+	_ = NewLogger(
 		NewSettings(&SSettings{}),
 		func(arg ILogArg) string {
 			return arg.(string)
 		},
 	)
-	_ = logger.GetSettings()
 }
 
 func TestNullLogger(t *testing.T) {

@@ -40,7 +40,7 @@ const (
 )
 
 type ILogBuilder interface {
-	ILogGetterFactory
+	Build() ILogGetter
 
 	WithType(ILogType) ILogBuilder
 	WithSize(int) ILogBuilder
@@ -48,10 +48,6 @@ type ILogBuilder interface {
 	WithHash([]byte) ILogBuilder
 	WithConn(conn.IConn) ILogBuilder
 	WithPubKey(asymmetric.IPubKey) ILogBuilder
-}
-
-type ILogGetterFactory interface {
-	Get() ILogGetter
 }
 
 type ILogGetter interface {

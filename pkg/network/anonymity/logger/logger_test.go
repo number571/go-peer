@@ -26,7 +26,7 @@ func TestLogger(t *testing.T) {
 		WithSize(tcSize).
 		WithType(CLogInfoExist)
 
-	getter := builder.Get()
+	getter := builder.Build()
 	if getter.GetService() != tcService {
 		t.Error("getter.GetService() != tcService")
 		return

@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/logger`: delete GetSettings
+- `pkg/network/anonymity/logger`: change interfaces
+
 <!-- ... -->
 
 ## v1.7.4

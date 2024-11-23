@@ -2,14 +2,16 @@ package logger
 
 import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/network/conn"
 )
 
 var (
-	_ ILogBuilder = &sLogBuilder{}
+	_ ILogBuilder = &sLogger{}
+	_ ILogGetter  = &sLogger{}
 )
 
-type sLogBuilder struct {
+type sLogger struct {
 	fService string
 	fType    ILogType
 	fHash    []byte
@@ -17,48 +19,74 @@ type sLogBuilder struct {
 	fSize    uint64
 	fPubKey  asymmetric.IPubKey
 	fConn    conn.IConn
-
-	fGetter ILogGetter
 }
 
 func NewLogBuilder(pService string) ILogBuilder {
-	logBuilder := &sLogBuilder{
+	logger := &sLogger{
 		fService: pService,
+		fHash:    make([]byte, hashing.CHasherSize),
 	}
-	logBuilder.fGetter = wrapLogBuilder(logBuilder)
-	return logBuilder
+	return logger
 }
 
-func (p *sLogBuilder) Get() ILogGetter {
-	return p.fGetter
+func (p *sLogger) GetService() string {
+	return p.fService
 }
 
-func (p *sLogBuilder) WithType(pType ILogType) ILogBuilder {
+func (p *sLogger) GetType() ILogType {
+	return p.fType
+}
+
+func (p *sLogger) GetConn() conn.IConn {
+	return p.fConn
+}
+
+func (p *sLogger) GetHash() []byte {
+	return p.fHash
+}
+
+func (p *sLogger) GetSize() uint64 {
+	return p.fSize
+}
+
+func (p *sLogger) GetPubKey() asymmetric.IPubKey {
+	return p.fPubKey
+}
+
+func (p *sLogger) GetProof() uint64 {
+	return p.fProof
+}
+
+func (p *sLogger) Build() ILogGetter {
+	return p
+}
+
+func (p *sLogger) WithType(pType ILogType) ILogBuilder {
 	p.fType = pType
 	return p
 }
 
-func (p *sLogBuilder) WithHash(pHash []byte) ILogBuilder {
+func (p *sLogger) WithHash(pHash []byte) ILogBuilder {
 	p.fHash = pHash
 	return p
 }
 
-func (p *sLogBuilder) WithProof(pProof uint64) ILogBuilder {
+func (p *sLogger) WithProof(pProof uint64) ILogBuilder {
 	p.fProof = pProof
 	return p
 }
 
-func (p *sLogBuilder) WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder {
+func (p *sLogger) WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder {
 	p.fPubKey = pPubKey
 	return p
 }
 
-func (p *sLogBuilder) WithConn(pConn conn.IConn) ILogBuilder {
+func (p *sLogger) WithConn(pConn conn.IConn) ILogBuilder {
 	p.fConn = pConn
 	return p
 }
 
-func (p *sLogBuilder) WithSize(pSize int) ILogBuilder {
+func (p *sLogger) WithSize(pSize int) ILogBuilder {
 	p.fSize = uint64(pSize)
 	return p
 }
