@@ -36,7 +36,7 @@ func newNode(serviceName, address string) anonymity.INode {
 			logger.NewSettings(&logger.SSettings{
 				FInfo: os.Stdout,
 				FWarn: os.Stdout,
-				FErro: os.Stdout,
+				FErro: os.Stderr,
 			}),
 			func(ia logger.ILogArg) string {
 				logGetter, ok := ia.(anon_logger.ILogGetter)
