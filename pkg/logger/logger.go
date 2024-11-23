@@ -10,9 +10,7 @@ var (
 )
 
 type sLogger struct {
-	fSettings ISettings
-	fLogFunc  ILogFunc
-
+	fLogFunc ILogFunc
 	fOutInfo *log.Logger
 	fOutWarn *log.Logger
 	fOutErro *log.Logger
@@ -26,10 +24,7 @@ const (
 )
 
 func NewLogger(pSett ISettings, pLogFunc ILogFunc) ILogger {
-	logger := &sLogger{
-		fSettings: pSett,
-		fLogFunc:  pLogFunc,
-	}
+	logger := &sLogger{fLogFunc: pLogFunc}
 
 	outInfo := pSett.GetInfoWriter()
 	if outInfo != nil {
@@ -47,10 +42,6 @@ func NewLogger(pSett ISettings, pLogFunc ILogFunc) ILogger {
 	}
 
 	return logger
-}
-
-func (p *sLogger) GetSettings() ISettings {
-	return p.fSettings
 }
 
 func (p *sLogger) PushInfo(pMsg ILogArg) {
