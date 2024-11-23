@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/number571/go-peer/build"
 )
 
 var (
@@ -22,14 +24,14 @@ func TestGoPeerVersion(t *testing.T) {
 		return
 	}
 
-	if strings.HasSuffix(CVersion, "~") {
-		if match[0][1] != CVersion {
+	if strings.HasSuffix(build.CVersion, "~") {
+		if match[0][1] != build.CVersion {
 			t.Error("the versions do not match")
 			return
 		}
 	} else {
 		// current version is always previous version in the changelog
-		if match[1][1] != CVersion {
+		if match[1][1] != build.CVersion {
 			t.Error("the versions do not match")
 			return
 		}
