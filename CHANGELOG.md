@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- Update `pkg/network/anonymity/queue`: add GetConsumersCap
+
 <!-- ... -->
 
 ## v1.7.5

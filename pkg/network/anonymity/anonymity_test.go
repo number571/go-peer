@@ -720,6 +720,7 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 				FNetworkMask:  networkMask,
 				FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
 				FQueuePeriod:  time.Second,
+				FConsumersCap: 1,
 			}),
 			client.NewClient(
 				asymmetric.NewPrivKey(),

@@ -89,6 +89,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				FNetworkMask:  networkMask,
 				FQueuePeriod:  2 * time.Second,
 				FPoolCapacity: [2]uint64{32, 32},
+				FConsumersCap: 1,
 			}),
 			client.NewClient(
 				asymmetric.NewPrivKey(),

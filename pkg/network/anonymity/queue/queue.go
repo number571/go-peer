@@ -29,12 +29,14 @@ type sQBProblemProcessor struct {
 
 	fMainPool *sMainPool
 	fRandPool *sRandPool
+
+	fConsumers map[string]uint64
 }
 
 type sMainPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan net_message.IMessage
-	fRawQueue chan []byte
+	fRawQueue map[uint64]chan []byte
 }
 
 type sRandPool struct {
@@ -50,13 +52,21 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 		fSettings: pSettings,
 		fClient:   pClient,
 		fMainPool: &sMainPool{
-			fQueue:    make(chan net_message.IMessage, poolCap[0]),
-			fRawQueue: make(chan []byte, poolCap[0]),
+			fQueue: make(chan net_message.IMessage, poolCap[0]),
+			fRawQueue: func() map[uint64]chan []byte {
+				consumersCap := pSettings.GetConsumersCap()
+				m := make(map[uint64]chan []byte, consumersCap)
+				for i := uint64(0); i < consumersCap; i++ {
+					m[i] = make(chan []byte, poolCap[0])
+				}
+				return m
+			}(),
 		},
 		fRandPool: &sRandPool{
 			fQueue:    make(chan net_message.IMessage, poolCap[1]),
 			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
 		},
+		fConsumers: make(map[string]uint64, 128),
 	}
 }
 
@@ -109,11 +119,13 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 		pWG.Done()
 		pCancel()
 	}()
-	for {
+	for i := uint64(0); ; i++ {
 		select {
 		case <-pCtx.Done():
 			return
-		case msg := <-p.fMainPool.fRawQueue:
+		case <-time.After(p.fSettings.GetQueuePeriod()):
+			break // next consumer
+		case msg := <-p.fMainPool.fRawQueue[i%p.fSettings.GetConsumersCap()]:
 			if err := p.pushMessage(pCtx, p.fMainPool.fQueue, msg); err != nil {
 				return
 			}
@@ -132,7 +144,13 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return errors.Join(ErrEncryptMessage, err)
 	}
-	p.fMainPool.fRawQueue <- rawMsg
+	hash := pPubKey.GetHasher().ToString()
+	v, ok := p.fConsumers[hash]
+	if !ok {
+		v = uint64(len(p.fConsumers)+1) % p.fSettings.GetConsumersCap()
+		p.fConsumers[hash] = v
+	}
+	p.fMainPool.fRawQueue[v] <- rawMsg
 	return nil
 }
 

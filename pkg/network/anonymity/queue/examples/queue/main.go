@@ -28,6 +28,7 @@ func main() {
 			}),
 			FQueuePeriod:  time.Second,
 			FPoolCapacity: [2]uint64{1 << 5, 1 << 5},
+			FConsumersCap: 1,
 		}),
 		client.NewClient(
 			asymmetric.NewPrivKey(),

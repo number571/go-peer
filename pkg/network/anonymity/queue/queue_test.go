@@ -36,7 +36,7 @@ func TestError(t *testing.T) {
 func TestSettings(t *testing.T) {
 	t.Parallel()
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		testSettings(t, i)
 	}
 }
@@ -54,7 +54,8 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FQueuePeriod: 500 * time.Millisecond,
+			FQueuePeriod:  500 * time.Millisecond,
+			FConsumersCap: 1,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
@@ -62,9 +63,19 @@ func testSettings(t *testing.T, n int) {
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
 			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FConsumersCap: 1,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
+			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePeriod:  500 * time.Millisecond,
+			FConsumersCap: 1,
+		})
+	case 3:
+		_ = NewSettings(&SSettings{
+			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
+				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			}),
 			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  500 * time.Millisecond,
 		})
@@ -85,6 +96,7 @@ func TestRunStopQueue(t *testing.T) {
 			}),
 			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
+			FConsumersCap: 1,
 		}),
 		client,
 	)
@@ -154,6 +166,7 @@ func TestQueue(t *testing.T) {
 			FNetworkMask:  1,
 			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
+			FConsumersCap: 1,
 		}),
 		client.NewClient(
 			asymmetric.NewPrivKey(),
