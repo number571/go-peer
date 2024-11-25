@@ -30,6 +30,7 @@ type sQBProblemProcessor struct {
 	fMainPool *sMainPool
 	fRandPool *sRandPool
 
+	fConsMutex sync.Mutex
 	fConsumers map[string]uint64
 }
 
@@ -66,7 +67,7 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 			fQueue:    make(chan net_message.IMessage, poolCap[1]),
 			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
 		},
-		fConsumers: make(map[string]uint64, 128),
+		fConsumers: make(map[string]uint64, 256),
 	}
 }
 
@@ -144,12 +145,14 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return errors.Join(ErrEncryptMessage, err)
 	}
+	p.fConsMutex.Lock()
 	hash := pPubKey.GetHasher().ToString()
 	v, ok := p.fConsumers[hash]
 	if !ok {
 		v = uint64(len(p.fConsumers)+1) % p.fSettings.GetConsumersCap()
 		p.fConsumers[hash] = v
 	}
+	p.fConsMutex.Unlock()
 	p.fMainPool.fRawQueue[v] <- rawMsg
 	return nil
 }
