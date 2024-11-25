@@ -53,7 +53,8 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 		fSettings: pSettings,
 		fClient:   pClient,
 		fMainPool: &sMainPool{
-			fQueue: make(chan net_message.IMessage, queuePoolCap[0]*consumersCap),
+			fQueue:     make(chan net_message.IMessage, queuePoolCap[0]*consumersCap),
+			fConsumers: make(map[string]uint64, 64),
 			fRawQueue: func() map[uint64]chan []byte {
 				m := make(map[uint64]chan []byte, consumersCap)
 				for i := uint64(0); i < consumersCap; i++ {
@@ -61,7 +62,6 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 				}
 				return m
 			}(),
-			fConsumers: make(map[string]uint64, 256),
 		},
 		fRandPool: &sRandPool{
 			fQueue:    make(chan net_message.IMessage, queuePoolCap[1]),
