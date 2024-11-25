@@ -15,7 +15,7 @@ type sSettings struct {
 	FMessageConstructSettings net_message.IConstructSettings
 	FNetworkMask              uint32
 	FConsumersCap             uint64
-	FPoolCapacity             [2]uint64
+	FQueuePoolCap             [2]uint64
 	FQueuePeriod              time.Duration
 }
 
@@ -24,7 +24,7 @@ func NewSettings(pSett *SSettings) ISettings {
 		FMessageConstructSettings: pSett.FMessageConstructSettings,
 		FNetworkMask:              pSett.FNetworkMask,
 		FConsumersCap:             pSett.FConsumersCap,
-		FPoolCapacity:             pSett.FPoolCapacity,
+		FQueuePoolCap:             pSett.FQueuePoolCap,
 		FQueuePeriod:              pSett.FQueuePeriod,
 	}).mustNotNull()
 }
@@ -36,8 +36,8 @@ func (p *sSettings) mustNotNull() ISettings {
 	if p.FQueuePeriod == 0 {
 		panic(`p.FQueuePeriod == 0`)
 	}
-	if p.FPoolCapacity[0] == 0 || p.FPoolCapacity[1] == 0 {
-		panic(`p.FPoolCapacity[0] == 0 || p.FPoolCapacity[1] == 0`)
+	if p.FQueuePoolCap[0] == 0 || p.FQueuePoolCap[1] == 0 {
+		panic(`p.FQueuePoolCap[0] == 0 || p.FQueuePoolCap[1] == 0`)
 	}
 	if p.FConsumersCap == 0 {
 		panic(`p.FConsumersLen == 0`)
@@ -54,8 +54,8 @@ func (p *sSettings) GetNetworkMask() uint32 {
 	return p.FNetworkMask
 }
 
-func (p *sSettings) GetPoolCapacity() [2]uint64 {
-	return p.FPoolCapacity
+func (p *sSettings) GetQueuePoolCap() [2]uint64 {
+	return p.FQueuePoolCap
 }
 
 func (p *sSettings) GetQueuePeriod() time.Duration {

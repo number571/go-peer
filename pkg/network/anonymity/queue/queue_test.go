@@ -62,12 +62,12 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FConsumersCap: 1,
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
-			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  500 * time.Millisecond,
 			FConsumersCap: 1,
 		})
@@ -76,7 +76,7 @@ func testSettings(t *testing.T, n int) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  500 * time.Millisecond,
 		})
 	}
@@ -94,7 +94,7 @@ func TestRunStopQueue(t *testing.T) {
 			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
-			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
@@ -114,7 +114,7 @@ func TestRunStopQueue(t *testing.T) {
 	err := testutils.TryN(50, 10*time.Millisecond, func() error {
 		sett := queue.GetSettings()
 		sQueue := queue.(*sQBProblemProcessor)
-		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetPoolCapacity()[0] {
+		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetQueuePoolCap()[0] {
 			return nil
 		}
 		return errors.New("len(void queue) != max capacity")
@@ -164,7 +164,7 @@ func TestQueue(t *testing.T) {
 				}),
 			}),
 			FNetworkMask:  1,
-			FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
@@ -175,7 +175,7 @@ func TestQueue(t *testing.T) {
 	)
 
 	sett := queue.GetSettings()
-	if sett.GetPoolCapacity() != [2]uint64{tcQueueCap, tcQueueCap} {
+	if sett.GetQueuePoolCap() != [2]uint64{tcQueueCap, tcQueueCap} {
 		t.Error("sett.GetMainCapacity() != tcQueueCap")
 		return
 	}

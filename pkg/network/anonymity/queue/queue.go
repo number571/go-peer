@@ -29,15 +29,14 @@ type sQBProblemProcessor struct {
 
 	fMainPool *sMainPool
 	fRandPool *sRandPool
-
-	fConsMutex sync.Mutex
-	fConsumers map[string]uint64
 }
 
 type sMainPool struct {
-	fCount    int64 // atomic variable
-	fQueue    chan net_message.IMessage
-	fRawQueue map[uint64]chan []byte
+	fMutex     sync.Mutex
+	fCount     int64 // atomic variable
+	fQueue     chan net_message.IMessage
+	fRawQueue  map[uint64]chan []byte
+	fConsumers map[string]uint64
 }
 
 type sRandPool struct {
@@ -47,27 +46,27 @@ type sRandPool struct {
 }
 
 func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProblemProcessor {
-	poolCap := pSettings.GetPoolCapacity()
+	consumersCap := pSettings.GetConsumersCap()
+	queuePoolCap := pSettings.GetQueuePoolCap()
 	return &sQBProblemProcessor{
 		fState:    state.NewBoolState(),
 		fSettings: pSettings,
 		fClient:   pClient,
 		fMainPool: &sMainPool{
-			fQueue: make(chan net_message.IMessage, poolCap[0]),
+			fQueue: make(chan net_message.IMessage, queuePoolCap[0]*consumersCap),
 			fRawQueue: func() map[uint64]chan []byte {
-				consumersCap := pSettings.GetConsumersCap()
 				m := make(map[uint64]chan []byte, consumersCap)
 				for i := uint64(0); i < consumersCap; i++ {
-					m[i] = make(chan []byte, poolCap[0])
+					m[i] = make(chan []byte, queuePoolCap[0])
 				}
 				return m
 			}(),
+			fConsumers: make(map[string]uint64, 256),
 		},
 		fRandPool: &sRandPool{
-			fQueue:    make(chan net_message.IMessage, poolCap[1]),
+			fQueue:    make(chan net_message.IMessage, queuePoolCap[1]),
 			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
 		},
-		fConsumers: make(map[string]uint64, 256),
 	}
 }
 
@@ -140,19 +139,22 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
+
 	rawMsg, err := p.fClient.EncryptMessage(pPubKey, pBytes)
 	if err != nil {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return errors.Join(ErrEncryptMessage, err)
 	}
-	p.fConsMutex.Lock()
+
+	p.fMainPool.fMutex.Lock()
 	hash := pPubKey.GetHasher().ToString()
-	v, ok := p.fConsumers[hash]
+	v, ok := p.fMainPool.fConsumers[hash]
 	if !ok {
-		v = uint64(len(p.fConsumers)+1) % p.fSettings.GetConsumersCap()
-		p.fConsumers[hash] = v
+		v = uint64(len(p.fMainPool.fConsumers)+1) % p.fSettings.GetConsumersCap()
+		p.fMainPool.fConsumers[hash] = v
 	}
-	p.fConsMutex.Unlock()
+	p.fMainPool.fMutex.Unlock()
+
 	p.fMainPool.fRawQueue[v] <- rawMsg
 	return nil
 }

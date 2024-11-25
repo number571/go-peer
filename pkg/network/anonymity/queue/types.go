@@ -26,5 +26,5 @@ type ISettings interface {
 	GetNetworkMask() uint32
 	GetConsumersCap() uint64
 	GetQueuePeriod() time.Duration
-	GetPoolCapacity() [2]uint64
+	GetQueuePoolCap() [2]uint64
 }

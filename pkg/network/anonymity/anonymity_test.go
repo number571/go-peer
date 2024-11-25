@@ -718,7 +718,7 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 					FRandMessageSizeBytes: limitVoidSize,
 				}),
 				FNetworkMask:  networkMask,
-				FPoolCapacity: [2]uint64{tcQueueCap, tcQueueCap},
+				FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 				FQueuePeriod:  time.Second,
 				FConsumersCap: 1,
 			}),

@@ -10,6 +10,10 @@
 
 - Update `pkg/network/anonymity/queue`: add GetConsumersCap
 
+### CHANGES
+
+- `pkg/network/anonymity/queue`: rename GetPoolCapacity -> GetQueuePoolCap
+
 <!-- ... -->
 
 ## v1.7.5

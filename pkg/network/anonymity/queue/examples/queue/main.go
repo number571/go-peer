@@ -27,7 +27,7 @@ func main() {
 				FSettings: net_message.NewSettings(&net_message.SSettings{}),
 			}),
 			FQueuePeriod:  time.Second,
-			FPoolCapacity: [2]uint64{1 << 5, 1 << 5},
+			FQueuePoolCap: [2]uint64{1 << 5, 1 << 5},
 			FConsumersCap: 1,
 		}),
 		client.NewClient(
