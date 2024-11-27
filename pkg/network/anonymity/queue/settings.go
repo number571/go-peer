@@ -40,9 +40,9 @@ func (p *sSettings) mustNotNull() ISettings {
 		panic(`p.FQueuePoolCap[0] == 0 || p.FQueuePoolCap[1] == 0`)
 	}
 	if p.FConsumersCap == 0 {
-		panic(`p.FConsumersLen == 0`)
+		panic(`p.FConsumersCap == 0`)
 	}
-	// p.FParallel, p.FNetworkMask, p.FWorkSizeBits, p.FRandQueuePeriod, p.FLimitVoidSizeBytes can be = 0
+	// p.FNetworkMask can be = 0
 	return p
 }
 

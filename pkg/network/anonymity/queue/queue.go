@@ -150,7 +150,7 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 	hash := pPubKey.GetHasher().ToString()
 	v, ok := p.fMainPool.fConsumers[hash]
 	if !ok {
-		v = uint64(len(p.fMainPool.fConsumers)+1) % p.fSettings.GetConsumersCap()
+		v = uint64(len(p.fMainPool.fConsumers)) % p.fSettings.GetConsumersCap()
 		p.fMainPool.fConsumers[hash] = v
 	}
 	p.fMainPool.fMutex.Unlock()
