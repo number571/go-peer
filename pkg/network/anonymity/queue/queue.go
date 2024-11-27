@@ -119,13 +119,13 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 		pWG.Done()
 		pCancel()
 	}()
-	for i := uint64(0); ; i++ {
+	for i := uint64(0); ; i = (i + 1) % p.fSettings.GetConsumersCap() {
 		select {
 		case <-pCtx.Done():
 			return
 		case <-time.After(p.fSettings.GetQueuePeriod()):
 			break // next consumer
-		case msg := <-p.fMainPool.fRawQueue[i%p.fSettings.GetConsumersCap()]:
+		case msg := <-p.fMainPool.fRawQueue[i]:
 			if err := p.pushMessage(pCtx, p.fMainPool.fQueue, msg); err != nil {
 				return
 			}
