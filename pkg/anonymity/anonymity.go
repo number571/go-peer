@@ -7,19 +7,17 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity/queue"
-	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
 
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
+	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
@@ -32,8 +30,9 @@ type sNode struct {
 	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
+	fProducer      IProducerF
+	fConsumer      IConsumerF
 	fKVDatavase    database.IKVDatabase
-	fNetwork       network.INode
 	fQueue         queue.IQBProblemProcessor
 	fMapPubKeys    asymmetric.IMapPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
@@ -43,8 +42,9 @@ type sNode struct {
 func NewNode(
 	pSett ISettings,
 	pLogger logger.ILogger,
+	pProducer IProducerF,
+	pConsumer IConsumerF,
 	pKVDatavase database.IKVDatabase,
-	pNetwork network.INode,
 	pQueue queue.IQBProblemProcessor,
 	pMapPubKeys asymmetric.IMapPubKeys,
 ) INode {
@@ -52,8 +52,9 @@ func NewNode(
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
 		fLogger:        pLogger,
+		fProducer:      pProducer,
+		fConsumer:      pConsumer,
 		fKVDatavase:    pKVDatavase,
-		fNetwork:       pNetwork,
 		fQueue:         pQueue,
 		fMapPubKeys:    pMapPubKeys,
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
@@ -62,48 +63,84 @@ func NewNode(
 }
 
 func (p *sNode) Run(pCtx context.Context) error {
-	networkMask := p.fQueue.GetSettings().GetNetworkMask()
-
-	enableFunc := func() error {
-		p.fNetwork.HandleFunc(networkMask, p.networkHandler)
-		return nil
-	}
-	if err := p.fState.Enable(enableFunc); err != nil {
+	if err := p.fState.Enable(nil); err != nil {
 		return errors.Join(ErrRunning, err)
 	}
+	defer func() { _ = p.fState.Disable(nil) }()
 
-	defer func() {
-		disableFunc := func() error {
-			p.fNetwork.HandleFunc(networkMask, nil)
-			return nil
-		}
-		_ = p.fState.Disable(disableFunc)
+	chCtx, cancel := context.WithCancel(pCtx)
+	defer cancel()
+
+	const N = 3
+
+	errs := [N]error{}
+	wg := &sync.WaitGroup{}
+	wg.Add(N)
+
+	go func() {
+		defer func() { wg.Done(); cancel() }()
+		errs[0] = p.fQueue.Run(chCtx)
+	}()
+	go func() {
+		defer func() { wg.Done(); cancel() }()
+		errs[1] = p.runConsumer(chCtx)
+	}()
+	go func() {
+		defer func() { wg.Done(); cancel() }()
+		errs[2] = p.runProducer(chCtx)
 	}()
 
-	chErr := make(chan error)
-	go func() { chErr <- p.fQueue.Run(pCtx) }()
+	wg.Wait()
+
+	select {
+	case <-pCtx.Done():
+		return pCtx.Err()
+	default:
+		for _, err := range errs {
+			if err != nil {
+				return err
+			}
+		}
+		panic("closed without errors")
+	}
+}
+
+func (p *sNode) runProducer(pCtx context.Context) error {
+	serviceName := p.fSettings.GetServiceName()
 
 	for {
 		select {
 		case <-pCtx.Done():
 			return pCtx.Err()
-		case err := <-chErr:
-			return errors.Join(ErrProcessRun, err)
 		default:
 			netMsg := p.fQueue.DequeueMessage(pCtx)
 			if netMsg == nil {
 				// context done
-				break
+				continue
 			}
 
-			logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-
-			// update logger state
-			p.enrichLogger(logBuilder, netMsg).
+			// create logger state
+			logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), netMsg).
 				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetPubKey())
 
 			// internal logger
-			_, _ = p.storeHashWithBroadcast(pCtx, logBuilder, netMsg)
+			_, _ = p.storeHashWithProduce(pCtx, logBuilder, netMsg)
+		}
+	}
+}
+
+func (p *sNode) runConsumer(pCtx context.Context) error {
+	for {
+		select {
+		case <-pCtx.Done():
+			return pCtx.Err()
+		default:
+			netMsg, err := p.fConsumer(pCtx)
+			if err != nil {
+				continue
+			}
+			// internal logger
+			_ = p.messageHandler(pCtx, netMsg)
 		}
 	}
 }
@@ -118,10 +155,6 @@ func (p *sNode) GetSettings() ISettings {
 
 func (p *sNode) GetKVDatabase() database.IKVDatabase {
 	return p.fKVDatavase
-}
-
-func (p *sNode) GetNetworkNode() network.INode {
-	return p.fNetwork
 }
 
 func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
@@ -202,17 +235,11 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
-func (p *sNode) networkHandler(
-	pCtx context.Context,
-	_ network.INode, // used as p.fNetwork
-	pConn conn.IConn,
-	pNetMsg net_message.IMessage,
-) error {
+func (p *sNode) messageHandler(pCtx context.Context, pNetMsg net_message.IMessage) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 	// update logger state
-	p.enrichLogger(logBuilder, pNetMsg).
-		WithConn(pConn)
+	p.enrichLogger(logBuilder, pNetMsg)
 
 	client := p.fQueue.GetClient()
 	encMsg := pNetMsg.GetPayload().GetBody()
@@ -225,10 +252,10 @@ func (p *sNode) networkHandler(
 	}
 
 	// try store hash of message
-	if ok, err := p.storeHashWithBroadcast(pCtx, logBuilder, pNetMsg); !ok {
+	if ok, err := p.storeHashWithProduce(pCtx, logBuilder, pNetMsg); !ok {
 		// internal logger
 		if err != nil {
-			return errors.Join(ErrStoreHashWithBroadcast, err)
+			return errors.Join(ErrStoreHashWithProduce, err)
 		}
 		// hash already exist in database
 		return nil
@@ -372,7 +399,7 @@ func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_me
 		WithSize(size)
 }
 
-func (p *sNode) storeHashWithBroadcast(
+func (p *sNode) storeHashWithProduce(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
 	pNetMsg net_message.IMessage,
@@ -387,7 +414,7 @@ func (p *sNode) storeHashWithBroadcast(
 	}
 
 	// redirect message to another nodes
-	if err := p.fNetwork.BroadcastMessage(pCtx, pNetMsg); err != nil {
+	if err := p.fProducer(pCtx, pNetMsg); err != nil {
 		// some connections can return errors
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return true, nil

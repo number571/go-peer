@@ -1,17 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/number571/go-peer/pkg/anonymity"
+	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
+	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity"
-	anon_logger "github.com/number571/go-peer/pkg/network/anonymity/logger"
-	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/network/conn"
 	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache"
@@ -26,8 +27,34 @@ const (
 	workSize    = uint64(10)
 )
 
-func newNode(serviceName, address string) anonymity.INode {
-	return anonymity.NewNode(
+func newNode(serviceName, address string) (network.INode, anonymity.INode) {
+	msgChan := make(chan net_message.IMessage)
+	networkNode := network.NewNode(
+		network.NewSettings(&network.SSettings{
+			FAddress:      address,
+			FMaxConnects:  256,
+			FReadTimeout:  time.Minute,
+			FWriteTimeout: time.Minute,
+			FConnSettings: conn.NewSettings(&conn.SSettings{
+				FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+					FWorkSizeBits: workSize,
+				}),
+				FLimitMessageSizeBytes: msgSize,
+				FWaitReadTimeout:       time.Hour,
+				FDialTimeout:           time.Minute,
+				FReadTimeout:           time.Minute,
+				FWriteTimeout:          time.Minute,
+			}),
+		}),
+		cache.NewLRUCache(1024),
+	).HandleFunc(
+		networkMask,
+		func(ctx context.Context, _ network.INode, _ conn.IConn, msg net_message.IMessage) error {
+			msgChan <- msg
+			return nil
+		},
+	)
+	anonymityNode := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  serviceName,
 			FFetchTimeout: time.Minute,
@@ -53,6 +80,17 @@ func newNode(serviceName, address string) anonymity.INode {
 				)
 			},
 		),
+		func(ctx context.Context, msg net_message.IMessage) error {
+			return networkNode.BroadcastMessage(ctx, msg)
+		},
+		func(ctx context.Context) (net_message.IMessage, error) {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case msg := <-msgChan:
+				return msg, nil
+			}
+		},
 		func() database.IKVDatabase {
 			db, err := database.NewKVDatabase("./database_" + serviceName + ".db")
 			if err != nil {
@@ -60,25 +98,6 @@ func newNode(serviceName, address string) anonymity.INode {
 			}
 			return db
 		}(),
-		network.NewNode(
-			network.NewSettings(&network.SSettings{
-				FAddress:      address,
-				FMaxConnects:  256,
-				FReadTimeout:  time.Minute,
-				FWriteTimeout: time.Minute,
-				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FMessageSettings: net_message.NewSettings(&net_message.SSettings{
-						FWorkSizeBits: workSize,
-					}),
-					FLimitMessageSizeBytes: msgSize,
-					FWaitReadTimeout:       time.Hour,
-					FDialTimeout:           time.Minute,
-					FReadTimeout:           time.Minute,
-					FWriteTimeout:          time.Minute,
-				}),
-			}),
-			cache.NewLRUCache(1024),
-		),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
@@ -88,7 +107,7 @@ func newNode(serviceName, address string) anonymity.INode {
 				}),
 				FNetworkMask:  networkMask,
 				FQueuePeriod:  2 * time.Second,
-				FConsumersCap: 5,
+				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
 			client.NewClient(
@@ -98,4 +117,5 @@ func newNode(serviceName, address string) anonymity.INode {
 		),
 		asymmetric.NewMapPubKeys(),
 	)
+	return networkNode, anonymityNode
 }

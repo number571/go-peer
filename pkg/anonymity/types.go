@@ -4,14 +4,18 @@ import (
 	"context"
 	"time"
 
+	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/network"
-	"github.com/number571/go-peer/pkg/network/anonymity/queue"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
+
+	net_message "github.com/number571/go-peer/pkg/network/message"
 )
+
+type IProducerF func(context.Context, net_message.IMessage) error
+type IConsumerF func(context.Context) (net_message.IMessage, error)
 
 type IHandlerF func(
 	context.Context,
@@ -27,7 +31,6 @@ type INode interface {
 	GetLogger() logger.ILogger
 	GetSettings() ISettings
 	GetKVDatabase() database.IKVDatabase
-	GetNetworkNode() network.INode
 	GetMessageQueue() queue.IQBProblemProcessor
 	GetMapPubKeys() asymmetric.IMapPubKeys
 

@@ -1,7 +1,7 @@
 package queue
 
 const (
-	errPrefix = "pkg/network/anonymity/queue = "
+	errPrefix = "pkg/anonymity/queue = "
 )
 
 type SQueueError struct {

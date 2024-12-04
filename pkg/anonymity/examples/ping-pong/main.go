@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/number571/go-peer/pkg/anonymity"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/network/anonymity"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -54,20 +54,22 @@ func main() {
 
 func runClientNode() anonymity.INode {
 	ctx := context.Background()
-	node := newNode("cnode", "").HandleFunc(nodeRouter, handler)
+	network, node := newNode("cnode", "")
+	node.HandleFunc(nodeRouter, handler)
 
 	go func() { _ = node.Run(ctx) }()
-	node.GetNetworkNode().AddConnection(ctx, nodeAddress)
+	network.AddConnection(ctx, nodeAddress)
 
 	return node
 }
 
 func runServiceNode() anonymity.INode {
 	ctx := context.Background()
-	node := newNode("snode", nodeAddress).HandleFunc(nodeRouter, handler)
+	network, node := newNode("snode", nodeAddress)
+	node.HandleFunc(nodeRouter, handler)
 
 	go func() { _ = node.Run(ctx) }()
-	go func() { _ = node.GetNetworkNode().Listen(ctx) }()
+	go func() { _ = network.Listen(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node
