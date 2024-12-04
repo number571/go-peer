@@ -14,7 +14,8 @@
 
 ### IMPROVEMENTS
 
-- Update `pkg/network/anonymity/queue`: add GetConsumersCap
+- `pkg/network/anonymity/queue`: add GetConsumersCap
+- `pkg/anonymity`: move from pkg/network/anonymity -> pkg/anonymity
 
 ### CHANGES
 
