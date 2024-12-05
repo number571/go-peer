@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/anonymity"
+	"github.com/number571/go-peer/pkg/anonymity/adapter"
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client"
@@ -80,7 +81,7 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 				)
 			},
 		),
-		anonymity.NewAdapterByFuncs(
+		adapter.NewAdapterByFuncs(
 			func(ctx context.Context, msg net_message.IMessage) error {
 				return networkNode.BroadcastMessage(ctx, msg)
 			},

@@ -1,4 +1,4 @@
-package anonymity
+package adapter
 
 import (
 	"context"
@@ -6,12 +6,17 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
+type (
+	iProducerF func(context.Context, net_message.IMessage) error
+	iConsumerF func(context.Context) (net_message.IMessage, error)
+)
+
 type sAdapter struct {
-	fProduce IProducerF
-	fConsume IConsumerF
+	fProduce iProducerF
+	fConsume iConsumerF
 }
 
-func NewAdapterByFuncs(pProduce IProducerF, pConsume IConsumerF) IAdapter {
+func NewAdapterByFuncs(pProduce iProducerF, pConsume iConsumerF) IAdapter {
 	return &sAdapter{
 		fProduce: pProduce,
 		fConsume: pConsume,

@@ -4,34 +4,18 @@ import (
 	"context"
 	"time"
 
+	"github.com/number571/go-peer/pkg/anonymity/adapter"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/database"
 	"github.com/number571/go-peer/pkg/types"
-
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type (
-	IProducerF func(context.Context, net_message.IMessage) error
-	IConsumerF func(context.Context) (net_message.IMessage, error)
-	IHandlerF  func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
+	IHandlerF func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
 )
-
-type IAdapter interface {
-	IProducer
-	IConsumer
-}
-
-type IProducer interface {
-	Produce(context.Context, net_message.IMessage) error
-}
-
-type IConsumer interface {
-	Consume(context.Context) (net_message.IMessage, error)
-}
 
 type INode interface {
 	types.IRunner
@@ -39,6 +23,7 @@ type INode interface {
 
 	GetLogger() logger.ILogger
 	GetSettings() ISettings
+	GetAdapter() adapter.IAdapter
 	GetKVDatabase() database.IKVDatabase
 	GetMapPubKeys() asymmetric.IMapPubKeys
 	GetQBProcessor() queue.IQBProblemProcessor
