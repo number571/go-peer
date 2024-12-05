@@ -119,7 +119,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			// nodes[1] -> nodes[0] -> nodes[2]
 			resp, err := nodes[0].FetchPayload(
 				ctx,
-				nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+				nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 				payload.NewPayload32(tcHead, []byte(reqBody)),
 			)
 			if err != nil {
@@ -149,15 +149,15 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 1)
 
-	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
-	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey())
+	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey())
+	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetQBProcessor().GetClient().GetPrivKey().GetPubKey())
 
 	ctx := context.Background()
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err != nil {
@@ -185,11 +185,11 @@ func TestFetchPayload(t *testing.T) {
 		},
 	)
 
-	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
+	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -199,7 +199,7 @@ func TestFetchPayload(t *testing.T) {
 
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -234,10 +234,10 @@ func TestBroadcastPayload(t *testing.T) {
 		},
 	)
 
-	largeBodySize := nodes[0].GetMessageQueue().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
+	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
@@ -247,7 +247,7 @@ func TestBroadcastPayload(t *testing.T) {
 
 	err1 := nodes[0].SendPayload(
 		context.Background(),
-		nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey(),
+		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
 		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
@@ -280,7 +280,7 @@ func TestEnqueuePayload(t *testing.T) {
 	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 8)
 
 	node := nodes[0].(*sNode)
-	pubKey := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey := nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
 
 	logBuilder := anon_logger.NewLogBuilder("test")
 	pld := payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody))
@@ -298,7 +298,7 @@ func TestEnqueuePayload(t *testing.T) {
 	).ToBytes()
 
 	for i := 0; i < tcQueueCap; i++ {
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQBProcessor.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -322,7 +322,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	node := _node.(*sNode)
 	handler := node.messageHandler
-	client := node.fQueue.GetClient()
+	client := node.fQBProcessor.GetClient()
 
 	privKey := client.GetPrivKey()
 	pubKey := privKey.GetPubKey()
@@ -450,7 +450,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	defer testFreeNodes([]INode{_node}, []network.INode{networkNode}, []context.CancelFunc{cancel}, 6)
 
 	node := _node.(*sNode)
-	client := node.fQueue.GetClient()
+	client := node.fQBProcessor.GetClient()
 
 	msg, err := client.EncryptMessage(
 		client.GetPrivKey().GetPubKey(),
@@ -503,7 +503,7 @@ func TestRecvSendMessage(t *testing.T) {
 		return
 	}
 
-	client := node.fQueue.GetClient()
+	client := node.fQBProcessor.GetClient()
 	pubKey := client.GetPrivKey().GetPubKey()
 	actionKey := newActionKey(pubKey, sAction(111).setType(true))
 
@@ -539,7 +539,7 @@ func TestRecvSendMessage(t *testing.T) {
 	).ToBytes()
 
 	for i := 0; i < tcQueueCap; i++ {
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQBProcessor.EnqueueMessage(pubKey, pldBytes); err != nil {
 			t.Error("failed send message (push to queue)")
 			return
 		}
@@ -548,7 +548,7 @@ func TestRecvSendMessage(t *testing.T) {
 	hasError := false
 	for i := 0; i < 10; i++ {
 		// message can be dequeued in the send's call time
-		if err := node.fQueue.EnqueueMessage(pubKey, pldBytes); err != nil {
+		if err := node.fQBProcessor.EnqueueMessage(pubKey, pldBytes); err != nil {
 			hasError = true
 			break
 		}
@@ -577,8 +577,8 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}
 
-	pubKey1 := nodes[1].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
-	pubKey0 := nodes[0].GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey1 := nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
+	pubKey0 := nodes[0].GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
 
 	nodes[0].GetMapPubKeys().SetPubKey(pubKey1)
 	nodes[1].GetMapPubKeys().SetPubKey(pubKey0)
@@ -764,7 +764,7 @@ func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsg
 	return net_message.NewMessage(
 		pSett,
 		payload.NewPayload32(
-			p.fQueue.GetSettings().GetNetworkMask(),
+			p.fQBProcessor.GetSettings().GetNetworkMask(),
 			pMsgBytes,
 		),
 	)

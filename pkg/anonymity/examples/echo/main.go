@@ -58,8 +58,8 @@ func runServiceNode() anonymity.INode {
 }
 
 func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
-	pubKey1 := node1.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
-	pubKey2 := node2.GetMessageQueue().GetClient().GetPrivKey().GetPubKey()
+	pubKey1 := node1.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
+	pubKey2 := node2.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
 
 	node1.GetMapPubKeys().SetPubKey(pubKey2)
 	node2.GetMapPubKeys().SetPubKey(pubKey1)

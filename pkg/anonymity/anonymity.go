@@ -32,7 +32,7 @@ type sNode struct {
 	fLogger        logger.ILogger
 	fAdapter       IAdapter
 	fKVDatavase    database.IKVDatabase
-	fQueue         queue.IQBProblemProcessor
+	fQBProcessor   queue.IQBProblemProcessor
 	fMapPubKeys    asymmetric.IMapPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
@@ -43,7 +43,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pAdapter IAdapter,
 	pKVDatavase database.IKVDatabase,
-	pQueue queue.IQBProblemProcessor,
+	pQBProcessor queue.IQBProblemProcessor,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -51,7 +51,7 @@ func NewNode(
 		fLogger:        pLogger,
 		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
-		fQueue:         pQueue,
+		fQBProcessor:   pQBProcessor,
 		fMapPubKeys:    asymmetric.NewMapPubKeys(),
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
 		fHandleActions: make(map[string]chan []byte, 64),
@@ -75,7 +75,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 	go func() {
 		defer func() { wg.Done(); cancel() }()
-		errs[0] = p.fQueue.Run(chCtx)
+		errs[0] = p.fQBProcessor.Run(chCtx)
 	}()
 	go func() {
 		defer func() { wg.Done(); cancel() }()
@@ -109,7 +109,7 @@ func (p *sNode) runProducer(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			netMsg := p.fQueue.DequeueMessage(pCtx)
+			netMsg := p.fQBProcessor.DequeueMessage(pCtx)
 			if netMsg == nil {
 				// context done
 				continue
@@ -117,7 +117,7 @@ func (p *sNode) runProducer(pCtx context.Context) error {
 
 			// create logger state
 			logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), netMsg).
-				WithPubKey(p.fQueue.GetClient().GetPrivKey().GetPubKey())
+				WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
 
 			// internal logger
 			_, _ = p.storeHashWithProduce(pCtx, logBuilder, netMsg)
@@ -153,8 +153,8 @@ func (p *sNode) GetKVDatabase() database.IKVDatabase {
 	return p.fKVDatavase
 }
 
-func (p *sNode) GetMessageQueue() queue.IQBProblemProcessor {
-	return p.fQueue
+func (p *sNode) GetQBProcessor() queue.IQBProblemProcessor {
+	return p.fQBProcessor
 }
 
 // Return f2f structure.
@@ -237,7 +237,7 @@ func (p *sNode) messageHandler(pCtx context.Context, pNetMsg net_message.IMessag
 	// update logger state
 	p.enrichLogger(logBuilder, pNetMsg)
 
-	client := p.fQueue.GetClient()
+	client := p.fQBProcessor.GetClient()
 	encMsg := pNetMsg.GetPayload().GetBody()
 
 	// load encrypted message without decryption try
@@ -367,14 +367,14 @@ func (p *sNode) enqueuePayload(
 
 	if loadHead(pPld.GetHead()).getAction().isRequest() {
 		logType = anon_logger.CLogBaseEnqueueRequest
-		client := p.fQueue.GetClient()
+		client := p.fQBProcessor.GetClient()
 		// enrich logger
 		pLogBuilder.
 			WithPubKey(client.GetPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
-	if err := p.fQueue.EnqueueMessage(pRecv, pldBytes); err != nil {
+	if err := p.fQBProcessor.EnqueueMessage(pRecv, pldBytes); err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(logType))
 		return errors.Join(ErrEnqueueMessage, err)
 	}

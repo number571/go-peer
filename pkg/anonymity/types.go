@@ -17,19 +17,21 @@ import (
 type (
 	IProducerF func(context.Context, net_message.IMessage) error
 	IConsumerF func(context.Context) (net_message.IMessage, error)
+	IHandlerF  func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
 )
 
 type IAdapter interface {
-	Produce(context.Context, net_message.IMessage) error
-	Consume(context.Context) (net_message.IMessage, error)
+	IProducer
+	IConsumer
 }
 
-type IHandlerF func(
-	context.Context,
-	INode,
-	asymmetric.IPubKey,
-	[]byte,
-) ([]byte, error)
+type IProducer interface {
+	Produce(context.Context, net_message.IMessage) error
+}
+
+type IConsumer interface {
+	Consume(context.Context) (net_message.IMessage, error)
+}
 
 type INode interface {
 	types.IRunner
@@ -38,8 +40,8 @@ type INode interface {
 	GetLogger() logger.ILogger
 	GetSettings() ISettings
 	GetKVDatabase() database.IKVDatabase
-	GetMessageQueue() queue.IQBProblemProcessor
 	GetMapPubKeys() asymmetric.IMapPubKeys
+	GetQBProcessor() queue.IQBProblemProcessor
 
 	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload64) error
 	FetchPayload(context.Context, asymmetric.IPubKey, payload.IPayload32) ([]byte, error)
