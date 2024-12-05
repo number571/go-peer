@@ -1,9 +1,13 @@
-package adapter
+package adapters
 
 import (
 	"context"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
+)
+
+var (
+	_ IAdapter = &sAdapter{}
 )
 
 type (

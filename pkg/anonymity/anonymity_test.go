@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/adapter"
+	"github.com/number571/go-peer/pkg/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -699,7 +699,7 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
 		),
-		adapter.NewAdapterByFuncs(
+		adapters.NewAdapterByFuncs(
 			func(ctx context.Context, msg net_message.IMessage) error {
 				return networkNode.BroadcastMessage(ctx, msg)
 			},

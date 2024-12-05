@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/adapter"
+	"github.com/number571/go-peer/pkg/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -23,7 +23,7 @@ type INode interface {
 
 	GetLogger() logger.ILogger
 	GetSettings() ISettings
-	GetAdapter() adapter.IAdapter
+	GetAdapter() adapters.IAdapter
 	GetKVDatabase() database.IKVDatabase
 	GetMapPubKeys() asymmetric.IMapPubKeys
 	GetQBProcessor() queue.IQBProblemProcessor

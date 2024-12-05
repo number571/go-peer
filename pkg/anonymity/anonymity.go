@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/adapter"
+	"github.com/number571/go-peer/pkg/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
@@ -31,7 +31,7 @@ type sNode struct {
 	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
-	fAdapter       adapter.IAdapter
+	fAdapter       adapters.IAdapter
 	fKVDatavase    database.IKVDatabase
 	fQBProcessor   queue.IQBProblemProcessor
 	fMapPubKeys    asymmetric.IMapPubKeys
@@ -42,7 +42,7 @@ type sNode struct {
 func NewNode(
 	pSett ISettings,
 	pLogger logger.ILogger,
-	pAdapter adapter.IAdapter,
+	pAdapter adapters.IAdapter,
 	pKVDatavase database.IKVDatabase,
 	pQBProcessor queue.IQBProblemProcessor,
 ) INode {
@@ -150,7 +150,7 @@ func (p *sNode) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sNode) GetAdapter() adapter.IAdapter {
+func (p *sNode) GetAdapter() adapters.IAdapter {
 	return p.fAdapter
 }
 
