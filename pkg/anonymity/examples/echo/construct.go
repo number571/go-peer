@@ -80,17 +80,19 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 				)
 			},
 		),
-		func(ctx context.Context, msg net_message.IMessage) error {
-			return networkNode.BroadcastMessage(ctx, msg)
-		},
-		func(ctx context.Context) (net_message.IMessage, error) {
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			case msg := <-msgChan:
-				return msg, nil
-			}
-		},
+		anonymity.NewAdapterByFuncs(
+			func(ctx context.Context, msg net_message.IMessage) error {
+				return networkNode.BroadcastMessage(ctx, msg)
+			},
+			func(ctx context.Context) (net_message.IMessage, error) {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case msg := <-msgChan:
+					return msg, nil
+				}
+			},
+		),
 		func() database.IKVDatabase {
 			db, err := database.NewKVDatabase("./database_" + serviceName + ".db")
 			if err != nil {

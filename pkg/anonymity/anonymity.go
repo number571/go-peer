@@ -30,8 +30,7 @@ type sNode struct {
 	fState         state.IState
 	fSettings      ISettings
 	fLogger        logger.ILogger
-	fProducer      IProducerF
-	fConsumer      IConsumerF
+	fAdapter       IAdapter
 	fKVDatavase    database.IKVDatabase
 	fQueue         queue.IQBProblemProcessor
 	fMapPubKeys    asymmetric.IMapPubKeys
@@ -42,8 +41,7 @@ type sNode struct {
 func NewNode(
 	pSett ISettings,
 	pLogger logger.ILogger,
-	pProducer IProducerF,
-	pConsumer IConsumerF,
+	pAdapter IAdapter,
 	pKVDatavase database.IKVDatabase,
 	pQueue queue.IQBProblemProcessor,
 	pMapPubKeys asymmetric.IMapPubKeys,
@@ -52,8 +50,7 @@ func NewNode(
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
 		fLogger:        pLogger,
-		fProducer:      pProducer,
-		fConsumer:      pConsumer,
+		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
 		fQueue:         pQueue,
 		fMapPubKeys:    pMapPubKeys,
@@ -135,7 +132,7 @@ func (p *sNode) runConsumer(pCtx context.Context) error {
 		case <-pCtx.Done():
 			return pCtx.Err()
 		default:
-			netMsg, err := p.fConsumer(pCtx)
+			netMsg, err := p.fAdapter.Consume(pCtx)
 			if err != nil {
 				continue
 			}
@@ -414,7 +411,7 @@ func (p *sNode) storeHashWithProduce(
 	}
 
 	// redirect message to another nodes
-	if err := p.fProducer(pCtx, pNetMsg); err != nil {
+	if err := p.fAdapter.Produce(pCtx, pNetMsg); err != nil {
 		// some connections can return errors
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return true, nil

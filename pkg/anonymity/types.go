@@ -14,8 +14,15 @@ import (
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
-type IProducerF func(context.Context, net_message.IMessage) error
-type IConsumerF func(context.Context) (net_message.IMessage, error)
+type (
+	IProducerF func(context.Context, net_message.IMessage) error
+	IConsumerF func(context.Context) (net_message.IMessage, error)
+)
+
+type IAdapter interface {
+	Produce(context.Context, net_message.IMessage) error
+	Consume(context.Context) (net_message.IMessage, error)
+}
 
 type IHandlerF func(
 	context.Context,

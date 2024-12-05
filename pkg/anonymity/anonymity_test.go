@@ -698,17 +698,19 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 			logger.NewSettings(&logger.SSettings{}),
 			func(_ logger.ILogArg) string { return "" },
 		),
-		func(ctx context.Context, msg net_message.IMessage) error {
-			return networkNode.BroadcastMessage(ctx, msg)
-		},
-		func(ctx context.Context) (net_message.IMessage, error) {
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			case msg := <-msgChan:
-				return msg, nil
-			}
-		},
+		NewAdapterByFuncs(
+			func(ctx context.Context, msg net_message.IMessage) error {
+				return networkNode.BroadcastMessage(ctx, msg)
+			},
+			func(ctx context.Context) (net_message.IMessage, error) {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case msg := <-msgChan:
+					return msg, nil
+				}
+			},
+		),
 		db,
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
