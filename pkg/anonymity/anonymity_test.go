@@ -731,7 +731,6 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 				tcMsgSize,
 			),
 		),
-		asymmetric.NewMapPubKeys(),
 	)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()

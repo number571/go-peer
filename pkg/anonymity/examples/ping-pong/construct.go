@@ -117,7 +117,6 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 				msgSize,
 			),
 		),
-		asymmetric.NewMapPubKeys(),
 	)
 	return networkNode, anonymityNode
 }

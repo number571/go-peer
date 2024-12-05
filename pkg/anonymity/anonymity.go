@@ -44,7 +44,6 @@ func NewNode(
 	pAdapter IAdapter,
 	pKVDatavase database.IKVDatabase,
 	pQueue queue.IQBProblemProcessor,
-	pMapPubKeys asymmetric.IMapPubKeys,
 ) INode {
 	return &sNode{
 		fState:         state.NewBoolState(),
@@ -53,7 +52,7 @@ func NewNode(
 		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
 		fQueue:         pQueue,
-		fMapPubKeys:    pMapPubKeys,
+		fMapPubKeys:    asymmetric.NewMapPubKeys(),
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
 		fHandleActions: make(map[string]chan []byte, 64),
 	}
