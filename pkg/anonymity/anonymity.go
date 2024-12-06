@@ -70,7 +70,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 
 	const N = 3
 
-	errs := [N]error{}
+	errs := make([]error, N)
 	wg := &sync.WaitGroup{}
 	wg.Add(N)
 
@@ -93,12 +93,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 	case <-pCtx.Done():
 		return pCtx.Err()
 	default:
-		for _, err := range errs {
-			if err != nil {
-				return err
-			}
-		}
-		panic("closed without errors")
+		return errors.Join(errs...)
 	}
 }
 
