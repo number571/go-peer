@@ -28,8 +28,11 @@ var handler = func(serviceName string) network.IHandlerF {
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var (
-		_     = runServiceNode("node1")
+		_     = runServiceNode(ctx, "node1")
 		_     = runClientNode("node2")
 		_     = runClientNode("node3")
 		node4 = runClientNode("node4")
@@ -59,11 +62,9 @@ func runClientNode(id string) network.INode {
 	return node
 }
 
-func runServiceNode(id string) network.INode {
-	ctx := context.Background()
+func runServiceNode(ctx context.Context, id string) network.INode {
 	node := newNode(serviceAddress).HandleFunc(serviceHeader, handler(id))
-
-	go func() { _ = node.Listen(ctx) }()
+	go func() { _ = node.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node

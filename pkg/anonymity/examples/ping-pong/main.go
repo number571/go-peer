@@ -69,7 +69,7 @@ func runServiceNode() anonymity.INode {
 	node.HandleFunc(nodeRouter, handler)
 
 	go func() { _ = node.Run(ctx) }()
-	go func() { _ = network.Listen(ctx) }()
+	go func() { _ = network.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node

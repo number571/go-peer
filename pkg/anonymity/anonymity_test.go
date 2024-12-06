@@ -54,8 +54,11 @@ func TestError(t *testing.T) {
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
-	node, networkNode, cancels := testNewNodeWithDB(time.Minute, "", &tsDatabase{})
-	defer testFreeNodes([]INode{node}, []network.INode{networkNode}, []context.CancelFunc{cancels}, 9)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	node, _ := testRunNodeWithDB(ctx, time.Minute, "", &tsDatabase{})
+	defer testFreeNodes([]INode{node}, 9)
 
 	sett := node.GetSettings()
 	if sett.GetFetchTimeout() != time.Minute {
@@ -99,18 +102,19 @@ func testSettings(t *testing.T, n int) {
 func TestComplexFetchPayload(t *testing.T) {
 	t.Parallel()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	addresses := [2]string{testutils.TgAddrs[2], testutils.TgAddrs[3]}
-	nodes, networkNodes, cancels := testNewNodes(t, time.Minute, addresses, 0)
+	nodes := testRunNodes(ctx, t, time.Minute, addresses, 0)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 0)
+	defer testFreeNodes(nodes[:], 0)
 
 	wg := sync.WaitGroup{}
 	wg.Add(tcIter)
-
-	ctx := context.Background()
 
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
@@ -141,19 +145,20 @@ func TestComplexFetchPayload(t *testing.T) {
 func TestF2FWithoutFriends(t *testing.T) {
 	t.Parallel()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// 3 seconds for wait
 	addresses := [2]string{testutils.TgAddrs[10], testutils.TgAddrs[11]}
-	nodes, networkNodes, cancels := testNewNodes(t, 3*time.Second, addresses, 1)
+	nodes := testRunNodes(ctx, t, 3*time.Second, addresses, 1)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 1)
+	defer testFreeNodes(nodes[:], 1)
 
 	nodes[0].GetMapPubKeys().DelPubKey(nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey())
 	nodes[1].GetMapPubKeys().DelPubKey(nodes[0].GetQBProcessor().GetClient().GetPrivKey().GetPubKey())
-
-	ctx := context.Background()
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
@@ -171,13 +176,16 @@ func TestF2FWithoutFriends(t *testing.T) {
 func TestFetchPayload(t *testing.T) {
 	t.Parallel()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	addresses := [2]string{testutils.TgAddrs[12], testutils.TgAddrs[13]}
-	nodes, networkNodes, cancels := testNewNodes(t, time.Minute, addresses, 4)
+	nodes := testRunNodes(ctx, t, time.Minute, addresses, 4)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 4)
+	defer testFreeNodes(nodes[:], 4)
 
 	nodes[1].HandleFunc(
 		tcHead,
@@ -187,7 +195,6 @@ func TestFetchPayload(t *testing.T) {
 	)
 
 	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
-	ctx := context.Background()
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
@@ -217,13 +224,16 @@ func TestFetchPayload(t *testing.T) {
 func TestBroadcastPayload(t *testing.T) {
 	t.Parallel()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	addresses := [2]string{testutils.TgAddrs[14], testutils.TgAddrs[15]}
-	nodes, networkNodes, cancels := testNewNodes(t, time.Minute, addresses, 3)
+	nodes := testRunNodes(ctx, t, time.Minute, addresses, 3)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 3)
+	defer testFreeNodes(nodes[:], 3)
 
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
@@ -272,13 +282,16 @@ func TestBroadcastPayload(t *testing.T) {
 func TestEnqueuePayload(t *testing.T) {
 	t.Parallel()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	addresses := [2]string{testutils.TgAddrs[16], testutils.TgAddrs[17]}
-	nodes, networkNodes, cancels := testNewNodes(t, time.Minute, addresses, 8)
+	nodes := testRunNodes(ctx, t, time.Minute, addresses, 8)
 	if nodes[0] == nil {
 		t.Error("nodes is null")
 		return
 	}
-	defer testFreeNodes(nodes[:], networkNodes[:], cancels[:], 8)
+	defer testFreeNodes(nodes[:], 8)
 
 	node := nodes[0].(*sNode)
 	pubKey := nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
@@ -318,8 +331,11 @@ func TestEnqueuePayload(t *testing.T) {
 func TestHandleWrapper(t *testing.T) {
 	t.Parallel()
 
-	_node, networkNode, cancel := testNewNode(time.Minute, "", 7, 0)
-	defer testFreeNodes([]INode{_node}, []network.INode{networkNode}, []context.CancelFunc{cancel}, 7)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	_node, _ := testRunNode(ctx, time.Minute, "", 7, 0)
+	defer testFreeNodes([]INode{_node}, 7)
 
 	node := _node.(*sNode)
 	handler := node.messageHandler
@@ -329,7 +345,6 @@ func TestHandleWrapper(t *testing.T) {
 	pubKey := privKey.GetPubKey()
 	node.GetMapPubKeys().SetPubKey(privKey.GetPubKey())
 
-	ctx := context.Background()
 	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
 		FSettings: net_message.NewSettings(&net_message.SSettings{}),
 	})
@@ -447,8 +462,11 @@ func TestHandleWrapper(t *testing.T) {
 func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, networkNode, cancel := testNewNode(time.Minute, "", 6, 0)
-	defer testFreeNodes([]INode{_node}, []network.INode{networkNode}, []context.CancelFunc{cancel}, 6)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	_node, _ := testRunNode(ctx, time.Minute, "", 6, 0)
+	defer testFreeNodes([]INode{_node}, 6)
 
 	node := _node.(*sNode)
 	client := node.fQBProcessor.GetClient()
@@ -472,7 +490,6 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	logBuilder := anon_logger.NewLogBuilder("_")
 
-	ctx := context.Background()
 	if ok, err := node.storeHashWithProduce(ctx, logBuilder, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
@@ -492,11 +509,11 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 func TestRecvSendMessage(t *testing.T) {
 	t.Parallel()
 
-	_node, networkNode, cancel := testNewNode(time.Minute, "", 5, 0)
-	defer testFreeNodes([]INode{_node}, []network.INode{networkNode}, []context.CancelFunc{cancel}, 5)
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	_node, _ := testRunNode(ctx, time.Minute, "", 5, 0)
+	defer testFreeNodes([]INode{_node}, 5)
 
 	node := _node.(*sNode)
 	if _, err := node.recvResponse(ctx, "not_exist"); err == nil {
@@ -564,17 +581,16 @@ func TestRecvSendMessage(t *testing.T) {
 // nodes[2], nodes[3], nodes[4] = routes
 // nodes[2], nodes[4] are have open ports
 // Scheme: (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int) ([5]INode, [5]network.INode, [5]context.CancelFunc) {
+func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int) [5]INode {
 	nodes := [5]INode{}
 	networkNodes := [5]network.INode{}
-	cancels := [5]context.CancelFunc{}
 	addrs := [5]string{"", "", addresses[0], "", addresses[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i], networkNodes[i], cancels[i] = testNewNode(timeWait, addrs[i], typeDB, i)
+		nodes[i], networkNodes[i] = testRunNode(ctx, timeWait, addrs[i], typeDB, i)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running %d", i, typeDB)
-			return [5]INode{}, [5]network.INode{}, [5]context.CancelFunc{}
+			return [5]INode{}
 		}
 	}
 
@@ -594,14 +610,13 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		)
 	}
 
-	ctx := context.Background()
 	go func() {
-		if err := networkNodes[2].Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := networkNodes[2].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 		}
 	}()
 	go func() {
-		if err := networkNodes[4].Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := networkNodes[4].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 		}
 	}()
@@ -613,24 +628,24 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 	})
 	if err1 != nil {
 		t.Error(err1)
-		return [5]INode{}, [5]network.INode{}, [5]context.CancelFunc{}
+		return [5]INode{}
 	}
 	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		return networkNodes[1].AddConnection(ctx, addresses[1])
 	})
 	if err2 != nil {
 		t.Error(err2)
-		return [5]INode{}, [5]network.INode{}, [5]context.CancelFunc{}
+		return [5]INode{}
 	}
 
 	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
 	if err := networkNodes[3].AddConnection(ctx, addresses[0]); err != nil {
 		t.Error(err)
-		return [5]INode{}, [5]network.INode{}, [5]context.CancelFunc{}
+		return [5]INode{}
 	}
 	if err := networkNodes[3].AddConnection(ctx, addresses[1]); err != nil {
 		t.Error(err)
-		return [5]INode{}, [5]network.INode{}, [5]context.CancelFunc{}
+		return [5]INode{}
 	}
 
 	go func() {
@@ -640,7 +655,7 @@ func testNewNodes(t *testing.T, timeWait time.Duration, addresses [2]string, typ
 		}
 	}()
 
-	return nodes, networkNodes, cancels
+	return nodes
 }
 
 /*
@@ -662,7 +677,7 @@ func (p *stLogging) HasErro() bool {
 }
 */
 
-func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatabase) (INode, network.INode, context.CancelFunc) {
+func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string, db database.IKVDatabase) (INode, network.INode) {
 	msgChan := make(chan net_message.IMessage)
 	parallel := uint64(1)
 	networkMask := uint32(1)
@@ -733,24 +748,21 @@ func testNewNodeWithDB(timeWait time.Duration, addr string, db database.IKVDatab
 			),
 		),
 	)
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = node.Run(ctx) }()
-	return node, networkNode, cancel
+	return node, networkNode
 }
 
-func testNewNode(timeWait time.Duration, addr string, typeDB, numDB int) (INode, network.INode, context.CancelFunc) {
+func testRunNode(ctx context.Context, timeWait time.Duration, addr string, typeDB, numDB int) (INode, network.INode) {
 	db, err := database.NewKVDatabase(fmt.Sprintf(tcPathDBTemplate, typeDB, numDB))
 	if err != nil {
 		panic(err)
 	}
-	return testNewNodeWithDB(timeWait, addr, db)
+	return testRunNodeWithDB(ctx, timeWait, addr, db)
 }
 
-func testFreeNodes(nodes []INode, networks []network.INode, cancels []context.CancelFunc, typeDB int) {
-	for i, node := range nodes {
+func testFreeNodes(nodes []INode, typeDB int) {
+	for _, node := range nodes {
 		node.GetKVDatabase().Close()
-		networks[i].Close()
-		cancels[i]()
 	}
 	testDeleteDB(typeDB)
 }
