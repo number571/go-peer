@@ -3,7 +3,6 @@ package logger
 import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
-	"github.com/number571/go-peer/pkg/network/conn"
 )
 
 var (
@@ -18,7 +17,6 @@ type sLogger struct {
 	fProof   uint64
 	fSize    uint64
 	fPubKey  asymmetric.IPubKey
-	fConn    conn.IConn
 }
 
 func NewLogBuilder(pService string) ILogBuilder {
@@ -35,10 +33,6 @@ func (p *sLogger) GetService() string {
 
 func (p *sLogger) GetType() ILogType {
 	return p.fType
-}
-
-func (p *sLogger) GetConn() conn.IConn {
-	return p.fConn
 }
 
 func (p *sLogger) GetHash() []byte {
@@ -78,11 +72,6 @@ func (p *sLogger) WithProof(pProof uint64) ILogBuilder {
 
 func (p *sLogger) WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder {
 	p.fPubKey = pPubKey
-	return p
-}
-
-func (p *sLogger) WithConn(pConn conn.IConn) ILogBuilder {
-	p.fConn = pConn
 	return p
 }
 

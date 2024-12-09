@@ -2,7 +2,6 @@ package logger
 
 import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/network/conn"
 )
 
 type (
@@ -46,7 +45,6 @@ type ILogBuilder interface {
 	WithSize(int) ILogBuilder
 	WithProof(uint64) ILogBuilder
 	WithHash([]byte) ILogBuilder
-	WithConn(conn.IConn) ILogBuilder
 	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }
 
@@ -56,6 +54,5 @@ type ILogGetter interface {
 	GetSize() uint64
 	GetProof() uint64
 	GetHash() []byte
-	GetConn() conn.IConn
 	GetPubKey() asymmetric.IPubKey
 }

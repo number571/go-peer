@@ -19,7 +19,6 @@ func TestLogger(t *testing.T) {
 
 	pubKey := asymmetric.NewPrivKey().GetPubKey()
 	builder := NewLogBuilder(tcService).
-		WithConn(nil).
 		WithHash([]byte(tcHash)).
 		WithProof(tcProof).
 		WithPubKey(pubKey).
@@ -29,11 +28,6 @@ func TestLogger(t *testing.T) {
 	getter := builder.Build()
 	if getter.GetService() != tcService {
 		t.Error("getter.GetService() != tcService")
-		return
-	}
-
-	if getter.GetConn() != nil {
-		t.Error("getter.GetConn() != nil")
 		return
 	}
 
