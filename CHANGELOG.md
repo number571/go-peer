@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### IMPROVEMENTS
+
+- `pkg/anonymity`: move from pkg/network/anonymity -> pkg/anonymity
+- `pkg/anonymity`: replace network.INode -> adapters.IAdapter
+
 <!-- ... -->
 
 ## v1.7.6
@@ -15,7 +20,6 @@
 ### IMPROVEMENTS
 
 - `pkg/network/anonymity/queue`: add GetConsumersCap
-- `pkg/anonymity`: move from pkg/network/anonymity -> pkg/anonymity
 
 ### CHANGES
 
