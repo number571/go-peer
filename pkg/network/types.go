@@ -2,11 +2,11 @@ package network
 
 import (
 	"context"
-	"io"
 	"time"
 
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
+	"github.com/number571/go-peer/pkg/types"
 
 	net_message "github.com/number571/go-peer/pkg/network/message"
 )
@@ -19,9 +19,7 @@ type IHandlerF func(
 ) error
 
 type INode interface {
-	io.Closer
-
-	Listen(context.Context) error
+	types.IRunner
 	HandleFunc(uint32, IHandlerF) INode
 
 	GetSettings() ISettings

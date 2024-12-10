@@ -105,12 +105,14 @@ func testSettings(t *testing.T, n int) {
 func TestBroadcast(t *testing.T) {
 	t.Parallel()
 
-	nodes, mapp, err := testNodes()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	nodes, mapp, err := testNodes(ctx)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer testFreeNodes(nodes[:])
 
 	// four receivers, sender not receive his messages
 	tcMutex := sync.Mutex{}
@@ -150,7 +152,6 @@ func TestBroadcast(t *testing.T) {
 	}
 
 	// nodes[0] -> nodes[1:]
-	ctx := context.Background()
 	for i := 0; i < tcIter; i++ {
 		go func(i int) {
 			pld := payload.NewPayload32(
@@ -205,28 +206,27 @@ func TestNodeConnection(t *testing.T) {
 		node2 = newTestNode(testutils.TgAddrs[4], 1)
 		node3 = newTestNode(testutils.TgAddrs[5], 16)
 	)
-	defer testFreeNodes([]INode{node1, node2, node3})
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
-		if err := node2.Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := node2.Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 			return
 		}
 	}()
-	defer node2.Close()
 
 	go func() {
-		if err := node3.Listen(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := node3.Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
 			return
 		}
 	}()
-	defer node3.Close()
 
 	time.Sleep(200 * time.Millisecond)
 	go func() {
-		if err := node2.Listen(ctx); err == nil {
+		if err := node2.Run(ctx); err == nil {
 			t.Error("success second run node")
 			return
 		}
@@ -278,18 +278,12 @@ func TestNodeConnection(t *testing.T) {
 		t.Error(err2)
 		return
 	}
-
-	if err := node2.Close(); err != nil {
-		t.Error(err)
-		return
-	}
 }
 
 func TestHandleMessage(t *testing.T) {
 	t.Parallel()
 
 	node := newTestNode("", 16).(*sNode)
-	defer testFreeNodes([]INode{node})
 
 	ctx := context.Background()
 	sett := message.NewConstructSettings(&message.SConstructSettings{
@@ -340,7 +334,7 @@ func TestContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go func() { _ = node1.Listen(ctx) }()
+	go func() { _ = node1.Run(ctx) }()
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		return node2.AddConnection(ctx, testutils.TgAddrs[6])
@@ -371,7 +365,7 @@ func TestContextCancel(t *testing.T) {
 	cancel()
 }
 
-func testNodes() ([5]INode, map[INode]map[string]bool, error) {
+func testNodes(ctx context.Context) ([5]INode, map[INode]map[string]bool, error) {
 	nodes := [5]INode{}
 	addrs := [5]string{"", "", testutils.TgAddrs[0], "", testutils.TgAddrs[1]}
 
@@ -379,10 +373,8 @@ func testNodes() ([5]INode, map[INode]map[string]bool, error) {
 		nodes[i] = newTestNode(addrs[i], 16)
 	}
 
-	ctx := context.Background()
-
-	go func() { _ = nodes[2].Listen(ctx) }()
-	go func() { _ = nodes[4].Listen(ctx) }()
+	go func() { _ = nodes[2].Run(ctx) }()
+	go func() { _ = nodes[4].Run(ctx) }()
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		return nodes[0].AddConnection(ctx, testutils.TgAddrs[0])
@@ -436,10 +428,4 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 		}),
 		cache.NewLRUCache(1024),
 	)
-}
-
-func testFreeNodes(nodes []INode) {
-	for _, node := range nodes {
-		node.Close()
-	}
 }

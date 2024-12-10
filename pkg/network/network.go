@@ -108,12 +108,22 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg net_message.IMessage
 // Opens a tcp connection to receive data from outside.
 // Checks the number of valid connections.
 // Redirects connections to the handle router.
-func (p *sNode) Listen(pCtx context.Context) error {
+func (p *sNode) Run(pCtx context.Context) error {
+	if p.fSettings.GetAddress() == "" {
+		<-pCtx.Done()
+		return pCtx.Err()
+	}
+
 	listener, err := net.Listen("tcp", p.fSettings.GetAddress())
 	if err != nil {
 		return errors.Join(ErrCreateListener, err)
 	}
 	defer listener.Close()
+
+	go func() {
+		<-pCtx.Done()
+		listener.Close()
+	}()
 
 	p.setListener(listener)
 	for {
@@ -138,24 +148,6 @@ func (p *sNode) Listen(pCtx context.Context) error {
 			go p.handleConn(pCtx, address, conn)
 		}
 	}
-}
-
-// Closes the listener and all connections.
-func (p *sNode) Close() error {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	listErr := make([]error, 0, len(p.fConnections)+1)
-	if p.fListener != nil {
-		listErr = append(listErr, p.fListener.Close())
-	}
-
-	for id, conn := range p.fConnections {
-		delete(p.fConnections, id)
-		listErr = append(listErr, conn.Close())
-	}
-
-	return errors.Join(listErr...)
 }
 
 // Saves the function to the map by key for subsequent redirection.

@@ -47,12 +47,14 @@ var handler = func(id string) network.IHandlerF {
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var (
-		_     = runServiceNode("node1")
+		_     = runServiceNode(ctx, "node1")
 		node1 = runClientNode("node2")
 	)
 
-	ctx := context.Background()
 	msg := message.NewMessage(
 		message.NewConstructSettings(&message.SConstructSettings{
 			FSettings: node1.GetSettings().GetConnSettings().GetMessageSettings(),
@@ -72,11 +74,9 @@ func runClientNode(id string) network.INode {
 	return node
 }
 
-func runServiceNode(id string) network.INode {
-	ctx := context.Background()
+func runServiceNode(ctx context.Context, id string) network.INode {
 	node := newNode(serviceAddress).HandleFunc(serviceHeader, handler(id))
-
-	go func() { _ = node.Listen(ctx) }()
+	go func() { _ = node.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node

@@ -2,9 +2,20 @@
 
 <!-- ... -->
 
-## v1.7.7~
+## v1.7.8~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.7
+
+*December 11, 2024*
+
+### IMPROVEMENTS
+
+- `pkg/anonymity`: move from pkg/network/anonymity -> pkg/anonymity
+- `pkg/anonymity`: replace network.INode -> adapters.IAdapter
 
 <!-- ... -->
 
@@ -14,7 +25,7 @@
 
 ### IMPROVEMENTS
 
-- Update `pkg/network/anonymity/queue`: add GetConsumersCap
+- `pkg/network/anonymity/queue`: add GetConsumersCap
 
 ### CHANGES
 

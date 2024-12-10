@@ -80,7 +80,6 @@ func TestMessage(t *testing.T) {
 			FWorkSizeBits: tcWorkSize,
 			FNetworkKey:   tcNetworkKey,
 		}),
-		FRandMessageSizeBytes: tcLimitVoid,
 	})
 
 	msgTmp := NewMessage(sett, pld)

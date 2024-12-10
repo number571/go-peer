@@ -55,6 +55,9 @@
 		<a href="https://vk.me/join/6Px6b0Qh/uZIK4ixUYWQm4Krepzq5xbYjYw=">
         	<img src="https://img.shields.io/badge/вконтакте-%232E87FB.svg?&style=for-the-badge&logo=vk&logoColor=white" alt="VKontakte" />
 		</a>
+		<a href="https://t.me/+9Kcxr8NyeU8zZDZi">
+        	<img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" />
+		</a>
 	</p>
 	About project
 </h2>

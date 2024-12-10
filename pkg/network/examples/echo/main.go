@@ -33,9 +33,11 @@ var handler = func(ctx context.Context, node network.INode, c conn.IConn, msg me
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var (
-		_       = runServiceNode()
-		ctx     = context.Background()
+		_       = runServiceNode(ctx)
 		conn, _ = conn.Connect(ctx, connSettings(), serviceAddress)
 	)
 
@@ -56,11 +58,9 @@ func main() {
 	fmt.Println(string(recvMsg.GetPayload().GetBody()))
 }
 
-func runServiceNode() network.INode {
-	ctx := context.Background()
+func runServiceNode(ctx context.Context) network.INode {
 	node := newNode(serviceAddress).HandleFunc(serviceHeader, handler)
-
-	go func() { _ = node.Listen(ctx) }()
+	go func() { _ = node.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node

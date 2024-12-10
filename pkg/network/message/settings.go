@@ -7,9 +7,8 @@ var (
 
 type SConstructSettings sConstructSettings
 type sConstructSettings struct {
-	FSettings             ISettings
-	FParallel             uint64
-	FRandMessageSizeBytes uint64
+	FSettings ISettings
+	FParallel uint64
 }
 
 type SSettings sSettings
@@ -20,9 +19,8 @@ type sSettings struct {
 
 func NewConstructSettings(pSett *SConstructSettings) IConstructSettings {
 	return (&sConstructSettings{
-		FSettings:             pSett.FSettings,
-		FParallel:             pSett.FParallel,
-		FRandMessageSizeBytes: pSett.FRandMessageSizeBytes,
+		FSettings: pSett.FSettings,
+		FParallel: pSett.FParallel,
 	}).mustNotNull()
 }
 
@@ -46,10 +44,6 @@ func (p *sConstructSettings) GetSettings() ISettings {
 
 func (p *sConstructSettings) GetParallel() uint64 {
 	return p.FParallel
-}
-
-func (p *sConstructSettings) GetRandMessageSizeBytes() uint64 {
-	return p.FRandMessageSizeBytes
 }
 
 func (p *sSettings) mustNotNull() ISettings {
