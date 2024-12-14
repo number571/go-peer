@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/anonymity`: delete produce message (relayer mode) in consume function
+
 <!-- ... -->
 
 ## v1.7.7

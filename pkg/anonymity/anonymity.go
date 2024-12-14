@@ -98,8 +98,6 @@ func (p *sNode) Run(pCtx context.Context) error {
 }
 
 func (p *sNode) runProducer(pCtx context.Context) error {
-	serviceName := p.fSettings.GetServiceName()
-
 	for {
 		select {
 		case <-pCtx.Done():
@@ -110,13 +108,8 @@ func (p *sNode) runProducer(pCtx context.Context) error {
 				// context done
 				continue
 			}
-
-			// create logger state
-			logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), netMsg).
-				WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
-
 			// internal logger
-			_, _ = p.storeHashWithProduce(pCtx, logBuilder, netMsg)
+			_, _ = p.storeHashWithProduce(pCtx, netMsg)
 		}
 	}
 }
@@ -129,6 +122,7 @@ func (p *sNode) runConsumer(pCtx context.Context) error {
 		default:
 			netMsg, err := p.fAdapter.Consume(pCtx)
 			if err != nil {
+				// context done or error
 				continue
 			}
 			// internal logger
@@ -248,10 +242,10 @@ func (p *sNode) messageHandler(pCtx context.Context, pNetMsg net_message.IMessag
 	}
 
 	// try store hash of message
-	if ok, err := p.storeHashWithProduce(pCtx, logBuilder, pNetMsg); !ok {
+	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg.GetHash()); err != nil {
 		// internal logger
-		if err != nil {
-			return errors.Join(ErrStoreHashWithProduce, err)
+		if !errors.Is(err, ErrHashAlreadyExist) {
+			return errors.Join(ErrStoreHashIntoDatabase, err)
 		}
 		// hash already exist in database
 		return nil
@@ -397,11 +391,16 @@ func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_me
 
 func (p *sNode) storeHashWithProduce(
 	pCtx context.Context,
-	pLogBuilder anon_logger.ILogBuilder,
 	pNetMsg net_message.IMessage,
 ) (bool, error) {
+	serviceName := p.fSettings.GetServiceName()
+
+	// create logger state
+	logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), pNetMsg).
+		WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
+
 	// try push hash into database
-	if err := p.storeHashIntoDatabase(pLogBuilder, pNetMsg.GetHash()); err != nil {
+	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg.GetHash()); err != nil {
 		// internal logger
 		if errors.Is(err, ErrHashAlreadyExist) {
 			return false, nil
@@ -412,12 +411,12 @@ func (p *sNode) storeHashWithProduce(
 	// redirect message to another nodes
 	if err := p.fAdapter.Produce(pCtx, pNetMsg); err != nil {
 		// some connections can return errors
-		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 		return true, nil
 	}
 
 	// full success broadcast
-	p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogBaseBroadcast))
+	p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogBaseBroadcast))
 	return true, nil
 }
 

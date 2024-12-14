@@ -488,14 +488,11 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	})
 
 	netMsg := node.testNewNetworkMessage(sett, msg)
-	logBuilder := anon_logger.NewLogBuilder("_")
-
-	if ok, err := node.storeHashWithProduce(ctx, logBuilder, netMsg); !ok || err != nil {
+	if ok, err := node.storeHashWithProduce(ctx, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
 	}
-
-	if ok, err := node.storeHashWithProduce(ctx, logBuilder, netMsg); ok || err != nil {
+	if ok, err := node.storeHashWithProduce(ctx, netMsg); ok || err != nil {
 		switch {
 		case ok:
 			t.Error("success store one message again")
@@ -723,6 +720,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 				case <-ctx.Done():
 					return nil, ctx.Err()
 				case msg := <-msgChan:
+					_ = networkNode.BroadcastMessage(ctx, msg)
 					return msg, nil
 				}
 			},

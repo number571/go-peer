@@ -90,6 +90,7 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 				case <-ctx.Done():
 					return nil, ctx.Err()
 				case msg := <-msgChan:
+					_ = networkNode.BroadcastMessage(ctx, msg)
 					return msg, nil
 				}
 			},
