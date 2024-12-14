@@ -338,7 +338,7 @@ func TestHandleWrapper(t *testing.T) {
 	defer testFreeNodes([]INode{_node}, 7)
 
 	node := _node.(*sNode)
-	handler := node.messageHandler
+	handler := node.consumeMessage
 	client := node.fQBProcessor.GetClient()
 
 	privKey := client.GetPrivKey()
@@ -488,11 +488,11 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	})
 
 	netMsg := node.testNewNetworkMessage(sett, msg)
-	if ok, err := node.storeHashWithProduce(ctx, netMsg); !ok || err != nil {
+	if ok, err := node.produceMessage(ctx, netMsg); !ok || err != nil {
 		t.Error(err)
 		return
 	}
-	if ok, err := node.storeHashWithProduce(ctx, netMsg); ok || err != nil {
+	if ok, err := node.produceMessage(ctx, netMsg); ok || err != nil {
 		switch {
 		case ok:
 			t.Error("success store one message again")

@@ -109,7 +109,7 @@ func (p *sNode) runProducer(pCtx context.Context) error {
 				continue
 			}
 			// internal logger
-			_, _ = p.storeHashWithProduce(pCtx, netMsg)
+			_, _ = p.produceMessage(pCtx, netMsg)
 		}
 	}
 }
@@ -126,7 +126,7 @@ func (p *sNode) runConsumer(pCtx context.Context) error {
 				continue
 			}
 			// internal logger
-			_ = p.messageHandler(pCtx, netMsg)
+			_ = p.consumeMessage(pCtx, netMsg)
 		}
 	}
 }
@@ -225,7 +225,7 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
-func (p *sNode) messageHandler(pCtx context.Context, pNetMsg net_message.IMessage) error {
+func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg net_message.IMessage) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 	// update logger state
@@ -389,7 +389,7 @@ func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_me
 		WithSize(size)
 }
 
-func (p *sNode) storeHashWithProduce(
+func (p *sNode) produceMessage(
 	pCtx context.Context,
 	pNetMsg net_message.IMessage,
 ) (bool, error) {
