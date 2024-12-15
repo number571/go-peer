@@ -1,3 +1,3 @@
 package build
 
-const CVersion = "v1.7.8"
+const CVersion = "v1.7.9~"
