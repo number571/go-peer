@@ -45,6 +45,7 @@ type ILogBuilder interface {
 	WithSize(int) ILogBuilder
 	WithProof(uint64) ILogBuilder
 	WithHash([]byte) ILogBuilder
+	WithConn(string) ILogBuilder
 	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }
 
@@ -54,5 +55,6 @@ type ILogGetter interface {
 	GetSize() uint64
 	GetProof() uint64
 	GetHash() []byte
+	GetConn() string
 	GetPubKey() asymmetric.IPubKey
 }

@@ -5,6 +5,9 @@
 ## v1.7.9~
 
 *??? ??, ????*
+### CHANGES
+
+- `pkg/anonymity/logger`: add WithConn(string)
 
 <!-- ... -->
 

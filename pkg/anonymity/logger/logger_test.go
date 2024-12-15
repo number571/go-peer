@@ -12,6 +12,7 @@ const (
 	tcHash    = "hash-example"
 	tcProof   = 3
 	tcSize    = 8192
+	tcConn    = "connection"
 )
 
 func TestLogger(t *testing.T) {
@@ -23,7 +24,8 @@ func TestLogger(t *testing.T) {
 		WithProof(tcProof).
 		WithPubKey(pubKey).
 		WithSize(tcSize).
-		WithType(CLogInfoExist)
+		WithType(CLogInfoExist).
+		WithConn(tcConn)
 
 	getter := builder.Build()
 	if getter.GetService() != tcService {
@@ -53,6 +55,11 @@ func TestLogger(t *testing.T) {
 
 	if getter.GetType() != CLogInfoExist {
 		t.Error("getter.GetType() != CLogInfoExist")
+		return
+	}
+
+	if getter.GetConn() != tcConn {
+		t.Error("getter.GetConn() != tcConn")
 		return
 	}
 }

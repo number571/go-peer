@@ -16,6 +16,7 @@ type sLogger struct {
 	fHash    []byte
 	fProof   uint64
 	fSize    uint64
+	fConn    string
 	fPubKey  asymmetric.IPubKey
 }
 
@@ -51,6 +52,10 @@ func (p *sLogger) GetProof() uint64 {
 	return p.fProof
 }
 
+func (p *sLogger) GetConn() string {
+	return p.fConn
+}
+
 func (p *sLogger) Build() ILogGetter {
 	return p
 }
@@ -77,5 +82,10 @@ func (p *sLogger) WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder {
 
 func (p *sLogger) WithSize(pSize int) ILogBuilder {
 	p.fSize = uint64(pSize)
+	return p
+}
+
+func (p *sLogger) WithConn(pConn string) ILogBuilder {
+	p.fConn = pConn
 	return p
 }
