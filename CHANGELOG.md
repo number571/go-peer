@@ -2,9 +2,16 @@
 
 <!-- ... -->
 
-## v1.7.9~
+## v1.7.10~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.9
+
+*December 15, 2024*
+
 ### CHANGES
 
 - `pkg/anonymity/logger`: add WithConn(string)
