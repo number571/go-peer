@@ -10,6 +10,6 @@
 		M - message bytes
 		E - encrypt
 
-	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg
+	More information in pkg/client
 */
 package layer2
