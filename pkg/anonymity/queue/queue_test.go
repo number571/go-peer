@@ -11,7 +11,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -51,16 +51,16 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
 			FQueuePeriod:  500 * time.Millisecond,
 			FConsumersCap: 1,
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
 			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FConsumersCap: 1,
@@ -73,8 +73,8 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
 			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  500 * time.Millisecond,
@@ -91,8 +91,8 @@ func TestRunStopQueue(t *testing.T) {
 	)
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
 			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
@@ -158,8 +158,8 @@ func TestQueue(t *testing.T) {
 
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{
 					FWorkSizeBits: 10,
 				}),
 			}),
@@ -210,7 +210,7 @@ func testQueue(queue IQBProblemProcessor) error {
 	time.Sleep(300 * time.Millisecond)
 
 	// auto fill queue enabled only if QB=true
-	msgs := make([]net_message.IMessage, 0, 3)
+	msgs := make([]layer1.IMessage, 0, 3)
 	for i := 0; i < 3; i++ {
 		msgs = append(msgs, queue.DequeueMessage(ctx))
 	}

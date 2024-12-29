@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/client/message,pkg/network/message`: move to pkg/message/layer2,pkg/message/layer1
+
 <!-- ... -->
 
 ## v1.7.9

@@ -3,7 +3,7 @@ package adapters
 import (
 	"context"
 
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 )
 
 type IAdapter interface {
@@ -12,9 +12,9 @@ type IAdapter interface {
 }
 
 type IProducer interface {
-	Produce(context.Context, net_message.IMessage) error
+	Produce(context.Context, layer1.IMessage) error
 }
 
 type IConsumer interface {
-	Consume(context.Context) (net_message.IMessage, error)
+	Consume(context.Context) (layer1.IMessage, error)
 }

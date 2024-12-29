@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -20,7 +20,7 @@ const (
 )
 
 var handler = func(serviceName string) network.IHandlerF {
-	return func(ctx context.Context, node network.INode, _ conn.IConn, msg message.IMessage) error {
+	return func(ctx context.Context, node network.INode, _ conn.IConn, msg layer1.IMessage) error {
 		defer node.BroadcastMessage(ctx, msg) // send this message to other connections
 		fmt.Printf("'%s' got '%s'\n", serviceName, string(msg.GetPayload().GetBody()))
 		return nil
@@ -40,8 +40,8 @@ func main() {
 
 	node4.BroadcastMessage(
 		context.Background(),
-		message.NewMessage(
-			message.NewConstructSettings(&message.SConstructSettings{
+		layer1.NewMessage(
+			layer1.NewConstructSettings(&layer1.SConstructSettings{
 				FSettings: node4.GetSettings().GetConnSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(

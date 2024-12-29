@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -18,12 +18,12 @@ const (
 	serviceAddress = "127.0.0.1:8080"
 )
 
-var handler = func(ctx context.Context, node network.INode, c conn.IConn, msg message.IMessage) error {
+var handler = func(ctx context.Context, node network.INode, c conn.IConn, msg layer1.IMessage) error {
 	resp := fmt.Sprintf("echo: [%s]", string(msg.GetPayload().GetBody()))
 	_ = c.WriteMessage(
 		ctx,
-		message.NewMessage(
-			message.NewConstructSettings(&message.SConstructSettings{
+		layer1.NewMessage(
+			layer1.NewConstructSettings(&layer1.SConstructSettings{
 				FSettings: node.GetSettings().GetConnSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(serviceHeader, []byte(resp)),
@@ -43,8 +43,8 @@ func main() {
 
 	_ = conn.WriteMessage(
 		ctx,
-		message.NewMessage(
-			message.NewConstructSettings(&message.SConstructSettings{
+		layer1.NewMessage(
+			layer1.NewConstructSettings(&layer1.SConstructSettings{
 				FSettings: conn.GetSettings().GetMessageSettings(),
 			}),
 			payload.NewPayload32(serviceHeader, []byte("hello, world!")),

@@ -1,4 +1,4 @@
-package message
+package layer1
 
 import (
 	"github.com/number571/go-peer/pkg/payload"

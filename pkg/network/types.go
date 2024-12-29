@@ -4,18 +4,17 @@ import (
 	"context"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/types"
-
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IHandlerF func(
 	context.Context,
 	INode,
 	conn.IConn,
-	net_message.IMessage,
+	layer1.IMessage,
 ) error
 
 type INode interface {
@@ -29,7 +28,7 @@ type INode interface {
 	AddConnection(context.Context, string) error
 	DelConnection(string) error
 
-	BroadcastMessage(context.Context, net_message.IMessage) error
+	BroadcastMessage(context.Context, layer1.IMessage) error
 }
 
 type ISettings interface {

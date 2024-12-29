@@ -9,9 +9,9 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/queue"
 	"github.com/number571/go-peer/pkg/client"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -23,8 +23,8 @@ const (
 func main() {
 	q := queue.NewQBProblemProcessor(
 		queue.NewSettings(&queue.SSettings{
-			FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-				FSettings: net_message.NewSettings(&net_message.SSettings{}),
+			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
 			FQueuePeriod:  time.Second,
 			FQueuePoolCap: [2]uint64{1 << 5, 1 << 5},
@@ -60,7 +60,7 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		msg, err := message.LoadMessage(q.GetClient().GetMessageSize(), netMsg.GetPayload().GetBody())
+		msg, err := layer2.LoadMessage(q.GetClient().GetMessageSize(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)
 		}

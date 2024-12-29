@@ -14,6 +14,6 @@
 			P - proof of work
 			E - encrypt
 
-	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_net_message.jpg
+	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer1_message.jpg
 */
-package message
+package layer1

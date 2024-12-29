@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -56,7 +56,7 @@ func testSettings(t *testing.T, n int) {
 			FReadTimeout:  tcTimeWait,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings:       message.NewSettings(&message.SSettings{}),
+				FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -70,7 +70,7 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects:  16,
 			FWriteTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings:       message.NewSettings(&message.SSettings{}),
+				FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -84,7 +84,7 @@ func testSettings(t *testing.T, n int) {
 			FMaxConnects: 16,
 			FReadTimeout: tcTimeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings:       message.NewSettings(&message.SSettings{}),
+				FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 				FLimitMessageSizeBytes: (8 << 10),
 				FWaitReadTimeout:       time.Hour,
 				FDialTimeout:           time.Minute,
@@ -120,7 +120,7 @@ func TestBroadcast(t *testing.T) {
 	wg.Add(4 * tcIter)
 
 	headHandle := uint32(123)
-	handleF := func(pCtx context.Context, node INode, _ conn.IConn, pMsg message.IMessage) error {
+	handleF := func(pCtx context.Context, node INode, _ conn.IConn, pMsg layer1.IMessage) error {
 		defer func() {
 			_ = node.BroadcastMessage(pCtx, pMsg)
 			wg.Done()
@@ -158,10 +158,10 @@ func TestBroadcast(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(tcBodyTemplate, i)),
 			)
-			sett := message.NewConstructSettings(&message.SConstructSettings{
+			sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 				FSettings: nodes[0].GetSettings().GetConnSettings().GetMessageSettings(),
 			})
-			_ = nodes[0].BroadcastMessage(ctx, message.NewMessage(sett, pld))
+			_ = nodes[0].BroadcastMessage(ctx, layer1.NewMessage(sett, pld))
 		}(i)
 	}
 
@@ -286,30 +286,30 @@ func TestHandleMessage(t *testing.T) {
 	node := newTestNode("", 16).(*sNode)
 
 	ctx := context.Background()
-	sett := message.NewConstructSettings(&message.SConstructSettings{
+	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 		FSettings: node.GetSettings().GetConnSettings().GetMessageSettings(),
 	})
 
 	node.HandleFunc(1, nil)
-	msg1 := message.NewMessage(sett, payload.NewPayload32(1, []byte{1}))
+	msg1 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{1}))
 	if ok := node.handleMessage(ctx, nil, msg1); ok {
 		t.Error("success handle message with nil function")
 		return
 	}
 
-	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
+	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
 		return errors.New("some error")
 	})
-	msg2 := message.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
+	msg2 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
 	if ok := node.handleMessage(ctx, nil, msg2); ok {
 		t.Error("success handle message with got error from function")
 		return
 	}
 
-	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ message.IMessage) error {
+	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
 		return nil
 	})
-	msg3 := message.NewMessage(sett, payload.NewPayload32(1, []byte{3}))
+	msg3 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{3}))
 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
 		t.Error("failed handle message with correct function")
 		return
@@ -345,7 +345,7 @@ func TestContextCancel(t *testing.T) {
 	}
 
 	headHandle := uint32(123)
-	sett := message.NewConstructSettings(&message.SConstructSettings{
+	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 		FSettings: node2.GetSettings().GetConnSettings().GetMessageSettings(),
 	})
 
@@ -355,7 +355,7 @@ func TestContextCancel(t *testing.T) {
 				headHandle,
 				[]byte(fmt.Sprintf(tcBodyTemplate, i)),
 			)
-			if err := node2.BroadcastMessage(ctx, message.NewMessage(sett, pld)); err != nil {
+			if err := node2.BroadcastMessage(ctx, layer1.NewMessage(sett, pld)); err != nil {
 				return
 			}
 		}
@@ -416,7 +416,7 @@ func newTestNode(pAddr string, pMaxConns uint64) INode {
 			FReadTimeout:  timeout,
 			FWriteTimeout: timeout,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings: message.NewSettings(&message.SSettings{
+				FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 					FWorkSizeBits: 10,
 				}),
 				FLimitMessageSizeBytes: (8 << 10),

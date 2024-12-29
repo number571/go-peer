@@ -6,9 +6,8 @@ import (
 
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/types"
-
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 type IQBProblemProcessor interface {
@@ -18,11 +17,11 @@ type IQBProblemProcessor interface {
 	GetClient() client.IClient
 
 	EnqueueMessage(asymmetric.IPubKey, []byte) error
-	DequeueMessage(context.Context) net_message.IMessage
+	DequeueMessage(context.Context) layer1.IMessage
 }
 
 type ISettings interface {
-	GetMessageConstructSettings() net_message.IConstructSettings
+	GetMessageConstructSettings() layer1.IConstructSettings
 	GetNetworkMask() uint32
 	GetConsumersCap() uint64
 	GetQueuePeriod() time.Duration

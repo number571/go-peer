@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -18,7 +18,7 @@ const (
 )
 
 var handler = func(id string) network.IHandlerF {
-	return func(ctx context.Context, n network.INode, _ conn.IConn, msg message.IMessage) error {
+	return func(ctx context.Context, n network.INode, _ conn.IConn, msg layer1.IMessage) error {
 		time.Sleep(time.Second) // delay for view "ping-pong" game
 
 		num, err := strconv.Atoi(string(msg.GetPayload().GetBody()))
@@ -34,8 +34,8 @@ var handler = func(id string) network.IHandlerF {
 		fmt.Printf("'%s' got '%s#%d'\n", id, val, num)
 		n.BroadcastMessage(
 			ctx,
-			message.NewMessage(
-				message.NewConstructSettings(&message.SConstructSettings{
+			layer1.NewMessage(
+				layer1.NewConstructSettings(&layer1.SConstructSettings{
 					FSettings: n.GetSettings().GetConnSettings().GetMessageSettings(),
 				}),
 				payload.NewPayload32(serviceHeader, []byte(fmt.Sprintf("%d", num+1))),
@@ -55,8 +55,8 @@ func main() {
 		node1 = runClientNode("node2")
 	)
 
-	msg := message.NewMessage(
-		message.NewConstructSettings(&message.SConstructSettings{
+	msg := layer1.NewMessage(
+		layer1.NewConstructSettings(&layer1.SConstructSettings{
 			FSettings: node1.GetSettings().GetConnSettings().GetMessageSettings(),
 		}),
 		payload.NewPayload32(serviceHeader, []byte("0")),

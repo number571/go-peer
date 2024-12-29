@@ -13,9 +13,9 @@ import (
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -29,7 +29,7 @@ const (
 )
 
 func newNode(serviceName, address string) (network.INode, anonymity.INode) {
-	msgChan := make(chan net_message.IMessage)
+	msgChan := make(chan layer1.IMessage)
 	networkNode := network.NewNode(
 		network.NewSettings(&network.SSettings{
 			FAddress:      address,
@@ -37,7 +37,7 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 			FReadTimeout:  time.Minute,
 			FWriteTimeout: time.Minute,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+				FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 					FWorkSizeBits: workSize,
 				}),
 				FLimitMessageSizeBytes: msgSize,
@@ -50,7 +50,7 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 		cache.NewLRUCache(1024),
 	).HandleFunc(
 		networkMask,
-		func(ctx context.Context, _ network.INode, _ conn.IConn, msg net_message.IMessage) error {
+		func(ctx context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
 			msgChan <- msg
 			return nil
 		},
@@ -82,10 +82,10 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 			},
 		),
 		adapters.NewAdapterByFuncs(
-			func(ctx context.Context, msg net_message.IMessage) error {
+			func(ctx context.Context, msg layer1.IMessage) error {
 				return networkNode.BroadcastMessage(ctx, msg)
 			},
-			func(ctx context.Context) (net_message.IMessage, error) {
+			func(ctx context.Context) (layer1.IMessage, error) {
 				select {
 				case <-ctx.Done():
 					return nil, ctx.Err()
@@ -104,8 +104,8 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 		}(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
-				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-					FSettings: net_message.NewSettings(&net_message.SSettings{
+				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+					FSettings: layer1.NewSettings(&layer1.SSettings{
 						FWorkSizeBits: workSize,
 					}),
 				}),

@@ -19,6 +19,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache"
@@ -27,7 +28,6 @@ import (
 
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
 	"github.com/number571/go-peer/pkg/network/conn"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 const (
@@ -345,8 +345,8 @@ func TestHandleWrapper(t *testing.T) {
 	pubKey := privKey.GetPubKey()
 	node.GetMapPubKeys().SetPubKey(privKey.GetPubKey())
 
-	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
-		FSettings: net_message.NewSettings(&net_message.SSettings{}),
+	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
+		FSettings: layer1.NewSettings(&layer1.SSettings{}),
 	})
 
 	msg, err := client.EncryptMessage(
@@ -483,8 +483,8 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		return
 	}
 
-	sett := net_message.NewConstructSettings(&net_message.SConstructSettings{
-		FSettings: net_message.NewSettings(&net_message.SSettings{}),
+	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
+		FSettings: layer1.NewSettings(&layer1.SSettings{}),
 	})
 
 	netMsg := node.testNewNetworkMessage(sett, msg)
@@ -675,7 +675,7 @@ func (p *stLogging) HasErro() bool {
 */
 
 func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string, db database.IKVDatabase) (INode, network.INode) {
-	msgChan := make(chan net_message.IMessage)
+	msgChan := make(chan layer1.IMessage)
 	parallel := uint64(1)
 	networkMask := uint32(1)
 	limitVoidSize := uint64(10_000)
@@ -686,7 +686,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 			FReadTimeout:  timeWait,
 			FWriteTimeout: timeWait,
 			FConnSettings: conn.NewSettings(&conn.SSettings{
-				FMessageSettings: net_message.NewSettings(&net_message.SSettings{
+				FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 					FWorkSizeBits: tcWorkSize,
 				}),
 				FLimitMessageSizeBytes: tcMsgSize + limitVoidSize,
@@ -697,7 +697,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 			}),
 		}),
 		cache.NewLRUCache(1024),
-	).HandleFunc(networkMask, func(_ context.Context, _ network.INode, _ conn.IConn, msg net_message.IMessage) error {
+	).HandleFunc(networkMask, func(_ context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
 		msgChan <- msg
 		return nil
 	})
@@ -712,10 +712,10 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 			func(_ logger.ILogArg) string { return "" },
 		),
 		adapters.NewAdapterByFuncs(
-			func(ctx context.Context, msg net_message.IMessage) error {
+			func(ctx context.Context, msg layer1.IMessage) error {
 				return networkNode.BroadcastMessage(ctx, msg)
 			},
-			func(ctx context.Context) (net_message.IMessage, error) {
+			func(ctx context.Context) (layer1.IMessage, error) {
 				select {
 				case <-ctx.Done():
 					return nil, ctx.Err()
@@ -728,8 +728,8 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 		db,
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
-				FMessageConstructSettings: net_message.NewConstructSettings(&net_message.SConstructSettings{
-					FSettings: net_message.NewSettings(&net_message.SSettings{
+				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
+					FSettings: layer1.NewSettings(&layer1.SSettings{
 						FWorkSizeBits: tcWorkSize,
 					}),
 					FParallel: parallel,
@@ -770,8 +770,8 @@ func testDeleteDB(typeDB int) {
 	}
 }
 
-func (p *sNode) testNewNetworkMessage(pSett net_message.IConstructSettings, pMsgBytes []byte) net_message.IMessage {
-	return net_message.NewMessage(
+func (p *sNode) testNewNetworkMessage(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
+	return layer1.NewMessage(
 		pSett,
 		payload.NewPayload32(
 			p.fQBProcessor.GetSettings().GetNetworkMask(),

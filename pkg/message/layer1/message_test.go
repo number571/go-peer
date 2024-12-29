@@ -1,4 +1,4 @@
-package message
+package layer1
 
 import (
 	"bytes"

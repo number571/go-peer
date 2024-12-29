@@ -1,7 +1,7 @@
-package message
+package layer1
 
 const (
-	errPrefix = "pkg/network/message = "
+	errPrefix = "pkg/message/layer1 = "
 )
 
 type SMessageError struct {

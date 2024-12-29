@@ -9,17 +9,17 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/queue"
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
+	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
 
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -225,7 +225,7 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
-func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg net_message.IMessage) error {
+func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
 	// update logger state
@@ -235,7 +235,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg net_message.IMessag
 	encMsg := pNetMsg.GetPayload().GetBody()
 
 	// load encrypted message without decryption try
-	if _, err := message.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
+	if _, err := layer2.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
 		// problem from sender's side
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 		return errors.Join(ErrLoadMessage, err)
@@ -377,7 +377,7 @@ func (p *sNode) enqueuePayload(
 	return nil
 }
 
-func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_message.IMessage) anon_logger.ILogBuilder {
+func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg layer1.IMessage) anon_logger.ILogBuilder {
 	var (
 		size  = len(pNetMsg.ToBytes())
 		hash  = pNetMsg.GetHash()
@@ -391,7 +391,7 @@ func (p *sNode) enrichLogger(pLogBuilder anon_logger.ILogBuilder, pNetMsg net_me
 
 func (p *sNode) produceMessage(
 	pCtx context.Context,
-	pNetMsg net_message.IMessage,
+	pNetMsg layer1.IMessage,
 ) (bool, error) {
 	serviceName := p.fSettings.GetServiceName()
 

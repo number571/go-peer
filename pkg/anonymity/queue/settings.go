@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 )
 
 var (
@@ -12,7 +12,7 @@ var (
 
 type SSettings sSettings
 type sSettings struct {
-	FMessageConstructSettings net_message.IConstructSettings
+	FMessageConstructSettings layer1.IConstructSettings
 	FNetworkMask              uint32
 	FConsumersCap             uint64
 	FQueuePoolCap             [2]uint64
@@ -46,7 +46,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetMessageConstructSettings() net_message.IConstructSettings {
+func (p *sSettings) GetMessageConstructSettings() layer1.IConstructSettings {
 	return p.FMessageConstructSettings
 }
 

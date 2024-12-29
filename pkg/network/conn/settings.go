@@ -3,7 +3,7 @@ package conn
 import (
 	"time"
 
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 )
 
 var (
@@ -17,7 +17,7 @@ type sSettings struct {
 	FDialTimeout           time.Duration
 	FReadTimeout           time.Duration
 	FWriteTimeout          time.Duration
-	FMessageSettings       net_message.ISettings
+	FMessageSettings       layer1.ISettings
 }
 
 func NewSettings(pSett *SSettings) ISettings {
@@ -53,7 +53,7 @@ func (p *sSettings) mustNotNull() ISettings {
 	return p
 }
 
-func (p *sSettings) GetMessageSettings() net_message.ISettings {
+func (p *sSettings) GetMessageSettings() layer1.ISettings {
 	return p.FMessageSettings
 }
 

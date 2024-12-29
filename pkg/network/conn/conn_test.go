@@ -13,7 +13,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -91,7 +91,7 @@ func testSettings(t *testing.T, n int) {
 	switch n {
 	case 0:
 		_ = NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{}),
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{}),
 			FWaitReadTimeout: time.Hour,
 			FDialTimeout:     time.Minute,
 			FReadTimeout:     time.Minute,
@@ -99,7 +99,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 1:
 		_ = NewSettings(&SSettings{
-			FMessageSettings:       message.NewSettings(&message.SSettings{}),
+			FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 			FLimitMessageSizeBytes: tcMsgSize,
 			FDialTimeout:           time.Minute,
 			FReadTimeout:           time.Minute,
@@ -107,7 +107,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 2:
 		_ = NewSettings(&SSettings{
-			FMessageSettings:       message.NewSettings(&message.SSettings{}),
+			FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
@@ -115,7 +115,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 3:
 		_ = NewSettings(&SSettings{
-			FMessageSettings:       message.NewSettings(&message.SSettings{}),
+			FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FDialTimeout:           time.Minute,
@@ -123,7 +123,7 @@ func testSettings(t *testing.T, n int) {
 		})
 	case 4:
 		_ = NewSettings(&SSettings{
-			FMessageSettings:       message.NewSettings(&message.SSettings{}),
+			FMessageSettings:       layer1.NewSettings(&layer1.SSettings{}),
 			FLimitMessageSizeBytes: tcMsgSize,
 			FWaitReadTimeout:       time.Hour,
 			FReadTimeout:           time.Minute,
@@ -149,7 +149,7 @@ func TestClosedConn(t *testing.T) {
 	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -170,12 +170,12 @@ func TestClosedConn(t *testing.T) {
 		return
 	}
 
-	sett := message.NewConstructSettings(&message.SConstructSettings{
+	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
 	pld := payload.NewPayload32(1, []byte("aaa"))
-	msg := message.NewMessage(sett, pld)
+	msg := layer1.NewMessage(sett, pld)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -211,7 +211,7 @@ func TestInvalidConn(t *testing.T) {
 	_, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -234,7 +234,7 @@ func TestReadMessage(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -251,8 +251,8 @@ func TestReadMessage(t *testing.T) {
 
 	ch := make(chan struct{})
 	rawConn.bodyPart = false
-	rawConn.headSize = message.CMessageHeadSize + 10
-	rawConn.bodySize = message.CMessageHeadSize + 10
+	rawConn.headSize = layer1.CMessageHeadSize + 10
+	rawConn.bodySize = layer1.CMessageHeadSize + 10
 	go func() {
 		defer wg.Done()
 		ctx := context.Background()
@@ -267,8 +267,8 @@ func TestReadMessage(t *testing.T) {
 	wg.Add(1)
 	rawConn.cancelBody = true
 	rawConn.bodyPart = false
-	rawConn.headSize = message.CMessageHeadSize + 10
-	rawConn.bodySize = message.CMessageHeadSize + 10
+	rawConn.headSize = layer1.CMessageHeadSize + 10
+	rawConn.bodySize = layer1.CMessageHeadSize + 10
 	go func() {
 		defer wg.Done()
 		ctx := context.Background()
@@ -287,7 +287,7 @@ func TestRecvDataBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -310,8 +310,8 @@ func TestRecvDataBytes(t *testing.T) {
 	}
 
 	rawConn.bodyPart = false
-	rawConn.headSize = message.CMessageHeadSize + 10
-	rawConn.bodySize = message.CMessageHeadSize + 10
+	rawConn.headSize = layer1.CMessageHeadSize + 10
+	rawConn.bodySize = layer1.CMessageHeadSize + 10
 	rawConn.readDlError = true
 	go func() {
 		ctx := context.Background()
@@ -329,7 +329,7 @@ func TestSendBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -361,7 +361,7 @@ func TestRecvHeadBytes(t *testing.T) {
 	rawConn := &tsConn{}
 	conn := LoadConn(
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -412,7 +412,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	conn, err := Connect(
 		context.Background(),
 		NewSettings(&SSettings{
-			FMessageSettings: message.NewSettings(&message.SSettings{
+			FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 				FWorkSizeBits: tcWorkSize,
 			}),
 			FLimitMessageSizeBytes: tcMsgSize,
@@ -435,12 +435,12 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		return
 	}
 
-	msgSett := message.NewConstructSettings(&message.SConstructSettings{
+	msgSett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
 	pld := payload.NewPayload32(tcHead, []byte(tcBody))
-	msg := message.NewMessage(msgSett, pld)
+	msg := layer1.NewMessage(msgSett, pld)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
 		t.Error(err)
@@ -478,7 +478,7 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 
 			conn := LoadConn(
 				NewSettings(&SSettings{
-					FMessageSettings: message.NewSettings(&message.SSettings{
+					FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 						FWorkSizeBits: tcWorkSize,
 						FNetworkKey:   pNetworkKey,
 					}),

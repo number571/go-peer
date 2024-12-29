@@ -11,10 +11,9 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
-
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -34,14 +33,14 @@ type sQBProblemProcessor struct {
 type sMainPool struct {
 	fMutex     sync.Mutex
 	fCount     int64 // atomic variable
-	fQueue     chan net_message.IMessage
+	fQueue     chan layer1.IMessage
 	fRawQueue  map[uint64]chan []byte
 	fConsumers map[string]uint64
 }
 
 type sRandPool struct {
 	fCount    int64 // atomic variable
-	fQueue    chan net_message.IMessage
+	fQueue    chan layer1.IMessage
 	fReceiver asymmetric.IPubKey
 }
 
@@ -53,7 +52,7 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 		fSettings: pSettings,
 		fClient:   pClient,
 		fMainPool: &sMainPool{
-			fQueue:     make(chan net_message.IMessage, queuePoolCap[0]*consumersCap),
+			fQueue:     make(chan layer1.IMessage, queuePoolCap[0]*consumersCap),
 			fConsumers: make(map[string]uint64, 128),
 			fRawQueue: func() map[uint64]chan []byte {
 				m := make(map[uint64]chan []byte, consumersCap)
@@ -64,7 +63,7 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 			}(),
 		},
 		fRandPool: &sRandPool{
-			fQueue:    make(chan net_message.IMessage, queuePoolCap[1]),
+			fQueue:    make(chan layer1.IMessage, queuePoolCap[1]),
 			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
 		},
 	}
@@ -159,7 +158,7 @@ func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes 
 	return nil
 }
 
-func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) net_message.IMessage {
+func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) layer1.IMessage {
 	for {
 		select {
 		case <-pCtx.Done():
@@ -208,10 +207,10 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	return p.pushMessage(pCtx, p.fRandPool.fQueue, msg)
 }
 
-func (p *sQBProblemProcessor) pushMessage(pCtx context.Context, pQueue chan<- net_message.IMessage, pMsg []byte) error {
-	chNetMsg := make(chan net_message.IMessage)
+func (p *sQBProblemProcessor) pushMessage(pCtx context.Context, pQueue chan<- layer1.IMessage, pMsg []byte) error {
+	chNetMsg := make(chan layer1.IMessage)
 	go func() {
-		chNetMsg <- net_message.NewMessage(
+		chNetMsg <- layer1.NewMessage(
 			p.fSettings.GetMessageConstructSettings(),
 			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
 		)

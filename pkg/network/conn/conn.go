@@ -9,9 +9,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload/joiner"
-
-	net_message "github.com/number571/go-peer/pkg/network/message"
 )
 
 var (
@@ -52,7 +51,7 @@ func (p *sConn) Close() error {
 	return p.fSocket.Close()
 }
 
-func (p *sConn) WriteMessage(pCtx context.Context, pMsg net_message.IMessage) error {
+func (p *sConn) WriteMessage(pCtx context.Context, pMsg layer1.IMessage) error {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
@@ -64,7 +63,7 @@ func (p *sConn) WriteMessage(pCtx context.Context, pMsg net_message.IMessage) er
 	return nil
 }
 
-func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_message.IMessage, error) {
+func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (layer1.IMessage, error) {
 	// large wait read deadline => the connection has not sent anything yet
 	msgSize, err := p.recvHeadBytes(pCtx, pChRead, p.fSettings.GetWaitReadTimeout())
 	if err != nil {
@@ -77,7 +76,7 @@ func (p *sConn) ReadMessage(pCtx context.Context, pChRead chan<- struct{}) (net_
 	}
 
 	// try unpack message from bytes
-	msg, err := net_message.LoadMessage(p.fSettings.GetMessageSettings(), dataBytes)
+	msg, err := layer1.LoadMessage(p.fSettings.GetMessageSettings(), dataBytes)
 	if err != nil {
 		return nil, errors.Join(ErrInvalidMessageBytes, err)
 	}
@@ -143,10 +142,10 @@ func (p *sConn) recvHeadBytes(
 	copy(msgSizeBytes[:], headBytes)
 
 	gotMsgSize := encoding.BytesToUint32(msgSizeBytes)
-	fullMsgSize := p.fSettings.GetLimitMessageSizeBytes() + net_message.CMessageHeadSize
+	fullMsgSize := p.fSettings.GetLimitMessageSizeBytes() + layer1.CMessageHeadSize
 
 	switch {
-	case gotMsgSize < net_message.CMessageHeadSize:
+	case gotMsgSize < layer1.CMessageHeadSize:
 		fallthrough
 	case uint64(gotMsgSize) > fullMsgSize:
 		return 0, ErrInvalidMsgSize

@@ -3,11 +3,11 @@ package client
 import (
 	"bytes"
 
-	"github.com/number571/go-peer/pkg/client/message"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
@@ -104,7 +104,7 @@ func (p *sClient) encryptWithParams(
 	}
 
 	cipher := symmetric.NewCipher(sk)
-	return message.NewMessage(
+	return layer2.NewMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
 			pkey.GetHasher().ToBytes(),
@@ -119,7 +119,7 @@ func (p *sClient) encryptWithParams(
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
-	msg, err := message.LoadMessage(p.fMessageSize, pMsg)
+	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}

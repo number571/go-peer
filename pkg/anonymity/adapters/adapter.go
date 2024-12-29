@@ -3,7 +3,7 @@ package adapters
 import (
 	"context"
 
-	net_message "github.com/number571/go-peer/pkg/network/message"
+	"github.com/number571/go-peer/pkg/message/layer1"
 )
 
 var (
@@ -11,8 +11,8 @@ var (
 )
 
 type (
-	iProducerF func(context.Context, net_message.IMessage) error
-	iConsumerF func(context.Context) (net_message.IMessage, error)
+	iProducerF func(context.Context, layer1.IMessage) error
+	iConsumerF func(context.Context) (layer1.IMessage, error)
 )
 
 type sAdapter struct {
@@ -27,10 +27,10 @@ func NewAdapterByFuncs(pProduce iProducerF, pConsume iConsumerF) IAdapter {
 	}
 }
 
-func (p *sAdapter) Produce(pCtx context.Context, pMsg net_message.IMessage) error {
+func (p *sAdapter) Produce(pCtx context.Context, pMsg layer1.IMessage) error {
 	return p.fProduce(pCtx, pMsg)
 }
 
-func (p *sAdapter) Consume(pCtx context.Context) (net_message.IMessage, error) {
+func (p *sAdapter) Consume(pCtx context.Context) (layer1.IMessage, error) {
 	return p.fConsume(pCtx)
 }

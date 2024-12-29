@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/network/message"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -132,7 +132,7 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 				FReadTimeout:  time.Minute,
 				FWriteTimeout: time.Minute,
 				FConnSettings: conn.NewSettings(&conn.SSettings{
-					FMessageSettings: message.NewSettings(&message.SSettings{
+					FMessageSettings: layer1.NewSettings(&layer1.SSettings{
 						FWorkSizeBits: 10,
 					}),
 					FLimitMessageSizeBytes: (8 << 10),
