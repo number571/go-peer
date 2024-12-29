@@ -1,19 +1,14 @@
-// Package message used as a storage and loading of encrypted messages.
+// Package message used as an encapsulated ciphertext.
 //
-// The package allows initializing verification of the correctness of
-// the message by the hash length and proof of work.
 /*
-	NETWORK MESSAGE FORMAT
+	MESSAGE FORMAT
 
-	E( K, P(HM) || HM || M )
+	E( PubK, K ) || E( K, M )
 	where
-		HM = H( K, M )
-		where
-			H - HMAC
-			K - network key
-			M - message bytes
-			P - proof of work
-			E - encrypt
+		PubK - public key
+		K - secret key
+		M - message bytes
+		E - encrypt
 
 	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg
 */
