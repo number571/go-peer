@@ -5,8 +5,10 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
+type IPubKeyHash = []byte
+
 type IMapPubKeys interface {
-	GetPubKey([]byte) IPubKey
+	GetPubKey(IPubKeyHash) IPubKey
 	DelPubKey(IPubKey)
 	SetPubKey(IPubKey)
 }
