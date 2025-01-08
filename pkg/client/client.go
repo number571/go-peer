@@ -7,7 +7,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
@@ -148,7 +147,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	)
 
 	// Get public key from map by pkid (hash)
-	sPubKey := pMapPubKeys.GetPubKey(encoding.HexEncode(pkid))
+	sPubKey := pMapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
 		return nil, nil, ErrDecodePublicKey
 	}

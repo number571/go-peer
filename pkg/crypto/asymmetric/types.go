@@ -6,7 +6,7 @@ import (
 )
 
 type IMapPubKeys interface {
-	GetPubKey(string) IPubKey
+	GetPubKey([]byte) IPubKey
 	DelPubKey(IPubKey)
 	SetPubKey(IPubKey)
 }
