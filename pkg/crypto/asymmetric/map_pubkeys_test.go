@@ -14,7 +14,7 @@ func TestMapPubKeys(t *testing.T) {
 	}
 
 	mapping := NewMapPubKeys(pubKeys...)
-	pkHash := pubKeys[1].GetHasher().ToBytes()
+	pkHash := pubKeys[1].GetHasher().ToString()
 	if pk := mapping.GetPubKey(pkHash); pk == nil {
 		t.Error("get invalid pub key")
 		return

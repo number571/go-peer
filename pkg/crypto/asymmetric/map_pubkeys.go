@@ -2,8 +2,6 @@ package asymmetric
 
 import (
 	"sync"
-
-	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -27,11 +25,11 @@ func NewMapPubKeys(pPubKeys ...IPubKey) IMapPubKeys {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sMapPubKeys) GetPubKey(pHash []byte) IPubKey {
+func (p *sMapPubKeys) GetPubKey(pHash string) IPubKey {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	pubKey, ok := p.fMapping[encoding.HexEncode(pHash)]
+	pubKey, ok := p.fMapping[pHash]
 	if !ok {
 		return nil
 	}
