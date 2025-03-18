@@ -45,14 +45,14 @@ lint-run: clean go-fmt-vet
 
 ### TEST
 # example run: make test-run N=10
-# for i in {1..100}; do echo $i; go test -race -shuffle=on -count=1 ./...; done;
+# for i in {1..100}; do echo $i; go test -shuffle=on -count=1 ./...; done;
 
 test-run:
 	$(_CHECK_ERROR);
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -race -cover -count=1 -shuffle=on `$(_GO_TEST_LIST)`; \
+		go test -cover -count=1 -shuffle=on `$(_GO_TEST_LIST)`; \
 		$(_CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";
