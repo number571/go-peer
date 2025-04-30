@@ -11,17 +11,17 @@ import (
 func encrypt(client client.IClient, outFilename, inFilename string) error {
 	pldLimit := client.GetPayloadLimit()
 
-	infile, err := os.Open(inFilename)
+	infile, err := os.Open(inFilename) //nolint:gosec
 	if err != nil {
 		return err
 	}
-	defer infile.Close()
+	defer func() { _ = infile.Close() }()
 
-	outfile, err := os.Create(outFilename)
+	outfile, err := os.Create(outFilename) //nolint:gosec
 	if err != nil {
 		return err
 	}
-	defer infile.Close()
+	defer func() { _ = infile.Close() }()
 
 	buf := make([]byte, pldLimit)
 	for i := 0; ; i++ {

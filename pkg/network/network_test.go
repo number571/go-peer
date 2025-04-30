@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package network
 
 import (
@@ -132,13 +132,13 @@ func TestBroadcast(t *testing.T) {
 		val := string(pMsg.GetPayload().GetBody())
 		flag, ok := mapp[node][val]
 		if !ok {
-			err := fmt.Errorf("incoming value '%s' undefined", val)
+			err := fmt.Errorf("incoming value '%s' undefined", val) //nolint:err113
 			t.Error(err)
 			return err
 		}
 
 		if flag {
-			err := fmt.Errorf("incoming value '%s' already exists", val)
+			err := fmt.Errorf("incoming value '%s' already exists", val) //nolint:err113
 			t.Error(err)
 			return err
 		}
@@ -234,7 +234,7 @@ func TestNodeConnection(t *testing.T) {
 
 	err1 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		if err := node1.AddConnection(ctx, "unknown_connection_address"); err == nil {
-			return errors.New("success add incorrect connection address")
+			return errors.New("success add incorrect connection address") //nolint:err113
 		}
 		return nil
 	})
@@ -270,7 +270,7 @@ func TestNodeConnection(t *testing.T) {
 
 	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		if len(node3.GetConnections()) != 1 {
-			return errors.New("has more than 1 connections (node2 should be auto disconnects by max conns param)")
+			return errors.New("has more than 1 connections (node2 should be auto disconnects by max conns param)") //nolint:err113
 		}
 		return nil
 	})
@@ -298,7 +298,7 @@ func TestHandleMessage(t *testing.T) {
 	}
 
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
-		return errors.New("some error")
+		return errors.New("some error") //nolint:err113
 	})
 	msg2 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
 	if ok := node.handleMessage(ctx, nil, msg2); ok {

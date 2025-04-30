@@ -32,13 +32,13 @@ var handler = func(id string) network.IHandlerF {
 		}
 
 		fmt.Printf("'%s' got '%s#%d'\n", id, val, num)
-		n.BroadcastMessage(
+		_ = n.BroadcastMessage(
 			ctx,
 			layer1.NewMessage(
 				layer1.NewConstructSettings(&layer1.SConstructSettings{
 					FSettings: n.GetSettings().GetConnSettings().GetMessageSettings(),
 				}),
-				payload.NewPayload32(serviceHeader, []byte(fmt.Sprintf("%d", num+1))),
+				payload.NewPayload32(serviceHeader, []byte(strconv.Itoa(num+1))),
 			),
 		)
 
@@ -61,7 +61,7 @@ func main() {
 		}),
 		payload.NewPayload32(serviceHeader, []byte("0")),
 	)
-	node1.BroadcastMessage(ctx, msg)
+	_ = node1.BroadcastMessage(ctx, msg)
 
 	select {}
 }
@@ -70,7 +70,7 @@ func runClientNode(id string) network.INode {
 	ctx := context.Background()
 	node := newNode("").HandleFunc(serviceHeader, handler(id))
 
-	node.AddConnection(ctx, serviceAddress)
+	_ = node.AddConnection(ctx, serviceAddress)
 	return node
 }
 

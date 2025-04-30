@@ -100,7 +100,7 @@ func (p *sConn) sendBytes(pCtx context.Context, pBytes []byte) error {
 				return errors.Join(ErrWriteToSocket, err)
 			}
 
-			bytesPtr -= uint64(n)
+			bytesPtr -= uint64(n) //nolint:gosec
 			pBytes = pBytes[:bytesPtr]
 		}
 	}
@@ -181,7 +181,7 @@ func (p *sConn) recvDataBytes(pCtx context.Context, pMustLen uint32, pInitTimeou
 				[]byte{},
 			)
 
-			mustLen -= uint32(n)
+			mustLen -= uint32(n) //nolint:gosec
 
 			if err := p.fSocket.SetReadDeadline(time.Now().Add(p.fSettings.GetReadTimeout())); err != nil {
 				return nil, errors.Join(ErrSetReadDeadline, err)

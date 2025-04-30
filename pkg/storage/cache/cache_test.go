@@ -19,19 +19,19 @@ func TestLRUCache(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		key := encoding.Uint64ToBytes(uint64(i))
+		key := encoding.Uint64ToBytes(uint64(i)) //nolint:gosec
 		if ok := lruCache.Set(key[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
 			t.Errorf("failed push %d", i)
 			return
 		}
-		if lruCache.GetIndex() != uint64((i+1)%3) {
+		if lruCache.GetIndex() != uint64((i+1)%3) { //nolint:gosec
 			t.Error("got invalid index")
 			return
 		}
 	}
 
 	for i := 0; i < 3; i++ {
-		key := encoding.Uint64ToBytes(uint64(i))
+		key := encoding.Uint64ToBytes(uint64(i)) //nolint:gosec
 		val, ok := lruCache.Get(
 			key[:],
 		)

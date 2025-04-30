@@ -26,8 +26,8 @@ func (p *sKeyBuilder) Build(pPassword string, pKeyLen uint64) []byte {
 	return pbkdf2.Key(
 		[]byte(pPassword),
 		p.fSalt,
-		int(p.fIterN),
-		int(pKeyLen),
+		int(p.fIterN), //nolint:gosec
+		int(pKeyLen),  //nolint:gosec
 		sha512.New,
 	)
 }

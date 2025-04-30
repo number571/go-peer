@@ -56,7 +56,7 @@ func TestPuzzle(t *testing.T) {
 func TestMultiPuzzle(t *testing.T) {
 	t.Parallel()
 
-	parallel := uint64(runtime.GOMAXPROCS(0) + 1)
+	parallel := uint64(runtime.GOMAXPROCS(0) + 1) //nolint:gosec
 	puzzle := NewPoWPuzzle(4)
 	for i := uint64(0); i < 1_000; i++ {
 		arr := encoding.Uint64ToBytes(i)

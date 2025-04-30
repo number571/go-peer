@@ -35,7 +35,7 @@ func runClientNode() anonymity.INode {
 	network, node := newNode("cnode", "")
 
 	go func() { _ = node.Run(ctx) }()
-	network.AddConnection(ctx, nodeAddress)
+	_ = network.AddConnection(ctx, nodeAddress)
 
 	return node
 }
@@ -46,7 +46,7 @@ func runServiceNode() anonymity.INode {
 	node.HandleFunc(
 		nodeRouter,
 		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
-			return []byte(fmt.Sprintf("echo: %s", string(b))), nil
+			return []byte("echo: " + string(b)), nil
 		},
 	)
 

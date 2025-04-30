@@ -123,7 +123,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 		case <-pCtx.Done():
 			return
 		case <-time.After(p.fSettings.GetQueuePeriod()):
-			break // next consumer
+			continue
 		case msg := <-p.fMainPool.fRawQueue[i]:
 			if err := p.pushMessage(pCtx, p.fMainPool.fQueue, msg); err != nil {
 				return
@@ -134,7 +134,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 
 func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
-	if uint64(incCount) > uint64(cap(p.fMainPool.fQueue)) {
+	if uint64(incCount) > uint64(cap(p.fMainPool.fQueue)) { //nolint:gosec
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
@@ -188,7 +188,7 @@ func (p *sQBProblemProcessor) DequeueMessage(pCtx context.Context) layer1.IMessa
 
 func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 	incCount := atomic.AddInt64(&p.fRandPool.fCount, 1)
-	if uint64(incCount) > uint64(cap(p.fRandPool.fQueue)) {
+	if uint64(incCount) > uint64(cap(p.fRandPool.fQueue)) { //nolint:gosec
 		atomic.AddInt64(&p.fRandPool.fCount, -1)
 		select {
 		case <-pCtx.Done():

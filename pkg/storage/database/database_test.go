@@ -26,7 +26,7 @@ func TestInvalidCreateDB(t *testing.T) {
 	t.Parallel()
 
 	path := "./not_exist/path/to/database/57199u140291724y121291d1/database.db"
-	defer os.RemoveAll(path)
+	defer func() { _ = os.RemoveAll(path) }()
 
 	_, err := NewKVDatabase(path)
 	if err == nil {
@@ -39,14 +39,14 @@ func TestClosedDB(t *testing.T) {
 	t.Parallel()
 
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 2)
-	defer os.RemoveAll(dbPath)
+	defer func() { _ = os.RemoveAll(dbPath) }()
 
 	db, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	if err := db.Close(); err != nil {
 		t.Error(err)
@@ -68,14 +68,14 @@ func TestCreateDB(t *testing.T) {
 	t.Parallel()
 
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 3)
-	defer os.RemoveAll(dbPath)
+	defer func() { _ = os.RemoveAll(dbPath) }()
 
 	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
 		t.Error(err)
@@ -97,14 +97,14 @@ func TestBasicDB(t *testing.T) {
 	t.Parallel()
 
 	dbPath := fmt.Sprintf(tcPathDBTemplate, 1)
-	defer os.RemoveAll(dbPath)
+	defer func() { _ = os.RemoveAll(dbPath) }()
 
 	store, err := NewKVDatabase(dbPath)
 	if err != nil {
 		t.Error("[testBasic]", err)
 		return
 	}
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	if _, err := store.Get([]byte("KEY")); err == nil {
 		t.Error("[testBasic] success get with bucket=nil")

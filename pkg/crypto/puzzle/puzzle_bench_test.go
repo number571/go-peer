@@ -134,7 +134,7 @@ func BenchmarkPuzzleParallel(b *testing.B) {
 		b.Run(t.name, func(b *testing.B) {
 
 			b.StopTimer()
-			parallel := uint64(runtime.GOMAXPROCS(0))
+			parallel := uint64(runtime.GOMAXPROCS(0)) //nolint:gosec
 			randomBytes := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
 				randomBytes = append(randomBytes, testutils.PseudoRandomBytes(i))

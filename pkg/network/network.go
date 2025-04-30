@@ -117,11 +117,11 @@ func (p *sNode) Run(pCtx context.Context) error {
 	if err != nil {
 		return errors.Join(ErrCreateListener, err)
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	go func() {
 		<-pCtx.Done()
-		listener.Close()
+		_ = listener.Close()
 	}()
 
 	p.setListener(listener)
@@ -136,7 +136,7 @@ func (p *sNode) Run(pCtx context.Context) error {
 			}
 
 			if p.hasMaxConnSize() {
-				tconn.Close()
+				_ = tconn.Close()
 				continue
 			}
 

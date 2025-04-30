@@ -81,7 +81,7 @@ func (p *sLogger) WithPubKey(pPubKey asymmetric.IPubKey) ILogBuilder {
 }
 
 func (p *sLogger) WithSize(pSize int) ILogBuilder {
-	p.fSize = uint64(pSize)
+	p.fSize = uint64(pSize) //nolint:gosec
 	return p
 }
 

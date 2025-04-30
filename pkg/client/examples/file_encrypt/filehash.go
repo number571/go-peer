@@ -8,15 +8,15 @@ import (
 )
 
 func fileHash(filename string) []byte {
-	f, err := os.Open(filename)
+	f, err := os.Open(filename) //nolint:gosec
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
-		log.Fatal(err)
+		log.Fatal(err) //nolint:gocritic
 	}
 
 	return h.Sum(nil)

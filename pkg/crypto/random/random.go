@@ -49,7 +49,7 @@ func (p *sRandom) GetBytes(n uint64) []byte {
 */
 func (p *sRandom) GetString(n uint64) string {
 	result := strings.Builder{}
-	result.Grow(int(n))
+	result.Grow(int(n)) //nolint:gosec
 
 	randBytes := p.GetBytes(n)
 	for _, b := range randBytes {

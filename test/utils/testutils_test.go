@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package testutils
 
 import (
@@ -32,7 +32,7 @@ func TestPseudoRandomBytes(t *testing.T) {
 func TestTryN(t *testing.T) {
 	t.Parallel()
 
-	if err := TryN(3, 10*time.Millisecond, func() error { return errors.New("some error") }); err != nil && err.Error() != "some error" {
+	if err := TryN(3, 10*time.Millisecond, func() error { return errors.New("some error") }); err != nil && err.Error() != "some error" { //nolint:err113
 		t.Error("success tryN with error")
 		return
 	}
@@ -45,7 +45,7 @@ func TestTryN(t *testing.T) {
 		10*time.Millisecond,
 		func() error {
 			if random.NewRandom().GetBool() {
-				return errors.New("some error")
+				return errors.New("some error") //nolint:err113
 			}
 			return nil
 		},

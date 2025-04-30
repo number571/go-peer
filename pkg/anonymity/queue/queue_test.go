@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package queue
 
 import (
@@ -117,7 +117,7 @@ func TestRunStopQueue(t *testing.T) {
 		if uint64(len(sQueue.fRandPool.fQueue)) == sett.GetQueuePoolCap()[0] {
 			return nil
 		}
-		return errors.New("len(void queue) != max capacity")
+		return errors.New("len(void queue) != max capacity") //nolint:err113
 	})
 	if err != nil {
 		t.Error(err)
@@ -218,7 +218,7 @@ func testQueue(queue IQBProblemProcessor) error {
 	for i := 0; i < len(msgs)-1; i++ {
 		for j := i + 1; j < len(msgs); j++ {
 			if bytes.Equal(msgs[i].GetHash(), msgs[j].GetHash()) {
-				return fmt.Errorf("hash of messages equals (%d and %d)", i, i)
+				return fmt.Errorf("hash of messages equals (%d and %d)", i, i) //nolint:err113
 			}
 		}
 	}
@@ -232,7 +232,7 @@ func testQueue(queue IQBProblemProcessor) error {
 
 	cancel()
 	if <-notClosed {
-		return errors.New("success dequeue with close")
+		return errors.New("success dequeue with close") //nolint:err113
 	}
 	return nil
 }

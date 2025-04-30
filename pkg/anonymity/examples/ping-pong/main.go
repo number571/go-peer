@@ -58,7 +58,7 @@ func runClientNode() anonymity.INode {
 	node.HandleFunc(nodeRouter, handler)
 
 	go func() { _ = node.Run(ctx) }()
-	network.AddConnection(ctx, nodeAddress)
+	_ = network.AddConnection(ctx, nodeAddress)
 
 	return node
 }

@@ -14,7 +14,7 @@ func NewBytesJoiner32(pBytesSlice [][]byte) []byte {
 		p = append(
 			p,
 			payload.NewPayload32(
-				uint32(len(b)),
+				uint32(len(b)), //nolint:gosec
 				b,
 			).ToBytes()...,
 		)
@@ -34,7 +34,7 @@ func LoadBytesJoiner32(pJoinerBytes []byte) ([][]byte, error) {
 		pLen := pld.GetHead()
 		pBytes := pld.GetBody()
 
-		if pLen > uint32(len(pBytes)) {
+		if pLen > uint32(len(pBytes)) { //nolint:gosec
 			return nil, ErrInvalidLength
 		}
 

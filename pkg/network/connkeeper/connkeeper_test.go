@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package connkeeper
 
 import (
@@ -98,7 +98,7 @@ func TestConnKeeper(t *testing.T) {
 	go func() {
 		err1 := testutils.TryN(50, 20*time.Millisecond, func() error {
 			if err := connKeeper.Run(ctx2); err == nil {
-				return errors.New("error is nil with already running connKeeper")
+				return errors.New("error is nil with already running connKeeper") //nolint:err113
 			}
 			return nil
 		})
@@ -110,7 +110,7 @@ func TestConnKeeper(t *testing.T) {
 
 	err1 := testutils.TryN(50, 20*time.Millisecond, func() error {
 		if len(connKeeper.GetNetworkNode().GetConnections()) != 1 {
-			return errors.New("length of connections != 1")
+			return errors.New("length of connections != 1") //nolint:err113
 		}
 		return nil
 	})
@@ -170,5 +170,5 @@ func testFreeService(listener net.Listener) {
 	if listener == nil {
 		return
 	}
-	listener.Close()
+	_ = listener.Close()
 }

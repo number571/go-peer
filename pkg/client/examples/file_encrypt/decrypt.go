@@ -12,17 +12,17 @@ import (
 func decrypt(client client.IClient, outFilename, inFilename string) error {
 	mapKeys := asymmetric.NewMapPubKeys(client.GetPrivKey().GetPubKey())
 
-	infile, err := os.Open(inFilename)
+	infile, err := os.Open(inFilename) //nolint:gosec
 	if err != nil {
 		return err
 	}
-	defer infile.Close()
+	defer func() { _ = infile.Close() }()
 
-	outfile, err := os.Create(outFilename)
+	outfile, err := os.Create(outFilename) //nolint:gosec
 	if err != nil {
 		return err
 	}
-	defer infile.Close()
+	defer func() { _ = infile.Close() }()
 
 	buf := make([]byte, client.GetMessageSize())
 	for i := 0; ; i++ {
@@ -33,8 +33,8 @@ func decrypt(client client.IClient, outFilename, inFilename string) error {
 			}
 			return err
 		}
-		if uint64(n) != client.GetMessageSize() {
-			return errors.New("uint64(n) != msgSize")
+		if uint64(n) != client.GetMessageSize() { //nolint:gosec
+			return errors.New("uint64(n) != msgSize") //nolint:err113
 		}
 		_, chunk, err := client.DecryptMessage(mapKeys, buf[:n])
 		if err != nil {

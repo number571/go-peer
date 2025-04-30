@@ -32,7 +32,7 @@ func NewCipher(pKey []byte) ICipher {
 
 func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {
 	blockSize := p.fBlock.BlockSize()
-	iv := random.NewRandom().GetBytes(uint64(blockSize))
+	iv := random.NewRandom().GetBytes(uint64(blockSize)) //nolint:gosec
 
 	stream := cipher.NewCFBEncrypter(p.fBlock, iv)
 	result := make([]byte, len(pMsg)+len(iv))

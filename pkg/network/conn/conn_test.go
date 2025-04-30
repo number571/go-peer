@@ -41,14 +41,14 @@ func (p *tsConn) Read(b []byte) (n int, err error) {
 		return n, nil
 	}
 	if p.cancelBody {
-		return 0, errors.New("some error1") // nolint: goerr113
+		return 0, errors.New("some error1") //nolint:err113
 	}
 	bodyBytes := random.NewRandom().GetBytes(p.bodySize)
 	n = copy(b, bodyBytes)
 	return n, nil
 }
 func (p *tsConn) Write(_ []byte) (n int, err error) {
-	return 0, errors.New("some error2") // nolint: goerr113
+	return 0, errors.New("some error2") //nolint:err113
 }
 func (p *tsConn) Close() error                  { return nil }
 func (p *tsConn) LocalAddr() net.Addr           { return &net.TCPAddr{} }
@@ -56,7 +56,7 @@ func (p *tsConn) RemoteAddr() net.Addr          { return &net.TCPAddr{} }
 func (p *tsConn) SetDeadline(_ time.Time) error { return nil }
 func (p *tsConn) SetReadDeadline(_ time.Time) error {
 	if p.bodyPart && p.readDlError {
-		return errors.New("some error3") // nolint: goerr113
+		return errors.New("some error3") //nolint:err113
 	}
 	return nil
 }
@@ -502,7 +502,7 @@ func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 			}
 
 			ok := func() bool {
-				defer conn.Close()
+				defer func() { _ = conn.Close() }()
 				return conn.WriteMessage(ctx, msg) == nil
 			}()
 
@@ -519,5 +519,5 @@ func testFreeService(listener net.Listener) {
 	if listener == nil {
 		return
 	}
-	listener.Close()
+	_ = listener.Close()
 }

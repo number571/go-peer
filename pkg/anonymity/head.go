@@ -24,11 +24,11 @@ func joinHead(pAction iAction, pRoute uint32) iHead {
 }
 
 func (p sHead) getRoute() uint32 {
-	return uint32(p & 0xFFFFFFFF)
+	return uint32(p & 0xFFFFFFFF) //nolint:gosec
 }
 
 func (p sHead) getAction() iAction {
-	return sAction(p >> 32)
+	return sAction(p >> 32) //nolint:gosec
 }
 
 func (p sHead) uint64() uint64 {

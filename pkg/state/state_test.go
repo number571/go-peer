@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package state
 
 import (
@@ -73,7 +73,7 @@ func Test_sState_Enable(t *testing.T) {
 			fields: fields{
 				fEnabled: true,
 			},
-			args:    args{f: func() error { return errors.New("some error") }},
+			args:    args{f: func() error { return errors.New("some error") }}, //nolint:err113
 			wantErr: true,
 		},
 		{
@@ -97,7 +97,7 @@ func Test_sState_Enable(t *testing.T) {
 			fields: fields{
 				fEnabled: false,
 			},
-			args:    args{f: func() error { return errors.New("some error") }},
+			args:    args{f: func() error { return errors.New("some error") }}, //nolint:err113
 			wantErr: true,
 		},
 	}
@@ -149,7 +149,7 @@ func Test_sState_Disable(t *testing.T) {
 			fields: fields{
 				fEnabled: true,
 			},
-			args:    args{f: func() error { return errors.New("some error") }},
+			args:    args{f: func() error { return errors.New("some error") }}, //nolint:err113
 			wantErr: true,
 		},
 		{
@@ -173,7 +173,7 @@ func Test_sState_Disable(t *testing.T) {
 			fields: fields{
 				fEnabled: false,
 			},
-			args:    args{f: func() error { return errors.New("some error") }},
+			args:    args{f: func() error { return errors.New("some error") }}, //nolint:err113
 			wantErr: true,
 		},
 	}

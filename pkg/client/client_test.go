@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package client
 
 import (
@@ -226,12 +226,12 @@ func (p *tsPrivKey) GetDSAPrivKey() asymmetric.IDSAPrivKey { return &tsDSAPrivKe
 
 func (p *tsKEMPubKey) ToBytes() []byte { return nil }
 func (p *tsKEMPubKey) Encapsulate() ([]byte, []byte, error) {
-	return nil, nil, errors.New("some error")
+	return nil, nil, errors.New("some error") //nolint:err113
 }
 
 func (p *tsKEMPrivKey) ToBytes() []byte                    { return nil }
 func (p *tsKEMPrivKey) GetPubKey() asymmetric.IKEMPubKey   { return &tsKEMPubKey{} }
-func (p *tsKEMPrivKey) Decapsulate([]byte) ([]byte, error) { return nil, errors.New("some error") }
+func (p *tsKEMPrivKey) Decapsulate([]byte) ([]byte, error) { return nil, errors.New("some error") } //nolint:err113
 
 func (p *tsDSAPrivKey) ToBytes() []byte                  { return nil }
 func (p *tsDSAPrivKey) GetPubKey() asymmetric.IDSAPubKey { return &tsDSAPubKey{} }

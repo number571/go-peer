@@ -155,7 +155,7 @@ PASS
 
 // go test -bench=BenchmarkMessageParallel -benchtime=100x -timeout 99999s
 func BenchmarkMessageParallel(b *testing.B) {
-	gomaxprocs := uint64(runtime.GOMAXPROCS(0))
+	gomaxprocs := uint64(runtime.GOMAXPROCS(0)) //nolint:gosec
 
 	benchTable := []struct {
 		name string

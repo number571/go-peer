@@ -1,4 +1,4 @@
-// nolint: goerr113
+// nolint: err113
 package anonymity
 
 import (
@@ -387,7 +387,7 @@ func TestHandleWrapper(t *testing.T) {
 	node.HandleFunc(
 		111,
 		func(_ context.Context, _ INode, _ asymmetric.IPubKey, _ []byte) ([]byte, error) {
-			return nil, errors.New("some error")
+			return nil, errors.New("some error") //nolint:err113
 		},
 	)
 
@@ -451,7 +451,7 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
-	node.fKVDatavase.Close()
+	_ = node.fKVDatavase.Close()
 	netMsg41 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(ctx, netMsg41); err == nil {
 		t.Error("got success code with closed database")
@@ -759,14 +759,14 @@ func testRunNode(ctx context.Context, timeWait time.Duration, addr string, typeD
 
 func testFreeNodes(nodes []INode, typeDB int) {
 	for _, node := range nodes {
-		node.GetKVDatabase().Close()
+		_ = node.GetKVDatabase().Close()
 	}
 	testDeleteDB(typeDB)
 }
 
 func testDeleteDB(typeDB int) {
 	for i := 0; i < 5; i++ {
-		os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, typeDB, i))
+		_ = os.RemoveAll(fmt.Sprintf(tcPathDBTemplate, typeDB, i))
 	}
 }
 
@@ -783,6 +783,6 @@ func (p *sNode) testNewNetworkMessage(pSett layer1.IConstructSettings, pMsgBytes
 type tsDatabase struct{}
 
 func (p *tsDatabase) Get([]byte) ([]byte, error) { return nil, database.ErrNotFound }
-func (p *tsDatabase) Set([]byte, []byte) error   { return errors.New("some error") }
+func (p *tsDatabase) Set([]byte, []byte) error   { return errors.New("some error") } //nolint:err113
 func (p *tsDatabase) Del([]byte) error           { return nil }
 func (p *tsDatabase) Close() error               { return nil }

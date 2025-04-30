@@ -61,24 +61,24 @@ func TestLogger(t *testing.T) {
 	t.Parallel()
 
 	defer func() {
-		os.Remove(tcPathInfo)
-		os.Remove(tcPathWarning)
-		os.Remove(tcPathError)
+		_ = os.Remove(tcPathInfo)
+		_ = os.Remove(tcPathWarning)
+		_ = os.Remove(tcPathError)
 	}()
 
-	fileInfo, err := os.OpenFile(tcPathInfo, os.O_CREATE|os.O_WRONLY, 0644)
+	fileInfo, err := os.OpenFile(tcPathInfo, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		t.Error(err.Error())
 		return
 	}
 
-	fileWarn, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0644)
+	fileWarn, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		t.Error(err.Error())
 		return
 	}
 
-	fileErro, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0644)
+	fileErro, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		t.Error(err.Error())
 		return

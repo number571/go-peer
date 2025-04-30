@@ -39,7 +39,7 @@ func (p *sPoWPuzzle) ProofBytes(pPackHash []byte, pParallel uint64) uint64 {
 		target = big.NewInt(1)
 	)
 
-	maxParallel := uint64(runtime.GOMAXPROCS(0))
+	maxParallel := uint64(runtime.GOMAXPROCS(0)) //nolint:gosec
 	setParallel := pParallel
 	if pParallel == 0 {
 		setParallel = 1
