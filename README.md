@@ -125,8 +125,6 @@ Also, the composition of these works can be found in the book `The general theor
 
 1. Anonymous network «[Hidden Lake](https://github.com/number571/hidden-lake)»
 2. Console messenger «[secpy-chat](https://github.com/number571/secpy-chat)» based on Hidden Lake services `HLT`, `HLE`
-3. Generator of asymmetric keys «[tkeygen](cmd/tools/keygen)» in `PrivKey{hex}`, `PubKey{hex}` format
-3. Serverless and stateless password manager «[tpmanager](cmd/tools/pmanager)»
 
 ## Star History
 
