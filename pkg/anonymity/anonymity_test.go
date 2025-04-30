@@ -608,12 +608,12 @@ func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, add
 	}
 
 	go func() {
-		if err := networkNodes[2].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := networkNodes[2].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 		}
 	}()
 	go func() {
-		if err := networkNodes[4].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
+		if err := networkNodes[4].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, context.Canceled) {
 			t.Error(err)
 		}
 	}()
