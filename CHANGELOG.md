@@ -4,13 +4,18 @@
 
 ## v1.7.11~
 
-*??? ??, ????*
+*April 30, 2025*
+
+### CHANGES
+
+- `cmd/tools`: deleted
+- `build`: deleted
 
 <!-- ... -->
 
 ## v1.7.10
 
-*January 10, 2024*
+*January 10, 2025*
 
 ### CHANGES
 
