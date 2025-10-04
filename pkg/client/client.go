@@ -44,7 +44,7 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 	}
 
 	pubKey := client.GetPrivKey().GetPubKey()
-	encMsg, err := client.encryptWithParams(pubKey, []byte{}, 0)
+	encMsg, err := client.encryptWithPadding(pubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -87,10 +87,10 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte,
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithParams(pRecv, pMsg, payloadLimit-resultSize)
+	return p.encryptWithPadding(pRecv, pMsg, payloadLimit-resultSize)
 }
 
-func (p *sClient) encryptWithParams(
+func (p *sClient) encryptWithPadding(
 	pRecv asymmetric.IPubKey,
 	pMsg []byte,
 	pPadd uint64,

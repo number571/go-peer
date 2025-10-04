@@ -59,7 +59,7 @@ func TestInvalidKeys(t *testing.T) {
 	t.Parallel()
 
 	_client := NewClient(asymmetric.NewPrivKey(), (8 << 10)).(*sClient)
-	if _, err := _client.encryptWithParams(&tsPubKey{}, []byte("hello"), 0); err == nil {
+	if _, err := _client.encryptWithPadding(&tsPubKey{}, []byte("hello"), 0); err == nil {
 		t.Error("success encrypt with invalid pubkey")
 		return
 	}
@@ -92,7 +92,7 @@ func TestInvalidClient(t *testing.T) {
 	msg1 := []byte("hello")
 	pad1 := client.GetPayloadLimit() - uint64(len(msg1)) + 2*encoding.CSizeUint32
 
-	enc1, err := _client.encryptWithParams(pubKey, msg1, pad1)
+	enc1, err := _client.encryptWithPadding(pubKey, msg1, pad1)
 	if err != nil {
 		t.Error(err)
 		return
