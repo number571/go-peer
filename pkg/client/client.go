@@ -21,9 +21,18 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fPrivKey     asymmetric.IPrivKey
-	fMessageSize uint64
-	fStructSize  uint64
+	fPrivKey             asymmetric.IPrivKey
+	fMessageSize         uint64
+	fStructSize          uint64
+	fStaticDecryptValues *sStaticDecryptValues
+}
+
+type sStaticDecryptValues struct {
+	fEncMsg         layer2.IMessage
+	fSKey           []byte
+	fDecSlice       [][]byte
+	fPubKey         asymmetric.IPubKey
+	fPayloadWrapper [][]byte
 }
 
 // Create client by private key as identification.
@@ -45,7 +54,7 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		panic("the payload size is lower than struct size")
 	}
 
-	return client
+	return client.withStaticDecryptValues()
 }
 
 func (p *sClient) GetMessageSize() uint64 {
@@ -116,25 +125,89 @@ func (p *sClient) encryptWithParams(
 	).ToBytes(), nil
 }
 
+func (p *sClient) withStaticDecryptValues() *sClient {
+	encMsg, err := p.EncryptMessage(p.fPrivKey.GetPubKey(), []byte{})
+	if err != nil {
+		panic(err)
+	}
+	msg, err := layer2.LoadMessage(p.fMessageSize, encMsg)
+	if err != nil {
+		panic(ErrInitCheckMessage)
+	}
+	skey, err := p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
+	if err != nil {
+		panic(ErrDecryptCipherKey)
+	}
+	decJoiner := symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
+	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
+	if err != nil || len(decSlice) != 5 {
+		panic(ErrDecodeBytesJoiner)
+	}
+	var (
+		pkid = decSlice[0]
+		salt = decSlice[1]
+		data = decSlice[2]
+		hash = decSlice[3]
+		sign = decSlice[4]
+	)
+	mapPubKeys := asymmetric.NewMapPubKeys(p.fPrivKey.GetPubKey())
+	sPubKey := mapPubKeys.GetPubKey(pkid)
+	if sPubKey == nil {
+		panic(ErrDecodePublicKey)
+	}
+	check := hashing.NewHMACHasher(salt, bytes.Join(
+		[][]byte{sPubKey.ToBytes(), p.fPrivKey.GetPubKey().ToBytes(), data},
+		[]byte{},
+	)).ToBytes()
+	if !bytes.Equal(check, hash) {
+		panic(ErrInvalidDataHash)
+	}
+	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
+		panic(ErrInvalidHashSign)
+	}
+	// Decode main data of message by session key.
+	payloadWrapper, err := joiner.LoadBytesJoiner32(data)
+	if err != nil || len(payloadWrapper) != 2 {
+		panic(ErrDecodePayloadWrapper)
+	}
+	p.fStaticDecryptValues = &sStaticDecryptValues{
+		fEncMsg:         msg,
+		fSKey:           skey,
+		fDecSlice:       decSlice,
+		fPubKey:         sPubKey,
+		fPayloadWrapper: payloadWrapper,
+	}
+	return p
+}
+
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
+	var resultError error
+
 	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
-		return nil, nil, ErrInitCheckMessage
+		msg = p.fStaticDecryptValues.fEncMsg
+		resultError = ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
 	skey, err := p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
 	if err != nil {
-		return nil, nil, ErrDecryptCipherKey
+		skey = p.fStaticDecryptValues.fSKey
+		if resultError == nil {
+			resultError = ErrDecryptCipherKey
+		}
 	}
 
 	// Decrypt data block by decrypted session key. Decode data block.
 	decJoiner := symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
-		return nil, nil, ErrDecodeBytesJoiner
+		decSlice = p.fStaticDecryptValues.fDecSlice
+		if resultError == nil {
+			resultError = ErrDecodeBytesJoiner
+		}
 	}
 
 	// Decode wrapped data.
@@ -149,7 +222,10 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	// Get public key from map by pkid (hash)
 	sPubKey := pMapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
-		return nil, nil, ErrDecodePublicKey
+		sPubKey = p.fStaticDecryptValues.fPubKey
+		if resultError == nil {
+			resultError = ErrDecodePublicKey
+		}
 	}
 
 	// Validate received hash with generated hash.
@@ -158,20 +234,27 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		[]byte{},
 	)).ToBytes()
 	if !bytes.Equal(check, hash) {
-		return nil, nil, ErrInvalidDataHash
+		if resultError == nil {
+			resultError = ErrInvalidDataHash
+		}
 	}
 
 	// Verify sign by public key of sender and hash of message.
 	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
-		return nil, nil, ErrInvalidHashSign
+		if resultError == nil {
+			resultError = ErrInvalidHashSign
+		}
 	}
 
 	// Decode main data of message by session key.
 	payloadWrapper, err := joiner.LoadBytesJoiner32(data)
 	if err != nil || len(payloadWrapper) != 2 {
-		return nil, nil, ErrDecodePayloadWrapper
+		payloadWrapper = p.fStaticDecryptValues.fPayloadWrapper
+		if resultError == nil {
+			resultError = ErrDecodePayloadWrapper
+		}
 	}
 
 	// Return public key of sender with payload.
-	return sPubKey, payloadWrapper[0], nil
+	return sPubKey, payloadWrapper[0], resultError
 }

@@ -74,7 +74,8 @@ func TestInvalidKeys(t *testing.T) {
 	}
 
 	_client.fPrivKey = &tsPrivKey{}
-	if _, _, err := _client.DecryptMessage(nil, enc); err == nil {
+	mapPubKeys := asymmetric.NewMapPubKeys()
+	if _, _, err := _client.DecryptMessage(mapPubKeys, enc); err == nil {
 		t.Error("success decrypt with invalid privkey")
 		return
 	}
@@ -220,7 +221,7 @@ func (p *tsPubKey) GetDSAPubKey() asymmetric.IDSAPubKey { return &tsDSAPubKey{} 
 
 func (p *tsPrivKey) ToString() string                      { return "" }
 func (p *tsPrivKey) ToBytes() []byte                       { return nil }
-func (p *tsPrivKey) GetPubKey() asymmetric.IPubKey         { return nil }
+func (p *tsPrivKey) GetPubKey() asymmetric.IPubKey         { return &tsPubKey{} }
 func (p *tsPrivKey) GetKEMPrivKey() asymmetric.IKEMPrivKey { return &tsKEMPrivKey{} }
 func (p *tsPrivKey) GetDSAPrivKey() asymmetric.IDSAPrivKey { return &tsDSAPrivKey{} }
 

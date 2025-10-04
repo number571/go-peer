@@ -1,7 +1,7 @@
-package anonymity
+package qb
 
 const (
-	errPrefix = "pkg/anonymity = "
+	errPrefix = "pkg/anonymity/qb = "
 )
 
 type SAnonymityError struct {
@@ -30,4 +30,5 @@ var (
 	ErrRunning               = &SAnonymityError{"node running"}
 	ErrProcessRun            = &SAnonymityError{"process run"}
 	ErrHashAlreadyExist      = &SAnonymityError{"hash already exist"}
+	ErrDecryptMessage        = &SAnonymityError{"decrypt message"}
 )

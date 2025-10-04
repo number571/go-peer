@@ -1,4 +1,4 @@
-package anonymity
+package qb
 
 import (
 	"context"
@@ -7,8 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/adapters"
-	"github.com/number571/go-peer/pkg/anonymity/queue"
+	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
+	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
+	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -19,7 +20,7 @@ import (
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
 
-	anon_logger "github.com/number571/go-peer/pkg/anonymity/logger"
+	anon_logger "github.com/number571/go-peer/pkg/anonymity/qb/logger"
 )
 
 var (
@@ -37,6 +38,7 @@ type sNode struct {
 	fMapPubKeys    asymmetric.IMapPubKeys
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
+	fDecryptors    []client.IDecryptor
 }
 
 func NewNode(
@@ -56,6 +58,7 @@ func NewNode(
 		fMapPubKeys:    asymmetric.NewMapPubKeys(),
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
 		fHandleActions: make(map[string]chan []byte, 64),
+		fDecryptors:    []client.IDecryptor{pQBProcessor.GetClient()},
 	}
 }
 
@@ -95,6 +98,14 @@ func (p *sNode) Run(pCtx context.Context) error {
 	default:
 		return errors.Join(errs...)
 	}
+}
+
+func (p *sNode) WithDecryptors(pDecryptors ...client.IDecryptor) INode {
+	decryptors := make([]client.IDecryptor, 0, 1+len(pDecryptors))
+	decryptors = append(decryptors, p.fQBProcessor.GetClient())
+	decryptors = append(decryptors, pDecryptors...)
+	p.fDecryptors = decryptors
+	return p
 }
 
 func (p *sNode) runProducer(pCtx context.Context) error {
@@ -225,6 +236,27 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
+func (p *sNode) tryDecryptMessage(pEncMsg []byte) (uint64, asymmetric.IPubKey, []byte, error) {
+	var (
+		id     uint64
+		pubKey asymmetric.IPubKey
+		decMsg []byte
+	)
+	for i, d := range p.fDecryptors {
+		pk, dm, err := d.DecryptMessage(p.fMapPubKeys, pEncMsg)
+		if err != nil {
+			continue
+		}
+		id = uint64(i) // nolint: gosec
+		pubKey = pk
+		decMsg = dm
+	}
+	if pubKey == nil {
+		return 0, nil, nil, ErrDecryptMessage
+	}
+	return id, pubKey, decMsg, nil
+}
+
 func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
@@ -251,8 +283,8 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 		return nil
 	}
 
-	// try decrypt message
-	pubKey, decMsg, err := client.DecryptMessage(p.fMapPubKeys, encMsg)
+	// try decrypt consumed message
+	id, pubKey, decMsg, err := p.tryDecryptMessage(encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
@@ -270,12 +302,13 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	// do request or response action
-	return p.handleDoAction(pCtx, logBuilder, pubKey, pld)
+	return p.handleDoAction(pCtx, logBuilder, id, pubKey, pld)
 }
 
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
+	pID uint64,
 	pSender asymmetric.IPubKey,
 	pPld payload.IPayload64,
 ) error {
@@ -288,7 +321,7 @@ func (p *sNode) handleDoAction(
 
 	if action.isRequest() {
 		// got request from another side (need generate response)
-		p.handleRequest(pCtx, pLogBuilder, pSender, head, body)
+		p.handleRequest(pCtx, pLogBuilder, pID, pSender, head, body)
 		return nil
 	}
 
@@ -319,6 +352,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
+	pID uint64,
 	pSender asymmetric.IPubKey,
 	pHead iHead,
 	pBody []byte,
@@ -331,7 +365,7 @@ func (p *sNode) handleRequest(
 	}
 
 	// response can be nil
-	resp, err := f(pCtx, p, pSender, pBody)
+	resp, err := f(pCtx, p, pID, pSender, pBody)
 	if err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
 		return

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity"
+	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -45,7 +45,7 @@ func runServiceNode() anonymity.INode {
 	network, node := newNode("snode", nodeAddress)
 	node.HandleFunc(
 		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
+		func(_ context.Context, _ anonymity.INode, _ uint64, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
 			return []byte("echo: " + string(b)), nil
 		},
 	)

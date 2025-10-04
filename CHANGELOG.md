@@ -4,7 +4,13 @@
 
 ## v1.7.11~
 
-*April 30, 2025*
+*??? ??, ????*
+
+### IMPROVEMENTS
+
+- `pkg/anonymity/qb`: move from pkg/anonymity -> pkg/anonymity/qb
+- `pkg/anonymity/qb`: add WithDecryptors
+- `pkg/client`: DecryptMessage with static time
 
 ### CHANGES
 

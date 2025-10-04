@@ -5,11 +5,19 @@ import (
 )
 
 type IClient interface {
-	GetMessageSize() uint64
-	GetPayloadLimit() uint64
+	IEncryptor
+	IDecryptor
 
 	GetPrivKey() asymmetric.IPrivKey
 
-	EncryptMessage(asymmetric.IPubKey, []byte) ([]byte, error)
+	GetMessageSize() uint64
+	GetPayloadLimit() uint64
+}
+
+type IDecryptor interface {
 	DecryptMessage(asymmetric.IMapPubKeys, []byte) (asymmetric.IPubKey, []byte, error)
+}
+
+type IEncryptor interface {
+	EncryptMessage(asymmetric.IPubKey, []byte) ([]byte, error)
 }

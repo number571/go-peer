@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/queue"
+	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/message/layer1"

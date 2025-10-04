@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity"
+	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKey, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, _ uint64, pubKey asymmetric.IPubKey, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 

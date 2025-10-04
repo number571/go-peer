@@ -1,11 +1,12 @@
-package anonymity
+package qb
 
 import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/anonymity/adapters"
-	"github.com/number571/go-peer/pkg/anonymity/queue"
+	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
+	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
+	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/payload"
@@ -14,7 +15,7 @@ import (
 )
 
 type (
-	IHandlerF func(context.Context, INode, asymmetric.IPubKey, []byte) ([]byte, error)
+	IHandlerF func(context.Context, INode, uint64, asymmetric.IPubKey, []byte) ([]byte, error)
 )
 
 type INode interface {
@@ -27,6 +28,8 @@ type INode interface {
 	GetKVDatabase() database.IKVDatabase
 	GetMapPubKeys() asymmetric.IMapPubKeys
 	GetQBProcessor() queue.IQBProblemProcessor
+
+	WithDecryptors(...client.IDecryptor) INode
 
 	SendPayload(context.Context, asymmetric.IPubKey, payload.IPayload64) error
 	FetchPayload(context.Context, asymmetric.IPubKey, payload.IPayload32) ([]byte, error)
