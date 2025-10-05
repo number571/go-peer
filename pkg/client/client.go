@@ -133,8 +133,7 @@ func (p *sClient) withStaticDecryptValues() *sClient {
 		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
 		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
 		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
-		data              = decSlice[2]
-		payloadWrapper, _ = joiner.LoadBytesJoiner32(data)
+		payloadWrapper, _ = joiner.LoadBytesJoiner32(decSlice[2])
 	)
 	p.fStaticDecryptValues = &sStaticDecryptValues{
 		fEncMsg:         msg,
