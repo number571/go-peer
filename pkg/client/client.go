@@ -150,6 +150,7 @@ func (p *sClient) withStaticDecryptValues() *sClient {
 func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
 	var resultError error
 
+	// Load message's structure from encrypted bytes.
 	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		msg = p.fStaticDecryptValues.fEncMsg
@@ -184,7 +185,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		sign = decSlice[4]
 	)
 
-	// Get public key from map by pkid (hash)
+	// Get public key from map by pkid (hash).
 	sPubKey := pMapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
 		sPubKey = p.fStaticDecryptValues.fPubKey
@@ -220,7 +221,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		}
 	}
 
-	// Return error if exists
+	// Return error if resultError exists.
 	if err := resultError; err != nil {
 		return nil, nil, err
 	}
