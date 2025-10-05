@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-
-	"github.com/number571/go-peer/build"
 )
 
 var (
@@ -23,7 +21,7 @@ func TestGoPeerVersion(t *testing.T) {
 		t.Fatal("versions not found")
 	}
 
-	version := build.GetVersion()
+	version := cVersion
 	if strings.HasSuffix(version, "~") {
 		if match[0][1] != version {
 			t.Fatal("the versions do not match")
