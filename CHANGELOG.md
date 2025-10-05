@@ -14,7 +14,6 @@
 ### CHANGES
 
 - `cmd/tools`: deleted
-- `build`: deleted
 
 <!-- ... -->
 
