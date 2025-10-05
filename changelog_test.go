@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+const (
+	cVersion = "v1.7.11~"
+)
+
 var (
 	//go:embed CHANGELOG.md
 	tgCHANGELOG string
