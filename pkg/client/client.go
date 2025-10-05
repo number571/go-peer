@@ -126,50 +126,18 @@ func (p *sClient) encryptWithPadding(
 }
 
 func (p *sClient) withStaticDecryptValues() *sClient {
-	encMsg, err := p.EncryptMessage(p.fPrivKey.GetPubKey(), []byte{})
-	if err != nil {
-		panic(err)
-	}
-	msg, err := layer2.LoadMessage(p.fMessageSize, encMsg)
-	if err != nil {
-		panic(ErrInitCheckMessage)
-	}
-	skey, err := p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
-	if err != nil {
-		panic(ErrDecryptCipherKey)
-	}
-	decJoiner := symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
-	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
-	if err != nil || len(decSlice) != 5 {
-		panic(ErrDecodeBytesJoiner)
-	}
 	var (
-		pkid = decSlice[0]
-		salt = decSlice[1]
-		data = decSlice[2]
-		hash = decSlice[3]
-		sign = decSlice[4]
+		encMsg, _         = p.EncryptMessage(p.fPrivKey.GetPubKey(), []byte{})
+		msg, _            = layer2.LoadMessage(p.fMessageSize, encMsg)
+		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
+		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
+		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
+		pkid              = decSlice[0]
+		data              = decSlice[2]
+		mapPubKeys        = asymmetric.NewMapPubKeys(p.fPrivKey.GetPubKey())
+		sPubKey           = mapPubKeys.GetPubKey(pkid)
+		payloadWrapper, _ = joiner.LoadBytesJoiner32(data)
 	)
-	mapPubKeys := asymmetric.NewMapPubKeys(p.fPrivKey.GetPubKey())
-	sPubKey := mapPubKeys.GetPubKey(pkid)
-	if sPubKey == nil {
-		panic(ErrDecodePublicKey)
-	}
-	check := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{sPubKey.ToBytes(), p.fPrivKey.GetPubKey().ToBytes(), data},
-		[]byte{},
-	)).ToBytes()
-	if !bytes.Equal(check, hash) {
-		panic(ErrInvalidDataHash)
-	}
-	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
-		panic(ErrInvalidHashSign)
-	}
-	// Decode main data of message by session key.
-	payloadWrapper, err := joiner.LoadBytesJoiner32(data)
-	if err != nil || len(payloadWrapper) != 2 {
-		panic(ErrDecodePayloadWrapper)
-	}
 	p.fStaticDecryptValues = &sStaticDecryptValues{
 		fEncMsg:         msg,
 		fSKey:           skey,
@@ -255,6 +223,11 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		}
 	}
 
+	// Return error if exists
+	if err := resultError; err != nil {
+		return nil, nil, err
+	}
+
 	// Return public key of sender with payload.
-	return sPubKey, payloadWrapper[0], resultError
+	return sPubKey, payloadWrapper[0], nil
 }
