@@ -14,7 +14,7 @@ var (
 	tgCHANGELOG string
 )
 
-func TestHiddenLakeVersion(t *testing.T) {
+func TestGoPeerVersion(t *testing.T) {
 	t.Parallel()
 
 	re := regexp.MustCompile(`##\s+(v\d+\.\d+\.\d+~?)\s+`)
