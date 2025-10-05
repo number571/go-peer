@@ -9,7 +9,7 @@ import (
 )
 
 func encrypt(client client.IClient, outFilename, inFilename string) error {
-	pldLimit := client.GetPayloadLimit()
+	pldLimit := client.GetPayloadSize()
 
 	infile, err := os.Open(inFilename) //nolint:gosec
 	if err != nil {

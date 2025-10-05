@@ -22,9 +22,9 @@ var (
 // Basic structure describing the user.
 type sClient struct {
 	fPrivKey             asymmetric.IPrivKey
-	fMessageSize         uint64
-	fStructSize          uint64
 	fStaticDecryptValues *sStaticDecryptValues
+	fMessageSize         uint64
+	fPayloadSize         uint64
 }
 
 type sStaticDecryptValues struct {
@@ -49,25 +49,13 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		panic(err)
 	}
 
-	client.fStructSize = uint64(len(encMsg))
-	if limit := client.GetPayloadLimit(); limit == 0 {
+	structSize := uint64(len(encMsg))
+	if pMessageSize <= structSize {
 		panic("the payload size is lower than struct size")
 	}
 
+	client.fPayloadSize = pMessageSize - structSize
 	return client.withStaticDecryptValues()
-}
-
-func (p *sClient) GetMessageSize() uint64 {
-	return p.fMessageSize
-}
-
-// Message is raw bytes of body payload without payload head.
-func (p *sClient) GetPayloadLimit() uint64 {
-	maxMsgSize := p.fMessageSize
-	if maxMsgSize <= p.fStructSize {
-		return 0
-	}
-	return maxMsgSize - p.fStructSize
 }
 
 // Get private key from client object.
@@ -75,11 +63,21 @@ func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
 	return p.fPrivKey
 }
 
+// Message is raw bytes of full structure+payload.
+func (p *sClient) GetMessageSize() uint64 {
+	return p.fMessageSize
+}
+
+// Payload is raw bytes of message without structure.
+func (p *sClient) GetPayloadSize() uint64 {
+	return p.fPayloadSize
+}
+
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
 func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
 	var (
-		payloadLimit = p.GetPayloadLimit()
+		payloadLimit = p.fPayloadSize
 		resultSize   = uint64(len(pMsg))
 	)
 

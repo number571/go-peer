@@ -194,7 +194,7 @@ func TestFetchPayload(t *testing.T) {
 		},
 	)
 
-	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
+	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadSize() - encoding.CSizeUint64 + 1
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),
@@ -245,7 +245,7 @@ func TestBroadcastPayload(t *testing.T) {
 		},
 	)
 
-	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadLimit() - encoding.CSizeUint64 + 1
+	largeBodySize := nodes[0].GetQBProcessor().GetClient().GetPayloadSize() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
 		context.Background(),
 		nodes[1].GetQBProcessor().GetClient().GetPrivKey().GetPubKey(),

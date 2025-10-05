@@ -11,7 +11,7 @@ type IClient interface {
 	GetPrivKey() asymmetric.IPrivKey
 
 	GetMessageSize() uint64
-	GetPayloadLimit() uint64
+	GetPayloadSize() uint64
 }
 
 type IDecryptor interface {
