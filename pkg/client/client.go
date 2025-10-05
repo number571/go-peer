@@ -127,22 +127,20 @@ func (p *sClient) encryptWithPadding(
 
 func (p *sClient) withStaticDecryptValues() *sClient {
 	var (
-		encMsg, _         = p.EncryptMessage(p.fPrivKey.GetPubKey(), []byte{})
+		pubKey            = p.fPrivKey.GetPubKey()
+		encMsg, _         = p.EncryptMessage(pubKey, []byte{})
 		msg, _            = layer2.LoadMessage(p.fMessageSize, encMsg)
 		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
 		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
 		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
-		pkid              = decSlice[0]
 		data              = decSlice[2]
-		mapPubKeys        = asymmetric.NewMapPubKeys(p.fPrivKey.GetPubKey())
-		sPubKey           = mapPubKeys.GetPubKey(pkid)
 		payloadWrapper, _ = joiner.LoadBytesJoiner32(data)
 	)
 	p.fStaticDecryptValues = &sStaticDecryptValues{
 		fEncMsg:         msg,
 		fSKey:           skey,
 		fDecSlice:       decSlice,
-		fPubKey:         sPubKey,
+		fPubKey:         pubKey,
 		fPayloadWrapper: payloadWrapper,
 	}
 	return p
