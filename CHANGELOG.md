@@ -9,7 +9,6 @@
 ### IMPROVEMENTS
 
 - `pkg/anonymity/qb`: move from pkg/anonymity -> pkg/anonymity/qb
-- `pkg/client`: DecryptMessage with static time
 
 ### CHANGES
 

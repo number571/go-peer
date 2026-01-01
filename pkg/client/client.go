@@ -21,18 +21,9 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fPrivKey             asymmetric.IPrivKey
-	fStaticDecryptValues *sStaticDecryptValues
-	fMessageSize         uint64
-	fPayloadSize         uint64
-}
-
-type sStaticDecryptValues struct {
-	fEncMsg         layer2.IMessage
-	fSKey           []byte
-	fDecSlice       [][]byte
-	fPubKey         asymmetric.IPubKey
-	fPayloadWrapper [][]byte
+	fPrivKey     asymmetric.IPrivKey
+	fMessageSize uint64
+	fPayloadSize uint64
 }
 
 // Create client by private key as identification.
@@ -55,7 +46,7 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 	}
 
 	client.fPayloadSize = pMessageSize - structSize
-	return client.withStaticDecryptValues()
+	return client
 }
 
 // Get private key from client object.
@@ -91,32 +82,23 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte,
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
 func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
-	var resultError error
-
 	// Load message's structure from encrypted bytes.
 	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
-		msg = p.fStaticDecryptValues.fEncMsg
-		resultError = ErrInitCheckMessage
+		return nil, nil, ErrInitCheckMessage
 	}
 
 	// Decrypt session key by private key of receiver.
 	skey, err := p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
 	if err != nil {
-		skey = p.fStaticDecryptValues.fSKey
-		if resultError == nil {
-			resultError = ErrDecryptCipherKey
-		}
+		return nil, nil, ErrDecryptCipherKey
 	}
 
 	// Decrypt data block by decrypted session key. Decode data block.
 	decJoiner := symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
-		decSlice = p.fStaticDecryptValues.fDecSlice
-		if resultError == nil {
-			resultError = ErrDecodeBytesJoiner
-		}
+		return nil, nil, ErrDecodeBytesJoiner
 	}
 
 	// Decode wrapped data.
@@ -131,10 +113,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	// Get public key from map by pkid (hash).
 	sPubKey := pMapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
-		sPubKey = p.fStaticDecryptValues.fPubKey
-		if resultError == nil {
-			resultError = ErrDecodePublicKey
-		}
+		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.
@@ -143,30 +122,18 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 		[]byte{},
 	)).ToBytes()
 	if !bytes.Equal(check, hash) {
-		if resultError == nil {
-			resultError = ErrInvalidDataHash
-		}
+		return nil, nil, ErrInvalidDataHash
 	}
 
 	// Verify sign by public key of sender and hash of message.
 	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
-		if resultError == nil {
-			resultError = ErrInvalidHashSign
-		}
+		return nil, nil, ErrInvalidHashSign
 	}
 
 	// Decode main data of message by session key.
 	payloadWrapper, err := joiner.LoadBytesJoiner32(data)
 	if err != nil || len(payloadWrapper) != 2 {
-		payloadWrapper = p.fStaticDecryptValues.fPayloadWrapper
-		if resultError == nil {
-			resultError = ErrDecodePayloadWrapper
-		}
-	}
-
-	// Return error if resultError exists.
-	if err := resultError; err != nil {
-		return nil, nil, err
+		return nil, nil, ErrDecodePayloadWrapper
 	}
 
 	// Return public key of sender with payload.
@@ -206,24 +173,4 @@ func (p *sClient) encryptWithPadding(
 			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
 		})),
 	).ToBytes(), nil
-}
-
-func (p *sClient) withStaticDecryptValues() *sClient {
-	var (
-		pubKey            = p.fPrivKey.GetPubKey()
-		encMsg, _         = p.EncryptMessage(pubKey, []byte{})
-		msg, _            = layer2.LoadMessage(p.fMessageSize, encMsg)
-		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
-		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
-		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
-		payloadWrapper, _ = joiner.LoadBytesJoiner32(decSlice[2])
-	)
-	p.fStaticDecryptValues = &sStaticDecryptValues{
-		fEncMsg:         msg,
-		fSKey:           skey,
-		fDecSlice:       decSlice,
-		fPubKey:         pubKey,
-		fPayloadWrapper: payloadWrapper,
-	}
-	return p
 }
