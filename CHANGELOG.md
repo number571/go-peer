@@ -6,12 +6,10 @@
 
 *??? ??, ????*
 
-### IMPROVEMENTS
-
-- `pkg/anonymity/qb`: move from pkg/anonymity -> pkg/anonymity/qb
-
 ### CHANGES
 
+- `pkg/anonymity/qb`: move from pkg/anonymity -> pkg/anonymity/qb
+- `pkg/crypto/hybrid/client`: move from pkg/client -> pkg/crypto/hybrid/client
 - `pkg/crypto/asymmetric`: NewHasher(pubKey.ToBytes()) -> NewHasher(pubKey.ToString())
 - `pkg/crypto/hashing`: NewHasher([]byte) -> NewHasher(interface{})
 - `cmd/tools`: deleted

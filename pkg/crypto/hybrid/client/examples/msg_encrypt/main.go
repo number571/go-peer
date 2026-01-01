@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 	"github.com/number571/go-peer/pkg/payload"
 )
 

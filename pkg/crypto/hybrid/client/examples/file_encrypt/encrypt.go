@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/number571/go-peer/pkg/client"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 )
 
 func encrypt(client client.IClient, outFilename, inFilename string) error {

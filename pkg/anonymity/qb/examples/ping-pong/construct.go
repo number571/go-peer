@@ -10,8 +10,8 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/qb/logger"
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
@@ -21,9 +21,7 @@ import (
 )
 
 const (
-	networkKey  = "network-key"
 	networkMask = uint32(0x11223344)
-	keySize     = uint64(1024)
 	msgSize     = uint64(8192)
 	workSize    = uint64(10)
 )

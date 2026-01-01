@@ -2,9 +2,10 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 )
 
 func main() {
@@ -18,6 +19,7 @@ func main() {
 	if !bytes.Equal(fileHash("image.jpg"), fileHash("dec_image.jpg")) {
 		panic("decrypt failed")
 	}
+	fmt.Println("done")
 }
 
 func newClient() client.IClient {

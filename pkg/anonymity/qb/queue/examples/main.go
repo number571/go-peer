@@ -8,15 +8,14 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
-	keySize     = 1024
 	payloadHead = 0x1
 )
 
@@ -78,7 +77,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetDSAPrivKey().GetPubKey().ToBytes()) {
+		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

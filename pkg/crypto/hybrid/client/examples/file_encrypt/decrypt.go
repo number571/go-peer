@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/number571/go-peer/pkg/client"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 )
 
 func decrypt(client client.IClient, outFilename, inFilename string) error {
