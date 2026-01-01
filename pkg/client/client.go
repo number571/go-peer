@@ -77,70 +77,15 @@ func (p *sClient) GetPayloadSize() uint64 {
 // The message can be decrypted only if private key is known.
 func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
 	var (
-		payloadLimit = p.fPayloadSize
-		resultSize   = uint64(len(pMsg))
+		payloadSize = p.fPayloadSize
+		resultSize  = uint64(len(pMsg))
 	)
 
-	if resultSize > payloadLimit {
+	if resultSize > payloadSize {
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithPadding(pRecv, pMsg, payloadLimit-resultSize)
-}
-
-func (p *sClient) encryptWithPadding(
-	pRecv asymmetric.IPubKey,
-	pMsg []byte,
-	pPadd uint64,
-) ([]byte, error) {
-	var (
-		rand = random.NewRandom()
-		salt = rand.GetBytes(cSaltSize)
-		pkey = p.fPrivKey.GetPubKey()
-	)
-
-	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
-	hash := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{pkey.ToBytes(), pRecv.ToBytes(), data},
-		[]byte{},
-	)).ToBytes()
-
-	ct, sk, err := pRecv.GetKEMPubKey().Encapsulate()
-	if err != nil {
-		return nil, ErrEncryptSymmetricKey
-	}
-
-	cipher := symmetric.NewCipher(sk)
-	return layer2.NewMessage(
-		ct,
-		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
-			pkey.GetHasher().ToBytes(),
-			salt,
-			data,
-			hash,
-			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
-		})),
-	).ToBytes(), nil
-}
-
-func (p *sClient) withStaticDecryptValues() *sClient {
-	var (
-		pubKey            = p.fPrivKey.GetPubKey()
-		encMsg, _         = p.EncryptMessage(pubKey, []byte{})
-		msg, _            = layer2.LoadMessage(p.fMessageSize, encMsg)
-		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
-		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
-		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
-		payloadWrapper, _ = joiner.LoadBytesJoiner32(decSlice[2])
-	)
-	p.fStaticDecryptValues = &sStaticDecryptValues{
-		fEncMsg:         msg,
-		fSKey:           skey,
-		fDecSlice:       decSlice,
-		fPubKey:         pubKey,
-		fPayloadWrapper: payloadWrapper,
-	}
-	return p
+	return p.encryptWithPadding(pRecv, pMsg, payloadSize-resultSize)
 }
 
 // Decrypt message with private key of receiver.
@@ -226,4 +171,59 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 
 	// Return public key of sender with payload.
 	return sPubKey, payloadWrapper[0], nil
+}
+
+func (p *sClient) encryptWithPadding(
+	pRecv asymmetric.IPubKey,
+	pMsg []byte,
+	pPadd uint64,
+) ([]byte, error) {
+	var (
+		rand = random.NewRandom()
+		salt = rand.GetBytes(cSaltSize)
+		pkey = p.fPrivKey.GetPubKey()
+	)
+
+	data := joiner.NewBytesJoiner32([][]byte{pMsg, rand.GetBytes(pPadd)})
+	hash := hashing.NewHMACHasher(salt, bytes.Join(
+		[][]byte{pkey.ToBytes(), pRecv.ToBytes(), data},
+		[]byte{},
+	)).ToBytes()
+
+	ct, sk, err := pRecv.GetKEMPubKey().Encapsulate()
+	if err != nil {
+		return nil, ErrEncryptSymmetricKey
+	}
+
+	cipher := symmetric.NewCipher(sk)
+	return layer2.NewMessage(
+		ct,
+		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
+			pkey.GetHasher().ToBytes(),
+			salt,
+			data,
+			hash,
+			p.fPrivKey.GetDSAPrivKey().SignBytes(hash),
+		})),
+	).ToBytes(), nil
+}
+
+func (p *sClient) withStaticDecryptValues() *sClient {
+	var (
+		pubKey            = p.fPrivKey.GetPubKey()
+		encMsg, _         = p.EncryptMessage(pubKey, []byte{})
+		msg, _            = layer2.LoadMessage(p.fMessageSize, encMsg)
+		skey, _           = p.fPrivKey.GetKEMPrivKey().Decapsulate(msg.GetEnck())
+		decJoiner         = symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
+		decSlice, _       = joiner.LoadBytesJoiner32(decJoiner)
+		payloadWrapper, _ = joiner.LoadBytesJoiner32(decSlice[2])
+	)
+	p.fStaticDecryptValues = &sStaticDecryptValues{
+		fEncMsg:         msg,
+		fSKey:           skey,
+		fDecSlice:       decSlice,
+		fPubKey:         pubKey,
+		fPayloadWrapper: payloadWrapper,
+	}
+	return p
 }
