@@ -7,18 +7,21 @@ import (
 func TestHasher(t *testing.T) {
 	t.Parallel()
 
-	msg := []byte("hello, world!")
+	msg := "hello, world!"
+	msgBytes := []byte(msg)
+
+	if NewHasher(msg).ToString() != NewHasher(msgBytes).ToString() {
+		t.Fatal("hash invalid with same data")
+	}
 
 	hash := NewHasher(msg).ToString()
 	if hash != NewHasher(msg).ToString() {
-		t.Error("hash is not determined")
-		return
+		t.Fatal("hash is not determinated")
 	}
 
-	msg[3] ^= 8
-	if hash == NewHasher(msg).ToString() {
-		t.Error("bit didn't change the result ")
-		return
+	msgBytes[3] ^= 8
+	if hash == NewHasher(msgBytes).ToString() {
+		t.Fatal("bit didn't change the result")
 	}
 }
 

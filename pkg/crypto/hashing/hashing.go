@@ -21,8 +21,17 @@ type sSHA512Hasher struct {
 	fHashStr string
 }
 
-func NewHasher(pData []byte) IHasher {
-	s := sha512.Sum384(pData)
+func NewHasher(pData interface{}) IHasher {
+	var d []byte
+	switch x := pData.(type) {
+	case []byte:
+		d = x
+	case string:
+		d = []byte(x)
+	default:
+		panic("invalid type of data")
+	}
+	s := sha512.Sum384(d)
 	return &sSHA512Hasher{fHash: s[:]}
 }
 

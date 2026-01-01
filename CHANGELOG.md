@@ -13,6 +13,8 @@
 
 ### CHANGES
 
+- `pkg/crypto/asymmetric`: NewHasher(pubKey.ToBytes()) -> NewHasher(pubKey.ToString())
+- `pkg/crypto/hashing`: NewHasher([]byte) -> NewHasher(interface{})
 - `cmd/tools`: deleted
 - `build`: deleted
 

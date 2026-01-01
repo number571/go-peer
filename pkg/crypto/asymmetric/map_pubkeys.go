@@ -27,7 +27,7 @@ func NewMapPubKeys(pPubKeys ...IPubKey) IMapPubKeys {
 }
 
 // Check the existence of a friend in the list by the public key.
-func (p *sMapPubKeys) GetPubKey(pHash []byte) IPubKey {
+func (p *sMapPubKeys) GetPubKey(pHash IPubKeyHash) IPubKey {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 

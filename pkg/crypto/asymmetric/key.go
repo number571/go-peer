@@ -116,7 +116,7 @@ func NewPubKey(pKEM IKEMPubKey, pSigner IDSAPubKey) IPubKey {
 		fKEM:    pKEM,
 		fSigner: pSigner,
 	}
-	pubKeyChain.fHasher = hashing.NewHasher(pubKeyChain.ToBytes())
+	pubKeyChain.fHasher = hashing.NewHasher(pubKeyChain.ToString())
 	return pubKeyChain
 }
 
@@ -152,7 +152,7 @@ func LoadPubKey(pKeychain interface{}) IPubKey {
 }
 
 func (p *sPubKey) GetHasher() hashing.IHasher {
-	return p.fHasher
+	return p.fHasher // NewHasher(p.ToString())
 }
 
 func (p *sPubKey) ToBytes() []byte {

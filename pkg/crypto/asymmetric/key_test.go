@@ -164,7 +164,7 @@ func TestPubKey(t *testing.T) {
 		return
 	}
 
-	if keychain.GetHasher().ToString() != hashing.NewHasher(keychain.ToBytes()).ToString() {
+	if keychain.GetHasher().ToString() != hashing.NewHasher(keychain.ToString()).ToString() {
 		t.Error("got invalid keychain hasher")
 		return
 	}
