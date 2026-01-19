@@ -48,7 +48,7 @@ test-run:
 	d=$$(date +%s); \
 	for i in {1..$(N)}; do \
 		echo $$i; \
-		go test -cover -count=1 -shuffle=on `$(_GO_TEST_LIST)`; \
+		go test -race -cover -count=1 -shuffle=on `$(_GO_TEST_LIST)`; \
 		$(_CHECK_ERROR); \
 	done; \
 	echo "Build took $$(($$(date +%s)-d)) seconds";

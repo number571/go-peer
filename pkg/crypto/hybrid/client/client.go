@@ -21,9 +21,9 @@ var (
 
 // Basic structure describing the user.
 type sClient struct {
-	fPrivKey     asymmetric.IPrivKey
-	fMessageSize uint64
-	fPayloadSize uint64
+	fPrivKey      asymmetric.IPrivKey
+	fMessageSize  uint64
+	fPayloadLimit uint64
 }
 
 // Create client by private key as identification.
@@ -45,7 +45,7 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		panic("the payload size is lower than struct size")
 	}
 
-	client.fPayloadSize = pMessageSize - structSize
+	client.fPayloadLimit = pMessageSize - structSize
 	return client
 }
 
@@ -60,23 +60,23 @@ func (p *sClient) GetMessageSize() uint64 {
 }
 
 // Payload is raw bytes of message without structure.
-func (p *sClient) GetPayloadSize() uint64 {
-	return p.fPayloadSize
+func (p *sClient) GetPayloadLimit() uint64 {
+	return p.fPayloadLimit
 }
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
 func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
 	var (
-		payloadSize = p.fPayloadSize
-		resultSize  = uint64(len(pMsg))
+		payloadLimit = p.fPayloadLimit
+		resultSize   = uint64(len(pMsg))
 	)
 
-	if resultSize > payloadSize {
+	if resultSize > payloadLimit {
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithPadding(pRecv, pMsg, payloadSize-resultSize)
+	return p.encryptWithPadding(pRecv, pMsg, payloadLimit-resultSize)
 }
 
 // Decrypt message with private key of receiver.

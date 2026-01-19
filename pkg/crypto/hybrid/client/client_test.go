@@ -90,7 +90,7 @@ func TestInvalidClient(t *testing.T) {
 
 	_client := client.(*sClient)
 	msg1 := []byte("hello")
-	pad1 := client.GetPayloadSize() - uint64(len(msg1)) + 2*encoding.CSizeUint32
+	pad1 := client.GetPayloadLimit() - uint64(len(msg1)) + 2*encoding.CSizeUint32
 
 	enc1, err := _client.encryptWithPadding(pubKey, msg1, pad1)
 	if err != nil {
@@ -104,7 +104,7 @@ func TestInvalidClient(t *testing.T) {
 		return
 	}
 
-	pad2 := client.GetPayloadSize() - uint64(len(msg1)) + asymmetric.CDSAPubKeySize - 3
+	pad2 := client.GetPayloadLimit() - uint64(len(msg1)) + asymmetric.CDSAPubKeySize - 3
 	enc2, err := tcEncryptWithParamsInvalidPKID(_client, pubKey, msg1, pad2)
 	if err != nil {
 		t.Error(err)

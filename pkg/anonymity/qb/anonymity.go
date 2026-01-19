@@ -225,15 +225,6 @@ func (p *sNode) recvResponse(pCtx context.Context, pActionKey string) ([]byte, e
 	}
 }
 
-func (p *sNode) tryDecryptMessage(pEncMsg []byte) (asymmetric.IPubKey, []byte, error) {
-	client := p.fQBProcessor.GetClient()
-	pubKey, decMsg, err := client.DecryptMessage(p.fMapPubKeys, pEncMsg)
-	if err != nil {
-		return nil, nil, ErrDecryptMessage
-	}
-	return pubKey, decMsg, nil
-}
-
 func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
 
@@ -261,7 +252,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	// try decrypt consumed message
-	pubKey, decMsg, err := p.tryDecryptMessage(encMsg)
+	pubKey, decMsg, err := client.DecryptMessage(p.fMapPubKeys, encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
