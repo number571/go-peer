@@ -350,7 +350,9 @@ func TestHandleWrapper(t *testing.T) {
 	node.GetMapPubKeys().SetPubKey(privKey.GetPubKey())
 
 	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
-		FSettings: layer1.NewSettings(&layer1.SSettings{}),
+		FSettings: layer1.NewSettings(&layer1.SSettings{
+			FWorkSizeBits: tcWorkSize,
+		}),
 	})
 
 	msg, err := client.EncryptMessage(
@@ -374,6 +376,11 @@ func TestHandleWrapper(t *testing.T) {
 	netMsgX := node.testNewNetworkMessageWithInvalidNetworkMask(sett, msg)
 	if err := handler(ctx, netMsgX); err == nil {
 		t.Error("success handle message with invalid network mask")
+		return
+	}
+	netMsgY := node.testNewNetworkMessageWithAnotherMessageType(sett, msg)
+	if err := handler(ctx, netMsgY); err == nil {
+		t.Error("success handle message with another network type")
 		return
 	}
 
@@ -793,6 +800,20 @@ func (p *sNode) testNewNetworkMessage(pSett layer1.IConstructSettings, pMsgBytes
 func (p *sNode) testNewNetworkMessageWithInvalidNetworkMask(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
 	return layer1.NewMessage(
 		pSett,
+		payload.NewPayload32(
+			p.fQBProcessor.GetSettings().GetNetworkMask()^1,
+			pMsgBytes,
+		),
+	)
+}
+
+func (p *sNode) testNewNetworkMessageWithAnotherMessageType(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
+	return layer1.NewMessage(
+		layer1.NewConstructSettings(&layer1.SConstructSettings{
+			FSettings: layer1.NewSettings(&layer1.SSettings{
+				FNetworkKey: pSett.GetSettings().GetNetworkKey() + "_",
+			}),
+		}),
 		payload.NewPayload32(
 			p.fQBProcessor.GetSettings().GetNetworkMask()^1,
 			pMsgBytes,

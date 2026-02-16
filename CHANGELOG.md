@@ -14,7 +14,7 @@
 
 ### BUG FIXES
 
-- Update `pkg/anonymity`: add check NetworkMask on consumeMessage
+- Update `pkg/anonymity`: add check checkMessageLayer1 on consumeMessage
 
 <!-- ... -->
 

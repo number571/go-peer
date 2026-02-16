@@ -231,11 +231,11 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	// update logger state
 	p.enrichLogger(logBuilder, pNetMsg)
 
-	// check network mask from message header
-	if p.fQBProcessor.GetSettings().GetNetworkMask() != pNetMsg.GetPayload().GetHead() {
-		// problem from sender's side (invalid network mask)
-		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnInvalidNetworkMask))
-		return ErrInvalidNetworkMask
+	// check network message on correct format
+	if ok := p.checkMessageLayer1(pNetMsg); !ok {
+		// another network mask || message settings
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnIncorrectLayer1))
+		return ErrInvalidLayer1Message
 	}
 
 	client := p.fQBProcessor.GetClient()
@@ -277,6 +277,18 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 
 	// do request or response action
 	return p.handleDoAction(pCtx, logBuilder, pubKey, pld)
+}
+
+func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
+	settings := p.fQBProcessor.GetSettings()
+	if settings.GetNetworkMask() != pNetMsg.GetPayload().GetHead() {
+		return false
+	}
+	_, err := layer1.LoadMessage(
+		settings.GetMessageConstructSettings().GetSettings(),
+		pNetMsg.ToBytes(),
+	)
+	return err == nil
 }
 
 func (p *sNode) handleDoAction(

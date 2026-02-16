@@ -29,7 +29,7 @@ const (
 	CLogWarnPayloadNull
 	CLogWarnUnknownRoute
 	CLogWarnIncorrectResponse
-	CLogWarnInvalidNetworkMask
+	CLogWarnIncorrectLayer1
 
 	// ERRO
 	CLogErroDatabaseGet
