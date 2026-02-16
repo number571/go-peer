@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### BUG FIXES
+
+- Update `pkg/anonymity`: storeHashIntoDatabase - hash from layer1 -> hash from layer2
+
 <!-- ... -->
 
 ## v1.7.11

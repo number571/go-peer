@@ -14,7 +14,6 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
@@ -70,7 +69,12 @@ func TestNodeSettings(t *testing.T) {
 	_node := node.(*sNode)
 	err := _node.storeHashIntoDatabase(
 		anon_logger.NewLogBuilder("_"),
-		hashing.NewHasher([]byte{}).ToBytes(),
+		layer1.NewMessage(
+			layer1.NewConstructSettings(&layer1.SConstructSettings{
+				FSettings: layer1.NewSettings(&layer1.SSettings{}),
+			}),
+			payload.NewPayload32(0, []byte{}),
+		),
 	)
 	if err == nil {
 		t.Error("success store hash into database without correct set function")

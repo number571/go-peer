@@ -8,7 +8,10 @@ import (
 type IMessage interface {
 	types.IConverter
 
+	// hash = HMAC(network_key, payload)
 	GetHash() []byte
+
+	// proof = PoW(hash)
 	GetProof() uint64
 
 	// payload = head(32bit) || body(Nbit)

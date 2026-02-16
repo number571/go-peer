@@ -242,13 +242,12 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	// try store hash of message
-	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg.GetHash()); err != nil {
+	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg); err != nil {
 		// internal logger
-		if !errors.Is(err, ErrHashAlreadyExist) {
-			return errors.Join(ErrStoreHashIntoDatabase, err)
+		if errors.Is(err, ErrHashAlreadyExist) {
+			return nil
 		}
-		// hash already exist in database
-		return nil
+		return errors.Join(ErrStoreHashIntoDatabase, err)
 	}
 
 	// try decrypt consumed message
@@ -400,7 +399,7 @@ func (p *sNode) produceMessage(
 		WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
 
 	// try push hash into database
-	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg.GetHash()); err != nil {
+	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg); err != nil {
 		// internal logger
 		if errors.Is(err, ErrHashAlreadyExist) {
 			return false, nil
@@ -420,9 +419,10 @@ func (p *sNode) produceMessage(
 	return true, nil
 }
 
-func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash []byte) error {
+func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pNetMsg layer1.IMessage) error {
 	// check already received data by hash
-	_, err := p.fKVDatavase.Get(pHash)
+	hash := hashing.NewHasher(pNetMsg.GetPayload().ToBytes()).ToBytes()
+	_, err := p.fKVDatavase.Get(hash)
 	if err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
 		return ErrHashAlreadyExist
@@ -432,7 +432,7 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pHash
 		return errors.Join(ErrGetHashFromDB, err)
 	}
 	// set hash to database with new address
-	if err := p.fKVDatavase.Set(pHash, []byte{}); err != nil {
+	if err := p.fKVDatavase.Set(hash, []byte{}); err != nil {
 		p.fLogger.PushErro(pLogBuilder.WithType(anon_logger.CLogErroDatabaseSet))
 		return errors.Join(ErrSetHashIntoDB, err)
 	}
