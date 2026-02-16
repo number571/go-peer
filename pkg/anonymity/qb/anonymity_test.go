@@ -371,6 +371,12 @@ func TestHandleWrapper(t *testing.T) {
 		return
 	}
 
+	netMsgX := node.testNewNetworkMessageWithInvalidNetworkMask(sett, msg)
+	if err := handler(ctx, netMsgX); err == nil {
+		t.Error("success handle message with invalid network mask")
+		return
+	}
+
 	if err := handler(ctx, netMsg); err != nil {
 		t.Error("repeated message:", err.Error())
 		return
@@ -779,6 +785,16 @@ func (p *sNode) testNewNetworkMessage(pSett layer1.IConstructSettings, pMsgBytes
 		pSett,
 		payload.NewPayload32(
 			p.fQBProcessor.GetSettings().GetNetworkMask(),
+			pMsgBytes,
+		),
+	)
+}
+
+func (p *sNode) testNewNetworkMessageWithInvalidNetworkMask(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
+	return layer1.NewMessage(
+		pSett,
+		payload.NewPayload32(
+			p.fQBProcessor.GetSettings().GetNetworkMask()^1,
 			pMsgBytes,
 		),
 	)

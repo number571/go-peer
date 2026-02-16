@@ -20,6 +20,7 @@ var (
 	ErrEnqueueMessage        = &SAnonymityError{"enqueue message"}
 	ErrUnknownType           = &SAnonymityError{"unknown type"}
 	ErrLoadMessage           = &SAnonymityError{"load message"}
+	ErrInvalidNetworkMask    = &SAnonymityError{"invalid network mask"}
 	ErrStoreHashIntoDatabase = &SAnonymityError{"store hash into database"}
 	ErrStoreHashWithProduce  = &SAnonymityError{"store hash with produce"}
 	ErrActionIsNotFound      = &SAnonymityError{"action is not found"}

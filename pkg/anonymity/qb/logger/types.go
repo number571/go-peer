@@ -29,6 +29,7 @@ const (
 	CLogWarnPayloadNull
 	CLogWarnUnknownRoute
 	CLogWarnIncorrectResponse
+	CLogWarnInvalidNetworkMask
 
 	// ERRO
 	CLogErroDatabaseGet

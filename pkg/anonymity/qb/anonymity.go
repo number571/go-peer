@@ -231,12 +231,19 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	// update logger state
 	p.enrichLogger(logBuilder, pNetMsg)
 
+	// check network mask from message header
+	if p.fQBProcessor.GetSettings().GetNetworkMask() != pNetMsg.GetPayload().GetHead() {
+		// problem from sender's side (invalid network mask)
+		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnInvalidNetworkMask))
+		return ErrInvalidNetworkMask
+	}
+
 	client := p.fQBProcessor.GetClient()
 	encMsg := pNetMsg.GetPayload().GetBody()
 
 	// load encrypted message without decryption try
 	if _, err := layer2.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
-		// problem from sender's side
+		// problem from sender's side (invalid structure)
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
 		return errors.Join(ErrLoadMessage, err)
 	}
@@ -421,7 +428,7 @@ func (p *sNode) produceMessage(
 
 func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pNetMsg layer1.IMessage) error {
 	// check already received data by hash
-	hash := hashing.NewHasher(pNetMsg.GetPayload().ToBytes()).ToBytes()
+	hash := hashing.NewHasher(pNetMsg.GetPayload().GetBody()).ToBytes()
 	_, err := p.fKVDatavase.Get(hash)
 	if err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))

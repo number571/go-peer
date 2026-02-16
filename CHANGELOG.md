@@ -2,9 +2,19 @@
 
 <!-- ... -->
 
-## v1.7.13~
+## v1.7.14~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.13
+
+*February 16, 2026*
+
+### BUG FIXES
+
+- Update `pkg/anonymity`: add check NetworkMask on consumeMessage
 
 <!-- ... -->
 
