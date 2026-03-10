@@ -40,12 +40,13 @@ type sMessage struct {
 func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	sett := pSett.GetSettings()
 	pldBytes := pPld.ToBytes()
+	hash := hashing.NewHasher(pldBytes).ToBytes()
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(sett.GetNetworkKey(), symmetric.CCipherKeySize)
-	hash := hashing.NewHMACHasher(key, pldBytes).ToBytes()
+	netHash := hashing.NewHMACHasher(key, hash).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(netHash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewCipher(key)
@@ -53,7 +54,7 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
-				hash,
+				netHash,
 				pldBytes,
 			},
 			[]byte{},
@@ -88,14 +89,15 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	copy(proofArr[:], dBytes[:cProofIndex])
 	proof := encoding.BytesToUint64(proofArr)
 
-	hash := dBytes[cProofIndex:cHashIndex]
+	netHash := dBytes[cProofIndex:cHashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
-	if !puzzle.VerifyBytes(hash, proof) {
+	if !puzzle.VerifyBytes(netHash, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	newHash := hashing.NewHMACHasher(key, dBytes[cHashIndex:]).ToBytes()
-	if !bytes.Equal(hash, newHash) {
+	hash := hashing.NewHasher(dBytes[cHashIndex:]).ToBytes()
+	newNetHash := hashing.NewHMACHasher(key, hash).ToBytes()
+	if !bytes.Equal(netHash, newNetHash) {
 		return nil, ErrInvalidAuthHash
 	}
 

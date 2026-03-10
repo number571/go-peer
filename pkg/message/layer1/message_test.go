@@ -99,9 +99,7 @@ func TestMessage(t *testing.T) {
 		return
 	}
 
-	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
-	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
-	newHash := hashing.NewHMACHasher(key, pld.ToBytes()).ToBytes()
+	newHash := hashing.NewHasher(pld.ToBytes()).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Error("payload hash not equal hash of message")
 		return

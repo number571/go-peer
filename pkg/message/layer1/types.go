@@ -8,14 +8,14 @@ import (
 type IMessage interface {
 	types.IConverter
 
-	// hash = HMAC(network_key, payload)
-	GetHash() []byte
-
-	// proof = PoW(hash)
-	GetProof() uint64
-
 	// payload = head(32bit) || body(Nbit)
 	GetPayload() payload.IPayload32
+
+	// hash = H(payload)
+	GetHash() []byte
+
+	// proof = PoW(HMAC(network_key, hash))
+	GetProof() uint64
 }
 
 type IConstructSettings interface {

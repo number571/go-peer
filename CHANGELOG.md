@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/message/layer1`: GetHash(): HMAC(key, payload) -> Hash(payload)
+
 <!-- ... -->
 
 ## v1.7.13
