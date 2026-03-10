@@ -14,7 +14,10 @@ type IMessage interface {
 	// hash = H(payload)
 	GetHash() []byte
 
-	// proof = PoW(HMAC(network_key, hash))
+	// hmac = HMAC(network_key, payload)
+	GetHmac() []byte
+
+	// proof = PoW(hmac)
 	GetProof() uint64
 }
 

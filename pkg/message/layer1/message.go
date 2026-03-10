@@ -32,7 +32,8 @@ var (
 
 type sMessage struct {
 	fEncd    []byte             // E( K, P(HM) || HM || M )
-	fHash    []byte             // HM = H( K, M )
+	fHash    []byte             // H( M )
+	fHmac    []byte             // HM = HMAC( K, M )
 	fProof   uint64             // P(HM)
 	fPayload payload.IPayload32 // M
 }
@@ -44,9 +45,9 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(sett.GetNetworkKey(), symmetric.CCipherKeySize)
-	netHash := hashing.NewHMACHasher(key, hash).ToBytes()
+	hmac := hashing.NewHMACHasher(key, pldBytes).ToBytes()
 
-	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(netHash, pSett.GetParallel())
+	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hmac, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
 	cipher := symmetric.NewCipher(key)
@@ -54,12 +55,13 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
 				proofBytes[:],
-				netHash,
+				hmac,
 				pldBytes,
 			},
 			[]byte{},
 		)),
 		fHash:    hash,
+		fHmac:    hmac,
 		fProof:   proof,
 		fPayload: pPld,
 	}
@@ -89,19 +91,20 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	copy(proofArr[:], dBytes[:cProofIndex])
 	proof := encoding.BytesToUint64(proofArr)
 
-	netHash := dBytes[cProofIndex:cHashIndex]
+	hmac := dBytes[cProofIndex:cHashIndex]
 	puzzle := puzzle.NewPoWPuzzle(pSett.GetWorkSizeBits())
-	if !puzzle.VerifyBytes(netHash, proof) {
+	if !puzzle.VerifyBytes(hmac, proof) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	hash := hashing.NewHasher(dBytes[cHashIndex:]).ToBytes()
-	newNetHash := hashing.NewHMACHasher(key, hash).ToBytes()
-	if !bytes.Equal(netHash, newNetHash) {
+	pldBytes := dBytes[cHashIndex:]
+	newHmac := hashing.NewHMACHasher(key, pldBytes).ToBytes()
+	if !bytes.Equal(hmac, newHmac) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	payload := payload.LoadPayload32(dBytes[cHashIndex:])
+	hash := hashing.NewHasher(pldBytes).ToBytes()
+	payload := payload.LoadPayload32(pldBytes)
 	if payload == nil {
 		return nil, ErrDecodePayload
 	}
@@ -109,6 +112,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 	return &sMessage{
 		fEncd:    msgBytes,
 		fHash:    hash,
+		fHmac:    hmac,
 		fProof:   proof,
 		fPayload: payload,
 	}, nil
@@ -120,6 +124,10 @@ func (p *sMessage) GetProof() uint64 {
 
 func (p *sMessage) GetHash() []byte {
 	return p.fHash
+}
+
+func (p *sMessage) GetHmac() []byte {
+	return p.fHmac
 }
 
 func (p *sMessage) GetPayload() payload.IPayload32 {

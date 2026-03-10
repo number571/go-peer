@@ -18,7 +18,6 @@ var (
 )
 
 const (
-	tcLimitVoid  = 128
 	tcHead       = 12345
 	tcWorkSize   = 10
 	tcBody       = "hello, world!"
@@ -102,6 +101,15 @@ func TestMessage(t *testing.T) {
 	newHash := hashing.NewHasher(pld.ToBytes()).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Error("payload hash not equal hash of message")
+		return
+	}
+
+	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
+	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
+
+	newHmac := hashing.NewHMACHasher(key, pld.ToBytes()).ToBytes()
+	if !bytes.Equal(msg.GetHmac(), newHmac) {
+		t.Error("payload hmac not equal hmac of message")
 		return
 	}
 
