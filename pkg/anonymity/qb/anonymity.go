@@ -440,7 +440,7 @@ func (p *sNode) produceMessage(
 
 func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pNetMsg layer1.IMessage) error {
 	// check already received data by hash
-	hash := hashing.NewHasher(pNetMsg.GetPayload().GetBody()).ToBytes()
+	hash := pNetMsg.GetHash()
 	_, err := p.fKVDatavase.Get(hash)
 	if err == nil {
 		p.fLogger.PushInfo(pLogBuilder.WithType(anon_logger.CLogInfoExist))
