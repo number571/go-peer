@@ -6,6 +6,10 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/storage/cache`: interface values []byte -> interface{}
+
 <!-- ... -->
 
 ## v1.7.14
