@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
@@ -60,7 +61,8 @@ func (p *sNode) BroadcastMessage(pCtx context.Context, pMsg layer1.IMessage) err
 	}
 
 	// node can redirect received message
-	_ = p.fCacheSetter.Set(pMsg.GetHash(), []byte{})
+	hash := encoding.HexEncode(pMsg.GetHash())
+	_ = p.fCacheSetter.Set(hash, []byte{})
 
 	wg := sync.WaitGroup{}
 	wg.Add(lenConnections)
@@ -277,7 +279,8 @@ func (p *sNode) messageReader(
 // Returns true if the message was successfully redirected to the handler function
 // > or if the message already existed in the hash value store.
 func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg layer1.IMessage) bool {
-	if !p.fCacheSetter.Set(pMsg.GetHash(), []byte{}) {
+	hash := encoding.HexEncode(pMsg.GetHash())
+	if !p.fCacheSetter.Set(hash, []byte{}) {
 		return true // hash of message already in queue
 	}
 

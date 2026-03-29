@@ -13,14 +13,14 @@ func TestLRUCache(t *testing.T) {
 
 	lruCache := NewLRUCache(3)
 
-	if _, ok := lruCache.Get([]byte("unknown-key")); ok {
+	if _, ok := lruCache.Get("unknown-key"); ok {
 		t.Error("success load unknown key")
 		return
 	}
 
 	for i := 0; i < 3; i++ {
 		key := encoding.Uint64ToBytes(uint64(i)) //nolint:gosec
-		if ok := lruCache.Set(key[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
+		if ok := lruCache.Set(string(key[:]), []byte(fmt.Sprintf("_%d_", i))); !ok {
 			t.Errorf("failed push %d", i)
 			return
 		}
@@ -33,7 +33,7 @@ func TestLRUCache(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		key := encoding.Uint64ToBytes(uint64(i)) //nolint:gosec
 		val, ok := lruCache.Get(
-			key[:],
+			string(key[:]),
 		)
 		if !ok {
 			t.Errorf("failed load %d", i)
@@ -51,14 +51,14 @@ func TestLRUCache(t *testing.T) {
 			break
 		}
 		key := encoding.Uint64ToBytes(i)
-		if !bytes.Equal(k, key[:]) {
+		if !bytes.Equal([]byte(k), key[:]) {
 			t.Error("got incorrect key")
 			return
 		}
 	}
 
 	key1 := encoding.Uint64ToBytes(1)
-	if ok := lruCache.Set(key1[:], []byte(fmt.Sprintf("_%d_", 1))); ok {
+	if ok := lruCache.Set(string(key1[:]), []byte(fmt.Sprintf("_%d_", 1))); ok {
 		t.Error("success push already exist value")
 		return
 	}
@@ -66,7 +66,7 @@ func TestLRUCache(t *testing.T) {
 	// start cycle of queue
 	i := uint64(4)
 	key2 := encoding.Uint64ToBytes(i)
-	if ok := lruCache.Set(key2[:], []byte(fmt.Sprintf("_%d_", i))); !ok {
+	if ok := lruCache.Set(string(key2[:]), []byte(fmt.Sprintf("_%d_", i))); !ok {
 		t.Errorf("failed push %d", i)
 		return
 	}
@@ -74,7 +74,7 @@ func TestLRUCache(t *testing.T) {
 	// try load init value
 	i = 0
 	key3 := encoding.Uint64ToBytes(i)
-	if _, ok := lruCache.Get(key3[:]); ok {
+	if _, ok := lruCache.Get(string(key3[:])); ok {
 		t.Errorf("success load rewrited value %d", i)
 		return
 	}
