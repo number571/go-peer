@@ -13,9 +13,9 @@ type ICache interface {
 }
 
 type ICacheSetter interface {
-	Set([]byte, []byte) bool
+	Set([]byte, interface{}) bool
 }
 
 type ICacheGetter interface {
-	Get([]byte) ([]byte, bool)
+	Get([]byte) (interface{}, bool)
 }

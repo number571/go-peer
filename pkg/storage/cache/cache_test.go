@@ -39,7 +39,7 @@ func TestLRUCache(t *testing.T) {
 			t.Errorf("failed load %d", i)
 			return
 		}
-		if !bytes.Equal(val, []byte(fmt.Sprintf("_%d_", i))) {
+		if !bytes.Equal(val.([]byte), []byte(fmt.Sprintf("_%d_", i))) {
 			t.Errorf("value is incorrect %d", i)
 			return
 		}
