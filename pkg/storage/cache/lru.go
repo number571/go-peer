@@ -2,8 +2,6 @@ package cache
 
 import (
 	"sync"
-
-	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -12,7 +10,7 @@ var (
 
 type sLRUCache struct {
 	fMutex sync.RWMutex
-	fMap   map[string][]byte
+	fMap   map[string]interface{}
 	fQueue []string
 	fIndex uint64
 }
@@ -20,7 +18,7 @@ type sLRUCache struct {
 func NewLRUCache(pCapacity uint64) ILRUCache {
 	return &sLRUCache{
 		fQueue: make([]string, pCapacity),
-		fMap:   make(map[string][]byte, pCapacity),
+		fMap:   make(map[string]interface{}, pCapacity),
 	}
 }
 
@@ -31,33 +29,32 @@ func (p *sLRUCache) GetIndex() uint64 {
 	return p.fIndex
 }
 
-func (p *sLRUCache) GetKey(i uint64) ([]byte, bool) {
+func (p *sLRUCache) GetKey(i uint64) (string, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
 	if uint64(len(p.fQueue)) <= i {
-		return nil, false
+		return "", false
 	}
 
-	hash := encoding.HexDecode(p.fQueue[i])
-	return hash, len(hash) != 0
+	key := p.fQueue[i]
+	return key, len(key) != 0
 }
 
-func (p *sLRUCache) Get(pKey []byte) ([]byte, bool) {
+func (p *sLRUCache) Get(pKey string) (interface{}, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
 
-	val, ok := p.fMap[encoding.HexEncode(pKey)]
+	val, ok := p.fMap[pKey]
 	return val, ok
 }
 
-func (p *sLRUCache) Set(pKey, pValue []byte) bool {
+func (p *sLRUCache) Set(pKey string, pValue interface{}) bool {
 	p.fMutex.Lock()
 	defer p.fMutex.Unlock()
 
 	// hash already exists in queue
-	hexKey := encoding.HexEncode(pKey)
-	if _, ok := p.fMap[hexKey]; ok {
+	if _, ok := p.fMap[pKey]; ok {
 		return false
 	}
 
@@ -65,8 +62,8 @@ func (p *sLRUCache) Set(pKey, pValue []byte) bool {
 	delete(p.fMap, p.fQueue[p.fIndex])
 
 	// push hash to queue
-	p.fQueue[p.fIndex] = hexKey
-	p.fMap[hexKey] = pValue
+	p.fQueue[p.fIndex] = pKey
+	p.fMap[pKey] = pValue
 
 	// increment queue index
 	p.fIndex = (p.fIndex + 1) % uint64(len(p.fQueue))
