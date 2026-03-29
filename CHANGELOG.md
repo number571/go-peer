@@ -2,13 +2,19 @@
 
 <!-- ... -->
 
-## v1.7.15~
+## v1.7.16~
 
 *??? ??, ????*
 
+<!-- ... -->
+
+## v1.7.15
+
+*March 30, 2026*
+
 ### CHANGES
 
-- `pkg/storage/cache`: interface values []byte -> interface{}
+- `pkg/storage/cache`: interface keys: []byte -> string; values: []byte -> interface{}
 
 <!-- ... -->
 
