@@ -1,10 +1,11 @@
-package client
+package macro
 
 import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/message/layer2"
@@ -16,26 +17,26 @@ const (
 )
 
 var (
-	_ IClient = &sClient{}
+	_ hybrid.IScheme = &sScheme{}
 )
 
 // Basic structure describing the user.
-type sClient struct {
+type sScheme struct {
 	fPrivKey      asymmetric.IPrivKey
 	fMessageSize  uint64
 	fPayloadLimit uint64
 }
 
-// Create client by private key as identification.
+// Create scheme by private key as identification.
 // Handle function is used when the network exists.
-func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
-	client := &sClient{
+func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) hybrid.IScheme {
+	scheme := &sScheme{
 		fMessageSize: pMessageSize,
 		fPrivKey:     pPrivKey,
 	}
 
-	pubKey := client.GetPrivKey().GetPubKey()
-	encMsg, err := client.encryptWithPadding(pubKey, []byte{}, 0)
+	pubKey := pPrivKey.GetPubKey()
+	encMsg, err := scheme.encryptWithPadding(pubKey, []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -45,28 +46,32 @@ func NewClient(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) IClient {
 		panic("the payload size is lower than struct size")
 	}
 
-	client.fPayloadLimit = pMessageSize - structSize
-	return client
+	scheme.fPayloadLimit = pMessageSize - structSize
+	return scheme
 }
 
-// Get private key from client object.
-func (p *sClient) GetPrivKey() asymmetric.IPrivKey {
-	return p.fPrivKey
+func (p *sScheme) GetRandomKey() hybrid.IParticipantKey {
+	return asymmetric.NewPrivKey().GetPubKey()
 }
 
 // Message is raw bytes of full structure+payload.
-func (p *sClient) GetMessageSize() uint64 {
+func (p *sScheme) GetMessageSize() uint64 {
 	return p.fMessageSize
 }
 
 // Payload is raw bytes of message without structure.
-func (p *sClient) GetPayloadLimit() uint64 {
+func (p *sScheme) GetPayloadLimit() uint64 {
 	return p.fPayloadLimit
 }
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte, error) {
+func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]byte, error) {
+	recv, ok := pRecv.(asymmetric.IPubKey)
+	if !ok {
+		return nil, ErrInvalidKeyType
+	}
+
 	var (
 		payloadLimit = p.fPayloadLimit
 		resultSize   = uint64(len(pMsg))
@@ -76,12 +81,17 @@ func (p *sClient) EncryptMessage(pRecv asymmetric.IPubKey, pMsg []byte) ([]byte,
 		return nil, ErrLimitMessageSize
 	}
 
-	return p.encryptWithPadding(pRecv, pMsg, payloadLimit-resultSize)
+	return p.encryptWithPadding(recv, pMsg, payloadLimit-resultSize)
 }
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the message.
-func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte) (asymmetric.IPubKey, []byte, error) {
+func (p *sScheme) DecryptMessage(pMapPubKeys hybrid.IKeysContainer, pMsg []byte) (hybrid.IParticipantKey, []byte, error) {
+	mapPubKeys, ok := pMapPubKeys.(asymmetric.IMapPubKeys)
+	if !ok {
+		return nil, nil, ErrInvalidKeyType
+	}
+
 	// Load message's structure from encrypted bytes.
 	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
 	if err != nil {
@@ -111,7 +121,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	)
 
 	// Get public key from map by pkid (hash).
-	sPubKey := pMapPubKeys.GetPubKey(pkid)
+	sPubKey := mapPubKeys.GetPubKey(pkid)
 	if sPubKey == nil {
 		return nil, nil, ErrDecodePublicKey
 	}
@@ -140,7 +150,7 @@ func (p *sClient) DecryptMessage(pMapPubKeys asymmetric.IMapPubKeys, pMsg []byte
 	return sPubKey, payloadWrapper[0], nil
 }
 
-func (p *sClient) encryptWithPadding(
+func (p *sScheme) encryptWithPadding(
 	pRecv asymmetric.IPubKey,
 	pMsg []byte,
 	pPadd uint64,

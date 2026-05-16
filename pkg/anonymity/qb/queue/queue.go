@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/message/layer1"
@@ -24,7 +24,7 @@ type sQBProblemProcessor struct {
 	fState state.IState
 
 	fSettings ISettings
-	fClient   client.IClient
+	fScheme   hybrid.IScheme
 
 	fMainPool *sMainPool
 	fRandPool *sRandPool
@@ -41,16 +41,16 @@ type sMainPool struct {
 type sRandPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan layer1.IMessage
-	fReceiver asymmetric.IPubKey
+	fReceiver hybrid.IParticipantKey
 }
 
-func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProblemProcessor {
+func NewQBProblemProcessor(pSettings ISettings, pScheme hybrid.IScheme) IQBProblemProcessor {
 	consumersCap := pSettings.GetConsumersCap()
 	queuePoolCap := pSettings.GetQueuePoolCap()
 	return &sQBProblemProcessor{
 		fState:    state.NewBoolState(),
 		fSettings: pSettings,
-		fClient:   pClient,
+		fScheme:   pScheme,
 		fMainPool: &sMainPool{
 			fQueue:     make(chan layer1.IMessage, queuePoolCap[0]*consumersCap),
 			fConsumers: make(map[string]uint64, 128),
@@ -64,7 +64,7 @@ func NewQBProblemProcessor(pSettings ISettings, pClient client.IClient) IQBProbl
 		},
 		fRandPool: &sRandPool{
 			fQueue:    make(chan layer1.IMessage, queuePoolCap[1]),
-			fReceiver: asymmetric.NewPrivKey().GetPubKey(),
+			fReceiver: pScheme.GetRandomKey(),
 		},
 	}
 }
@@ -73,8 +73,8 @@ func (p *sQBProblemProcessor) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sQBProblemProcessor) GetClient() client.IClient {
-	return p.fClient
+func (p *sQBProblemProcessor) GetScheme() hybrid.IScheme {
+	return p.fScheme
 }
 
 func (p *sQBProblemProcessor) Run(pCtx context.Context) error {
@@ -132,21 +132,21 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 	}
 }
 
-func (p *sQBProblemProcessor) EnqueueMessage(pPubKey asymmetric.IPubKey, pBytes []byte) error {
+func (p *sQBProblemProcessor) EnqueueMessage(pKey hybrid.IParticipantKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > uint64(cap(p.fMainPool.fQueue)) { //nolint:gosec
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return ErrQueueLimit
 	}
 
-	rawMsg, err := p.fClient.EncryptMessage(pPubKey, pBytes)
+	rawMsg, err := p.fScheme.EncryptMessage(pKey, pBytes)
 	if err != nil {
 		atomic.AddInt64(&p.fMainPool.fCount, -1)
 		return errors.Join(ErrEncryptMessage, err)
 	}
 
 	p.fMainPool.fMutex.Lock()
-	hash := pPubKey.GetHasher().ToString()
+	hash := hashing.NewHasher(pKey.ToBytes()).ToString()
 	v, ok := p.fMainPool.fConsumers[hash]
 	if !ok {
 		v = uint64(len(p.fMainPool.fConsumers)) % p.fSettings.GetConsumersCap()
@@ -197,7 +197,7 @@ func (p *sQBProblemProcessor) fillRandPool(pCtx context.Context) error {
 			return nil
 		}
 	}
-	msg, err := p.fClient.EncryptMessage(
+	msg, err := p.fScheme.EncryptMessage(
 		p.fRandPool.fReceiver,
 		random.NewRandom().GetBytes(encoding.CSizeUint64),
 	)

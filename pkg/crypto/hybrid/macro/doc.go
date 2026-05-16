@@ -44,4 +44,4 @@
 	More information in article: https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf
 	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg
 */
-package client
+package macro

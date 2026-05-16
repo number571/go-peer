@@ -9,7 +9,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
@@ -20,6 +20,7 @@ const (
 )
 
 func main() {
+	privKey := asymmetric.NewPrivKey()
 	q := queue.NewQBProblemProcessor(
 		queue.NewSettings(&queue.SSettings{
 			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -29,8 +30,8 @@ func main() {
 			FQueuePoolCap: [2]uint64{1 << 5, 1 << 5},
 			FConsumersCap: 1,
 		}),
-		client.NewClient(
-			asymmetric.NewPrivKey(),
+		macro.NewScheme(
+			privKey,
 			(8<<10),
 		),
 	)
@@ -46,7 +47,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		err := q.EnqueueMessage(
-			q.GetClient().GetPrivKey().GetPubKey(),
+			privKey.GetPubKey(),
 			payload.NewPayload64(payloadHead, []byte(fmt.Sprintf("hello, world! %d", i))).ToBytes(),
 		)
 		if err != nil {
@@ -59,12 +60,12 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		msg, err := layer2.LoadMessage(q.GetClient().GetMessageSize(), netMsg.GetPayload().GetBody())
+		msg, err := layer2.LoadMessage(q.GetScheme().GetMessageSize(), netMsg.GetPayload().GetBody())
 		if err != nil {
 			panic(err)
 		}
-		pubKey, decMsg, err := q.GetClient().DecryptMessage(
-			asymmetric.NewMapPubKeys(q.GetClient().GetPrivKey().GetPubKey()),
+		pubKey, decMsg, err := q.GetScheme().DecryptMessage(
+			asymmetric.NewMapPubKeys(privKey.GetPubKey()),
 			msg.ToBytes(),
 		)
 		if err != nil {
@@ -77,7 +78,7 @@ func main() {
 		if pld.GetHead() != payloadHead {
 			panic("payload head is invalid")
 		}
-		if !bytes.Equal(pubKey.ToBytes(), q.GetClient().GetPrivKey().GetPubKey().ToBytes()) {
+		if !bytes.Equal(pubKey.ToBytes(), privKey.GetPubKey().ToBytes()) {
 			panic("public key is invalid")
 		}
 		fmt.Println(string(pld.GetBody()))

@@ -1,29 +1,30 @@
-package client
+package macro
 
 import (
 	"testing"
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
 /*
 goos: linux
 goarch: amd64
-pkg: github.com/number571/go-peer/pkg/client
+pkg: github.com/number571/go-peer/pkg/scheme
 cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkClient/mlkem=768,mldsa=65-12              10000             94239 ns/op
---- BENCH: BenchmarkClient/mlkem=768,mldsa=65-12
-    client_bench_test.go:67: Timer_Encrypt(N=1): 207.249µs
-    client_bench_test.go:80: Timer_Decrypt(N=1): 131.503µs
-    client_bench_test.go:67: Timer_Encrypt(N=10000): 2.376859383s
-    client_bench_test.go:80: Timer_Decrypt(N=10000): 942.366433ms
+BenchmarkScheme/mlkem=768,mldsa=65-12              10000             94239 ns/op
+--- BENCH: BenchmarkScheme/mlkem=768,mldsa=65-12
+    scheme_bench_test.go:67: Timer_Encrypt(N=1): 207.249µs
+    scheme_bench_test.go:80: Timer_Decrypt(N=1): 131.503µs
+    scheme_bench_test.go:67: Timer_Encrypt(N=10000): 2.376859383s
+    scheme_bench_test.go:80: Timer_Decrypt(N=10000): 942.366433ms
 PASS
 */
 
-// go test -bench=BenchmarkClient -benchtime=1000x -timeout 99999s
-func BenchmarkClient(b *testing.B) {
+// go test -bench=BenchmarkScheme -benchtime=1000x -timeout 99999s
+func BenchmarkScheme(b *testing.B) {
 	privKey := asymmetric.NewPrivKey()
 	pubKey := privKey.GetPubKey()
 
@@ -32,11 +33,11 @@ func BenchmarkClient(b *testing.B) {
 
 	benchTable := []struct {
 		name   string
-		client IClient
+		scheme hybrid.IScheme
 	}{
 		{
 			name:   "mlkem=768,mldsa=65",
-			client: NewClient(privKey, (8 << 10)),
+			scheme: NewScheme(privKey, (8 << 10)),
 		},
 	}
 
@@ -55,7 +56,7 @@ func BenchmarkClient(b *testing.B) {
 
 			nowEnc := time.Now()
 			for i := 0; i < b.N; i++ {
-				encMsg, err := t.client.EncryptMessage(pubKey, randomBytes[i])
+				encMsg, err := t.scheme.EncryptMessage(pubKey, randomBytes[i])
 				if err != nil {
 					b.Error(err)
 					return
@@ -69,7 +70,7 @@ func BenchmarkClient(b *testing.B) {
 
 			nowDec := time.Now()
 			for i := 0; i < b.N; i++ {
-				_, _, err := t.client.DecryptMessage(mapKeys, encMessages[i])
+				_, _, err := t.scheme.DecryptMessage(mapKeys, encMessages[i])
 				if err != nil {
 					b.Error(err)
 					return

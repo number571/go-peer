@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// IV + Proof + Hash + Payload32Head=[head]
+	// IV + Proof + HMAC + Payload32Head=[head]
 	// 16 + 8 + 48 + 4 = 76 additional bytes to origin message
 	CMessageHeadSize = 0 +
 		1*symmetric.CCipherBlockSize +

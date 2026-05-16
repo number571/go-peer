@@ -7,6 +7,7 @@ import (
 
 	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -16,12 +17,14 @@ const (
 )
 
 func main() {
-	nodeService, nodeClient := runServiceNode(), runClientNode()
+	nodeService := runServiceNode()
+	nodeClient := runClientNode()
+
 	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
 
 	ctx := context.Background()
 	for {
-		resp, _ := nodeClient.FetchPayload(
+		resp, _ := nodeClient.fAnonymity.FetchPayload(
 			ctx,
 			pubKeyService,
 			payload.NewPayload32(nodeRouter, []byte("hello, world!")),
@@ -30,39 +33,39 @@ func main() {
 	}
 }
 
-func runClientNode() anonymity.INode {
+func runClientNode() *sNode {
 	ctx := context.Background()
-	network, node := newNode("cnode", "")
+	node := newNode("cnode", "")
 
-	go func() { _ = node.Run(ctx) }()
-	_ = network.AddConnection(ctx, nodeAddress)
+	go func() { _ = node.fAnonymity.Run(ctx) }()
+	_ = node.fNetwork.AddConnection(ctx, nodeAddress)
 
 	return node
 }
 
-func runServiceNode() anonymity.INode {
+func runServiceNode() *sNode {
 	ctx := context.Background()
-	network, node := newNode("snode", nodeAddress)
-	node.HandleFunc(
+	node := newNode("snode", nodeAddress)
+	node.fAnonymity.HandleFunc(
 		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ asymmetric.IPubKey, b []byte) ([]byte, error) {
+		func(_ context.Context, _ anonymity.INode, _ hybrid.IParticipantKey, b []byte) ([]byte, error) {
 			return []byte("echo: " + string(b)), nil
 		},
 	)
 
-	go func() { _ = node.Run(ctx) }()
-	go func() { _ = network.Run(ctx) }()
+	go func() { _ = node.fAnonymity.Run(ctx) }()
+	go func() { _ = node.fNetwork.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node
 }
 
-func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
-	pubKey1 := node1.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
-	pubKey2 := node2.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
+func exchangeKeys(node1, node2 *sNode) (asymmetric.IPubKey, asymmetric.IPubKey) {
+	pubKey1 := node1.fPrivKey.GetPubKey()
+	pubKey2 := node2.fPrivKey.GetPubKey()
 
-	node1.GetMapPubKeys().SetPubKey(pubKey2)
-	node2.GetMapPubKeys().SetPubKey(pubKey1)
+	node1.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey2)
+	node2.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey1)
 
 	return pubKey1, pubKey2
 }

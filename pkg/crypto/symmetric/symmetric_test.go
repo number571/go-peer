@@ -12,13 +12,9 @@ var (
 func TestKeySize(t *testing.T) {
 	t.Parallel()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-	_ = NewCipher([]byte{123})
+	if cipher := NewCipher([]byte{123}); cipher != nil {
+		t.Fatal("success create cipher with invalid key size")
+	}
 }
 
 func TestEncrypt(t *testing.T) {

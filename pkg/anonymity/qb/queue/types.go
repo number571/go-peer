@@ -4,8 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/types"
 )
@@ -14,9 +13,9 @@ type IQBProblemProcessor interface {
 	types.IRunner
 
 	GetSettings() ISettings
-	GetClient() client.IClient
+	GetScheme() hybrid.IScheme
 
-	EnqueueMessage(asymmetric.IPubKey, []byte) error
+	EnqueueMessage(hybrid.IParticipantKey, []byte) error
 	DequeueMessage(context.Context) layer1.IMessage
 }
 

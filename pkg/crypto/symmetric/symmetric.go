@@ -22,12 +22,10 @@ type sAESCipher struct {
 
 func NewCipher(pKey []byte) ICipher {
 	if len(pKey) != CCipherKeySize {
-		panic("len(pKey) != CCipherKeySize")
+		return nil
 	}
 	block, _ := aes.NewCipher(pKey)
-	return &sAESCipher{
-		fBlock: block,
-	}
+	return &sAESCipher{fBlock: block}
 }
 
 func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {

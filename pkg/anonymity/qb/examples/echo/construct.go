@@ -11,7 +11,7 @@ import (
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/qb/logger"
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
@@ -26,7 +26,14 @@ const (
 	workSize    = uint64(10)
 )
 
-func newNode(serviceName, address string) (network.INode, anonymity.INode) {
+type sNode struct {
+	fNetwork   network.INode
+	fAnonymity anonymity.INode
+	fPrivKey   asymmetric.IPrivKey
+}
+
+func newNode(serviceName, address string) *sNode {
+	privKey := asymmetric.NewPrivKey()
 	msgChan := make(chan layer1.IMessage)
 	networkNode := network.NewNode(
 		network.NewSettings(&network.SSettings{
@@ -100,6 +107,7 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 			}
 			return db
 		}(),
+		asymmetric.NewMapPubKeys(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -112,11 +120,11 @@ func newNode(serviceName, address string) (network.INode, anonymity.INode) {
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
-			client.NewClient(
-				asymmetric.NewPrivKey(),
+			macro.NewScheme(
+				privKey,
 				msgSize,
 			),
 		),
 	)
-	return networkNode, anonymityNode
+	return &sNode{networkNode, anonymityNode, privKey}
 }

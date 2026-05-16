@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
 	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
@@ -85,8 +85,9 @@ func testSettings(t *testing.T, n int) {
 func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
-	client := client.NewClient(
-		asymmetric.NewPrivKey(),
+	privKey := asymmetric.NewPrivKey()
+	scheme := macro.NewScheme(
+		privKey,
 		tcMsgSize,
 	)
 	queue := NewQBProblemProcessor(
@@ -98,7 +99,7 @@ func TestRunStopQueue(t *testing.T) {
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
-		client,
+		scheme,
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -134,7 +135,7 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}()
 
-	pubKey := client.GetPrivKey().GetPubKey()
+	pubKey := privKey.GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	for i := 0; i < tcQueueCap; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
@@ -156,6 +157,7 @@ func TestRunStopQueue(t *testing.T) {
 func TestQueue(t *testing.T) {
 	t.Parallel()
 
+	privKey := asymmetric.NewPrivKey()
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
 			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -168,8 +170,8 @@ func TestQueue(t *testing.T) {
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
-		client.NewClient(
-			asymmetric.NewPrivKey(),
+		macro.NewScheme(
+			privKey,
 			tcMsgSize,
 		),
 	)
@@ -180,13 +182,13 @@ func TestQueue(t *testing.T) {
 		return
 	}
 
-	if err := testQueue(queue); err != nil {
+	if err := testQueue(queue, privKey); err != nil {
 		t.Error(err)
 		return
 	}
 }
 
-func testQueue(queue IQBProblemProcessor) error {
+func testQueue(queue IQBProblemProcessor, privKey asymmetric.IPrivKey) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
@@ -199,8 +201,7 @@ func testQueue(queue IQBProblemProcessor) error {
 		}
 	}()
 
-	client := queue.GetClient()
-	pubKey := client.GetPrivKey().GetPubKey()
+	pubKey := privKey.GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err
