@@ -11,7 +11,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
@@ -274,7 +273,7 @@ func tcEncryptWithParamsInvalidPKID(
 	}
 
 	cipher := symmetric.NewCipher(sk)
-	return layer2.NewMessage(
+	return newMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
 			[]byte("123"),

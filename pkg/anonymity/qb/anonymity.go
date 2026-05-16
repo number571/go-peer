@@ -11,10 +11,9 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/hybrid"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/message/layer1"
-	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -234,7 +233,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 
 	// check network message on correct format
 	if ok := p.checkMessageLayer1(pNetMsg); !ok {
-		// another network mask || message settings
+		// another network mask || message settings on adapter's side
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnIncorrectLayer1))
 		return ErrInvalidLayer1Message
 	}
@@ -242,11 +241,10 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	scheme := p.fQBProcessor.GetScheme()
 	encMsg := pNetMsg.GetPayload().GetBody()
 
-	// load encrypted message without decryption try
-	if _, err := layer2.LoadMessage(scheme.GetMessageSize(), encMsg); err != nil {
-		// problem from sender's side (invalid structure)
+	// check size on static payload structure.
+	if uint64(len(encMsg)) != scheme.GetMessageSize() {
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-		return errors.Join(ErrLoadMessage, err)
+		return ErrInvalidPayloadSize
 	}
 
 	// try store hash of message

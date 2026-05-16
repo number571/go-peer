@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/hybrid"
-	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
 	"github.com/number571/go-peer/pkg/types"
 )
 

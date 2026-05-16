@@ -9,9 +9,8 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
 	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
-	"github.com/number571/go-peer/pkg/message/layer1"
-	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -60,13 +59,12 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		msg, err := layer2.LoadMessage(q.GetScheme().GetMessageSize(), netMsg.GetPayload().GetBody())
-		if err != nil {
-			panic(err)
+		if uint64(len(netMsg.GetPayload().GetBody())) != (q.GetScheme().GetMessageSize()) {
+			panic("payload size is invalid")
 		}
 		pubKey, decMsg, err := q.GetScheme().DecryptMessage(
 			asymmetric.NewMapPubKeys(privKey.GetPubKey()),
-			msg.ToBytes(),
+			netMsg.GetPayload().GetBody(),
 		)
 		if err != nil {
 			panic(err)

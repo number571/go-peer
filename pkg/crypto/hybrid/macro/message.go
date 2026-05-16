@@ -1,4 +1,4 @@
-package layer2
+package macro
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ type sMessage struct {
 	fEncd []byte
 }
 
-func NewMessage(pEnck, pEncd []byte) IMessage {
+func newMessage(pEnck, pEncd []byte) IMessage {
 	if len(pEnck) != asymmetric.CKEMCiphertextSize {
 		panic(`len(pEnck) != asymmetric.CKEMCiphertextSize`)
 	}
@@ -28,7 +28,7 @@ func NewMessage(pEnck, pEncd []byte) IMessage {
 }
 
 // Message can be created only with client module.
-func LoadMessage(pSize uint64, pMsg interface{}) (IMessage, error) {
+func loadMessage(pSize uint64, pMsg interface{}) (IMessage, error) {
 	kSize := uint64(asymmetric.CKEMCiphertextSize)
 	if kSize >= pSize {
 		return nil, ErrSizeMessageBytes
@@ -45,7 +45,7 @@ func LoadMessage(pSize uint64, pMsg interface{}) (IMessage, error) {
 	if uint64(len(recvMsg)) != pSize {
 		return nil, ErrLoadMessageBytes
 	}
-	return NewMessage(recvMsg[:kSize], recvMsg[kSize:]), nil
+	return newMessage(recvMsg[:kSize], recvMsg[kSize:]), nil
 }
 
 func (p *sMessage) GetEnck() []byte {

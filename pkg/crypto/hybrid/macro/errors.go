@@ -23,4 +23,7 @@ var (
 	ErrInvalidHashSign      = &SSchemeError{"invalid hash sign"}
 	ErrEncryptSymmetricKey  = &SSchemeError{"encrypt symmetric key"}
 	ErrDecodeBytesJoiner    = &SSchemeError{"decode bytes joiner"}
+	ErrUnknownMessageType   = &SSchemeError{"unknown type of message"}
+	ErrLoadMessageBytes     = &SSchemeError{"load message bytes"}
+	ErrSizeMessageBytes     = &SSchemeError{"size message bytes"}
 )

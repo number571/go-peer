@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
@@ -17,6 +18,7 @@ const (
 )
 
 type sAESCipher struct {
+	fKey   []byte
 	fBlock cipher.Block
 }
 
@@ -25,7 +27,7 @@ func NewCipher(pKey []byte) ICipher {
 		return nil
 	}
 	block, _ := aes.NewCipher(pKey)
-	return &sAESCipher{fBlock: block}
+	return &sAESCipher{fKey: pKey, fBlock: block}
 }
 
 func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {
@@ -51,4 +53,12 @@ func (p *sAESCipher) DecryptBytes(pMsg []byte) []byte {
 
 	stream.XORKeyStream(result, pMsg[blockSize:])
 	return result
+}
+
+func (p *sAESCipher) ToBytes() []byte {
+	return p.fKey
+}
+
+func (p *sAESCipher) ToString() string {
+	return encoding.HexEncode(p.fKey)
 }

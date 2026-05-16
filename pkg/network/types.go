@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/types"

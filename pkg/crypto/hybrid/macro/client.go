@@ -8,7 +8,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
-	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
@@ -85,7 +84,7 @@ func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]b
 }
 
 // Decrypt message with private key of receiver.
-// No one else except the sender will be able to decrypt the message.
+// No one else except the sender will be able to decrypt the layer2.
 func (p *sScheme) DecryptMessage(pMapPubKeys hybrid.IKeysContainer, pMsg []byte) (hybrid.IParticipantKey, []byte, error) {
 	mapPubKeys, ok := pMapPubKeys.(asymmetric.IMapPubKeys)
 	if !ok {
@@ -93,7 +92,7 @@ func (p *sScheme) DecryptMessage(pMapPubKeys hybrid.IKeysContainer, pMsg []byte)
 	}
 
 	// Load message's structure from encrypted bytes.
-	msg, err := layer2.LoadMessage(p.fMessageSize, pMsg)
+	msg, err := loadMessage(p.fMessageSize, pMsg)
 	if err != nil {
 		return nil, nil, ErrInitCheckMessage
 	}
@@ -173,7 +172,7 @@ func (p *sScheme) encryptWithPadding(
 	}
 
 	cipher := symmetric.NewCipher(sk)
-	return layer2.NewMessage(
+	return newMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{
 			pkey.GetHasher().ToBytes(),

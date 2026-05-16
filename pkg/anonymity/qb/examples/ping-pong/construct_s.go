@@ -1,3 +1,5 @@
+//go:build symmetric
+
 package main
 
 import (
@@ -10,10 +12,12 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/qb/logger"
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
+	"github.com/number571/go-peer/pkg/crypto/hybrid"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
+	"github.com/number571/go-peer/pkg/crypto/hybrid/micro"
+	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/storage/cache"
@@ -22,18 +26,21 @@ import (
 
 const (
 	networkMask = uint32(0x11223344)
-	msgSize     = uint64(8192)
+	msgSize     = uint64(128)
 	workSize    = uint64(10)
 )
 
 type sNode struct {
 	fNetwork   network.INode
 	fAnonymity anonymity.INode
-	fPrivKey   asymmetric.IPrivKey
+	fKey       hybrid.IParticipantKey // not used
+}
+
+func printTagVersion() {
+	fmt.Println("build_tag: symmetric")
 }
 
 func newNode(serviceName, address string) *sNode {
-	privKey := asymmetric.NewPrivKey()
 	msgChan := make(chan layer1.IMessage)
 	networkNode := network.NewNode(
 		network.NewSettings(&network.SSettings{
@@ -107,7 +114,7 @@ func newNode(serviceName, address string) *sNode {
 			}
 			return db
 		}(),
-		asymmetric.NewMapPubKeys(),
+		symmetric.NewListCiphers(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -120,11 +127,20 @@ func newNode(serviceName, address string) *sNode {
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
-			macro.NewScheme(
-				privKey,
+			micro.NewScheme(
 				msgSize,
 			),
 		),
 	)
-	return &sNode{networkNode, anonymityNode, privKey}
+	return &sNode{networkNode, anonymityNode, nil}
+}
+
+func exchangeKeys(node1, node2 *sNode) (hybrid.IParticipantKey, hybrid.IParticipantKey) {
+	key := random.NewRandom().GetBytes(symmetric.CCipherKeySize)
+	cipher := symmetric.NewCipher(key)
+
+	node1.fAnonymity.GetKeysContainer().(symmetric.IListCiphers).Add(cipher)
+	node2.fAnonymity.GetKeysContainer().(symmetric.IListCiphers).Add(cipher)
+
+	return cipher, cipher
 }

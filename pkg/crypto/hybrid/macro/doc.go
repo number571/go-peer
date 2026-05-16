@@ -1,6 +1,15 @@
 // Package client makes it possible to encrypt and decrypt messages using a monolithic cryptographic protocol.
 //
 /*
+	MESSAGE FORMAT
+
+	E( PubK, K ) || E( K, M )
+	where
+		PubK - public key
+		K - secret key
+		M - message bytes
+		E - encrypt
+
 	CLIENT MESSAGE PROTOCOL
 
 	Protocol participants:
@@ -42,6 +51,6 @@
 		IF ≠, than protocol is interrupted.
 
 	More information in article: https://github.com/number571/go-peer/blob/master/docs/monolithic_cryptographic_protocol.pdf
-	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_message.jpg
+	Scheme: https://github.com/number571/go-peer/blob/master/images/go-peer_layer2_layer2.jpg
 */
 package macro

@@ -1,7 +1,7 @@
 package layer1
 
 const (
-	errPrefix = "pkg/message/layer1 = "
+	errPrefix = "pkg/crypto/hybrid/layer1 = "
 )
 
 type SMessageError struct {

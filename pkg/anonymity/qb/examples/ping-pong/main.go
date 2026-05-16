@@ -6,7 +6,6 @@ import (
 	"time"
 
 	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hybrid"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
@@ -39,16 +38,20 @@ var (
 	}
 )
 
+func init() {
+	printTagVersion()
+}
+
 func main() {
 	nodeService := runServiceNode()
 	nodeClient := runClientNode()
 
-	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
+	keyService, _ := exchangeKeys(nodeService, nodeClient)
 
 	numBytes := encoding.Uint64ToBytes(0)
 	_ = nodeClient.fAnonymity.SendPayload(
 		context.Background(),
-		pubKeyService,
+		keyService,
 		payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 	)
 
@@ -76,14 +79,4 @@ func runServiceNode() *sNode {
 
 	time.Sleep(time.Second) // wait listener
 	return node
-}
-
-func exchangeKeys(node1, node2 *sNode) (asymmetric.IPubKey, asymmetric.IPubKey) {
-	pubKey1 := node1.fPrivKey.GetPubKey()
-	pubKey2 := node2.fPrivKey.GetPubKey()
-
-	node1.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey2)
-	node2.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey1)
-
-	return pubKey1, pubKey2
 }
