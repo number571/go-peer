@@ -1,9 +1,9 @@
-package hybrid
+package layer2
 
 import "github.com/number571/go-peer/pkg/types"
 
 type (
-	IKeysContainer  interface{} // TODO:
+	IKeysContainer  interface{}
 	IParticipantKey types.IConverter
 )
 
@@ -12,7 +12,6 @@ type IScheme interface {
 	IDecryptor
 
 	GetRandomKey() IParticipantKey
-
 	GetMessageSize() uint64
 	GetPayloadLimit() uint64
 }

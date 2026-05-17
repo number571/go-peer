@@ -1,7 +1,7 @@
 package micro
 
 const (
-	errPrefix = "pkg/crypto/hybrid/micro = "
+	errPrefix = "pkg/crypto/hybrid/layer2/micro = "
 )
 
 type SClientError struct {

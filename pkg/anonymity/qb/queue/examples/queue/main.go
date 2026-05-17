@@ -9,8 +9,8 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/macro"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/macro"
 	"github.com/number571/go-peer/pkg/payload"
 )
 

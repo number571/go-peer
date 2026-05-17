@@ -1,7 +1,7 @@
 package macro
 
 const (
-	errPrefix = "pkg/crypto/hybrid/macro = "
+	errPrefix = "pkg/crypto/hybrid/layer2/macro = "
 )
 
 type SSchemeError struct {

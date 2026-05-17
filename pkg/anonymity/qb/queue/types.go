@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/number571/go-peer/pkg/crypto/hybrid"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
+	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/types"
 )
 

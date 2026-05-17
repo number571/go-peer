@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid"
+	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
