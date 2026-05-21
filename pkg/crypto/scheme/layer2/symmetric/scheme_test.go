@@ -13,7 +13,7 @@ func TestScheme(t *testing.T) {
 	t.Parallel()
 
 	var (
-		key = symmetric.NewCipher(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
+		key = symmetric.NewCipherGCM(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
 		msg = []byte("hello, world!")
 	)
 
@@ -24,7 +24,7 @@ func TestScheme(t *testing.T) {
 	}
 
 	listCiphers := symmetric.NewListCiphers()
-	listCiphers.Add(symmetric.NewCipher(key.ToBytes()))
+	listCiphers.Add(symmetric.NewCipherGCM(key.ToBytes()))
 
 	gotKey, gotMsg, err := scheme.DecryptMessage(listCiphers, encMsg)
 	if err != nil {

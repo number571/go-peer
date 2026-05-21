@@ -12,7 +12,7 @@ var (
 func TestKeySize(t *testing.T) {
 	t.Parallel()
 
-	if cipher := NewCipher([]byte{123}); cipher != nil {
+	if cipher := NewCipherCFB([]byte{123}); cipher != nil {
 		t.Fatal("success create cipher with invalid key size")
 	}
 }
@@ -24,7 +24,7 @@ func TestEncrypt(t *testing.T) {
 		msg = []byte("hello, world!")
 	)
 
-	cipher := NewCipher(tgKey)
+	cipher := NewCipherCFB(tgKey)
 
 	emsg := cipher.EncryptBytes(msg)
 

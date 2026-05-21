@@ -50,7 +50,7 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hmac, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewCipher(key)
+	cipher := symmetric.NewCipherCFB(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
@@ -85,7 +85,7 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(pSett.GetNetworkKey(), symmetric.CCipherKeySize)
-	dBytes := symmetric.NewCipher(key).DecryptBytes(msgBytes)
+	dBytes := symmetric.NewCipherCFB(key).DecryptBytes(msgBytes)
 
 	proofArr := [encoding.CSizeUint64]byte{}
 	copy(proofArr[:], dBytes[:cProofIndex])

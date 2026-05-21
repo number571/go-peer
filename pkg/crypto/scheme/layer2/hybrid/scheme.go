@@ -104,7 +104,7 @@ func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte)
 	}
 
 	// Decrypt data block by decrypted session key. Decode data block.
-	decJoiner := symmetric.NewCipher(skey).DecryptBytes(msg.GetEncd())
+	decJoiner := symmetric.NewCipherCFB(skey).DecryptBytes(msg.GetEncd())
 	decSlice, err := joiner.LoadBytesJoiner32(decJoiner)
 	if err != nil || len(decSlice) != 5 {
 		return nil, nil, ErrDecodeBytesJoiner
@@ -171,7 +171,7 @@ func (p *sScheme) encryptWithPadding(
 		return nil, ErrEncryptSymmetricKey
 	}
 
-	cipher := symmetric.NewCipher(sk)
+	cipher := symmetric.NewCipherCFB(sk)
 	return newMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{

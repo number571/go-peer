@@ -272,7 +272,7 @@ func tcEncryptWithParamsInvalidPKID(
 		return nil, ErrEncryptSymmetricKey
 	}
 
-	cipher := symmetric.NewCipher(sk)
+	cipher := symmetric.NewCipherCFB(sk)
 	return newMessage(
 		ct,
 		cipher.EncryptBytes(joiner.NewBytesJoiner32([][]byte{

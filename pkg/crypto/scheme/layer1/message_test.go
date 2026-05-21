@@ -241,7 +241,7 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewCipher(key)
+	cipher := symmetric.NewCipherCFB(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{
@@ -269,7 +269,7 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hash, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
 
-	cipher := symmetric.NewCipher(key)
+	cipher := symmetric.NewCipherCFB(key)
 	return &sMessage{
 		fEncd: cipher.EncryptBytes(bytes.Join(
 			[][]byte{

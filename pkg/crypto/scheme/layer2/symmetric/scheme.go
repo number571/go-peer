@@ -3,7 +3,7 @@ package symmetric
 import (
 	"bytes"
 
-	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
@@ -28,8 +28,9 @@ func NewScheme(pMessageSize uint64) layer2.IScheme {
 		fMessageSize: pMessageSize,
 	}
 
-	tmpCipher := symmetric.NewCipher(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
-	encMsg, err := scheme.encryptWithPadding(tmpCipher, []byte{}, 0)
+	encKey := make([]byte, symmetric.CCipherKeySize)
+	cipher := symmetric.NewCipherGCM(encKey)
+	encMsg, err := scheme.encryptWithPadding(cipher, []byte{}, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +45,7 @@ func NewScheme(pMessageSize uint64) layer2.IScheme {
 }
 
 func (p *sScheme) GetRandomKey() layer2.IParticipantKey {
-	return symmetric.NewCipher(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
+	return symmetric.NewCipherGCM(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
 }
 
 func (p *sScheme) GetMessageSize() uint64 {
@@ -71,40 +72,41 @@ func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]b
 }
 
 func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
-	if uint64(len(pMsg)) != p.fMessageSize {
+	var lenMsg = len(pMsg)
+	if (uint64(lenMsg) != p.fMessageSize) || (lenMsg < cSaltSize+encoding.CSizeUint32) {
 		return nil, nil, ErrMessageSize
 	}
+
 	listCiphers, ok := pListKeys.(symmetric.IListCiphers)
 	if !ok {
 		return nil, nil, ErrInvalidKeyType
 	}
+
+	salt := pMsg[:cSaltSize]
 	list := listCiphers.Get()
+
 	for _, c := range list {
-		dec := c.DecryptBytes(pMsg)
-		if len(dec) <= cSaltSize+hashing.CHasherSize+encoding.CSizeUint32 {
+		keyBuilder := keybuilder.NewKeyBuilder(0, salt)
+		encKey := keyBuilder.Build(c.ToString(), symmetric.CCipherKeySize)
+
+		cipher := symmetric.NewCipherGCM(encKey)
+		decMsg := cipher.DecryptBytes(pMsg[cSaltSize:])
+		if len(decMsg) < encoding.CSizeUint32 {
 			continue
 		}
-		var (
-			salt = dec[:cSaltSize]
-			hmac = dec[cSaltSize : cSaltSize+hashing.CHasherSize]
-			data = dec[cSaltSize+hashing.CHasherSize:]
-		)
-		check := hashing.NewHMACHasher(c.ToBytes(), bytes.Join(
-			[][]byte{salt, data},
-			[]byte{},
-		)).ToBytes()
-		if !bytes.Equal(check, hmac) {
-			continue
-		}
+
 		lenb := [encoding.CSizeUint32]byte{}
-		copy(lenb[:], data[:encoding.CSizeUint32])
-		msg := data[encoding.CSizeUint32:]
+		copy(lenb[:], decMsg[:encoding.CSizeUint32])
+		msg := decMsg[encoding.CSizeUint32:]
+
 		msgSize := encoding.BytesToUint32(lenb)
 		if msgSize > uint32(len(msg)) { // nolint: gosec
 			return nil, nil, ErrDecodeMessage
 		}
+
 		return c, msg[:msgSize], nil
 	}
+
 	return nil, nil, ErrDecryptMessage
 }
 
@@ -117,17 +119,14 @@ func (p *sScheme) encryptWithPadding(
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
 	)
+
 	lenb := encoding.Uint32ToBytes(uint32(len(pMsg))) // nolint: gosec
 	data := bytes.Join([][]byte{lenb[:], pMsg, rand.GetBytes(pPadd)}, []byte{})
-	return pCipher.EncryptBytes(bytes.Join(
-		[][]byte{
-			salt,
-			hashing.NewHMACHasher(pCipher.ToBytes(), bytes.Join(
-				[][]byte{salt, data},
-				[]byte{},
-			)).ToBytes(),
-			data,
-		},
-		[]byte{},
-	)), nil
+
+	keyBuilder := keybuilder.NewKeyBuilder(0, salt)
+	encKey := keyBuilder.Build(pCipher.ToString(), symmetric.CCipherKeySize)
+	return bytes.Join([][]byte{
+		salt,
+		symmetric.NewCipherGCM(encKey).EncryptBytes(data),
+	}, []byte{}), nil
 }

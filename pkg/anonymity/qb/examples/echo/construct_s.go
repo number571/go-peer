@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/micro"
+	ssym "github.com/number571/go-peer/pkg/crypto/scheme/layer2/symmetric"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -42,7 +42,7 @@ func printTagVersion() {
 
 func newNode(serviceName, address string) *sNode {
 	msgChan := make(chan layer1.IMessage)
-	scheme := micro.NewScheme(msgSize)
+	scheme := ssym.NewScheme(msgSize)
 
 	networkNode := network.NewNode(
 		network.NewSettings(&network.SSettings{

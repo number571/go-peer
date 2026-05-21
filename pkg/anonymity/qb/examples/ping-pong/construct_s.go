@@ -15,7 +15,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/micro"
+	ssym "github.com/number571/go-peer/pkg/crypto/scheme/layer2/symmetric"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -127,7 +127,7 @@ func newNode(serviceName, address string) *sNode {
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
-			micro.NewScheme(
+			ssym.NewScheme(
 				msgSize,
 			),
 		),
