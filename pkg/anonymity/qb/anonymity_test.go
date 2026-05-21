@@ -16,8 +16,8 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/macro"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
@@ -194,7 +194,7 @@ func TestFetchPayload(t *testing.T) {
 
 	nodes[1].HandleFunc(
 		tcHead,
-		func(_ context.Context, _ INode, _ hybrid.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
 			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
 		},
 	)
@@ -243,7 +243,7 @@ func TestBroadcastPayload(t *testing.T) {
 	chResult := make(chan string)
 	nodes[1].HandleFunc(
 		tcHead,
-		func(_ context.Context, _ INode, _ hybrid.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
 			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
 			go func() { chResult <- res }()
 			return nil, nil
@@ -403,7 +403,7 @@ func TestHandleWrapper(t *testing.T) {
 
 	node.HandleFunc(
 		111,
-		func(_ context.Context, _ INode, _ hybrid.IParticipantKey, _ []byte) ([]byte, error) {
+		func(_ context.Context, _ INode, _ layer2.IParticipantKey, _ []byte) ([]byte, error) {
 			return nil, errors.New("some error") //nolint:err113
 		},
 	)
@@ -617,7 +617,7 @@ func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, add
 	for _, node := range nodes {
 		node.HandleFunc(
 			tcHead,
-			func(_ context.Context, _ INode, _ hybrid.IParticipantKey, reqBytes []byte) ([]byte, error) {
+			func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
 				// send response
 				return []byte(string(reqBytes) + " (response)"), nil
 			},
@@ -758,7 +758,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 				FQueuePeriod:  time.Second,
 				FConsumersCap: 1,
 			}),
-			macro.NewScheme(
+			hybrid.NewScheme(
 				privKey,
 				tcMsgSize,
 			),

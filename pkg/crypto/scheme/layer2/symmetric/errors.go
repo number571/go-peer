@@ -1,7 +1,7 @@
-package micro
+package symmetric
 
 const (
-	errPrefix = "pkg/crypto/hybrid/layer2/micro = "
+	errPrefix = "pkg/crypto/scheme/layer2/symmetric = "
 )
 
 type SClientError struct {

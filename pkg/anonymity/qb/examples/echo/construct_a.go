@@ -14,8 +14,8 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/macro"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -32,7 +32,7 @@ const (
 type sNode struct {
 	fNetwork   network.INode
 	fAnonymity anonymity.INode
-	fKey       hybrid.IParticipantKey
+	fKey       layer2.IParticipantKey
 }
 
 func printTagVersion() {
@@ -127,7 +127,7 @@ func newNode(serviceName, address string) *sNode {
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
-			macro.NewScheme(
+			hybrid.NewScheme(
 				privKey,
 				msgSize,
 			),
@@ -136,7 +136,7 @@ func newNode(serviceName, address string) *sNode {
 	return &sNode{networkNode, anonymityNode, privKey.GetPubKey()}
 }
 
-func exchangeKeys(node1, node2 *sNode) (hybrid.IParticipantKey, hybrid.IParticipantKey) {
+func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticipantKey) {
 	pubKey1 := node1.fKey.(asymmetric.IPubKey)
 	pubKey2 := node2.fKey.(asymmetric.IPubKey)
 

@@ -1,14 +1,22 @@
-package macro
+package hybrid
 
 import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/encoding"
+	"github.com/number571/go-peer/pkg/types"
 )
 
+type iMessage interface {
+	types.IConverter
+
+	GetEnck() []byte
+	GetEncd() []byte
+}
+
 var (
-	_ IMessage = &sMessage{}
+	_ iMessage = &sMessage{}
 )
 
 // Basic structure of transport package.
@@ -17,7 +25,7 @@ type sMessage struct {
 	fEncd []byte
 }
 
-func newMessage(pEnck, pEncd []byte) IMessage {
+func newMessage(pEnck, pEncd []byte) iMessage {
 	if len(pEnck) != asymmetric.CKEMCiphertextSize {
 		panic(`len(pEnck) != asymmetric.CKEMCiphertextSize`)
 	}
@@ -28,7 +36,7 @@ func newMessage(pEnck, pEncd []byte) IMessage {
 }
 
 // Message can be created only with client module.
-func loadMessage(pSize uint64, pMsg interface{}) (IMessage, error) {
+func loadMessage(pSize uint64, pMsg interface{}) (iMessage, error) {
 	kSize := uint64(asymmetric.CKEMCiphertextSize)
 	if kSize >= pSize {
 		return nil, ErrSizeMessageBytes

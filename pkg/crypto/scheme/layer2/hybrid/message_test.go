@@ -1,4 +1,4 @@
-package macro
+package hybrid
 
 import (
 	"bytes"
@@ -77,7 +77,7 @@ func TestMessage(t *testing.T) {
 	testMessage(t, msgSize, msg2)
 }
 
-func testMessage(t *testing.T, msgSize uint64, msg IMessage) {
+func testMessage(t *testing.T, msgSize uint64, msg iMessage) {
 	if !bytes.Equal(msg.ToBytes(), tgBinaryMessage) {
 		t.Error("invalid convert to bytes")
 		return

@@ -1,5 +1,5 @@
 // nolint: err113
-package macro
+package hybrid
 
 import (
 	"bytes"

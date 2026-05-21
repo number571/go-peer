@@ -12,7 +12,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
@@ -33,7 +33,7 @@ type sNode struct {
 	fAdapter       adapters.IAdapter
 	fKVDatavase    database.IKVDatabase
 	fQBProcessor   queue.IQBProblemProcessor
-	fKeysContainer hybrid.IKeysContainer
+	fKeysContainer layer2.IKeysContainer
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -43,7 +43,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pAdapter adapters.IAdapter,
 	pKVDatavase database.IKVDatabase,
-	pKeysContainer hybrid.IKeysContainer,
+	pKeysContainer layer2.IKeysContainer,
 	pQBProcessor queue.IQBProblemProcessor,
 ) INode {
 	return &sNode{
@@ -152,7 +152,7 @@ func (p *sNode) GetQBProcessor() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetKeysContainer() hybrid.IKeysContainer {
+func (p *sNode) GetKeysContainer() layer2.IKeysContainer {
 	return p.fKeysContainer
 }
 
@@ -164,7 +164,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
-	pRecv hybrid.IParticipantKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -179,7 +179,7 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv hybrid.IParticipantKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewRandom().GetUint64()) //nolint:gosec
@@ -294,7 +294,7 @@ func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender hybrid.IParticipantKey,
+	pSender layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -318,7 +318,7 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender hybrid.IParticipantKey,
+	pSender layer2.IParticipantKey,
 	pAction iAction,
 	pBody []byte,
 ) {
@@ -337,7 +337,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender hybrid.IParticipantKey,
+	pSender layer2.IParticipantKey,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -371,7 +371,7 @@ func (p *sNode) handleRequest(
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv hybrid.IParticipantKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -499,7 +499,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pKey hybrid.IParticipantKey, pAction iAction) string {
+func newActionKey(pKey layer2.IParticipantKey, pAction iAction) string {
 	pubKeyAddr := hashing.NewHasher(pKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

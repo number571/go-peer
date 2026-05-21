@@ -1,4 +1,4 @@
-package micro
+package symmetric
 
 import (
 	"bytes"

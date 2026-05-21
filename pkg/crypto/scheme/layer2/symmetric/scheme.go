@@ -1,17 +1,17 @@
-package micro
+package symmetric
 
 import (
 	"bytes"
 
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
-	_ hybrid.IScheme = &sScheme{}
+	_ layer2.IScheme = &sScheme{}
 )
 
 const (
@@ -23,7 +23,7 @@ type sScheme struct {
 	fPayloadLimit uint64
 }
 
-func NewScheme(pMessageSize uint64) hybrid.IScheme {
+func NewScheme(pMessageSize uint64) layer2.IScheme {
 	scheme := &sScheme{
 		fMessageSize: pMessageSize,
 	}
@@ -43,7 +43,7 @@ func NewScheme(pMessageSize uint64) hybrid.IScheme {
 	return scheme
 }
 
-func (p *sScheme) GetRandomKey() hybrid.IParticipantKey {
+func (p *sScheme) GetRandomKey() layer2.IParticipantKey {
 	return symmetric.NewCipher(random.NewRandom().GetBytes(symmetric.CCipherKeySize))
 }
 
@@ -55,7 +55,7 @@ func (p *sScheme) GetPayloadLimit() uint64 {
 	return p.fPayloadLimit
 }
 
-func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]byte, error) {
+func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]byte, error) {
 	recv, ok := pRecv.(symmetric.ICipher)
 	if !ok {
 		return nil, ErrInvalidKeyType
@@ -70,7 +70,7 @@ func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]b
 	return p.encryptWithPadding(recv, pMsg, payloadLimit-resultSize)
 }
 
-func (p *sScheme) DecryptMessage(pListKeys hybrid.IKeysContainer, pMsg []byte) (hybrid.IParticipantKey, []byte, error) {
+func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
 	if uint64(len(pMsg)) != p.fMessageSize {
 		return nil, nil, ErrMessageSize
 	}

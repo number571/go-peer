@@ -1,11 +1,11 @@
-package macro
+package hybrid
 
 import (
 	"testing"
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -33,7 +33,7 @@ func BenchmarkScheme(b *testing.B) {
 
 	benchTable := []struct {
 		name   string
-		scheme hybrid.IScheme
+		scheme layer2.IScheme
 	}{
 		{
 			name:   "mlkem=768,mldsa=65",

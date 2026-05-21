@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
@@ -24,7 +24,7 @@ type sQBProblemProcessor struct {
 	fState state.IState
 
 	fSettings ISettings
-	fScheme   hybrid.IScheme
+	fScheme   layer2.IScheme
 
 	fMainPool *sMainPool
 	fRandPool *sRandPool
@@ -41,10 +41,10 @@ type sMainPool struct {
 type sRandPool struct {
 	fCount    int64 // atomic variable
 	fQueue    chan layer1.IMessage
-	fReceiver hybrid.IParticipantKey
+	fReceiver layer2.IParticipantKey
 }
 
-func NewQBProblemProcessor(pSettings ISettings, pScheme hybrid.IScheme) IQBProblemProcessor {
+func NewQBProblemProcessor(pSettings ISettings, pScheme layer2.IScheme) IQBProblemProcessor {
 	consumersCap := pSettings.GetConsumersCap()
 	queuePoolCap := pSettings.GetQueuePoolCap()
 	return &sQBProblemProcessor{
@@ -73,7 +73,7 @@ func (p *sQBProblemProcessor) GetSettings() ISettings {
 	return p.fSettings
 }
 
-func (p *sQBProblemProcessor) GetScheme() hybrid.IScheme {
+func (p *sQBProblemProcessor) GetScheme() layer2.IScheme {
 	return p.fScheme
 }
 
@@ -132,7 +132,7 @@ func (p *sQBProblemProcessor) runMainPoolFiller(pCtx context.Context, pCancel fu
 	}
 }
 
-func (p *sQBProblemProcessor) EnqueueMessage(pKey hybrid.IParticipantKey, pBytes []byte) error {
+func (p *sQBProblemProcessor) EnqueueMessage(pKey layer2.IParticipantKey, pBytes []byte) error {
 	incCount := atomic.AddInt64(&p.fMainPool.fCount, 1)
 	if uint64(incCount) > uint64(cap(p.fMainPool.fQueue)) { //nolint:gosec
 		atomic.AddInt64(&p.fMainPool.fCount, -1)

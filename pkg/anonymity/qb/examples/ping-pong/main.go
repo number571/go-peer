@@ -6,7 +6,7 @@ import (
 	"time"
 
 	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pKey hybrid.IParticipantKey, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, pKey layer2.IParticipantKey, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 

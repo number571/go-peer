@@ -14,7 +14,7 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/micro"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/logger"
@@ -33,7 +33,7 @@ const (
 type sNode struct {
 	fNetwork   network.INode
 	fAnonymity anonymity.INode
-	fKey       hybrid.IParticipantKey // not used
+	fKey       layer2.IParticipantKey // not used
 }
 
 func printTagVersion() {
@@ -135,7 +135,7 @@ func newNode(serviceName, address string) *sNode {
 	return &sNode{networkNode, anonymityNode, nil}
 }
 
-func exchangeKeys(node1, node2 *sNode) (hybrid.IParticipantKey, hybrid.IParticipantKey) {
+func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticipantKey) {
 	key := random.NewRandom().GetBytes(symmetric.CCipherKeySize)
 	cipher := symmetric.NewCipher(key)
 

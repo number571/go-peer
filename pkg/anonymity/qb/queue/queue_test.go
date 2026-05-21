@@ -11,7 +11,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/macro"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -86,7 +86,7 @@ func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
 	privKey := asymmetric.NewPrivKey()
-	scheme := macro.NewScheme(
+	scheme := hybrid.NewScheme(
 		privKey,
 		tcMsgSize,
 	)
@@ -170,7 +170,7 @@ func TestQueue(t *testing.T) {
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
-		macro.NewScheme(
+		hybrid.NewScheme(
 			privKey,
 			tcMsgSize,
 		),

@@ -1,4 +1,4 @@
-package macro
+package hybrid
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
-	hybrid "github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	_ hybrid.IScheme = &sScheme{}
+	_ layer2.IScheme = &sScheme{}
 )
 
 // Basic structure describing the user.
@@ -28,7 +28,7 @@ type sScheme struct {
 
 // Create scheme by private key as identification.
 // Handle function is used when the network exists.
-func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) hybrid.IScheme {
+func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) layer2.IScheme {
 	scheme := &sScheme{
 		fMessageSize: pMessageSize,
 		fPrivKey:     pPrivKey,
@@ -49,7 +49,7 @@ func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) hybrid.IScheme
 	return scheme
 }
 
-func (p *sScheme) GetRandomKey() hybrid.IParticipantKey {
+func (p *sScheme) GetRandomKey() layer2.IParticipantKey {
 	return asymmetric.NewPrivKey().GetPubKey()
 }
 
@@ -65,7 +65,7 @@ func (p *sScheme) GetPayloadLimit() uint64 {
 
 // Encrypt message with public key of receiver.
 // The message can be decrypted only if private key is known.
-func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]byte, error) {
+func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]byte, error) {
 	recv, ok := pRecv.(asymmetric.IPubKey)
 	if !ok {
 		return nil, ErrInvalidKeyType
@@ -85,7 +85,7 @@ func (p *sScheme) EncryptMessage(pRecv hybrid.IParticipantKey, pMsg []byte) ([]b
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the layer2.
-func (p *sScheme) DecryptMessage(pMapPubKeys hybrid.IKeysContainer, pMsg []byte) (hybrid.IParticipantKey, []byte, error) {
+func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
 	mapPubKeys, ok := pMapPubKeys.(asymmetric.IMapPubKeys)
 	if !ok {
 		return nil, nil, ErrInvalidKeyType

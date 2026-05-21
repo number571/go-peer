@@ -10,7 +10,7 @@ import (
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/macro"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -29,7 +29,7 @@ func main() {
 			FQueuePoolCap: [2]uint64{1 << 5, 1 << 5},
 			FConsumersCap: 1,
 		}),
-		macro.NewScheme(
+		hybrid.NewScheme(
 			privKey,
 			(8<<10),
 		),
