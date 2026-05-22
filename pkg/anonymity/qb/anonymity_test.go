@@ -162,8 +162,8 @@ func TestF2FWithoutFriends(t *testing.T) {
 	}
 	defer testFreeNodes(nodes[:], 1)
 
-	nodes[0].GetKeysContainer().(asymmetric.IMapPubKeys).DelPubKey(privKeys[1].GetPubKey())
-	nodes[1].GetKeysContainer().(asymmetric.IMapPubKeys).DelPubKey(privKeys[0].GetPubKey())
+	nodes[0].GetKeysContainer().Del(privKeys[1].GetPubKey().GetHasher().ToString())
+	nodes[1].GetKeysContainer().Del(privKeys[0].GetPubKey().GetHasher().ToString())
 
 	// nodes[1] -> nodes[0] -> nodes[2]
 	_, err := nodes[0].FetchPayload(
@@ -347,7 +347,7 @@ func TestHandleWrapper(t *testing.T) {
 	scheme := node.fQBProcessor.GetScheme()
 
 	pubKey := privKey.GetPubKey()
-	node.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(privKey.GetPubKey())
+	node.GetKeysContainer().Add(privKey.GetPubKey())
 
 	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
 		FSettings: layer1.NewSettings(&layer1.SSettings{
@@ -611,8 +611,8 @@ func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, add
 	pubKey1 := privKeys[1].GetPubKey()
 	pubKey0 := privKeys[0].GetPubKey()
 
-	nodes[0].GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey1)
-	nodes[1].GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey0)
+	nodes[0].GetKeysContainer().Add(pubKey1)
+	nodes[1].GetKeysContainer().Add(pubKey0)
 
 	for _, node := range nodes {
 		node.HandleFunc(
@@ -744,7 +744,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 			},
 		),
 		db,
-		asymmetric.NewMapPubKeys(),
+		layer2.NewKeysContainer(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{

@@ -28,8 +28,8 @@ func BenchmarkScheme(b *testing.B) {
 	privKey := asymmetric.NewPrivKey()
 	pubKey := privKey.GetPubKey()
 
-	mapKeys := asymmetric.NewMapPubKeys()
-	mapKeys.SetPubKey(pubKey)
+	keysContainer := layer2.NewKeysContainer()
+	keysContainer.Add(pubKey)
 
 	benchTable := []struct {
 		name   string
@@ -70,7 +70,7 @@ func BenchmarkScheme(b *testing.B) {
 
 			nowDec := time.Now()
 			for i := 0; i < b.N; i++ {
-				_, _, err := t.scheme.DecryptMessage(mapKeys, encMessages[i])
+				_, _, err := t.scheme.DecryptMessage(keysContainer, encMessages[i])
 				if err != nil {
 					b.Error(err)
 					return

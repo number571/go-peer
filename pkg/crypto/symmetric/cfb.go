@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
 )
 
@@ -12,7 +13,12 @@ func NewCipherCFB(pKey []byte) ICipher {
 		return nil
 	}
 	block, _ := aes.NewCipher(pKey)
-	return &sAESCipher{fMode: modeCFB, fKey: pKey, fBlock: block}
+	return &sAESCipher{
+		fMode:   modeCFB,
+		fKey:    pKey,
+		fBlock:  block,
+		fHasher: hashing.NewHMACHasher(pKey, []byte("__hasher__")),
+	}
 }
 
 func (p *sAESCipher) encryptBytesCFB(pMsg []byte) []byte {

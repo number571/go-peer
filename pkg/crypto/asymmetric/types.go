@@ -5,14 +5,6 @@ import (
 	"github.com/number571/go-peer/pkg/types"
 )
 
-type IPubKeyHash = []byte
-
-type IMapPubKeys interface {
-	GetPubKey(IPubKeyHash) IPubKey
-	DelPubKey(IPubKey)
-	SetPubKey(IPubKey)
-}
-
 type IPrivKey interface {
 	types.IConverter
 

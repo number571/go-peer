@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 
+	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
@@ -24,9 +25,10 @@ const (
 )
 
 type sAESCipher struct {
-	fMode  iEncMode
-	fKey   []byte
-	fBlock cipher.Block
+	fMode   iEncMode
+	fKey    []byte
+	fBlock  cipher.Block
+	fHasher hashing.IHasher
 }
 
 func (p *sAESCipher) EncryptBytes(pMsg []byte) []byte {
@@ -57,4 +59,8 @@ func (p *sAESCipher) ToBytes() []byte {
 
 func (p *sAESCipher) ToString() string {
 	return encoding.HexEncode(p.fKey)
+}
+
+func (p *sAESCipher) GetHasher() hashing.IHasher {
+	return p.fHasher
 }

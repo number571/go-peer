@@ -114,7 +114,7 @@ func newNode(serviceName, address string) *sNode {
 			}
 			return db
 		}(),
-		asymmetric.NewMapPubKeys(),
+		layer2.NewKeysContainer(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -140,8 +140,8 @@ func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticip
 	pubKey1 := node1.fKey.(asymmetric.IPubKey)
 	pubKey2 := node2.fKey.(asymmetric.IPubKey)
 
-	node1.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey2)
-	node2.fAnonymity.GetKeysContainer().(asymmetric.IMapPubKeys).SetPubKey(pubKey1)
+	node1.fAnonymity.GetKeysContainer().Add(pubKey2)
+	node2.fAnonymity.GetKeysContainer().Add(pubKey1)
 
 	return pubKey1, pubKey2
 }

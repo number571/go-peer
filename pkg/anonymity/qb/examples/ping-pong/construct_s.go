@@ -114,7 +114,7 @@ func newNode(serviceName, address string) *sNode {
 			}
 			return db
 		}(),
-		symmetric.NewListCiphers(),
+		layer2.NewKeysContainer(),
 		queue.NewQBProblemProcessor(
 			queue.NewSettings(&queue.SSettings{
 				FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -137,10 +137,10 @@ func newNode(serviceName, address string) *sNode {
 
 func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticipantKey) {
 	key := random.NewRandom().GetBytes(symmetric.CCipherKeySize)
-	cipher := symmetric.NewCipher(key)
+	cipher := symmetric.NewCipherGCM(key)
 
-	node1.fAnonymity.GetKeysContainer().(symmetric.IListCiphers).Add(cipher)
-	node2.fAnonymity.GetKeysContainer().(symmetric.IListCiphers).Add(cipher)
+	node1.fAnonymity.GetKeysContainer().Add(cipher)
+	node2.fAnonymity.GetKeysContainer().Add(cipher)
 
 	return cipher, cipher
 }

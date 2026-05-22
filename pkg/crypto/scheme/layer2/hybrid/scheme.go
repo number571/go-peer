@@ -8,6 +8,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
@@ -85,12 +86,7 @@ func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]b
 
 // Decrypt message with private key of receiver.
 // No one else except the sender will be able to decrypt the layer2.
-func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
-	mapPubKeys, ok := pMapPubKeys.(asymmetric.IMapPubKeys)
-	if !ok {
-		return nil, nil, ErrInvalidKeyType
-	}
-
+func (p *sScheme) DecryptMessage(pKeysContainer layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
 	// Load message's structure from encrypted bytes.
 	msg, err := loadMessage(p.fMessageSize, pMsg)
 	if err != nil {
@@ -120,14 +116,18 @@ func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte)
 	)
 
 	// Get public key from map by pkid (hash).
-	sPubKey := mapPubKeys.GetPubKey(pkid)
-	if sPubKey == nil {
+	sPubKey, ok := pKeysContainer.Get(encoding.HexEncode(pkid))
+	if !ok {
+		return nil, nil, ErrDecodePublicKey
+	}
+	pubKey, ok := sPubKey.(asymmetric.IPubKey)
+	if !ok {
 		return nil, nil, ErrDecodePublicKey
 	}
 
 	// Validate received hash with generated hash.
 	check := hashing.NewHMACHasher(salt, bytes.Join(
-		[][]byte{sPubKey.ToBytes(), p.fPrivKey.GetPubKey().ToBytes(), data},
+		[][]byte{pubKey.ToBytes(), p.fPrivKey.GetPubKey().ToBytes(), data},
 		[]byte{},
 	)).ToBytes()
 	if !bytes.Equal(check, hash) {
@@ -135,7 +135,7 @@ func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte)
 	}
 
 	// Verify sign by public key of sender and hash of message.
-	if !sPubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
+	if !pubKey.GetDSAPubKey().VerifyBytes(hash, sign) {
 		return nil, nil, ErrInvalidHashSign
 	}
 
@@ -146,7 +146,7 @@ func (p *sScheme) DecryptMessage(pMapPubKeys layer2.IKeysContainer, pMsg []byte)
 	}
 
 	// Return public key of sender with payload.
-	return sPubKey, payloadWrapper[0], nil
+	return pubKey, payloadWrapper[0], nil
 }
 
 func (p *sScheme) encryptWithPadding(

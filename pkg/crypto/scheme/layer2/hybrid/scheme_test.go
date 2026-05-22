@@ -9,6 +9,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload/joiner"
@@ -74,18 +75,22 @@ func TestInvalidKeys(t *testing.T) {
 	}
 
 	_scheme.fPrivKey = &tsPrivKey{}
-	mapPubKeys := asymmetric.NewMapPubKeys()
-	if _, _, err := _scheme.DecryptMessage(mapPubKeys, enc); err == nil {
+	keysContainer := layer2.NewKeysContainer()
+	if _, _, err := _scheme.DecryptMessage(keysContainer, enc); err == nil {
 		t.Error("success decrypt with invalid privkey")
 		return
 	}
 
 	_key := make([]byte, symmetric.CCipherKeySize)
-	if _, _, err := _scheme.DecryptMessage(symmetric.NewCipherCFB(_key), enc); err == nil {
+	_cipher := symmetric.NewCipherCFB(_key)
+
+	_keysContainer := layer2.NewKeysContainer()
+	_keysContainer.Add(_cipher)
+	if _, _, err := _scheme.DecryptMessage(_keysContainer, enc); err == nil {
 		t.Error("success decrypt with another key type")
 		return
 	}
-	if _, err := _scheme.EncryptMessage(symmetric.NewCipherCFB(_key), enc); err == nil {
+	if _, err := _scheme.EncryptMessage(_cipher, enc); err == nil {
 		t.Error("success encrypt with another key type")
 		return
 	}
@@ -110,8 +115,8 @@ func TestInvalidScheme(t *testing.T) {
 		return
 	}
 
-	mapKeys := asymmetric.NewMapPubKeys(pubKey)
-	if _, _, err := scheme.DecryptMessage(mapKeys, enc1); err == nil {
+	keysContainer := layer2.NewKeysContainer()
+	if _, _, err := scheme.DecryptMessage(keysContainer, enc1); err == nil {
 		t.Error("success decrypt message with invalid bytes structure (without joiner)")
 		return
 	}
@@ -122,7 +127,7 @@ func TestInvalidScheme(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if _, _, err := scheme.DecryptMessage(mapKeys, enc2); err == nil {
+	if _, _, err := scheme.DecryptMessage(keysContainer, enc2); err == nil {
 		t.Error("success decrypt message with invalid dsa public key")
 		return
 	}
@@ -146,7 +151,8 @@ func TestScheme(t *testing.T) {
 	// _ = os.WriteFile("message/test_binary.msg", enc, 0600)
 	// _ = os.WriteFile("message/test_string.msg", []byte(encoding.HexEncode(enc)), 0600)
 
-	gotPubKey, dec, err := scheme.DecryptMessage(asymmetric.NewMapPubKeys(pubKey), enc)
+	keysContainer := layer2.NewKeysContainer(pubKey)
+	gotPubKey, dec, err := scheme.DecryptMessage(keysContainer, enc)
 	if err != nil {
 		t.Error(err)
 		return
@@ -170,7 +176,7 @@ func TestDecrypt(t *testing.T) {
 	schemePrivKey := asymmetric.NewPrivKey()
 	scheme := NewScheme(schemePrivKey, (8 << 10))
 
-	if _, _, err := scheme.DecryptMessage(asymmetric.NewMapPubKeys(), []byte{123}); err == nil {
+	if _, _, err := scheme.DecryptMessage(layer2.NewKeysContainer(), []byte{123}); err == nil {
 		t.Error("success decrypt with invalid ciphertext (1)")
 		return
 	}
@@ -184,7 +190,7 @@ func TestDecrypt(t *testing.T) {
 		return
 	}
 
-	mapKeys := asymmetric.NewMapPubKeys(pubKey)
+	mapKeys := layer2.NewKeysContainer(pubKey)
 
 	if _, _, err := scheme.DecryptMessage(mapKeys, enc); err != nil {
 		t.Error(err)

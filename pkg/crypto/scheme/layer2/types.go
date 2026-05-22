@@ -1,10 +1,8 @@
 package layer2
 
-import "github.com/number571/go-peer/pkg/types"
-
-type (
-	IKeysContainer  interface{}
-	IParticipantKey types.IConverter
+import (
+	"github.com/number571/go-peer/pkg/crypto/hashing"
+	"github.com/number571/go-peer/pkg/types"
 )
 
 type IScheme interface {
@@ -22,4 +20,16 @@ type IDecryptor interface {
 
 type IEncryptor interface {
 	EncryptMessage(IParticipantKey, []byte) ([]byte, error)
+}
+
+type IKeysContainer interface {
+	List() []IParticipantKey
+	Add(IParticipantKey) bool
+	Del(string) bool
+	Get(string) (IParticipantKey, bool)
+}
+
+type IParticipantKey interface {
+	types.IConverter
+	GetHasher() hashing.IHasher
 }

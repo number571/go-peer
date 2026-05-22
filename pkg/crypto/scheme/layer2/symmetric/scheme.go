@@ -53,34 +53,32 @@ func (p *sScheme) GetPayloadLimit() uint64 {
 	return p.fPayloadLimit
 }
 
-func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]byte, error) {
-	recv, ok := pRecv.(symmetric.ICipher)
-	if !ok {
+func (p *sScheme) EncryptMessage(pKey layer2.IParticipantKey, pMsg []byte) ([]byte, error) {
+	if _, ok := pKey.(symmetric.ICipher); !ok {
 		return nil, ErrInvalidKeyType
 	}
+
 	var (
 		payloadLimit = p.fPayloadLimit
 		resultSize   = uint64(len(pMsg))
 	)
+
 	if resultSize > payloadLimit {
 		return nil, ErrLimitMessageSize
 	}
-	return p.encryptWithPadding(recv, pMsg, payloadLimit-resultSize), nil
+
+	return p.encryptWithPadding(pKey, pMsg, payloadLimit-resultSize), nil
 }
 
-func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
-	listCiphers, ok := pListKeys.(symmetric.IListCiphers)
-	if !ok {
-		return nil, nil, ErrInvalidKeyType
-	}
+func (p *sScheme) DecryptMessage(pKeysContainer layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
 	if uint64(len(pMsg)) != p.fMessageSize {
 		return nil, nil, ErrInvalidMessageSize
 	}
 
+	listKeys := pKeysContainer.List()
 	salt := pMsg[:cSaltSize]
-	list := listCiphers.Get()
 
-	for _, c := range list {
+	for _, c := range listKeys {
 		keyBuilder := keybuilder.NewKeyBuilder(0, salt)
 		encKey := keyBuilder.Build(c.ToString(), symmetric.CCipherKeySize)
 
@@ -106,7 +104,7 @@ func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (
 }
 
 func (p *sScheme) encryptWithPadding(
-	pCipher symmetric.ICipher,
+	pKey layer2.IParticipantKey,
 	pMsg []byte,
 	pPadd uint64,
 ) []byte {
@@ -119,7 +117,7 @@ func (p *sScheme) encryptWithPadding(
 	data := bytes.Join([][]byte{lenb[:], pMsg, rand.GetBytes(pPadd)}, []byte{})
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, salt)
-	encKey := keyBuilder.Build(pCipher.ToString(), symmetric.CCipherKeySize)
+	encKey := keyBuilder.Build(pKey.ToString(), symmetric.CCipherKeySize)
 	return bytes.Join([][]byte{
 		salt,
 		symmetric.NewCipherGCM(encKey).EncryptBytes(data),

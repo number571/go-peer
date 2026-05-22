@@ -6,6 +6,7 @@ import (
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 )
 
@@ -54,7 +55,7 @@ func TestScheme(t *testing.T) {
 		t.Fatal("success encrypt message with overflow")
 	}
 
-	listCiphers := symmetric.NewListCiphers()
+	listCiphers := layer2.NewKeysContainer()
 	listCiphers.Add(symmetric.NewCipherGCM(key.ToBytes()))
 
 	gotKey, gotMsg, err := scheme.DecryptMessage(listCiphers, encMsg)
@@ -65,7 +66,7 @@ func TestScheme(t *testing.T) {
 		t.Fatal("success decrypt with invalid message size")
 	}
 
-	anotherListCiphers := symmetric.NewListCiphers()
+	anotherListCiphers := layer2.NewKeysContainer()
 	anotherListCiphers.Add(symmetric.NewCipherGCM(make([]byte, symmetric.CCipherKeySize)))
 	if _, _, err := scheme.DecryptMessage(anotherListCiphers, encMsg); err == nil {
 		t.Fatal("success decrypt with undefined key")
@@ -78,11 +79,15 @@ func TestScheme(t *testing.T) {
 		t.Fatal("msgs are diff")
 	}
 
-	if _, _, err := scheme.DecryptMessage(asymmetric.NewMapPubKeys(), []byte{}); err == nil {
+	_pubKey := asymmetric.NewPrivKey().GetPubKey()
+	_keysContainer := layer2.NewKeysContainer()
+	_keysContainer.Add(_pubKey)
+
+	if _, _, err := scheme.DecryptMessage(_keysContainer, []byte{}); err == nil {
 		t.Error("success decrypt with another key type")
 		return
 	}
-	if _, err := scheme.EncryptMessage(asymmetric.NewPrivKey().GetPubKey(), []byte{}); err == nil {
+	if _, err := scheme.EncryptMessage(_pubKey, []byte{}); err == nil {
 		t.Error("success encrypt with another key type")
 		return
 	}
