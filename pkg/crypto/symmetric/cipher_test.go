@@ -3,11 +3,43 @@ package symmetric
 import (
 	"bytes"
 	"testing"
+
+	"github.com/number571/go-peer/pkg/encoding"
 )
 
 var (
 	tgKey = []byte("it is a large key with 256 bits!")
 )
+
+func TestPanic(t *testing.T) {
+	t.Parallel()
+
+	testPanicEncrypt(t)
+	testPanicDecrypt(t)
+}
+
+func testPanicEncrypt(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	cipher := &sAESCipher{fMode: 999}
+	_ = cipher.EncryptBytes([]byte{})
+}
+
+func testPanicDecrypt(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+	cipher := &sAESCipher{fMode: 999}
+	_ = cipher.DecryptBytes([]byte{})
+}
 
 func TestKeySize(t *testing.T) {
 	t.Parallel()
@@ -54,5 +86,12 @@ func testEncrypt(t *testing.T, c func(pKey []byte) ICipher) {
 	if dec := cipher.DecryptBytes([]byte{123}); dec != nil {
 		t.Error("success decrypt message with len < iv size")
 		return
+	}
+
+	if !bytes.Equal(cipher.ToBytes(), tgKey) {
+		t.Fatal("key bytes not equal")
+	}
+	if cipher.ToString() != encoding.HexEncode(tgKey) {
+		t.Fatal("string key not equal")
 	}
 }
