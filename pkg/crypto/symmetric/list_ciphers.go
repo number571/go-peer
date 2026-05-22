@@ -10,14 +10,14 @@ var (
 
 type sListCiphers struct {
 	fMtx  *sync.RWMutex
-	fMap  map[string]interface{}
+	fMap  map[string]struct{}
 	fList []ICipher
 }
 
 func NewListCiphers(pCiphers ...ICipher) IListCiphers {
 	listCiphers := &sListCiphers{
 		fMtx:  &sync.RWMutex{},
-		fMap:  make(map[string]interface{}, 128),
+		fMap:  make(map[string]struct{}, 128),
 		fList: make([]ICipher, 0, 128),
 	}
 	for _, v := range pCiphers {
