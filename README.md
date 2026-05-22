@@ -71,7 +71,7 @@ The `go-peer` library contains a large number of functions necessary to ensure t
 5. The `anonymity/qb` module to ensure anonymity based on the fifth^ stage. Presents the main functions for working with the network on top of the `anonymity/qb/adapters` and `anonymity/qb/queue` modules.
 6. The `anonymity/qb/queue` module represents the generation, storage and issuance of encrypted messages every time the period specified by the application is reached. Uses the `crypto/scheme/layer2` and `crypto/scheme/layer1` modules.
 
-> Examples of works in the directories [pkg/crypto/hybrid/client/examples](pkg/crypto/hybrid/client/examples/), [pkg/network/examples](pkg/network/examples/), [pkg/anonymity/qb/examples](pkg/anonymity/qb/examples/), [pkg/anonymity/qb/queue/examples](pkg/anonymity/qb/queue/examples/);
+> Examples of works in the directories [pkg/network/examples](pkg/network/examples/), [pkg/anonymity/qb/examples](pkg/anonymity/qb/examples/), [pkg/anonymity/qb/queue/examples](pkg/anonymity/qb/queue/examples/);
 
 ## Coverage map
 
