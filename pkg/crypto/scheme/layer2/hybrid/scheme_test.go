@@ -79,6 +79,16 @@ func TestInvalidKeys(t *testing.T) {
 		t.Error("success decrypt with invalid privkey")
 		return
 	}
+
+	_key := make([]byte, symmetric.CCipherKeySize)
+	if _, _, err := _scheme.DecryptMessage(symmetric.NewCipherCFB(_key), enc); err == nil {
+		t.Error("success decrypt with another key type")
+		return
+	}
+	if _, err := _scheme.EncryptMessage(symmetric.NewCipherCFB(_key), enc); err == nil {
+		t.Error("success encrypt with another key type")
+		return
+	}
 }
 
 func TestInvalidScheme(t *testing.T) {

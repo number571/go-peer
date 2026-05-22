@@ -12,6 +12,19 @@ type tsSomeStruct struct {
 	N int    `json:"n"`
 }
 
+func TestPanic(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("nothing panics")
+			return
+		}
+	}()
+
+	_ = NewConverter(func() {})
+}
+
 func TestConverter(t *testing.T) {
 	t.Parallel()
 

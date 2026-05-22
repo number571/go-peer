@@ -15,7 +15,7 @@ var (
 )
 
 const (
-	cSaltSize = 16 // bytes
+	cSaltSize = 16 // salt for key generation
 )
 
 type sScheme struct {
@@ -30,10 +30,7 @@ func NewScheme(pMessageSize uint64) layer2.IScheme {
 
 	encKey := make([]byte, symmetric.CCipherKeySize)
 	cipher := symmetric.NewCipherGCM(encKey)
-	encMsg, err := scheme.encryptWithPadding(cipher, []byte{}, 0)
-	if err != nil {
-		panic(err)
-	}
+	encMsg := scheme.encryptWithPadding(cipher, []byte{}, 0)
 
 	structSize := uint64(len(encMsg))
 	if pMessageSize <= structSize {
@@ -68,18 +65,16 @@ func (p *sScheme) EncryptMessage(pRecv layer2.IParticipantKey, pMsg []byte) ([]b
 	if resultSize > payloadLimit {
 		return nil, ErrLimitMessageSize
 	}
-	return p.encryptWithPadding(recv, pMsg, payloadLimit-resultSize)
+	return p.encryptWithPadding(recv, pMsg, payloadLimit-resultSize), nil
 }
 
 func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (layer2.IParticipantKey, []byte, error) {
-	var lenMsg = len(pMsg)
-	if (uint64(lenMsg) != p.fMessageSize) || (lenMsg < cSaltSize+encoding.CSizeUint32) {
-		return nil, nil, ErrMessageSize
-	}
-
 	listCiphers, ok := pListKeys.(symmetric.IListCiphers)
 	if !ok {
 		return nil, nil, ErrInvalidKeyType
+	}
+	if uint64(len(pMsg)) != p.fMessageSize {
+		return nil, nil, ErrInvalidMessageSize
 	}
 
 	salt := pMsg[:cSaltSize]
@@ -91,7 +86,7 @@ func (p *sScheme) DecryptMessage(pListKeys layer2.IKeysContainer, pMsg []byte) (
 
 		cipher := symmetric.NewCipherGCM(encKey)
 		decMsg := cipher.DecryptBytes(pMsg[cSaltSize:])
-		if len(decMsg) < encoding.CSizeUint32 {
+		if decMsg == nil {
 			continue
 		}
 
@@ -114,7 +109,7 @@ func (p *sScheme) encryptWithPadding(
 	pCipher symmetric.ICipher,
 	pMsg []byte,
 	pPadd uint64,
-) ([]byte, error) {
+) []byte {
 	var (
 		rand = random.NewRandom()
 		salt = rand.GetBytes(cSaltSize)
@@ -128,5 +123,5 @@ func (p *sScheme) encryptWithPadding(
 	return bytes.Join([][]byte{
 		salt,
 		symmetric.NewCipherGCM(encKey).EncryptBytes(data),
-	}, []byte{}), nil
+	}, []byte{})
 }

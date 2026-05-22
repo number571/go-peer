@@ -2,6 +2,7 @@ package symmetric
 
 import (
 	"bytes"
+	"crypto/des" //nolint:gosec
 	"testing"
 
 	"github.com/number571/go-peer/pkg/encoding"
@@ -25,7 +26,6 @@ func testPanicEncrypt(t *testing.T) {
 			return
 		}
 	}()
-
 	cipher := &sAESCipher{fMode: 999}
 	_ = cipher.EncryptBytes([]byte{})
 }
@@ -93,5 +93,17 @@ func testEncrypt(t *testing.T, c func(pKey []byte) ICipher) {
 	}
 	if cipher.ToString() != encoding.HexEncode(tgKey) {
 		t.Fatal("string key not equal")
+	}
+
+	block, err := des.NewCipher([]byte("abcdefgh")) //nolint:gosec
+	if err != nil {
+		t.Fatal(err)
+	}
+	anotherCipher := &sAESCipher{fMode: modeGCM, fBlock: block}
+	if m := anotherCipher.encryptBytesGCM([]byte{}); m != nil {
+		t.Fatal("success encrypt message with another cipher")
+	}
+	if m := anotherCipher.decryptBytesGCM([]byte{}); m != nil {
+		t.Fatal("success decrypt message with another cipher")
 	}
 }
