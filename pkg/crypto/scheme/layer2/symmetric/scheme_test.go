@@ -16,26 +16,8 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
-}
-
-func TestPanicNewScheme(t *testing.T) {
-	t.Parallel()
-
-	tcNewSchemeWithSmallMsgSize(t)
-}
-
-func tcNewSchemeWithSmallMsgSize(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	_ = NewScheme(8)
 }
 
 func TestScheme(t *testing.T) {
@@ -46,7 +28,14 @@ func TestScheme(t *testing.T) {
 		msg = []byte("hello, world!")
 	)
 
-	scheme := NewScheme(128)
+	if _, err := NewScheme(8); err == nil {
+		t.Fatal("success init scheme with struct size >= message size")
+	}
+
+	scheme, err := NewScheme(128)
+	if err != nil {
+		t.Fatal(err)
+	}
 	encMsg, err := scheme.EncryptMessage(key, msg)
 	if err != nil {
 		t.Fatal(err)
@@ -84,12 +73,10 @@ func TestScheme(t *testing.T) {
 	_keysContainer.Add(_pubKey)
 
 	if _, _, err := scheme.DecryptMessage(_keysContainer, []byte{}); err == nil {
-		t.Error("success decrypt with another key type")
-		return
+		t.Fatal("success decrypt with another key type")
 	}
 	if _, err := scheme.EncryptMessage(_pubKey, []byte{}); err == nil {
-		t.Error("success encrypt with another key type")
-		return
+		t.Fatal("success encrypt with another key type")
 	}
 
 	if scheme.GetRandomKey().ToString() == scheme.GetRandomKey().ToString() { //nolint:staticcheck

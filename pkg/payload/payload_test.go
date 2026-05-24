@@ -12,24 +12,20 @@ func TestPayload64(t *testing.T) {
 
 	decPl := LoadPayload64(pl.ToBytes())
 	if decPl == nil {
-		t.Error("decode payload is nil")
-		return
+		t.Fatal("decode payload is nil")
 	}
 
 	if !bytes.Equal(pl.GetBody(), decPl.GetBody()) {
-		t.Error("data not equal with decoded version of payload")
-		return
+		t.Fatal("data not equal with decoded version of payload")
 	}
 
 	if pl.GetHead() != decPl.GetHead() {
-		t.Error("title not equal with decoded version of payload")
-		return
+		t.Fatal("title not equal with decoded version of payload")
 	}
 
 	invalidPld := LoadPayload64([]byte{1})
 	if invalidPld != nil {
-		t.Error("invalid payload success decoded")
-		return
+		t.Fatal("invalid payload success decoded")
 	}
 }
 
@@ -40,23 +36,19 @@ func TestPayload32(t *testing.T) {
 
 	decPl := LoadPayload32(pl.ToBytes())
 	if decPl == nil {
-		t.Error("decode payload is nil")
-		return
+		t.Fatal("decode payload is nil")
 	}
 
 	if !bytes.Equal(pl.GetBody(), decPl.GetBody()) {
-		t.Error("data not equal with decoded version of payload")
-		return
+		t.Fatal("data not equal with decoded version of payload")
 	}
 
 	if pl.GetHead() != decPl.GetHead() {
-		t.Error("title not equal with decoded version of payload")
-		return
+		t.Fatal("title not equal with decoded version of payload")
 	}
 
 	invalidPld := LoadPayload32([]byte{1})
 	if invalidPld != nil {
-		t.Error("invalid payload success decoded")
-		return
+		t.Fatal("invalid payload success decoded")
 	}
 }

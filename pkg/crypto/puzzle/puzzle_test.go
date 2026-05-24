@@ -13,8 +13,7 @@ func TestPuzzleDiffSize(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	_ = NewPoWPuzzle(5000)
@@ -32,24 +31,20 @@ func TestPuzzle(t *testing.T) {
 	proof := puzzle.ProofBytes(hash, 1)
 
 	if !puzzle.VerifyBytes(hash, proof) {
-		t.Error("proof is invalid")
-		return
+		t.Fatal("proof is invalid")
 	}
 
 	if puzzle.ProofBytes(hash, 0) != proof {
-		t.Error("proof is invalid with parallel=[0,1]")
-		return
+		t.Fatal("proof is invalid with parallel=[0,1]")
 	}
 
 	if NewPoWPuzzle(25).VerifyBytes(hash, proof) {
-		t.Error("proof 10 with 25 bits is valid?")
-		return
+		t.Fatal("proof 10 with 25 bits is valid?")
 	}
 
 	hash[3] ^= 8
 	if puzzle.VerifyBytes(hash, proof) {
-		t.Error("proof is correct?")
-		return
+		t.Fatal("proof is correct?")
 	}
 }
 

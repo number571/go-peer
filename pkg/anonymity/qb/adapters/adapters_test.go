@@ -34,17 +34,14 @@ func TestAdapter(t *testing.T) {
 		payload.NewPayload32(0x01, []byte(tcMessage)),
 	))
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	msg, err := adapter.Consume(ctx)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcMessage)) {
-		t.Error("consume invalid message")
-		return
+		t.Fatal("consume invalid message")
 	}
 }

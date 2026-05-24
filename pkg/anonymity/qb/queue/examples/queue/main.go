@@ -30,10 +30,10 @@ func main() {
 			FQueuePoolCap: [2]uint64{1 << 5, 1 << 5},
 			FConsumersCap: 1,
 		}),
-		hybrid.NewScheme(
-			privKey,
-			(8<<10),
-		),
+		func() layer2.IScheme {
+			scheme, _ := hybrid.NewScheme(privKey, (8 << 10))
+			return scheme
+		}(),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())

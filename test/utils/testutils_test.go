@@ -19,13 +19,11 @@ func TestPseudoRandomBytes(t *testing.T) {
 	r3 := PseudoRandomBytes(2)
 
 	if len(r1) != 16 && len(r2) != 16 && len(r3) != 16 {
-		t.Error("len(r1) != 16 && len(r2) != 16 && len(r3) != 16")
-		return
+		t.Fatal("len(r1) != 16 && len(r2) != 16 && len(r3) != 16")
 	}
 
 	if !bytes.Equal(r1, r2) || bytes.Equal(r1, r3) {
-		t.Error("!bytes.Equal(r1, r2) || bytes.Equal(r1, r3)")
-		return
+		t.Fatal("!bytes.Equal(r1, r2) || bytes.Equal(r1, r3)")
 	}
 }
 
@@ -33,12 +31,10 @@ func TestTryN(t *testing.T) {
 	t.Parallel()
 
 	if err := TryN(3, 10*time.Millisecond, func() error { return errors.New("some error") }); err != nil && err.Error() != "some error" { //nolint:err113
-		t.Error("success tryN with error")
-		return
+		t.Fatal("success tryN with error")
 	}
 	if err := TryN(3, 10*time.Millisecond, func() error { return nil }); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	err := TryN(
 		1000,
@@ -51,7 +47,6 @@ func TestTryN(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 }

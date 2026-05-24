@@ -29,8 +29,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SEncodingError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -39,12 +38,10 @@ func TestHex(t *testing.T) {
 
 	data := HexEncode(tgNumInBytes)
 	if !bytes.Equal(tgNumInBytes, HexDecode(data)) {
-		t.Error("bytes not equals")
-		return
+		t.Fatal("bytes not equals")
 	}
 	if dec := HexDecode("!@#"); dec != nil {
-		t.Error("success decode invalid data")
-		return
+		t.Fatal("success decode invalid data")
 	}
 }
 
@@ -53,8 +50,7 @@ func TestBytes(t *testing.T) {
 
 	bnum := Uint64ToBytes(tgBytesInNum)
 	if tgBytesInNum != BytesToUint64(bnum) {
-		t.Error("numbers not equals")
-		return
+		t.Fatal("numbers not equals")
 	}
 }
 
@@ -62,25 +58,21 @@ func TestSerializeJSON(t *testing.T) {
 	t.Parallel()
 
 	if string(SerializeJSON(tgMessage)) != tcJSON {
-		t.Error("serialize string is invalid (non indent)")
-		return
+		t.Fatal("serialize string is invalid (non indent)")
 	}
 
 	res := new(tsMessage)
 
 	if err := DeserializeJSON([]byte(tcJSON), res); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if res.FResult != "hello" || res.FReturn != 5 {
-		t.Error("fields not equals")
-		return
+		t.Fatal("fields not equals")
 	}
 
 	if err := DeserializeJSON([]byte(`qwerty`), res); err == nil {
-		t.Error("success deserialize invalid data")
-		return
+		t.Fatal("success deserialize invalid data")
 	}
 }
 
@@ -88,24 +80,20 @@ func TestSerializeYAML(t *testing.T) {
 	t.Parallel()
 
 	if string(SerializeYAML(tgMessage)) != tcYaml {
-		t.Error("serialize string is invalid (non indent)")
-		return
+		t.Fatal("serialize string is invalid (non indent)")
 	}
 
 	res := new(tsMessage)
 
 	if err := DeserializeYAML([]byte(tcYaml), res); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if res.FResult != "hello" || res.FReturn != 5 {
-		t.Error("fields not equals")
-		return
+		t.Fatal("fields not equals")
 	}
 
 	if err := DeserializeYAML([]byte(`qwerty`), res); err == nil {
-		t.Error("success deserialize invalid data")
-		return
+		t.Fatal("success deserialize invalid data")
 	}
 }

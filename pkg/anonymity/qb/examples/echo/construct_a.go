@@ -127,10 +127,10 @@ func newNode(serviceName, address string) *sNode {
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
 			}),
-			hybrid.NewScheme(
-				privKey,
-				msgSize,
-			),
+			func() layer2.IScheme {
+				scheme, _ := hybrid.NewScheme(privKey, msgSize)
+				return scheme
+			}(),
 		),
 	)
 	return &sNode{networkNode, anonymityNode, privKey.GetPubKey()}

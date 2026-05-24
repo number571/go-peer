@@ -36,8 +36,11 @@ func BenchmarkScheme(b *testing.B) {
 		scheme layer2.IScheme
 	}{
 		{
-			name:   "mlkem=768,mldsa=65",
-			scheme: NewScheme(privKey, (8 << 10)),
+			name: "mlkem=768,mldsa=65",
+			scheme: func() layer2.IScheme {
+				scheme, _ := NewScheme(privKey, (8 << 10))
+				return scheme
+			}(),
 		},
 	}
 

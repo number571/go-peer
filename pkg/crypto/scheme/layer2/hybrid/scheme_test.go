@@ -15,54 +15,34 @@ import (
 	"github.com/number571/go-peer/pkg/payload/joiner"
 )
 
-func TestPanicNewScheme(t *testing.T) {
-	t.Parallel()
-
-	tcNewSchemeWithSmallMsgSize(t)
-	tcNewSchemeWithInvalidPrivKey(t)
-}
-
-func tcNewSchemeWithSmallMsgSize(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	_ = NewScheme(asymmetric.NewPrivKey(), 8)
-}
-
-func tcNewSchemeWithInvalidPrivKey(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
-		}
-	}()
-
-	_ = NewScheme(&tsPrivKey{}, (8 << 10))
-}
-
 func TestError(t *testing.T) {
 	t.Parallel()
 
 	str := "value"
 	err := &SSchemeError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
 func TestInvalidKeys(t *testing.T) {
 	t.Parallel()
 
+	if _, err := NewScheme(asymmetric.NewPrivKey(), 8); err == nil {
+		t.Fatal("success init scheme with struct size >= message size")
+	}
+	if _, err := NewScheme(&tsPrivKey{}, (8 << 10)); err == nil {
+		t.Fatal("success init scheme with invalid private key")
+	}
+
 	_schemePrivKey := asymmetric.NewPrivKey()
-	_scheme := NewScheme(_schemePrivKey, (8 << 10)).(*sScheme)
+	_scheme1, err := NewScheme(_schemePrivKey, (8 << 10))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_scheme := _scheme1.(*sScheme)
 	if _, err := _scheme.encryptWithPadding(&tsPubKey{}, []byte("hello"), 0); err == nil {
-		t.Error("success encrypt with invalid pubkey")
-		return
+		t.Fatal("success encrypt with invalid pubkey")
 	}
 
 	pubKey := _schemePrivKey.GetPubKey()
@@ -70,15 +50,13 @@ func TestInvalidKeys(t *testing.T) {
 
 	enc, err := _scheme.EncryptMessage(pubKey, msg)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	_scheme.fPrivKey = &tsPrivKey{}
 	keysContainer := layer2.NewKeysContainer()
 	if _, _, err := _scheme.DecryptMessage(keysContainer, enc); err == nil {
-		t.Error("success decrypt with invalid privkey")
-		return
+		t.Fatal("success decrypt with invalid privkey")
 	}
 
 	_key := make([]byte, symmetric.CCipherKeySize)
@@ -87,12 +65,10 @@ func TestInvalidKeys(t *testing.T) {
 	_keysContainer := layer2.NewKeysContainer()
 	_keysContainer.Add(_cipher)
 	if _, _, err := _scheme.DecryptMessage(_keysContainer, enc); err == nil {
-		t.Error("success decrypt with another key type")
-		return
+		t.Fatal("success decrypt with another key type")
 	}
 	if _, err := _scheme.EncryptMessage(_cipher, enc); err == nil {
-		t.Error("success encrypt with another key type")
-		return
+		t.Fatal("success encrypt with another key type")
 	}
 }
 
@@ -102,7 +78,11 @@ func TestInvalidScheme(t *testing.T) {
 	msgsize := uint64(8 << 10)
 
 	schemePrivKey := asymmetric.NewPrivKey()
-	scheme := NewScheme(schemePrivKey, msgsize)
+	scheme, err := NewScheme(schemePrivKey, msgsize)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	pubKey := schemePrivKey.GetPubKey()
 
 	_scheme := scheme.(*sScheme)
@@ -111,25 +91,21 @@ func TestInvalidScheme(t *testing.T) {
 
 	enc1, err := _scheme.encryptWithPadding(pubKey, msg1, pad1)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	keysContainer := layer2.NewKeysContainer()
 	if _, _, err := scheme.DecryptMessage(keysContainer, enc1); err == nil {
-		t.Error("success decrypt message with invalid bytes structure (without joiner)")
-		return
+		t.Fatal("success decrypt message with invalid bytes structure (without joiner)")
 	}
 
 	pad2 := scheme.GetPayloadLimit() - uint64(len(msg1)) + asymmetric.CDSAPubKeySize - 3
 	enc2, err := tcEncryptWithParamsInvalidPKID(_scheme, pubKey, msg1, pad2)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if _, _, err := scheme.DecryptMessage(keysContainer, enc2); err == nil {
-		t.Error("success decrypt message with invalid dsa public key")
-		return
+		t.Fatal("success decrypt message with invalid dsa public key")
 	}
 }
 
@@ -137,15 +113,17 @@ func TestScheme(t *testing.T) {
 	t.Parallel()
 
 	schemePrivKey := asymmetric.NewPrivKey()
-	scheme := NewScheme(schemePrivKey, (8 << 10))
+	scheme, err := NewScheme(schemePrivKey, (8 << 10))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	pubKey := schemePrivKey.GetPubKey()
 	msg := []byte("hello, world!")
 
 	enc, err := scheme.EncryptMessage(pubKey, msg)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	// _ = os.WriteFile("message/test_binary.msg", enc, 0600)
@@ -154,16 +132,13 @@ func TestScheme(t *testing.T) {
 	keysContainer := layer2.NewKeysContainer(pubKey)
 	gotPubKey, dec, err := scheme.DecryptMessage(keysContainer, enc)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if !bytes.Equal(pubKey.ToBytes(), gotPubKey.(asymmetric.IPubKey).ToBytes()) {
-		t.Error("invalid decrypt key")
-		return
+		t.Fatal("invalid decrypt key")
 	}
 	if !bytes.Equal(msg, dec) {
-		t.Error("invalid decrypt message")
-		return
+		t.Fatal("invalid decrypt message")
 	}
 
 	// fmt.Println(scheme.GetPayloadLimit(), scheme.GetMessageSize())
@@ -174,11 +149,13 @@ func TestDecrypt(t *testing.T) {
 	t.Parallel()
 
 	schemePrivKey := asymmetric.NewPrivKey()
-	scheme := NewScheme(schemePrivKey, (8 << 10))
+	scheme, err := NewScheme(schemePrivKey, (8 << 10))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if _, _, err := scheme.DecryptMessage(layer2.NewKeysContainer(), []byte{123}); err == nil {
-		t.Error("success decrypt with invalid ciphertext (1)")
-		return
+		t.Fatal("success decrypt with invalid ciphertext (1)")
 	}
 
 	pubKey := schemePrivKey.GetPubKey()
@@ -186,35 +163,30 @@ func TestDecrypt(t *testing.T) {
 
 	enc, err := scheme.EncryptMessage(pubKey, msg)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	mapKeys := layer2.NewKeysContainer(pubKey)
 
 	if _, _, err := scheme.DecryptMessage(mapKeys, enc); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	enc[0] ^= 1
 	if _, _, err := scheme.DecryptMessage(mapKeys, enc); err == nil {
-		t.Error("success decrypt with invalid ciphertext (2)")
-		return
+		t.Fatal("success decrypt with invalid ciphertext (2)")
 	}
 
 	enc[0] ^= 1
 	enc[len(enc)-1] ^= 1
 	if _, _, err := scheme.DecryptMessage(mapKeys, enc); err == nil {
-		t.Error("success decrypt with invalid ciphertext (3)")
-		return
+		t.Fatal("success decrypt with invalid ciphertext (3)")
 	}
 
 	enc[len(enc)-1] ^= 1
 	enc[asymmetric.CKEMCiphertextSize+symmetric.CCipherBlockSize+2*encoding.CSizeUint32+hashing.CHasherSize+1] ^= 1
 	if _, _, err := scheme.DecryptMessage(mapKeys, enc); err == nil {
-		t.Error("success decrypt with invalid ciphertext (4)")
-		return
+		t.Fatal("success decrypt with invalid ciphertext (4)")
 	}
 }
 

@@ -22,8 +22,7 @@ func TestPanic(t *testing.T) {
 func testPanicEncrypt(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	cipher := &sAESCipher{fMode: 999}
@@ -33,8 +32,7 @@ func testPanicEncrypt(t *testing.T) {
 func testPanicDecrypt(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	cipher := &sAESCipher{fMode: 999}
@@ -69,23 +67,19 @@ func testEncrypt(t *testing.T, c func(pKey []byte) ICipher) {
 	emsg := cipher.EncryptBytes(msg)
 
 	if bytes.Equal(msg, emsg) {
-		t.Error("encrypted message = open message")
-		return
+		t.Fatal("encrypted message = open message")
 	}
 
 	if !bytes.Equal(msg, cipher.DecryptBytes(emsg)) {
-		t.Error("decrypted message is invalid")
-		return
+		t.Fatal("decrypted message is invalid")
 	}
 
 	if !bytes.Equal(cipher.DecryptBytes(emsg), cipher.DecryptBytes(emsg)) {
-		t.Error("decrypted message is not determinated")
-		return
+		t.Fatal("decrypted message is not determinated")
 	}
 
 	if dec := cipher.DecryptBytes([]byte{123}); dec != nil {
-		t.Error("success decrypt message with len < iv size")
-		return
+		t.Fatal("success decrypt message with len < iv size")
 	}
 
 	if !bytes.Equal(cipher.ToBytes(), tgKey) {

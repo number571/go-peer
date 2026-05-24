@@ -12,7 +12,7 @@ func TestNew(t *testing.T) {
 
 	privKey := NewPrivKeyFromSeed(seed)
 	if privKey.ToString() != tcPrivKey {
-		t.Error("get another key from seed")
+		t.Fatal("get another key from seed")
 	}
 }
 
@@ -21,8 +21,7 @@ func TestPanicNewPrivKey(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 
@@ -34,8 +33,7 @@ func TestPanicLoadPrivKey(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 
@@ -47,8 +45,7 @@ func TestPanicLoadPubKey(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 
@@ -59,16 +56,13 @@ func TestInvalidPrivKey(t *testing.T) {
 	t.Parallel()
 
 	if pk := LoadPrivKey("123"); pk != nil {
-		t.Error("load priv key (1)")
-		return
+		t.Fatal("load priv key (1)")
 	}
 	if pk := LoadPrivKey(cPrivKeyPrefix); pk != nil {
-		t.Error("load priv key (2)")
-		return
+		t.Fatal("load priv key (2)")
 	}
 	if pk := LoadPrivKey(cPrivKeyPrefix + "x" + cKeySuffix); pk != nil {
-		t.Error("load priv key (3)")
-		return
+		t.Fatal("load priv key (3)")
 	}
 }
 
@@ -76,16 +70,13 @@ func TestInvalidPubKey(t *testing.T) {
 	t.Parallel()
 
 	if pk := LoadPubKey("123"); pk != nil {
-		t.Error("load pub key (1)")
-		return
+		t.Fatal("load pub key (1)")
 	}
 	if pk := LoadPubKey(cPubKeyPrefix); pk != nil {
-		t.Error("load pub key (2)")
-		return
+		t.Fatal("load pub key (2)")
 	}
 	if pk := LoadPubKey(cPubKeyPrefix + "x" + cKeySuffix); pk != nil {
-		t.Error("load pub key (3)")
-		return
+		t.Fatal("load pub key (3)")
 	}
 }
 
@@ -97,32 +88,26 @@ func TestPrivKey(t *testing.T) {
 
 	keychain := newPrivKey(kemPrivKey, signerPrivKey)
 	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEMPrivKey().ToBytes()) {
-		t.Error("invalid kem priv key (1)")
-		return
+		t.Fatal("invalid kem priv key (1)")
 	}
 	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetDSAPrivKey().ToBytes()) {
-		t.Error("invalid signer priv key (1)")
-		return
+		t.Fatal("invalid signer priv key (1)")
 	}
 
 	keychain = LoadPrivKey(keychain.ToString())
 	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEMPrivKey().ToBytes()) {
-		t.Error("invalid kem priv key (2)")
-		return
+		t.Fatal("invalid kem priv key (2)")
 	}
 	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetDSAPrivKey().ToBytes()) {
-		t.Error("invalid signer priv key (2)")
-		return
+		t.Fatal("invalid signer priv key (2)")
 	}
 
 	keychain = LoadPrivKey(keychain.ToBytes())
 	if !bytes.Equal(kemPrivKey.ToBytes(), keychain.GetKEMPrivKey().ToBytes()) {
-		t.Error("invalid kem priv key (3)")
-		return
+		t.Fatal("invalid kem priv key (3)")
 	}
 	if !bytes.Equal(signerPrivKey.ToBytes(), keychain.GetDSAPrivKey().ToBytes()) {
-		t.Error("invalid signer priv key (3)")
-		return
+		t.Fatal("invalid signer priv key (3)")
 	}
 
 	// fmt.Println("priv.key", len(keychain.ToString()))
@@ -136,37 +121,30 @@ func TestPubKey(t *testing.T) {
 
 	keychain := NewPubKey(kemPubKey, signerPubKey)
 	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEMPubKey().ToBytes()) {
-		t.Error("invalid kem pub key (1)")
-		return
+		t.Fatal("invalid kem pub key (1)")
 	}
 	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetDSAPubKey().ToBytes()) {
-		t.Error("invalid signer pub key (1)")
-		return
+		t.Fatal("invalid signer pub key (1)")
 	}
 
 	keychain = LoadPubKey(keychain.ToString())
 	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEMPubKey().ToBytes()) {
-		t.Error("invalid kem pub key (2)")
-		return
+		t.Fatal("invalid kem pub key (2)")
 	}
 	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetDSAPubKey().ToBytes()) {
-		t.Error("invalid signer pub key (2)")
-		return
+		t.Fatal("invalid signer pub key (2)")
 	}
 
 	keychain = LoadPubKey(keychain.ToBytes())
 	if !bytes.Equal(kemPubKey.ToBytes(), keychain.GetKEMPubKey().ToBytes()) {
-		t.Error("invalid kem pub key (3)")
-		return
+		t.Fatal("invalid kem pub key (3)")
 	}
 	if !bytes.Equal(signerPubKey.ToBytes(), keychain.GetDSAPubKey().ToBytes()) {
-		t.Error("invalid signer pub key (3)")
-		return
+		t.Fatal("invalid signer pub key (3)")
 	}
 
 	if keychain.GetHasher().ToString() != hashing.NewHasher(keychain.ToString()).ToString() {
-		t.Error("got invalid keychain hasher")
-		return
+		t.Fatal("got invalid keychain hasher")
 	}
 
 	// fmt.Println("pub.key", len(keychain.ToString()))

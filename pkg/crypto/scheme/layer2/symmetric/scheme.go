@@ -2,6 +2,8 @@ package symmetric
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/keybuilder"
 	"github.com/number571/go-peer/pkg/crypto/random"
@@ -10,12 +12,33 @@ import (
 	"github.com/number571/go-peer/pkg/encoding"
 )
 
-var (
-	_ layer2.IScheme = &sScheme{}
+const (
+	// Salt + Nonce + AuthTag + Int32[len]
+	// 16 + 12 + 16 + 4 = 48 additional bytes to origin message
+	CMessageHeadSize = 0 +
+		1*cSaltSize +
+		1*cNonceSize +
+		1*symmetric.CCipherBlockSize +
+		1*encoding.CSizeUint32
 )
 
 const (
-	cSaltSize = 16 // salt for key generation
+	cSaltSize  = 16 // salt for key generation
+	cNonceSize = 12 // gcm nonce
+)
+
+func init() {
+	scheme, err := NewScheme(128)
+	if err != nil {
+		panic(err)
+	}
+	if (scheme.GetMessageSize() - scheme.GetPayloadLimit()) != CMessageHeadSize {
+		panic("incorrect calculated head size of message")
+	}
+}
+
+var (
+	_ layer2.IScheme = &sScheme{}
 )
 
 type sScheme struct {
@@ -23,7 +46,7 @@ type sScheme struct {
 	fPayloadLimit uint64
 }
 
-func NewScheme(pMessageSize uint64) layer2.IScheme {
+func NewScheme(pMessageSize uint64) (layer2.IScheme, error) {
 	scheme := &sScheme{
 		fMessageSize: pMessageSize,
 	}
@@ -33,12 +56,12 @@ func NewScheme(pMessageSize uint64) layer2.IScheme {
 	encMsg := scheme.encryptWithPadding(cipher, []byte{}, 0)
 
 	structSize := uint64(len(encMsg))
-	if pMessageSize <= structSize {
-		panic("the payload size is lower than struct size")
+	if structSize >= pMessageSize {
+		return nil, errors.Join(ErrStructGTEMessageSize, fmt.Errorf("struct size = %d", structSize)) //nolint:err113
 	}
 
 	scheme.fPayloadLimit = pMessageSize - structSize
-	return scheme
+	return scheme, nil
 }
 
 func (p *sScheme) GetRandomKey() layer2.IParticipantKey {
@@ -78,9 +101,15 @@ func (p *sScheme) DecryptMessage(pKeysContainer layer2.IKeysContainer, pMsg []by
 	listKeys := pKeysContainer.List()
 	salt := pMsg[:cSaltSize]
 
-	for _, c := range listKeys {
+	var (
+		decrypted bool
+		resKey    layer2.IParticipantKey
+		resMsg    []byte
+	)
+
+	for _, k := range listKeys {
 		keyBuilder := keybuilder.NewKeyBuilder(0, salt)
-		encKey := keyBuilder.Build(c.ToString(), symmetric.CCipherKeySize)
+		encKey := keyBuilder.Build(k.ToString(), symmetric.CCipherKeySize)
 
 		cipher := symmetric.NewCipherGCM(encKey)
 		decMsg := cipher.DecryptBytes(pMsg[cSaltSize:])
@@ -97,9 +126,14 @@ func (p *sScheme) DecryptMessage(pKeysContainer layer2.IKeysContainer, pMsg []by
 			return nil, nil, ErrDecodeMessage
 		}
 
-		return c, msg[:msgSize], nil
+		decrypted = true
+		resKey = k
+		resMsg = msg[:msgSize]
 	}
 
+	if decrypted {
+		return resKey, resMsg, nil
+	}
 	return nil, nil, ErrDecryptMessage
 }
 

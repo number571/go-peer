@@ -21,8 +21,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SConnKeeperError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -37,8 +36,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n {
@@ -60,8 +58,7 @@ func TestConnKeeperSettings(t *testing.T) {
 	connKeeper := newTestConnKeeper(duration)
 
 	if connKeeper.GetSettings().GetDuration() != duration {
-		t.Error("got invalid settings param")
-		return
+		t.Fatal("got invalid settings param")
 	}
 }
 
@@ -73,8 +70,7 @@ func TestConnKeeper(t *testing.T) {
 
 	connKeeper := newTestConnKeeper(50 * time.Millisecond)
 	if node := connKeeper.GetNetworkNode(); node == nil {
-		t.Error("network node is nil")
-		return
+		t.Fatal("network node is nil")
 	}
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -86,7 +82,6 @@ func TestConnKeeper(t *testing.T) {
 	go func() {
 		if err := connKeeper.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
-			return
 		}
 	}()
 
@@ -104,7 +99,6 @@ func TestConnKeeper(t *testing.T) {
 		})
 		if err1 != nil {
 			t.Error(err1)
-			return
 		}
 	}()
 
@@ -115,8 +109,7 @@ func TestConnKeeper(t *testing.T) {
 		return nil
 	})
 	if err1 != nil {
-		t.Error(err1)
-		return
+		t.Fatal(err1)
 	}
 }
 

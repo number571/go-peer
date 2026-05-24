@@ -68,20 +68,17 @@ func TestLogger(t *testing.T) {
 
 	fileInfo, err := os.OpenFile(tcPathInfo, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	fileWarn, err := os.OpenFile(tcPathWarning, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	fileErro, err := os.OpenFile(tcPathError, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		t.Error(err.Error())
-		return
+		t.Fatal(err.Error())
 	}
 
 	logger := NewLogger(
@@ -101,25 +98,25 @@ func TestLogger(t *testing.T) {
 
 	res, err := os.ReadFile(tcPathInfo)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 	if !strings.Contains(string(res), tcTestInfo) {
-		t.Error("info does not contains tcTestInfo")
+		t.Fatal("info does not contains tcTestInfo")
 	}
 
 	res, err = os.ReadFile(tcPathWarning)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 	if !strings.Contains(string(res), tcTestWarning) {
-		t.Error("warning does not contains tcTestWarning")
+		t.Fatal("warning does not contains tcTestWarning")
 	}
 
 	res, err = os.ReadFile(tcPathError)
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatal(err.Error())
 	}
 	if !strings.Contains(string(res), tcTestError) {
-		t.Error("error does not contains tcTestError")
+		t.Fatal("error does not contains tcTestError")
 	}
 }

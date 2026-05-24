@@ -13,8 +13,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SStateError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 

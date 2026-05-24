@@ -33,13 +33,11 @@ func TestHMACSHasher(t *testing.T) {
 
 	hash := NewHMACHasher(key, msg).ToString()
 	if hash != NewHMACHasher(key, msg).ToString() {
-		t.Error("hash is not determined")
-		return
+		t.Fatal("hash is not determined")
 	}
 
 	msg[3] ^= 8
 	if hash == NewHMACHasher(key, msg).ToString() {
-		t.Error("bit didn't change the result")
-		return
+		t.Fatal("bit didn't change the result")
 	}
 }

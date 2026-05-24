@@ -26,4 +26,5 @@ var (
 	ErrUnknownMessageType   = &SSchemeError{"unknown type of message"}
 	ErrLoadMessageBytes     = &SSchemeError{"load message bytes"}
 	ErrSizeMessageBytes     = &SSchemeError{"size message bytes"}
+	ErrStructGTEMessageSize = &SSchemeError{"struct >= message size"}
 )

@@ -12,20 +12,18 @@ func TestNewKEM(t *testing.T) {
 	t.Parallel()
 
 	if pk := newKEMPrivKey(&tsPrivateKeyKEM{}); pk != nil {
-		t.Error("success get another kem privkey (not mlkem768)")
-		return
+		t.Fatal("success get another kem privkey (not mlkem768)")
 	}
 
 	if pk := newKEMPubKey(&tsPublicKeyKEM{}); pk != nil {
-		t.Error("success get another kem pubkey (not mlkem768)")
-		return
+		t.Fatal("success get another kem pubkey (not mlkem768)")
 	}
 
 	seed := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32}
 
 	privKey := NewKEMPrivKeyFromSeed(seed)
 	if encoding.HexEncode(privKey.ToBytes()) != tcKEMPrivKey {
-		t.Error("get another kem key from seed")
+		t.Fatal("get another kem key from seed")
 	}
 }
 
@@ -34,8 +32,7 @@ func TestPanicNewKEMPrivKey(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 
@@ -48,32 +45,27 @@ func TestKEM(t *testing.T) {
 	privKey := NewKEMPrivKey()
 	privKey = LoadKEMPrivKey(privKey.ToBytes())
 	if pk := LoadKEMPrivKey([]byte{123}); pk != nil {
-		t.Error("success load kem priv key")
-		return
+		t.Fatal("success load kem priv key")
 	}
 
 	pubKey := privKey.GetPubKey()
 	pubKey = LoadKEMPubKey(pubKey.ToBytes())
 	if pk := LoadKEMPubKey([]byte{123}); pk != nil {
-		t.Error("success load kem pub key")
-		return
+		t.Fatal("success load kem pub key")
 	}
 
 	ct, ss1, err := pubKey.Encapsulate()
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	ss2, err := privKey.Decapsulate(ct)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if !bytes.Equal(ss1, ss2) {
-		t.Error("invalid shared secret")
-		return
+		t.Fatal("invalid shared secret")
 	}
 
 	// fmt.Println(len(privKey.ToBytes()))

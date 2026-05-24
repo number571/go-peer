@@ -46,8 +46,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SAnonymityError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -62,8 +61,7 @@ func TestNodeSettings(t *testing.T) {
 
 	sett := node.GetSettings()
 	if sett.GetFetchTimeout() != time.Minute {
-		t.Error("sett.GetFetchTimeout() != time.Minute")
-		return
+		t.Fatal("sett.GetFetchTimeout() != time.Minute")
 	}
 	_ = node.GetLogger()
 
@@ -78,8 +76,7 @@ func TestNodeSettings(t *testing.T) {
 		),
 	)
 	if err == nil {
-		t.Error("success store hash into database without correct set function")
-		return
+		t.Fatal("success store hash into database without correct set function")
 	}
 }
 
@@ -94,8 +91,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n { // nolint: gocritic
@@ -113,8 +109,7 @@ func TestComplexFetchPayload(t *testing.T) {
 	addresses := [2]string{testutils.TgAddrs[2], testutils.TgAddrs[3]}
 	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 0)
 	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
+		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 0)
 
@@ -157,8 +152,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	addresses := [2]string{testutils.TgAddrs[10], testutils.TgAddrs[11]}
 	nodes, privKeys := testRunNodes(ctx, t, 3*time.Second, addresses, 1)
 	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
+		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 1)
 
@@ -175,7 +169,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 		return
 	}
 
-	t.Error("get response without list of friends")
+	t.Fatal("get response without list of friends")
 }
 
 func TestFetchPayload(t *testing.T) {
@@ -187,8 +181,7 @@ func TestFetchPayload(t *testing.T) {
 	addresses := [2]string{testutils.TgAddrs[12], testutils.TgAddrs[13]}
 	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 4)
 	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
+		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 4)
 
@@ -206,8 +199,7 @@ func TestFetchPayload(t *testing.T) {
 		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
-		t.Error("success fetch payload with large body")
-		return
+		t.Fatal("success fetch payload with large body")
 	}
 
 	result, err1 := nodes[0].FetchPayload(
@@ -216,13 +208,11 @@ func TestFetchPayload(t *testing.T) {
 		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
 	)
 	if err1 != nil {
-		t.Error(err1)
-		return
+		t.Fatal(err1)
 	}
 
 	if string(result) != fmt.Sprintf("echo: '%s'", tcMsgBody) {
-		t.Error("got invalid message body")
-		return
+		t.Fatal("got invalid message body")
 	}
 }
 
@@ -235,8 +225,7 @@ func TestBroadcastPayload(t *testing.T) {
 	addresses := [2]string{testutils.TgAddrs[14], testutils.TgAddrs[15]}
 	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 3)
 	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
+		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 3)
 
@@ -257,8 +246,7 @@ func TestBroadcastPayload(t *testing.T) {
 		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
 	)
 	if err == nil {
-		t.Error("success broadcast payload with large body")
-		return
+		t.Fatal("success broadcast payload with large body")
 	}
 
 	err1 := nodes[0].SendPayload(
@@ -267,20 +255,17 @@ func TestBroadcastPayload(t *testing.T) {
 		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
 	)
 	if err1 != nil {
-		t.Error(err1)
-		return
+		t.Fatal(err1)
 	}
 
 	select {
 	case x := <-chResult:
 		if x != fmt.Sprintf("echo: '%s'", tcMsgBody) {
-			t.Error("got invalid message body")
-			return
+			t.Fatal("got invalid message body")
 		}
 		// success
 	case <-time.After(time.Minute):
-		t.Error("error: time after 1 minute")
-		return
+		t.Fatal("error: time after 1 minute")
 	}
 }
 
@@ -293,8 +278,7 @@ func TestEnqueuePayload(t *testing.T) {
 	addresses := [2]string{testutils.TgAddrs[16], testutils.TgAddrs[17]}
 	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 8)
 	if nodes[0] == nil {
-		t.Error("nodes is null")
-		return
+		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 8)
 
@@ -307,8 +291,7 @@ func TestEnqueuePayload(t *testing.T) {
 	overheadBody := random.NewRandom().GetBytes(tcMsgSize + 1)
 	overPld := payload.NewPayload64(uint64(tcHead), overheadBody)
 	if err := node.enqueuePayload(logBuilder, pubKey, overPld); err == nil {
-		t.Error("success with overhead message")
-		return
+		t.Fatal("success with overhead message")
 	}
 
 	pldBytes := payload.NewPayload64(
@@ -318,8 +301,7 @@ func TestEnqueuePayload(t *testing.T) {
 
 	for i := 0; i < tcQueueCap; i++ {
 		if err := node.fQBProcessor.EnqueueMessage(pubKey, pldBytes); err != nil {
-			t.Error("failed send message (push to queue)")
-			return
+			t.Fatal("failed send message (push to queue)")
 		}
 	}
 
@@ -330,7 +312,7 @@ func TestEnqueuePayload(t *testing.T) {
 		}
 	}
 
-	t.Error("success enqueue payload over queue capacity")
+	t.Fatal("success enqueue payload over queue capacity")
 }
 
 func TestHandleWrapper(t *testing.T) {
@@ -363,42 +345,35 @@ func TestHandleWrapper(t *testing.T) {
 		).ToBytes(),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	if err := handler(ctx, netMsg); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsgX := node.testNewNetworkMessageWithInvalidNetworkMask(sett, msg)
 	if err := handler(ctx, netMsgX); err == nil {
-		t.Error("success handle message with invalid network mask")
-		return
+		t.Fatal("success handle message with invalid network mask")
 	}
 	netMsgY := node.testNewNetworkMessageWithAnotherMessageType(sett, msg)
 	if err := handler(ctx, netMsgY); err == nil {
-		t.Error("success handle message with another network type")
-		return
+		t.Fatal("success handle message with another network type")
 	}
 
 	if err := handler(ctx, netMsg); err != nil {
-		t.Error("repeated message:", err.Error())
-		return
+		t.Fatal("repeated message:", err.Error())
 	}
 
 	msgWithoutPld, err := scheme.EncryptMessage(pubKey, []byte{123})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsgWithoutPld := node.testNewNetworkMessage(sett, msgWithoutPld)
 	if err := handler(ctx, netMsgWithoutPld); err != nil {
-		t.Error(err) // works only logger
-		return
+		t.Fatal(err) // works only logger
 	}
 
 	node.HandleFunc(
@@ -416,14 +391,12 @@ func TestHandleWrapper(t *testing.T) {
 		).ToBytes(),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsg2 := node.testNewNetworkMessage(sett, msg2)
 	if err := handler(ctx, netMsg2); err != nil {
-		t.Error(err) // works only logger
-		return
+		t.Fatal(err) // works only logger
 	}
 
 	msg3, err := scheme.EncryptMessage(
@@ -434,14 +407,12 @@ func TestHandleWrapper(t *testing.T) {
 		).ToBytes(),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsg3 := node.testNewNetworkMessage(sett, msg3)
 	if err := handler(ctx, netMsg3); err != nil {
-		t.Error(err) // works only logger
-		return
+		t.Fatal(err) // works only logger
 	}
 
 	msg4, err := scheme.EncryptMessage(
@@ -452,27 +423,23 @@ func TestHandleWrapper(t *testing.T) {
 		).ToBytes(),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	netMsg4 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(ctx, netMsg4); err != nil {
-		t.Error(err) // works only logger
-		return
+		t.Fatal(err) // works only logger
 	}
 
 	netMsg5 := node.testNewNetworkMessage(sett, []byte{123})
 	if err := handler(ctx, netMsg5); err == nil {
-		t.Error("got success code with invalid message body")
-		return
+		t.Fatal("got success code with invalid message body")
 	}
 
 	_ = node.fKVDatavase.Close()
 	netMsg41 := node.testNewNetworkMessage(sett, msg4)
 	if err := handler(ctx, netMsg41); err == nil {
-		t.Error("got success code with closed database")
-		return
+		t.Fatal("got success code with closed database")
 	}
 }
 
@@ -496,8 +463,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 		).ToBytes(),
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -506,15 +472,14 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 
 	netMsg := node.testNewNetworkMessage(sett, msg)
 	if ok, err := node.produceMessage(ctx, netMsg); !ok || err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if ok, err := node.produceMessage(ctx, netMsg); ok || err != nil {
 		switch {
 		case ok:
-			t.Error("success store one message again")
+			t.Fatal("success store one message again")
 		case err != nil:
-			t.Error("got error with try store twice same message")
+			t.Fatal("got error with try store twice same message")
 		}
 		return
 	}
@@ -531,8 +496,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	node := _node.(*sNode)
 	if _, err := node.recvResponse(ctx, "not_exist"); err == nil {
-		t.Error("success got action by undefined key")
-		return
+		t.Fatal("success got action by undefined key")
 	}
 
 	pubKey := privKey.GetPubKey()
@@ -541,26 +505,22 @@ func TestRecvSendMessage(t *testing.T) {
 	node.setAction(actionKey)
 	action, ok := node.getAction(actionKey)
 	if !ok {
-		t.Error("undefined created action key (1)")
-		return
+		t.Fatal("undefined created action key (1)")
 	}
 
 	close(action)
 	if _, err := node.recvResponse(ctx, actionKey); err == nil {
-		t.Error("success got closed action")
-		return
+		t.Fatal("success got closed action")
 	}
 
 	node.setAction(actionKey)
 	if _, ok := node.getAction(actionKey); !ok {
-		t.Error("undefined created action key (2)")
-		return
+		t.Fatal("undefined created action key (2)")
 	}
 
 	cancel()
 	if _, err := node.recvResponse(ctx, actionKey); err == nil {
-		t.Error("success got action from canceled context")
-		return
+		t.Fatal("success got action from canceled context")
 	}
 
 	msgBody := "hello, world!"
@@ -571,8 +531,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	for i := 0; i < tcQueueCap; i++ {
 		if err := node.fQBProcessor.EnqueueMessage(pubKey, pldBytes); err != nil {
-			t.Error("failed send message (push to queue)")
-			return
+			t.Fatal("failed send message (push to queue)")
 		}
 	}
 
@@ -586,7 +545,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	if !hasError {
-		t.Error("success send message (push to queue) over queue capacity")
+		t.Fatal("success send message (push to queue) over queue capacity")
 	}
 }
 
@@ -641,31 +600,30 @@ func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, add
 		return networkNodes[0].AddConnection(ctx, addresses[0])
 	})
 	if err1 != nil {
-		t.Error(err1)
+		t.Fatal(err1)
 		return [5]INode{}, [5]asymmetric.IPrivKey{}
 	}
 	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
 		return networkNodes[1].AddConnection(ctx, addresses[1])
 	})
 	if err2 != nil {
-		t.Error(err2)
+		t.Fatal(err2)
 		return [5]INode{}, [5]asymmetric.IPrivKey{}
 	}
 
 	// routes to routes (nodes[3] -> nodes[2], nodes[3] -> nodes[4])
 	if err := networkNodes[3].AddConnection(ctx, addresses[0]); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 		return [5]INode{}, [5]asymmetric.IPrivKey{}
 	}
 	if err := networkNodes[3].AddConnection(ctx, addresses[1]); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 		return [5]INode{}, [5]asymmetric.IPrivKey{}
 	}
 
 	go func() {
 		if err := nodes[0].Run(ctx); err == nil {
 			t.Error("success twice running node")
-			return
 		}
 	}()
 
@@ -758,10 +716,10 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 				FQueuePeriod:  time.Second,
 				FConsumersCap: 1,
 			}),
-			hybrid.NewScheme(
-				privKey,
-				tcMsgSize,
-			),
+			func() layer2.IScheme {
+				scheme, _ := hybrid.NewScheme(privKey, tcMsgSize)
+				return scheme
+			}(),
 		),
 	)
 	go func() { _ = node.Run(ctx) }()

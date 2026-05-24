@@ -13,9 +13,10 @@ func (err *SError) Error() string {
 }
 
 var (
-	ErrInvalidKeyType     = &SError{"invalid key type"}
-	ErrDecryptMessage     = &SError{"decrypt message"}
-	ErrLimitMessageSize   = &SError{"limit message size"}
-	ErrInvalidMessageSize = &SError{"invalidmessage size"}
-	ErrDecodeMessage      = &SError{"decode message"}
+	ErrInvalidKeyType       = &SError{"invalid key type"}
+	ErrDecryptMessage       = &SError{"decrypt message"}
+	ErrLimitMessageSize     = &SError{"limit message size"}
+	ErrInvalidMessageSize   = &SError{"invalidmessage size"}
+	ErrDecodeMessage        = &SError{"decode message"}
+	ErrStructGTEMessageSize = &SError{"struct >= message size"}
 )

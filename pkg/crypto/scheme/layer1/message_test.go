@@ -44,8 +44,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SMessageError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -60,8 +59,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n { // nolint: gocritic
@@ -83,25 +81,21 @@ func TestMessage(t *testing.T) {
 
 	msgTmp := NewMessage(sett, pld)
 	if !bytes.Equal(msgTmp.GetPayload().GetBody(), []byte(tcBody)) {
-		t.Error("payload body not equal body in message")
-		return
+		t.Fatal("payload body not equal body in message")
 	}
 
 	msg, err := LoadMessage(sett.GetSettings(), msgTmp.ToBytes())
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if msgTmp.ToString() != msg.ToString() {
-		t.Error("msgTmp != msg")
-		return
+		t.Fatal("msgTmp != msg")
 	}
 
 	newHash := hashing.NewHasher(pld.ToBytes()).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
-		t.Error("payload hash not equal hash of message")
-		return
+		t.Fatal("payload hash not equal hash of message")
 	}
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
@@ -109,13 +103,11 @@ func TestMessage(t *testing.T) {
 
 	newHmac := hashing.NewHMACHasher(key, pld.ToBytes()).ToBytes()
 	if !bytes.Equal(msg.GetHmac(), newHmac) {
-		t.Error("payload hmac not equal hmac of message")
-		return
+		t.Fatal("payload hmac not equal hmac of message")
 	}
 
 	if msg.GetPayload().GetHead() != tcHead {
-		t.Error("payload head not equal head in message")
-		return
+		t.Fatal("payload head not equal head in message")
 	}
 
 	newSett := NewConstructSettings(&SConstructSettings{
@@ -132,76 +124,62 @@ func TestMessage(t *testing.T) {
 		}
 		msgL, err := LoadMessage(newSett.GetSettings(), msgN.ToBytes())
 		if err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 		if msgN.GetProof() != msgL.GetProof() {
-			t.Error("got invalid proof")
-			return
+			t.Fatal("got invalid proof")
 		}
 		if len(msgN.ToBytes()) != len(msgL.ToBytes()) {
-			t.Error("new msg size != load msg size")
-			return
+			t.Fatal("new msg size != load msg size")
 		}
 		if len(msgN.ToBytes()) != CMessageHeadSize+len(pld.GetBody()) {
-			t.Error("msg size != head size + payload body")
-			return
+			t.Fatal("msg size != head size + payload body")
 		}
 		break
 	}
 
 	msg1, err := LoadMessage(sett.GetSettings(), msg.ToBytes())
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
-		t.Error("load message not equal new message")
-		return
+		t.Fatal("load message not equal new message")
 	}
 
 	msg2, err := LoadMessage(sett.GetSettings(), msg.ToString())
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	if !bytes.Equal(msg.GetPayload().ToBytes(), msg2.GetPayload().ToBytes()) {
-		t.Error("load message not equal new message")
-		return
+		t.Fatal("load message not equal new message")
 	}
 
 	msg3 := NewMessage(sett, pld).(*sMessage)
 	msg3.fEncd[0] ^= 1
 	if _, err := LoadMessage(sett.GetSettings(), msg3.ToBytes()); err == nil {
-		t.Error("success load with invalid encd")
-		return
+		t.Fatal("success load with invalid encd")
 	}
 
 	if _, err := LoadMessage(sett.GetSettings(), struct{}{}); err == nil {
-		t.Error("success load with unknown type of message")
-		return
+		t.Fatal("success load with unknown type of message")
 	}
 
 	if _, err := LoadMessage(sett.GetSettings(), []byte{1}); err == nil {
-		t.Error("success load incorrect message")
-		return
+		t.Fatal("success load incorrect message")
 	}
 
 	if _, err := LoadMessage(sett.GetSettings(), []byte{1}); err == nil {
-		t.Error("success load incorrect message")
-		return
+		t.Fatal("success load incorrect message")
 	}
 
 	randBytes := random.NewRandom().GetBytes(encoding.CSizeUint64 + hashing.CHasherSize)
 	if _, err := LoadMessage(sett.GetSettings(), randBytes); err == nil {
-		t.Error("success load incorrect message")
-		return
+		t.Fatal("success load incorrect message")
 	}
 
 	prng := random.NewRandom()
 	if _, err := LoadMessage(sett.GetSettings(), prng.GetBytes(64)); err == nil {
-		t.Error("success load incorrect message")
-		return
+		t.Fatal("success load incorrect message")
 	}
 
 	msgBytes := bytes.Join(
@@ -212,18 +190,15 @@ func TestMessage(t *testing.T) {
 		[]byte{},
 	)
 	if _, err := LoadMessage(sett.GetSettings(), msgBytes); err == nil {
-		t.Error("success load incorrect payload")
-		return
+		t.Fatal("success load incorrect payload")
 	}
 
 	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage1(sett, pld).ToBytes()); err == nil {
-		t.Error("success load invalid message 1")
-		return
+		t.Fatal("success load invalid message 1")
 	}
 
 	if _, err := LoadMessage(sett.GetSettings(), tNewInvalidMessage2(sett, pld).ToBytes()); err == nil {
-		t.Error("success load invalid message 2")
-		return
+		t.Fatal("success load invalid message 2")
 	}
 }
 

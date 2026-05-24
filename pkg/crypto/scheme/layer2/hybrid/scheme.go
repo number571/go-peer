@@ -2,6 +2,8 @@ package hybrid
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
@@ -13,8 +15,32 @@ import (
 )
 
 const (
+	// EncKey + IV + J(msg,padd) + J(pkHash,salt,data,hash,sign) + PkHash + Salt + DataHash + Sign
+	// 1088 + 16 + 8 + 20 + 48 + 32 + 48 + 3309 = 4569 additional bytes to origin message
+	CMessageHeadSize = 0 +
+		1*asymmetric.CKEMCiphertextSize +
+		1*symmetric.CCipherBlockSize +
+		2*encoding.CSizeUint32 +
+		5*encoding.CSizeUint32 +
+		1*hashing.CHasherSize +
+		1*cSaltSize +
+		1*hashing.CHasherSize +
+		1*asymmetric.CDSASignSize
+)
+
+const (
 	cSaltSize = 32 // bytes
 )
+
+func init() {
+	scheme, err := NewScheme(asymmetric.NewPrivKey(), (8 << 10))
+	if err != nil {
+		panic(err)
+	}
+	if (scheme.GetMessageSize() - scheme.GetPayloadLimit()) != CMessageHeadSize {
+		panic("incorrect calculated head size of message")
+	}
+}
 
 var (
 	_ layer2.IScheme = &sScheme{}
@@ -29,7 +55,7 @@ type sScheme struct {
 
 // Create scheme by private key as identification.
 // Handle function is used when the network exists.
-func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) layer2.IScheme {
+func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) (layer2.IScheme, error) {
 	scheme := &sScheme{
 		fMessageSize: pMessageSize,
 		fPrivKey:     pPrivKey,
@@ -38,16 +64,16 @@ func NewScheme(pPrivKey asymmetric.IPrivKey, pMessageSize uint64) layer2.IScheme
 	pubKey := pPrivKey.GetPubKey()
 	encMsg, err := scheme.encryptWithPadding(pubKey, []byte{}, 0)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	structSize := uint64(len(encMsg))
-	if pMessageSize <= structSize {
-		panic("the payload size is lower than struct size")
+	if structSize >= pMessageSize {
+		return nil, errors.Join(ErrStructGTEMessageSize, fmt.Errorf("struct size = %d", structSize)) //nolint:err113
 	}
 
 	scheme.fPayloadLimit = pMessageSize - structSize
-	return scheme
+	return scheme, nil
 }
 
 func (p *sScheme) GetRandomKey() layer2.IParticipantKey {

@@ -29,37 +29,31 @@ func TestLogger(t *testing.T) {
 
 	getter := builder.Build()
 	if getter.GetService() != tcService {
-		t.Error("getter.GetService() != tcService")
-		return
+		t.Fatal("getter.GetService() != tcService")
 	}
 
 	if !bytes.Equal(getter.GetHash(), []byte(tcHash)) {
-		t.Error("!bytes.Equal(getter.GetHash(), []byte(tcHash))")
-		return
+		t.Fatal("!bytes.Equal(getter.GetHash(), []byte(tcHash))")
 	}
 
 	if getter.GetProof() != tcProof {
-		t.Error("getter.GetProof() != tcProof")
-		return
+		t.Fatal("getter.GetProof() != tcProof")
 	}
 
 	if !bytes.Equal(pubKey.ToBytes(), getter.GetPubKey().ToBytes()) {
-		t.Error("!bytes.Equal(pubKey.ToBytes(), getter.GetPubKey().ToBytes())")
-		return
+		t.Fatal("!bytes.Equal(pubKey.ToBytes(), getter.GetPubKey().ToBytes())")
 	}
 
 	if getter.GetSize() != tcSize {
-		t.Error("getter.GetSize() != tcSize")
-		return
+		t.Fatal("getter.GetSize() != tcSize")
 	}
 
 	if getter.GetType() != CLogInfoExist {
-		t.Error("getter.GetType() != CLogInfoExist")
-		return
+		t.Fatal("getter.GetType() != CLogInfoExist")
 	}
 
 	if getter.GetConn() != tcConn {
-		t.Error("getter.GetConn() != tcConn")
+		t.Fatal("getter.GetConn() != tcConn")
 		return
 	}
 }
