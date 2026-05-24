@@ -10,8 +10,9 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-	"github.com/number571/go-peer/pkg/crypto/hybrid/client"
-	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -28,8 +29,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SQueueError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -44,8 +44,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n {
@@ -85,8 +84,9 @@ func testSettings(t *testing.T, n int) {
 func TestRunStopQueue(t *testing.T) {
 	t.Parallel()
 
-	client := client.NewClient(
-		asymmetric.NewPrivKey(),
+	privKey := asymmetric.NewPrivKey()
+	scheme, _ := hybrid.NewScheme(
+		privKey,
 		tcMsgSize,
 	)
 	queue := NewQBProblemProcessor(
@@ -98,7 +98,7 @@ func TestRunStopQueue(t *testing.T) {
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
-		client,
+		scheme,
 	)
 
 	ctx1, cancel1 := context.WithCancel(context.Background())
@@ -107,7 +107,6 @@ func TestRunStopQueue(t *testing.T) {
 	go func() {
 		if err := queue.Run(ctx1); err != nil && !errors.Is(err, context.Canceled) {
 			t.Error(err)
-			return
 		}
 	}()
 
@@ -120,8 +119,7 @@ func TestRunStopQueue(t *testing.T) {
 		return errors.New("len(void queue) != max capacity") //nolint:err113
 	})
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	ctx2, cancel2 := context.WithCancel(context.Background())
@@ -130,16 +128,14 @@ func TestRunStopQueue(t *testing.T) {
 	go func() {
 		if err := queue.Run(ctx2); err == nil {
 			t.Error("success run already running queue")
-			return
 		}
 	}()
 
-	pubKey := client.GetPrivKey().GetPubKey()
+	pubKey := privKey.GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	for i := 0; i < tcQueueCap; i++ {
 		if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
-			t.Error(err)
-			return
+			t.Fatal(err)
 		}
 	}
 
@@ -150,12 +146,13 @@ func TestRunStopQueue(t *testing.T) {
 		}
 	}
 
-	t.Error("success enqueue message with max capacity")
+	t.Fatal("success enqueue message with max capacity")
 }
 
 func TestQueue(t *testing.T) {
 	t.Parallel()
 
+	privKey := asymmetric.NewPrivKey()
 	queue := NewQBProblemProcessor(
 		NewSettings(&SSettings{
 			FMessageConstructSettings: layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -168,25 +165,26 @@ func TestQueue(t *testing.T) {
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,
 		}),
-		client.NewClient(
-			asymmetric.NewPrivKey(),
-			tcMsgSize,
-		),
+		func() layer2.IScheme {
+			scheme, _ := hybrid.NewScheme(
+				privKey,
+				tcMsgSize,
+			)
+			return scheme
+		}(),
 	)
 
 	sett := queue.GetSettings()
 	if sett.GetQueuePoolCap() != [2]uint64{tcQueueCap, tcQueueCap} {
-		t.Error("sett.GetMainCapacity() != tcQueueCap")
-		return
+		t.Fatal("sett.GetMainCapacity() != tcQueueCap")
 	}
 
-	if err := testQueue(queue); err != nil {
-		t.Error(err)
-		return
+	if err := testQueue(queue, privKey); err != nil {
+		t.Fatal(err)
 	}
 }
 
-func testQueue(queue IQBProblemProcessor) error {
+func testQueue(queue IQBProblemProcessor, privKey asymmetric.IPrivKey) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
 		cancel()
@@ -199,8 +197,7 @@ func testQueue(queue IQBProblemProcessor) error {
 		}
 	}()
 
-	client := queue.GetClient()
-	pubKey := client.GetPrivKey().GetPubKey()
+	pubKey := privKey.GetPubKey()
 	pldBytes := payload.NewPayload64(0, []byte(tcMsgBody)).ToBytes()
 	if err := queue.EnqueueMessage(pubKey, pldBytes); err != nil {
 		return err

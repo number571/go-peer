@@ -1,0 +1,103 @@
+package symmetric
+
+import (
+	"bytes"
+	"crypto/des" //nolint:gosec
+	"testing"
+
+	"github.com/number571/go-peer/pkg/encoding"
+)
+
+var (
+	tgKey = []byte("it is a large key with 256 bits!")
+)
+
+func TestPanic(t *testing.T) {
+	t.Parallel()
+
+	testPanicEncrypt(t)
+	testPanicDecrypt(t)
+}
+
+func testPanicEncrypt(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("nothing panics")
+		}
+	}()
+	cipher := &sAESCipher{fMode: 999}
+	_ = cipher.EncryptBytes([]byte{})
+}
+
+func testPanicDecrypt(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("nothing panics")
+		}
+	}()
+	cipher := &sAESCipher{fMode: 999}
+	_ = cipher.DecryptBytes([]byte{})
+}
+
+func TestKeySize(t *testing.T) {
+	t.Parallel()
+
+	if cipher := NewCipherCFB([]byte{123}); cipher != nil {
+		t.Fatal("success create cipher with invalid key size (1)")
+	}
+	if cipher := NewCipherGCM([]byte{123}); cipher != nil {
+		t.Fatal("success create cipher with invalid key size (2)")
+	}
+}
+
+func TestEncrypt(t *testing.T) {
+	t.Parallel()
+
+	testEncrypt(t, NewCipherCFB)
+	testEncrypt(t, NewCipherGCM)
+}
+
+func testEncrypt(t *testing.T, c func(pKey []byte) ICipher) {
+	var (
+		msg = []byte("hello, world!")
+	)
+
+	cipher := c(tgKey)
+
+	emsg := cipher.EncryptBytes(msg)
+
+	if bytes.Equal(msg, emsg) {
+		t.Fatal("encrypted message = open message")
+	}
+
+	if !bytes.Equal(msg, cipher.DecryptBytes(emsg)) {
+		t.Fatal("decrypted message is invalid")
+	}
+
+	if !bytes.Equal(cipher.DecryptBytes(emsg), cipher.DecryptBytes(emsg)) {
+		t.Fatal("decrypted message is not determinated")
+	}
+
+	if dec := cipher.DecryptBytes([]byte{123}); dec != nil {
+		t.Fatal("success decrypt message with len < iv size")
+	}
+
+	if !bytes.Equal(cipher.ToBytes(), tgKey) {
+		t.Fatal("key bytes not equal")
+	}
+	if cipher.ToString() != encoding.HexEncode(tgKey) {
+		t.Fatal("string key not equal")
+	}
+
+	block, err := des.NewCipher([]byte("abcdefgh")) //nolint:gosec
+	if err != nil {
+		t.Fatal(err)
+	}
+	anotherCipher := &sAESCipher{fMode: modeGCM, fBlock: block}
+	if m := anotherCipher.encryptBytesGCM([]byte{}); m != nil {
+		t.Fatal("success encrypt message with another cipher")
+	}
+	if m := anotherCipher.decryptBytesGCM([]byte{}); m != nil {
+		t.Fatal("success decrypt message with another cipher")
+	}
+}

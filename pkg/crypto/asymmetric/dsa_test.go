@@ -13,20 +13,18 @@ func TestNewDSA(t *testing.T) {
 	t.Parallel()
 
 	if pk := newDSAPrivKey(&tsPrivateKeyDSA{}); pk != nil {
-		t.Error("success get another dsa privkey (not mldsa65)")
-		return
+		t.Fatal("success get another dsa privkey (not mldsa65)")
 	}
 
 	if pk := newDSAPubKey(&tsPublicKeyDSA{}); pk != nil {
-		t.Error("success get another dsa pubkey (not mldsa65)")
-		return
+		t.Fatal("success get another dsa pubkey (not mldsa65)")
 	}
 
 	seed := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32}
 
 	privKey := NewDSAPrivKeyFromSeed(seed)
 	if encoding.HexEncode(privKey.ToBytes()) != tcDSAPrivKey {
-		t.Error("get another dsa key from seed")
+		t.Fatal("get another dsa key from seed")
 	}
 }
 
@@ -35,8 +33,7 @@ func TestPanicNewDSAPrivKey(t *testing.T) {
 
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 
@@ -49,23 +46,20 @@ func TestSigner(t *testing.T) {
 	privKey := NewDSAPrivKey()
 	privKey = LoadDSAPrivKey(privKey.ToBytes())
 	if pk := LoadDSAPrivKey([]byte{123}); pk != nil {
-		t.Error("success load dsa priv key")
-		return
+		t.Fatal("success load dsa priv key")
 	}
 
 	pubKey := privKey.GetPubKey()
 	pubKey = LoadDSAPubKey(pubKey.ToBytes())
 	if pk := LoadDSAPubKey([]byte{123}); pk != nil {
-		t.Error("success load dsa pub key")
-		return
+		t.Fatal("success load dsa pub key")
 	}
 
 	msg := []byte("hello, world!")
 	sign := privKey.SignBytes(msg)
 
 	if !pubKey.VerifyBytes(msg, sign) {
-		t.Error("invalid verify")
-		return
+		t.Fatal("invalid verify")
 	}
 
 	// fmt.Println(len(privKey.ToBytes()))

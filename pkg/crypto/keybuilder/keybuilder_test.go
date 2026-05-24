@@ -22,12 +22,10 @@ func TestKeyBuilder(t *testing.T) {
 
 	hash := NewKeyBuilder(1<<10, salt).Build(pasw, tcKeySize)
 	if encoding.HexEncode(hash) != tcHash {
-		t.Error("hash is correct?")
-		return
+		t.Fatal("hash is correct?")
 	}
 
 	if !bytes.Equal(hash, NewKeyBuilder(1<<10, salt).Build(pasw, tcKeySize)) {
-		t.Error("hash is not determined")
-		return
+		t.Fatal("hash is not determined")
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 )
 
 type IConn interface {

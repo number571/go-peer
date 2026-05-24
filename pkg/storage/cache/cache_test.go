@@ -14,8 +14,7 @@ func TestLRUCache(t *testing.T) {
 	lruCache := NewLRUCache(3)
 
 	if _, ok := lruCache.Get("unknown-key"); ok {
-		t.Error("success load unknown key")
-		return
+		t.Fatal("success load unknown key")
 	}
 
 	for i := 0; i < 3; i++ {
@@ -25,8 +24,7 @@ func TestLRUCache(t *testing.T) {
 			return
 		}
 		if lruCache.GetIndex() != uint64((i+1)%3) { //nolint:gosec
-			t.Error("got invalid index")
-			return
+			t.Fatal("got invalid index")
 		}
 	}
 
@@ -52,30 +50,26 @@ func TestLRUCache(t *testing.T) {
 		}
 		key := encoding.Uint64ToBytes(i)
 		if !bytes.Equal([]byte(k), key[:]) {
-			t.Error("got incorrect key")
-			return
+			t.Fatal("got incorrect key")
 		}
 	}
 
 	key1 := encoding.Uint64ToBytes(1)
 	if ok := lruCache.Set(string(key1[:]), []byte(fmt.Sprintf("_%d_", 1))); ok {
-		t.Error("success push already exist value")
-		return
+		t.Fatal("success push already exist value")
 	}
 
 	// start cycle of queue
 	i := uint64(4)
 	key2 := encoding.Uint64ToBytes(i)
 	if ok := lruCache.Set(string(key2[:]), []byte(fmt.Sprintf("_%d_", i))); !ok {
-		t.Errorf("failed push %d", i)
-		return
+		t.Fatalf("failed push %d", i)
 	}
 
 	// try load init value
 	i = 0
 	key3 := encoding.Uint64ToBytes(i)
 	if _, ok := lruCache.Get(string(key3[:])); ok {
-		t.Errorf("success load rewrited value %d", i)
-		return
+		t.Fatalf("success load rewrited value %d", i)
 	}
 }

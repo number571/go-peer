@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/message/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/network/conn"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache"
@@ -29,8 +29,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SNetworkError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -45,8 +44,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n {
@@ -110,8 +108,7 @@ func TestBroadcast(t *testing.T) {
 
 	nodes, mapp, err := testNodes(ctx)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	// four receivers, sender not receive his messages
@@ -174,8 +171,7 @@ func TestBroadcast(t *testing.T) {
 	select {
 	case <-ch:
 	case <-time.After(tcTimeWait):
-		t.Error("limit of waiting time for group")
-		return
+		t.Fatal("limit of waiting time for group")
 	}
 
 	for _, node := range nodes {
@@ -213,14 +209,12 @@ func TestNodeConnection(t *testing.T) {
 	go func() {
 		if err := node2.Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
-			return
 		}
 	}()
 
 	go func() {
 		if err := node3.Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) {
 			t.Error(err)
-			return
 		}
 	}()
 
@@ -228,7 +222,6 @@ func TestNodeConnection(t *testing.T) {
 	go func() {
 		if err := node2.Run(ctx); err == nil {
 			t.Error("success second run node")
-			return
 		}
 	}()
 
@@ -239,33 +232,27 @@ func TestNodeConnection(t *testing.T) {
 		return nil
 	})
 	if err1 != nil {
-		t.Error(err1)
-		return
+		t.Fatal(err1)
 	}
 
 	if err := node1.AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if err := node1.AddConnection(ctx, testutils.TgAddrs[4]); err == nil {
-		t.Error("success add already exist connection")
-		return
+		t.Fatal("success add already exist connection")
 	}
 
 	if err := node1.AddConnection(ctx, testutils.TgAddrs[5]); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if err := node1.AddConnection(ctx, testutils.TgAddrs[5]); err == nil {
-		t.Error("success add second connection with limit = 1")
-		return
+		t.Fatal("success add second connection with limit = 1")
 	}
 
 	if err := node3.AddConnection(ctx, testutils.TgAddrs[4]); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	err2 := testutils.TryN(50, 10*time.Millisecond, func() error {
@@ -275,8 +262,7 @@ func TestNodeConnection(t *testing.T) {
 		return nil
 	})
 	if err2 != nil {
-		t.Error(err2)
-		return
+		t.Fatal(err2)
 	}
 }
 
@@ -293,8 +279,7 @@ func TestHandleMessage(t *testing.T) {
 	node.HandleFunc(1, nil)
 	msg1 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{1}))
 	if ok := node.handleMessage(ctx, nil, msg1); ok {
-		t.Error("success handle message with nil function")
-		return
+		t.Fatal("success handle message with nil function")
 	}
 
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
@@ -302,8 +287,7 @@ func TestHandleMessage(t *testing.T) {
 	})
 	msg2 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
 	if ok := node.handleMessage(ctx, nil, msg2); ok {
-		t.Error("success handle message with got error from function")
-		return
+		t.Fatal("success handle message with got error from function")
 	}
 
 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
@@ -311,8 +295,7 @@ func TestHandleMessage(t *testing.T) {
 	})
 	msg3 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{3}))
 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
-		t.Error("failed handle message with correct function")
-		return
+		t.Fatal("failed handle message with correct function")
 	}
 }
 
@@ -321,7 +304,7 @@ func TestNodeSettings(t *testing.T) {
 
 	gotSett := newTestNode("", 16).GetSettings()
 	if gotSett.GetMaxConnects() != 16 {
-		t.Error("invalid setting's value")
+		t.Fatal("invalid setting's value")
 	}
 }
 
@@ -340,8 +323,7 @@ func TestContextCancel(t *testing.T) {
 		return node2.AddConnection(ctx, testutils.TgAddrs[6])
 	})
 	if err1 != nil {
-		t.Error(err1)
-		return
+		t.Fatal(err1)
 	}
 
 	headHandle := uint32(123)

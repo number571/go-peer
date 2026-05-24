@@ -19,7 +19,7 @@ var (
 	ErrRetryLimit            = &SAnonymityError{"retry limit"}
 	ErrEnqueueMessage        = &SAnonymityError{"enqueue message"}
 	ErrUnknownType           = &SAnonymityError{"unknown type"}
-	ErrLoadMessage           = &SAnonymityError{"load message"}
+	ErrInvalidPayloadSize    = &SAnonymityError{"invalid payload size"}
 	ErrInvalidLayer1Message  = &SAnonymityError{"invalid layer1 message"}
 	ErrStoreHashIntoDatabase = &SAnonymityError{"store hash into database"}
 	ErrStoreHashWithProduce  = &SAnonymityError{"store hash with produce"}

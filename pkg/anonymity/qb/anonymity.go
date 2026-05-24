@@ -9,12 +9,11 @@ import (
 
 	"github.com/number571/go-peer/pkg/anonymity/qb/adapters"
 	"github.com/number571/go-peer/pkg/anonymity/qb/queue"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
 	"github.com/number571/go-peer/pkg/crypto/hashing"
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/logger"
-	"github.com/number571/go-peer/pkg/message/layer1"
-	"github.com/number571/go-peer/pkg/message/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
@@ -34,7 +33,7 @@ type sNode struct {
 	fAdapter       adapters.IAdapter
 	fKVDatavase    database.IKVDatabase
 	fQBProcessor   queue.IQBProblemProcessor
-	fMapPubKeys    asymmetric.IMapPubKeys
+	fKeysContainer layer2.IKeysContainer
 	fHandleRoutes  map[uint32]IHandlerF
 	fHandleActions map[string]chan []byte
 }
@@ -44,6 +43,7 @@ func NewNode(
 	pLogger logger.ILogger,
 	pAdapter adapters.IAdapter,
 	pKVDatavase database.IKVDatabase,
+	pKeysContainer layer2.IKeysContainer,
 	pQBProcessor queue.IQBProblemProcessor,
 ) INode {
 	return &sNode{
@@ -53,7 +53,7 @@ func NewNode(
 		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
 		fQBProcessor:   pQBProcessor,
-		fMapPubKeys:    asymmetric.NewMapPubKeys(),
+		fKeysContainer: pKeysContainer,
 		fHandleRoutes:  make(map[uint32]IHandlerF, 64),
 		fHandleActions: make(map[string]chan []byte, 64),
 	}
@@ -152,8 +152,8 @@ func (p *sNode) GetQBProcessor() queue.IQBProblemProcessor {
 }
 
 // Return f2f structure.
-func (p *sNode) GetMapPubKeys() asymmetric.IMapPubKeys {
-	return p.fMapPubKeys
+func (p *sNode) GetKeysContainer() layer2.IKeysContainer {
+	return p.fKeysContainer
 }
 
 func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
@@ -164,7 +164,7 @@ func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
-	pRecv asymmetric.IPubKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
@@ -179,7 +179,7 @@ func (p *sNode) SendPayload(
 // Payload head must be uint32.
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
-	pRecv asymmetric.IPubKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload32,
 ) ([]byte, error) {
 	headAction := sAction(random.NewRandom().GetUint64()) //nolint:gosec
@@ -233,19 +233,18 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 
 	// check network message on correct format
 	if ok := p.checkMessageLayer1(pNetMsg); !ok {
-		// another network mask || message settings
+		// another network mask || message settings on adapter's side
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnIncorrectLayer1))
 		return ErrInvalidLayer1Message
 	}
 
-	client := p.fQBProcessor.GetClient()
+	scheme := p.fQBProcessor.GetScheme()
 	encMsg := pNetMsg.GetPayload().GetBody()
 
-	// load encrypted message without decryption try
-	if _, err := layer2.LoadMessage(client.GetMessageSize(), encMsg); err != nil {
-		// problem from sender's side (invalid structure)
+	// check size on static payload structure.
+	if uint64(len(encMsg)) != scheme.GetMessageSize() {
 		p.fLogger.PushWarn(logBuilder.WithType(anon_logger.CLogWarnMessageNull))
-		return errors.Join(ErrLoadMessage, err)
+		return ErrInvalidPayloadSize
 	}
 
 	// try store hash of message
@@ -258,14 +257,15 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	// try decrypt consumed message
-	pubKey, decMsg, err := client.DecryptMessage(p.fMapPubKeys, encMsg)
+	pKey, decMsg, err := scheme.DecryptMessage(p.fKeysContainer, encMsg)
 	if err != nil {
 		p.fLogger.PushInfo(logBuilder.WithType(anon_logger.CLogInfoUndecryptable))
 		return nil
 	}
 
+	// // TODO:
 	// enrich logger
-	logBuilder.WithPubKey(pubKey)
+	// logBuilder.WithPubKey(pubKey)
 
 	// get payload from decrypted message
 	pld := payload.LoadPayload64(decMsg)
@@ -276,7 +276,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	// do request or response action
-	return p.handleDoAction(pCtx, logBuilder, pubKey, pld)
+	return p.handleDoAction(pCtx, logBuilder, pKey, pld)
 }
 
 func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
@@ -294,7 +294,7 @@ func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
 func (p *sNode) handleDoAction(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
@@ -318,7 +318,7 @@ func (p *sNode) handleDoAction(
 func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender layer2.IParticipantKey,
 	pAction iAction,
 	pBody []byte,
 ) {
@@ -337,7 +337,7 @@ func (p *sNode) handleResponse(
 func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
-	pSender asymmetric.IPubKey,
+	pSender layer2.IParticipantKey,
 	pHead iHead,
 	pBody []byte,
 ) {
@@ -371,7 +371,7 @@ func (p *sNode) handleRequest(
 
 func (p *sNode) enqueuePayload(
 	pLogBuilder anon_logger.ILogBuilder,
-	pRecv asymmetric.IPubKey,
+	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
 	logType := anon_logger.CLogBaseEnqueueResponse
@@ -379,10 +379,11 @@ func (p *sNode) enqueuePayload(
 
 	if loadHead(pPld.GetHead()).getAction().isRequest() {
 		logType = anon_logger.CLogBaseEnqueueRequest
-		client := p.fQBProcessor.GetClient()
+		// // TODO:
+		// client := p.fQBProcessor.GetClient()
 		// enrich logger
 		pLogBuilder.
-			WithPubKey(client.GetPrivKey().GetPubKey()).
+			// WithPubKey(client.GetPrivKey().GetPubKey()).
 			WithSize(len(pldBytes))
 	}
 
@@ -414,8 +415,11 @@ func (p *sNode) produceMessage(
 	serviceName := p.fSettings.GetServiceName()
 
 	// create logger state
-	logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), pNetMsg).
-		WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
+	logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), pNetMsg)
+
+	// // TODO:
+	// .
+	// 	WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
 
 	// try push hash into database
 	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg); err != nil {
@@ -495,7 +499,7 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pPubKey asymmetric.IPubKey, pAction iAction) string {
-	pubKeyAddr := hashing.NewHasher(pPubKey.ToBytes()).ToBytes()
+func newActionKey(pKey layer2.IParticipantKey, pAction iAction) string {
+	pubKeyAddr := hashing.NewHasher(pKey.ToBytes()).ToBytes()
 	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
 }

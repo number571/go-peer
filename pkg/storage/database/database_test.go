@@ -17,8 +17,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SDatabaseError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -30,8 +29,7 @@ func TestInvalidCreateDB(t *testing.T) {
 
 	_, err := NewKVDatabase(path)
 	if err == nil {
-		t.Error("success create database with incorrect path")
-		return
+		t.Fatal("success create database with incorrect path")
 	}
 }
 
@@ -43,24 +41,20 @@ func TestClosedDB(t *testing.T) {
 
 	db, err := NewKVDatabase(dbPath)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	defer func() { _ = db.Close() }()
 
 	if err := db.Close(); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if err := db.Set([]byte("KEY"), []byte("VALUE")); err == nil {
-		t.Error("success set with closed db")
-		return
+		t.Fatal("success set with closed db")
 	}
 
 	if err := db.Del([]byte("KEY")); err == nil {
-		t.Error("success del with closed db")
-		return
+		t.Fatal("success del with closed db")
 	}
 }
 
@@ -72,24 +66,20 @@ func TestCreateDB(t *testing.T) {
 
 	store, err := NewKVDatabase(dbPath)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 	defer func() { _ = store.Close() }()
 
 	if err := store.Set([]byte("KEY"), []byte("VALUE")); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if _, err := store.Get([]byte("KEY")); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if err := store.Close(); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 }
 
@@ -101,45 +91,37 @@ func TestBasicDB(t *testing.T) {
 
 	store, err := NewKVDatabase(dbPath)
 	if err != nil {
-		t.Error("[testBasic]", err)
-		return
+		t.Fatal("[testBasic]", err)
 	}
 	defer func() { _ = store.Close() }()
 
 	if _, err := store.Get([]byte("KEY")); err == nil {
-		t.Error("[testBasic] success get with bucket=nil")
-		return
+		t.Fatal("[testBasic] success get with bucket=nil")
 	}
 
 	if err := store.Del([]byte("KEY")); err != nil {
-		t.Error("[testBasic]", err) // without error if bucket=nil
-		return
+		t.Fatal("[testBasic]", err) // without error if bucket=nil
 	}
 
 	data1 := []byte("hello, world!")
 	if err := store.Set([]byte("KEY"), data1); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	data2, err := store.Get([]byte("KEY"))
 	if err != nil {
-		t.Error("[testBasic]", err)
-		return
+		t.Fatal("[testBasic]", err)
 	}
 
 	if !bytes.Equal(data1, data2) {
-		t.Error("[testBasic] saved and loaded values not equals")
-		return
+		t.Fatal("[testBasic] saved and loaded values not equals")
 	}
 
 	if err := store.Del([]byte("KEY")); err != nil {
-		t.Error("[testBasic]", err)
-		return
+		t.Fatal("[testBasic]", err)
 	}
 
 	if _, err := store.Get([]byte("undefined key")); err == nil {
-		t.Error("[testBasic] got value by undefined key")
-		return
+		t.Fatal("[testBasic] got value by undefined key")
 	}
 }

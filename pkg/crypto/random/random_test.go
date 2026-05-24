@@ -11,17 +11,17 @@ func TestCSPRNG(t *testing.T) {
 	r := NewRandom()
 
 	if bytes.Equal(r.GetBytes(8), r.GetBytes(8)) {
-		t.Error("bytes in random equals")
+		t.Fatal("bytes in random equals")
 	}
 
 	x := r.GetString(8)
 	if x == r.GetString(8) {
-		t.Error("strings in random equals")
+		t.Fatal("strings in random equals")
 	}
 
 	y := r.GetUint64()
 	if y == r.GetUint64() {
-		t.Error("numbers in random equals")
+		t.Fatal("numbers in random equals")
 	}
 }
 

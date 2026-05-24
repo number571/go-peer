@@ -2,9 +2,26 @@
 
 <!-- ... -->
 
-## v1.7.16~
+## v1.7.17~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.16
+
+*May 24, 2026*
+
+### IMPROVEMENTS
+
+- `pkg/crypto/scheme/layer2`: add IKeysContainer
+- `pkg/crypto/scheme/layer2/symmetric`: add symmetric scheme
+
+### CHANGES
+
+- `pkg/crypto/scheme`: move pkg/message/layer1, pkg/message/layer2 -> pkg/crypto/scheme, pkg/crypto/scheme/hybrid
+- `pkg/crypto/scheme`: add CMessageHeadSize const
+- `pkg/crypto/asymmetric`: delete IMapPubKeys
 
 <!-- ... -->
 

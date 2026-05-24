@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/crypto/random"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/message/layer1"
 	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
@@ -68,8 +68,7 @@ func TestError(t *testing.T) {
 	str := "value"
 	err := &SConnError{str}
 	if err.Error() != errPrefix+str {
-		t.Error("incorrect err.Error()")
-		return
+		t.Fatal("incorrect err.Error()")
 	}
 }
 
@@ -84,8 +83,7 @@ func TestSettings(t *testing.T) {
 func testSettings(t *testing.T, n int) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Error("nothing panics")
-			return
+			t.Fatal("nothing panics")
 		}
 	}()
 	switch n {
@@ -161,13 +159,11 @@ func TestClosedConn(t *testing.T) {
 		testutils.TgAddrs[8],
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if err := conn.Close(); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -181,27 +177,23 @@ func TestClosedConn(t *testing.T) {
 	defer cancel()
 
 	if err := conn.WriteMessage(ctx, msg); err == nil {
-		t.Error("success write payload to closed connection")
-		return
+		t.Fatal("success write payload to closed connection")
 	}
 
 	readCh := make(chan struct{})
 	go func() { <-readCh }()
 
 	if _, err := conn.ReadMessage(ctx, readCh); err == nil {
-		t.Error("success read payload from closed connection")
-		return
+		t.Fatal("success read payload from closed connection")
 	}
 
 	sconn := conn.(*sConn)
 	if err := sconn.sendBytes(ctx, []byte("hello, world!")); err == nil {
-		t.Error("success send bytes to closed connection")
-		return
+		t.Fatal("success send bytes to closed connection")
 	}
 
 	if _, err := sconn.recvDataBytes(ctx, 128, time.Second); err == nil {
-		t.Error("success recv data bytes from closed connection")
-		return
+		t.Fatal("success recv data bytes from closed connection")
 	}
 }
 
@@ -223,8 +215,7 @@ func TestInvalidConn(t *testing.T) {
 		"INVALID_ADDRESS",
 	)
 	if err == nil {
-		t.Error("success connect to invalid address")
-		return
+		t.Fatal("success connect to invalid address")
 	}
 }
 
@@ -258,7 +249,6 @@ func TestReadMessage(t *testing.T) {
 		ctx := context.Background()
 		if _, err := conn.ReadMessage(ctx, ch); err == nil {
 			t.Error("success read message with invalid conn 1")
-			return
 		}
 	}()
 	<-ch
@@ -274,7 +264,6 @@ func TestReadMessage(t *testing.T) {
 		ctx := context.Background()
 		if _, err := conn.ReadMessage(ctx, ch); err == nil {
 			t.Error("success read message with invalid conn 2")
-			return
 		}
 	}()
 	<-ch
@@ -305,8 +294,7 @@ func TestRecvDataBytes(t *testing.T) {
 	cancel()
 
 	if _, err := conn.recvDataBytes(ctx, 1, 5*time.Second); err == nil {
-		t.Error("success recv data bytes with invalid conn 1")
-		return
+		t.Fatal("success recv data bytes with invalid conn 1")
 	}
 
 	rawConn.bodyPart = false
@@ -317,7 +305,6 @@ func TestRecvDataBytes(t *testing.T) {
 		ctx := context.Background()
 		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
 			t.Error("success recv data bytes with invalid conn 2")
-			return
 		}
 	}()
 	<-ch
@@ -345,13 +332,11 @@ func TestSendBytes(t *testing.T) {
 	cancel()
 
 	if err := conn.sendBytes(ctx, []byte{123}); err == nil {
-		t.Error("success send bytes with invalid conn 1")
-		return
+		t.Fatal("success send bytes with invalid conn 1")
 	}
 
 	if err := conn.sendBytes(context.Background(), []byte{123}); err == nil {
-		t.Error("success send bytes with invalid conn 2")
-		return
+		t.Fatal("success send bytes with invalid conn 2")
 	}
 }
 
@@ -381,7 +366,6 @@ func TestRecvHeadBytes(t *testing.T) {
 		ctx := context.Background()
 		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
 			t.Error("success recv head bytes with invalid conn 1")
-			return
 		}
 	}()
 	<-ch
@@ -392,7 +376,6 @@ func TestRecvHeadBytes(t *testing.T) {
 		ctx := context.Background()
 		if _, err := conn.recvHeadBytes(ctx, ch, 5*time.Second); err == nil {
 			t.Error("success recv head bytes with invalid conn 2")
-			return
 		}
 	}()
 	<-ch
@@ -424,15 +407,13 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		pAddr,
 	)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	socket := conn.GetSocket()
 	remoteAddr := strings.ReplaceAll(pAddr, "localhost", "127.0.0.1")
 	if socket.RemoteAddr().String() != remoteAddr {
-		t.Error("got incorrect remote address")
-		return
+		t.Fatal("got incorrect remote address")
 	}
 
 	msgSett := layer1.NewConstructSettings(&layer1.SConstructSettings{
@@ -443,8 +424,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 	msg := layer1.NewMessage(msgSett, pld)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	readCh := make(chan struct{})
@@ -452,21 +432,18 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 
 	msgRecv, err := conn.ReadMessage(ctx, readCh)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	if !bytes.Equal(msgRecv.GetPayload().GetBody(), []byte(tcBody)) {
-		t.Error("load payload not equal new payload")
-		return
+		t.Fatal("load payload not equal new payload")
 	}
 }
 
 func testNewService(t *testing.T, pAddr, pNetworkKey string) net.Listener {
 	listener, err := net.Listen("tcp", pAddr)
 	if err != nil {
-		t.Error(err)
-		return nil
+		t.Fatal(err)
 	}
 
 	go func() {

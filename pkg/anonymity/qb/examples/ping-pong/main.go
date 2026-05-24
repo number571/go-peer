@@ -6,7 +6,7 @@ import (
 	"time"
 
 	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
+	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/payload"
 )
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	handler = func(ctx context.Context, n anonymity.INode, pubKey asymmetric.IPubKey, b []byte) ([]byte, error) {
+	handler = func(ctx context.Context, n anonymity.INode, pKey layer2.IParticipantKey, b []byte) ([]byte, error) {
 		numBytes := [encoding.CSizeUint64]byte{}
 		copy(numBytes[:], b)
 
@@ -31,56 +31,52 @@ var (
 		numBytes = encoding.Uint64ToBytes(num + 1)
 		_ = n.SendPayload(
 			ctx,
-			pubKey,
+			pKey,
 			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 		)
 		return nil, nil
 	}
 )
 
+func init() {
+	printTagVersion()
+}
+
 func main() {
-	nodeService, nodeClient := runServiceNode(), runClientNode()
-	pubKeyService, _ := exchangeKeys(nodeService, nodeClient)
+	nodeService := runServiceNode()
+	nodeClient := runClientNode()
+
+	keyService, _ := exchangeKeys(nodeService, nodeClient)
 
 	numBytes := encoding.Uint64ToBytes(0)
-	_ = nodeClient.SendPayload(
+	_ = nodeClient.fAnonymity.SendPayload(
 		context.Background(),
-		pubKeyService,
+		keyService,
 		payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
 	)
 
 	select {}
 }
 
-func runClientNode() anonymity.INode {
+func runClientNode() *sNode {
 	ctx := context.Background()
-	network, node := newNode("cnode", "")
-	node.HandleFunc(nodeRouter, handler)
+	node := newNode("cnode", "")
+	node.fAnonymity.HandleFunc(nodeRouter, handler)
 
-	go func() { _ = node.Run(ctx) }()
-	_ = network.AddConnection(ctx, nodeAddress)
+	go func() { _ = node.fAnonymity.Run(ctx) }()
+	_ = node.fNetwork.AddConnection(ctx, nodeAddress)
 
 	return node
 }
 
-func runServiceNode() anonymity.INode {
+func runServiceNode() *sNode {
 	ctx := context.Background()
-	network, node := newNode("snode", nodeAddress)
-	node.HandleFunc(nodeRouter, handler)
+	node := newNode("snode", nodeAddress)
+	node.fAnonymity.HandleFunc(nodeRouter, handler)
 
-	go func() { _ = node.Run(ctx) }()
-	go func() { _ = network.Run(ctx) }()
+	go func() { _ = node.fAnonymity.Run(ctx) }()
+	go func() { _ = node.fNetwork.Run(ctx) }()
 
 	time.Sleep(time.Second) // wait listener
 	return node
-}
-
-func exchangeKeys(node1, node2 anonymity.INode) (asymmetric.IPubKey, asymmetric.IPubKey) {
-	pubKey1 := node1.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
-	pubKey2 := node2.GetQBProcessor().GetClient().GetPrivKey().GetPubKey()
-
-	node1.GetMapPubKeys().SetPubKey(pubKey2)
-	node2.GetMapPubKeys().SetPubKey(pubKey1)
-
-	return pubKey1, pubKey2
 }
