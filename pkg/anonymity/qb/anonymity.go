@@ -239,7 +239,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	scheme := p.fQBProcessor.GetScheme()
-	encMsg := pNetMsg.GetPayload().GetBody()
+	encMsg := pNetMsg.GetBody()
 
 	// check size on static payload structure.
 	if uint64(len(encMsg)) != scheme.GetMessageSize() {
@@ -281,9 +281,6 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 
 func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
 	settings := p.fQBProcessor.GetSettings()
-	if settings.GetNetworkMask() != pNetMsg.GetPayload().GetHead() {
-		return false
-	}
 	_, err := layer1.LoadMessage(
 		settings.GetMessageConstructSettings().GetSettings(),
 		pNetMsg.ToBytes(),

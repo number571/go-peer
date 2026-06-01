@@ -8,17 +8,15 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/puzzle"
 	"github.com/number571/go-peer/pkg/crypto/symmetric"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
-	// IV + Proof + HMAC + Payload32Head=[head]
-	// 16 + 8 + 48 + 4 = 76 additional bytes to origin message
+	// IV + Proof + HMAC
+	// 16 + 8 + 48 = 72 additional bytes to origin message
 	CMessageHeadSize = 0 +
 		1*symmetric.CCipherBlockSize +
 		1*encoding.CSizeUint64 +
-		1*hashing.CHasherSize +
-		1*encoding.CSizeUint32
+		1*hashing.CHasherSize
 )
 
 const (
@@ -31,21 +29,20 @@ var (
 )
 
 type sMessage struct {
-	fEncd    []byte             // E( K, P(HM) || HM || M )
-	fHash    []byte             // H( M )
-	fHmac    []byte             // HM = HMAC( K, M )
-	fProof   uint64             // P(HM)
-	fPayload payload.IPayload32 // M
+	fProof uint64 // P(HM)
+	fEncd  []byte // E( K, P(HM) || HM || M )
+	fHash  []byte // H( M )
+	fHmac  []byte // HM = HMAC( K, M )
+	fBody  []byte // M
 }
 
-func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
+func NewMessage(pSett IConstructSettings, pBody []byte) IMessage {
 	sett := pSett.GetSettings()
-	pldBytes := pPld.ToBytes()
-	hash := hashing.NewHasher(pldBytes).ToBytes()
+	hash := hashing.NewHasher(pBody).ToBytes()
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(sett.GetNetworkKey(), symmetric.CCipherKeySize)
-	hmac := hashing.NewHMACHasher(key, pldBytes).ToBytes()
+	hmac := hashing.NewHMACHasher(key, pBody).ToBytes()
 
 	proof := puzzle.NewPoWPuzzle(sett.GetWorkSizeBits()).ProofBytes(hmac, pSett.GetParallel())
 	proofBytes := encoding.Uint64ToBytes(proof)
@@ -56,14 +53,14 @@ func NewMessage(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
 			[][]byte{
 				proofBytes[:],
 				hmac,
-				pldBytes,
+				pBody,
 			},
 			[]byte{},
 		)),
-		fHash:    hash,
-		fHmac:    hmac,
-		fProof:   proof,
-		fPayload: pPld,
+		fHash:  hash,
+		fHmac:  hmac,
+		fProof: proof,
+		fBody:  pBody,
 	}
 }
 
@@ -97,24 +94,19 @@ func LoadMessage(pSett ISettings, pData interface{}) (IMessage, error) {
 		return nil, ErrInvalidProofOfWork
 	}
 
-	pldBytes := dBytes[cHashIndex:]
-	newHmac := hashing.NewHMACHasher(key, pldBytes).ToBytes()
+	body := dBytes[cHashIndex:]
+	newHmac := hashing.NewHMACHasher(key, body).ToBytes()
 	if !bytes.Equal(hmac, newHmac) {
 		return nil, ErrInvalidAuthHash
 	}
 
-	hash := hashing.NewHasher(pldBytes).ToBytes()
-	payload := payload.LoadPayload32(pldBytes)
-	if payload == nil {
-		return nil, ErrDecodePayload
-	}
-
+	hash := hashing.NewHasher(body).ToBytes()
 	return &sMessage{
-		fEncd:    msgBytes,
-		fHash:    hash,
-		fHmac:    hmac,
-		fProof:   proof,
-		fPayload: payload,
+		fEncd:  msgBytes,
+		fHash:  hash,
+		fHmac:  hmac,
+		fProof: proof,
+		fBody:  body,
 	}, nil
 }
 
@@ -130,8 +122,8 @@ func (p *sMessage) GetHmac() []byte {
 	return p.fHmac
 }
 
-func (p *sMessage) GetPayload() payload.IPayload32 {
-	return p.fPayload
+func (p *sMessage) GetBody() []byte {
+	return p.fBody
 }
 
 func (p *sMessage) ToBytes() []byte {

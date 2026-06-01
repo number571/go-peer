@@ -72,7 +72,7 @@ func TestNodeSettings(t *testing.T) {
 			layer1.NewConstructSettings(&layer1.SConstructSettings{
 				FSettings: layer1.NewSettings(&layer1.SSettings{}),
 			}),
-			payload.NewPayload32(0, []byte{}),
+			[]byte{},
 		),
 	)
 	if err == nil {
@@ -353,10 +353,6 @@ func TestHandleWrapper(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	netMsgX := node.testNewNetworkMessageWithInvalidNetworkMask(sett, msg)
-	if err := handler(ctx, netMsgX); err == nil {
-		t.Fatal("success handle message with invalid network mask")
-	}
 	netMsgY := node.testNewNetworkMessageWithAnotherMessageType(sett, msg)
 	if err := handler(ctx, netMsgY); err == nil {
 		t.Fatal("success handle message with another network type")
@@ -672,11 +668,12 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
+		func(_ context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
+			msgChan <- msg
+			return nil
+		},
 		cache.NewLRUCache(1024),
-	).HandleFunc(networkMask, func(_ context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
-		msgChan <- msg
-		return nil
-	})
+	)
 	node := NewNode(
 		NewSettings(&SSettings{
 			FServiceName:  "TEST",
@@ -750,20 +747,7 @@ func testDeleteDB(typeDB int) {
 func (p *sNode) testNewNetworkMessage(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
 	return layer1.NewMessage(
 		pSett,
-		payload.NewPayload32(
-			p.fQBProcessor.GetSettings().GetNetworkMask(),
-			pMsgBytes,
-		),
-	)
-}
-
-func (p *sNode) testNewNetworkMessageWithInvalidNetworkMask(pSett layer1.IConstructSettings, pMsgBytes []byte) layer1.IMessage {
-	return layer1.NewMessage(
-		pSett,
-		payload.NewPayload32(
-			p.fQBProcessor.GetSettings().GetNetworkMask()^1,
-			pMsgBytes,
-		),
+		pMsgBytes,
 	)
 }
 
@@ -774,10 +758,7 @@ func (p *sNode) testNewNetworkMessageWithAnotherMessageType(pSett layer1.IConstr
 				FNetworkKey: pSett.GetSettings().GetNetworkKey() + "_",
 			}),
 		}),
-		payload.NewPayload32(
-			p.fQBProcessor.GetSettings().GetNetworkMask()^1,
-			pMsgBytes,
-		),
+		pMsgBytes,
 	)
 }
 

@@ -135,6 +135,9 @@ func newTestConnKeeper(pDuration time.Duration) IConnKeeper {
 					FWriteTimeout:          time.Minute,
 				}),
 			}),
+			func(ctx context.Context, i1 network.INode, i2 conn.IConn, i3 layer1.IMessage) error {
+				return nil
+			},
 			cache.NewLRUCache(1024),
 		),
 	)

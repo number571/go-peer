@@ -1,15 +1,14 @@
 package layer1
 
 import (
-	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/types"
 )
 
 type IMessage interface {
 	types.IConverter
 
-	// payload = head(32bit) || body(Nbit)
-	GetPayload() payload.IPayload32
+	// body = payload
+	GetBody() []byte
 
 	// hash = H(payload)
 	GetHash() []byte

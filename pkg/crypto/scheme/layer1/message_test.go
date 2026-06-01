@@ -18,7 +18,6 @@ var (
 )
 
 const (
-	tcHead       = 12345
 	tcWorkSize   = 10
 	tcBody       = "hello, world!"
 	tcNetworkKey = "network_key_1"
@@ -71,7 +70,6 @@ func testSettings(t *testing.T, n int) {
 func TestMessage(t *testing.T) {
 	t.Parallel()
 
-	pld := payload.NewPayload32(tcHead, []byte(tcBody))
 	sett := NewConstructSettings(&SConstructSettings{
 		FSettings: NewSettings(&SSettings{
 			FWorkSizeBits: tcWorkSize,
@@ -79,8 +77,9 @@ func TestMessage(t *testing.T) {
 		}),
 	})
 
+	pld := []byte(tcBody)
 	msgTmp := NewMessage(sett, pld)
-	if !bytes.Equal(msgTmp.GetPayload().GetBody(), []byte(tcBody)) {
+	if !bytes.Equal(msgTmp.GetBody(), pld) {
 		t.Fatal("payload body not equal body in message")
 	}
 
@@ -93,7 +92,7 @@ func TestMessage(t *testing.T) {
 		t.Fatal("msgTmp != msg")
 	}
 
-	newHash := hashing.NewHasher(pld.ToBytes()).ToBytes()
+	newHash := hashing.NewHasher(pld).ToBytes()
 	if !bytes.Equal(msg.GetHash(), newHash) {
 		t.Fatal("payload hash not equal hash of message")
 	}
@@ -101,13 +100,9 @@ func TestMessage(t *testing.T) {
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
 
-	newHmac := hashing.NewHMACHasher(key, pld.ToBytes()).ToBytes()
+	newHmac := hashing.NewHMACHasher(key, pld).ToBytes()
 	if !bytes.Equal(msg.GetHmac(), newHmac) {
 		t.Fatal("payload hmac not equal hmac of message")
-	}
-
-	if msg.GetPayload().GetHead() != tcHead {
-		t.Fatal("payload head not equal head in message")
 	}
 
 	newSett := NewConstructSettings(&SConstructSettings{
@@ -132,7 +127,7 @@ func TestMessage(t *testing.T) {
 		if len(msgN.ToBytes()) != len(msgL.ToBytes()) {
 			t.Fatal("new msg size != load msg size")
 		}
-		if len(msgN.ToBytes()) != CMessageHeadSize+len(pld.GetBody()) {
+		if len(msgN.ToBytes()) != CMessageHeadSize+len(pld) {
 			t.Fatal("msg size != head size + payload body")
 		}
 		break
@@ -142,7 +137,7 @@ func TestMessage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(msg.GetPayload().ToBytes(), msg1.GetPayload().ToBytes()) {
+	if !bytes.Equal(msg.GetBody(), msg1.GetBody()) {
 		t.Fatal("load message not equal new message")
 	}
 
@@ -150,7 +145,7 @@ func TestMessage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(msg.GetPayload().ToBytes(), msg2.GetPayload().ToBytes()) {
+	if !bytes.Equal(msg.GetBody(), msg2.GetBody()) {
 		t.Fatal("load message not equal new message")
 	}
 
@@ -202,10 +197,10 @@ func TestMessage(t *testing.T) {
 	}
 }
 
-func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
+func tNewInvalidMessage1(pSett IConstructSettings, pPld []byte) IMessage {
 	sett := pSett.GetSettings()
 
-	bytesJoiner := pPld.ToBytes()
+	bytesJoiner := pPld
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
@@ -226,16 +221,16 @@ func tNewInvalidMessage1(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			},
 			[]byte{},
 		)),
-		fHash:    hash,
-		fProof:   proof,
-		fPayload: pPld,
+		fHash:  hash,
+		fProof: proof,
+		fBody:  pPld,
 	}
 }
 
-func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMessage {
+func tNewInvalidMessage2(pSett IConstructSettings, pPld []byte) IMessage {
 	sett := pSett.GetSettings()
 
-	bytesJoiner := []byte{}
+	bytesJoiner := []byte{111}
 
 	keyBuilder := keybuilder.NewKeyBuilder(0, []byte{}) // the network_key must have good entropy
 	key := keyBuilder.Build(tcNetworkKey, symmetric.CCipherKeySize)
@@ -250,12 +245,12 @@ func tNewInvalidMessage2(pSett IConstructSettings, pPld payload.IPayload32) IMes
 			[][]byte{
 				proofBytes[:],
 				hash,
-				bytesJoiner,
+				pPld,
 			},
 			[]byte{},
 		)),
-		fHash:    hash,
-		fProof:   proof,
-		fPayload: pPld,
+		fHash:  hash,
+		fProof: proof,
+		fBody:  pPld,
 	}
 }

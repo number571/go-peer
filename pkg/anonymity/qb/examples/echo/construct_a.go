@@ -59,13 +59,11 @@ func newNode(serviceName, address string) *sNode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		cache.NewLRUCache(1024),
-	).HandleFunc(
-		networkMask,
 		func(ctx context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
 			msgChan <- msg
 			return nil
 		},
+		cache.NewLRUCache(1024),
 	)
 	anonymityNode := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{

@@ -12,7 +12,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 )
 
@@ -212,7 +211,7 @@ func (p *sQBProblemProcessor) pushMessage(pCtx context.Context, pQueue chan<- la
 	go func() {
 		chNetMsg <- layer1.NewMessage(
 			p.fSettings.GetMessageConstructSettings(),
-			payload.NewPayload32(p.fSettings.GetNetworkMask(), pMsg),
+			pMsg,
 		)
 	}()
 	select {

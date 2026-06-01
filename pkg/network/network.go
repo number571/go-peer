@@ -18,12 +18,12 @@ var (
 )
 
 type sNode struct {
-	fMutex        sync.RWMutex
-	fSettings     ISettings
-	fListener     net.Listener
-	fCacheSetter  cache.ICacheSetter
-	fConnections  map[string]conn.IConn
-	fHandleRoutes map[uint32]IHandlerF
+	fMutex       sync.RWMutex
+	fSettings    ISettings
+	fHandlerF    IHandlerF
+	fListener    net.Listener
+	fCacheSetter cache.ICacheSetter
+	fConnections map[string]conn.IConn
 }
 
 // Creating a node object managed by connections with multiple nodes.
@@ -31,13 +31,14 @@ type sNode struct {
 // Redirects messages to handle routers by keys.
 func NewNode(
 	pSettings ISettings,
+	pHandlerF IHandlerF,
 	pCacheSetter cache.ICacheSetter,
 ) INode {
 	return &sNode{
-		fSettings:     pSettings,
-		fCacheSetter:  pCacheSetter,
-		fConnections:  make(map[string]conn.IConn, pSettings.GetMaxConnects()),
-		fHandleRoutes: make(map[uint32]IHandlerF, 64),
+		fSettings:    pSettings,
+		fHandlerF:    pHandlerF,
+		fCacheSetter: pCacheSetter,
+		fConnections: make(map[string]conn.IConn, pSettings.GetMaxConnects()),
 	}
 }
 
@@ -149,15 +150,6 @@ func (p *sNode) Run(pCtx context.Context) error {
 			go p.handleConn(pCtx, address, conn)
 		}
 	}
-}
-
-// Saves the function to the map by key for subsequent redirection.
-func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fHandleRoutes[pHead] = pHandle
-	return p
 }
 
 // Retrieves the entire list of connections with addresses.
@@ -283,13 +275,7 @@ func (p *sNode) handleMessage(pCtx context.Context, pConn conn.IConn, pMsg layer
 	if !p.fCacheSetter.Set(hash, []byte{}) {
 		return true // hash of message already in queue
 	}
-
-	f, ok := p.getFunction(pMsg.GetPayload().GetHead())
-	if !ok || f == nil {
-		return false // function is not found = protocol error
-	}
-
-	err := f(pCtx, p, pConn, pMsg)
+	err := p.fHandlerF(pCtx, p, pConn, pMsg)
 	return err == nil // function error = protocol error
 }
 
@@ -317,15 +303,6 @@ func (p *sNode) setConnection(pAddress string, pConn conn.IConn) {
 	defer p.fMutex.Unlock()
 
 	p.fConnections[pAddress] = pConn
-}
-
-// Gets the handler function by key.
-func (p *sNode) getFunction(pHead uint32) (IHandlerF, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	f, ok := p.fHandleRoutes[pHead]
-	return f, ok
 }
 
 // Sets the listener.

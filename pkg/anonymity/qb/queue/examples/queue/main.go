@@ -60,12 +60,12 @@ func main() {
 		if netMsg == nil {
 			panic("net message is nil")
 		}
-		if uint64(len(netMsg.GetPayload().GetBody())) != (q.GetScheme().GetMessageSize()) {
+		if uint64(len(netMsg.GetBody())) != (q.GetScheme().GetMessageSize()) {
 			panic("payload size is invalid")
 		}
 		pubKey, decMsg, err := q.GetScheme().DecryptMessage(
 			layer2.NewKeysContainer(privKey.GetPubKey()),
-			netMsg.GetPayload().GetBody(),
+			netMsg.GetBody(),
 		)
 		if err != nil {
 			panic(err)

@@ -6,6 +6,11 @@
 
 *??? ??, ????*
 
+### CHANGES
+
+- `pkg/crypto/scheme/layer1`: Payload32 -> []byte
+- `pkg/network`: deleted HandleFunc
+
 <!-- ... -->
 
 ## v1.7.16
