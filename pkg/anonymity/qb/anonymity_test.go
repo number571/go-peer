@@ -649,7 +649,6 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 	privKey := asymmetric.NewPrivKey()
 	msgChan := make(chan layer1.IMessage)
 	parallel := uint64(1)
-	networkMask := uint32(1)
 	limitVoidSize := uint64(10_000)
 	networkNode := network.NewNode(
 		network.NewSettings(&network.SSettings{
@@ -708,7 +707,6 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 					}),
 					FParallel: parallel,
 				}),
-				FNetworkMask:  networkMask,
 				FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 				FQueuePeriod:  time.Second,
 				FConsumersCap: 1,

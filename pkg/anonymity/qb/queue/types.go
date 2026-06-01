@@ -21,7 +21,6 @@ type IQBProblemProcessor interface {
 
 type ISettings interface {
 	GetMessageConstructSettings() layer1.IConstructSettings
-	GetNetworkMask() uint32
 	GetConsumersCap() uint64
 	GetQueuePeriod() time.Duration
 	GetQueuePoolCap() [2]uint64

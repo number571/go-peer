@@ -24,9 +24,8 @@ import (
 )
 
 const (
-	networkMask = uint32(0x11223344)
-	msgSize     = uint64(8192)
-	workSize    = uint64(10)
+	msgSize  = uint64(8192)
+	workSize = uint64(10)
 )
 
 type sNode struct {
@@ -120,7 +119,6 @@ func newNode(serviceName, address string) *sNode {
 						FWorkSizeBits: workSize,
 					}),
 				}),
-				FNetworkMask:  networkMask,
 				FQueuePeriod:  2 * time.Second,
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},

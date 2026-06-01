@@ -13,7 +13,6 @@ var (
 type SSettings sSettings
 type sSettings struct {
 	FMessageConstructSettings layer1.IConstructSettings
-	FNetworkMask              uint32
 	FConsumersCap             uint64
 	FQueuePoolCap             [2]uint64
 	FQueuePeriod              time.Duration
@@ -22,7 +21,6 @@ type sSettings struct {
 func NewSettings(pSett *SSettings) ISettings {
 	return (&sSettings{
 		FMessageConstructSettings: pSett.FMessageConstructSettings,
-		FNetworkMask:              pSett.FNetworkMask,
 		FConsumersCap:             pSett.FConsumersCap,
 		FQueuePoolCap:             pSett.FQueuePoolCap,
 		FQueuePeriod:              pSett.FQueuePeriod,
@@ -48,10 +46,6 @@ func (p *sSettings) mustNotNull() ISettings {
 
 func (p *sSettings) GetMessageConstructSettings() layer1.IConstructSettings {
 	return p.FMessageConstructSettings
-}
-
-func (p *sSettings) GetNetworkMask() uint32 {
-	return p.FNetworkMask
 }
 
 func (p *sSettings) GetQueuePoolCap() [2]uint64 {
