@@ -29,6 +29,7 @@ type sNode struct {
 	fMutex         sync.RWMutex
 	fState         state.IState
 	fSettings      ISettings
+	fHandlerF      IHandlerF
 	fLogger        logger.ILogger
 	fAdapter       adapters.IAdapter
 	fKVDatavase    database.IKVDatabase
@@ -40,6 +41,7 @@ type sNode struct {
 
 func NewNode(
 	pSett ISettings,
+	pHandlerF IHandlerF,
 	pLogger logger.ILogger,
 	pAdapter adapters.IAdapter,
 	pKVDatavase database.IKVDatabase,
@@ -49,6 +51,7 @@ func NewNode(
 	return &sNode{
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
+		fHandlerF:      pHandlerF,
 		fLogger:        pLogger,
 		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
@@ -154,11 +157,6 @@ func (p *sNode) GetQBProcessor() queue.IQBProblemProcessor {
 // Return f2f structure.
 func (p *sNode) GetKeysContainer() layer2.IKeysContainer {
 	return p.fKeysContainer
-}
-
-func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
-	p.setRoute(pHead, pHandle)
-	return p
 }
 
 // Send message without response waiting.
@@ -338,15 +336,8 @@ func (p *sNode) handleRequest(
 	pHead iHead,
 	pBody []byte,
 ) {
-	// get function by payload head
-	f, ok := p.getRoute(pHead.getRoute())
-	if !ok || f == nil {
-		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
-		return
-	}
-
 	// response can be nil
-	resp, err := f(pCtx, p, pSender, pBody)
+	resp, err := p.fHandlerF(pCtx, p, pSender, pBody)
 	if err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
 		return
@@ -457,21 +448,6 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pNetM
 		return errors.Join(ErrSetHashIntoDB, err)
 	}
 	return nil
-}
-
-func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fHandleRoutes[pHead] = pHandle
-}
-
-func (p *sNode) getRoute(pHead uint32) (IHandlerF, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	f, ok := p.fHandleRoutes[pHead]
-	return f, ok
 }
 
 func (p *sNode) getAction(pActionKey string) (chan []byte, bool) {

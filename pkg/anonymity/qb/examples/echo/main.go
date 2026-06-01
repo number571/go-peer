@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	anonymity "github.com/number571/go-peer/pkg/anonymity/qb"
-	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/payload"
 )
 
@@ -49,12 +47,6 @@ func runClientNode() *sNode {
 func runServiceNode() *sNode {
 	ctx := context.Background()
 	node := newNode("snode", nodeAddress)
-	node.fAnonymity.HandleFunc(
-		nodeRouter,
-		func(_ context.Context, _ anonymity.INode, _ layer2.IParticipantKey, b []byte) ([]byte, error) {
-			return []byte("echo: " + string(b)), nil
-		},
-	)
 
 	go func() { _ = node.fAnonymity.Run(ctx) }()
 	go func() { _ = node.fNetwork.Run(ctx) }()

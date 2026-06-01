@@ -19,7 +19,6 @@ type (
 
 type INode interface {
 	types.IRunner
-	HandleFunc(uint32, IHandlerF) INode
 
 	GetLogger() logger.ILogger
 	GetSettings() ISettings

@@ -56,7 +56,9 @@ func TestNodeSettings(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node, _, _ := testRunNodeWithDB(ctx, time.Minute, "", &tsDatabase{})
+	node, _, _ := testRunNodeWithDB(ctx, time.Minute, "", &tsDatabase{}, func(ctx context.Context, i INode, ik layer2.IParticipantKey, b []byte) ([]byte, error) {
+		return nil, nil
+	})
 	defer testFreeNodes([]INode{node}, 9)
 
 	sett := node.GetSettings()
@@ -107,7 +109,9 @@ func TestComplexFetchPayload(t *testing.T) {
 	defer cancel()
 
 	addresses := [2]string{testutils.TgAddrs[2], testutils.TgAddrs[3]}
-	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 0)
+	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 0, func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		return []byte(string(reqBytes) + " (response)"), nil
+	})
 	if nodes[0] == nil {
 		t.Fatal("nodes is null")
 	}
@@ -150,7 +154,9 @@ func TestF2FWithoutFriends(t *testing.T) {
 
 	// 3 seconds for wait
 	addresses := [2]string{testutils.TgAddrs[10], testutils.TgAddrs[11]}
-	nodes, privKeys := testRunNodes(ctx, t, 3*time.Second, addresses, 1)
+	nodes, privKeys := testRunNodes(ctx, t, 3*time.Second, addresses, 1, func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		return []byte(string(reqBytes) + " (response)"), nil
+	})
 	if nodes[0] == nil {
 		t.Fatal("nodes is null")
 	}
@@ -179,18 +185,13 @@ func TestFetchPayload(t *testing.T) {
 	defer cancel()
 
 	addresses := [2]string{testutils.TgAddrs[12], testutils.TgAddrs[13]}
-	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 4)
+	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 4, func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
+	})
 	if nodes[0] == nil {
 		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 4)
-
-	nodes[1].HandleFunc(
-		tcHead,
-		func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
-			return []byte(fmt.Sprintf("echo: '%s'", string(reqBytes))), nil
-		},
-	)
 
 	largeBodySize := nodes[0].GetQBProcessor().GetScheme().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	_, err := nodes[0].FetchPayload(
@@ -222,22 +223,17 @@ func TestBroadcastPayload(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	chResult := make(chan string)
 	addresses := [2]string{testutils.TgAddrs[14], testutils.TgAddrs[15]}
-	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 3)
+	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 3, func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		res := fmt.Sprintf("echo: '%s'", string(reqBytes))
+		go func() { chResult <- res }()
+		return nil, nil
+	})
 	if nodes[0] == nil {
 		t.Fatal("nodes is null")
 	}
 	defer testFreeNodes(nodes[:], 3)
-
-	chResult := make(chan string)
-	nodes[1].HandleFunc(
-		tcHead,
-		func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
-			res := fmt.Sprintf("echo: '%s'", string(reqBytes))
-			go func() { chResult <- res }()
-			return nil, nil
-		},
-	)
 
 	largeBodySize := nodes[0].GetQBProcessor().GetScheme().GetPayloadLimit() - encoding.CSizeUint64 + 1
 	err := nodes[0].SendPayload(
@@ -276,7 +272,9 @@ func TestEnqueuePayload(t *testing.T) {
 	defer cancel()
 
 	addresses := [2]string{testutils.TgAddrs[16], testutils.TgAddrs[17]}
-	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 8)
+	nodes, privKeys := testRunNodes(ctx, t, time.Minute, addresses, 8, func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
+		return []byte(string(reqBytes) + " (response)"), nil
+	})
 	if nodes[0] == nil {
 		t.Fatal("nodes is null")
 	}
@@ -321,7 +319,9 @@ func TestHandleWrapper(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_node, _, privKey := testRunNode(ctx, time.Minute, "", 7, 0)
+	_node, _, privKey := testRunNode(ctx, time.Minute, "", 7, 0, func(_ context.Context, _ INode, _ layer2.IParticipantKey, _ []byte) ([]byte, error) {
+		return nil, errors.New("some error") //nolint:err113
+	})
 	defer testFreeNodes([]INode{_node}, 7)
 
 	node := _node.(*sNode)
@@ -371,13 +371,6 @@ func TestHandleWrapper(t *testing.T) {
 	if err := handler(ctx, netMsgWithoutPld); err != nil {
 		t.Fatal(err) // works only logger
 	}
-
-	node.HandleFunc(
-		111,
-		func(_ context.Context, _ INode, _ layer2.IParticipantKey, _ []byte) ([]byte, error) {
-			return nil, errors.New("some error") //nolint:err113
-		},
-	)
 
 	msg2, err := scheme.EncryptMessage(
 		pubKey,
@@ -445,7 +438,9 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_node, _, privKey := testRunNode(ctx, time.Minute, "", 6, 0)
+	_node, _, privKey := testRunNode(ctx, time.Minute, "", 6, 0, func(ctx context.Context, i INode, ik layer2.IParticipantKey, b []byte) ([]byte, error) {
+		return nil, nil
+	})
 	defer testFreeNodes([]INode{_node}, 6)
 
 	node := _node.(*sNode)
@@ -487,7 +482,9 @@ func TestRecvSendMessage(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_node, _, privKey := testRunNode(ctx, time.Minute, "", 5, 0)
+	_node, _, privKey := testRunNode(ctx, time.Minute, "", 5, 0, func(ctx context.Context, i INode, ik layer2.IParticipantKey, b []byte) ([]byte, error) {
+		return nil, nil
+	})
 	defer testFreeNodes([]INode{_node}, 5)
 
 	node := _node.(*sNode)
@@ -549,14 +546,14 @@ func TestRecvSendMessage(t *testing.T) {
 // nodes[2], nodes[3], nodes[4] = routes
 // nodes[2], nodes[4] are have open ports
 // Scheme: (nodes[0]) -> nodes[2] -> nodes[3] -> nodes[4] -> (nodes[1])
-func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int) ([5]INode, [5]asymmetric.IPrivKey) {
+func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, addresses [2]string, typeDB int, handlerF IHandlerF) ([5]INode, [5]asymmetric.IPrivKey) {
 	nodes := [5]INode{}
 	networkNodes := [5]network.INode{}
 	privKeys := [5]asymmetric.IPrivKey{}
 	addrs := [5]string{"", "", addresses[0], "", addresses[1]}
 
 	for i := 0; i < 5; i++ {
-		nodes[i], networkNodes[i], privKeys[i] = testRunNode(ctx, timeWait, addrs[i], typeDB, i)
+		nodes[i], networkNodes[i], privKeys[i] = testRunNode(ctx, timeWait, addrs[i], typeDB, i, handlerF)
 		if nodes[i] == nil {
 			t.Errorf("node (%d) is not running %d", i, typeDB)
 			return [5]INode{}, [5]asymmetric.IPrivKey{}
@@ -568,16 +565,6 @@ func testRunNodes(ctx context.Context, t *testing.T, timeWait time.Duration, add
 
 	nodes[0].GetKeysContainer().Add(pubKey1)
 	nodes[1].GetKeysContainer().Add(pubKey0)
-
-	for _, node := range nodes {
-		node.HandleFunc(
-			tcHead,
-			func(_ context.Context, _ INode, _ layer2.IParticipantKey, reqBytes []byte) ([]byte, error) {
-				// send response
-				return []byte(string(reqBytes) + " (response)"), nil
-			},
-		)
-	}
 
 	go func() {
 		if err := networkNodes[2].Run(ctx); err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, context.Canceled) {
@@ -645,7 +632,7 @@ func (p *stLogging) HasErro() bool {
 }
 */
 
-func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string, db database.IKVDatabase) (INode, network.INode, asymmetric.IPrivKey) {
+func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string, db database.IKVDatabase, handlerF IHandlerF) (INode, network.INode, asymmetric.IPrivKey) {
 	privKey := asymmetric.NewPrivKey()
 	msgChan := make(chan layer1.IMessage)
 	parallel := uint64(1)
@@ -678,6 +665,7 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 			FServiceName:  "TEST",
 			FFetchTimeout: timeWait,
 		}),
+		handlerF,
 		// internal_std_logger.NewStdLogger(&stLogging{}, internal_anon_logger.GetLogFunc()),
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{}),
@@ -721,12 +709,12 @@ func testRunNodeWithDB(ctx context.Context, timeWait time.Duration, addr string,
 	return node, networkNode, privKey
 }
 
-func testRunNode(ctx context.Context, timeWait time.Duration, addr string, typeDB, numDB int) (INode, network.INode, asymmetric.IPrivKey) {
+func testRunNode(ctx context.Context, timeWait time.Duration, addr string, typeDB, numDB int, handlerF IHandlerF) (INode, network.INode, asymmetric.IPrivKey) {
 	db, err := database.NewKVDatabase(fmt.Sprintf(tcPathDBTemplate, typeDB, numDB))
 	if err != nil {
 		panic(err)
 	}
-	return testRunNodeWithDB(ctx, timeWait, addr, db)
+	return testRunNodeWithDB(ctx, timeWait, addr, db, handlerF)
 }
 
 func testFreeNodes(nodes []INode, typeDB int) {

@@ -69,6 +69,9 @@ func newNode(serviceName, address string) *sNode {
 			FServiceName:  serviceName,
 			FFetchTimeout: time.Minute,
 		}),
+		func(_ context.Context, _ anonymity.INode, _ layer2.IParticipantKey, b []byte) ([]byte, error) {
+			return []byte("echo: " + string(b)), nil
+		},
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{
 				FInfo: os.Stdout,

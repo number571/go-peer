@@ -16,9 +16,11 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
+	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -69,6 +71,7 @@ func newNode(serviceName, address string) *sNode {
 			FServiceName:  serviceName,
 			FFetchTimeout: time.Minute,
 		}),
+		handler,
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{
 				FInfo: os.Stdout,
@@ -141,3 +144,25 @@ func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticip
 
 	return pubKey1, pubKey2
 }
+
+var (
+	handler = func(ctx context.Context, n anonymity.INode, pKey layer2.IParticipantKey, b []byte) ([]byte, error) {
+		numBytes := [encoding.CSizeUint64]byte{}
+		copy(numBytes[:], b)
+
+		num := encoding.BytesToUint64(numBytes)
+		msg := "ping"
+		if num%2 == 1 {
+			msg = "pong"
+		}
+		fmt.Printf("%s-%d\n", msg, num)
+
+		numBytes = encoding.Uint64ToBytes(num + 1)
+		_ = n.SendPayload(
+			ctx,
+			pKey,
+			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
+		)
+		return nil, nil
+	}
+)
