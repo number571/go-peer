@@ -5,12 +5,10 @@ import (
 	"time"
 
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
 	nodeAddress = "127.0.0.1:8080"
-	nodeRouter  = uint32(0xA557711A)
 )
 
 func init() {
@@ -27,7 +25,7 @@ func main() {
 	_ = nodeClient.fAnonymity.SendPayload(
 		context.Background(),
 		keyService,
-		payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
+		numBytes[:],
 	)
 
 	select {}

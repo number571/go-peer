@@ -129,7 +129,7 @@ func TestComplexFetchPayload(t *testing.T) {
 			resp, err := nodes[0].FetchPayload(
 				ctx,
 				privKeys[1].GetPubKey(),
-				payload.NewPayload32(tcHead, []byte(reqBody)),
+				[]byte(reqBody),
 			)
 			if err != nil {
 				t.Errorf("%s (%d)", err.Error(), i)
@@ -169,7 +169,7 @@ func TestF2FWithoutFriends(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		privKeys[1].GetPubKey(),
-		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
+		[]byte(tcMsgBody),
 	)
 	if err != nil {
 		return
@@ -197,7 +197,7 @@ func TestFetchPayload(t *testing.T) {
 	_, err := nodes[0].FetchPayload(
 		ctx,
 		privKeys[1].GetPubKey(),
-		payload.NewPayload32(tcHead, random.NewRandom().GetBytes(largeBodySize)),
+		random.NewRandom().GetBytes(largeBodySize),
 	)
 	if err == nil {
 		t.Fatal("success fetch payload with large body")
@@ -206,7 +206,7 @@ func TestFetchPayload(t *testing.T) {
 	result, err1 := nodes[0].FetchPayload(
 		ctx,
 		privKeys[1].GetPubKey(),
-		payload.NewPayload32(tcHead, []byte(tcMsgBody)),
+		[]byte(tcMsgBody),
 	)
 	if err1 != nil {
 		t.Fatal(err1)
@@ -239,7 +239,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err := nodes[0].SendPayload(
 		context.Background(),
 		privKeys[1].GetPubKey(),
-		payload.NewPayload64(uint64(tcHead), random.NewRandom().GetBytes(largeBodySize)),
+		random.NewRandom().GetBytes(largeBodySize),
 	)
 	if err == nil {
 		t.Fatal("success broadcast payload with large body")
@@ -248,7 +248,7 @@ func TestBroadcastPayload(t *testing.T) {
 	err1 := nodes[0].SendPayload(
 		context.Background(),
 		privKeys[1].GetPubKey(),
-		payload.NewPayload64(uint64(tcHead), []byte(tcMsgBody)),
+		[]byte(tcMsgBody),
 	)
 	if err1 != nil {
 		t.Fatal(err1)
@@ -293,7 +293,7 @@ func TestEnqueuePayload(t *testing.T) {
 	}
 
 	pldBytes := payload.NewPayload64(
-		joinHead(sAction(1).setType(true), tcHead).uint64(),
+		setRequestBit(tcHead),
 		[]byte(tcMsgBody),
 	).ToBytes()
 
@@ -340,7 +340,7 @@ func TestHandleWrapper(t *testing.T) {
 	msg, err := scheme.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), tcHead).uint64(),
+			setRequestBit(tcHead),
 			[]byte(tcMsgBody),
 		).ToBytes(),
 	)
@@ -375,7 +375,7 @@ func TestHandleWrapper(t *testing.T) {
 	msg2, err := scheme.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), 111).uint64(),
+			setRequestBit(111),
 			[]byte(tcMsgBody),
 		).ToBytes(),
 	)
@@ -407,7 +407,7 @@ func TestHandleWrapper(t *testing.T) {
 	msg4, err := scheme.EncryptMessage(
 		pubKey,
 		payload.NewPayload64(
-			joinHead(sAction(1).setType(false), 111).uint64(),
+			setResponseBit(111),
 			[]byte(tcMsgBody),
 		).ToBytes(),
 	)
@@ -449,7 +449,7 @@ func TestStoreHashWithBroadcastMessage(t *testing.T) {
 	msg, err := scheme.EncryptMessage(
 		privKey.GetPubKey(),
 		payload.NewPayload64(
-			joinHead(sAction(1).setType(true), 111).uint64(),
+			setRequestBit(111),
 			[]byte(tcMsgBody),
 		).ToBytes(),
 	)
@@ -493,7 +493,7 @@ func TestRecvSendMessage(t *testing.T) {
 	}
 
 	pubKey := privKey.GetPubKey()
-	actionKey := newActionKey(pubKey, sAction(111).setType(true))
+	actionKey := newActionKey(pubKey, setRequestBit(111))
 
 	node.setAction(actionKey)
 	action, ok := node.getAction(actionKey)
@@ -518,7 +518,7 @@ func TestRecvSendMessage(t *testing.T) {
 
 	msgBody := "hello, world!"
 	pldBytes := payload.NewPayload64(
-		joinHead(sAction(1).setType(true), tcHead).uint64(),
+		setRequestBit(tcHead),
 		[]byte(msgBody),
 	).ToBytes()
 

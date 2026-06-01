@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
@@ -28,7 +26,7 @@ func main() {
 		resp, _ := nodeClient.fAnonymity.FetchPayload(
 			ctx,
 			keyToService,
-			payload.NewPayload32(nodeRouter, []byte("hello, world!")),
+			[]byte("hello, world!"),
 		)
 		fmt.Println(string(resp))
 	}

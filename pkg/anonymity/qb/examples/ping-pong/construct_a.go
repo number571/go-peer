@@ -20,7 +20,6 @@ import (
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
-	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/storage/cache"
 	"github.com/number571/go-peer/pkg/storage/database"
 )
@@ -161,7 +160,7 @@ var (
 		_ = n.SendPayload(
 			ctx,
 			pKey,
-			payload.NewPayload64(uint64(nodeRouter), numBytes[:]),
+			numBytes[:],
 		)
 		return nil, nil
 	}
