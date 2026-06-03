@@ -10,6 +10,9 @@
 
 - `pkg/crypto/scheme/layer1`: Payload32 -> []byte
 - `pkg/network`: deleted HandleFunc
+- `pkg/anonymity/qb`: deleted HandleFunc
+- `pkg/anonymity/qb`: change alg fetch request/response
+- `pkg/anonymity/qb`: SendPayload, FetchPayload: []byte
 
 <!-- ... -->
 

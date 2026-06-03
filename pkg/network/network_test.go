@@ -234,39 +234,6 @@ func TestNodeConnection(t *testing.T) {
 	}
 }
 
-// func TestHandleMessage(t *testing.T) {
-// 	t.Parallel()
-
-// 	node := newTestNode("", 16).(*sNode)
-
-// 	ctx := context.Background()
-// 	sett := layer1.NewConstructSettings(&layer1.SConstructSettings{
-// 		FSettings: node.GetSettings().GetConnSettings().GetMessageSettings(),
-// 	})
-
-// 	node.HandleFunc(1, nil)
-// 	msg1 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{1}))
-// 	if ok := node.handleMessage(ctx, nil, msg1); ok {
-// 		t.Fatal("success handle message with nil function")
-// 	}
-
-// 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
-// 		return errors.New("some error") //nolint:err113
-// 	})
-// 	msg2 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{2}))
-// 	if ok := node.handleMessage(ctx, nil, msg2); ok {
-// 		t.Fatal("success handle message with got error from function")
-// 	}
-
-// 	node.HandleFunc(1, func(_ context.Context, _ INode, _ conn.IConn, _ layer1.IMessage) error {
-// 		return nil
-// 	})
-// 	msg3 := layer1.NewMessage(sett, payload.NewPayload32(1, []byte{3}))
-// 	if ok := node.handleMessage(ctx, nil, msg3); !ok {
-// 		t.Fatal("failed handle message with correct function")
-// 	}
-// }
-
 func TestNodeSettings(t *testing.T) {
 	t.Parallel()
 
