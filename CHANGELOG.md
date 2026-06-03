@@ -2,9 +2,23 @@
 
 <!-- ... -->
 
-## v1.7.17~
+## v1.7.18~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.17
+
+*June 03, 2026*
+
+### CHANGES
+
+- `pkg/crypto/scheme/layer1`: Payload32 -> []byte
+- `pkg/network`: deleted HandleFunc
+- `pkg/anonymity/qb`: deleted HandleFunc
+- `pkg/anonymity/qb`: change alg fetch request/response
+- `pkg/anonymity/qb`: SendPayload, FetchPayload: []byte
 
 <!-- ... -->
 

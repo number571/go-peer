@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
-	"github.com/number571/go-peer/pkg/payload"
 )
 
 const (
@@ -31,7 +30,7 @@ func TestAdapter(t *testing.T) {
 		layer1.NewConstructSettings(&layer1.SConstructSettings{
 			FSettings: layer1.NewSettings(&layer1.SSettings{}),
 		}),
-		payload.NewPayload32(0x01, []byte(tcMessage)),
+		[]byte(tcMessage),
 	))
 	if err != nil {
 		t.Fatal(err)
@@ -41,7 +40,7 @@ func TestAdapter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(msg.GetPayload().GetBody(), []byte(tcMessage)) {
+	if !bytes.Equal(msg.GetBody(), []byte(tcMessage)) {
 		t.Fatal("consume invalid message")
 	}
 }

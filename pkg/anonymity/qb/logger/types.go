@@ -1,9 +1,5 @@
 package logger
 
-import (
-	"github.com/number571/go-peer/pkg/crypto/asymmetric"
-)
-
 type (
 	ILogType uint8
 )
@@ -44,7 +40,6 @@ type ILogBuilder interface {
 	WithProof(uint64) ILogBuilder
 	WithHash([]byte) ILogBuilder
 	WithConn(string) ILogBuilder
-	WithPubKey(asymmetric.IPubKey) ILogBuilder
 }
 
 type ILogGetter interface {
@@ -54,5 +49,4 @@ type ILogGetter interface {
 	GetProof() uint64
 	GetHash() []byte
 	GetConn() string
-	GetPubKey() asymmetric.IPubKey
 }

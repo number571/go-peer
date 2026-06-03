@@ -160,7 +160,6 @@ func TestQueue(t *testing.T) {
 					FWorkSizeBits: 10,
 				}),
 			}),
-			FNetworkMask:  1,
 			FQueuePoolCap: [2]uint64{tcQueueCap, tcQueueCap},
 			FQueuePeriod:  100 * time.Millisecond,
 			FConsumersCap: 1,

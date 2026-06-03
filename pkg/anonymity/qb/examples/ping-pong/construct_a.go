@@ -16,6 +16,7 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2/hybrid"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/network"
 	"github.com/number571/go-peer/pkg/network/conn"
@@ -24,9 +25,8 @@ import (
 )
 
 const (
-	networkMask = uint32(0x11223344)
-	msgSize     = uint64(8192)
-	workSize    = uint64(10)
+	msgSize  = uint64(8192)
+	workSize = uint64(10)
 )
 
 type sNode struct {
@@ -59,19 +59,18 @@ func newNode(serviceName, address string) *sNode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		cache.NewLRUCache(1024),
-	).HandleFunc(
-		networkMask,
 		func(ctx context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
 			msgChan <- msg
 			return nil
 		},
+		cache.NewLRUCache(1024),
 	)
 	anonymityNode := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  serviceName,
 			FFetchTimeout: time.Minute,
 		}),
+		handler,
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{
 				FInfo: os.Stdout,
@@ -122,7 +121,6 @@ func newNode(serviceName, address string) *sNode {
 						FWorkSizeBits: workSize,
 					}),
 				}),
-				FNetworkMask:  networkMask,
 				FQueuePeriod:  2 * time.Second,
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
@@ -145,3 +143,25 @@ func exchangeKeys(node1, node2 *sNode) (layer2.IParticipantKey, layer2.IParticip
 
 	return pubKey1, pubKey2
 }
+
+var (
+	handler = func(ctx context.Context, n anonymity.INode, pKey layer2.IParticipantKey, b []byte) ([]byte, error) {
+		numBytes := [encoding.CSizeUint64]byte{}
+		copy(numBytes[:], b)
+
+		num := encoding.BytesToUint64(numBytes)
+		msg := "ping"
+		if num%2 == 1 {
+			msg = "pong"
+		}
+		fmt.Printf("%s-%d\n", msg, num)
+
+		numBytes = encoding.Uint64ToBytes(num + 1)
+		_ = n.SendPayload(
+			ctx,
+			pKey,
+			numBytes[:],
+		)
+		return nil, nil
+	}
+)

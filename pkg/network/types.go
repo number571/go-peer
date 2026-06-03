@@ -19,7 +19,6 @@ type IHandlerF func(
 
 type INode interface {
 	types.IRunner
-	HandleFunc(uint32, IHandlerF) INode
 
 	GetSettings() ISettings
 	GetCacheSetter() cache.ICacheSetter

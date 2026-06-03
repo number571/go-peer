@@ -13,12 +13,20 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer2"
+	"github.com/number571/go-peer/pkg/encoding"
 	"github.com/number571/go-peer/pkg/logger"
 	"github.com/number571/go-peer/pkg/payload"
 	"github.com/number571/go-peer/pkg/state"
 	"github.com/number571/go-peer/pkg/storage/database"
 
 	anon_logger "github.com/number571/go-peer/pkg/anonymity/qb/logger"
+)
+
+const (
+	// Head
+	// 8 additional bytes to origin message
+	CMessageHeadSize = 0 +
+		1*encoding.CSizeUint64
 )
 
 var (
@@ -29,6 +37,7 @@ type sNode struct {
 	fMutex         sync.RWMutex
 	fState         state.IState
 	fSettings      ISettings
+	fHandlerF      IHandlerF
 	fLogger        logger.ILogger
 	fAdapter       adapters.IAdapter
 	fKVDatavase    database.IKVDatabase
@@ -40,6 +49,7 @@ type sNode struct {
 
 func NewNode(
 	pSett ISettings,
+	pHandlerF IHandlerF,
 	pLogger logger.ILogger,
 	pAdapter adapters.IAdapter,
 	pKVDatavase database.IKVDatabase,
@@ -49,6 +59,7 @@ func NewNode(
 	return &sNode{
 		fState:         state.NewBoolState(),
 		fSettings:      pSett,
+		fHandlerF:      pHandlerF,
 		fLogger:        pLogger,
 		fAdapter:       pAdapter,
 		fKVDatavase:    pKVDatavase,
@@ -156,22 +167,22 @@ func (p *sNode) GetKeysContainer() layer2.IKeysContainer {
 	return p.fKeysContainer
 }
 
-func (p *sNode) HandleFunc(pHead uint32, pHandle IHandlerF) INode {
-	p.setRoute(pHead, pHandle)
-	return p
-}
-
 // Send message without response waiting.
 func (p *sNode) SendPayload(
 	_ context.Context,
 	pRecv layer2.IParticipantKey,
-	pPld payload.IPayload64,
+	pBytes []byte,
 ) error {
 	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(logBuilder, pRecv, pPld); err != nil {
+
+	headAction := random.NewRandom().GetUint64()
+
+	pld := payload.NewPayload64(setRequestBit(headAction), pBytes)
+	if err := p.enqueuePayload(logBuilder, pRecv, pld); err != nil {
 		// internal logger
 		return errors.Join(ErrEnqueuePayload, err)
 	}
+
 	return nil
 }
 
@@ -180,21 +191,18 @@ func (p *sNode) SendPayload(
 func (p *sNode) FetchPayload(
 	pCtx context.Context,
 	pRecv layer2.IParticipantKey,
-	pPld payload.IPayload32,
+	pBytes []byte,
 ) ([]byte, error) {
-	headAction := sAction(random.NewRandom().GetUint64()) //nolint:gosec
+	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
+
+	headAction := random.NewRandom().GetUint64()
 	actionKey := newActionKey(pRecv, headAction)
 
 	p.setAction(actionKey)
 	defer p.delAction(actionKey)
 
-	newPld := payload.NewPayload64(
-		joinHead(headAction.setType(true), pPld.GetHead()).uint64(),
-		pPld.GetBody(),
-	)
-
-	logBuilder := anon_logger.NewLogBuilder(p.fSettings.GetServiceName())
-	if err := p.enqueuePayload(logBuilder, pRecv, newPld); err != nil {
+	pld := payload.NewPayload64(setRequestBit(headAction), pBytes)
+	if err := p.enqueuePayload(logBuilder, pRecv, pld); err != nil {
 		// internal logger
 		return nil, errors.Join(ErrEnqueuePayload, err)
 	}
@@ -239,7 +247,7 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 	}
 
 	scheme := p.fQBProcessor.GetScheme()
-	encMsg := pNetMsg.GetPayload().GetBody()
+	encMsg := pNetMsg.GetBody()
 
 	// check size on static payload structure.
 	if uint64(len(encMsg)) != scheme.GetMessageSize() {
@@ -263,10 +271,6 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 		return nil
 	}
 
-	// // TODO:
-	// enrich logger
-	// logBuilder.WithPubKey(pubKey)
-
 	// get payload from decrypted message
 	pld := payload.LoadPayload64(decMsg)
 	if pld == nil {
@@ -281,9 +285,6 @@ func (p *sNode) consumeMessage(pCtx context.Context, pNetMsg layer1.IMessage) er
 
 func (p *sNode) checkMessageLayer1(pNetMsg layer1.IMessage) bool {
 	settings := p.fQBProcessor.GetSettings()
-	if settings.GetNetworkMask() != pNetMsg.GetPayload().GetHead() {
-		return false
-	}
 	_, err := layer1.LoadMessage(
 		settings.GetMessageConstructSettings().GetSettings(),
 		pNetMsg.ToBytes(),
@@ -298,20 +299,18 @@ func (p *sNode) handleDoAction(
 	pPld payload.IPayload64,
 ) error {
 	// get [head:body] from payload
-	head := loadHead(pPld.GetHead())
+	head := pPld.GetHead()
 	body := pPld.GetBody()
 
 	// check state of payload = [request,response]?
-	action := head.getAction()
-
-	if action.isRequest() {
+	if hasRequestBit(head) {
 		// got request from another side (need generate response)
 		p.handleRequest(pCtx, pLogBuilder, pSender, head, body)
 		return nil
 	}
 
 	// got response message from our side request
-	p.handleResponse(pCtx, pLogBuilder, pSender, action, body)
+	p.handleResponse(pCtx, pLogBuilder, pSender, head, body)
 	return nil
 }
 
@@ -319,11 +318,12 @@ func (p *sNode) handleResponse(
 	_ context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
 	pSender layer2.IParticipantKey,
-	pAction iAction,
+	pHead uint64,
 	pBody []byte,
 ) {
 	// get session by payload head
-	actionKey := newActionKey(pSender, pAction)
+	actionKey := newActionKey(pSender, pHead)
+
 	action, ok := p.getAction(actionKey)
 	if !ok {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogBaseGetResponse))
@@ -338,18 +338,11 @@ func (p *sNode) handleRequest(
 	pCtx context.Context,
 	pLogBuilder anon_logger.ILogBuilder,
 	pSender layer2.IParticipantKey,
-	pHead iHead,
+	pHead uint64,
 	pBody []byte,
 ) {
-	// get function by payload head
-	f, ok := p.getRoute(pHead.getRoute())
-	if !ok || f == nil {
-		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnUnknownRoute))
-		return
-	}
-
 	// response can be nil
-	resp, err := f(pCtx, p, pSender, pBody)
+	resp, err := p.fHandlerF(pCtx, p, pSender, pBody)
 	if err != nil {
 		p.fLogger.PushWarn(pLogBuilder.WithType(anon_logger.CLogWarnIncorrectResponse))
 		return
@@ -361,11 +354,10 @@ func (p *sNode) handleRequest(
 
 	// create response and put this to the queue
 	// internal logger
-	newHead := joinHead(pHead.getAction().setType(false), pHead.getRoute()).uint64()
 	_ = p.enqueuePayload(
 		pLogBuilder,
 		pSender,
-		payload.NewPayload64(newHead, resp),
+		payload.NewPayload64(setResponseBit(pHead), resp),
 	)
 }
 
@@ -374,17 +366,16 @@ func (p *sNode) enqueuePayload(
 	pRecv layer2.IParticipantKey,
 	pPld payload.IPayload64,
 ) error {
-	logType := anon_logger.CLogBaseEnqueueResponse
 	pldBytes := pPld.ToBytes()
 
-	if loadHead(pPld.GetHead()).getAction().isRequest() {
+	// enrich logger
+	pLogBuilder.
+		WithSize(len(pldBytes))
+
+	// check state of payload = [request,response]?
+	logType := anon_logger.CLogBaseEnqueueResponse
+	if hasRequestBit(pPld.GetHead()) {
 		logType = anon_logger.CLogBaseEnqueueRequest
-		// // TODO:
-		// client := p.fQBProcessor.GetClient()
-		// enrich logger
-		pLogBuilder.
-			// WithPubKey(client.GetPrivKey().GetPubKey()).
-			WithSize(len(pldBytes))
 	}
 
 	if err := p.fQBProcessor.EnqueueMessage(pRecv, pldBytes); err != nil {
@@ -416,10 +407,6 @@ func (p *sNode) produceMessage(
 
 	// create logger state
 	logBuilder := p.enrichLogger(anon_logger.NewLogBuilder(serviceName), pNetMsg)
-
-	// // TODO:
-	// .
-	// 	WithPubKey(p.fQBProcessor.GetClient().GetPrivKey().GetPubKey())
 
 	// try push hash into database
 	if err := p.storeHashIntoDatabase(logBuilder, pNetMsg); err != nil {
@@ -462,21 +449,6 @@ func (p *sNode) storeHashIntoDatabase(pLogBuilder anon_logger.ILogBuilder, pNetM
 	return nil
 }
 
-func (p *sNode) setRoute(pHead uint32, pHandle IHandlerF) {
-	p.fMutex.Lock()
-	defer p.fMutex.Unlock()
-
-	p.fHandleRoutes[pHead] = pHandle
-}
-
-func (p *sNode) getRoute(pHead uint32) (IHandlerF, bool) {
-	p.fMutex.RLock()
-	defer p.fMutex.RUnlock()
-
-	f, ok := p.fHandleRoutes[pHead]
-	return f, ok
-}
-
 func (p *sNode) getAction(pActionKey string) (chan []byte, bool) {
 	p.fMutex.RLock()
 	defer p.fMutex.RUnlock()
@@ -499,7 +471,19 @@ func (p *sNode) delAction(pActionKey string) {
 	delete(p.fHandleActions, pActionKey)
 }
 
-func newActionKey(pKey layer2.IParticipantKey, pAction iAction) string {
-	pubKeyAddr := hashing.NewHasher(pKey.ToBytes()).ToBytes()
-	return fmt.Sprintf("%s-%d", pubKeyAddr, pAction.uint31())
+func newActionKey(pKey layer2.IParticipantKey, pHead uint64) string {
+	pKeyAddr := hashing.NewHasher(pKey.ToBytes()).ToBytes()
+	return fmt.Sprintf("%s-%d", pKeyAddr, setResponseBit(pHead))
+}
+
+func hasRequestBit(v uint64) bool {
+	return v&1 == 1
+}
+
+func setRequestBit(v uint64) uint64 {
+	return v | 1 // set 1
+}
+
+func setResponseBit(v uint64) uint64 {
+	return v &^ 1 // set 0
 }

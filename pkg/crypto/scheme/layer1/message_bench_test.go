@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -88,11 +87,11 @@ func BenchmarkMessageSequence(b *testing.B) {
 		b.Run(t.name, func(b *testing.B) {
 			b.StopTimer()
 			messages := make([]IMessage, b.N)
-			randomPayloads := make([]payload.IPayload32, 0, b.N)
+			randomPayloads := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
 				randomPayloads = append(
 					randomPayloads,
-					payload.NewPayload32(1, testutils.PseudoRandomBytes(i)),
+					testutils.PseudoRandomBytes(i),
 				)
 			}
 			b.StartTimer()
@@ -206,11 +205,11 @@ func BenchmarkMessageParallel(b *testing.B) {
 		b.Run(t.name, func(b *testing.B) {
 			b.StopTimer()
 			messages := make([]IMessage, b.N)
-			randomPayloads := make([]payload.IPayload32, 0, b.N)
+			randomPayloads := make([][]byte, 0, b.N)
 			for i := 0; i < b.N; i++ {
 				randomPayloads = append(
 					randomPayloads,
-					payload.NewPayload32(1, testutils.PseudoRandomBytes(i)),
+					testutils.PseudoRandomBytes(i),
 				)
 			}
 			b.StartTimer()

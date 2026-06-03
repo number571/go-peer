@@ -14,7 +14,6 @@ import (
 	"github.com/number571/go-peer/pkg/crypto/random"
 	"github.com/number571/go-peer/pkg/crypto/scheme/layer1"
 	"github.com/number571/go-peer/pkg/encoding"
-	"github.com/number571/go-peer/pkg/payload"
 	testutils "github.com/number571/go-peer/test/utils"
 )
 
@@ -170,7 +169,7 @@ func TestClosedConn(t *testing.T) {
 		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
-	pld := payload.NewPayload32(1, []byte("aaa"))
+	pld := []byte("aaa")
 	msg := layer1.NewMessage(sett, pld)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -420,7 +419,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		FSettings: conn.GetSettings().GetMessageSettings(),
 	})
 
-	pld := payload.NewPayload32(tcHead, []byte(tcBody))
+	pld := []byte(tcBody)
 	msg := layer1.NewMessage(msgSett, pld)
 	ctx := context.Background()
 	if err := conn.WriteMessage(ctx, msg); err != nil {
@@ -435,7 +434,7 @@ func testConn(t *testing.T, pAddr, pNetworkKey string) {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(msgRecv.GetPayload().GetBody(), []byte(tcBody)) {
+	if !bytes.Equal(msgRecv.GetBody(), []byte(tcBody)) {
 		t.Fatal("load payload not equal new payload")
 	}
 }

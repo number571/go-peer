@@ -24,9 +24,8 @@ import (
 )
 
 const (
-	networkMask = uint32(0x11223344)
-	msgSize     = uint64(8192)
-	workSize    = uint64(10)
+	msgSize  = uint64(8192)
+	workSize = uint64(10)
 )
 
 type sNode struct {
@@ -59,19 +58,20 @@ func newNode(serviceName, address string) *sNode {
 				FWriteTimeout:          time.Minute,
 			}),
 		}),
-		cache.NewLRUCache(1024),
-	).HandleFunc(
-		networkMask,
 		func(ctx context.Context, _ network.INode, _ conn.IConn, msg layer1.IMessage) error {
 			msgChan <- msg
 			return nil
 		},
+		cache.NewLRUCache(1024),
 	)
 	anonymityNode := anonymity.NewNode(
 		anonymity.NewSettings(&anonymity.SSettings{
 			FServiceName:  serviceName,
 			FFetchTimeout: time.Minute,
 		}),
+		func(_ context.Context, _ anonymity.INode, _ layer2.IParticipantKey, b []byte) ([]byte, error) {
+			return []byte("echo: " + string(b)), nil
+		},
 		logger.NewLogger(
 			logger.NewSettings(&logger.SSettings{
 				FInfo: os.Stdout,
@@ -122,7 +122,6 @@ func newNode(serviceName, address string) *sNode {
 						FWorkSizeBits: workSize,
 					}),
 				}),
-				FNetworkMask:  networkMask,
 				FQueuePeriod:  2 * time.Second,
 				FConsumersCap: 1,
 				FQueuePoolCap: [2]uint64{32, 32},
