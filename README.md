@@ -85,7 +85,7 @@ $ go get github.com/number571/go-peer
 
 ## Requirements
 
-1. Go version `>= 1.23`
+1. Go version `>= 1.25`
 
 ## Releases
 
