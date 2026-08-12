@@ -129,7 +129,7 @@ Also, the composition of these works can be found in the book `The general theor
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=number571/go-peer&type=Date)](https://star-history.com/#number571/go-peer&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=number571/go-peer&type=Date)](https://star-history.dera.page/#number571/go-peer&type=Date)
 
 ## License
 
