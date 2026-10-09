@@ -2,9 +2,19 @@
 
 <!-- ... -->
 
-## v1.7.18~
+## v1.7.19~
 
 *??? ??, ????*
+
+<!-- ... -->
+
+## v1.7.18
+
+*October 09, 2026*
+
+### CHANGES
+
+- `go.mod`: update versions golang.org/x/crypto, github.com/cloudflare/circl
 
 <!-- ... -->
 

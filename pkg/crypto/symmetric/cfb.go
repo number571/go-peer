@@ -25,7 +25,7 @@ func (p *sAESCipher) encryptBytesCFB(pMsg []byte) []byte {
 	blockSize := p.fBlock.BlockSize()
 	iv := random.NewRandom().GetBytes(uint64(blockSize)) //nolint:gosec
 
-	stream := cipher.NewCFBEncrypter(p.fBlock, iv)
+	stream := cipher.NewCFBEncrypter(p.fBlock, iv) // nolint: staticcheck
 	result := make([]byte, len(pMsg)+len(iv))
 	copy(result[:blockSize], iv)
 
@@ -39,7 +39,7 @@ func (p *sAESCipher) decryptBytesCFB(pMsg []byte) []byte {
 		return nil
 	}
 
-	stream := cipher.NewCFBDecrypter(p.fBlock, pMsg[:blockSize])
+	stream := cipher.NewCFBDecrypter(p.fBlock, pMsg[:blockSize]) // nolint: staticcheck
 	result := make([]byte, len(pMsg)-blockSize)
 
 	stream.XORKeyStream(result, pMsg[blockSize:])
